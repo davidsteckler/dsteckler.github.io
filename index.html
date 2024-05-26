@@ -121,10 +121,10 @@
     <header>
         <h1>David Steckler</h1>
         <nav>
-            <a href="index.html">Home</a> <!-- Ensure Home link points to index.html -->
+            <a href="index.html">Home</a>
             <a href="#about">About</a>
             <a href="#course">Course</a>
-            <a href="blog.html">Blog</a> <!-- Link to Blog Page -->
+            <a href="blog.html">Blog</a>
             <a href="#contact">Contact</a>
             <a href="#testimonials">Testimonials</a>
         </nav>
@@ -137,8 +137,8 @@
             <div class="email-signup">
                 <h3>Free Weekly AI Tips</h3>
                 <p>Join to receive practical AI strategies, cutting-edge insights, and personal tool recommendations.</p>
-                <form action="send_email.php" method="POST"> <!-- Updated Form Action -->
-                    <input type="email" name="email" placeholder="Your Email Address" required>
+                <form id="email-form">
+                    <input type="email" name="email" placeholder="d.steckler91@gmail.com" required>
                     <button type="submit">Join Now</button>
                 </form>
                 <p class="lead-magnet">Get my free eBook when it is ready: "10 Ways to Transform Your Workflow with AI" when you sign up!</p>
@@ -194,5 +194,52 @@
     <footer>
         <p>&copy; 2024 David Steckler. All rights reserved.</p>
     </footer>
+
+    <script>
+        document.getElementById('email-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+
+            fetch('https://api.mailjet.com/v3.1/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic ' + btoa('9137307eacb8dc327d2ae9335132e722:bbf92e65e4957b1ea25f6b2413efd4dc')
+                },
+                body: JSON.stringify({
+                    Messages: [
+                        {
+                            From: {
+                                Email: "d.steckler91@gmail.com",
+                                Name: "David Steckler"
+                            },
+                            To: [
+                                {
+                                    Email: email,
+                                    Name: "Subscriber"
+                                }
+                            ],
+                            Subject: "Thank you for subscribing!",
+                            TextPart: "Dear Subscriber, thank you for subscribing to our email list.",
+                            HTMLPart: "<h3>Dear Subscriber,</h3><br />Thank you for subscribing to our email list."
+                        }
+                    ]
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.Messages && data.Messages[0].Status === 'success') {
+                      alert('Thank you for subscribing!');
+                  } else {
+                      alert('There was an error. Please try again.');
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('There was an error. Please try again.');
+              });
+        });
+    </script>
 </body>
 </html>
