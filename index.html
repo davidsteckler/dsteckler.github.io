@@ -137,7 +137,7 @@
             <div class="email-signup">
                 <h3>Free Weekly AI Tips</h3>
                 <p>Join to receive practical AI strategies, cutting-edge insights, and personal tool recommendations.</p>
-                <form id="email-form">
+                <form action="https://formspree.io/f/xnqeylgy" method="POST">
                     <input type="email" name="email" placeholder="Your Email Address" required>
                     <button type="submit">Join Now</button>
                 </form>
@@ -168,7 +168,7 @@
         <section id="contact">
             <h2>Contact Me</h2>
             <p>If you have any questions or just want to say hello, feel free to reach out!</p>
-            <form action="#" method="POST">
+            <form action="https://formspree.io/f/xnqeylgy" method="POST">
                 <label for="name">Name:</label><br>
                 <input type="text" id="name" name="name" required><br>
                 <label for="email">Email:</label><br>
@@ -194,53 +194,5 @@
     <footer>
         <p>&copy; 2024 David Steckler. All rights reserved.</p>
     </footer>
-
-    <script>
-        document.getElementById('email-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const formData = new FormData(event.target);
-            const email = formData.get('email');
-
-            fetch('https://api.mailjet.com/v3.1/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Basic ' + btoa('9137307eacb8dc327d2ae9335132e722:bbf92e65e4957b1ea25f6b2413efd4dc')
-                },
-                body: JSON.stringify({
-                    Messages: [
-                        {
-                            From: {
-                                Email: "d.steckler91@gmail.com",
-                                Name: "David Steckler"
-                            },
-                            To: [
-                                {
-                                    Email: email,
-                                    Name: "Subscriber"
-                                }
-                            ],
-                            Subject: "Thank you for subscribing!",
-                            TextPart: "Dear Subscriber, thank you for subscribing to our email list.",
-                            HTMLPart: "<h3>Dear Subscriber,</h3><br />Thank you for subscribing to our email list."
-                        }
-                    ]
-                })
-            }).then(response => response.json())
-              .then(data => {
-                  console.log('Response:', data); // Add this line for debugging
-                  if (data.Messages && data.Messages[0].Status === 'success') {
-                      alert('Thank you for subscribing!');
-                  } else {
-                      alert('There was an error. Please try again.');
-                  }
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  alert('There was an error. Please try again.');
-              });
-        });
-    </script>
 </body>
 </html>
