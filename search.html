@@ -105,6 +105,13 @@
             return parts.map(part => part.toLowerCase() === query.toLowerCase() ? `<span class="highlight">${part}</span>` : part).join('');
         }
 
+        function extractTextContent(html) {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const elementsToRemove = doc.querySelectorAll('script, style, header, footer, nav, form');
+            elementsToRemove.forEach(el => el.remove());
+            return doc.body.textContent || '';
+        }
+
         function searchSite() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const resultsDiv = document.getElementById('results');
@@ -129,23 +136,21 @@
                 fetch(page)
                     .then(response => response.text())
                     .then(data => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(data, 'text/html');
-                        const bodyText = doc.body.textContent.toLowerCase();
-                        const title = doc.querySelector('title').textContent;
-                        const snippetIndex = bodyText.indexOf(searchTerm);
+                        const textContent = extractTextContent(data).toLowerCase();
+                        const snippetIndex = textContent.indexOf(searchTerm);
 
                         if (snippetIndex !== -1) {
                             resultsFound = true;
                             const snippetStart = Math.max(snippetIndex - 30, 0);
-                            const snippetEnd = Math.min(snippetIndex + 70, bodyText.length);
-                            const snippet = bodyText.slice(snippetStart, snippetEnd);
+                            const snippetEnd = Math.min(snippetIndex + 70, textContent.length);
+                            const snippet = textContent.slice(snippetStart, snippetEnd);
                             const highlightedSnippet = highlight(snippet, searchTerm);
-                            
+                            const title = page.split('.').slice(0, -1).join('.').replace('-', ' ');
+
                             const resultItem = document.createElement('div');
                             resultItem.classList.add('result-item');
                             resultItem.innerHTML = `
-                                <h3><a href="${page}">${title}</a></h3>
+                                <h3><a href="${page}">${title.charAt(0).toUpperCase() + title.slice(1)}</a></h3>
                                 <p>...${highlightedSnippet}...</p>
                             `;
                             resultsDiv.appendChild(resultItem);
