@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering ChatGPT Course</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAsGRSihVzBkQ9Sdi6VNc5T0dxapsc8Zo",
+            authDomain: "chatgpt-course-1f3a8.firebaseapp.com",
+            projectId: "chatgpt-course-1f3a8",
+            storageBucket: "chatgpt-course-1f3a8.appspot.com",
+            messagingSenderId: "1095145356990",
+            appId: "1:1095145356990:web:e9934f0f20f22086d928ef",
+            measurementId: "G-32P354IDTY"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        function login() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('course-content').style.display = 'block';
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        }
+
+        function signup() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('course-content').style.display = 'block';
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        }
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('course-content').style.display = 'block';
+            } else {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('course-content').style.display = 'none';
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #login-form, #course-content {
+            text-align: center;
+        }
+        input[type="email"], input[type="password"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #3498db;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mastering ChatGPT Course</h1>
+        <div id="login-form">
+            <h2>Login</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <button onclick="signup()">Sign Up</button>
+        </div>
+        <div id="course-content" style="display:none;">
+            <h2>Course Videos</h2>
+            <div>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/R-eyhTNbit0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
