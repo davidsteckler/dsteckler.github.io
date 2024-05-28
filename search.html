@@ -64,6 +64,10 @@
         .results {
             margin-top: 20px;
         }
+        .result-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
         .highlight {
             background-color: yellow;
         }
@@ -128,12 +132,22 @@
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(data, 'text/html');
                         const bodyText = doc.body.textContent.toLowerCase();
-                        const textWithHighlight = highlight(doc.body.innerHTML, searchTerm);
+                        const title = doc.querySelector('title').textContent;
+                        const snippetIndex = bodyText.indexOf(searchTerm);
 
-                        if (bodyText.includes(searchTerm)) {
+                        if (snippetIndex !== -1) {
                             resultsFound = true;
+                            const snippetStart = Math.max(snippetIndex - 30, 0);
+                            const snippetEnd = Math.min(snippetIndex + 70, bodyText.length);
+                            const snippet = bodyText.slice(snippetStart, snippetEnd);
+                            const highlightedSnippet = highlight(snippet, searchTerm);
+                            
                             const resultItem = document.createElement('div');
-                            resultItem.innerHTML = `<h3>Result in <a href="${page}">${page}</a></h3><p>${textWithHighlight}</p>`;
+                            resultItem.classList.add('result-item');
+                            resultItem.innerHTML = `
+                                <h3><a href="${page}">${title}</a></h3>
+                                <p>...${highlightedSnippet}...</p>
+                            `;
                             resultsDiv.appendChild(resultItem);
                         }
                     })
