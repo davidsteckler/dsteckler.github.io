@@ -172,6 +172,7 @@
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Enter search term..." onkeyup="searchSite()">
         </div>
+        <div id="result-count"></div>
         <div class="results" id="results"></div>
     </div>
 
@@ -195,7 +196,9 @@
         function searchSite() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const resultsDiv = document.getElementById('results');
+            const resultCountDiv = document.getElementById('result-count');
             resultsDiv.innerHTML = '';
+            resultCountDiv.innerHTML = '';
 
             if (searchTerm === '') {
                 return;
@@ -210,17 +213,19 @@
                 'testimonials.html'
             ];
 
-            let resultsFound = false;
+            let totalMatches = 0;
 
             pages.forEach(page => {
                 fetch(page)
                     .then(response => response.text())
                     .then(data => {
                         const textContent = extractTextContent(data).toLowerCase();
-                        const snippetIndex = textContent.indexOf(searchTerm);
+                        const regex = new RegExp(searchTerm, 'gi');
+                        const matches = textContent.match(regex);
 
-                        if (snippetIndex !== -1) {
-                            resultsFound = true;
+                        if (matches && matches.length > 0) {
+                            totalMatches += matches.length;
+                            const snippetIndex = textContent.indexOf(searchTerm);
                             const snippetStart = Math.max(snippetIndex - 30, 0);
                             const snippetEnd = Math.min(snippetIndex + 70, textContent.length);
                             const snippet = textContent.slice(snippetStart, snippetEnd);
@@ -239,10 +244,10 @@
                     .catch(error => console.error('Error fetching page:', error));
             });
 
-            if (!resultsFound) {
-                const noResults = document.createElement('p');
-                noResults.textContent = 'No results found';
-                resultsDiv.appendChild(noResults);
+            if (totalMatches === 0) {
+                resultCountDiv.textContent = 'No results found';
+            } else {
+                resultCountDiv.textContent = `${totalMatches} results found`;
             }
         }
 
