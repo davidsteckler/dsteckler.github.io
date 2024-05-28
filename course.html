@@ -119,6 +119,19 @@
             font-weight: bold;
             color: #000;
         }
+        .buy-now {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .buy-now button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
     </style>
 </head>
 <body>
@@ -138,19 +151,42 @@
         <section id="course">
             <h2>Upcoming Course: Mastering ChatGPT</h2>
             <p>Stay tuned for my 1-hour course on what most people get wrong about ChatGPT. It will be packed with stories and examples that are insanely valuable, that you can immediately use. Thousands of hours of experimentation packed into one hour delivered to you. Sign up for my email list to get notified when the course is available.</p>
-            <p>Coming soon. Drop your email here to get notified when it is ready!</p>
-            <div class="email-signup">
-                <form action="https://formspree.io/f/xnqeylgy" method="POST">
+            <p><strong>Get the course now for only $20, the cheapest it will ever be!</strong></p>
+            <p>By purchasing now, you'll get immediate access as soon as the course is released. This is a limited-time pre-sale offer, so act fast to lock in the lowest price.</p>
+            <div class="buy-now">
+                <h3>Pre-Order Now</h3>
+                <form id="payment-form" action="https://formspree.io/f/xnqeylgy" method="POST" onsubmit="redirectToPaypal(event)">
                     <input type="email" name="email" placeholder="Your Email Address" required>
-                    <button type="submit">Notify Me</button>
+                    <button type="submit">Buy Now for $20</button>
                 </form>
             </div>
         </section>
-
     </div>
 
     <footer>
         <p>&copy; 2024 David Steckler. All rights reserved.</p>
     </footer>
+
+    <script>
+        function redirectToPaypal(event) {
+            event.preventDefault();
+            var form = event.target;
+            var email = form.email.value;
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email })
+            }).then(function(response) {
+                if (response.ok) {
+                    window.location.href = 'https://paypal.me/DASteckler/20';
+                } else {
+                    alert('There was an error processing your request. Please try again.');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
