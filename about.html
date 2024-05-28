@@ -66,11 +66,50 @@
         em {
             font-style: italic;
         }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #fff;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+            }
+            nav.active {
+                display: flex;
+            }
+            .menu-toggle {
+                display: block;
+                cursor: pointer;
+                background-color: #3498db;
+                color: #fff;
+                border: none;
+                padding: 10px;
+                font-size: 1em;
+                border-radius: 5px;
+            }
+        }
+
+        /* Default hidden for menu-toggle on larger screens */
+        .menu-toggle {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>David Steckler</h1>
+        <button class="menu-toggle">Menu</button>
         <nav>
             <a href="index.html">Home</a>
             <a href="about.html" class="active">About</a>
@@ -122,5 +161,11 @@
     <footer>
         <p>&copy; 2024 David Steckler. All rights reserved.</p>
     </footer>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
