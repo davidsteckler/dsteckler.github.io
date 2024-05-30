@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const timerDisplay = document.getElementById('timer');
     let score = 0;
     let timeLeft = 30; // Game time in seconds
-    let gameInterval;
     let timerInterval;
 
     // Function to move the ball to a random position and set random size and speed
@@ -32,8 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateScore() {
         score += 1;
         scoreBoard.textContent = `Score: ${score}`;
-        // Play click sound
-        new Audio('click-sound.mp3').play();
     }
 
     // Function to update the timer
@@ -42,10 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         timerDisplay.textContent = `Time: ${timeLeft}`;
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            clearInterval(gameInterval);
             alert(`Game over! Your score is ${score}`);
-            // Play end sound
-            new Audio('end-sound.mp3').play();
         }
     }
 
