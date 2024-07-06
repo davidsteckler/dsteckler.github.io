@@ -1,0 +1,431 @@
+Sure, I'll adjust the color for the hover effect and add some space between the header and the text. I'll also ensure all sections are included in the redesign. Here’s the updated code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David Steckler - Personal Brand</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --background-color: #f5f5f5;
+            --accent-color: #2ecc71; /* Changed accent color to green */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+
+        header h1 {
+            color: #fff;
+            margin: 0;
+            font-size: 2em;
+            transition: transform 0.3s ease;
+        }
+
+        header h1:hover {
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 120px auto 20px; /* Added more space above container */
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+
+        p {
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--accent-color);
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            padding: 5px 8px;
+            transition: color 0.3s ease;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #fff;
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .active::after {
+            width: 100%;
+        }
+
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        .email-signup {
+            text-align: center;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .email-signup::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%, transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                top: -50%;
+                left: -50%;
+            }
+            100% {
+                top: 150%;
+                left: 150%;
+            }
+        }
+
+        .email-signup h3 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .email-signup input[type="email"] {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 70%;
+            box-sizing: border-box;
+            margin-right: -5px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .email-signup input[type="email"]:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+        }
+
+        .email-signup button {
+            padding: 15px 20px;
+            border: none;
+            background-color: var(--secondary-color);
+            color: #fff;
+            border-radius: 5px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .email-signup button:hover {
+            background-color: var(--accent-color);
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        /* Hidden Features */
+        .easter-egg {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .easter-egg:hover {
+            opacity: 1;
+        }
+
+        /* Dark Mode Toggle */
+        #dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #dark-mode-toggle:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            --text-color: #f5f5f5;
+            --background-color: #2c3e50;
+        }
+
+        body.dark-mode .container {
+            background-color: #34495e;
+        }
+
+        body.dark-mode header {
+            background-color: #1a2533;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: var(--primary-color);
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                margin: 5px 0;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>David Steckler</h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="#landing" class="active">Home</a>
+            <a href="#about">About</a>
+            <a href="#course">Course</a>
+            <a href="#blog">Blog</a>
+            <a href="#contact">Contact</a>
+            <a href="#testimonials">Testimonials</a>
+        </nav>
+    </header>
+
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+
+    <div class="container">
+        <section id="landing">
+            <h2>Unlock the Power of AI in Your Daily Life</h2>
+            <p>
+                I hate having my time wasted, so I promise to never waste yours. I'm constantly experimenting with AI in my own life. One of my favorite <span class="highlight">use cases</span>? <span class="highlight">Getting music recommendations</span> on my terms—not Spotify's algorithm. I break down songs to understand why I like them and then get more recommendations spanning decades and artists I might never have heard of. It's like giving a mixtape to your future self from the past. Time travel, baby.
+            </p>
+            <p>
+                From my <span class="highlight">thousands of hours of experiments</
+
+span>, you're going to get the best of the best in <span class="highlight">bite-sized lessons</span>. These are things you can implement in just 10 minutes and start seeing benefits immediately. My goal is to cover what I hear no one else talking about.
+            </p>
+            <p>
+                When you come here, you will get new insights that always excite you to take action. I want you to try AI in ways that bring a little more <span class="highlight">magic</span> into your life while also building a deeper understanding of what this tool can do.
+            </p>
+            <p>
+                I'll be posting these experiments on my blog and sharing them with my email list weekly. We often fall back into old habits, but we need to learn what this technology can do that was previously impossible. <span class="highlight">That's my goal and promise to you.</span>
+            </p>
+            <p>Best,<br>Steckler</p>
+            <div class="email-signup">
+                <h3>Unlock Weekly AI Insights and Stories!</h3>
+                <p>Practical AI strategies & unique insights <strong>delivered straight to your inbox.</strong></p>
+                <form action="https://formspree.io/f/xnqeylgy" method="POST">
+                    <input type="email" name="email" placeholder="Your Email Address" required>
+                    <button type="submit">Join Now</button>
+                </form>
+                <p class="lead-magnet"><em>Stay ahead in the AI game with content that's real, relatable, and packed with value.</em></p>
+            </div>
+        </section>
+
+        <section id="course">
+            <h2>Upcoming Course: Mastering ChatGPT</h2>
+            <p>Stay tuned for my 1-hour course on what most people get wrong about ChatGPT. It will be packed with stories and examples that are insanely valuable, that you can immediately use. Thousands of hours of experimentation packed into one hour delivered to you. Sign up for my email list to get notified when the course is available.</p>
+        </section>
+
+        <section id="blog">
+            <h2>Blog</h2>
+            <p>Check out my latest blog posts where I share valuable stories, tips, and insights about AI, ChatGPT, and more.</p>
+            <ul>
+                <li><a href="post1.html">How I Built My Website</a></li>
+                <li><a href="post2.html">Blog Post 2</a></li>
+                <li><a href="post3.html">Blog Post 3</a></li>
+            </ul>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Me</h2>
+            <p>If you have any questions or just want to say hello, feel free to reach out!</p>
+            <form action="https://formspree.io/f/xnqeylgy" method="POST">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name" required><br>
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required><br>
+                <label for="message">Message:</label><br>
+                <textarea id="message" name="message" rows="5" required></textarea><br>
+                <button type="submit">Send</button>
+            </form>
+        </section>
+
+        <section id="testimonials">
+            <h2>Testimonials</h2>
+            <p>Here's what people are saying about my work:</p>
+            <blockquote>
+                <p>"David's insights into ChatGPT are game-changing. His advice is practical and easy to implement." - Happy User</p>
+            </blockquote>
+            <blockquote>
+                <p>"I've learned so much from David's blog. His tips have saved me hours of work." - Grateful Reader</p>
+            </blockquote>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <div class="easter-egg" title="You found me!">🎉</div>
+
+    <script>
+        // Menu toggle
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        // Easter egg
+        const easterEgg = document.querySelector('.easter-egg');
+        easterEgg.addEventListener('click', () => {
+            alert('Congratulations! You\'ve unlocked a secret message: "AI is not just about technology, it\'s about enhancing human creativity and potential."');
+        });
+
+        // Typing effect for the main heading
+        const heading = document.querySelector('h1');
+        const text = heading.textContent;
+        heading.textContent = '';
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                heading.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        typeWriter();
+    </script>
+</body>
+</html>
+```
