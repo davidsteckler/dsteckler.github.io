@@ -1,186 +1,353 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Ghost, Zap, Star, Award } from 'lucide-react';
-
-const GAME_DURATION = 60;
-const INITIAL_BALL_SIZE = 50;
-const INITIAL_BALL_SPEED = 1000;
-
-const getRandomPosition = (max) => Math.floor(Math.random() * max);
-
-const BallCatcher = () => {
-  const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
-  const [ballPosition, setBallPosition] = useState({ x: 0, y: 0 });
-  const [ballSize, setBallSize] = useState(INITIAL_BALL_SIZE);
-  const [ballSpeed, setBallSpeed] = useState(INITIAL_BALL_SPEED);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  const [dialogContent, setDialogContent] = useState({});
-  const [theme, setTheme] = useState('default');
-  const [powerUp, setPowerUp] = useState(null);
-
-  const moveBall = useCallback(() => {
-    const gameArea = document.getElementById('gameArea');
-    if (gameArea) {
-      const maxX = gameArea.clientWidth - ballSize;
-      const maxY = gameArea.clientHeight - ballSize;
-      setBallPosition({
-        x: getRandomPosition(maxX),
-        y: getRandomPosition(maxY),
-      });
-    }
-  }, [ballSize]);
-
-  const handleCatch = () => {
-    setScore((prevScore) => prevScore + 1);
-    moveBall();
-    
-    // Easter egg: Every 10th catch
-    if (score > 0 && (score + 1) % 10 === 0) {
-      setDialogContent({
-        title: "Achievement Unlocked!",
-        description: "You've caught 10 balls! Here's a fun fact: The world record for most balls juggled is 11 balls for 23 catches!",
-      });
-      setShowDialog(true);
-    }
-
-    // Difficulty increase
-    if (score > 0 && (score + 1) % 5 === 0) {
-      setBallSize((prevSize) => Math.max(prevSize - 5, 20));
-      setBallSpeed((prevSpeed) => Math.max(prevSpeed - 50, 500));
-    }
-
-    // Random power-up
-    if (Math.random() < 0.1) {
-      const powerUps = ['freeze', 'double', 'magnet'];
-      setPowerUp(powerUps[Math.floor(Math.random() * powerUps.length)]);
-    }
-  };
-
-  const startGame = () => {
-    setGameStarted(true);
-    setScore(0);
-    setTimeLeft(GAME_DURATION);
-    setBallSize(INITIAL_BALL_SIZE);
-    setBallSpeed(INITIAL_BALL_SPEED);
-    moveBall();
-  };
-
-  useEffect(() => {
-    if (gameStarted && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
-
-      return () => clearInterval(timer);
-    } else if (timeLeft === 0) {
-      setGameStarted(false);
-      setDialogContent({
-        title: "Game Over!",
-        description: `Your final score is ${score}. Can you beat it next time?`,
-      });
-      setShowDialog(true);
-    }
-  }, [gameStarted, timeLeft, score]);
-
-  useEffect(() => {
-    if (gameStarted) {
-      const interval = setInterval(moveBall, ballSpeed);
-      return () => clearInterval(interval);
-    }
-  }, [gameStarted, ballSpeed, moveBall]);
-
-  useEffect(() => {
-    const themes = ['spooky', 'electric', 'space', 'underwater'];
-    const randomTheme = themes[Math.floor(Math.random() * themes.length)];
-    setTheme(randomTheme);
-  }, []);
-
-  const applyPowerUp = () => {
-    switch (powerUp) {
-      case 'freeze':
-        setTimeLeft((prevTime) => prevTime + 5);
-        break;
-      case 'double':
-        setScore((prevScore) => prevScore + 1);
-        break;
-      case 'magnet':
-        setBallSize((prevSize) => prevSize * 1.5);
-        setTimeout(() => setBallSize(INITIAL_BALL_SIZE), 5000);
-        break;
-      default:
-        break;
-    }
-    setPowerUp(null);
-  };
-
-  const getThemeStyles = () => {
-    switch (theme) {
-      case 'spooky':
-        return { backgroundColor: '#2c3e50', color: '#ecf0f1' };
-      case 'electric':
-        return { backgroundColor: '#f39c12', color: '#34495e' };
-      case 'space':
-        return { backgroundColor: '#2c3e50', color: '#e74c3c' };
-      case 'underwater':
-        return { backgroundColor: '#3498db', color: '#ecf0f1' };
-      default:
-        return { backgroundColor: '#fff', color: '#000' };
-    }
-  };
-
-  return (
-    <div id="gameArea" style={{ ...getThemeStyles(), position: 'relative', width: '600px', height: '400px', border: '2px solid #000', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '18px' }}>Score: {score}</div>
-      <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '18px' }}>Time: {timeLeft}</div>
-      {!gameStarted && (
-        <button onClick={startGame} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', padding: '10px 20px', fontSize: '18px' }}>
-          Start Game
-        </button>
-      )}
-      {gameStarted && (
-        <div
-          onClick={handleCatch}
-          style={{
-            position: 'absolute',
-            left: `${ballPosition.x}px`,
-            top: `${ballPosition.y}px`,
-            width: `${ballSize}px`,
-            height: `${ballSize}px`,
-            borderRadius: '50%',
-            backgroundColor: theme === 'spooky' ? '#7f8c8d' : 'red',
-            cursor: 'pointer',
-            transition: 'all 0.1s ease-out',
-          }}
-        />
-      )}
-      {powerUp && (
-        <div onClick={applyPowerUp} style={{ position: 'absolute', top: '40px', left: '10px', cursor: 'pointer' }}>
-          {powerUp === 'freeze' && <Zap size={24} color="#3498db" />}
-          {powerUp === 'double' && <Star size={24} color="#f1c40f" />}
-          {powerUp === 'magnet' && <Ghost size={24} color="#9b59b6" />}
-        </div>
-      )}
-      {theme === 'underwater' && (
-        <div style={{ position: 'absolute', bottom: '10px', left: '10px', fontSize: '24px' }}>🐠🐟🐡</div>
-      )}
-      {theme === 'space' && (
-        <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', fontSize: '24px' }}>🚀🌟🪐</div>
-      )}
-      <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{dialogContent.title}</AlertDialogTitle>
-            <AlertDialogDescription>{dialogContent.description}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowDialog(false)}>OK</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Catch the Ball</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        #gameArea {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            border: 2px solid #000;
+            overflow: hidden;
+        }
+        #ball {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.1s ease-out;
+        }
+        #scoreBoard, #timer, #powerUp {
+            position: absolute;
+            font-size: 18px;
+        }
+        #scoreBoard { top: 10px; left: 10px; }
+        #timer { top: 10px; right: 10px; }
+        #powerUp { 
+            bottom: 10px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background-color: rgba(255,255,255,0.7);
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+        #themeElement {
+            position: absolute;
+            font-size: 24px;
+        }
+        #dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        #easterEggHint {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="scoreBoard">Score: 0</div>
+        <div id="timer">Time: 60</div>
+        <div id="ball"></div>
+        <div id="powerUp"></div>
+        <div id="themeElement"></div>
+        <button id="startButton">Start Game</button>
+        <div id="easterEggHint">Secrets await... 🕵️</div>
     </div>
-  );
-};
+    <div id="dialog">
+        <h2 id="dialogTitle"></h2>
+        <p id="dialogContent"></p>
+        <button onclick="closeDialog()">OK</button>
+    </div>
 
-export default BallCatcher;
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const ball = document.getElementById('ball');
+        const scoreBoard = document.getElementById('scoreBoard');
+        const timer = document.getElementById('timer');
+        const startButton = document.getElementById('startButton');
+        const powerUpElement = document.getElementById('powerUp');
+        const themeElement = document.getElementById('themeElement');
+        const dialog = document.getElementById('dialog');
+        const dialogTitle = document.getElementById('dialogTitle');
+        const dialogContent = document.getElementById('dialogContent');
+
+        let score = 0;
+        let timeLeft = 60;
+        let ballSize = 50;
+        let ballSpeed = 1000;
+        let gameInterval;
+        let powerUp = null;
+        let gameStarted = false;
+
+        const themes = ['pastel', 'forest', 'ocean', 'sunset'];
+        let currentTheme = themes[Math.floor(Math.random() * themes.length)];
+
+        function setTheme(theme) {
+            switch (theme) {
+                case 'pastel':
+                    gameArea.style.backgroundColor = '#FFE5E5';
+                    gameArea.style.color = '#6E7582';
+                    ball.style.backgroundColor = '#92A8D1';
+                    themeElement.innerHTML = '🍭🎨🌸';
+                    break;
+                case 'forest':
+                    gameArea.style.backgroundColor = '#E8F3E8';
+                    gameArea.style.color = '#2C4A2C';
+                    ball.style.backgroundColor = '#6B8E23';
+                    themeElement.innerHTML = '🌳🍃🌿';
+                    break;
+                case 'ocean':
+                    gameArea.style.backgroundColor = '#E0F0FF';
+                    gameArea.style.color = '#00008B';
+                    ball.style.backgroundColor = '#4682B4';
+                    themeElement.innerHTML = '🌊🐠🐚';
+                    break;
+                case 'sunset':
+                    gameArea.style.backgroundColor = '#FFF0E5';
+                    gameArea.style.color = '#8B4513';
+                    ball.style.backgroundColor = '#FFA07A';
+                    themeElement.innerHTML = '🌅🌴🏖️';
+                    break;
+            }
+            themeElement.style.bottom = '10px';
+            themeElement.style.left = '10px';
+        }
+
+        function getRandomPosition(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+        function moveBall() {
+            const maxX = gameArea.clientWidth - ballSize;
+            const maxY = gameArea.clientHeight - ballSize;
+            ball.style.left = `${getRandomPosition(maxX)}px`;
+            ball.style.top = `${getRandomPosition(maxY)}px`;
+        }
+
+        function handleCatch() {
+            if (!gameStarted) return;
+            score++;
+            scoreBoard.textContent = `Score: ${score}`;
+            moveBall();
+
+            if (score % 10 === 0) {
+                showRandomDialog();
+            }
+
+            if (score % 5 === 0) {
+                ballSize = Math.max(ballSize - 5, 20);
+                ballSpeed = Math.max(ballSpeed - 50, 500);
+                ball.style.width = `${ballSize}px`;
+                ball.style.height = `${ballSize}px`;
+                clearInterval(gameInterval);
+                gameInterval = setInterval(moveBall, ballSpeed);
+            }
+
+            if (Math.random() < 0.2) {  // Increased chance of power-up
+                const powerUps = ['freeze', 'double', 'magnet', 'shrink', 'slow'];
+                powerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
+                powerUpElement.innerHTML = getPowerUpEmoji() + " Click to activate!";
+            }
+        }
+
+        function getPowerUpEmoji() {
+            switch (powerUp) {
+                case 'freeze': return '❄️';
+                case 'double': return '2️⃣';
+                case 'magnet': return '🧲';
+                case 'shrink': return '🔍';
+                case 'slow': return '🐌';
+            }
+        }
+
+        function applyPowerUp() {
+            switch (powerUp) {
+                case 'freeze':
+                    timeLeft += 5;
+                    showDialog("Time Freeze!", "You've gained 5 extra seconds!");
+                    break;
+                case 'double':
+                    score += 5;
+                    scoreBoard.textContent = `Score: ${score}`;
+                    showDialog("Double Points!", "You've earned 5 bonus points!");
+                    break;
+                case 'magnet':
+                    const originalSize = ballSize;
+                    ballSize *= 1.5;
+                    ball.style.width = `${ballSize}px`;
+                    ball.style.height = `${ballSize}px`;
+                    setTimeout(() => {
+                        ballSize = originalSize;
+                        ball.style.width = `${ballSize}px`;
+                        ball.style.height = `${ballSize}px`;
+                    }, 5000);
+                    showDialog("Magnet Power!", "The ball is larger for 5 seconds!");
+                    break;
+                case 'shrink':
+                    ballSize = Math.max(ballSize - 10, 10);
+                    ball.style.width = `${ballSize}px`;
+                    ball.style.height = `${ballSize}px`;
+                    showDialog("Shrink Ray!", "The ball has shrunk! Be quick!");
+                    break;
+                case 'slow':
+                    const originalSpeed = ballSpeed;
+                    ballSpeed *= 1.5;
+                    clearInterval(gameInterval);
+                    gameInterval = setInterval(moveBall, ballSpeed);
+                    setTimeout(() => {
+                        ballSpeed = originalSpeed;
+                        clearInterval(gameInterval);
+                        gameInterval = setInterval(moveBall, ballSpeed);
+                    }, 5000);
+                    showDialog("Slow Motion!", "The ball moves slower for 5 seconds!");
+                    break;
+            }
+            powerUp = null;
+            powerUpElement.innerHTML = '';
+        }
+
+        function startGame() {
+            gameStarted = true;
+            score = 0;
+            timeLeft = 60;
+            ballSize = 50;
+            ballSpeed = 1000;
+            scoreBoard.textContent = 'Score: 0';
+            timer.textContent = 'Time: 60';
+            startButton.style.display = 'none';
+            ball.style.display = 'block';
+            ball.style.width = `${ballSize}px`;
+            ball.style.height = `${ballSize}px`;
+            setTheme(currentTheme);
+            moveBall();
+            gameInterval = setInterval(moveBall, ballSpeed);
+            
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timer.textContent = `Time: ${timeLeft}`;
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    clearInterval(gameInterval);
+                    gameStarted = false;
+                    ball.style.display = 'none';
+                    startButton.style.display = 'block';
+                    showDialog("Game Over!", `Your final score is ${score}. Can you beat it next time?`);
+                }
+            }, 1000);
+        }
+
+        function showDialog(title, content) {
+            dialogTitle.textContent = title;
+            dialogContent.textContent = content;
+            dialog.style.display = 'block';
+        }
+
+        function closeDialog() {
+            dialog.style.display = 'none';
+        }
+
+        function showRandomDialog() {
+            const dialogs = [
+                { title: "Ball Catcher Extraordinaire!", content: "You're on fire! Keep up the great work!" },
+                { title: "Reflexes of a Cat!", content: "Your quick moves are impressive. Are you part feline?" },
+                { title: "Ball Whisperer", content: "The balls seem drawn to your cursor. What's your secret?" },
+                { title: "Gravity Defier", content: "You're catching balls like they're in zero-G!" },
+                { title: "Click Master", content: "Your clicking skills are off the charts! Well done!" },
+                { title: "Ball Magnet", content: "Are you using a hidden magnet? Your catches are magnetic!" },
+                { title: "Cursor Virtuoso", content: "Your cursor control is like a beautifully choreographed dance!" },
+                { title: "Pixel Perfect", content: "You're catching those balls with pixel-perfect precision!" },
+                { title: "Spherical Sorcerer", content: "You must be using some kind of ball-catching magic!" },
+                { title: "Digital Acrobat", content: "The way you navigate those pixels is simply acrobatic!" }
+            ];
+            const randomDialog = dialogs[Math.floor(Math.random() * dialogs.length)];
+            showDialog(randomDialog.title, randomDialog.content);
+        }
+
+        ball.addEventListener('click', handleCatch);
+        startButton.addEventListener('click', startGame);
+        powerUpElement.addEventListener('click', applyPowerUp);
+
+        // Easter Eggs
+        const easterEggs = [
+            { code: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'], 
+              action: () => { 
+                  score *= 2; 
+                  scoreBoard.textContent = `Score: ${score}`; 
+                  showDialog("Konami Code Activated!", "You've unlocked the legendary code! Your score has been doubled!");
+              }
+            },
+            { code: ['s', 'u', 'p', 'e', 'r'], 
+              action: () => { 
+                  ballSize *= 2; 
+                  ball.style.width = `${ballSize}px`; 
+                  ball.style.height = `${ballSize}px`; 
+                  showDialog("Super Size!", "The ball has grown to super size!");
+              }
+            },
+            { code: ['t', 'i', 'm', 'e'], 
+              action: () => { 
+                  timeLeft += 30; 
+                  showDialog("Time Warp!", "You've gained an extra 30 seconds!");
+              }
+            },
+            { code: ['r', 'a', 'i', 'n', 'b', 'o', 'w'], 
+              action: () => { 
+                  ball.style.background = 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
+                  showDialog("Rainbow Mode!", "Catch the rainbow!");
+              }
+            },
+            { code: ['g', 'r', 'a', 'v', 'i', 't', 'y'], 
+              action: () => { 
+                  gameArea.style.transform = 'rotate(180deg)';
+                  showDialog("Gravity Flip!", "Everything's upside down!");
+                  setTimeout(() => { gameArea.style.transform = 'rotate(0deg)'; }, 10000);
+              }
+            }
+        ];
+
+        let currentEasterEgg = 0;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === easterEggs[currentEasterEgg].code[0]) {
+                easterEggs[currentEasterEgg].code.shift();
+                if (easterEggs[currentEasterEgg].code.length === 0) {
+                    easterEggs[currentEasterEgg].action();
+                    currentEasterEgg = (currentEasterEgg + 1) % easterEggs.length;
+                }
+            } else {
+                easterEggs[currentEasterEgg].code = [...easterEggs[currentEasterEgg].code];
+            }
+        });
+    </script>
+</body>
+</html>
