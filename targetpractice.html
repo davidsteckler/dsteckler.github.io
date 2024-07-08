@@ -42,6 +42,10 @@
             font-size: 1.5em;
             margin-top: 20px;
         }
+        #game-canvas {
+            display: flex;
+            justify-content: center;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 </head>
@@ -81,22 +85,22 @@
             let canvas = createCanvas(400, 400);
             canvas.parent('game-canvas');
             noStroke();
-            frameRate(2);
+            drawTarget();
         }
 
-        function draw() {
+        function drawTarget() {
             // Draw the sky
             fill('cyan');
             rect(0, 0, 400, 250);
-            
+
             // Draw the grass
             fill('lightgreen');
             rect(0, 250, 400, 150);
-            
+
             // Draw the stand
             fill('sienna');
             triangle(150, 350, 200, 150, 250, 350);
-            
+
             // Draw the target circles
             fill('blue');
             circle(200, 200, 170);
@@ -104,35 +108,40 @@
             circle(200, 200, 110);
             fill('yellow');
             circle(200, 200, 30);
-            
-            // Shoot the arrow
-            shootArrow();
         }
 
         function mousePressed() {
-            if (hitColour === '#0000ff') {  // Hex for 'blue'
-                score += 50;
-                console.log('You hit the outer circle, 50 points!');
-            } else if (hitColour === '#ff0000') {  // Hex for 'red'
-                score += 200;
-                console.log('You hit the inner circle, 200 points!');
-            } else if (hitColour === '#ffff00') {  // Hex for 'yellow'
-                score += 500;
-                console.log('You hit the middle, 500 points!');
+            shootArrow(mouseX, mouseY);
+        }
+
+        function shootArrow(x, y) {
+            if (dist(x, y, 200, 200) < 15) {
+                // Arrow was clicked on
+                hitColour = get(x, y);
+                if (hitColour[0] == 0 && hitColour[1] == 0 && hitColour[2] == 255) {
+                    score += 50;
+                    console.log('You hit the outer circle, 50 points!');
+                } else if (hitColour[0] == 255 && hitColour[1] == 0 && hitColour[2] == 0) {
+                    score += 200;
+                    console.log('You hit the inner circle, 200 points!');
+                } else if (hitColour[0] == 255 && hitColour[1] == 255 && hitColour[2] == 0) {
+                    score += 500;
+                    console.log('You hit the middle, 500 points!');
+                } else {
+                    console.log('You missed! No points!');
+                }
+                document.getElementById('score').innerText = score;
+                drawTarget();
             } else {
                 console.log('You missed! No points!');
             }
-            document.getElementById('score').innerText = score;
         }
+    </script>
 
-        function shootArrow() {
-            let arrowX = random(100, 300);
-            let arrowY = random(100, 300);
-            let col = get(arrowX, arrowY);
-            hitColour = `#${hex(col[0], 2)}${hex(col[1], 2)}${hex(col[2], 2)}`;  // Convert RGB to Hex
-            fill('sienna');
-            circle(arrowX, arrowY, 15);
-        }
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
     </script>
 </body>
 </html>
