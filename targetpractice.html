@@ -121,10 +121,10 @@
                 color: #fff;
             }
         }
-        .score {
+        .score, .timer, .high-score {
             text-align: center;
             font-size: 1.5em;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         #game-canvas {
             display: flex;
@@ -143,6 +143,28 @@
         }
         .log li {
             margin-bottom: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .buttons button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: #fff;
+        }
+        .buttons button.stop {
+            background-color: #e74c3c;
+        }
+        .buttons button.reset {
+            background-color: #f1c40f;
+            color: #333;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
@@ -168,10 +190,17 @@
             <p>Click to check if the arrow hit the target. The outer circle is worth 50 points, the inner circle is worth 200 points, the middle circle is worth 500 points, the fourth circle is worth 1000 points, and the fifth circle is worth 2000 points. Good luck!</p>
             <div id="game-canvas"></div>
             <div class="score">Score: <span id="score">0</span></div>
+            <div class="timer">Time Left: <span id="time">60</span>s</div>
+            <div class="high-score">High Score: <span id="high-score">0</span></div>
             <div id="text-output"></div>
             <div class="log">
                 <h3>Hit Log</h3>
                 <ul id="hit-log"></ul>
+            </div>
+            <div class="buttons">
+                <button onclick="startGame()">Start</button>
+                <button class="stop" onclick="stopGame()">Stop</button>
+                <button class="reset" onclick="resetGame()">Reset</button>
             </div>
         </section>
     </div>
@@ -187,19 +216,24 @@
         let totalShots = 0;
         let hits = 0;
         let difficulty = 2; // Default difficulty level
+        let timer = 60;
+        let highScore = 0;
+        let gameInterval;
+        let timerInterval;
+        let gameRunning = false;
 
         function setup() {
             let canvas = createCanvas(400, 400);
             canvas.parent('game-canvas');
             noStroke();
-            difficulty = int(prompt("Choose difficulty level (1: Easy, 2: Medium, 3: Hard):", "2"));
-            frameRate(difficulty); // Set the speed of arrow movement based on difficulty
-            drawTarget();
+            frameRate(2); // Set a default frame rate
         }
 
         function draw() {
-            drawTarget();
-            shootArrow();
+            if (gameRunning) {
+                drawTarget();
+                shootArrow();
+            }
         }
 
         function drawTarget() {
@@ -238,6 +272,8 @@
         }
 
         function mousePressed() {
+            if (!gameRunning) return;
+
             if (hitColour[0] === 255 && hitColour[1] === 165 && hitColour[2] === 0) { // Orange
                 score += 1000;
                 logHit('You hit the fourth circle, 1000 points! 🟠');
@@ -257,6 +293,11 @@
                 logHit('You missed! No points! ❌');
             }
             document.getElementById('score').innerText = score;
+
+            if (score > highScore) {
+                highScore = score;
+                document.getElementById('high-score').innerText = highScore;
+            }
         }
 
         function logHit(message) {
@@ -264,6 +305,50 @@
             const newLog = document.createElement('li');
             newLog.innerText = message;
             log.insertBefore(newLog, log.firstChild);
+        }
+
+        function updateTimer() {
+            if (timer > 0) {
+                timer--;
+                document.getElementById('time').innerText = timer;
+            } else {
+                stopGame();
+                alert('Time\'s up! Your score: ' + score);
+            }
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+
+            gameRunning = true;
+            score = 0;
+            timer = 60;
+            document.getElementById('score').innerText = score;
+            document.getElementById('time').innerText = timer;
+
+            difficulty = int(prompt("Choose difficulty level (1: Easy, 2: Medium, 3: Hard):", "2"));
+            frameRate(difficulty);
+
+            gameInterval = setInterval(() => loop(), 1000 / difficulty);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopGame() {
+            gameRunning = false;
+            noLoop();
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+        }
+
+        function resetGame() {
+            stopGame();
+            score = 0;
+            timer = 60;
+            document.getElementById('score').innerText = score;
+            document.getElementById('time').innerText = timer;
+            document.getElementById('hit-log').innerHTML = '';
+            highScore = 0;
+            document.getElementById('high-score').innerText = highScore;
         }
 
         document.querySelector('.menu-toggle').addEventListener('click', function() {
