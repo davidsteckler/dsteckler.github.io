@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Target Practice Game</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000; /* Changed to black */
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        header h1 {
+            color: #fff; /* White text for better contrast */
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        .score {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Target Practice Game</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="game">
+            <h2>Target Practice</h2>
+            <p>Click on the target to score points. The outer circle is worth 50 points, the inner circle is worth 200 points, and the middle circle is worth 500 points. Good luck!</p>
+            <div id="game-canvas"></div>
+            <div class="score">Score: <span id="score">0</span></div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <!-- Add your p5.js sketch below -->
+    <script>
+        let hitColour;
+        let score = 0;
+
+        function setup() {
+            let canvas = createCanvas(400, 400);
+            canvas.parent('game-canvas');
+            noStroke();
+            frameRate(2);
+        }
+
+        function draw() {
+            // Draw the sky
+            fill('cyan');
+            rect(0, 0, 400, 250);
+            
+            // Draw the grass
+            fill('lightgreen');
+            rect(0, 250, 400, 150);
+            
+            // Draw the stand
+            fill('sienna');
+            triangle(150, 350, 200, 150, 250, 350);
+            
+            // Draw the target circles
+            fill('blue');
+            circle(200, 200, 170);
+            fill('red');
+            circle(200, 200, 110);
+            fill('yellow');
+            circle(200, 200, 30);
+            
+            // Shoot the arrow
+            shootArrow();
+        }
+
+        function mousePressed() {
+            if (hitColour === '#0000ff') {  // Hex for 'blue'
+                score += 50;
+                console.log('You hit the outer circle, 50 points!');
+            } else if (hitColour === '#ff0000') {  // Hex for 'red'
+                score += 200;
+                console.log('You hit the inner circle, 200 points!');
+            } else if (hitColour === '#ffff00') {  // Hex for 'yellow'
+                score += 500;
+                console.log('You hit the middle, 500 points!');
+            } else {
+                console.log('You missed! No points!');
+            }
+            document.getElementById('score').innerText = score;
+        }
+
+        function shootArrow() {
+            let arrowX = random(100, 300);
+            let arrowY = random(100, 300);
+            let col = get(arrowX, arrowY);
+            hitColour = `#${hex(col[0], 2)}${hex(col[1], 2)}${hex(col[2], 2)}`;  // Convert RGB to Hex
+            fill('sienna');
+            circle(arrowX, arrowY, 15);
+        }
+    </script>
+</body>
+</html>
