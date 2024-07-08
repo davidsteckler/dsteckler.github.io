@@ -165,7 +165,7 @@
     <div class="container">
         <section id="game">
             <h2>Target Practice</h2>
-            <p>Click to check if the arrow hit the target. The outer circle is worth 50 points, the inner circle is worth 200 points, and the middle circle is worth 500 points. Good luck!</p>
+            <p>Click to check if the arrow hit the target. The outer circle is worth 50 points, the inner circle is worth 200 points, the middle circle is worth 500 points, the fourth circle is worth 1000 points, and the fifth circle is worth 2000 points. Good luck!</p>
             <div id="game-canvas"></div>
             <div class="score">Score: <span id="score">0</span></div>
             <div id="text-output"></div>
@@ -186,12 +186,14 @@
         let arrowX, arrowY;
         let totalShots = 0;
         let hits = 0;
+        let difficulty = 2; // Default difficulty level
 
         function setup() {
             let canvas = createCanvas(400, 400);
             canvas.parent('game-canvas');
             noStroke();
-            frameRate(2); // Control the speed of arrow movement
+            difficulty = int(prompt("Choose difficulty level (1: Easy, 2: Medium, 3: Hard):", "2"));
+            frameRate(difficulty); // Set the speed of arrow movement based on difficulty
             drawTarget();
         }
 
@@ -214,8 +216,12 @@
             triangle(150, 350, 200, 150, 250, 350);
 
             // Draw the target circles
+            fill('orange');
+            circle(200, 200, 230); // Fourth circle
+            fill('purple');
+            circle(200, 200, 190); // Fifth circle
             fill('blue');
-            circle(200, 200, 170);
+            circle(200, 200, 150);
             fill('red');
             circle(200, 200, 110);
             fill('yellow');
@@ -232,17 +238,23 @@
         }
 
         function mousePressed() {
-            if (hitColour[0] === 0 && hitColour[1] === 0 && hitColour[2] === 255) { // Blue
+            if (hitColour[0] === 255 && hitColour[1] === 165 && hitColour[2] === 0) { // Orange
+                score += 1000;
+                logHit('You hit the fourth circle, 1000 points! 🟠');
+            } else if (hitColour[0] === 128 && hitColour[1] === 0 && hitColour[2] === 128) { // Purple
+                score += 2000;
+                logHit('You hit the fifth circle, 2000 points! 🟣');
+            } else if (hitColour[0] === 0 && hitColour[1] === 0 && hitColour[2] === 255) { // Blue
                 score += 50;
-                logHit('You hit the outer circle, 50 points!');
+                logHit('You hit the outer circle, 50 points! 🔵');
             } else if (hitColour[0] === 255 && hitColour[1] === 0 && hitColour[2] === 0) { // Red
                 score += 200;
-                logHit('You hit the inner circle, 200 points!');
+                logHit('You hit the inner circle, 200 points! 🔴');
             } else if (hitColour[0] === 255 && hitColour[1] === 255 && hitColour[2] === 0) { // Yellow
                 score += 500;
-                logHit('You hit the middle, 500 points!');
+                logHit('You hit the middle, 500 points! 🟡');
             } else {
-                logHit('You missed! No points!');
+                logHit('You missed! No points! ❌');
             }
             document.getElementById('score').innerText = score;
         }
