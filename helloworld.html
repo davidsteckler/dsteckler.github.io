@@ -98,6 +98,37 @@
                 color: #fff;
             }
         }
+        .step-navigation {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .step {
+            background-color: #ddd;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .step.active {
+            background-color: #3498db;
+            color: #fff;
+        }
+        .step-nav-arrows {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .step-nav-arrows button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
         .slider {
             position: relative;
             width: 100%;
@@ -111,21 +142,6 @@
         .slide {
             min-width: 100%;
             transition: 0.5s;
-        }
-        .slider-nav {
-            display: flex;
-            justify-content: space-between;
-            position: absolute;
-            width: 100%;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        .slider-nav button {
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
         }
         .code-output {
             background-color: #f5f5f5;
@@ -183,17 +199,25 @@
     </header>
 
     <div class="container">
+        <div class="step-nav-arrows">
+            <button onclick="changeSlide(-1)">&#10094; Previous</button>
+            <div class="step-navigation" id="step-navigation">
+                <!-- Step navigation will be dynamically generated -->
+            </div>
+            <button onclick="changeSlide(1)">Next &#10095;</button>
+        </div>
         <section id="helloworld">
             <h2>Hello World Project</h2>
             <div class="slider">
                 <div class="slides">
-                    <div class="slide">
+                    <!-- Repeat this block for each step (total 16 steps) -->
+                    <div class="slide" data-step="1">
                         <h3>Step 1: Introduction</h3>
                         <p>This is project 1 of 6 in the Introduction to Python path.</p>
                         <p>This project provides step-by-step instructions to help you learn new skills.</p>
                         <h4>You will make</h4>
                         <p>Find out what the Python 🐍 programming language can do by writing an interactive project that uses emojis 🙌 🙌🏼 🙌🏽 🙌🏾 🙌🏿.</p>
-                        <p>Emojis are small colorful images 🥰 used to add extra meaning to messages. Emoji means 'picture word' in Japanese.</p>
+                        <p>Emojis are small colorful images 🥰 used to add extra meaning to messages. Emoji means ‘picture word’ in Japanese.</p>
                         <p>You will:</p>
                         <ul>
                             <li>print() text, including emojis 🚀, and get input() ⌨️ from the user</li>
@@ -211,7 +235,7 @@
                             <pre id="output"></pre>
                         </div>
                     </div>
-                    <div class="slide">
+                    <div class="slide" data-step="2">
                         <h3>Step 2: Write Your First Program</h3>
                         <div class="code-section">
                             <div class="code-box">
@@ -222,18 +246,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="slide">
-                        <h3>Step 3: Run Your Program</h3>
-                        <p>Save your file with a `.py` extension (e.g., `helloworld.py`). Open a terminal or command prompt, navigate to the directory where you saved your file, and run the program by typing `python helloworld.py`.</p>
-                    </div>
-                    <div class="slide">
-                        <h3>Step 4: Celebrate!</h3>
-                        <p>Congratulations! You've written and run your first Python program. Enjoy the moment and think about what you want to code next.</p>
-                    </div>
-                </div>
-                <div class="slider-nav">
-                    <button class="prev">&#10094;</button>
-                    <button class="next">&#10095;</button>
+                    <!-- Additional steps go here -->
                 </div>
             </div>
         </section>
@@ -250,24 +263,41 @@
 
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
-        const totalSlides = slides.length;
+        const totalSlides = 16;
 
-        document.querySelector('.next').addEventListener('click', function() {
-            changeSlide(1);
-        });
-
-        document.querySelector('.prev').addEventListener('click', function() {
-            changeSlide(-1);
-        });
+        function updateStepNavigation() {
+            const nav = document.getElementById('step-navigation');
+            nav.innerHTML = '';
+            for (let i = 1; i <= totalSlides; i++) {
+                const step = document.createElement('div');
+                step.className = 'step';
+                step.innerText = 'Step ' + i;
+                if (i === currentSlide + 1) {
+                    step.classList.add('active');
+                }
+                step.setAttribute('data-step', i - 1);
+                step.onclick = () => goToSlide(i - 1);
+                nav.appendChild(step);
+            }
+        }
 
         function changeSlide(direction) {
             slides[currentSlide].style.display = 'none';
             currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
             slides[currentSlide].style.display = 'block';
+            updateStepNavigation();
         }
 
-        // Initialize first slide
+        function goToSlide(step) {
+            slides[currentSlide].style.display = 'none';
+            currentSlide = step;
+            slides[currentSlide].style.display = 'block';
+            updateStepNavigation();
+        }
+
+        // Initialize first slide and navigation
         slides[currentSlide].style.display = 'block';
+        updateStepNavigation();
 
         // JavaScript to simulate the Python example
         let outputInterval;
