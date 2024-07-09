@@ -138,6 +138,33 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+        .code-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .code-box {
+            flex: 1;
+            padding: 10px;
+            margin: 10px;
+            background-color: #eef;
+            border-radius: 5px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        .button-group button {
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-group button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -166,7 +193,7 @@
                         <p>This project provides step-by-step instructions to help you learn new skills.</p>
                         <h4>You will make</h4>
                         <p>Find out what the Python 🐍 programming language can do by writing an interactive project that uses emojis 🙌 🙌🏼 🙌🏽 🙌🏾 🙌🏿.</p>
-                        <p>Emojis are small colorful images 🥰 used to add extra meaning to messages. Emoji means ‘picture word’ in Japanese.</p>
+                        <p>Emojis are small colorful images 🥰 used to add extra meaning to messages. Emoji means 'picture word' in Japanese.</p>
                         <p>You will:</p>
                         <ul>
                             <li>print() text, including emojis 🚀, and get input() ⌨️ from the user</li>
@@ -176,16 +203,24 @@
                         <div class="code-output">
                             <p>What do you think the code will do?</p>
                             <input type="text" id="guess" placeholder="Type your guess here">
-                            <button onclick="submitGuess()">Submit Guess</button>
-                            <button onclick="runCode()">Run</button>
-                            <button onclick="stopCode()">Stop</button>
+                            <div class="button-group">
+                                <button onclick="submitGuess()">Submit Guess</button>
+                                <button onclick="runCode()">Run</button>
+                                <button onclick="stopCode()">Stop</button>
+                            </div>
                             <pre id="output"></pre>
                         </div>
                     </div>
                     <div class="slide">
                         <h3>Step 2: Write Your First Program</h3>
-                        <p>Open your code editor and create a new file. Write the following code to print "Hello, World!" to the screen:</p>
-                        <pre><code>print("Hello, World!")</code></pre>
+                        <div class="code-section">
+                            <div class="code-box">
+                                <pre><code>print("Hello, World!")</code></pre>
+                            </div>
+                            <div class="code-box">
+                                <p>This line of code prints "Hello, World!" to the screen. It's a simple way to start learning how to use Python.</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="slide">
                         <h3>Step 3: Run Your Program</h3>
@@ -236,6 +271,8 @@
 
         // JavaScript to simulate the Python example
         let outputInterval;
+        let isDiceRolling = false;
+
         function runCode() {
             const output = document.getElementById('output');
             output.innerText = '';
@@ -245,18 +282,24 @@
                 'Python 🐍 is very good at maths!',
                 (230 * 5782 ** 2 / 23781).toString(),
                 'The date and time is ' + new Date(),
-                'Rolling a dice...',
-                'I ❤️ rainbows 🌈',
-                'Unicorns 🦄 make me 😃',
-                'I\'d like to make a story 📖 with Python 🐍'
+                'Rolling a dice...'
             ];
 
             let index = 0;
             outputInterval = setInterval(() => {
                 if (index < messages.length) {
                     output.innerText += messages[index] + '\n';
-                    index++;
+                    if (messages[index] === 'Rolling a dice...') {
+                        isDiceRolling = true;
+                        clearInterval(outputInterval);
+                        askForDiceSides();
+                    } else {
+                        index++;
+                    }
                 } else {
+                    output.innerText += 'I ❤️ rainbows 🌈\n';
+                    output.innerText += 'Unicorns 🦄 make me 😃\n';
+                    output.innerText += 'I\'d like to make a story 📖 with Python 🐍\n';
                     clearInterval(outputInterval);
                 }
             }, 1000);
@@ -265,6 +308,17 @@
         function stopCode() {
             clearInterval(outputInterval);
             document.getElementById('output').innerText = '';
+            isDiceRolling = false;
+        }
+
+        function askForDiceSides() {
+            const sides = prompt('How many sides?');
+            const roll = Math.floor(Math.random() * sides) + 1;
+            const output = document.getElementById('output');
+            output.innerText += `That's a D${sides}\n`;
+            output.innerText += `You rolled a ${roll} ${'🔥'.repeat(roll)}\n`;
+            isDiceRolling = false;
+            runCode();
         }
 
         function submitGuess() {
