@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World Project - David Steckler</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            color: #fff;
+        }
+        header h1 a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        .slider {
+            position: relative;
+            width: 100%;
+            margin: auto;
+        }
+        .slides {
+            display: flex;
+            overflow: hidden;
+            width: 100%;
+        }
+        .slide {
+            min-width: 100%;
+            transition: 0.5s;
+        }
+        .slider-nav {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .slider-nav button {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="helloworld">
+            <h2>Hello World Project</h2>
+            <div class="slider">
+                <div class="slides">
+                    <div class="slide">
+                        <h3>Step 1: Set Up Your Environment</h3>
+                        <p>First, you need to set up your programming environment. Make sure you have a code editor installed, such as Visual Studio Code, Sublime Text, or Atom.</p>
+                    </div>
+                    <div class="slide">
+                        <h3>Step 2: Write Your First Program</h3>
+                        <p>Open your code editor and create a new file. Write the following code to print "Hello, World!" to the screen:</p>
+                        <pre><code>print("Hello, World!")</code></pre>
+                    </div>
+                    <div class="slide">
+                        <h3>Step 3: Run Your Program</h3>
+                        <p>Save your file with a `.py` extension (e.g., `helloworld.py`). Open a terminal or command prompt, navigate to the directory where you saved your file, and run the program by typing `python helloworld.py`.</p>
+                    </div>
+                    <div class="slide">
+                        <h3>Step 4: Celebrate!</h3>
+                        <p>Congratulations! You've written and run your first Python program. Enjoy the moment and think about what you want to code next.</p>
+                    </div>
+                </div>
+                <div class="slider-nav">
+                    <button class="prev">&#10094;</button>
+                    <button class="next">&#10095;</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.querySelector('.next').addEventListener('click', function() {
+            changeSlide(1);
+        });
+
+        document.querySelector('.prev').addEventListener('click', function() {
+            changeSlide(-1);
+        });
+
+        function changeSlide(direction) {
+            slides[currentSlide].style.display = 'none';
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            slides[currentSlide].style.display = 'block';
+        }
+
+        // Initialize first slide
+        slides[currentSlide].style.display = 'block';
+    </script>
+</body>
+</html>
