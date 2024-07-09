@@ -127,6 +127,17 @@
             padding: 10px;
             cursor: pointer;
         }
+        .code-output {
+            background-color: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .code-output pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -150,8 +161,26 @@
             <div class="slider">
                 <div class="slides">
                     <div class="slide">
-                        <h3>Step 1: Set Up Your Environment</h3>
-                        <p>First, you need to set up your programming environment. Make sure you have a code editor installed, such as Visual Studio Code, Sublime Text, or Atom.</p>
+                        <h3>Step 1: Introduction</h3>
+                        <p>This is project 1 of 6 in the Introduction to Python path.</p>
+                        <p>This project provides step-by-step instructions to help you learn new skills.</p>
+                        <h4>You will make</h4>
+                        <p>Find out what the Python 🐍 programming language can do by writing an interactive project that uses emojis 🙌 🙌🏼 🙌🏽 🙌🏾 🙌🏿.</p>
+                        <p>Emojis are small colorful images 🥰 used to add extra meaning to messages. Emoji means ‘picture word’ in Japanese.</p>
+                        <p>You will:</p>
+                        <ul>
+                            <li>print() text, including emojis 🚀, and get input() ⌨️ from the user</li>
+                            <li>Store text and numbers in variables</li>
+                            <li>Use functions to organize your code</li>
+                        </ul>
+                        <div class="code-output">
+                            <p>What do you think the code will do?</p>
+                            <input type="text" id="guess" placeholder="Type your guess here">
+                            <button onclick="submitGuess()">Submit Guess</button>
+                            <button onclick="runCode()">Run</button>
+                            <button onclick="stopCode()">Stop</button>
+                            <pre id="output"></pre>
+                        </div>
                     </div>
                     <div class="slide">
                         <h3>Step 2: Write Your First Program</h3>
@@ -204,6 +233,44 @@
 
         // Initialize first slide
         slides[currentSlide].style.display = 'block';
+
+        // JavaScript to simulate the Python example
+        let outputInterval;
+        function runCode() {
+            const output = document.getElementById('output');
+            output.innerText = '';
+            const messages = [
+                'Hello 🌍🌎🌏',
+                'Welcome to Python 🐍',
+                'Python 🐍 is very good at maths!',
+                (230 * 5782 ** 2 / 23781).toString(),
+                'The date and time is ' + new Date(),
+                'Rolling a dice...',
+                'I ❤️ rainbows 🌈',
+                'Unicorns 🦄 make me 😃',
+                'I\'d like to make a story 📖 with Python 🐍'
+            ];
+
+            let index = 0;
+            outputInterval = setInterval(() => {
+                if (index < messages.length) {
+                    output.innerText += messages[index] + '\n';
+                    index++;
+                } else {
+                    clearInterval(outputInterval);
+                }
+            }, 1000);
+        }
+
+        function stopCode() {
+            clearInterval(outputInterval);
+            document.getElementById('output').innerText = '';
+        }
+
+        function submitGuess() {
+            const guess = document.getElementById('guess').value;
+            alert(`Great thoughts! The code will print some text and emojis, do some math, show the date and time, and roll a virtual dice.`);
+        }
     </script>
 </body>
 </html>
