@@ -65,13 +65,16 @@
             height: 200px;
             margin-top: 10px;
             font-family: monospace;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: scroll;
         }
         #quiz, #challenge {
             margin-top: 20px;
         }
         .color-box {
-            width: 20px;
-            height: 20px;
+            width: 50px;
+            height: 50px;
             display: inline-block;
             margin-right: 10px;
             border: 1px solid #333;
@@ -97,6 +100,43 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+        .binary-columns {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .binary-column {
+            flex: 1;
+            text-align: center;
+            font-family: monospace;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .slider-value {
+            font-family: monospace;
+            width: 150px;
+        }
+        #hexCode {
+            font-family: monospace;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        #steganoGuide {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e0f0ff;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -118,17 +158,34 @@
         </div>
         <div class="column">
             <h2>Binary Representation</h2>
-            <div id="binaryDisplay"></div>
+            <div class="binary-columns">
+                <div class="binary-column" id="redColumn">R</div>
+                <div class="binary-column" id="greenColumn">G</div>
+                <div class="binary-column" id="blueColumn">B</div>
+            </div>
             <textarea id="binaryTextArea" readonly></textarea>
         </div>
         <div class="column">
             <h2>Interactive Learning</h2>
             <div id="colorMixer">
                 <h3>Color Mixer</h3>
-                <label>Red: <input type="range" id="redSlider" min="0" max="255" value="0"></label>
-                <label>Green: <input type="range" id="greenSlider" min="0" max="255" value="0"></label>
-                <label>Blue: <input type="range" id="blueSlider" min="0" max="255" value="0"></label>
+                <div class="slider-container">
+                    <label>Red:</label>
+                    <input type="range" id="redSlider" min="0" max="255" value="0">
+                    <span id="redValue" class="slider-value"></span>
+                </div>
+                <div class="slider-container">
+                    <label>Green:</label>
+                    <input type="range" id="greenSlider" min="0" max="255" value="0">
+                    <span id="greenValue" class="slider-value"></span>
+                </div>
+                <div class="slider-container">
+                    <label>Blue:</label>
+                    <input type="range" id="blueSlider" min="0" max="255" value="0">
+                    <span id="blueValue" class="slider-value"></span>
+                </div>
                 <div id="colorPreview" class="color-box"></div>
+                <div id="hexCode"></div>
                 <div id="binaryColor"></div>
             </div>
             <div id="quiz">
@@ -144,6 +201,16 @@
                 <input type="text" id="secretAnswer">
                 <button id="submitSecret">Submit</button>
                 <p id="secretResult"></p>
+                <div id="steganoGuide">
+                    <h4>How to Find the Secret Message:</h4>
+                    <ol>
+                        <li>The secret is hidden in the least significant bits of the RGB values.</li>
+                        <li>Each pixel's RGB values contain 1 bit of the message (3 bits per pixel).</li>
+                        <li>The message is encoded in ASCII, with each character taking 8 bits.</li>
+                        <li>Look at the binary representation of the first few pixels to decode the message.</li>
+                        <li>The message is "BINARY" - try to spot this pattern in the least significant bits!</li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
@@ -176,9 +243,14 @@
         const zoomCanvas = document.getElementById('zoomCanvas');
         const zoomCtx = zoomCanvas.getContext('2d');
         const messageBox = document.getElementById('messageBox');
+        const redValue = document.getElementById('redValue');
+        const greenValue = document.getElementById('greenValue');
+        const blueValue = document.getElementById('blueValue');
+        const hexCode = document.getElementById('hexCode');
 
         let currentImage = null;
         let originalImageData = null;
+        let selectedPixel = null;
 
         upload.addEventListener('change', function(event) {
             const file = event.target.files[0];
@@ -213,6 +285,23 @@
             const pixelData = ctx.getImageData(x, y, 1, 1).data;
             displayPixelInfo(x, y, pixelData);
             updateZoom(x, y);
+        });
+
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((event.clientX - rect.left) * (canvas.width / rect.width));
+            const y = Math.floor((event.clientY - rect.top) * (canvas.height / rect.height));
+            const pixelData = ctx.getImageData(x, y, 1, 1).data;
+            displayPixelInfo(x, y, pixelData);
+            updateZoom(x, y);
+            highlightBinaryRepresentation(x, y);
+            selectedPixel = { x, y };
+            
+            // Set color mixer to clicked pixel color
+            redSlider.value = pixelData[0];
+            greenSlider.value = pixelData[1];
+            blueSlider.value = pixelData[2];
+            updateColorMixer();
         });
 
         function displayPixelInfo(x, y, pixelData) {
@@ -250,17 +339,43 @@
         function displayBinaryValues() {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             let binaryText = '';
-            for (let y = 0; y < canvas.height; y += 8) {
-                for (let x = 0; x < canvas.width; x += 8) {
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
                     const index = (y * canvas.width + x) * 4;
                     const [r, g, b] = imageData.data.slice(index, index + 3);
                     const binaryR = r.toString(2).padStart(8, '0');
                     const binaryG = g.toString(2).padStart(8, '0');
                     const binaryB = b.toString(2).padStart(8, '0');
-                    binaryText += `(${x},${y}): ${binaryR}${binaryG}${binaryB}\n`;
+                    binaryText += `(${x.toString().padStart(3)},${y.toString().padStart(3)}): ${binaryR}${binaryG}${binaryB}\n`;
                 }
             }
             binaryTextArea.value = binaryText;
+        }
+
+        function highlightBinaryRepresentation(x, y) {
+            const binaryText = binaryTextArea.value;
+            const lines = binaryText.split('\n');
+            const targetLine = lines.find(line => line.startsWith(`(${x.toString().padStart(3)},${y.toString().padStart(3)})`));
+            
+            if (targetLine) {
+                const lineIndex = lines.indexOf(targetLine);
+                const startIndex = binaryText.indexOf(targetLine);
+                const endIndex = startIndex + targetLine.length;
+
+                binaryTextArea.setSelectionRange(startIndex, endIndex);
+                binaryTextArea.focus();
+                binaryTextArea.scrollTop = lineIndex * 15; // Approximate line height
+
+                const [r, g, b] = targetLine.split(':')[1].trim().match(/.{8}/g);
+                document.getElementById('redColumn').innerHTML = `R<br>${r}`;
+                document.getElementById('greenColumn').innerHTML = `G<br>${g}`;
+                document.getElementById('blueColumn').innerHTML = `B<br>${b}`;
+
+                document.querySelectorAll('.binary-column').forEach(col => col.classList.add('highlight'));
+                setTimeout(() => {
+                    document.querySelectorAll('.binary-column').forEach(col => col.classList.remove('highlight'));
+                }, 2000);
+            }
         }
 
         invertColorsBtn.addEventListener('click', function() {
@@ -349,11 +464,22 @@
             const g = greenSlider.value;
             const b = blueSlider.value;
             colorPreview.style.backgroundColor = `rgb(${r},${g},${b})`;
+            
+            // Update binary representation
             binaryColor.innerHTML = `
                 <div class="binary-value">R: ${parseInt(r).toString(2).padStart(8, '0')}</div>
                 <div class="binary-value">G: ${parseInt(g).toString(2).padStart(8, '0')}</div>
                 <div class="binary-value">B: ${parseInt(b).toString(2).padStart(8, '0')}</div>
             `;
+
+            // Update decimal and binary values for sliders
+            redValue.textContent = `${r} (${parseInt(r).toString(2).padStart(8, '0')})`;
+            greenValue.textContent = `${g} (${parseInt(g).toString(2).padStart(8, '0')})`;
+            blueValue.textContent = `${b} (${parseInt(b).toString(2).padStart(8, '0')})`;
+
+            // Update hex code
+            const hex = `#${parseInt(r).toString(16).padStart(2, '0')}${parseInt(g).toString(16).padStart(2, '0')}${parseInt(b).toString(16).padStart(2, '0')}`;
+            hexCode.textContent = `Hex: ${hex.toUpperCase()}`;
         }
 
         redSlider.addEventListener('input', updateColorMixer);
