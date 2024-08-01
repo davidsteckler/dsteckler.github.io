@@ -110,6 +110,40 @@
             visibility: visible;
             opacity: 1;
         }
+
+        /* Mobile-specific styles */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .section {
+                padding: 10px;
+            }
+            .dropdown {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .content {
+                padding: 8px;
+            }
+            .preview {
+                width: 40px;
+                height: 40px;
+            }
+            button {
+                padding: 4px 8px;
+                font-size: 14px;
+            }
+            .ascii-chart {
+                grid-template-columns: repeat(8, minmax(40px, 1fr));
+            }
+            .ascii-char {
+                font-size: 10px;
+            }
+            .ascii-explanation {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -341,66 +375,66 @@
                 139: "Partial Line Down",
                 140: "Partial Line Up",
                 141: "Reverse Line Feed",
-            142: "Single Shift Two",
-            143: "Single Shift Three",
-            144: "Device Control String",
-            145: "Private Use One",
-            146: "Private Use Two",
-            147: "Set Transmit State",
-            148: "Cancel Character",
-            149: "Message Waiting",
-            150: "Start of Protected Area",
-            151: "End of Protected Area",
-            152: "Start of String",
-            153: "Single Graphic Character Introducer",
-            154: "Single Character Introducer",
-            155: "Control Sequence Introducer",
-            156: "String Terminator",
-            157: "Operating System Command",
-            158: "Privacy Message",
-            159: "Application Program Command"
-        };
+                142: "Single Shift Two",
+                143: "Single Shift Three",
+                144: "Device Control String",
+                145: "Private Use One",
+                146: "Private Use Two",
+                147: "Set Transmit State",
+                148: "Cancel Character",
+                149: "Message Waiting",
+                150: "Start of Protected Area",
+                151: "End of Protected Area",
+                152: "Start of String",
+                153: "Single Graphic Character Introducer",
+                154: "Single Character Introducer",
+                155: "Control Sequence Introducer",
+                156: "String Terminator",
+                157: "Operating System Command",
+                158: "Privacy Message",
+                159: "Application Program Command"
+            };
 
-        const chart = document.getElementById('asciiChart');
-        for (let i = 0; i < 128; i++) {
-            const item = document.createElement('div');
-            item.className = 'ascii-item';
-            let char = String.fromCharCode(i);
-            if (i < 32 || i === 127) {
-                char = 'CTRL';
-                const tooltip = document.createElement('span');
-                tooltip.className = 'tooltip';
-                tooltip.textContent = controlCharacters[i];
-                item.appendChild(tooltip);
+            const chart = document.getElementById('asciiChart');
+            for (let i = 0; i < 128; i++) {
+                const item = document.createElement('div');
+                item.className = 'ascii-item';
+                let char = String.fromCharCode(i);
+                if (i < 32 || i === 127) {
+                    char = 'CTRL';
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = controlCharacters[i];
+                    item.appendChild(tooltip);
+                }
+                if (char === ' ') char = '␠';
+                item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
+                chart.appendChild(item);
             }
-            if (char === ' ') char = '␠';
-            item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
-            chart.appendChild(item);
+
+            const extendedChart = document.getElementById('extendedAsciiChart');
+            for (let i = 128; i < 256; i++) {
+                const item = document.createElement('div');
+                item.className = 'ascii-item';
+                let char = String.fromCharCode(i);
+                if (i < 160) {
+                    char = 'CTRL';
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = extendedControlCharacters[i];
+                    item.appendChild(tooltip);
+                }
+                item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
+                extendedChart.appendChild(item);
+            }
         }
 
-        const extendedChart = document.getElementById('extendedAsciiChart');
-        for (let i = 128; i < 256; i++) {
-            const item = document.createElement('div');
-            item.className = 'ascii-item';
-            let char = String.fromCharCode(i);
-            if (i < 160) {
-                char = 'CTRL';
-                const tooltip = document.createElement('span');
-                tooltip.className = 'tooltip';
-                tooltip.textContent = extendedControlCharacters[i];
-                item.appendChild(tooltip);
-            }
-            item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
-            extendedChart.appendChild(item);
-        }
-    }
-
-    // Initialize
-    updatePixel('10101010');
-    updateColor('10101010');
-    updateText('10101010');
-    updateAudio('10101010');
-    generateASCIIChart();
-</script>
+        // Initialize
+        updatePixel('10101010');
+        updateColor('10101010');
+        updateText('10101010');
+        updateAudio('10101010');
+        generateASCIIChart();
+    </script>
 </body>
 </html>
