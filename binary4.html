@@ -137,6 +137,34 @@
             background-color: #e0f0ff;
             border-radius: 5px;
         }
+        #walkthrough {
+            display: none;
+            background-color: #f0f8ff;
+            border: 1px solid #4682b4;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        #walkthrough h4 {
+            margin-top: 0;
+        }
+        .step {
+            margin-bottom: 15px;
+        }
+        .step-content {
+            margin-left: 20px;
+        }
+        .next-button, .prev-button {
+            background-color: #4682b4;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .highlight-lsb {
+            background-color: yellow;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +179,7 @@
                 <button id="pixelate">Pixelate</button>
                 <button id="reset">Reset Image</button>
                 <button id="hideSecretMessage">Hide Secret</button>
+                <button id="navigateTopLeft">Go to Top-Left Pixel</button>
             </div>
             <canvas id="canvas" width="256" height="256"></canvas>
             <div id="pixelInfo" class="pixel-info"></div>
@@ -201,15 +230,12 @@
                 <input type="text" id="secretAnswer">
                 <button id="submitSecret">Submit</button>
                 <p id="secretResult"></p>
-                <div id="steganoGuide">
-                    <h4>How to Find the Secret Message:</h4>
-                    <ol>
-                        <li>The secret is hidden in the least significant bits of the RGB values.</li>
-                        <li>Each pixel's RGB values contain 1 bit of the message (3 bits per pixel).</li>
-                        <li>The message is encoded in ASCII, with each character taking 8 bits.</li>
-                        <li>Look at the binary representation of the first few pixels to decode the message.</li>
-                        <li>The message is "BINARY" - try to spot this pattern in the least significant bits!</li>
-                    </ol>
+                <button id="startWalkthrough">Start Interactive Walkthrough</button>
+                <div id="walkthrough">
+                    <h4>Steganography Walkthrough</h4>
+                    <div id="stepContent"></div>
+                    <button class="prev-button" onclick="prevStep()">Previous</button>
+                    <button class="next-button" onclick="nextStep()">Next</button>
                 </div>
             </div>
         </div>
@@ -228,6 +254,7 @@
         const pixelateBtn = document.getElementById('pixelate');
         const resetBtn = document.getElementById('reset');
         const hideSecretBtn = document.getElementById('hideSecretMessage');
+        const navigateTopLeftBtn = document.getElementById('navigateTopLeft');
         const redSlider = document.getElementById('redSlider');
         const greenSlider = document.getElementById('greenSlider');
         const blueSlider = document.getElementById('blueSlider');
@@ -239,7 +266,6 @@
         const quizResult = document.getElementById('quizResult');
         const secretAnswer = document.getElementById('secretAnswer');
         const submitSecret = document.getElementById('submitSecret');
-        const secretResult = document.getElementById('secretResult');
         const zoomCanvas = document.getElementById('zoomCanvas');
         const zoomCtx = zoomCanvas.getContext('2d');
         const messageBox = document.getElementById('messageBox');
@@ -251,6 +277,138 @@
         let currentImage = null;
         let originalImageData = null;
         let selectedPixel = null;
+
+        const startWalkthroughBtn = document.getElementById('startWalkthrough');
+        const walkthrough = document.getElementById('walkthrough');
+        const stepContent = document.getElementById('stepContent');
+
+        let currentStep = 0;
+        const steps = [
+            {
+                content: "Welcome to the Steganography Challenge Walkthrough! We'll guide you through finding the hidden message step by step. Are you ready to begin?",
+                action: null
+            },
+            {
+                content: "Step 1: Understanding Least Significant Bit (LSB)\n\nIn steganography, we often hide information in the least significant bit of each color channel. This is the rightmost bit in the binary representation of a color value.\n\nFor example, in the binary number 10101100, the least significant bit is the rightmost 0.\n\nCan you identify the least significant bit in this binary number: 11010101?",
+                action: function() {
+                    const userAnswer = prompt("What is the least significant bit in 11010101?");
+                    if (userAnswer === "1") {
+                        alert("Correct! The rightmost bit (1) is the least significant bit.");
+                        return true;
+                    } else {
+                        alert("Not quite. The least significant bit is the rightmost bit, which is 1 in this case. Let's try this step again.");
+                        return false;
+                    }
+                }
+            },
+            {
+                content: "Step 2: Locating the Hidden Message\n\nIn our image, we've hidden the message in the first few pixels. Each pixel contains 3 color channels (Red, Green, Blue), and we've used the LSB of each channel to store 1 bit of our message.\n\nLet's look at the binary representation of the first pixel. Click on the top-left pixel of the image.",
+                action: function() {
+                    navigateToTopLeftPixel();
+                    return true;
+                }
+            },
+            {
+                content: "Great! Now look at the binary values in the 'Pixel Info' section. Can you spot the least significant bits?",
+                action: function() {
+                    const userAnswer = prompt("What are the least significant bits for R, G, and B? (Enter 3 bits, e.g., 101)");
+                    const correctAnswer = getLSBsOfSelectedPixel();
+                    if (userAnswer === correctAnswer) {
+                        alert("Correct! These three bits are part of our hidden message.");
+                        return true;
+                    } else {
+                        alert(`Not quite. The least significant bits are ${correctAnswer}. Let's try this step again.`);
+                        return false;
+                    }
+                }
+            },
+            {
+                content: "Step 3: Decoding the Message\n\nEach character in our message is represented by 8 bits (1 byte). So, we need to look at 3 pixels to get 9 bits, which gives us 1 full character and 1 bit of the next.\n\nLet's collect the LSBs from the first 3 pixels. Click on the first three pixels from left to right.",
+                action: function() {
+                    canvas.addEventListener('click', pixelClickHandler);
+                    return true;
+                }
+            },
+            {
+                content: "Excellent! Now we have 9 bits. The first 8 bits represent our first character. In binary, it's 01000010.\n\nTo decode this, we can use an ASCII table or an online binary-to-text converter. Can you figure out what letter this represents?",
+                action: function() {
+                    const userAnswer = prompt("What letter does 01000010 represent? (Hint: It's the first letter of our hidden word)");
+                    if (userAnswer.toUpperCase() === "B") {
+                        alert("Correct! 01000010 represents the letter 'B' in ASCII.");
+                        return true;
+                    } else {
+                        alert("Not quite. 01000010 represents the letter 'B' in ASCII. Let's try this step again.");
+                        return false;
+                    }
+                }
+            },
+            {
+                content: "Step 4: Completing the Message\n\nNow that you know how to decode one character, you can continue this process for the next few pixels to reveal the entire message.\n\nRemember, each character is 8 bits, and we get 3 bits per pixel. So you'll need to look at about 3 pixels per character.\n\nTry to decode the next few characters. What do you think the full message is?",
+                action: function() {
+                    const userAnswer = prompt("What do you think the full hidden message is?");
+                    if (userAnswer.toUpperCase() === "BINARY") {
+                        alert("Congratulations! You've successfully decoded the hidden message: BINARY");
+                        return true;
+                    } else {
+                        alert("Not quite. The hidden message is 'BINARY'. Don't worry, steganography takes practice!");
+                        return true;
+                    }
+                }
+            },
+            {
+                content: "Congratulations! You've completed the Steganography Challenge Walkthrough.\n\nYou've learned how to:\n1. Identify the least significant bits\n2. Locate hidden data in an image\n3. Decode binary data into text\n\nFeel free to experiment with hiding and finding more messages in images!",
+                action: null
+            }
+        ];
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                if (steps[currentStep].action === null || steps[currentStep].action()) {
+                    currentStep++;
+                    updateStepContent();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateStepContent();
+            }
+        }
+
+        function updateStepContent() {
+            stepContent.innerHTML = steps[currentStep].content;
+        }
+
+        startWalkthroughBtn.addEventListener('click', function() {
+            walkthrough.style.display = 'block';
+            currentStep = 0;
+            updateStepContent();
+        });
+
+        function pixelClickHandler(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((event.clientX - rect.left) * (canvas.width / rect.width));
+            const y = Math.floor((event.clientY - rect.top) * (canvas.height / rect.height));
+            const pixelData = ctx.getImageData(x, y, 1, 1).data;
+            displayPixelInfo(x, y, pixelData);
+            highlightLSB();
+        }
+
+        function highlightLSB() {
+            const binaries = document.querySelectorAll('.binary-value');
+            binaries.forEach(binary => {
+                const text = binary.textContent;
+                const highlightedText = text.slice(0, -1) + '<span class="highlight-lsb">' + text.slice(-1) + '</span>';
+                binary.innerHTML = highlightedText;
+            });
+        }
+
+        function getLSBsOfSelectedPixel() {
+            const binaries = document.querySelectorAll('.binary-value');
+            return Array.from(binaries).map(binary => binary.textContent.slice(-1)).join('');
+        }
 
         upload.addEventListener('change', function(event) {
             const file = event.target.files[0];
@@ -459,6 +617,18 @@
             }
         });
 
+        function navigateToTopLeftPixel() {
+            const x = 0;
+            const y = 0;
+            const pixelData = ctx.getImageData(x, y, 1, 1).data;
+            displayPixelInfo(x, y, pixelData);
+            highlightBinaryRepresentation(x, y);
+            selectedPixel = { x, y };
+            showMessage("Navigated to top-left pixel!", "success");
+        }
+
+        navigateTopLeftBtn.addEventListener('click', navigateToTopLeftPixel);
+
         function updateColorMixer() {
             const r = redSlider.value;
             const g = greenSlider.value;
@@ -539,5 +709,6 @@
         generateQuiz();
         updateColorMixer();
     </script>
+    <a href="binary2.html">Go to Binary2</a>
 </body>
 </html>
