@@ -429,11 +429,15 @@
         });
 
         function drawImage(img) {
-            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-            const x = (canvas.width / 2) - (img.width / 2) * scale;
-            const y = (canvas.height / 2) - (img.height / 2) * scale;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const imgWidth = img.width;
+            const imgHeight = img.height;
+            const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight);
+            const x = (canvasWidth / 2) - (imgWidth / 2) * scale;
+            const y = (canvasHeight / 2) - (imgHeight / 2) * scale;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.drawImage(img, x, y, imgWidth * scale, imgHeight * scale);
         }
 
         canvas.addEventListener('mousemove', function(event) {
