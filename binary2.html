@@ -164,6 +164,37 @@
         strong {
             font-weight: bold;
         }
+        .reflection-question {
+            background-color: #f8f9fa;
+            border-left: 4px solid #2c3e50;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+        }
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .option-button {
+            padding: 10px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: left;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            color: #333;
+        }
+        .option-button:hover {
+            background-color: #f0f0f0;
+        }
+        #questionResult {
+            margin-top: 15px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -188,6 +219,18 @@
             <p>Flip count: <span id="flipCount">0</span>/8</p>
             <p>Pattern: <span id="binaryPattern"></span></p>
             <button id="resetPattern">Reset</button>
+        </div>
+
+        <div class="reflection-question">
+            <h3>Observing the Switch Pattern</h3>
+            <p>After flipping the switch 8 times, what pattern did you notice in the resulting binary sequence?</p>
+            <div class="question-options">
+                <button class="option-button" onclick="checkAnswer('random')">The 0s and 1s appear in a random order</button>
+                <button class="option-button" onclick="checkAnswer('alternating')">It strictly alternates between 0 and 1</button>
+                <button class="option-button" onclick="checkAnswer('allZeros')">All the digits are 0</button>
+                <button class="option-button" onclick="checkAnswer('allOnes')">All the digits are 1</button>
+            </div>
+            <p id="questionResult"></p>
         </div>
     </section>
 
@@ -370,6 +413,16 @@
             binaryPattern.textContent = '';
             lightBulb.classList.add('light-off');
         });
+
+        // Reflection question for switch pattern
+        function checkAnswer(answer) {
+            const resultElement = document.getElementById('questionResult');
+            if (answer === 'alternating') {
+                resultElement.textContent = "Correct! The switch creates a predictable, alternating pattern of 0s and 1s. Each flip changes the state from 0 to 1 or 1 to 0. This demonstrates how binary uses two distinct states to represent information in a clear, predictable manner.";
+            } else {
+                resultElement.textContent = "Not quite. Look closely at how the pattern changes with each flip. Is there a consistent rule to how it changes from one flip to the next?";
+            }
+        }
 
         // ASCII to binary converter
         const asciiInput = document.getElementById('asciiInput');
