@@ -41,15 +41,26 @@
         }
         .explanation {
             margin-top: 10px;
+            background-color: #d9dee4;
+            padding: 10px;
+            border-radius: 5px;
         }
         .explanation p {
+            margin: 0;
             display: none;
         }
-        .explanation p:first-child {
-            display: block;
+        .explanation p.level-1 {
+            font-weight: bold;
+            color: #000;
         }
-        input[type="range"] {
-            width: 100%;
+        .explanation p.level-2 {
+            color: #444;
+        }
+        .explanation p.level-3 {
+            color: #666;
+        }
+        input[type="range"].explanation-slider {
+            width: 60%; /* Less wide slider for explanation depth */
             margin: 10px 0;
             height: 24px;
         }
@@ -137,8 +148,11 @@
                 font-size: 18px;
             }
             input[type="range"] {
-                width: 120%;
+                width: 100%;
                 height: 28px;
+            }
+            input[type="range"].explanation-slider {
+                width: 80%; /* Adjust width for explanation depth slider on mobile */
             }
             .ascii-chart {
                 grid-template-columns: repeat(8, minmax(40px, 1fr));
@@ -181,9 +195,9 @@
             <button id="randomizePixel">Randomize</button>
             <input type="range" min="1" max="3" value="1" class="explanation-slider">
             <div class="explanation">
-                <p id="pixelExplanation1">This binary number represents a medium gray pixel.</p>
-                <p id="pixelExplanation2">In 8-bit grayscale, this binary number translates to a decimal value between 0 (black) and 255 (white).</p>
-                <p id="pixelExplanation3">Each bit in the binary number represents a power of 2. This system allows 256 shades of gray to be represented with just 8 bits.</p>
+                <p id="pixelExplanation1" class="level-1">This binary number represents a medium gray pixel.</p>
+                <p id="pixelExplanation2" class="level-2">In 8-bit grayscale, this binary number translates to a decimal value between 0 (black) and 255 (white).</p>
+                <p id="pixelExplanation3" class="level-3">Each bit in the binary number represents a power of 2. This system allows 256 shades of gray to be represented with just 8 bits.</p>
             </div>
         </div>
 
@@ -195,9 +209,9 @@
             <button id="randomizeColor">Randomize Green</button>
             <input type="range" min="1" max="3" value="1" class="explanation-slider">
             <div class="explanation">
-                <p id="colorExplanation1">This binary number represents the green component in this RGB color.</p>
-                <p id="colorExplanation2">In the RGB color model, this value is being used for the green channel, while red and blue remain at 0.</p>
-                <p id="colorExplanation3">24-bit color uses 8 bits each for red, green, and blue, allowing for 16,777,216 possible colors using just three bytes of data.</p>
+                <p id="colorExplanation1" class="level-1">This binary number represents the green component in this RGB color.</p>
+                <p id="colorExplanation2" class="level-2">In the RGB color model, this value is being used for the green channel, while red and blue remain at 0.</p>
+                <p id="colorExplanation3" class="level-3">24-bit color uses 8 bits each for red, green, and blue, allowing for 16,777,216 possible colors using just three bytes of data.</p>
             </div>
         </div>
 
@@ -209,9 +223,9 @@
             <button id="randomizeText">Randomize</button>
             <input type="range" min="1" max="3" value="1" class="explanation-slider">
             <div class="explanation">
-                <p id="textExplanation1">This binary number represents a character in ASCII encoding.</p>
-                <p id="textExplanation2">ASCII uses 7 bits to represent 128 characters. Values above 127 fall into the extended ASCII range.</p>
-                <p id="textExplanation3">Extended ASCII, which uses all 8 bits, allows for 256 characters, including special symbols and characters from other languages.</p>
+                <p id="textExplanation1" class="level-1">This binary number represents a character in ASCII encoding.</p>
+                <p id="textExplanation2" class="level-2">ASCII uses 7 bits to represent 128 characters. Values above 127 fall into the extended ASCII range.</p>
+                <p id="textExplanation3" class="level-3">Extended ASCII, which uses all 8 bits, allows for 256 characters, including special symbols and characters from other languages.</p>
             </div>
 
             <div class="ascii-section">
@@ -247,9 +261,9 @@
             <button id="randomizeAudio">Randomize</button>
             <input type="range" min="1" max="3" value="1" class="explanation-slider">
             <div class="explanation">
-                <p id="audioExplanation1">This binary number could represent part of an audio waveform.</p>
-                <p id="audioExplanation2">In digital audio, this might represent the amplitude of a sound wave at a specific moment.</p>
-                <p id="audioExplanation3">8-bit audio uses values from 0 to 255 to represent sound wave amplitude. The pattern of bits affects the tone's frequency and timbre.</p>
+                <p id="audioExplanation1" class="level-1">This binary number could represent part of an audio waveform.</p>
+                <p id="audioExplanation2" class="level-2">In digital audio, this might represent the amplitude of a sound wave at a specific moment.</p>
+                <p id="audioExplanation3" class="level-3">8-bit audio uses values from 0 to 255 to represent sound wave amplitude. The pattern of bits affects the tone's frequency and timbre.</p>
             </div>
         </div>
     </div>
@@ -262,7 +276,7 @@
             document.getElementById('pixelBinary').textContent = binary;
             document.getElementById('pixelValue').textContent = decimal;
             document.getElementById('pixelPreview').style.backgroundColor = `rgb(${decimal},${decimal},${decimal})`;
-            document.getElementById('pixelExplanation1').textContent = `This binary number represents a ${decimal < 85 ? 'dark' : decimal > 170 ? 'light' : 'medium'} gray pixel.`;
+            updateExplanations('pixelExplanation', decimal);
         }
 
         function updateColor(binary) {
@@ -270,7 +284,7 @@
             document.getElementById('colorBinary').textContent = binary;
             document.getElementById('colorGreen').textContent = green;
             document.getElementById('colorPreview').style.backgroundColor = `rgb(0,${green},0)`;
-            document.getElementById('colorExplanation1').textContent = `This binary number represents the green component (${green}) in this RGB color, with red and blue set to 0.`;
+            updateExplanations('colorExplanation', green);
         }
 
         function updateText(binary) {
@@ -281,7 +295,7 @@
             document.getElementById('textBinary').textContent = binary;
             document.getElementById('textChar').textContent = char;
             document.getElementById('textDecimal').textContent = decimal;
-            document.getElementById('textExplanation1').textContent = `This binary number represents the character '${char}' (decimal ${decimal}) in ASCII encoding.`;
+            updateExplanations('textExplanation', decimal);
         }
 
         function updateAudio(binary) {
@@ -289,11 +303,16 @@
             const frequency = 200 + (decimal * 2); // Map 0-255 to 200-710 Hz
             document.getElementById('audioBinary').textContent = binary;
             document.getElementById('audioFrequency').textContent = frequency;
-            document.getElementById('audioExplanation1').textContent = `This binary number represents a tone with a frequency of ${frequency} Hz.`;
+            updateExplanations('audioExplanation', frequency);
         }
 
         function randomBinary() {
             return Math.floor(Math.random() * 256).toString(2).padStart(8, '0');
+        }
+
+        function updateExplanations(idPrefix, value) {
+            document.querySelectorAll(`.${idPrefix}`).forEach(p => p.style.display = 'none');
+            document.getElementById(`${idPrefix}1`).style.display = 'block';
         }
 
         document.getElementById('randomizePixel').addEventListener('click', () => updatePixel(randomBinary()));
@@ -306,6 +325,12 @@
             const selectedContent = document.getElementById(this.value + 'Content');
             if (selectedContent) {
                 selectedContent.style.display = 'block';
+                const slider = selectedContent.querySelector('.explanation-slider');
+                slider.value = 1;
+                const explanations = slider.nextElementSibling.querySelectorAll('p');
+                explanations.forEach((p, index) => {
+                    p.style.display = index < slider.value ? 'block' : 'none';
+                });
             }
         });
 
