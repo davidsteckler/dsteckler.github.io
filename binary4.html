@@ -2,27 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Binary Image Encoding</title>
+    <title>Advanced Binary Image Encoding</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
             background-color: #f0f0f0;
             margin: 0;
+            padding: 20px;
         }
-        h2 {
+        h1 {
+            color: #333;
             margin-bottom: 20px;
         }
-        input[type="file"] {
-            margin-bottom: 20px;
+        .container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .column {
+            flex: 1;
+            margin: 0 10px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         canvas {
             border: 1px solid #333;
             margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="file"], button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
         }
         .pixel-info {
             display: flex;
@@ -32,52 +56,163 @@
         }
         .binary-value {
             margin-top: 5px;
-            font-size: 0.8em;
-            color: #666;
+            font-family: monospace;
+            font-size: 1em;
+            color: #333;
+        }
+        #binaryTextArea {
+            width: 100%;
+            height: 200px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        #quiz, #challenge {
+            margin-top: 20px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 10px;
+            border: 1px solid #333;
+        }
+        #zoomCanvas {
+            border: 2px solid #333;
+            margin-top: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        #messageBox {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <h2>Binary Image Encoding</h2>
-    <input type="file" id="upload" accept="image/*">
-    <canvas id="canvas" width="256" height="256"></canvas>
-    <div id="pixelInfo" class="pixel-info"></div>
+    <h1>Advanced Binary Image Encoding</h1>
+    <div class="container">
+        <div class="column">
+            <h2>Image Manipulation</h2>
+            <div class="controls">
+                <input type="file" id="upload" accept="image/*">
+                <button id="invertColors">Invert Colors</button>
+                <button id="grayscale">Grayscale</button>
+                <button id="pixelate">Pixelate</button>
+                <button id="reset">Reset Image</button>
+                <button id="hideSecretMessage">Hide Secret</button>
+            </div>
+            <canvas id="canvas" width="256" height="256"></canvas>
+            <div id="pixelInfo" class="pixel-info"></div>
+            <canvas id="zoomCanvas" width="100" height="100" class="hidden"></canvas>
+        </div>
+        <div class="column">
+            <h2>Binary Representation</h2>
+            <div id="binaryDisplay"></div>
+            <textarea id="binaryTextArea" readonly></textarea>
+        </div>
+        <div class="column">
+            <h2>Interactive Learning</h2>
+            <div id="colorMixer">
+                <h3>Color Mixer</h3>
+                <label>Red: <input type="range" id="redSlider" min="0" max="255" value="0"></label>
+                <label>Green: <input type="range" id="greenSlider" min="0" max="255" value="0"></label>
+                <label>Blue: <input type="range" id="blueSlider" min="0" max="255" value="0"></label>
+                <div id="colorPreview" class="color-box"></div>
+                <div id="binaryColor"></div>
+            </div>
+            <div id="quiz">
+                <h3>Binary Color Quiz</h3>
+                <p id="quizQuestion"></p>
+                <input type="text" id="quizAnswer">
+                <button id="submitQuiz">Submit</button>
+                <p id="quizResult"></p>
+            </div>
+            <div id="challenge">
+                <h3>Steganography Challenge</h3>
+                <p>Find the hidden message in the image!</p>
+                <input type="text" id="secretAnswer">
+                <button id="submitSecret">Submit</button>
+                <p id="secretResult"></p>
+            </div>
+        </div>
+    </div>
+    <div id="messageBox" class="hidden"></div>
 
     <script>
         const upload = document.getElementById('upload');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const pixelInfo = document.getElementById('pixelInfo');
+        const binaryDisplay = document.getElementById('binaryDisplay');
+        const binaryTextArea = document.getElementById('binaryTextArea');
+        const invertColorsBtn = document.getElementById('invertColors');
+        const grayscaleBtn = document.getElementById('grayscale');
+        const pixelateBtn = document.getElementById('pixelate');
+        const resetBtn = document.getElementById('reset');
+        const hideSecretBtn = document.getElementById('hideSecretMessage');
+        const redSlider = document.getElementById('redSlider');
+        const greenSlider = document.getElementById('greenSlider');
+        const blueSlider = document.getElementById('blueSlider');
+        const colorPreview = document.getElementById('colorPreview');
+        const binaryColor = document.getElementById('binaryColor');
+        const quizQuestion = document.getElementById('quizQuestion');
+        const quizAnswer = document.getElementById('quizAnswer');
+        const submitQuiz = document.getElementById('submitQuiz');
+        const quizResult = document.getElementById('quizResult');
+        const secretAnswer = document.getElementById('secretAnswer');
+        const submitSecret = document.getElementById('submitSecret');
+        const secretResult = document.getElementById('secretResult');
+        const zoomCanvas = document.getElementById('zoomCanvas');
+        const zoomCtx = zoomCanvas.getContext('2d');
+        const messageBox = document.getElementById('messageBox');
+
+        let currentImage = null;
+        let originalImageData = null;
 
         upload.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Resize the image to fit the canvas
-                        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-                        const x = (canvas.width / 2) - (img.width / 2) * scale;
-                        const y = (canvas.height / 2) - (img.height / 2) * scale;
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-
-                        // Display binary values for each pixel
+                    currentImage = new Image();
+                    currentImage.onload = function() {
+                        drawImage(currentImage);
+                        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                         displayBinaryValues();
+                        showMessage("Image uploaded successfully!", "success");
                     }
-                    img.src = e.target.result;
+                    currentImage.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
         });
 
+        function drawImage(img) {
+            const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+            const x = (canvas.width / 2) - (img.width / 2) * scale;
+            const y = (canvas.height / 2) - (img.height / 2) * scale;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        }
+
         canvas.addEventListener('mousemove', function(event) {
             const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            const x = Math.floor((event.clientX - rect.left) * (canvas.width / rect.width));
+            const y = Math.floor((event.clientY - rect.top) * (canvas.height / rect.height));
             const pixelData = ctx.getImageData(x, y, 1, 1).data;
             displayPixelInfo(x, y, pixelData);
+            updateZoom(x, y);
         });
 
         function displayPixelInfo(x, y, pixelData) {
@@ -94,21 +229,189 @@
             `;
         }
 
+        function updateZoom(x, y) {
+            const zoomFactor = 5;
+            const zoomSize = 10;
+            zoomCtx.imageSmoothingEnabled = false;
+            zoomCtx.drawImage(
+                canvas,
+                Math.max(0, x - zoomSize / 2),
+                Math.max(0, y - zoomSize / 2),
+                zoomSize,
+                zoomSize,
+                0,
+                0,
+                zoomCanvas.width,
+                zoomCanvas.height
+            );
+            zoomCanvas.classList.remove('hidden');
+        }
+
         function displayBinaryValues() {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            for (let y = 0; y < canvas.height; y++) {
-                for (let x = 0; x < canvas.width; x++) {
+            let binaryText = '';
+            for (let y = 0; y < canvas.height; y += 8) {
+                for (let x = 0; x < canvas.width; x += 8) {
                     const index = (y * canvas.width + x) * 4;
                     const [r, g, b] = imageData.data.slice(index, index + 3);
                     const binaryR = r.toString(2).padStart(8, '0');
                     const binaryG = g.toString(2).padStart(8, '0');
                     const binaryB = b.toString(2).padStart(8, '0');
-                    ctx.fillStyle = `rgb(${r},${g},${b})`;
-                    ctx.fillRect(x, y, 1, 1);
-                    // Optionally, you could draw binary values on the canvas itself if desired
+                    binaryText += `(${x},${y}): ${binaryR}${binaryG}${binaryB}\n`;
                 }
             }
+            binaryTextArea.value = binaryText;
         }
+
+        invertColorsBtn.addEventListener('click', function() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i] = 255 - imageData.data[i];
+                imageData.data[i + 1] = 255 - imageData.data[i + 1];
+                imageData.data[i + 2] = 255 - imageData.data[i + 2];
+            }
+            ctx.putImageData(imageData, 0, 0);
+            displayBinaryValues();
+            showMessage("Colors inverted!", "success");
+        });
+
+        grayscaleBtn.addEventListener('click', function() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const avg = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+                imageData.data[i] = imageData.data[i + 1] = imageData.data[i + 2] = avg;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            displayBinaryValues();
+            showMessage("Image converted to grayscale!", "success");
+        });
+
+        pixelateBtn.addEventListener('click', function() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixelSize = 8;
+            for (let y = 0; y < canvas.height; y += pixelSize) {
+                for (let x = 0; x < canvas.width; x += pixelSize) {
+                    const index = (y * canvas.width + x) * 4;
+                    const [r, g, b] = imageData.data.slice(index, index + 3);
+                    for (let py = 0; py < pixelSize && y + py < canvas.height; py++) {
+                        for (let px = 0; px < pixelSize && x + px < canvas.width; px++) {
+                            const i = ((y + py) * canvas.width + (x + px)) * 4;
+                            imageData.data[i] = r;
+                            imageData.data[i + 1] = g;
+                            imageData.data[i + 2] = b;
+                        }
+                    }
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            displayBinaryValues();
+            showMessage("Image pixelated!", "success");
+        });
+
+        resetBtn.addEventListener('click', function() {
+            if (originalImageData) {
+                ctx.putImageData(originalImageData, 0, 0);
+                displayBinaryValues();
+                showMessage("Image reset to original!", "success");
+            } else {
+                showMessage("No original image to reset to.", "error");
+            }
+        });
+
+        hideSecretBtn.addEventListener('click', function() {
+            if (originalImageData) {
+                const secretMessage = "BINARY";
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let messageIndex = 0;
+
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    if (messageIndex < secretMessage.length) {
+                        const charCode = secretMessage.charCodeAt(messageIndex);
+                        imageData.data[i] = (imageData.data[i] & 0xFE) | ((charCode >> 7) & 1);
+                        imageData.data[i + 1] = (imageData.data[i + 1] & 0xFE) | ((charCode >> 6) & 1);
+                        imageData.data[i + 2] = (imageData.data[i + 2] & 0xFE) | ((charCode >> 5) & 1);
+                        messageIndex++;
+                    } else {
+                        break;
+                    }
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                displayBinaryValues();
+                showMessage("Secret message hidden in the image!", "success");
+            } else {
+                showMessage("Please upload an image first.", "error");
+            }
+        });
+
+        function updateColorMixer() {
+            const r = redSlider.value;
+            const g = greenSlider.value;
+            const b = blueSlider.value;
+            colorPreview.style.backgroundColor = `rgb(${r},${g},${b})`;
+            binaryColor.innerHTML = `
+                <div class="binary-value">R: ${parseInt(r).toString(2).padStart(8, '0')}</div>
+                <div class="binary-value">G: ${parseInt(g).toString(2).padStart(8, '0')}</div>
+                <div class="binary-value">B: ${parseInt(b).toString(2).padStart(8, '0')}</div>
+            `;
+        }
+
+        redSlider.addEventListener('input', updateColorMixer);
+        greenSlider.addEventListener('input', updateColorMixer);
+        blueSlider.addEventListener('input', updateColorMixer);
+
+        function generateQuiz() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            const binaryR = r.toString(2).padStart(8, '0');
+            const binaryG = g.toString(2).padStart(8, '0');
+            const binaryB = b.toString(2).padStart(8, '0');
+            quizQuestion.innerHTML = `
+                What is the decimal RGB value for this binary color?<br>
+                R: ${binaryR}<br>
+                G: ${binaryG}<br>
+                B: ${binaryB}
+            `;
+            quizQuestion.dataset.answer = `${r},${g},${b}`;
+        }
+
+        submitQuiz.addEventListener('click', function() {
+            const userAnswer = quizAnswer.value.replace(/\s/g, '');
+            const correctAnswer = quizQuestion.dataset.answer;
+            if (userAnswer === correctAnswer) {
+                quizResult.textContent = "Correct! Well done!";
+                quizResult.style.color = "green";
+            } else {
+                quizResult.textContent = `Incorrect. The correct answer is ${correctAnswer}.`;
+                quizResult.style.color = "red";
+            }
+            generateQuiz();
+        });
+
+        submitSecret.addEventListener('click', function() {
+            const userAnswer = secretAnswer.value.toUpperCase();
+            if (userAnswer === "BINARY") {
+                secretResult.textContent = "Congratulations! You found the secret message!";
+                secretResult.style.color = "green";
+            } else {
+                secretResult.textContent = "That's not the secret message. Try again!";
+                secretResult.style.color = "red";
+            }
+        });
+
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = type;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Initialize
+        generateQuiz();
+        updateColorMixer();
     </script>
 </body>
 </html>
