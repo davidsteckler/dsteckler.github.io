@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary: From Simple Switches to Complex Digital Worlds</title>
+    <title>Binary: The Hidden Language of Your Digital Life</title>
+    <script src="https://chir.ag/projects/ntc/ntc.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
@@ -75,8 +76,8 @@
             background-color: #34495e;
         }
         .color-preview {
-            width: 100px;
-            height: 100px;
+            width: 150px;
+            height: 150px;
             border: 1px solid #000;
             margin-top: 10px;
         }
@@ -89,14 +90,88 @@
             background-color: #e9ecef;
             border-radius: 5px;
         }
+        .bulb {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .bulb.on {
+            background-color: yellow;
+            box-shadow: 0 0 10px yellow;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .place-value {
+            font-size: 0.8em;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .mini-bulb-container {
+            display: inline-block;
+            position: relative;
+            margin: 0 5px;
+        }
+        .mini-bulb-label {
+            position: absolute;
+            top: -20px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.8em;
+        }
+        .mini-bulb {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            line-height: 40px;
+            font-size: 1em;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            color: #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .mini-bulb.on {
+            background-color: yellow;
+            box-shadow: 0 0 20px yellow;
+        }
+        em {
+            font-style: italic;
+        }
+        strong {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Binary: From Simple Switches to Complex Digital Worlds</h1>
+    <h1>Binary: The Hidden Language of Your Digital Life</h1>
     
     <section id="introduction">
         <h2>The Power of Two Choices</h2>
-        <p>Binary is simple: it's just 0s and 1s. But from these two digits, we build the digital world. <a href="https://en.wikipedia.org/wiki/Binary_code" target="_blank">Learn more about binary code</a>.</p>
+        <p>Imagine if you could build an entire universe with just two words: "yes" and "no". That's essentially what binary does. It's the foundational language of all digital technology, from the smartphone in your pocket to the most powerful supercomputers.</p>
         <div class="explanation">
             <h3>Explanation Depth: <input type="range" id="binaryExplanationLevel" min="1" max="3" value="1"></h3>
             <div id="binaryExplanation"></div>
@@ -118,19 +193,23 @@
 
     <section id="text-representation">
         <h2>From Letters to Binary</h2>
-        <p>Every character you type is secretly a number. That number? It's in binary. <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank">Learn more about ASCII</a>.</p>
+        <p>Every text message you send, every email you write, begins its journey as a series of 1s and 0s. Let's peek behind the curtain and see how it works.</p>
         <div class="explanation">
             <h3>Explanation Depth: <input type="range" id="textExplanationLevel" min="1" max="3" value="1"></h3>
             <div id="textExplanation"></div>
         </div>
         <div class="demo">
-            <input type="text" id="asciiInput" maxlength="1" placeholder="Type a letter">
+            <input type="text" id="asciiInput" maxlength="1" placeholder="Type a character">
             <p>ASCII: <span id="asciiOutput"></span></p>
             <p>Binary: <span id="binaryOutput"></span></p>
         </div>
         <div class="challenge">
             <h3>Challenge: Decode a Binary Message</h3>
             <p>Decode this binary message: <span id="binaryMessage"></span></p>
+            <div id="decodeBulbs"></div>
+            <p>Decimal Value: <span id="decimalValue">0</span></p>
+            <input type="text" id="binaryInput" maxlength="8" placeholder="Type a binary number (8 bits)">
+            <p>Character: <span id="binaryCharOutput"></span></p>
             <input type="text" id="decodedMessage" placeholder="Your answer">
             <button id="checkMessageAnswer">Check Answer</button>
             <p id="messageResult"></p>
@@ -139,7 +218,7 @@
 
     <section id="color-representation">
         <h2>Colors in Binary</h2>
-        <p>Every color on your screen is a mix of red, green, and blue. Each intensity? A number in binary. <a href="https://en.wikipedia.org/wiki/RGB_color_model" target="_blank">Learn more about RGB</a>.</p>
+        <p>The vibrant world on your screen is painted with numbers. Each color is a unique recipe of red, green, and blue, all written in binary.</p>
         <div class="explanation">
             <h3>Explanation Depth: <input type="range" id="colorExplanationLevel" min="1" max="3" value="1"></h3>
             <div id="colorExplanation"></div>
@@ -150,18 +229,20 @@
             <label>Blue: <input type="range" id="blueSlider" min="0" max="255"> <input type="number" id="blueInput" min="0" max="255"></label><br>
             <div class="color-preview" id="colorPreview"></div>
             <p>RGB Binary: <span id="rgbBinary"></span></p>
+            <p>Color: <span id="colorName"></span></p>
         </div>
         <div class="challenge">
             <h3>Challenge: Create a Specific Color</h3>
-            <p>Use the sliders to create this color: <span id="targetColor"></span></p>
+            <p>Use the sliders to create this color: <span id="targetColor" style="display:inline-block; width: 50px; height: 50px;"></span> <span id="targetColorName"></span></p>
             <button id="checkColorChallenge">Check Answer</button>
+            <button id="newColorChallenge">Try Again</button>
             <p id="colorChallengeResult"></p>
         </div>
     </section>
 
     <section id="image-representation">
         <h2>Pictures: A Sea of Tiny Lights</h2>
-        <p>Images are just grids of numbers. Each number? A color. Each color? Binary. <a href="https://en.wikipedia.org/wiki/Bitmap" target="_blank">Learn more about bitmaps</a>.</p>
+        <p>Every digital image is a mosaic of tiny colored dots, each one a binary number. Let's zoom in and see how it works.</p>
         <div class="explanation">
             <h3>Explanation Depth: <input type="range" id="imageExplanationLevel" min="1" max="3" value="1"></h3>
             <div id="imageExplanation"></div>
@@ -172,6 +253,8 @@
             <button id="randomizePixels">Randomize Pixels</button>
             <p>Hover over pixels to see their binary representation.</p>
             <p>Binary of selected pixel: <span id="pixelBinary"></span></p>
+            <p>Color: <span id="pixelColorName"></span></p>
+
         </div>
         <div class="challenge">
             <h3>Challenge: Color Depth and Binary</h3>
@@ -187,11 +270,28 @@
                 <button onclick="checkValuesPerChannel()">Check</button>
                 <p id="valuesResult"></p>
                 
-                <li>Now, calculate the total number of unique colors:</li>
-                <input type="number" id="totalColors">
+                <li>Calculate the total number of unique colors by multiplying the values per channel for each channel.</li>
+                <input type="number" id="totalColorsInput" min="1" value="">
                 <button onclick="checkTotalColors()">Check</button>
-                <p id="colorsResult"></p>
+                <p id="totalColorsResult"></p>
             </ol>
+        </div>
+    </section>
+
+    <section id="summary">
+        <h2>The Binary Revolution: Why It Matters</h2>
+        <div class="explanation">
+            <h3>Explanation Depth: <input type="range" id="summaryExplanationLevel" min="1" max="3" value="1"></h3>
+            <div id="summaryExplanation"></div>
+        </div>
+        <div class="summary-part">
+            <p>Binary is everywhere. It's not just the language of computers; it's the foundation of our digital world. Every email, every text, every app relies on binary. <em>Understanding binary means understanding the heart of digital technology.</em></p>
+        </div>
+        <div class="summary-part">
+            <p>At its core, binary is simple. Yet, this simplicity powers the most complex systems in our world. <strong>It's this elegance and efficiency that makes binary so powerful.</strong></p>
+        </div>
+        <div class="summary-part">
+            <p>As technology evolves, binary remains at the center. The future of computing, from quantum computers to AI, still relies on the fundamental principles of binary. <em>Embracing binary is embracing the future.</em></p>
         </div>
     </section>
 
@@ -199,9 +299,9 @@
         // Explanation levels
         const explanations = {
             binary: [
-                "Binary is like a light switch: it's either on or off.",
-                "Binary uses two digits, 0 and 1, to represent information. It's the foundation of all digital data.",
-                "Binary is a base-2 number system. Each digit represents a power of 2, allowing complex data to be encoded using only two states. This system forms the basis of all digital computing and data storage."
+                "Binary is like a <em>light switch</em>: it's either <strong>on or off</strong>, <strong>1 or 0</strong>.",
+                "Binary uses <strong>two digits</strong>, 0 and 1, to represent <em>all information</em> in computers. It's the <strong>foundation</strong> of all digital data.",
+                "Binary is a <strong>base-2 number system</strong> where each digit represents a <em>power of 2</em>. This system allows <strong>complex data</strong> to be encoded using only <em>two states</em>, forming the basis of all digital computing and data storage."
             ],
             text: [
                 "Letters are turned into numbers, then into binary.",
@@ -217,16 +317,21 @@
                 "Images are made up of many tiny colored dots called pixels.",
                 "Each pixel's color is stored as a combination of red, green, and blue values. These values are represented in binary.",
                 "A typical image uses 24 bits per pixel. For a 1920x1080 image, that's over 6 million pixels, each with its own binary code. This allows for high-resolution images but also requires significant data storage and processing power."
+            ],
+            summary: [
+                "Binary is the language that powers all digital technology.",
+                "Binary's simplicity allows for complex data to be stored, processed, and transmitted efficiently across all kinds of digital devices and networks.",
+                "The binary system's elegance lies in its ability to represent virtually anything - text, images, sounds, videos, and even abstract concepts - using only two states. This universality has revolutionized how we create, share, and interact with information, fundamentally reshaping our world in the digital age."
             ]
         };
 
         function updateExplanation(sectionId, level) {
             const explanationElement = document.getElementById(`${sectionId}Explanation`);
-            explanationElement.textContent = explanations[sectionId][level - 1];
+            explanationElement.innerHTML = explanations[sectionId][level - 1];
         }
 
         // Set up explanation level sliders
-        ['binary', 'text', 'color', 'image'].forEach(section => {
+        ['binary', 'text', 'color', 'image', 'summary'].forEach(section => {
             const slider = document.getElementById(`${section}ExplanationLevel`);
             slider.addEventListener('input', function() {
                 updateExplanation(section, this.value);
@@ -281,6 +386,20 @@
             }
         });
 
+        // Binary to ASCII character converter
+        const binaryInput = document.getElementById('binaryInput');
+        const binaryCharOutput = document.getElementById('binaryCharOutput');
+
+        binaryInput.addEventListener('input', function() {
+            const binary = this.value;
+            if (/^[01]{8}$/.test(binary)) {
+                const decimal = parseInt(binary, 2);
+                binaryCharOutput.textContent = String.fromCharCode(decimal);
+            } else {
+                binaryCharOutput.textContent = '';
+            }
+        });
+
         // Decode Binary Message Challenge
         const words = ['HELLO', 'WORLD', 'BINARY', 'CODING', 'FUN', 'LEARN', 'BITS', 'BYTES'];
         function getRandomWord() {
@@ -292,16 +411,53 @@
         }
 
         const binaryMessage = document.getElementById('binaryMessage');
-        const randomWord = getRandomWord();
-        binaryMessage.textContent = wordToBinary(randomWord);
+        const decodeBulbs = document.getElementById('decodeBulbs');
+        let currentWord = getRandomWord();
+        binaryMessage.textContent = wordToBinary(currentWord);
+
+        // Create mini binary bulbs for decoding with place values
+        const placeValues = [128, 64, 32, 16, 8, 4, 2, 1];
+        for (let i = 0; i < 8; i++) {
+            const container = document.createElement('div');
+            container.className = 'mini-bulb-container';
+            
+            const label = document.createElement('div');
+            label.className = 'mini-bulb-label';
+            label.textContent = placeValues[i];
+            
+            const bulb = document.createElement('div');
+            bulb.className = 'mini-bulb';
+            bulb.textContent = '0';
+            
+            bulb.addEventListener('click', function() {
+                this.textContent = this.textContent === '0' ? '1' : '0';
+                this.classList.toggle('on');
+                calculateDecimalValue();
+            });
+            
+            container.appendChild(label);
+            container.appendChild(bulb);
+            decodeBulbs.appendChild(container);
+        }
+
+        function calculateDecimalValue() {
+            const bulbs = document.querySelectorAll('.mini-bulb');
+            let decimalValue = 0;
+            bulbs.forEach((bulb, index) => {
+                if (bulb.textContent === '1') {
+                    decimalValue += placeValues[index];
+                }
+            });
+            document.getElementById('decimalValue').textContent = decimalValue;
+        }
 
         document.getElementById('checkMessageAnswer').addEventListener('click', function() {
             const userAnswer = document.getElementById('decodedMessage').value.toUpperCase();
             const result = document.getElementById('messageResult');
-            if (userAnswer === randomWord) {
-                result.textContent = "Correct! You've successfully decoded the binary message!";
+            if (userAnswer === currentWord) {
+                result.innerHTML = "<strong>Correct!</strong> You've successfully <em>decoded</em> the binary message!";
             } else {
-                result.textContent = "Not quite. Try again!";
+                result.innerHTML = "<strong>Not quite.</strong> Try again! <em>Hint:</em> Use the decimal value to find the corresponding ASCII character.";
             }
         });
 
@@ -314,16 +470,20 @@
         const blueInput = document.getElementById('blueInput');
         const colorPreview = document.getElementById('colorPreview');
         const rgbBinary = document.getElementById('rgbBinary');
+        const colorName = document.getElementById('colorName');
 
         function updateColor() {
             const r = redSlider.value;
             const g = greenSlider.value;
             const b = blueSlider.value;
-            colorPreview.style.backgroundColor = `rgb(${r},${g},${b})`;
+            const color = `rgb(${r},${g},${b})`;
+            colorPreview.style.backgroundColor = color;
             rgbBinary.textContent = `${parseInt(r).toString(2).padStart(8, '0')} ${parseInt(g).toString(2).padStart(8, '0')} ${parseInt(b).toString(2).padStart(8, '0')}`;
             redInput.value = r;
             greenInput.value = g;
             blueInput.value = b;
+            const colorNameResult = ntc.name(color)[1];
+            colorName.textContent = `RGB(${r}, ${g}, ${b})`;
         }
 
         redSlider.addEventListener('input', updateColor);
@@ -350,9 +510,11 @@
         }
 
         const targetColor = document.getElementById('targetColor');
-        const randomColor = getRandomColor();
+        const targetColorName = document.getElementById('targetColorName');
+        let randomColor = getRandomColor();
         targetColor.style.backgroundColor = randomColor;
-        targetColor.textContent = randomColor;
+        const targetColorNameResult = ntc.name(randomColor)[1];
+        targetColorName.textContent = `RGB(${randomColor.match(/\d+/g).join(', ')})`;
 
         document.getElementById('checkColorChallenge').addEventListener('click', function() {
             const userColor = colorPreview.style.backgroundColor;
@@ -364,6 +526,14 @@
             }
         });
 
+        document.getElementById('newColorChallenge').addEventListener('click', function() {
+            randomColor = getRandomColor();
+            targetColor.style.backgroundColor = randomColor;
+            const newTargetColorNameResult = ntc.name(randomColor)[1];
+            targetColorName.textContent = `RGB(${randomColor.match(/\d+/g).join(', ')})`;
+            document.getElementById('colorChallengeResult').textContent = '';
+        });
+
         // Pixel canvas
         const canvas = document.getElementById('pixelCanvas');
         const ctx = canvas.getContext('2d');
@@ -371,6 +541,8 @@
         const gridSize = 5;
         const randomizeButton = document.getElementById('randomizePixels');
         const pixelBinary = document.getElementById('pixelBinary');
+        const pixelColorName = document.getElementById('pixelColorName');
+        const rgbValues = document.getElementById('rgbValues');
 
         function drawPixelGrid() {
             for (let y = 0; y < gridSize; y++) {
@@ -391,6 +563,9 @@
             const pixel = ctx.getImageData(x * pixelSize, y * pixelSize, 1, 1).data;
             const binary = pixel.slice(0, 3).map(v => v.toString(2).padStart(8, '0')).join(' ');
             pixelBinary.textContent = `${pixel[0]} ${pixel[1]} ${pixel[2]} (${binary})`;
+            const pixelColorNameResult = ntc.name(`rgb(${pixel[0]},${pixel[1]},${pixel[2]})`)[1];
+            pixelColorName.textContent = `RGB(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+            rgbValues.textContent = `R: ${pixel[0]}, G: ${pixel[1]}, B: ${pixel[2]}`;
         });
 
         randomizeButton.addEventListener('click', drawPixelGrid);
@@ -419,14 +594,21 @@
         }
 
         function checkTotalColors() {
-            const answer = document.getElementById('totalColors').value;
-            const result = document.getElementById('colorsResult');
-            if (answer === '16777216') {
+            const totalColorsInput = document.getElementById('totalColorsInput').value;
+            const result = document.getElementById('totalColorsResult');
+            if (totalColorsInput == 16777216) {
                 result.textContent = "Correct! 24-bit color allows for 256 * 256 * 256 = 16,777,216 unique colors.";
             } else {
-                result.textContent = "Not quite. Hint: Consider how many combinations you can make when each of the three color channels (R, G, B) has 256 possible values.";
+                result.textContent = "Not quite. Hint: Multiply the number of values per channel for each of the three channels (R, G, B).";
             }
         }
+
+        // Initialize explanations
+        updateExplanation('binary', 1);
+        updateExplanation('text', 1);
+        updateExplanation('color', 1);
+        updateExplanation('image', 1);
+        updateExplanation('summary', 1);
     </script>
 </body>
 </html>
