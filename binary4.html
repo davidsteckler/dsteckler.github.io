@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Binary Image Encoding</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        .pixel-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .binary-value {
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h2>Binary Image Encoding</h2>
+    <input type="file" id="upload" accept="image/*">
+    <canvas id="canvas" width="256" height="256"></canvas>
+    <div id="pixelInfo" class="pixel-info"></div>
+
+    <script>
+        const upload = document.getElementById('upload');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const pixelInfo = document.getElementById('pixelInfo');
+
+        upload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // Resize the image to fit the canvas
+                        const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                        const x = (canvas.width / 2) - (img.width / 2) * scale;
+                        const y = (canvas.height / 2) - (img.height / 2) * scale;
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+                        // Display binary values for each pixel
+                        displayBinaryValues();
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        canvas.addEventListener('mousemove', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const pixelData = ctx.getImageData(x, y, 1, 1).data;
+            displayPixelInfo(x, y, pixelData);
+        });
+
+        function displayPixelInfo(x, y, pixelData) {
+            const [r, g, b, a] = pixelData;
+            const binaryR = r.toString(2).padStart(8, '0');
+            const binaryG = g.toString(2).padStart(8, '0');
+            const binaryB = b.toString(2).padStart(8, '0');
+            pixelInfo.innerHTML = `
+                <div>Pixel at (${x}, ${y})</div>
+                <div>RGB: (${r}, ${g}, ${b})</div>
+                <div class="binary-value">R: ${binaryR}</div>
+                <div class="binary-value">G: ${binaryG}</div>
+                <div class="binary-value">B: ${binaryB}</div>
+            `;
+        }
+
+        function displayBinaryValues() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const index = (y * canvas.width + x) * 4;
+                    const [r, g, b] = imageData.data.slice(index, index + 3);
+                    const binaryR = r.toString(2).padStart(8, '0');
+                    const binaryG = g.toString(2).padStart(8, '0');
+                    const binaryB = b.toString(2).padStart(8, '0');
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.fillRect(x, y, 1, 1);
+                    // Optionally, you could draw binary values on the canvas itself if desired
+                }
+            }
+        }
+    </script>
+</body>
+</html>
