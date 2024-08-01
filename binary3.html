@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Binary Representations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+        }
+        .section {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .dropdown {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .content {
+            display: none;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .preview {
+            width: 50px;
+            height: 50px;
+            margin: 10px 0;
+        }
+        .explanation {
+            margin-top: 10px;
+        }
+        .explanation p {
+            display: none;
+        }
+        .explanation p:first-child {
+            display: block;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .ascii-section {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .ascii-chart {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .ascii-item {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+            position: relative;
+        }
+        .ascii-char {
+            font-weight: bold;
+        }
+        .ascii-explanation {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .extended-ascii {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #888;
+        }
+        .tooltip {
+            visibility: hidden;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 120px;
+        }
+        .ascii-item:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Binary Representations</h1>
+
+    <p>Select a category to see how binary numbers can be interpreted:</p>
+
+    <div class="section">
+        <select id="representationDropdown" class="dropdown">
+            <option value="">Choose a representation</option>
+            <option value="pixel">As a Grayscale Pixel</option>
+            <option value="color">As a Color Component</option>
+            <option value="text">As Text</option>
+            <option value="audio">In Audio</option>
+        </select>
+
+        <div id="pixelContent" class="content">
+            <h3>As a Grayscale Pixel</h3>
+            <div id="pixelPreview" class="preview"></div>
+            <p>Binary: <span id="pixelBinary">10101010</span></p>
+            <p>Grayscale value: <span id="pixelValue">170</span> (out of 255)</p>
+            <button id="randomizePixel">Randomize</button>
+            <input type="range" min="1" max="3" value="1" class="explanation-slider">
+            <div class="explanation">
+                <p id="pixelExplanation1">This binary number represents a medium gray pixel.</p>
+                <p id="pixelExplanation2">In 8-bit grayscale, this binary number translates to a decimal value between 0 (black) and 255 (white).</p>
+                <p id="pixelExplanation3">Each bit in the binary number represents a power of 2. This system allows 256 shades of gray to be represented with just 8 bits.</p>
+            </div>
+        </div>
+
+        <div id="colorContent" class="content">
+            <h3>As a Color Component (Green)</h3>
+            <div id="colorPreview" class="preview"></div>
+            <p>Binary (Green component): <span id="colorBinary">10101010</span></p>
+            <p>RGB: (0, <span id="colorGreen">170</span>, 0)</p>
+            <button id="randomizeColor">Randomize Green</button>
+            <input type="range" min="1" max="3" value="1" class="explanation-slider">
+            <div class="explanation">
+                <p id="colorExplanation1">This binary number represents the green component in this RGB color.</p>
+                <p id="colorExplanation2">In the RGB color model, this value is being used for the green channel, while red and blue remain at 0.</p>
+                <p id="colorExplanation3">24-bit color uses 8 bits each for red, green, and blue, allowing for 16,777,216 possible colors using just three bytes of data.</p>
+            </div>
+        </div>
+
+        <div id="textContent" class="content">
+            <h3>As Text (ASCII)</h3>
+            <p>Binary: <span id="textBinary">10101010</span></p>
+            <p>ASCII character: <span id="textChar">ª</span></p>
+            <p>Decimal value: <span id="textDecimal">170</span></p>
+            <button id="randomizeText">Randomize</button>
+            <input type="range" min="1" max="3" value="1" class="explanation-slider">
+            <div class="explanation">
+                <p id="textExplanation1">This binary number represents a character in ASCII encoding.</p>
+                <p id="textExplanation2">ASCII uses 7 bits to represent 128 characters. Values above 127 fall into the extended ASCII range.</p>
+                <p id="textExplanation3">Extended ASCII, which uses all 8 bits, allows for 256 characters, including special symbols and characters from other languages.</p>
+            </div>
+
+            <div class="ascii-section">
+                <h4>ASCII Chart: The Digital Alphabet</h4>
+                <div class="ascii-chart" id="asciiChart"></div>
+                
+                <p class="ascii-explanation">
+                    ASCII, born in 1963, became computing's universal language. It uses 7 bits to represent 128 characters.
+                    The first 32 numbers (0-31) are control characters for behind-the-scenes tasks.
+                    The rest (32-127) are the visible characters you type.
+                    Hover over the control characters to learn their specific purposes.
+                </p>
+
+                <div class="extended-ascii">
+                    <h4>Extended ASCII: The International Upgrade</h4>
+                    <div class="ascii-chart" id="extendedAsciiChart"></div>
+                    
+                    <p class="ascii-explanation">
+                        By the 1980s, 128 characters weren't enough. Extended ASCII used an 8th bit to add 128 more characters (128-255).
+                        Numbers 128-159 are additional control characters.
+                        160-255 brought in characters like é, ñ, and ╔═══╗ for international text and simple drawings.
+                        Hover over the control characters to see their purposes. Note that different systems may interpret these differently.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="audioContent" class="content">
+            <h3>In Audio</h3>
+            <p>Binary: <span id="audioBinary">10101010</span></p>
+            <p>Frequency: <span id="audioFrequency">440</span> Hz</p>
+            <button id="playAudio">Play Sound</button>
+            <button id="randomizeAudio">Randomize</button>
+            <input type="range" min="1" max="3" value="1" class="explanation-slider">
+            <div class="explanation">
+                <p id="audioExplanation1">This binary number could represent part of an audio waveform.</p>
+                <p id="audioExplanation2">In digital audio, this might represent the amplitude of a sound wave at a specific moment.</p>
+                <p id="audioExplanation3">8-bit audio uses values from 0 to 255 to represent sound wave amplitude. The pattern of bits affects the tone's frequency and timbre.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function updatePixel(binary) {
+            const decimal = parseInt(binary, 2);
+            document.getElementById('pixelBinary').textContent = binary;
+            document.getElementById('pixelValue').textContent = decimal;
+            document.getElementById('pixelPreview').style.backgroundColor = `rgb(${decimal},${decimal},${decimal})`;
+            document.getElementById('pixelExplanation1').textContent = `This binary number represents a ${decimal < 85 ? 'dark' : decimal > 170 ? 'light' : 'medium'} gray pixel.`;
+        }
+
+        function updateColor(binary) {
+            const green = parseInt(binary, 2);
+            document.getElementById('colorBinary').textContent = binary;
+            document.getElementById('colorGreen').textContent = green;
+            document.getElementById('colorPreview').style.backgroundColor = `rgb(0,${green},0)`;
+            document.getElementById('colorExplanation1').textContent = `This binary number represents the green component (${green}) in this RGB color, with red and blue set to 0.`;
+        }
+
+        function updateText(binary) {
+            const decimal = parseInt(binary, 2);
+            let char = String.fromCharCode(decimal);
+            if (char === ' ') char = '(space)';
+            if (decimal < 32 || (decimal >= 127 && decimal <= 159)) char = `(control: ${decimal})`;
+            document.getElementById('textBinary').textContent = binary;
+            document.getElementById('textChar').textContent = char;
+            document.getElementById('textDecimal').textContent = decimal;
+            document.getElementById('textExplanation1').textContent = `This binary number represents the character '${char}' (decimal ${decimal}) in ASCII encoding.`;
+        }
+
+        function updateAudio(binary) {
+            const decimal = parseInt(binary, 2);
+            const frequency = 200 + (decimal * 2); // Map 0-255 to 200-710 Hz
+            document.getElementById('audioBinary').textContent = binary;
+            document.getElementById('audioFrequency').textContent = frequency;
+            document.getElementById('audioExplanation1').textContent = `This binary number represents a tone with a frequency of ${frequency} Hz.`;
+        }
+
+        function randomBinary() {
+            return Math.floor(Math.random() * 256).toString(2).padStart(8, '0');
+        }
+
+        document.getElementById('randomizePixel').addEventListener('click', () => updatePixel(randomBinary()));
+        document.getElementById('randomizeColor').addEventListener('click', () => updateColor(randomBinary()));
+        document.getElementById('randomizeText').addEventListener('click', () => updateText(randomBinary()));
+        document.getElementById('randomizeAudio').addEventListener('click', () => updateAudio(randomBinary()));
+
+        document.getElementById('representationDropdown').addEventListener('change', function() {
+            document.querySelectorAll('.content').forEach(div => div.style.display = 'none');
+            const selectedContent = document.getElementById(this.value + 'Content');
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            }
+        });
+
+        document.querySelectorAll('.explanation-slider').forEach(slider => {
+            slider.addEventListener('input', function() {
+                const explanations = this.nextElementSibling.querySelectorAll('p');
+                explanations.forEach((p, index) => {
+                    p.style.display = index < this.value ? 'block' : 'none';
+                });
+            });
+        });
+
+        document.getElementById('playAudio').addEventListener('click', function() {
+            const frequency = parseFloat(document.getElementById('audioFrequency').textContent);
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        });
+
+        function generateASCIIChart() {
+            const controlCharacters = {
+                0: "Null character",
+                1: "Start of Heading",
+                2: "Start of Text",
+                3: "End of Text",
+                4: "End of Transmission",
+                5: "Enquiry",
+                6: "Acknowledgment",
+                7: "Bell",
+                8: "Backspace",
+                9: "Horizontal Tab",
+                10: "Line Feed",
+                11: "Vertical Tab",
+                12: "Form Feed",
+                13: "Carriage Return",
+                14: "Shift Out",
+                15: "Shift In",
+                16: "Data Link Escape",
+                17: "Device Control 1",
+                18: "Device Control 2",
+                19: "Device Control 3",
+                20: "Device Control 4",
+                21: "Negative Acknowledgment",
+                22: "Synchronous Idle",
+                23: "End of Transmission Block",
+                24: "Cancel",
+                25: "End of Medium",
+                26: "Substitute",
+                27: "Escape",
+                28: "File Separator",
+                29: "Group Separator",
+                30: "Record Separator",
+                31: "Unit Separator",
+                127: "Delete"
+            };
+
+            const extendedControlCharacters = {
+                128: "Padding Character",
+                129: "High Octet Preset",
+                130: "Break Permitted Here",
+                131: "No Break Here",
+                132: "Index",
+                133: "Next Line",
+                134: "Start of Selected Area",
+                135: "End of Selected Area",
+                136: "Horizontal Tab Set",
+                137: "Horizontal Tab with Justification",
+                138: "Vertical Tab Set",
+                139: "Partial Line Down",
+                140: "Partial Line Up",
+                141: "Reverse Line Feed",
+                142: "Single Shift Two",
+                143: "Single Shift Three",
+                144: "Device Control String",
+                145: "Private Use One",
+                146: "Private Use Two",
+                147: "Set Transmit State",
+                148: "Cancel Character",
+                149: "Message Waiting",
+                150: "Start of Protected Area",
+                151: "End of Protected Area",
+                152: "Start of String",
+                153: "Single Graphic Character Introducer",
+                154: "Single Character Introducer",
+                155: "Control Sequence Introducer",
+                156: "String Terminator",
+                157: "Operating System Command",
+                158: "Privacy Message",
+                159: "Application Program Command"
+            };
+
+            const chart = document.getElementById('asciiChart');
+            for (let i = 0; i < 128; i++) {
+                const item = document.createElement('div');
+                item.className = 'ascii-item';
+                let char = String.fromCharCode(i);
+                if (i < 32 || i === 127) {
+                    char = 'CTRL';
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = controlCharacters[i];
+                    item.appendChild(tooltip);
+                }
+                if (char === ' ') char = '␠';
+                item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
+                chart.appendChild(item);
+            }
+
+            const extendedChart = document.getElementById('extendedAsciiChart');
+            for (let i = 128; i < 256; i++) {
+                const item = document.createElement('div');
+                item.className = 'ascii-item';
+                let char = String.fromCharCode(i);
+                if (i < 160) {
+                    char = 'CTRL';
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = extendedControlCharacters[i];
+                    item.appendChild(tooltip);
+                }
+                item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
+                extendedChart.appendChild(item);
+            }
+        }
+
+        // Initialize
+        updatePixel('10101010');
+        updateColor('10101010');
+        updateText('10101010');
+        updateAudio('10101010');
+        generateASCIIChart();
+    </script>
+</body>
+</html>
