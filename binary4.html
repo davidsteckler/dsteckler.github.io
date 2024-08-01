@@ -2,30 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Advanced Binary Image Encoding</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Binary Image Encoding - David Steckler</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-        }
-        h1 {
+            padding: 0;
             color: #333;
-            margin-bottom: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            color: #fff;
+        }
+        header h1 a {
+            color: #fff;
+            text-decoration: none;
         }
         .container {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
             max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        .main-title {
+            text-align: center;
+            padding: 20px 0;
+            background-color: #f0f0f0;
+            margin-bottom: 20px;
+        }
+        .main-title h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #333;
+        }
+        .back-link {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .back-arrow {
+            font-size: 1.2em;
+            text-decoration: none;
+            color: #3498db;
+        }
+        .back-arrow:hover {
+            color: #2980b9;
+        }
+        .content-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
         }
         .column {
             flex: 1;
-            margin: 0 10px;
+            min-width: 300px;
             background-color: white;
             padding: 20px;
             border-radius: 10px;
@@ -165,134 +267,109 @@
         .highlight-lsb {
             background-color: yellow;
         }
-        .header-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .back-arrow {
-            font-size: 2em;
-            margin-right: 20px;
-            text-decoration: none;
-            color: #333;
-        }
-        .back-arrow:hover {
-            color: #666;
-        }
-        .header-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .back-arrow {
-            font-size: 2em;
-            margin-right: 20px;
-            text-decoration: none;
-            color: #333;
-            position: relative;
-        }
-        .back-arrow:hover {
-            color: #666;
-        }
-        /* New styles for custom tooltip */
-        .back-arrow::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            left: 50%;
-            top: 100%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            padding: 5px 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            border-radius: 4px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-        .back-arrow:hover::after {
-            opacity: 1;
-        }
     </style>
 </head>
 <body>
-    <div class="header-container">
-        <a href="binary3.html" class="back-arrow" data-tooltip="Go back to binary3.html">&#8592;</a>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="main-title">
         <h1>Advanced Binary Image Encoding</h1>
     </div>
+
+    <div class="back-link">
+        <a href="binary3.html" class="back-arrow">&#8592; Back to Binary 3</a>
+    </div>
+
     <div class="container">
-        <div class="column">
-            <h2>Image Manipulation</h2>
-            <div class="controls">
-                <input type="file" id="upload" accept="image/*">
-                <button id="invertColors">Invert Colors</button>
-                <button id="grayscale">Grayscale</button>
-                <button id="pixelate">Pixelate</button>
-                <button id="reset">Reset Image</button>
-                <button id="hideSecretMessage">Hide Secret</button>
-                <button id="navigateTopLeft">Go to Top-Left Pixel</button>
-            </div>
-            <canvas id="canvas" width="256" height="256"></canvas>
-            <div id="pixelInfo" class="pixel-info"></div>
-            <canvas id="zoomCanvas" width="100" height="100" class="hidden"></canvas>
-        </div>
-        <div class="column">
-            <h2>Binary Representation</h2>
-            <div class="binary-columns">
-                <div class="binary-column" id="redColumn">R</div>
-                <div class="binary-column" id="greenColumn">G</div>
-                <div class="binary-column" id="blueColumn">B</div>
-            </div>
-            <textarea id="binaryTextArea" readonly></textarea>
-        </div>
-        <div class="column">
-            <h2>Interactive Learning</h2>
-            <div id="colorMixer">
-                <h3>Color Mixer</h3>
-                <div class="slider-container">
-                    <label>Red:</label>
-                    <input type="range" id="redSlider" min="0" max="255" value="0">
-                    <span id="redValue" class="slider-value"></span>
+        <div class="content-container">
+            <div class="column">
+                <h2>Image Manipulation</h2>
+                <div class="controls">
+                    <input type="file" id="upload" accept="image/*">
+                    <button id="invertColors">Invert Colors</button>
+                    <button id="grayscale">Grayscale</button>
+                    <button id="pixelate">Pixelate</button>
+                    <button id="reset">Reset Image</button>
+                    <button id="hideSecretMessage">Hide Secret</button>
+                    <button id="navigateTopLeft">Go to Top-Left Pixel</button>
                 </div>
-                <div class="slider-container">
-                    <label>Green:</label>
-                    <input type="range" id="greenSlider" min="0" max="255" value="0">
-                    <span id="greenValue" class="slider-value"></span>
-                </div>
-                <div class="slider-container">
-                    <label>Blue:</label>
-                    <input type="range" id="blueSlider" min="0" max="255" value="0">
-                    <span id="blueValue" class="slider-value"></span>
-                </div>
-                <div id="colorPreview" class="color-box"></div>
-                <div id="hexCode"></div>
-                <div id="binaryColor"></div>
+                <canvas id="canvas" width="256" height="256"></canvas>
+                <div id="pixelInfo" class="pixel-info"></div>
+                <canvas id="zoomCanvas" width="100" height="100" class="hidden"></canvas>
             </div>
-            <div id="quiz">
-                <h3>Binary Color Quiz</h3>
-                <p id="quizQuestion"></p>
-                <input type="text" id="quizAnswer">
-                <button id="submitQuiz">Submit</button>
-                <p id="quizResult"></p>
+            <div class="column">
+                <h2>Binary Representation</h2>
+                <div class="binary-columns">
+                    <div class="binary-column" id="redColumn">R</div>
+                    <div class="binary-column" id="greenColumn">G</div>
+                    <div class="binary-column" id="blueColumn">B</div>
+                </div>
+                <textarea id="binaryTextArea" readonly></textarea>
             </div>
-            <div id="challenge">
-                <h3>Steganography Challenge</h3>
-                <p>Find the hidden message in the image!</p>
-                <input type="text" id="secretAnswer">
-                <button id="submitSecret">Submit</button>
-                <p id="secretResult"></p>
-                <button id="startWalkthrough">Start Interactive Walkthrough</button>
-                <div id="walkthrough">
-                    <h4>Steganography Walkthrough</h4>
-                    <div id="stepContent"></div>
-                    <button class="prev-button" onclick="prevStep()">Previous</button>
-                    <button class="next-button" onclick="nextStep()">Next</button>
+            <div class="column">
+                <h2>Interactive Learning</h2>
+                <div id="colorMixer">
+                    <h3>Color Mixer</h3>
+                    <div class="slider-container">
+                        <label>Red:</label>
+                        <input type="range" id="redSlider" min="0" max="255" value="0">
+                        <span id="redValue" class="slider-value"></span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Green:</label>
+                        <input type="range" id="greenSlider" min="0" max="255" value="0">
+                        <span id="greenValue" class="slider-value"></span>
+                    </div>
+                    <div class="slider-container">
+                        <label>Blue:</label>
+                        <input type="range" id="blueSlider" min="0" max="255" value="0">
+                        <span id="blueValue" class="slider-value"></span>
+                    </div>
+                    <div id="colorPreview" class="color-box"></div>
+                    <div id="hexCode"></div>
+                    <div id="binaryColor"></div>
+                </div>
+                <div id="quiz">
+                    <h3>Binary Color Quiz</h3>
+                    <p id="quizQuestion"></p>
+                    <input type="text" id="quizAnswer">
+                    <button id="submitQuiz">Submit</button>
+                    <p id="quizResult"></p>
+                </div>
+                <div id="challenge">
+                    <h3>Steganography Challenge</h3>
+                    <p>Find the hidden message in the image!</p>
+                    <input type="text" id="secretAnswer">
+                    <button id="submitSecret">Submit</button>
+                    <p id="secretResult"></p>
+                    <button id="startWalkthrough">Start Interactive Walkthrough</button>
+                    <div id="walkthrough">
+                        <h4>Steganography Walkthrough</h4>
+                        <div id="stepContent"></div>
+                        <button class="prev-button" onclick="prevStep()">Previous</button>
+                        <button class="next-button" onclick="nextStep()">Next</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <div id="messageBox" class="hidden"></div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
 
     <script>
         const upload = document.getElementById('upload');
@@ -626,6 +703,7 @@
                         for (let px = 0; px < pixelSize && x + px < canvas.width; px++) {
                             const i = ((y + py) * canvas.width + (x + px)) * 4;
                             imageData.data[i] = r;
+                            imageData.data[i] = r;
                             imageData.data[i + 1] = g;
                             imageData.data[i + 2] = b;
                         }
@@ -764,7 +842,10 @@
         // Initialize
         generateQuiz();
         updateColorMixer();
+
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
     </script>
-    <a href="binary2.html">Go to Binary2</a>
 </body>
 </html>
