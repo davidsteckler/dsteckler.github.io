@@ -51,10 +51,12 @@
         input[type="range"] {
             width: 100%;
             margin: 10px 0;
+            height: 24px;
         }
         button {
-            padding: 5px 10px;
-            margin: 5px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 16px;
             cursor: pointer;
         }
         .ascii-section {
@@ -131,7 +133,7 @@
                 height: 40px;
             }
             button {
-                padding: 4px 8px;
+                padding: 8px 12px;
                 font-size: 14px;
             }
             .ascii-chart {
@@ -142,6 +144,13 @@
             }
             .ascii-explanation {
                 font-size: 14px;
+            }
+            .ascii-item {
+                cursor: pointer;
+            }
+            .ascii-item.active .tooltip {
+                visibility: visible;
+                opacity: 1;
             }
         }
     </style>
@@ -428,6 +437,33 @@
                 extendedChart.appendChild(item);
             }
         }
+
+        // Mobile-specific tooltip toggle and timeout
+        function handleMobileTooltips() {
+            const isMobile = window.matchMedia("(max-width: 600px)").matches;
+
+            if (isMobile) {
+                document.querySelectorAll('.ascii-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const tooltip = item.querySelector('.tooltip');
+                        if (tooltip.style.visibility === 'visible') {
+                            tooltip.style.visibility = 'hidden';
+                            tooltip.style.opacity = '0';
+                        } else {
+                            tooltip.style.visibility = 'visible';
+                            tooltip.style.opacity = '1';
+                            setTimeout(() => {
+                                tooltip.style.visibility = 'hidden';
+                                tooltip.style.opacity = '0';
+                            }, 2000);
+                        }
+                    });
+                });
+            }
+        }
+
+        window.addEventListener('resize', handleMobileTooltips);
+        window.addEventListener('load', handleMobileTooltips);
 
         // Initialize
         updatePixel('10101010');
