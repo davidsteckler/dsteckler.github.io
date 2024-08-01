@@ -443,19 +443,23 @@
             const isMobile = window.matchMedia("(max-width: 600px)").matches;
 
             if (isMobile) {
-                document.querySelectorAll('.ascii-item').forEach(item => {
-                    item.addEventListener('click', () => {
+                document.addEventListener('click', function(event) {
+                    const asciiItems = document.querySelectorAll('.ascii-item');
+                    let clickedItem = event.target.closest('.ascii-item');
+
+                    asciiItems.forEach(item => {
                         const tooltip = item.querySelector('.tooltip');
-                        if (tooltip.style.visibility === 'visible') {
-                            tooltip.style.visibility = 'hidden';
-                            tooltip.style.opacity = '0';
-                        } else {
-                            tooltip.style.visibility = 'visible';
-                            tooltip.style.opacity = '1';
-                            setTimeout(() => {
+                        if (item === clickedItem) {
+                            if (tooltip.style.visibility === 'visible') {
                                 tooltip.style.visibility = 'hidden';
                                 tooltip.style.opacity = '0';
-                            }, 2000);
+                            } else {
+                                tooltip.style.visibility = 'visible';
+                                tooltip.style.opacity = '1';
+                            }
+                        } else {
+                            tooltip.style.visibility = 'hidden';
+                            tooltip.style.opacity = '0';
                         }
                     });
                 });
