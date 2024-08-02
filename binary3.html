@@ -3,19 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Binary Representations</title>
+    <title>Interactive Binary Representations - David Steckler</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
             padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         h1, h2, h3, h4 {
-            color: #2c3e50;
+            color: #333;
+            margin-bottom: 10px;
         }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: #fff;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            z-index: 1;
+        }
+        .menu a {
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .menu a:hover {
+            background-color: #f1f1f1;
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        .profile-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        /* Styles specific to the Interactive Binary Representations content */
         .section {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -60,7 +170,7 @@
             color: #555;
         }
         input[type="range"].explanation-slider {
-            width: 20%; /* Less wide slider for explanation depth */
+            width: 20%;
             margin: 10px 0;
             height: 24px;
         }
@@ -152,7 +262,7 @@
                 height: 28px;
             }
             input[type="range"].explanation-slider {
-                width: 80%; /* Adjust width for explanation depth slider on mobile */
+                width: 80%;
             }
             .ascii-chart {
                 grid-template-columns: repeat(8, minmax(40px, 1fr));
@@ -174,99 +284,119 @@
     </style>
 </head>
 <body>
-    <h1>Interactive Binary Representations</h1>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+        </nav>
+    </header>
 
-    <p>Select a category to see how binary numbers can be interpreted:</p>
+    <div class="container">
+        <h1>Interactive Binary Representations</h1>
 
-    <div class="section">
-        <select id="representationDropdown" class="dropdown">
-            <option value="">Choose a representation</option>
-            <option value="pixel">As a Grayscale Pixel</option>
-            <option value="color">As a Color Component</option>
-            <option value="text">As Text</option>
-            <option value="audio">In Audio</option>
-        </select>
+        <p>Select a category to see how binary numbers can be interpreted:</p>
 
-        <div id="pixelContent" class="content">
-            <h3>As a Grayscale Pixel</h3>
-            <div id="pixelPreview" class="preview"></div>
-            <p>Binary: <span id="pixelBinary">10101010</span></p>
-            <p>Grayscale value: <span id="pixelValue">170</span> (out of 255)</p>
-            <button id="randomizePixel">Randomize</button>
-            <input type="range" min="1" max="3" value="1" class="explanation-slider">
-            <div class="explanation">
-                <p id="pixelExplanation1" class="level-1">This binary number represents a medium gray pixel.</p>
-                <p id="pixelExplanation2" class="level-2">In 8-bit grayscale, this binary number translates to a decimal value between 0 (black) and 255 (white).</p>
-                <p id="pixelExplanation3" class="level-3">Each bit in the binary number represents a power of 2. This system allows 256 shades of gray to be represented with just 8 bits.</p>
-            </div>
-        </div>
+        <div class="section">
+            <select id="representationDropdown" class="dropdown">
+                <option value="">Choose a representation</option>
+                <option value="pixel">As a Grayscale Pixel</option>
+                <option value="color">As a Color Component</option>
+                <option value="text">As Text</option>
+                <option value="audio">In Audio</option>
+            </select>
 
-        <div id="colorContent" class="content">
-            <h3>As a Color Component (Green)</h3>
-            <div id="colorPreview" class="preview"></div>
-            <p>Binary (Green component): <span id="colorBinary">10101010</span></p>
-            <p>RGB: (0, <span id="colorGreen">170</span>, 0)</p>
-            <button id="randomizeColor">Randomize Green</button>
-            <input type="range" min="1" max="3" value="1" class="explanation-slider">
-            <div class="explanation">
-                <p id="colorExplanation1" class="level-1">This binary number represents the green component in this RGB color.</p>
-                <p id="colorExplanation2" class="level-2">In the RGB color model, this value is being used for the green channel, while red and blue remain at 0.</p>
-                <p id="colorExplanation3" class="level-3">24-bit color uses 8 bits each for red, green, and blue, allowing for 16,777,216 possible colors using just three bytes of data.</p>
-            </div>
-        </div>
-
-        <div id="textContent" class="content">
-            <h3>As Text (ASCII)</h3>
-            <p>Binary: <span id="textBinary">10101010</span></p>
-            <p>ASCII character: <span id="textChar">ª</span></p>
-            <p>Decimal value: <span id="textDecimal">170</span></p>
-            <button id="randomizeText">Randomize</button>
-            <input type="range" min="1" max="3" value="1" class="explanation-slider">
-            <div class="explanation">
-                <p id="textExplanation1" class="level-1">This binary number represents a character in ASCII encoding.</p>
-                <p id="textExplanation2" class="level-2">ASCII uses 7 bits to represent 128 characters. Values above 127 fall into the extended ASCII range.</p>
-                <p id="textExplanation3" class="level-3">Extended ASCII, which uses all 8 bits, allows for 256 characters, including special symbols and characters from other languages.</p>
+            <div id="pixelContent" class="content">
+                <h3>As a Grayscale Pixel</h3>
+                <div id="pixelPreview" class="preview"></div>
+                <p>Binary: <span id="pixelBinary">10101010</span></p>
+                <p>Grayscale value: <span id="pixelValue">170</span> (out of 255)</p>
+                <button id="randomizePixel">Randomize</button>
+                <input type="range" min="1" max="3" value="1" class="explanation-slider">
+                <div class="explanation">
+                    <p id="pixelExplanation1" class="level-1">This binary number represents a medium gray pixel.</p>
+                    <p id="pixelExplanation2" class="level-2">In 8-bit grayscale, this binary number translates to a decimal value between 0 (black) and 255 (white).</p>
+                    <p id="pixelExplanation3" class="level-3">Each bit in the binary number represents a power of 2. This system allows 256 shades of gray to be represented with just 8 bits.</p>
+                </div>
             </div>
 
-            <div class="ascii-section">
-                <h4>ASCII Chart: The Digital Alphabet</h4>
-                <div class="ascii-chart" id="asciiChart"></div>
-                
-                <p class="ascii-explanation">
-                    ASCII, born in 1963, became computing's universal language. It uses 7 bits to represent 128 characters.
-                    The first 32 numbers (0-31) are control characters for behind-the-scenes tasks.
-                    The rest (32-127) are the visible characters you type.
-                    Hover over the control characters to learn their specific purposes.
-                </p>
+            <div id="colorContent" class="content">
+                <h3>As a Color Component (Green)</h3>
+                <div id="colorPreview" class="preview"></div>
+                <p>Binary (Green component): <span id="colorBinary">10101010</span></p>
+                <p>RGB: (0, <span id="colorGreen">170</span>, 0)</p>
+                <button id="randomizeColor">Randomize Green</button>
+                <input type="range" min="1" max="3" value="1" class="explanation-slider">
+                <div class="explanation">
+                    <p id="colorExplanation1" class="level-1">This binary number represents the green component in this RGB color.</p>
+                    <p id="colorExplanation2" class="level-2">In the RGB color model, this value is being used for the green channel, while red and blue remain at 0.</p>
+                    <p id="colorExplanation3" class="level-3">24-bit color uses 8 bits each for red, green, and blue, allowing for 16,777,216 possible colors using just three bytes of data.</p>
+                </div>
+            </div>
 
-                <div class="extended-ascii">
-                    <h4>Extended ASCII: The International Upgrade</h4>
-                    <div class="ascii-chart" id="extendedAsciiChart"></div>
+            <div id="textContent" class="content">
+                <h3>As Text (ASCII)</h3>
+                <p>Binary: <span id="textBinary">10101010</span></p>
+                <p>ASCII character: <span id="textChar">ª</span></p>
+                <p>Decimal value: <span id="textDecimal">170</span></p>
+                <button id="randomizeText">Randomize</button>
+                <input type="range" min="1" max="3" value="1" class="explanation-slider">
+                <div class="explanation">
+                    <p id="textExplanation1" class="level-1">This binary number represents a character in ASCII encoding.</p>
+                    <p id="textExplanation2" class="level-2">ASCII uses 7 bits to represent 128 characters. Values above 127 fall into the extended ASCII range.</p>
+                    <p id="textExplanation3" class="level-3">Extended ASCII, which uses all 8 bits, allows for 256 characters, including special symbols and characters from other languages.</p>
+                </div>
+
+                <div class="ascii-section">
+                    <h4>ASCII Chart: The Digital Alphabet</h4>
+                    <div class="ascii-chart" id="asciiChart"></div>
                     
                     <p class="ascii-explanation">
-                        By the 1980s, 128 characters weren't enough. Extended ASCII used an 8th bit to add 128 more characters (128-255).
-                        Numbers 128-159 are additional control characters.
-                        160-255 brought in characters like é, ñ, and ╔═══╗ for international text and simple drawings.
-                        Hover over the control characters to see their purposes. Note that different systems may interpret these differently.
+                        ASCII, born in 1963, became computing's universal language. It uses 7 bits to represent 128 characters.
+                        The first 32 numbers (0-31) are control characters for behind-the-scenes tasks.
+                        The rest (32-127) are the visible characters you type.
+                        Hover over the control characters to learn their specific purposes.
                     </p>
+
+                    <div class="extended-ascii">
+                        <h4>Extended ASCII: The International Upgrade</h4>
+                        <div class="ascii-chart" id="extendedAsciiChart"></div>
+                        
+                        <p class="ascii-explanation">
+                            By the 1980s, 128 characters weren't enough. Extended ASCII used an 8th bit to add 128 more characters (128-255).
+                            Numbers 128-159 are additional control characters.
+                            160-255 brought in characters like é, ñ, and ╔═══╗ for international text and simple drawings.
+                            Hover over the control characters to see their purposes. Note that different systems may interpret these differently.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="audioContent" class="content">
+                <h3>In Audio</h3>
+                <p>Binary: <span id="audioBinary">10101010</span></p>
+                <p>Frequency: <span id="audioFrequency">440</span> Hz</p>
+                <button id="playAudio">Play Sound</button>
+                <button id="randomizeAudio">Randomize</button>
+                <input type="range" min="1" max="3" value="1" class="explanation-slider">
+                <div class="explanation">
+                    <p id="audioExplanation1" class="level-1">This binary number could represent part of an audio waveform.</p>
+                    <p id="audioExplanation2" class="level-2">In digital audio, this might represent the amplitude of a sound wave at a specific moment.</p>
+                    <p id="audioExplanation3" class="level-3">8-bit audio uses values from 0 to 255 to represent sound wave amplitude. The pattern of bits affects the tone's frequency and timbre.</p>
                 </div>
             </div>
         </div>
-
-        <div id="audioContent" class="content">
-            <h3>In Audio</h3>
-            <p>Binary: <span id="audioBinary">10101010</span></p>
-            <p>Frequency: <span id="audioFrequency">440</span> Hz</p>
-            <button id="playAudio">Play Sound</button>
-            <button id="randomizeAudio">Randomize</button>
-            <input type="range" min="1" max="3" value="1" class="explanation-slider">
-            <div class="explanation">
-                <p id="audioExplanation1" class="level-1">This binary number could represent part of an audio waveform.</p>
-                <p id="audioExplanation2" class="level-2">In digital audio, this might represent the amplitude of a sound wave at a specific moment.</p>
-                <p id="audioExplanation3" class="level-3">8-bit audio uses values from 0 to 255 to represent sound wave amplitude. The pattern of bits affects the tone's frequency and timbre.</p>
-            </div>
-        </div>
     </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
 
     <script>
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -504,6 +634,32 @@
         updateText('10101010');
         updateAudio('10101010');
         generateASCIIChart();
+
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        // Function to set active link
+        function setActiveLink() {
+            // Get the current page name from the URL
+            var path = window.location.pathname;
+            var page = path.split("/").pop();
+
+            // Remove .html extension if present
+            page = page.replace('.html', '');
+
+            // Create an ID from the page name
+            var linkId = page + '-link';
+
+            // Get the link element and add the 'active' class
+            var activeLink = document.getElementById(linkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // Call the function to set the active link
+        setActiveLink();
     </script>
 </body>
 </html>
