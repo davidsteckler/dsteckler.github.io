@@ -7,16 +7,125 @@
     <script src="https://chir.ag/projects/ntc/ntc.js"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
             padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         h1, h2, h3 {
-            color: #2c3e50;
+            color: #333;
+            margin-bottom: 10px;
         }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: #fff;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            z-index: 1;
+        }
+        .menu a {
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .menu a:hover {
+            background-color: #f1f1f1;
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        .profile-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        /* Additional styles for Binary page */
         .demo, .challenge {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -198,145 +307,164 @@
     </style>
 </head>
 <body>
-    <h1>Binary: The Hidden Language</h1>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Binary: The Hidden Language</h1>
     
-    <section id="introduction">
-        <h2>The Power of Two Choices</h2>
-        <p>Imagine if you could build an entire universe with just two words: "yes" and "no". That's essentially what binary does. It's the foundational language of all digital technology, from the smartphone in your pocket to the most powerful supercomputers.</p>
-        <div class="explanation">
-            <h3>Explanation Depth: <input type="range" id="binaryExplanationLevel" min="1" max="3" value="1"></h3>
-            <div id="binaryExplanation"></div>
-        </div>
-        <div class="challenge">
-            <h3>Challenge: Binary Switch Patterns</h3>
-            <p>Flip the switch up to 8 times and observe the binary pattern:</p>
-            <label class="switch">
-                <input type="checkbox" id="patternSwitch">
-                <span class="slider"></span>
-            </label>
-            <div id="lightBulb" class="light-bulb light-off"></div>
-            <p>Switch state: <span id="switchState">0</span></p>
-            <p>Flip count: <span id="flipCount">0</span>/8</p>
-            <p>Pattern: <span id="binaryPattern"></span></p>
-            <button id="resetPattern">Reset</button>
-        </div>
-
-        <div class="reflection-question">
-            <h3>Observing the Switch Pattern</h3>
-            <p>After flipping the switch 8 times, what pattern did you notice in the resulting binary sequence?</p>
-            <div class="question-options">
-                <button class="option-button" onclick="checkAnswer('random')">The 0s and 1s appear in a random order</button>
-                <button class="option-button" onclick="checkAnswer('alternating')">It strictly alternates between 0 and 1</button>
-                <button class="option-button" onclick="checkAnswer('allZeros')">All the digits are 0</button>
-                <button class="option-button" onclick="checkAnswer('allOnes')">All the digits are 1</button>
+        <section id="introduction">
+            <h2>The Power of Two Choices</h2>
+            <p>Imagine if you could build an entire universe with just two words: "yes" and "no". That's essentially what binary does. It's the foundational language of all digital technology, from the smartphone in your pocket to the most powerful supercomputers.</p>
+            <div class="explanation">
+                <h3>Explanation Depth: <input type="range" id="binaryExplanationLevel" min="1" max="3" value="1"></h3>
+                <div id="binaryExplanation"></div>
             </div>
-            <p id="questionResult"></p>
-        </div>
-    </section>
+            <div class="challenge">
+                <h3>Challenge: Binary Switch Patterns</h3>
+                <p>Flip the switch up to 8 times and observe the binary pattern:</p>
+                <label class="switch">
+                    <input type="checkbox" id="patternSwitch">
+                    <span class="slider"></span>
+                </label>
+                <div id="lightBulb" class="light-bulb light-off"></div>
+                <p>Switch state: <span id="switchState">0</span></p>
+                <p>Flip count: <span id="flipCount">0</span>/8</p>
+                <p>Pattern: <span id="binaryPattern"></span></p>
+                <button id="resetPattern">Reset</button>
+            </div>
 
-    <section id="text-representation">
-        <h2>From Letters to Binary</h2>
-        <p>Every text message you send, every email you write, begins its journey as a series of 1s and 0s. Let's peek behind the curtain and see how it works.</p>
-        <div class="explanation">
-            <h3>Explanation Depth: <input type="range" id="textExplanationLevel" min="1" max="3" value="1"></h3>
-            <div id="textExplanation"></div>
-        </div>
-        <div class="demo">
-            <input type="text" id="asciiInput" maxlength="1" placeholder="Type a character">
-            <p>ASCII: <span id="asciiOutput"></span></p>
-            <p>Binary: <span id="binaryOutput"></span></p>
-        </div>
-        <div class="challenge">
-            <h3>Challenge: Decode a Binary Message</h3>
-            <p>Decode this binary message: <span id="binaryMessage"></span></p>
-            <div id="decodeBulbs"></div>
-            <p>Decimal Value: <span id="decimalValue">0</span></p>
-            <input type="text" id="binaryInput" maxlength="8" placeholder="Type a binary number (8 bits)">
-            <p>Character: <span id="binaryCharOutput"></span></p>
-            <input type="text" id="decodedMessage" placeholder="Your answer">
-            <button id="checkMessageAnswer">Check Answer</button>
-            <p id="messageResult"></p>
-        </div>
-    </section>
+            <div class="reflection-question">
+                <h3>Observing the Switch Pattern</h3>
+                <p>After flipping the switch 8 times, what pattern did you notice in the resulting binary sequence?</p>
+                <div class="question-options">
+                    <button class="option-button" onclick="checkAnswer('random')">The 0s and 1s appear in a random order</button>
+                    <button class="option-button" onclick="checkAnswer('alternating')">It strictly alternates between 0 and 1</button>
+                    <button class="option-button" onclick="checkAnswer('allZeros')">All the digits are 0</button>
+                    <button class="option-button" onclick="checkAnswer('allOnes')">All the digits are 1</button>
+                </div>
+                <p id="questionResult"></p>
+            </div>
+        </section>
 
-    <section id="color-representation">
-        <h2>Colors in Binary</h2>
-        <p>The vibrant world on your screen is painted with numbers. Each color is a unique recipe of red, green, and blue, all written in binary.</p>
-        <div class="explanation">
-            <h3>Explanation Depth: <input type="range" id="colorExplanationLevel" min="1" max="3" value="1"></h3>
-            <div id="colorExplanation"></div>
-        </div>
-        <div class="demo">
-            <label>Red: <input type="range" id="redSlider" min="0" max="255"> <input type="number" id="redInput" min="0" max="255"></label><br>
-            <label>Green: <input type="range" id="greenSlider" min="0" max="255"> <input type="number" id="greenInput" min="0" max="255"></label><br>
-            <label>Blue: <input type="range" id="blueSlider" min="0" max="255"> <input type="number" id="blueInput" min="0" max="255"></label><br>
-            <div class="color-preview" id="colorPreview"></div>
-            <p>RGB Binary: <span id="rgbBinary"></span></p>
-            <p>Color: <span id="colorName"></span></p>
-        </div>
-        <div class="challenge">
-            <h3>Challenge: Create a Specific Color</h3>
-            <p>Use the sliders to create this color: <span id="targetColor" style="display:inline-block; width: 50px; height: 50px;"></span> <span id="targetColorName"></span></p>
-            <button id="checkColorChallenge">Check Answer</button>
-            <button id="newColorChallenge">Try Again</button>
-            <p id="colorChallengeResult"></p>
-        </div>
-    </section>
+        <section id="text-representation">
+            <h2>From Letters to Binary</h2>
+            <p>Every text message you send, every email you write, begins its journey as a series of 1s and 0s. Let's peek behind the curtain and see how it works.</p>
+            <div class="explanation">
+                <h3>Explanation Depth: <input type="range" id="textExplanationLevel" min="1" max="3" value="1"></h3>
+                <div id="textExplanation"></div>
+            </div>
+            <div class="demo">
+                <input type="text" id="asciiInput" maxlength="1" placeholder="Type a character">
+                <p>ASCII: <span id="asciiOutput"></span></p>
+                <p>Binary: <span id="binaryOutput"></span></p>
+            </div>
+            <div class="challenge">
+                <h3>Challenge: Decode a Binary Message</h3>
+                <p>Decode this binary message: <span id="binaryMessage"></span></p>
+                <div id="decodeBulbs"></div>
+                <p>Decimal Value: <span id="decimalValue">0</span></p>
+                <input type="text" id="binaryInput" maxlength="8" placeholder="Type a binary number (8 bits)">
+                <p>Character: <span id="binaryCharOutput"></span></p>
+                <input type="text" id="decodedMessage" placeholder="Your answer">
+                <button id="checkMessageAnswer">Check Answer</button>
+                <p id="messageResult"></p>
+            </div>
+        </section>
 
-    <section id="image-representation">
-        <h2>Pictures: A Sea of Tiny Lights</h2>
-        <p>Every digital image is a mosaic of tiny colored dots, each one a binary number. Let's zoom in and see how it works.</p>
-        <div class="explanation">
-            <h3>Explanation Depth: <input type="range" id="imageExplanationLevel" min="1" max="3" value="1"></h3>
-            <div id="imageExplanation"></div>
-        </div>
-        <div class="demo">
-            <canvas id="pixelCanvas" width="150" height="150" style="border:1px solid #000;"></canvas>
-            <br>
-            <button id="randomizePixels">Randomize Pixels</button>
-            <p>Hover over pixels to see their binary representation.</p>
-            <p>Binary of selected pixel: <span id="pixelBinary"></span></p>
-            <p>Color: <span id="pixelColorName"></span></p>
+        <section id="color-representation">
+            <h2>Colors in Binary</h2>
+            <p>The vibrant world on your screen is painted with numbers. Each color is a unique recipe of red, green, and blue, all written in binary.</p>
+            <div class="explanation">
+                <h3>Explanation Depth: <input type="range" id="colorExplanationLevel" min="1" max="3" value="1"></h3>
+                <div id="colorExplanation"></div>
+            </div>
+            <div class="demo">
+                <label>Red: <input type="range" id="redSlider" min="0" max="255"> <input type="number" id="redInput" min="0" max="255"></label><br>
+                <label>Green: <input type="range" id="greenSlider" min="0" max="255"> <input type="number" id="greenInput" min="0" max="255"></label><br>
+                <label>Blue: <input type="range" id="blueSlider" min="0" max="255"> <input type="number" id="blueInput" min="0" max="255"></label><br>
+                <div class="color-preview" id="colorPreview"></div>
+                <p>RGB Binary: <span id="rgbBinary"></span></p>
+                <p>Color: <span id="colorName"></span></p>
+            </div>
+            <div class="challenge">
+                <h3>Challenge: Create a Specific Color</h3>
+                <p>Use the sliders to create this color: <span id="targetColor" style="display:inline-block; width: 50px; height: 50px;"></span> <span id="targetColorName"></span></p>
+                <button id="checkColorChallenge">Check Answer</button>
+                <button id="newColorChallenge">Try Again</button>
+                <p id="colorChallengeResult"></p>
+            </div>
+        </section>
 
-        </div>
-        <div class="challenge">
-            <h3>Challenge: Color Depth and Binary</h3>
-            <p>Let's explore how many unique colors can be represented with 24-bit color depth.</p>
-            <ol>
-                <li>How many bits are used for each color channel (Red, Green, Blue)?</li>
-                <input type="number" id="bitsPerChannel" min="1" max="8">
-                <button onclick="checkBitsPerChannel()">Check</button>
-                <p id="bitsResult"></p>
-                
-                <li>How many unique values can each channel represent?</li>
-                <input type="number" id="valuesPerChannel" min="1" max="256">
-                <button onclick="checkValuesPerChannel()">Check</button>
-                <p id="valuesResult"></p>
-                
-                <li>Calculate the total number of unique colors by multiplying the values per channel for each channel.</li>
-                <input type="number" id="totalColorsInput" min="1" value="">
-                <button onclick="checkTotalColors()">Check</button>
-                <p id="totalColorsResult"></p>
-            </ol>
-        </div>
-    </section>
+        <section id="image-representation">
+            <h2>Pictures: A Sea of Tiny Lights</h2>
+            <p>Every digital image is a mosaic of tiny colored dots, each one a binary number. Let's zoom in and see how it works.</p>
+            <div class="explanation">
+                <h3>Explanation Depth: <input type="range" id="imageExplanationLevel" min="1" max="3" value="1"></h3>
+                <div id="imageExplanation"></div>
+            </div>
+            <div class="demo">
+                <canvas id="pixelCanvas" width="150" height="150" style="border:1px solid #000;"></canvas>
+                <br>
+                <button id="randomizePixels">Randomize Pixels</button>
+                <p>Hover over pixels to see their binary representation.</p>
+                <p>Binary of selected pixel: <span id="pixelBinary"></span></p>
+                <p>Color: <span id="pixelColorName"></span></p>
+            </div>
+            <div class="challenge">
+                <h3>Challenge: Color Depth and Binary</h3>
+                <p>Let's explore how many unique colors can be represented with 24-bit color depth.</p>
+                <ol>
+                    <li>How many bits are used for each color channel (Red, Green, Blue)?</li>
+                    <input type="number" id="bitsPerChannel" min="1" max="8">
+                    <button onclick="checkBitsPerChannel()">Check</button>
+                    <p id="bitsResult"></p>
+                    
+                    <li>How many unique values can each channel represent?</li>
+                    <input type="number" id="valuesPerChannel" min="1" max="256">
+                    <button onclick="checkValuesPerChannel()">Check</button>
+                    <p id="valuesResult"></p>
+                    
+                    <li>Calculate the total number of unique colors by multiplying the values per channel for each channel.</li>
+                    <input type="number" id="totalColorsInput" min="1" value="">
+                    <button onclick="checkTotalColors()">Check</button>
+                    <p id="totalColorsResult"></p>
+                </ol>
+            </div>
+        </section>
 
-    <section id="summary">
-        <h2>Why Binary It Matters</h2>
-        <div class="explanation">
-            <h3>Explanation Depth: <input type="range" id="summaryExplanationLevel" min="1" max="3" value="1"></h3>
-            <div id="summaryExplanation"></div>
-        </div>
-        <div class="summary-part">
-            <p>Binary is everywhere. It's not just the language of computers; it's the foundation of our digital world. Every email, every text, every app relies on binary. <em>Understanding binary means understanding the heart of digital technology.</em></p>
-        </div>
-        <div class="summary-part">
-            <p>At its core, binary is simple. Yet, this simplicity powers the most complex systems in our world. <strong>It's this elegance and efficiency that makes binary so powerful.</strong></p>
-        </div>
-        <div class="summary-part">
-            <p>As technology evolves, binary remains at the center. The future of computing, from quantum computers to AI, still relies on the fundamental principles of binary. <em>Embracing binary is embracing the future.</em></p>
-        </div>
-    </section>
+        <section id="summary">
+            <h2>Why Binary It Matters</h2>
+            <div class="explanation">
+                <h3>Explanation Depth: <input type="range" id="summaryExplanationLevel" min="1" max="3" value="1"></h3>
+                <div id="summaryExplanation"></div>
+            </div>
+            <div class="summary-part">
+                <p>Binary is everywhere. It's not just the language of computers; it's the foundation of our digital world. Every email, every text, every app relies on binary. <em>Understanding binary means understanding the heart of digital technology.</em></p>
+            </div>
+            <div class="summary-part">
+                <p>At its core, binary is simple. Yet, this simplicity powers the most complex systems in our world. <strong>It's this elegance and efficiency that makes binary so powerful.</strong></p>
+            </div>
+            <div class="summary-part">
+                <p>As technology evolves, binary remains at the center. The future of computing, from quantum computers to AI, still relies on the fundamental principles of binary. <em>Embracing binary is embracing the future.</em></p>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
 
     <script>
         // Explanation levels
@@ -556,7 +684,6 @@
         });
 
         updateColor(); // Initialize color preview
-
         // Color Challenge
         function getRandomColor() {
             return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
@@ -662,6 +789,33 @@
         updateExplanation('color', 1);
         updateExplanation('image', 1);
         updateExplanation('summary', 1);
+
+        // Menu toggle for mobile
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        // Function to set active link
+        function setActiveLink() {
+            // Get the current page name from the URL
+            var path = window.location.pathname;
+            var page = path.split("/").pop();
+
+            // Remove .html extension if present
+            page = page.replace('.html', '');
+
+            // Create an ID from the page name
+            var linkId = page + '-link';
+
+            // Get the link element and add the 'active' class
+            var activeLink = document.getElementById(linkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // Call the function to set the active link
+        setActiveLink();
     </script>
 </body>
 </html>
