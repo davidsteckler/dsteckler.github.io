@@ -3,30 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary Bulbs Game</title>
+    <title>Binary Bulbs Game - David Steckler</title>
     <style>
         body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #333333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        h1 {
+            padding: 0;
             color: #333;
-            margin-bottom: 40px;
-            font-size: 2.5em;
+            background-color: #f5f5f5;
+            line-height: 1.6;
         }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        /* Binary Bulbs Game specific styles */
         .game-container {
             max-width: 900px;
             width: 100%;
+            margin: 0 auto;
         }
         #bulbs {
             display: flex;
@@ -46,7 +99,7 @@
             text-align: center;
             font-weight: bold;
             color: #333;
-            font-size: 1.2em;
+            font-size: 1rem;
         }
         .bulb {
             width: 80px;
@@ -54,7 +107,7 @@
             border: 2px solid #333;
             border-radius: 50% 50% 10% 10%;
             line-height: 80px;
-            font-size: 1.8em;
+            font-size: 1.8rem;
             font-weight: bold;
             background-color: #f0f0f0;
             color: #333;
@@ -69,14 +122,11 @@
             background-color: yellow;
             box-shadow: 0 0 20px yellow;
         }
-        #placeValueSum {
-            font-size: 1.2em;
-            margin: 10px 0;
+        #placeValueSum, #numberDisplay, #binaryDisplay {
+            font-size: 1.2rem;
+            margin: 15px 0;
             color: #666;
-        }
-        #numberDisplay, #binaryDisplay {
-            font-size: 1.5em;
-            margin: 10px 0;
+            text-align: center;
         }
         .controls {
             display: flex;
@@ -91,6 +141,7 @@
         }
         .toggle-label {
             margin-right: 10px;
+            font-size: 1rem;
         }
         .switch {
             position: relative;
@@ -136,7 +187,7 @@
         }
         button {
             padding: 10px 20px;
-            font-size: 16px;
+            font-size: 1rem;
             cursor: pointer;
             background-color: #333;
             color: #fff;
@@ -160,11 +211,13 @@
         .info-section h2 {
             margin-bottom: 15px;
             color: #333;
+            font-size: 1.8rem;
         }
         .info-section p {
             margin-bottom: 15px;
             color: #666;
             line-height: 1.6;
+            font-size: 1.1rem;
         }
         @keyframes flash {
             0%, 100% { opacity: 1; }
@@ -178,27 +231,29 @@
                 width: 35px;
                 height: 35px;
                 line-height: 35px;
-                font-size: 0.8em;
+                font-size: 0.8rem;
             }
             .bulb-label {
-                font-size: 0.6em;
+                font-size: 0.7rem;
                 top: -20px;
             }
             h1 {
-                font-size: 2em;
+                font-size: 1.8rem;
                 margin-bottom: 20px;
             }
             #placeValueSum, #numberDisplay, #binaryDisplay {
-                font-size: 1em;
+                font-size: 1rem;
                 margin: 5px 0;
             }
             .controls {
-                flex-direction: row;
+                flex-direction: column;
                 gap: 10px;
             }
             .toggle-container {
                 flex-direction: row;
                 align-items: center;
+                justify-content: space-between;
+                width: 100%;
             }
             .toggle-label {
                 margin-right: 5px;
@@ -215,224 +270,241 @@
                 transform: translateX(18px);
             }
             button {
-                padding: 5px 10px;
-                font-size: 14px;
+                padding: 8px 16px;
+                font-size: 0.9rem;
                 margin: 5px 0;
             }
         }
     </style>
 </head>
 <body>
-    <h1>Binary Bulbs Game</h1>
-    
-    <div class="game-container">
-        <div id="bulbs"></div>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+        </nav>
+    </header>
 
-        <div id="placeValueSum">Sum: 0 = 0</div>
+    <div class="container">
+        <h1>Binary Bulbs Game</h1>
+        
+        <div class="game-container">
+            <div id="bulbs"></div>
 
-        <div id="numberDisplay">Decimal: 0</div>
-        <div id="binaryDisplay">Binary: 00000000</div>
+            <div id="placeValueSum">Sum: 0 = 0</div>
+            <div id="numberDisplay">Decimal: 0</div>
+            <div id="binaryDisplay">Binary: 00000000</div>
 
-        <div class="controls">
-            <div class="toggle-container">
-                <span class="toggle-label">Difficulty:</span>
-                <label class="switch">
-                    <input type="checkbox" id="difficultyToggle">
-                    <span class="slider"></span>
-                </label>
+            <div class="controls">
+                <div class="toggle-container">
+                    <span class="toggle-label">Difficulty:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="difficultyToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-container">
+                    <span class="toggle-label">Game Mode:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="gameModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-container">
+                    <span class="toggle-label">Labels:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="labelsToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
-            <div class="toggle-container">
-                <span class="toggle-label">Game Mode:</span>
-                <label class="switch">
-                    <input type="checkbox" id="gameModeToggle">
-                    <span class="slider"></span>
-                </label>
+
+            <div class="button-container">
+                <button onclick="resetBits()">Reset</button>
+                <button onclick="randomizeBits()">Randomize</button>
             </div>
-            <div class="toggle-container">
-                <span class="toggle-label">Labels:</span>
-                <label class="switch">
-                    <input type="checkbox" id="labelsToggle" checked>
-                    <span class="slider"></span>
-                </label>
+
+            <div id="alert" style="display: none; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">
+                <span>Create the binary representation of: <span id="target"></span></span>
+                <button id="newChallengeButton" style="display: none;" onclick="startNewGame()">New Challenge</button>
             </div>
-        </div>
 
-        <div class="button-container">
-            <button onclick="resetBits()">Reset</button>
-            <button onclick="randomizeBits()">Randomize</button>
-        </div>
+            <div class="page-break"></div>
 
-        <div id="alert" style="display: none; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">
-            <span>Create the binary representation of: <span id="target"></span></span>
-            <button id="newChallengeButton" style="display: none;" onclick="startNewGame()">New Challenge</button>
-        </div>
-
-        <div class="page-break"></div>
-
-        <div class="info-section">
-            <h2>What is Binary?</h2>
-            <p>
-                Binary is the language of computers, using just two states: on and off, represented by 1 and 0. In our everyday world, we use the decimal system with ten digits, but computers think in this simple binary code.
-            </p>
-            <p>
-                Each bulb above represents a binary digit or 'bit'. When it's on (yellow), it adds its value to the total. The rightmost bulb is worth 1, and each bulb to the left doubles in value.
-            </p>
-            <p>
-                Experiment with the bulbs above. Toggle them on and off, and watch how the decimal number changes. Can you create specific numbers? This is how computers build complex data from simple on/off switches!
-            </p>
+            <div class="info-section">
+                <h2>What is Binary?</h2>
+                <p>
+                    Binary is the language of computers, using just two states: on and off, represented by 1 and 0. In our everyday world, we use the decimal system with ten digits, but computers think in this simple binary code.
+                </p>
+                <p>
+                    Each bulb above represents a binary digit or 'bit'. When it's on (yellow), it adds its value to the total. The rightmost bulb is worth 1, and each bulb to the left doubles in value.
+                </p>
+                <p>
+                    Experiment with the bulbs above. Toggle them on and off, and watch how the decimal number changes. Can you create specific numbers? This is how computers build complex data from simple on/off switches!
+                </p>
+            </div>
         </div>
     </div>
 
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
     <script>
-        let bits = [0, 0, 0, 0, 0, 0, 0, 0];
-        let target = 0;
-        let isHardMode = false;
-        const difficultyToggle = document.getElementById('difficultyToggle');
-        const gameModeToggle = document.getElementById('gameModeToggle');
-        const labelsToggle = document.getElementById('labelsToggle');
-        const alertElement = document.getElementById('alert');
-        const targetElement = document.getElementById('target');
-        const newChallengeButton = document.getElementById('newChallengeButton');
-        const placeValueSumElement = document.getElementById('placeValueSum');
-        const bulbsContainer = document.getElementById('bulbs');
+let bits = [0, 0, 0, 0, 0, 0, 0, 0];
+let target = 0;
+let isHardMode = false;
+const difficultyToggle = document.getElementById('difficultyToggle');
+const gameModeToggle = document.getElementById('gameModeToggle');
+const labelsToggle = document.getElementById('labelsToggle');
+const alertElement = document.getElementById('alert');
+const targetElement = document.getElementById('target');
+const newChallengeButton = document.getElementById('newChallengeButton');
+const placeValueSumElement = document.getElementById('placeValueSum');
+const bulbsContainer = document.getElementById('bulbs');
 
-        function createBulbs() {
-            bulbsContainer.innerHTML = '';
-            const values = [128, 64, 32, 16, 8, 4, 2, 1];
-            values.forEach((value, index) => {
-                const container = document.createElement('div');
-                container.className = 'bulb-container';
-                
-                const label = document.createElement('div');
-                label.className = 'bulb-label';
-                label.textContent = value;
-                
-                const bulb = document.createElement('div');
-                bulb.className = 'bulb';
-                bulb.textContent = '0';
-                
-                bulb.addEventListener('click', () => toggleBit(index));
-                
-                container.appendChild(label);
-                container.appendChild(bulb);
-                bulbsContainer.appendChild(container);
-            });
-        }
+function createBulbs() {
+    bulbsContainer.innerHTML = '';
+    const values = [128, 64, 32, 16, 8, 4, 2, 1];
+    values.forEach((value, index) => {
+        const container = document.createElement('div');
+        container.className = 'bulb-container';
+        
+        const label = document.createElement('div');
+        label.className = 'bulb-label';
+        label.textContent = value;
+        
+        const bulb = document.createElement('div');
+        bulb.className = 'bulb';
+        bulb.textContent = '0';
+        
+        bulb.addEventListener('click', () => toggleBit(index));
+        
+        container.appendChild(label);
+        container.appendChild(bulb);
+        bulbsContainer.appendChild(container);
+    });
+}
 
-        function toggleBit(index) {
-            bits[index] = 1 - bits[index];
-            updateDisplay();
-        }
+function toggleBit(index) {
+    bits[index] = 1 - bits[index];
+    updateDisplay();
+}
 
-        function updateDisplay() {
-            const bulbElements = document.querySelectorAll('.bulb');
-            bulbElements.forEach((element, index) => {
-                element.classList.toggle('on', bits[index] === 1);
-                element.textContent = bits[index];
-            });
+function updateDisplay() {
+    const bulbElements = document.querySelectorAll('.bulb');
+    bulbElements.forEach((element, index) => {
+        element.classList.toggle('on', bits[index] === 1);
+        element.textContent = bits[index];
+    });
 
-            let number = bits.reduce((acc, bit, index) => acc + bit * Math.pow(2, 7 - index), 0);
-            let binary = bits.join('');
+    let number = bits.reduce((acc, bit, index) => acc + bit * Math.pow(2, 7 - index), 0);
+    let binary = bits.join('');
 
-            if (gameModeToggle.checked && isHardMode) {
-                document.getElementById('numberDisplay').textContent = `Target: ${target}`;
-                document.getElementById('binaryDisplay').textContent = 'Binary: ????????';
-                placeValueSumElement.textContent = 'Sum: Hidden in Hard Mode';
-            } else {
-                document.getElementById('numberDisplay').textContent = `Decimal: ${number}`;
-                document.getElementById('binaryDisplay').textContent = `Binary: ${binary}`;
-                
-                let placeValueSum = bits.reduce((sum, bit, index) => {
-                    let placeValue = Math.pow(2, 7 - index);
-                    return sum + (bit === 1 ? `${placeValue} + ` : '');
-                }, '').slice(0, -3) || '0';
-                placeValueSumElement.textContent = `Sum: ${placeValueSum} = ${number}`;
-            }
+    if (gameModeToggle.checked && isHardMode) {
+        document.getElementById('numberDisplay').textContent = `Target: ${target}`;
+        document.getElementById('binaryDisplay').textContent = 'Binary: ????????';
+        placeValueSumElement.textContent = 'Sum: Hidden in Hard Mode';
+    } else {
+        document.getElementById('numberDisplay').textContent = `Decimal: ${number}`;
+        document.getElementById('binaryDisplay').textContent = `Binary: ${binary}`;
+        
+        let placeValueSum = bits.reduce((sum, bit, index) => {
+            let placeValue = Math.pow(2, 7 - index);
+            return sum + (bit === 1 ? `${placeValue} + ` : '');
+        }, '').slice(0, -3) || '0';
+        placeValueSumElement.textContent = `Sum: ${placeValueSum} = ${number}`;
+    }
 
-            if (gameModeToggle.checked) {
-                document.getElementById('numberDisplay').textContent += ` | Target: ${target}`;
-                if (number === target) {
-                    celebrateWin();
-                } else {
-                    newChallengeButton.style.display = 'none';
-                }
-            }
-        }
-
-        function celebrateWin() {
-            const bulbElements = document.querySelectorAll('.bulb');
-            alertElement.innerHTML = `<span class="flashing">Congratulations! You've reached the target: ${target}</span>`;
-            alertElement.style.display = 'block';
-
-            let danceCount = 0;
-            const danceInterval = setInterval(() => {
-                bulbElements.forEach(bulb => {
-                    bulb.classList.toggle('on', Math.random() < 0.5);
-                    bulb.textContent = bulb.classList.contains('on') ? '1' : '0';
-                });
-                danceCount++;
-                if (danceCount >= 10) {
-                    clearInterval(danceInterval);
-                    // Do not reset bits immediately, keep displaying the result
-                    alertElement.classList.remove('flashing');
-                    alertElement.innerHTML = `<span>Congratulations! You've reached the target: ${target}</span>
-                                              <button onclick="startNewGame()">New Challenge</button>`;
-                    newChallengeButton.style.display = 'inline-block';
-                }
-            }, 200);
-        }
-
-        function resetBits() {
-            bits = [0, 0, 0, 0, 0, 0, 0, 0];
-            updateDisplay();
-        }
-
-        function randomizeBits() {
-            bits = bits.map(() => Math.round(Math.random()));
-            updateDisplay();
-        }
-
-        function startNewGame() {
-            target = Math.floor(Math.random() * 256);
-            targetElement.textContent = target;
-            resetBits();
-            alertElement.style.display = 'block';
-            alertElement.innerHTML = `<span>Create the binary representation of: <span id="target">${target}</span></span>`;
+    if (gameModeToggle.checked) {
+        document.getElementById('numberDisplay').textContent += ` | Target: ${target}`;
+        if (number === target) {
+            celebrateWin();
+        } else {
             newChallengeButton.style.display = 'none';
-            
-            if (isHardMode) {
-                setTimeout(() => {
-                    updateDisplay();
-                }, 5000);
-            } else {
-                updateDisplay();
-            }
         }
+    }
+}
 
-        difficultyToggle.addEventListener('change', () => {
-            isHardMode = difficultyToggle.checked;
-            if (gameModeToggle.checked) {
-                startNewGame();
-            }
+function celebrateWin() {
+    const bulbElements = document.querySelectorAll('.bulb');
+    alertElement.innerHTML = `<span class="flashing">Congratulations! You've reached the target: ${target}</span>`;
+    alertElement.style.display = 'block';
+
+    let danceCount = 0;
+    const danceInterval = setInterval(() => {
+        bulbElements.forEach(bulb => {
+            bulb.classList.toggle('on', Math.random() < 0.5);
+            bulb.textContent = bulb.classList.contains('on') ? '1' : '0';
         });
+        danceCount++;
+        if (danceCount >= 10) {
+            clearInterval(danceInterval);
+            alertElement.classList.remove('flashing');
+            alertElement.innerHTML = `<span>Congratulations! You've reached the target: ${target}</span>
+                                      <button onclick="startNewGame()">New Challenge</button>`;
+            newChallengeButton.style.display = 'inline-block';
+        }
+    }, 200);
+}
 
-        gameModeToggle.addEventListener('change', () => {
-            if (gameModeToggle.checked) {
-                startNewGame();
-            } else {
-                alertElement.style.display = 'none';
-                updateDisplay();
-            }
-        });
+function resetBits() {
+    bits = [0, 0, 0, 0, 0, 0, 0, 0];
+    updateDisplay();
+}
 
-        labelsToggle.addEventListener('change', () => {
-            document.querySelectorAll('.bulb-label').forEach(label => {
-                label.style.display = labelsToggle.checked ? 'block' : 'none';
-            });
-        });
+function randomizeBits() {
+    bits = bits.map(() => Math.round(Math.random()));
+    updateDisplay();
+}
 
-        createBulbs();
+function startNewGame() {
+    target = Math.floor(Math.random() * 256);
+    targetElement.textContent = target;
+    resetBits();
+    alertElement.style.display = 'block';
+    alertElement.innerHTML = `<span>Create the binary representation of: <span id="target">${target}</span></span>`;
+    newChallengeButton.style.display = 'none';
+    
+    if (isHardMode) {
+        setTimeout(() => {
+            updateDisplay();
+        }, 5000);
+    } else {
         updateDisplay();
-    </script>
+    }
+}
+
+difficultyToggle.addEventListener('change', () => {
+    isHardMode = difficultyToggle.checked;
+    if (gameModeToggle.checked) {
+        startNewGame();
+    }
+});
+
+gameModeToggle.addEventListener('change', () => {
+    if (gameModeToggle.checked) {
+        startNewGame();
+    } else {
+        alertElement.style.display = 'none';
+        updateDisplay();
+    }
+});
+
+labelsToggle.addEventListener('change', () => {
+    document.querySelectorAll('.bulb-label').forEach(label => {
+        label.style.display = labelsToggle.checked ? 'block' : 'none';
+    });
+});
+
+createBulbs();
+updateDisplay();    </script>
 </body>
 </html>
