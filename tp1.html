@@ -1,4 +1,353 @@
-<rect x="50" y="20" width="200" height="160" fill="none" stroke="black" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Archer's Journey: Interactive Target Practice Tutorial</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        .tutorial-container {
+            position: relative;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .step.active {
+            display: block;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+        .nav-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .progress-container {
+            margin-top: 20px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress {
+            width: 0;
+            height: 100%;
+            background-color: #2ecc71;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .code-block {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .code-block .line-number {
+            display: inline-block;
+            width: 20px;
+            color: #999;
+            text-align: right;
+            margin-right: 10px;
+            user-select: none;
+        }
+        .code-block .keyword { color: #0000FF; }
+        .code-block .function { color: #FF00FF; }
+        .code-block .number { color: #009900; }
+        .code-block .string { color: #990000; }
+        .code-block .comment { color: #999999; font-style: italic; }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted #3498db;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .interactive-demo {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+            background-color: #f8f8f8;
+            margin-bottom: 15px;
+        }
+        .animation-container {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .sun {
+            width: 50px;
+            height: 50px;
+            background-color: yellow;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: -50px;
+            animation: sunRise 5s linear infinite;
+        }
+        @keyframes sunRise {
+            0% { left: -50px; }
+            100% { left: 100%; }
+        }
+        .diagram {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .step-content {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .step-header {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .step-description {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .storytelling {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .next-step-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .next-step-button:hover {
+            background-color: #2980b9;
+        }
+        .next-step-button svg {
+            margin-left: 10px;
+            fill: white;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>The Archer's Journey: Interactive Target Practice Tutorial</h1>
+        <p>Welcome, young archer! Today, we embark on a quest to create our very own archery game. Just as our ancestors used bows and arrows to hunt and protect their communities, we'll use code to bring our digital archery range to life.</p>
+        
+        <div class="tutorial-container">
+            <div id="step1" class="step active">
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>Step 1: Creating Our World</h2>
+                    </div>
+                    <div class="animation-container">
+                        <div class="sun"></div>
+                    </div>
+                    <div class="storytelling">
+                        Imagine standing in an open field, the sky stretching endlessly above you. This is where our journey begins. We'll start by painting the sky, just as nature does every morning.
+                    </div>
+                    <div class="step-description">
+                        Let's set up the <span class="tooltip">canvas<span class="tooltiptext">A blank space where we can draw and create our game</span></span> for our archery range and paint the sky:
+                    </div>
+                    <div class="code-block">
+<span class="line-number">1</span><span class="keyword">def</span> <span class="function">setup</span>():
+<span class="line-number">2</span>    <span class="function">size</span>(<span class="number">400</span>, <span class="number">400</span>)  <span class="comment"># Create a 400x400 pixel canvas</span>
+<span class="line-number">3</span>    <span class="function">no_stroke</span>()     <span class="comment"># Remove outlines from shapes</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span><span class="keyword">def</span> <span class="function">draw</span>():
+<span class="line-number">6</span>    <span class="function">fill</span>(<span class="string">'cyan'</span>)    <span class="comment"># Choose sky-blue color</span>
+<span class="line-number">7</span>    <span class="function">rect</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">400</span>, <span class="number">250</span>)  <span class="comment"># Draw a rectangle for the sky</span>
+                    </div>
+                    <div class="interactive-demo">
+                        <canvas id="step1-canvas" width="400" height="250"></canvas>
+                    </div>
+                    <p>In this code, we're telling the computer to create a space for our game and then fill part of it with a sky-blue color.</p>
+                    <div class="diagram">
+                        <svg width="300" height="200">
+                            <rect x="50" y="20" width="200" height="160" fill="none" stroke="black" />
                             <text x="150" y="15" text-anchor="middle">Canvas (400x400)</text>
                             <rect x="50" y="20" width="200" height="100" fill="cyan" />
                             <text x="150" y="75" text-anchor="middle" fill="white">Sky (400x250)</text>
