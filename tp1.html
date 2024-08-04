@@ -1,0 +1,93 @@
+<rect x="50" y="20" width="200" height="160" fill="none" stroke="black" />
+                            <text x="150" y="15" text-anchor="middle">Canvas (400x400)</text>
+                            <rect x="50" y="20" width="200" height="100" fill="cyan" />
+                            <text x="150" y="75" text-anchor="middle" fill="white">Sky (400x250)</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button id="prevBtn" class="nav-button" onclick="navigate(-1)" disabled>Previous</button>
+                <button id="nextBtn" class="nav-button" onclick="navigate(1)">Next</button>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+                <div id="progress-text" class="progress-text">Step 1 of 13</div>
+            </div>
+
+            <a href="tp2.html" class="next-step-button">
+                Next Step
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 13;
+
+        function navigate(direction) {
+            const prevStep = document.getElementById(`step${currentStep}`);
+            currentStep += direction;
+            const nextStep = document.getElementById(`step${currentStep}`);
+
+            prevStep.classList.remove('active');
+            nextStep.classList.add('active');
+
+            updateButtons();
+            updateProgressBar();
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentStep === 1;
+            document.getElementById('nextBtn').disabled = currentStep === totalSteps;
+        }
+
+        function updateProgressBar() {
+            const progress = (currentStep - 1) / (totalSteps - 1) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+            document.getElementById('progress-text').textContent = `Step ${currentStep} of ${totalSteps}`;
+        }
+
+        function setupCanvases() {
+            const canvas = document.getElementById('step1-canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = 'cyan';
+                ctx.fillRect(0, 0, 400, 250);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCanvases();
+            updateProgressBar();
+        });
+
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        function setActiveLink() {
+            var path = window.location.pathname;
+            var page = path.split("/").pop();
+            page = page.replace('.html', '');
+            var linkId = page + '-link';
+            var activeLink = document.getElementById(linkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+        setActiveLink();
+    </script>
+</body>
+</html>
