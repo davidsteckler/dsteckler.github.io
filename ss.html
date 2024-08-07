@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracy's World - Stretched Slinky</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #canvas {
+            border: 1px solid #ccc;
+            display: block;
+            margin: 0 auto;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .interactive-description {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .interactive-description span {
+            cursor: pointer;
+            color: #3498db;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html" class="active">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>Tracy's World - Stretched Slinky</h2>
+        <p>Experiment with the Tracy Python activity by adjusting the sliders below. See how changing the circle size and forward distance affects the stretched slinky shape!</p>
+        
+        <canvas id="canvas" width="400" height="400"></canvas>
+        
+        <div class="controls">
+            <div class="slider-container">
+                <label for="circleSize" class="tooltip">Circle Size
+                    <span class="tooltiptext">Adjusts the radius of each circle in the slinky. In Tracy, this is set using circle(size).</span>
+                </label>
+                <input type="range" id="circleSize" min="10" max="60" value="35">
+                <span id="circleSizeValue">35</span>
+            </div>
+            <div class="slider-container">
+                <label for="forwardDistance" class="tooltip">Forward Distance
+                    <span class="tooltiptext">Sets the distance Tracy moves forward between circles. In Tracy, this is set using forward(distance).</span>
+                </label>
+                <input type="range" id="forwardDistance" min="10" max="70" value="40">
+                <span id="forwardDistanceValue">40</span>
+            </div>
+        </div>
+        
+        <div class="interactive-description">
+            <p>Tracy starts at the <span class="tooltip">center<span class="tooltiptext">The center of the grid (0, 0)</span></span> of the grid, facing <span class="tooltip">east<span class="tooltiptext">To the right of the screen</span></span>. She then:</p>
+            <ol>
+                <li><span class="tooltip">Draws a circle<span class="tooltiptext">Using the circle(size) command</span></span> clockwise, starting and ending at the bottom of the circle.</li>
+                <li><span class="tooltip">Moves forward<span class="tooltiptext">Using the forward(distance) command</span></span> to the starting point of the next circle.</li>
+                <li>Repeats this process for each circle in the slinky.</li>
+            </ol>
+            <p>Try adjusting the sliders to see how changing the <span class="tooltip">circle size<span class="tooltiptext">This affects the radius of each circle</span></span> and <span class="tooltip">forward distance<span class="tooltiptext">This changes the space between circles</span></span> impacts the slinky's shape!</p>
+        </div>
+
+        <h3>Python Code:</h3>
+        <pre id="pythonCode">
+circle(35)
+forward(40)
+circle(35)
+forward(40)
+circle(35)
+forward(40)
+circle(35)
+forward(40)
+circle(35)
+forward(40)</pre>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const circleSizeSlider = document.getElementById('circleSize');
+        const forwardDistanceSlider = document.getElementById('forwardDistance');
+        const circleSizeValue = document.getElementById('circleSizeValue');
+        const forwardDistanceValue = document.getElementById('forwardDistanceValue');
+        const pythonCode = document.getElementById('pythonCode');
+
+        function drawSlinky() {
+            const circleSize = parseInt(circleSizeSlider.value);
+            const forwardDistance = parseInt(forwardDistanceSlider.value);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            
+            // Start from the center (0, 0) in Tracy's world
+            let x = canvas.width / 2;
+            let y = canvas.height / 2;
+
+            ctx.moveTo(x, y + circleSize);
+
+            for (let i = 0; i < 5; i++) {
+                // Draw circle clockwise
+                ctx.arc(x, y, circleSize, Math.PI / 2, Math.PI * 2.5, false);
+                
+                // Move to the right (east)
+                x += forwardDistance;
+                
+                // Move to the bottom of the next circle
+                ctx.lineTo(x, y + circleSize);
+            }
+
+            ctx.stroke();
+
+            circleSizeValue.textContent = circleSize;
+            forwardDistanceValue.textContent = forwardDistance;
+
+            pythonCode.textContent = `circle(${circleSize})
+forward(${forwardDistance})
+circle(${circleSize})
+forward(${forwardDistance})
+circle(${circleSize})
+forward(${forwardDistance})
+circle(${circleSize})
+forward(${forwardDistance})
+circle(${circleSize})
+forward(${forwardDistance})`;
+        }
+
+        circleSizeSlider.addEventListener('input', drawSlinky);
+        forwardDistanceSlider.addEventListener('input', drawSlinky);
+
+        drawSlinky();
+    </script>
+</body>
+</html>
