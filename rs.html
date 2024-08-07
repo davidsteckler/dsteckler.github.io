@@ -61,34 +61,54 @@
             background-color: rgba(255, 255, 255, 0.5);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        #canvas {
-            border: 1px solid #ccc;
-            display: block;
-            margin: 0 auto;
-        }
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 10px;
-        }
         .requirements {
             background-color: #e6f7ff;
             border-left: 5px solid #1890ff;
             padding: 10px;
             margin-bottom: 20px;
         }
-        #pythonCode {
-            background-color: #f0f0f0;
+        .example {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
             padding: 10px;
+            background-color: #f0f0f0;
             border-radius: 5px;
-            white-space: pre-wrap;
+        }
+        .example pre {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .example svg {
+            flex: 1;
+            max-width: 200px;
+            height: auto;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
@@ -109,7 +129,7 @@
     <div class="container">
         <h2>Tracy's World - Remixed Slinky Project</h2>
         
-        <p>Create a unique slinky design using Tracy's <code>circle</code> and <code>forward</code> commands. Your task: craft a pattern that fits within Tracy's 400x400 grid.</p>
+        <p>Create a unique slinky design using Tracy's <code>circle</code> and <code>forward</code> commands. Your task: craft a <span class="tooltip">pattern<span class="tooltiptext">A repeated or recurring sequence in your design</span></span> that fits within Tracy's 400x400 grid.</p>
 
         <div class="requirements">
             <h3>Project Requirements:</h3>
@@ -119,100 +139,58 @@
                 <li>Use at least 5 <code>forward</code> commands</li>
                 <li>Use at least 2 different forward distances</li>
                 <li>Keep your design within the 400x400 grid</li>
-                <li>Create a clear rhythm in your design</li>
+                <li>Create a clear <span class="tooltip">rhythm<span class="tooltiptext">A regular, repeated pattern of shapes or movements in your design</span></span> in your design</li>
             </ul>
         </div>
 
-        <h3>Interactive Example:</h3>
-        <canvas id="canvas" width="400" height="400"></canvas>
-        
-        <div class="controls">
-            <div class="slider-container">
-                <label for="circle1">Circle 1 Size</label>
-                <input type="range" id="circle1" min="10" max="60" value="10">
-                <span id="circle1Value">10</span>
-            </div>
-            <div class="slider-container">
-                <label for="forward1">Forward 1 Distance</label>
-                <input type="range" id="forward1" min="10" max="70" value="20">
-                <span id="forward1Value">20</span>
-            </div>
-            <!-- Repeat for circles 2-6 and forwards 2-5 -->
+        <h3>Example Designs:</h3>
+
+        <div class="example">
+            <pre>
+circle(50)
+forward(30)
+circle(40)
+forward(40)
+circle(30)
+forward(50)
+circle(20)
+forward(60)
+circle(30)
+forward(50)
+circle(40)
+forward(40)
+            </pre>
+            <svg viewBox="0 0 400 400" width="200" height="200">
+                <path d="M200 175 A50 50 0 1 1 200 275 L230 275 A40 40 0 1 1 230 355 L270 355 A30 30 0 1 1 270 415 L330 415 A20 20 0 1 1 330 455 L380 455 A30 30 0 1 1 380 515 L330 515 A40 40 0 1 1 330 595" fill="none" stroke="black" stroke-width="2"/>
+            </svg>
         </div>
-        
-        <h3>Python Code:</h3>
-        <pre id="pythonCode"></pre>
+
+        <div class="example">
+            <pre>
+circle(10)
+forward(20)
+circle(20)
+forward(30)
+circle(30)
+forward(40)
+circle(40)
+forward(50)
+circle(50)
+forward(60)
+circle(60)
+forward(70)
+            </pre>
+            <svg viewBox="0 0 400 400" width="200" height="200">
+                <path d="M200 200 A10 10 0 1 1 200 220 L220 220 A20 20 0 1 1 220 260 L250 260 A30 30 0 1 1 250 320 L290 320 A40 40 0 1 1 290 400 L340 400 A50 50 0 1 1 340 500 L400 500 A60 60 0 1 1 400 620" fill="none" stroke="black" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <p>These examples show possible design approaches. Your task is to create your own unique pattern using the required commands.</p>
+
     </div>
 
     <footer>
         <p>&copy; 2024 David Steckler. All rights reserved.</p>
     </footer>
-
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const pythonCode = document.getElementById('pythonCode');
-
-        function updateSliderValue(sliderId) {
-            const slider = document.getElementById(sliderId);
-            const valueSpan = document.getElementById(sliderId + 'Value');
-            valueSpan.textContent = slider.value;
-        }
-
-        function drawSlinky() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            
-            let x = 0;
-            let y = canvas.height;
-
-            for (let i = 1; i <= 6; i++) {
-                const circleSize = parseInt(document.getElementById('circle' + i).value);
-                ctx.arc(x, y, circleSize, Math.PI, 0, false);
-                x += circleSize;
-                
-                if (i < 6) {
-                    const forwardDistance = parseInt(document.getElementById('forward' + i).value);
-                    x += forwardDistance;
-                }
-            }
-
-            ctx.stroke();
-
-            updatePythonCode();
-        }
-
-        function updatePythonCode() {
-            let code = "";
-            for (let i = 1; i <= 6; i++) {
-                const circleSize = document.getElementById('circle' + i).value;
-                code += `circle(${circleSize})\n`;
-                if (i < 6) {
-                    const forwardDistance = document.getElementById('forward' + i).value;
-                    code += `forward(${forwardDistance})\n`;
-                }
-            }
-            pythonCode.textContent = code;
-        }
-
-        // Set up event listeners for all sliders
-        for (let i = 1; i <= 6; i++) {
-            const circleSlider = document.getElementById('circle' + i);
-            circleSlider.addEventListener('input', () => {
-                updateSliderValue('circle' + i);
-                drawSlinky();
-            });
-            
-            if (i < 6) {
-                const forwardSlider = document.getElementById('forward' + i);
-                forwardSlider.addEventListener('input', () => {
-                    updateSliderValue('forward' + i);
-                    drawSlinky();
-                });
-            }
-        }
-
-        drawSlinky();
-    </script>
 </body>
 </html>
