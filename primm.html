@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIMM Spaced Repetition Game</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        #game-container {
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        #code-display {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            position: relative;
+        }
+        .highlight {
+            background-color: yellow;
+            position: absolute;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        #question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #d0d0d0;
+        }
+        .option.selected {
+            background-color: #3498db;
+            color: white;
+        }
+        #feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        #feedback.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        #feedback.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        #next-btn, #reset-btn, #check-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #next-btn:hover, #reset-btn:hover, #check-btn:hover {
+            background-color: #2980b9;
+        }
+        #visual-output {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .turtle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid green;
+            transition: all 0.5s;
+        }
+        .circle {
+            position: absolute;
+            border: 2px solid blue;
+            border-radius: 50%;
+            transition: all 0.5s;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        #progress {
+            width: 0;
+            height: 20px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>PRIMM Spaced Repetition Game</h1>
+        <p>Welcome to the PRIMM game! Learn computer science concepts through the PRIMM approach: 
+            <span class="tooltip">Predict<span class="tooltiptext">Guess what the code will do</span></span>, 
+            <span class="tooltip">Run<span class="tooltiptext">Execute the code and observe the results</span></span>, 
+            <span class="tooltip">Investigate<span class="tooltiptext">Explore how the code works</span></span>, 
+            <span class="tooltip">Modify<span class="tooltiptext">Change the code to achieve different results</span></span>, and 
+            <span class="tooltip">Make<span class="tooltiptext">Create your own code from scratch</span></span>.
+        </p>
+        <div id="game-container">
+            <div id="progress-bar"><div id="progress"></div></div>
+            <div id="code-display"></div>
+            <div id="visual-output"></div>
+            <div id="question"></div>
+            <div id="options"></div>
+            <button id="check-btn" style="display: none;">Check Answer</button>
+            <div id="feedback"></div>
+            <button id="next-btn" style="display: none;">Next</button>
+            <button id="reset-btn">Reset Game</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                code: `circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)`,
+                question: "What shape will this code create?",
+                options: [
+                    "A straight line",
+                    "A spiral",
+                    "A stretched slinky",
+                    "A square"
+                ],
+                correctAnswer: 2,
+                explanation: "This code creates a stretched slinky shape. It repeatedly draws a circle with radius 35, then moves forward by 20 units. This pattern creates a series of connected circles, resembling a stretched slinky.",
+                stage: "Predict",
+                highlight: [[0, 10], [11, 22], [23, 33], [34, 45], [46, 56], [57, 68], [69, 79], [80, 91], [92, 102], [103, 114]]
+            },
+            {
+                code: `circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)`,
+                question: "How many circles will be drawn by this code?",
+                options: [
+                    "3",
+                    "4",
+                    "5",
+                    "6"
+                ],
+                correctAnswer: 2,
+                explanation: "This code draws 5 circles. Each `circle(35)` command creates one circle, and there are 5 such commands in the code.",
+                stage: "Investigate",
+                highlight: [[0, 10], [23, 33], [46, 56], [69, 79], [92, 102]]
+            },
+            {
+                code: `circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)
+circle(35)
+forward(20)`,
+                question: "How would you modify this code to make the slinky longer?",
+                options: [
+                    "Increase the number in circle()",
+                    "Decrease the number in forward()",
+                    "Increase the number in forward()",
+                    "Add more circle() and forward() pairs"
+                ],
+                correctAnswer: 2,
+                explanation: "To make the slinky longer, you should increase the number in forward(). This will create more space between each circle, stretching out the slinky. Increasing the number in circle() would make the circles larger, not the slinky longer. Decreasing the number in forward() would compress the slinky.",
+                stage: "Modify",
+                highlight: [[11, 22], [34, 45], [57, 68], [80, 91], [103, 114]]
+            },
+            {
+                code: `# Create a similar pattern but make the circles bigger
+circle(70)
+forward(20)
+circle(70)
+forward(20)
+circle(70)
+forward(20)
+circle(70)
+forward(20)
+circle(70)
+forward(20)`,
+                question: "What effect will this modification have on the slinky?",
+                options: [
+                    "It will make the slinky longer",
+                    "It will make the slinky shorter",
+                    "It will make the circles in the slinky larger",
+                    "It will have no effect on the slinky"
+                ],
+                correctAnswer: 2,
+                explanation: "This modification will make the circles in the slinky larger. By changing circle(35) to circle(70), we've doubled the radius of each circle. The forward distance remains the same, so the overall length of the slinky won't change significantly, but each circle will be much bigger.",
+                stage: "Make",
+                highlight: [[38, 48], [61, 71], [84, 94], [107, 117], [130, 140]]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            const codeDisplay = document.getElementById('code-display');
+            codeDisplay.textContent = question.code;
+            
+            // Add highlights
+            codeDisplay.innerHTML = '';
+            let lastIndex = 0;
+            question.highlight.forEach(([start, end]) => {
+                codeDisplay.appendChild(document.createTextNode(question.code.substring(lastIndex, start)));
+                const highlight = document.createElement('span');
+                highlight.className = 'highlight';
+                highlight.textContent = question.code.substring(start, end);
+                codeDisplay.appendChild(highlight);
+                lastIndex = end;
+            });
+            codeDisplay.appendChild(document.createTextNode(question.code.substring(lastIndex)));
+
+            document.getElementById('question').textContent = `[${question.stage}] ${question.question}`;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.classList.add('option');
+                button.onclick = () => selectOption(index);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('check-btn').style.display = 'inline-block';
+            
+            // Clear previous visual output
+            document.getElementById('visual-output').innerHTML = '';
+
+            // Update progress bar
+            updateProgressBar();
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+        }
+
+        function checkAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedOption = document.querySelector('.option.selected');
+            if (!selectedOption) {
+                alert("Please select an answer before checking.");
+                return;
+            }
+
+            const selectedIndex = Array.from(selectedOption.parentNode.children).indexOf(selectedOption);
+            const feedbackElement = document.getElementById('feedback');
+            
+            if (selectedIndex === question.correctAnswer) {
+                feedbackElement.textContent = `Correct! ${question.explanation}`;
+                feedbackElement.className = 'correct';
+                score++;
+            } else {
+                feedbackElement.textContent = `Incorrect. ${question.explanation}`;
+                feedbackElement.className = 'incorrect';
+            }
+
+            feedbackElement.style.display = 'block';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            document.getElementById('check-btn').style.display = 'none';
+
+            // Visualize the code execution
+            visualizeCode(question.code);
+        }
+
+        function visualizeCode(code) {
+            const visualOutput = document.getElementById('visual-output');
+            visualOutput.innerHTML = '';
+            let x = 150, y = 150, angle = 0;
+            const turtle = document.createElement('div');
+            turtle.className = 'turtle';
+            turtle.style.left = `${x}px`;
+            turtle.style.top = `${y}px`;
+            visualOutput.appendChild(turtle);
+
+            const commands = code.split('\n');
+            commands.forEach((command, index) => {
+                setTimeout(() => {
+                    if (command.startsWith('circle')) {
+                        const radius = parseInt(command.match(/\d+/)[0]);
+                        const circle = document.createElement('div');
+                        circle.className = 'circle';
+                        circle.style.width = `${radius * 2}px`;
+                        circle.style.height = `${radius * 2}px`;
+                        circle.style.left = `${x - radius}px`;
+                        circle.style.top = `${y - radius}px`;
+                        visualOutput.appendChild(circle);
+                    } else if (command.startsWith('forward')) {
+                        const distance = parseInt(command.match(/\d+/)[0]);
+                        x += distance * Math.cos(angle);
+                        y += distance * Math.sin(angle);
+                        turtle.style.left = `${x}px`;
+                        turtle.style.top = `${y}px`;
+                    }
+                }, index * 500);
+            });
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            const gameContainer = document.getElementById('game-container');
+            gameContainer.innerHTML = `
+                <h2>Game Over!</h2>
+                <p>Your score: ${score} out of ${questions.length}</p>
+                <button id="reset-btn" onclick="resetGame()">Play Again</button>
+            `;
+        }
+
+        function resetGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            questions.sort(() => Math.random() - 0.5);
+            displayQuestion();
+        }
+
+        function updateProgressBar() {
+            const progress = document.getElementById('progress');
+            const percentage = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progress.style.width = `${percentage}%`;
+            progress.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+        }
+
+        document.getElementById('check-btn').addEventListener('click', checkAnswer);
+        document.getElementById('next-btn').addEventListener('click', nextQuestion);
+        document.getElementById('reset-btn').addEventListener('click', resetGame);
+
+        // Initialize the game
+        resetGame();
+
+        // Menu toggle functionality
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        // Function to set active link
+        function setActiveLink() {
+            var path = window.location.pathname;
+            var page = path.split("/").pop();
+            page = page.replace('.html', '');
+            var linkId = page + '-link';
+            var activeLink = document.getElementById(linkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        // Call the function to set the active link
+        setActiveLink();
+    </script>
+</body>
+</html>
