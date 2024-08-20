@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Shortcuts - David Steckler</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: #fff;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            z-index: 1;
+        }
+        .menu a {
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .menu a:hover {
+            background-color: #f1f1f1;
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        /* Additional styles for the keyboard shortcuts page */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .category {
+            cursor: pointer;
+            background-color: #e6e6e6;
+        }
+        .shortcut-row {
+            display: none;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .try-it {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            margin: 2px 2px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+            <a href="ks.html" id="ks-link" class="active">Keyboard Shortcuts</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Useful Keyboard Shortcuts for 7th Grade Computer Science</h1>
+        <p>Discover and practice essential keyboard shortcuts to boost your productivity and efficiency while working on your computer. Click on a category to expand it and see the shortcuts. Hover over the shortcut descriptions for more information, and use the "Try it" button to practice!</p>
+        
+        <table id="shortcutsTable">
+            <tr>
+                <th>Category</th>
+                <th>Shortcut</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+            <!-- Table content will be dynamically populated by JavaScript -->
+        </table>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Menu toggle functionality
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        // Keyboard shortcuts data
+        const shortcuts = [
+            {
+                category: "Text Editing",
+                shortcuts: [
+                    { keys: "Ctrl + C", description: "Copy selected text", tooltip: "Copies the selected text to the clipboard" },
+                    { keys: "Ctrl + X", description: "Cut selected text", tooltip: "Cuts the selected text and copies it to the clipboard" },
+                    { keys: "Ctrl + V", description: "Paste text", tooltip: "Pastes text from the clipboard" },
+                    { keys: "Ctrl + Z", description: "Undo last action", tooltip: "Reverses the last action you performed" },
+                    { keys: "Ctrl + Y", description: "Redo last action", tooltip: "Redoes the last undone action" },
+                    { keys: "Ctrl + A", description: "Select all", tooltip: "Selects all text or items in the current window" }
+                ]
+            },
+            {
+                category: "Navigation",
+                shortcuts: [
+                    { keys: "Home", description: "Move to beginning of line", tooltip: "Moves the cursor to the start of the current line" },
+                    { keys: "End", description: "Move to end of line", tooltip: "Moves the cursor to the end of the current line" },
+                    { keys: "Ctrl + Home", description: "Move to beginning of document", tooltip: "Moves the cursor to the start of the document" },
+                    { keys: "Ctrl + End", description: "Move to end of document", tooltip: "Moves the cursor to the end of the document" },
+                    { keys: "Ctrl + Left/Right Arrow", description: "Move by word", tooltip: "Moves the cursor one word left or right" }
+                ]
+            },
+            {
+                category: "Window Management",
+                shortcuts: [
+                    { keys: "Windows + Left/Right Arrow", description: "Snap window to left/right", tooltip: "Snaps the current window to the left or right half of the screen" },
+                    { keys: "Windows + Up Arrow", description: "Maximize window", tooltip: "Maximizes the current window" },
+                    { keys: "Windows + Down Arrow", description: "Minimize window", tooltip: "Minimizes the current window" },
+                    { keys: "Alt + Tab", description: "Switch between open windows", tooltip: "Allows you to quickly switch between open applications" }
+                ]
+            },
+            {
+                category: "File Management",
+                shortcuts: [
+                    { keys: "Ctrl + S", description: "Save current file", tooltip: "Saves the changes in the current file" },
+                    { keys: "Ctrl + O", description: "Open file", tooltip: "Opens the file dialog to select and open a file" },
+                    { keys: "Ctrl + N", description: "New file", tooltip: "Creates a new file or document" },
+                    { keys: "Ctrl + W", description: "Close current window", tooltip: "Closes the current window or tab" }
+                ]
+            }
+        ];
+
+        // Populate table with shortcuts
+        const table = document.getElementById('shortcutsTable');
+        shortcuts.forEach(category => {
+            const categoryRow = table.insertRow();
+            categoryRow.className = 'category';
+            categoryRow.insertCell().innerHTML = `<strong>${category.category}</strong>`;
+            categoryRow.insertCell().colSpan = 3;
+            
+            category.shortcuts.forEach(shortcut => {
+                const row = table.insertRow();
+                row.className = 'shortcut-row';
+                row.insertCell(); // Empty cell for indentation
+                row.insertCell().textContent = shortcut.keys;
+                row.insertCell().innerHTML = `
+                    <span class="tooltip">
+                        ${shortcut.description}
+                        <span class="tooltiptext">${shortcut.tooltip}</span>
+                    </span>`;
+                row.insertCell().innerHTML = `<button class="try-it" onclick="tryShortcut('${shortcut.keys}')">Try it</button>`;
+            });
+        });
+
+        // Toggle category visibility
+        document.querySelectorAll('.category').forEach(row => {
+            row.addEventListener('click', () => {
+                let current = row.nextElementSibling;
+                while (current && current.classList.contains('shortcut-row')) {
+                    current.style.display = current.style.display === 'none' ? 'table-row' : 'none';
+                    current = current.nextElementSibling;
+                }
+            });
+        });
+
+        // Function to simulate trying a shortcut
+        function tryShortcut(keys) {
+            alert(`Great job! You just practiced the "${keys}" shortcut. Keep using it to build muscle memory!`);
+        }
+    </script>
+</body>
+</html>
