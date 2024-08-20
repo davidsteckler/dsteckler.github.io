@@ -117,33 +117,88 @@
                 color: #fff;
             }
         }
-        /* Additional styles for the keyboard shortcuts page */
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .shortcut-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .shortcut-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .shortcut-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .key {
+            display: inline-block;
+            background-color: #e0e0e0;
+            border: 1px solid #999;
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-family: monospace;
+        }
+        .interactive-area {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
             margin-bottom: 20px;
         }
-        th, td {
-            border: 1px solid #ddd;
+        #textInput {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
             padding: 10px;
-            text-align: left;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
-        th {
-            background-color: #f2f2f2;
+        .highlight {
+            background-color: #e7f5ff;
+        }
+        #shortcutChallenge {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        #challengeInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #challengeResult {
             font-weight: bold;
         }
-        .category {
-            cursor: pointer;
-            background-color: #e6e6e6;
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 20px;
         }
-        .shortcut-row {
-            display: none;
+        #progressBar {
+            width: 0;
+            height: 20px;
+            background-color: #3498db;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
         }
+
+        /* New styles for tooltips */
         .tooltip {
             position: relative;
             display: inline-block;
             cursor: help;
         }
+
         .tooltip .tooltiptext {
             visibility: hidden;
             width: 200px;
@@ -160,22 +215,50 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
+
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
         }
-        .try-it {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 12px;
-            margin: 2px 2px;
+
+        /* Style for categories */
+        .category-header {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* Styles for dropdown menus */
+        .dropdown {
+            margin-top: 20px;
             cursor: pointer;
-            border-radius: 3px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-weight: bold;
+            position: relative;
+        }
+        .dropdown::after {
+            content: '▼';
+            font-size: 12px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .dropdown-content {
+            display: none;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .dropdown.active .dropdown-content {
+            display: block;
         }
     </style>
 </head>
@@ -196,18 +279,44 @@
     </header>
 
     <div class="container">
-        <h1>Useful Keyboard Shortcuts for 7th Grade Computer Science</h1>
-        <p>Discover and practice essential keyboard shortcuts to boost your productivity and efficiency while working on your computer. Click on a category to expand it and see the shortcuts. Hover over the shortcut descriptions for more information, and use the "Try it" button to practice!</p>
+        <h1>Essential Keyboard Shortcuts for Computer Science</h1>
+        <p>Discover and practice essential keyboard shortcuts to boost your productivity and efficiency while working on your computer. These shortcuts are particularly useful for 7th-grade computer science students.</p>
         
-        <table id="shortcutsTable">
-            <tr>
-                <th>Category</th>
-                <th>Shortcut</th>
-                <th>Description</th>
-                <th>Action</th>
-            </tr>
-            <!-- Table content will be dynamically populated by JavaScript -->
-        </table>
+        <div class="dropdown">
+            PC Shortcuts
+            <div class="dropdown-content">
+                <div class="shortcut-container" id="pcShortcuts">
+                    <!-- PC shortcuts will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            Mac Shortcuts
+            <div class="dropdown-content">
+                <div class="shortcut-container" id="macShortcuts">
+                    <!-- Mac shortcuts will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <h2>Interactive Shortcut Practice Area</h2>
+        <div class="interactive-area">
+            <p>Type or paste some text in the box below and try out the shortcuts!</p>
+            <textarea id="textInput" placeholder="Type or paste your text here..."></textarea>
+            <p>Selected text: <span id="selectedText">None</span></p>
+            <p>Last action: <span id="lastAction">None</span></p>
+        </div>
+
+        <div id="shortcutChallenge">
+            <h3>Shortcut Challenge</h3>
+            <p id="challengePrompt">Can you perform this action?</p>
+            <input type="text" id="challengeInput" placeholder="Type your answer here...">
+            <p id="challengeResult"></p>
+            <div class="progress-container">
+                <div id="progressBar"></div>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -215,91 +324,186 @@
     </footer>
 
     <script>
-        // Menu toggle functionality
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('nav').classList.toggle('active');
         });
 
-        // Keyboard shortcuts data
-        const shortcuts = [
-            {
-                category: "Text Editing",
-                shortcuts: [
-                    { keys: "Ctrl + C", description: "Copy selected text", tooltip: "Copies the selected text to the clipboard" },
-                    { keys: "Ctrl + X", description: "Cut selected text", tooltip: "Cuts the selected text and copies it to the clipboard" },
-                    { keys: "Ctrl + V", description: "Paste text", tooltip: "Pastes text from the clipboard" },
-                    { keys: "Ctrl + Z", description: "Undo last action", tooltip: "Reverses the last action you performed" },
-                    { keys: "Ctrl + Y", description: "Redo last action", tooltip: "Redoes the last undone action" },
-                    { keys: "Ctrl + A", description: "Select all", tooltip: "Selects all text or items in the current window" }
-                ]
-            },
-            {
-                category: "Navigation",
-                shortcuts: [
-                    { keys: "Home", description: "Move to beginning of line", tooltip: "Moves the cursor to the start of the current line" },
-                    { keys: "End", description: "Move to end of line", tooltip: "Moves the cursor to the end of the current line" },
-                    { keys: "Ctrl + Home", description: "Move to beginning of document", tooltip: "Moves the cursor to the start of the document" },
-                    { keys: "Ctrl + End", description: "Move to end of document", tooltip: "Moves the cursor to the end of the document" },
-                    { keys: "Ctrl + Left/Right Arrow", description: "Move by word", tooltip: "Moves the cursor one word left or right" }
-                ]
-            },
-            {
-                category: "Window Management",
-                shortcuts: [
-                    { keys: "Windows + Left/Right Arrow", description: "Snap window to left/right", tooltip: "Snaps the current window to the left or right half of the screen" },
-                    { keys: "Windows + Up Arrow", description: "Maximize window", tooltip: "Maximizes the current window" },
-                    { keys: "Windows + Down Arrow", description: "Minimize window", tooltip: "Minimizes the current window" },
-                    { keys: "Alt + Tab", description: "Switch between open windows", tooltip: "Allows you to quickly switch between open applications" }
-                ]
-            },
-            {
-                category: "File Management",
-                shortcuts: [
-                    { keys: "Ctrl + S", description: "Save current file", tooltip: "Saves the changes in the current file" },
-                    { keys: "Ctrl + O", description: "Open file", tooltip: "Opens the file dialog to select and open a file" },
-                    { keys: "Ctrl + N", description: "New file", tooltip: "Creates a new file or document" },
-                    { keys: "Ctrl + W", description: "Close current window", tooltip: "Closes the current window or tab" }
-                ]
-            }
+        const pcShortcuts = [
+            { keys: "Ctrl + C", description: "Copy selected text", tooltip: "Copies the selected text to the clipboard" },
+            { keys: "Ctrl + V", description: "Paste text", tooltip: "Pastes text from the clipboard" },
+            { keys: "Ctrl + X", description: "Cut selected text", tooltip: "Cuts the selected text and copies it to the clipboard" },
+            { keys: "Ctrl + Z", description: "Undo last action", tooltip: "Reverses the last action you performed" },
+            { keys: "Ctrl + A", description: "Select all", tooltip: "Selects all text or items in the current context" },
+            { keys: "Ctrl + W", description: "Close current window", tooltip: "Closes the current window or tab" },
+            { keys: "Alt + Tab", description: "Switch between open apps", tooltip: "Quickly switch between open applications" },
+            { keys: "Alt + F4", description: "Close current app", tooltip: "Closes the current app or window" },
+            { keys: "Windows + D", description: "Show/Hide desktop", tooltip: "Minimizes all windows to show the desktop" },
+            { keys: "Windows + Left Arrow", description: "Snap window to the left", tooltip: "Snaps the current window to the left half of the screen" },
+            { keys: "Windows + Right Arrow", description: "Snap window to the right", tooltip: "Snaps the current window to the right half of the screen" },
+            { keys: "Windows + Tab", description: "Open Task View", tooltip: "Opens the Task View to switch between apps" },
+            { keys: "F10", description: "Activate menu bar in app", tooltip: "Activates the menu bar in the current application" },
+            { keys: "F11", description: "Toggle fullscreen mode", tooltip: "Toggles fullscreen mode on and off" },
+            { keys: "Ctrl + Shift + Esc", description: "Open Task Manager", tooltip: "Opens the Windows Task Manager" },
+            { keys: "Ctrl + Tab", description: "Move forward through tabs", tooltip: "Moves forward through tabs in a dialog or browser" },
+            { keys: "Ctrl + Shift + Tab", description: "Move backward through tabs", tooltip: "Moves backward through tabs in a dialog or browser" }
         ];
 
-        // Populate table with shortcuts
-        const table = document.getElementById('shortcutsTable');
-        shortcuts.forEach(category => {
-            const categoryRow = table.insertRow();
-            categoryRow.className = 'category';
-            categoryRow.insertCell().innerHTML = `<strong>${category.category}</strong>`;
-            categoryRow.insertCell().colSpan = 3;
-            
-            category.shortcuts.forEach(shortcut => {
-                const row = table.insertRow();
-                row.className = 'shortcut-row';
-                row.insertCell(); // Empty cell for indentation
-                row.insertCell().textContent = shortcut.keys;
-                row.insertCell().innerHTML = `
-                    <span class="tooltip">
-                        ${shortcut.description}
-                        <span class="tooltiptext">${shortcut.tooltip}</span>
-                    </span>`;
-                row.insertCell().innerHTML = `<button class="try-it" onclick="tryShortcut('${shortcut.keys}')">Try it</button>`;
-            });
-        });
+        const macShortcuts = [
+            { keys: "Command + C", description: "Copy selected text", tooltip: "Copies the selected text to the clipboard" },
+            { keys: "Command + V", description: "Paste text", tooltip: "Pastes text from the clipboard" },
+            { keys: "Command + X", description: "Cut selected text", tooltip: "Cuts the selected text and copies it to the clipboard" },
+            { keys: "Command + Z", description: "Undo last action", tooltip: "Reverses the last action you performed" },
+            { keys: "Command + A", description: "Select all", tooltip: "Selects all text or items in the current context" },
+            { keys: "Command + W", description: "Close current window", tooltip: "Closes the current window or tab" },
+            { keys: "Command + Tab", description: "Switch between open apps", tooltip: "Quickly switch between open applications" },
+            { keys: "Command + Option + Esc", description: "Force Quit Applications", tooltip: "Opens the Force Quit Applications window" },
+            { keys: "Command + F", description: "Find", tooltip: "Opens the find dialog to search for text" },
+            { keys: "Command + Shift + F", description: "Enter Fullscreen Mode", tooltip: "Enters fullscreen mode in the current application" },
+            { keys: "F10", description: "Mute/Unmute", tooltip: "Mutes or unmutes the system volume" },
+            { keys: "F11", description: "Lower volume", tooltip: "Lowers the system volume" },
+            { keys: "F12", description: "Raise volume", tooltip: "Raises the system volume" },
+            { keys: "Control + Tab", description: "Move forward through tabs", tooltip: "Moves forward through tabs in a dialog or browser" },
+            { keys: "Control + Shift + Tab", description: "Move backward through tabs", tooltip: "Moves backward through tabs in a dialog or browser" }
+        ];
 
-        // Toggle category visibility
-        document.querySelectorAll('.category').forEach(row => {
-            row.addEventListener('click', () => {
-                let current = row.nextElementSibling;
-                while (current && current.classList.contains('shortcut-row')) {
-                    current.style.display = current.style.display === 'none' ? 'table-row' : 'none';
-                    current = current.nextElementSibling;
-                }
-            });
-        });
-
-        // Function to simulate trying a shortcut
-        function tryShortcut(keys) {
-            alert(`Great job! You just practiced the "${keys}" shortcut. Keep using it to build muscle memory!`);
+        function createShortcutCard(shortcut) {
+            const card = document.createElement('div');
+            card.className = 'shortcut-card';
+            card.innerHTML = `
+                <h3>${shortcut.description}</h3>
+                <p class="tooltip">
+                    <span class="key">${shortcut.keys}</span>
+                    <span class="tooltiptext">${shortcut.tooltip}</span>
+                </p>
+            `;
+            return card;
         }
+
+        const pcShortcutsContainer = document.getElementById('pcShortcuts');
+        const macShortcutsContainer = document.getElementById('macShortcuts');
+
+        pcShortcuts.forEach(shortcut => {
+            pcShortcutsContainer.appendChild(createShortcutCard(shortcut));
+        });
+
+        macShortcuts.forEach(shortcut => {
+            macShortcutsContainer.appendChild(createShortcutCard(shortcut));
+        });
+
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            dropdown.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+
+        const textInput = document.getElementById('textInput');
+        const selectedTextSpan = document.getElementById('selectedText');
+        const lastActionSpan = document.getElementById('lastAction');
+
+        textInput.addEventListener('select', function() {
+            selectedTextSpan.textContent = this.value.substring(this.selectionStart, this.selectionEnd) || 'None';
+        });
+
+        textInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                selectedTextSpan.textContent = 'None';
+                lastActionSpan.textContent = 'None';
+            }
+        });
+
+        function flashLastAction() {
+            lastActionSpan.style.backgroundColor = '#e7f5ff';
+            setTimeout(() => {
+                lastActionSpan.style.backgroundColor = 'transparent';
+            }, 300);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {  // Check for both PC (Ctrl) and Mac (Command) keys
+                switch (e.key) {
+                    case 'c':
+                        lastActionSpan.textContent = 'Copied text';
+                        flashLastAction();
+                        break;
+                    case 'x':
+                        lastActionSpan.textContent = 'Cut text';
+                        flashLastAction();
+                        break;
+                    case 'v':
+                        lastActionSpan.textContent = 'Pasted text';
+                        flashLastAction();
+                        break;
+                    case 'z':
+                        lastActionSpan.textContent = 'Undo';
+                        flashLastAction();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        lastActionSpan.textContent = 'Saved (simulated)';
+                        flashLastAction();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        lastActionSpan.textContent = 'Find (simulated)';
+                        flashLastAction();
+                        break;
+                    case 'a':
+                        lastActionSpan.textContent = 'Selected all';
+                        flashLastAction();
+                        break;
+                    case 'w':
+                        lastActionSpan.textContent = 'Closed window';
+                        flashLastAction();
+                        break;
+                }
+            }
+        });
+
+        // Shortcut Challenge
+        const challengePrompt = document.getElementById('challengePrompt');
+        const challengeInput = document.getElementById('challengeInput');
+        const challengeResult = document.getElementById('challengeResult');
+        const progressBar = document.getElementById('progressBar');
+
+        let currentChallenge;
+        let challengesCompleted = 0;
+
+        function updateProgress() {
+            const progress = (challengesCompleted / 10) * 100; // 10 challenges to complete
+            progressBar.style.width = `${progress}%`;
+            if (challengesCompleted === 10) {
+                challengeResult.textContent = 'Congratulations! You\'ve mastered the keyboard shortcuts!';
+                challengeResult.style.color = 'green';
+                challengePrompt.textContent = 'Challenge completed!';
+                challengeInput.disabled = true;
+            }
+        }
+
+        function newChallenge() {
+            const allShortcuts = [...pcShortcuts, ...macShortcuts];
+            currentChallenge = allShortcuts[Math.floor(Math.random() * allShortcuts.length)];
+            challengePrompt.textContent = `What's the shortcut for "${currentChallenge.description}"?`;
+            challengeInput.value = '';
+            challengeResult.textContent = '';
+        }
+
+        challengeInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                if (this.value.toLowerCase() === currentChallenge.keys.toLowerCase()) {
+                    challengeResult.textContent = 'Correct! Great job!';
+                    challengeResult.style.color = 'green';
+                    challengesCompleted++;
+                    updateProgress();
+                    setTimeout(newChallenge, 1500);
+                } else {
+                    challengeResult.textContent = 'Not quite. Try again!';
+                    challengeResult.style.color = 'red';
+                }
+            }
+        });
+
+        // Initialize the first challenge
+        newChallenge();
     </script>
 </body>
 </html>
