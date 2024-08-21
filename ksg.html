@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Keyboard Shortcuts - David Steckler</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .keyboard-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(60, 1fr);
+            gap: 3px;
+            font-family: 'Arial', sans-serif;
+            font-size: 10px;
+        }
+        .key {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 2px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            grid-column: span 4;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px;
+            position: relative;
+        }
+        .key:hover {
+            background-color: #e0e0e0;
+        }
+        .key.highlight { background-color: #3498db; color: #fff; }
+        .key.pressed { background-color: #2980b9; color: #fff; }
+        .key.fn { grid-column: span 3; }
+        .key.wide { grid-column: span 6; }
+        .key.extra-wide { grid-column: span 8; }
+        .key.super-wide { grid-column: span 24; }
+        .row-gap { height: 5px; }
+        .key .secondary {
+            font-size: 8px;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            color: #555;
+        }
+        .shortcut-input {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .shortcut-input input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .shortcut-input button, .toggle-container button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .shortcut-input button:hover, .toggle-container button:hover {
+            background-color: #2980b9;
+        }
+        .stats {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .toggle-container button {
+            margin: 0 10px;
+        }
+        .active {
+            background-color: #2980b9;
+        }
+        /* Modal Styles */
+        #successModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        #modalContent {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        #modalContent h2 {
+            margin-bottom: 20px;
+        }
+        #modalContent p.shortcut {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        #modalContent p.description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        #modalContent button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #modalContent button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html" class="active">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>Learn Keyboard Shortcuts</h2>
+        <p>Practice common keyboard shortcuts to improve your productivity. Toggle between PC and Mac layouts and type the shortcut shown below:</p>
+        
+        <div class="toggle-container">
+            <button id="pcToggle" class="active">PC Layout</button>
+            <button id="macToggle">Mac Layout</button>
+        </div>
+
+        <div class="shortcut-input">
+            <input type="text" id="shortcutInput" placeholder="Type shortcut here" readonly>
+            <button id="nextShortcut">Next Shortcut</button>
+        </div>
+
+        <div class="keyboard-container">
+            <div class="keyboard" id="keyboard">
+                <!-- Keyboard will be dynamically generated here -->
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">Correct: <span id="correct">0</span></div>
+            <div class="stat-item">Time: <span id="time">0</span>s</div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal">
+        <div id="modalContent">
+            <h2>Great Job!</h2>
+            <p id="successMessage"></p>
+            <p class="shortcut" id="shortcutKeys"></p>
+            <p class="description" id="shortcutUsage"></p>
+            <button id="continueButton">Continue</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        const pcKeyboardLayout = [
+            [{ primary: 'Esc' }, { primary: 'F1' }, { primary: 'F2' }, { primary: 'F3' }, { primary: 'F4' }, { primary: 'F5' }, { primary: 'F6' }, { primary: 'F7' }, { primary: 'F8' }, { primary: 'F9' }, { primary: 'F10' }, { primary: 'F11' }, { primary: 'F12' }],
+            [{ primary: '`', secondary: '~' }, { primary: '1', secondary: '!' }, { primary: '2', secondary: '@' }, { primary: '3', secondary: '#' }, { primary: '4', secondary: '$' }, { primary: '5', secondary: '%' }, { primary: '6', secondary: '^' }, { primary: '7', secondary: '&' }, { primary: '8', secondary: '*' }, { primary: '9', secondary: '(' }, { primary: '0', secondary: ')' }, { primary: '-', secondary: '_' }, { primary: '=', secondary: '+' }, { primary: 'Backspace' }],
+            [{ primary: 'Tab' }, { primary: 'Q' }, { primary: 'W' }, { primary: 'E' }, { primary: 'R' }, { primary: 'T' }, { primary: 'Y' }, { primary: 'U' }, { primary: 'I' }, { primary: 'O' }, { primary: 'P' }, { primary: '[', secondary: '{' }, { primary: ']', secondary: '}' }, { primary: '\\', secondary: '|' }],
+            [{ primary: 'Caps Lock' }, { primary: 'A' }, { primary: 'S' }, { primary: 'D' }, { primary: 'F' }, { primary: 'G' }, { primary: 'H' }, { primary: 'J' }, { primary: 'K' }, { primary: 'L' }, { primary: ';', secondary: ':' }, { primary: '\'', secondary: '"' }, { primary: 'Enter' }],
+            [{ primary: 'Shift' }, { primary: 'Z' }, { primary: 'X' }, { primary: 'C' }, { primary: 'V' }, { primary: 'B' }, { primary: 'N' }, { primary: 'M' }, { primary: ',', secondary: '<' }, { primary: '.', secondary: '>' }, { primary: '/', secondary: '?' }, { primary: 'Shift' }],
+            [{ primary: 'Ctrl' }, { primary: 'Win' }, { primary: 'Alt' }, { primary: 'Space' }, { primary: 'Alt' }, { primary: 'Win' }, { primary: 'Menu' }, { primary: 'Ctrl' }]
+        ];
+
+        const macKeyboardLayout = [
+            [{ primary: 'Esc' }, { primary: 'F1' }, { primary: 'F2' }, { primary: 'F3' }, { primary: 'F4' }, { primary: 'F5' }, { primary: 'F6' }, { primary: 'F7' }, { primary: 'F8' }, { primary: 'F9' }, { primary: 'F10' }, { primary: 'F11' }, { primary: 'F12' }],
+            [{ primary: '`', secondary: '~' }, { primary: '1', secondary: '!' }, { primary: '2', secondary: '@' }, { primary: '3', secondary: '#' }, { primary: '4', secondary: '$' }, { primary: '5', secondary: '%' }, { primary: '6', secondary: '^' }, { primary: '7', secondary: '&' }, { primary: '8', secondary: '*' }, { primary: '9', secondary: '(' }, { primary: '0', secondary: ')' }, { primary: '-', secondary: '_' }, { primary: '=', secondary: '+' }, { primary: 'Delete' }],
+            [{ primary: 'Tab' }, { primary: 'Q' }, { primary: 'W' }, { primary: 'E' }, { primary: 'R' }, { primary: 'T' }, { primary: 'Y' }, { primary: 'U' }, { primary: 'I' }, { primary: 'O' }, { primary: 'P' }, { primary: '[', secondary: '{' }, { primary: ']', secondary: '}' }, { primary: '\\', secondary: '|' }],
+            [{ primary: 'Caps Lock' }, { primary: 'A' }, { primary: 'S' }, { primary: 'D' }, { primary: 'F' }, { primary: 'G' }, { primary: 'H' }, { primary: 'J' }, { primary: 'K' }, { primary: 'L' }, { primary: ';', secondary: ':' }, { primary: '\'', secondary: '"' }, { primary: 'Return' }],
+            [{ primary: 'Shift' }, { primary: 'Z' }, { primary: 'X' }, { primary: 'C' }, { primary: 'V' }, { primary: 'B' }, { primary: 'N' }, { primary: 'M' }, { primary: ',', secondary: '<' }, { primary: '.', secondary: '>' }, { primary: '/', secondary: '?' }, { primary: 'Shift' }],
+            [{ primary: 'fn' }, { primary: 'Control' }, { primary: 'Option' }, { primary: 'Command' }, { primary: 'Space' }, { primary: 'Command' }, { primary: 'Option' }, { primary: 'Control' }]
+        ];
+
+        const pcShortcuts = [
+            { keys: ["Ctrl", "C"], description: "Copy", usage: "Use this to quickly copy any selected text or item. It's faster than right-clicking and selecting 'Copy' from the menu." },
+            { keys: ["Ctrl", "V"], description: "Paste", usage: "Paste what you've copied anywhere in a document. Great for moving text or files quickly." },
+            { keys: ["Ctrl", "X"], description: "Cut", usage: "Cut selected text or items to move them elsewhere. Think of it as moving rather than just copying." },
+            { keys: ["Ctrl", "Z"], description: "Undo", usage: "Undo your last action. A lifesaver when you've made a mistake." },
+            { keys: ["Ctrl", "Y"], description: "Redo", usage: "Redo something you've undone. Perfect for going back after an undo." },
+            { keys: ["Ctrl", "A"], description: "Select All", usage: "Select all text or items in the current window or document. Useful for large edits." },
+            { keys: ["Ctrl", "F"], description: "Find", usage: "Search for specific text within a document or webpage. Saves time on scrolling and searching." },
+            { keys: ["Ctrl", "S"], description: "Save", usage: "Save your current document or work. Get into the habit of doing this frequently." },
+            { keys: ["Ctrl", "P"], description: "Print", usage: "Open the print dialog to quickly print the document you're working on." },
+            { keys: ["Ctrl", "W"], description: "Close Tab", usage: "Close the current tab in your browser or document. Keeps your workspace tidy." }
+        ];
+
+        const macShortcuts = [
+            { keys: ["Command", "C"], description: "Copy", usage: "Copy selected items quickly without using the mouse. Perfect for text, files, and more." },
+            { keys: ["Command", "V"], description: "Paste", usage: "Paste what you've copied with ease. Works in documents, emails, and other apps." },
+            { keys: ["Command", "X"], description: "Cut", usage: "Cut and move items from one place to another. It's like a quick move command." },
+            { keys: ["Command", "Z"], description: "Undo", usage: "Undo the last action you took. A must-use when something goes wrong." },
+            { keys: ["Command", "Shift", "Z"], description: "Redo", usage: "Redo what you just undid. Keeps your workflow smooth." },
+            { keys: ["Command", "A"], description: "Select All", usage: "Select all items or text in the current area. Ideal for bulk actions." },
+            { keys: ["Command", "F"], description: "Find", usage: "Quickly search for text or items within a document. Much faster than manual searching." },
+            { keys: ["Command", "S"], description: "Save", usage: "Save your work immediately. Prevents loss of progress." },
+            { keys: ["Command", "P"], description: "Print", usage: "Print the current document or screen. Fast and efficient." },
+            { keys: ["Command", "W"], description: "Close Tab", usage: "Close the current tab or window to reduce clutter. Great for multitasking." }
+        ];
+
+        let currentLayout = pcKeyboardLayout;
+        let currentShortcuts = pcShortcuts;
+        let currentShortcut;
+        let startTime;
+
+        function createKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.innerHTML = ''; // Clear existing keyboard
+            currentLayout.forEach((row, rowIndex) => {
+                row.forEach(key => {
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    keyDiv.textContent = key.primary;
+                    keyDiv.dataset.key = key.primary.toLowerCase();
+                    if (key.secondary) {
+                        const secondarySpan = document.createElement('span');
+                        secondarySpan.className = 'secondary';
+                        secondarySpan.textContent = key.secondary;
+                        keyDiv.appendChild(secondarySpan);
+                    }
+                    if (['Backspace', 'Tab', 'Caps Lock', 'Enter', 'Return', 'Shift'].includes(key.primary)) {
+                        keyDiv.classList.add('wide');
+                    }
+                    if (['Delete'].includes(key.primary)) {
+                        keyDiv.classList.add('extra-wide');
+                    }
+                    if (key.primary === 'Space') {
+                        keyDiv.classList.add('super-wide');
+                    }
+                    if (key.primary.startsWith('F')) {
+                        keyDiv.classList.add('fn');
+                    }
+                    keyboard.appendChild(keyDiv);
+                });
+                if (rowIndex < currentLayout.length - 1) {
+                    const rowGap = document.createElement('div');
+                    rowGap.className = 'row-gap';
+                    rowGap.style.gridColumn = '1 / -1';
+                    keyboard.appendChild(rowGap);
+                }
+            });
+        }
+
+        function highlightKey(key) {
+            let keyElement;
+            if (key === 'Meta') {
+                keyElement = document.querySelector('.key[data-key="command"]');
+            } else if (key === 'Alt' && currentLayout === macKeyboardLayout) {
+                keyElement = document.querySelector('.key[data-key="option"]');
+            } else if (key === 'Control' && currentLayout === macKeyboardLayout) {
+                keyElement = document.querySelector('.key[data-key="control"]');
+            } else if (key === 'Fn') {
+                keyElement = document.querySelector('.key[data-key="fn"]');
+            } else {
+                keyElement = document.querySelector(`.key[data-key="${key.toLowerCase()}"]`);
+            }
+            if (keyElement) {
+                keyElement.classList.add('pressed');
+            }
+        }
+
+        function unhighlightKey(key) {
+            let keyElement;
+            if (key === 'Meta') {
+                keyElement = document.querySelector('.key[data-key="command"]');
+            } else if (key === 'Alt' && currentLayout === macKeyboardLayout) {
+                keyElement = document.querySelector('.key[data-key="option"]');
+            } else if (key === 'Control' && currentLayout === macKeyboardLayout) {
+                keyElement = document.querySelector('.key[data-key="control"]');
+            } else if (key === 'Fn') {
+                keyElement = document.querySelector('.key[data-key="fn"]');
+            } else {
+                keyElement = document.querySelector(`.key[data-key="${key.toLowerCase()}"]`);
+            }
+            if (keyElement) {
+                keyElement.classList.remove('pressed');
+            }
+        }
+
+        function setNextShortcut() {
+            currentShortcut = currentShortcuts[Math.floor(Math.random() * currentShortcuts.length)];
+            document.getElementById('shortcutInput').placeholder = `${currentShortcut.keys.join(' + ')} (${currentShortcut.description})`;
+            startTime = new Date();
+        }
+
+        function showSuccessModal(description, keys, usage) {
+            const successMessage = `Great Job! You just opened the ${description} screen.`;
+            document.getElementById('successMessage').textContent = successMessage;
+            document.getElementById('shortcutKeys').textContent = keys.join(' + ');
+            document.getElementById('shortcutUsage').textContent = usage;
+            const modal = document.getElementById('successModal');
+            modal.style.display = 'flex';
+            document.getElementById('continueButton').focus();
+        }
+
+        function hideSuccessModal() {
+            const modal = document.getElementById('successModal');
+            modal.style.display = 'none';
+        }
+
+        document.addEventListener('keydown', (event) => {
+            event.preventDefault(); // Prevent default browser shortcuts
+            highlightKey(event.key);
+
+            if (currentShortcut) {
+                const pressedKeys = [];
+                if (event.ctrlKey) pressedKeys.push(currentLayout === pcKeyboardLayout ? 'Ctrl' : 'Control');
+                if (event.altKey) pressedKeys.push(currentLayout === pcKeyboardLayout ? 'Alt' : 'Option');
+                if (event.metaKey) pressedKeys.push('Command');
+                if (event.shiftKey) pressedKeys.push('Shift');
+                if (event.key === 'Fn') pressedKeys.push('fn');
+                if (!['Control', 'Alt', 'Meta', 'Shift', 'Fn'].includes(event.key)) {
+                    pressedKeys.push(event.key.toUpperCase());
+                }
+
+                if (pressedKeys.join('+') === currentShortcut.keys.join('+')) {
+                    document.getElementById('correct').textContent = parseInt(document.getElementById('correct').textContent) + 1;
+                    showSuccessModal(currentShortcut.description, currentShortcut.keys, currentShortcut.usage);
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            unhighlightKey(event.key);
+        });
+
+        document.getElementById('nextShortcut').addEventListener('click', setNextShortcut);
+        document.getElementById('continueButton').addEventListener('click', () => {
+            hideSuccessModal();
+            setNextShortcut();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && document.getElementById('successModal').style.display === 'flex') {
+                hideSuccessModal();
+                setNextShortcut();
+            }
+        });
+
+        document.getElementById('pcToggle').addEventListener('click', () => {
+            currentLayout = pcKeyboardLayout;
+            currentShortcuts = pcShortcuts;
+            document.getElementById('pcToggle').classList.add('active');
+            document.getElementById('macToggle').classList.remove('active');
+            createKeyboard();
+            setNextShortcut();
+        });
+
+        document.getElementById('macToggle').addEventListener('click', () => {
+            currentLayout = macKeyboardLayout;
+            currentShortcuts = macShortcuts;
+            document.getElementById('macToggle').classList.add('active');
+            document.getElementById('pcToggle').classList.remove('active');
+            createKeyboard();
+            setNextShortcut();
+        });
+
+        createKeyboard();
+        setNextShortcut();
+
+        setInterval(() => {
+            if (startTime) {
+                const elapsed = Math.floor((new Date() - startTime) / 1000);
+                document.getElementById('time').textContent = elapsed;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
