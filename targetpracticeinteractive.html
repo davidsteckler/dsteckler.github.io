@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Target Practice Learning</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            width: 100%;
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .game-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        #game-canvas {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+        .info-panel {
+            width: 55%;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-left: 20px;
+        }
+        .interactive-element {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .interactive-element:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        .code-snippet {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .description {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .buttons button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: #fff;
+        }
+        .concept-buttons {
+            margin-top: 20px;
+        }
+        #playable-game {
+            margin-top: 40px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+    <header>
+        <h1>David Steckler</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>Interactive Target Practice Learning</h2>
+        <p>Hover over the game elements or click the buttons below to learn how to build this in Python!</p>
+        
+        <div class="game-container">
+            <div id="game-canvas"></div>
+            <div class="info-panel">
+                <h3>Python Concepts</h3>
+                <p id="concept-explanation">Hover over game elements or click buttons to see explanations and Python code snippets.</p>
+                <div class="code-snippet" id="code-snippet"></div>
+                <div class="description" id="description"></div>
+            </div>
+        </div>
+        
+        <div class="concept-buttons">
+            <button onclick="showConcept('Timer', timerCode, timerDescription)">Timer</button>
+            <button onclick="showConcept('Score', scoreCode, scoreDescription)">Score</button>
+            <button onclick="showConcept('Game Logic', gameLogicCode, gameLogicDescription)">Game Logic</button>
+            <button onclick="showConcept('Start Game', startGameCode, startGameDescription)">Start Game</button>
+            <button onclick="showConcept('Stop Game', stopGameCode, stopGameDescription)">Stop Game</button>
+            <button onclick="showConcept('Reset Game', resetGameCode, resetGameDescription)">Reset Game</button>
+        </div>
+        
+        <div id="playable-game">
+            <h3>Playable Target Practice Game</h3>
+            <p>Click to check if the arrow hit the target. The outer circle is worth 50 points, the inner circle is worth 200 points, the middle circle is worth 500 points, the fourth circle is worth 1000 points, and the fifth circle is worth 2000 points. Good luck!</p>
+            
+            <div class="buttons">
+                <button onclick="startGame()">Start</button>
+                <button onclick="stopGame()">Stop</button>
+                <button onclick="resetGame()">Reset</button>
+            </div>
+            
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="timer">Time Left: <span id="time">60</span>s</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let hitColour;
+        let score = 0;
+        let arrowX, arrowY;
+        let timer = 60;
+        let gameRunning = false;
+        let gameInterval;
+        let timerInterval;
+
+        function setup() {
+            let canvas = createCanvas(400, 400);
+            canvas.parent('game-canvas');
+            noStroke();
+            frameRate(2);
+            drawTarget();
+            addInteractiveElements();
+        }
+
+        function draw() {
+            if (gameRunning) {
+                drawTarget();
+                shootArrow();
+            }
+        }
+
+        function drawTarget() {
+            // Sky
+            fill('cyan');
+            rect(0, 0, 400, 250);
+
+            // Grass
+            fill('lightgreen');
+            rect(0, 250, 400, 150);
+
+            // Stand
+            fill('sienna');
+            triangle(150, 350, 200, 150, 250, 350);
+
+            // Target circles
+            fill('orange');
+            circle(200, 200, 230);
+            fill('purple');
+            circle(200, 200, 190);
+            fill('blue');
+            circle(200, 200, 150);
+            fill('red');
+            circle(200, 200, 110);
+            fill('yellow');
+            circle(200, 200, 30);
+        }
+
+        function shootArrow() {
+            arrowX = random(100, 300);
+            arrowY = random(100, 300);
+            hitColour = get(arrowX, arrowY);
+
+            fill('sienna');
+            circle(arrowX, arrowY, 15);
+        }
+
+        function mousePressed() {
+            if (!gameRunning) return;
+
+            checkHit();
+            document.getElementById('score').innerText = score;
+        }
+
+        function checkHit() {
+            if (hitColour[0] === 255 && hitColour[1] === 165 && hitColour[2] === 0) {
+                score += 1000;
+            } else if (hitColour[0] === 128 && hitColour[1] === 0 && hitColour[2] === 128) {
+                score += 2000;
+            } else if (hitColour[0] === 0 && hitColour[1] === 0 && hitColour[2] === 255) {
+                score += 50;
+            } else if (hitColour[0] === 255 && hitColour[1] === 0 && hitColour[2] === 0) {
+                score += 200;
+            } else if (hitColour[0] === 255 && hitColour[1] === 255 && hitColour[2] === 0) {
+                score += 500;
+            }
+        }
+
+        function updateTimer() {
+            if (timer > 0) {
+                timer--;
+                document.getElementById('time').innerText = timer;
+            } else {
+                stopGame();
+                alert('Time\'s up! Your score: ' + score);
+            }
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+            gameRunning = true;
+            score = 0;
+            timer = 60;
+            document.getElementById('score').innerText = score;
+            document.getElementById('time').innerText = timer;
+            gameInterval = setInterval(() => loop(), 500);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopGame() {
+            gameRunning = false;
+            noLoop();
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+        }
+
+        function resetGame() {
+            stopGame();
+            score = 0;
+            timer = 60;
+            document.getElementById('score').innerText = score;
+            document.getElementById('time').innerText = timer;
+            drawTarget();
+        }
+
+        function addInteractiveElements() {
+            const elements = [
+                { id: 'sky', top: 0, left: 0, width: 400, height: 250, concept: 'Drawing Sky', 
+                  code: 'fill("cyan")\nrect(0, 0, 400, 250)',
+                  description: 'Creates a cyan rectangle for the sky using the fill() and rect() functions.' },
+                { id: 'grass', top: 250, left: 0, width: 400, height: 150, concept: 'Drawing Grass', 
+                  code: 'fill("lightgreen")\nrect(0, 250, 400, 150)',
+                  description: 'Creates a light green rectangle for the grass using the fill() and rect() functions.' },
+                { id: 'stand', top: 150, left: 150, width: 100, height: 200, concept: 'Drawing Stand', 
+                  code: 'fill("sienna")\ntriangle(150, 350, 200, 150, 250, 350)',
+                  description: 'Draws a sienna-colored triangle for the stand using the fill() and triangle() functions.' },
+                { id: 'orange-ring', top: 85, left: 85, width: 230, height: 230, concept: 'Drawing Orange Ring', 
+                  code: 'fill("orange")\ncircle(200, 200, 230)',
+                  description: 'Creates the outermost orange circle of the target.' },
+                { id: 'purple-ring', top: 105, left: 105, width: 190, height: 190, concept: 'Drawing Purple Ring', 
+                  code: 'fill("purple")\ncircle(200, 200, 190)',
+                  description: 'Creates the purple circle of the target.' },
+                { id: 'blue-ring', top: 125, left: 125, width: 150, height: 150, concept: 'Drawing Blue Ring', 
+                  code: 'fill("blue")\ncircle(200, 200, 150)',
+                  description: 'Creates the blue circle of the target.' },
+                { id: 'red-ring', top: 145, left: 145, width: 110, height: 110, concept: 'Drawing Red Ring', 
+                  code: 'fill("red")\ncircle(200, 200, 110)',
+                  description: 'Creates the red circle of the target.' },
+                { id: 'yellow-ring', top: 185, left: 185, width: 30, height: 30, concept: 'Drawing Yellow Ring', 
+                  code: 'fill("yellow")\ncircle(200, 200, 30)',
+                  description: 'Creates the innermost yellow circle of the target.' },
+                { id: 'arrow', top: 192, left: 192, width: 16, height: 16, concept: 'Shooting Arrow', 
+                  code: 'arrowX = random(100, 300)\narrowY = random(100, 300)\nfill("sienna")\ncircle(arrowX, arrowY, 15)',
+                  description: 'Generates random coordinates for the arrow and draws it as a small circle.' },
+            ];
+
+            const gameCanvas = document.getElementById('game-canvas');
+            elements.forEach(el => {
+                const div = document.createElement('div');
+                div.className = 'interactive-element';
+                div.style.top = el.top + 'px';
+                div.style.left = el.left + 'px';
+                div.style.width = el.width + 'px';
+                div.style.height = el.height + 'px';
+                div.addEventListener('mouseover', () => showConcept(el.concept, el.code, el.description));
+                div.addEventListener('mouseout', hideConcept);
+                gameCanvas.appendChild(div);
+            });
+        }
+
+        function showConcept(concept, code, description) {
+            document.getElementById('concept-explanation').innerText = concept;
+            document.getElementById('code-snippet').innerText = code;
+            document.getElementById('description').innerText = description;
+        }
+
+        function hideConcept() {
+            document.getElementById('concept-explanation').innerText = 'Hover over game elements or click buttons to see explanations and Python code snippets.';
+            document.getElementById('code-snippet').innerText = '';
+            document.getElementById('description').innerText = '';
+        }
+
+        const timerCode = `def updateTimer():
+    global timer
+    if timer > 0:
+        timer -= 1
+        print(f"Time Left: {timer}s")
+    else:
+        stopGame()
+        print(f"Time's up! Your score: {score}")`;
+
+        const timerDescription = "This function decrements the timer every second, updates the display, and ends the game when the timer reaches zero.";
+
+        const scoreCode = `def updateScore(points):
+    global score
+    score += points
+    print(f"Score: {score}")`;
+
+        const scoreDescription = "This function adds points to the score and updates the display.";
+
+        const gameLogicCode = `def checkHit():
+    global score
+    if hitColour == Color('orange'):
+        updateScore(1000)
+    elif hitColour == Color('purple'):
+        updateScore(2000)
+    elif hitColour == Color('blue'):
+        updateScore(50)
+    updateScore(50)
+    elif hitColour == Color('red'):
+        updateScore(200)
+    elif hitColour == Color('yellow'):
+        updateScore(500)
+    else:
+        print("Miss! No points.")`;
+
+        const gameLogicDescription = "This function checks the color of the hit location and awards points based on which part of the target was hit. Orange ring: 1000 points, Purple ring: 2000 points, Blue ring: 50 points, Red ring: 200 points, Yellow center: 500 points. If the arrow misses the target, no points are awarded.";
+
+        const startGameCode = `def startGame():
+    global gameRunning, score, timer
+    if not gameRunning:
+        gameRunning = True
+        score = 0
+        timer = 60
+        updateScore(0)
+        updateTimer()
+        gameLoop()`;
+
+        const startGameDescription = "This function initializes the game by setting the game state to running, resetting the score and timer, and starting the main game loop.";
+
+        const stopGameCode = `def stopGame():
+    global gameRunning
+    gameRunning = False
+    print("Game stopped.")`;
+
+        const stopGameDescription = "This function stops the game by setting the game state to not running, which will halt the main game loop.";
+
+        const resetGameCode = `def resetGame():
+    global score, timer
+    stopGame()
+    score = 0
+    timer = 60
+    updateScore(0)
+    updateTimer()
+    drawTarget()`;
+
+        const resetGameDescription = "This function resets the game to its initial state by stopping the game, resetting the score and timer, and redrawing the target.";
+    </script>
+</body>
+</html>
