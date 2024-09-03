@@ -133,6 +133,22 @@
             line-height: 30px;
             color: white;
         }
+        .toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .toggle-btn {
+            padding: 10px 20px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .toggle-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -155,15 +171,20 @@
         
         <p>Learn to browse efficiently: open links in new tabs without losing your place.</p>
         
+        <div class="toggle-container">
+            <button id="pc-toggle" class="toggle-btn active">PC (Ctrl + Click)</button>
+            <button id="mac-toggle" class="toggle-btn">Mac (Cmd + Click)</button>
+        </div>
+        
         <h2>The Technique</h2>
         
-        <p>Use Ctrl + Click or the middle mouse button. Simple, yet powerful.</p>
+        <p id="technique-description">Use Ctrl + Click or the middle mouse button. Simple, yet powerful.</p>
         
         <h2>Practice Zone</h2>
         
         <div class="interactive-area">
             <p>Challenge: Open all three links in new tabs before the timer runs out!</p>
-            <a href="https://en.wikipedia.org/wiki/Control_key" class="test-link" target="_blank">Ctrl Key</a>
+            <a href="https://en.wikipedia.org/wiki/Control_key" class="test-link" target="_blank">Modifier Key</a>
             <a href="https://en.wikipedia.org/wiki/Mouse_keys" class="test-link" target="_blank">Mouse Buttons</a>
             <a href="https://en.wikipedia.org/wiki/Tab_(interface)" class="test-link" target="_blank">Browser Tabs</a>
             <p id="result"></p>
@@ -200,10 +221,59 @@
         let linksClicked = 0;
         let progressWidth = 0;
         let progressInterval;
+        let isMac = false;
+
+        const pcToggle = document.getElementById('pc-toggle');
+        const macToggle = document.getElementById('mac-toggle');
+        const techniqueDescription = document.getElementById('technique-description');
+
+        pcToggle.addEventListener('click', () => {
+            isMac = false;
+            pcToggle.classList.add('active');
+            macToggle.classList.remove('active');
+            techniqueDescription.textContent = "Use Ctrl + Click or the middle mouse button. Simple, yet powerful.";
+            resetChallenge();
+        });
+
+        macToggle.addEventListener('click', () => {
+            isMac = true;
+            macToggle.classList.add('active');
+            pcToggle.classList.remove('active');
+            techniqueDescription.textContent = "Use Cmd + Click or the middle mouse button. Simple, yet powerful.";
+            resetChallenge();
+        });
+
+        function resetChallenge() {
+            linksClicked = 0;
+            progressWidth = 0;
+            clearInterval(progressInterval);
+            document.querySelectorAll('.test-link').forEach(link => {
+                link.style.backgroundColor = '#3498db';
+            });
+            document.getElementById('result').textContent = "";
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-bar').textContent = '0%';
+            startChallenge();
+        }
+
+        function startChallenge() {
+            progressInterval = setInterval(function() {
+                if (progressWidth < 100) {
+                    progressWidth++;
+                    document.getElementById('progress-bar').style.width = progressWidth + '%';
+                    document.getElementById('progress-bar').textContent = progressWidth + '%';
+                } else {
+                    clearInterval(progressInterval);
+                    if (linksClicked < 3) {
+                        document.getElementById('result').textContent = "Time's up! Give it another try.";
+                    }
+                }
+            }, 100);
+        }
 
         document.querySelectorAll('.test-link').forEach(link => {
             link.addEventListener('click', function(e) {
-                if (e.ctrlKey || e.button === 1) {
+                if ((isMac && e.metaKey) || (!isMac && e.ctrlKey) || e.button === 1) {
                     linksClicked++;
                     this.style.backgroundColor = '#2ecc71';
                     if (linksClicked === 3) {
@@ -214,23 +284,14 @@
                     }
                 } else {
                     e.preventDefault();
-                    document.getElementById('result').textContent = "Tip: Use Ctrl+Click or the middle mouse button.";
+                    document.getElementById('result').textContent = isMac ? 
+                        "Tip: Use Cmd+Click or the middle mouse button." :
+                        "Tip: Use Ctrl+Click or the middle mouse button.";
                 }
             });
         });
 
-        progressInterval = setInterval(function() {
-            if (progressWidth < 100) {
-                progressWidth++;
-                document.getElementById('progress-bar').style.width = progressWidth + '%';
-                document.getElementById('progress-bar').textContent = progressWidth + '%';
-            } else {
-                clearInterval(progressInterval);
-                if (linksClicked < 3) {
-                    document.getElementById('result').textContent = "Time's up! Give it another try.";
-                }
-            }
-        }, 100);
+        startChallenge();
     </script>
 </body>
 </html>
