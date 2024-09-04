@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Tab Mastery</title>
+    <title>Ctrl/Cmd+Click: Effortless Multitasking</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -138,15 +138,20 @@
             justify-content: center;
             margin-bottom: 20px;
         }
-        .toggle-btn {
+        .toggle-btn, .reset-btn {
             padding: 10px 20px;
             background-color: #ddd;
             border: none;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin: 0 5px;
         }
         .toggle-btn.active {
             background-color: #3498db;
+            color: white;
+        }
+        .reset-btn {
+            background-color: #e74c3c;
             color: white;
         }
     </style>
@@ -167,13 +172,14 @@
     </header>
 
     <div class="container">
-        <h1>New Tab Mastery</h1>
+        <h1>Ctrl/Cmd+Click: Effortless Multitasking</h1>
         
-        <p>Learn to browse efficiently: open links in new tabs without losing your place.</p>
+        <p>Open links in new tabs without losing your place. Boost your browsing efficiency.</p>
         
         <div class="toggle-container">
             <button id="pc-toggle" class="toggle-btn active">PC (Ctrl + Click)</button>
             <button id="mac-toggle" class="toggle-btn">Mac (Cmd + Click)</button>
+            <button id="reset-btn" class="reset-btn">Reset</button>
         </div>
         
         <h2>The Technique</h2>
@@ -184,9 +190,9 @@
         
         <div class="interactive-area">
             <p>Challenge: Open all three links in new tabs before the timer runs out!</p>
-            <a href="https://en.wikipedia.org/wiki/Control_key" class="test-link" target="_blank">Modifier Key</a>
-            <a href="https://en.wikipedia.org/wiki/Mouse_keys" class="test-link" target="_blank">Mouse Buttons</a>
-            <a href="https://en.wikipedia.org/wiki/Tab_(interface)" class="test-link" target="_blank">Browser Tabs</a>
+            <a href="#" class="test-link" target="_blank">Shortcut 1</a>
+            <a href="#" class="test-link" target="_blank">Shortcut 2</a>
+            <a href="#" class="test-link" target="_blank">Shortcut 3</a>
             <p id="result"></p>
             <div id="progress">
                 <div id="progress-bar">0%</div>
@@ -201,6 +207,24 @@
     </footer>
 
     <script>
+        const shortcutPages = [
+            'https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts',
+            'https://en.wikipedia.org/wiki/Keyboard_shortcut',
+            'https://en.wikipedia.org/wiki/Control_key',
+            'https://en.wikipedia.org/wiki/Command_key',
+            'https://en.wikipedia.org/wiki/Alt_key',
+            'https://en.wikipedia.org/wiki/Function_key',
+            'https://en.wikipedia.org/wiki/Windows_key',
+            'https://en.wikipedia.org/wiki/Menu_key',
+            'https://en.wikipedia.org/wiki/Cut,_copy,_and_paste',
+            'https://en.wikipedia.org/wiki/Undo',
+            'https://en.wikipedia.org/wiki/Tabbed_browsing',
+            'https://en.wikipedia.org/wiki/Web_browser',
+            'https://en.wikipedia.org/wiki/Multitasking',
+            'https://en.wikipedia.org/wiki/Productivity_software',
+            'https://en.wikipedia.org/wiki/User_interface',
+        ];
+
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('nav').classList.toggle('active');
         });
@@ -225,6 +249,7 @@
 
         const pcToggle = document.getElementById('pc-toggle');
         const macToggle = document.getElementById('mac-toggle');
+        const resetBtn = document.getElementById('reset-btn');
         const techniqueDescription = document.getElementById('technique-description');
 
         pcToggle.addEventListener('click', () => {
@@ -243,12 +268,15 @@
             resetChallenge();
         });
 
+        resetBtn.addEventListener('click', resetChallenge);
+
         function resetChallenge() {
             linksClicked = 0;
             progressWidth = 0;
             clearInterval(progressInterval);
             document.querySelectorAll('.test-link').forEach(link => {
                 link.style.backgroundColor = '#3498db';
+                link.href = shortcutPages[Math.floor(Math.random() * shortcutPages.length)];
             });
             document.getElementById('result').textContent = "";
             document.getElementById('progress-bar').style.width = '0%';
@@ -291,7 +319,7 @@
             });
         });
 
-        startChallenge();
+        resetChallenge();
     </script>
 </body>
 </html>
