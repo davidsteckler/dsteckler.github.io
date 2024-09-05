@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slinky (Example Program) Quiz</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1, footer p {
+            color: #fff;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: none;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #d0d0d0;
+        }
+        .selected {
+            background-color: #3498db;
+            color: white;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f4fd;
+            border-radius: 5px;
+            display: none;
+        }
+        #progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            margin-bottom: 20px;
+        }
+        #progress {
+            width: 0%;
+            height: 30px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #final-score {
+            font-size: 36px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .nav-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
+        .nav-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #question-indicator {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html" id="home-link">Home</a>
+            <a href="about.html" id="about-link">About</a>
+            <a href="course.html" id="course-link">Course</a>
+            <a href="blog.html" id="blog-link">Blog</a>
+            <a href="contact.html" id="contact-link">Contact</a>
+            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
+            <a href="search.html" id="search-link">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Slinky (Example Program) Quiz</h1>
+        <p>Test your understanding of the Slinky example program! Answer the questions and see how well you grasp the concepts.</p>
+        
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+        
+        <div id="score">Score: 0</div>
+        
+        <div id="question-indicator"></div>
+
+        <div id="quiz-container">
+            <!-- Questions will be dynamically inserted here -->
+        </div>
+
+        <div class="navigation">
+            <button id="prev-button" class="nav-button" onclick="previousQuestion()">Previous</button>
+            <button id="next-button" class="nav-button" onclick="nextQuestion()">Next</button>
+        </div>
+
+        <div id="final-score"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                question: "1. What pattern do you notice in how the commands are written in the Slinky code?",
+                options: [
+                    "All commands are the same",
+                    "Commands alternate between circle() and forward()",
+                    "There's no pattern in the commands",
+                    "Commands are in alphabetical order"
+                ],
+                correct: 1,
+                explanations: [
+                    "Not quite. While the commands might look similar, there's a distinct pattern in how they alternate.",
+                    "Correct! The code alternates between circle() and forward() commands, creating a Slinky-like pattern.",
+                    "Look closer! There's actually a clear pattern in how the commands are organized.",
+                    "The commands aren't alphabetical, but there is a pattern. Try observing how they alternate."
+                ]
+            },
+            {
+                question: "2. How does rearranging the order of the commands change what the Slinky program does?",
+                options: [
+                    "It has no effect on the program",
+                    "It causes the program to crash",
+                    "It changes the order of actions performed",
+                    "It makes the program run faster"
+                ],
+                correct: 2,
+                explanations: [
+                    "The order of commands in programming is crucial. Changing it will definitely have an effect.",
+                    "Rearranging commands typically doesn't cause crashes, but it does change the program's behavior.",
+                    "Exactly! If you put all circle() commands first, for example, it would draw all circles in one spot, then move forward in a straight line.",
+                    "The speed of the program isn't affected by the order of commands, but the output certainly is."
+                ]
+            },
+            {
+                question: "3. What happens when you capitalize the first letter in one of the circle commands?",
+                options: [
+                    "Nothing changes",
+                    "The circle becomes larger",
+                    "It causes an error",
+                    "The program runs faster"
+                ],
+                correct: 2,
+                explanations: [
+                    "In programming, capitalization often matters. Changing it usually has an effect.",
+                    "Capitalization doesn't affect the size of the circle, but it does have an important impact.",
+                    "Correct! Most programming languages are case-sensitive, so Circle() would be treated as a different command than circle(), likely causing an error.",
+                    "Capitalization doesn't affect the speed of the program, but it can affect whether the program runs at all."
+                ]
+            },
+            {
+                question: "4. How does the Slinky program behave if you remove the parentheses from the first command?",
+                options: [
+                    "It runs normally",
+                    "It causes a syntax error",
+                    "The command is ignored",
+                    "The program crashes"
+                ],
+                correct: 1,
+                explanations: [
+                    "Parentheses in programming commands serve a crucial purpose. Removing them will have an effect.",
+                    "Correct! Removing parentheses (e.g., circle 35) will likely cause a syntax error. The parentheses are necessary to indicate that 35 is an argument for the circle function.",
+                    "The command wouldn't be ignored, but it would cause an issue with the program.",
+                    "While it might not crash, the program certainly won't run correctly without the parentheses."
+                ]
+            },
+            {
+                question: "5. What happens if you set all the numerical values in the Slinky program to the same number?",
+                options: [
+                    "The program crashes",
+                    "Nothing changes",
+                    "The circles become equally sized and spaced",
+                    "The circles disappear"
+                ],
+                correct: 2,
+                explanations: [
+                    "Using the same number for all values won't crash the program, but it will change its output.",
+                    "The program's output would definitely change if all values were the same.",
+                    "Exactly! If all values are the same, the circles will be the same size and equally spaced. The spacing between circles will depend on the number used.",
+                    "The circles won't disappear, but their arrangement will change significantly."
+                ]
+            },
+            {
+                question: "6. What occurs when you delete the closing parenthesis in the first command of the Slinky program?",
+                options: [
+                    "The program runs normally",
+                    "It causes a syntax error",
+                    "The command is ignored",
+                    "The program creates larger circles"
+                ],
+                correct: 1,
+                explanations: [
+                    "Parentheses in programming need to be matched. Missing one will cause issues.",
+                    "Correct! Deleting the closing parenthesis will cause a syntax error. The program expects matching open and close parentheses.",
+                    "The command won't be ignored, but it will cause a problem in the program.",
+                    "The size of the circles isn't affected by parentheses, but the program's ability to run is."
+                ]
+            },
+            {
+                question: "7. Does adding a blank line between the commands on the 2nd and 3rd lines affect the Slinky program?",
+                options: [
+                    "Yes, it changes the program's output",
+                    "No, it doesn't affect the program",
+                    "It causes the program to crash",
+                    "It makes the program run faster"
+                ],
+                correct: 1,
+                explanations: [
+                    "Blank lines can affect some programs, but not in this case.",
+                    "Correct! Adding a blank line typically does not affect the program's execution. Most programming languages ignore extra whitespace between commands.",
+                    "Blank lines don't cause programs to crash. They're often used to improve readability.",
+                    "The speed of the program isn't affected by blank lines."
+                ]
+            },
+            {
+                question: "8. What is the result of indenting only the first command in the Slinky program?",
+                options: [
+                    "It causes an error",
+                    "It changes the program's output",
+                    "It has no effect on the program's execution",
+                    "It makes the program run faster"
+                ],
+                correct: 2,
+                explanations: [
+                    "Indentation doesn't typically cause errors in this context, but it can in some languages.",
+                    "Indentation doesn't change the output in this case, but it can affect readability.",
+                    "Correct! In most programming languages, indentation doesn't affect the program's execution. However, it might make the code harder to read.",
+                    "Indentation doesn't affect the speed of the program's execution."
+                ]
+            },
+            {
+                question: "9. How does the Slinky program change if you indent only the second command?",
+                options: [
+                    "It causes an error",
+                    "It changes the program's output",
+                    "It has no effect on the program's execution",
+                    "It makes the program run faster"
+                ],
+                correct: 2,
+                explanations: [
+                    "Indentation alone doesn't typically cause errors in this context.",
+                    "The output remains the same, but the code's readability might be affected.",
+                    "Correct! Like question 8, indenting only the second command usually doesn't change the program's execution, but it affects readability.",
+                    "Indentation doesn't impact the program's execution speed."
+                ]
+            },
+            {
+                question: "10. If you set all the numerical values in the Slinky program to the same number, what do you observe about the spacing between the circles?",
+                options: [
+                    "The circles overlap completely",
+                    "The circles are randomly spaced",
+                    "The circles are equally spaced",
+                    "There is no space between the circles"
+                ],
+                correct: 2,
+                explanations: [
+                    "The circles won't completely overlap, but their arrangement will change.",
+                    "The spacing won't be random if all values are the same.",
+                    "Correct! If all values are the same, the circles will be equally spaced. The amount of space depends on the number used.",
+                    "There will still be space between the circles, but it will be consistent."
+                ]
+            },
+            {
+                question: "11. How would you adjust the numbers in the circle and forward commands to make the circles touch each other instead of overlapping?",
+                options: [
+                    "Make all numbers the same",
+                    "Make the forward distance equal to the circle diameter",
+                    "Make the forward distance twice the circle radius",
+                    "Make the forward distance half the circle radius"
+                ],
+                correct: 1,
+                explanations: [
+                    "Making all numbers the same wouldn't necessarily make the circles touch without overlapping.",
+                    "Correct! To make the circles touch without overlapping, the forward distance should equal the diameter of the circles. For example, if circle(35) draws a circle with diameter 70, then forward(70) would make the next circle touch the previous one without overlapping.",
+                    "This would actually make the circles overlap slightly.",
+                    "This would leave a gap between the circles."
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function createQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <p>${q.question}</p>
+                    <div class="options">
+                        ${q.options.map((option, i) => `
+                            <div class="option" onclick="selectOption(${index}, ${i})">${option}</div>
+                        `).join('')}
+                    </div>
+                    <button onclick="checkAnswer(${index})">Check Answer</button>
+                    <div id="feedback-${index}" class="feedback"></div>
+                    <div id="explanation-${index}" class="explanation"></div>
+                `;
+                quizContainer.appendChild(questionDiv);
+            });
+            showQuestion(currentQuestion);
+            updateNavButtons();
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            const options = document.querySelectorAll(`.question:nth-child(${questionIndex + 1}) .option`);
+            options.forEach(option => option.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+        }
+
+        function checkAnswer(index) {
+            const selectedOption = document.querySelector(`.question:nth-child(${index + 1}) .option.selected`);
+            const feedbackElement = document.getElementById(`feedback-${index}`);
+            const explanationElement = document.getElementById(`explanation-${index}`);
+            
+            if (!selectedOption) {
+                feedbackElement.innerHTML = "Please select an answer.";
+                feedbackElement.className = "feedback";
+                return;
+            }
+            
+            const selectedIndex = Array.from(selectedOption.parentNode.children).indexOf(selectedOption);
+            
+            if (selectedIndex === questions[index].correct) {
+                feedbackElement.innerHTML = "Correct!";
+                feedbackElement.className = "feedback correct";
+                if (!questions[index].answered) {
+                    score++;
+                    questions[index].answered = true;
+                }
+            } else {
+                feedbackElement.innerHTML = "Incorrect. Try again!";
+                feedbackElement.className = "feedback incorrect";
+            }
+            
+            explanationElement.innerHTML = questions[index].explanations[selectedIndex];
+            explanationElement.style.display = 'block';
+            
+            updateScore();
+        }
+
+        function showQuestion(index) {
+            const questionElements = document.querySelectorAll('.question');
+            questionElements.forEach((q, i) => {
+                if (i === index) {
+                    q.style.display = 'block';
+                } else {
+                    q.style.display = 'none';
+                }
+            });
+            updateProgressBar();
+            updateQuestionIndicator();
+            updateNavButtons();
+        }
+
+        function updateQuestionIndicator() {
+            const indicator = document.getElementById('question-indicator');
+            indicator.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+        }
+
+        function updateNavButtons() {
+            const prevButton = document.getElementById('prev-button');
+            const nextButton = document.getElementById('next-button');
+            
+            prevButton.disabled = currentQuestion === 0;
+            nextButton.disabled = currentQuestion === questions.length - 1;
+            
+            if (currentQuestion === questions.length - 1) {
+                nextButton.textContent = 'Finish Quiz';
+            } else {
+                nextButton.textContent = 'Next';
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerHTML = `Score: ${score}/${questions.length}`;
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+            document.getElementById('progress').innerHTML = `${Math.round(progress)}%`;
+        }
+
+        function finishQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.style.display = 'none';
+            
+            const finalScore = document.getElementById('final-score');
+            finalScore.style.display = 'block';
+            finalScore.innerHTML = `Congratulations! You've completed the quiz.<br>Your final score is: ${score}/${questions.length}`;
+            
+            const retryButton = document.createElement('button');
+            retryButton.innerHTML = 'Retry Quiz';
+            retryButton.onclick = resetQuiz;
+            finalScore.appendChild(retryButton);
+            
+            document.querySelector('.navigation').style.display = 'none';
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            questions.forEach(q => q.answered = false);
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.style.display = 'block';
+            document.getElementById('final-score').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'flex';
+            showQuestion(currentQuestion);
+            updateScore();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createQuiz();
+            updateScore();
+            updateQuestionIndicator();
+            updateNavButtons();
+        });
+
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        function setActiveLink() {
+            var path = window.location.pathname;
+            var page = path.split("/").pop();
+            page = page.replace('.html', '');
+            var linkId = page + '-link';
+            var activeLink = document.getElementById(linkId);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        setActiveLink();
+    </script>
+</body>
+</html>
