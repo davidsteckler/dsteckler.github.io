@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Existing head content -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combining Like Terms - David Steckler</title>
+    <title>Interactive Calculator - David Steckler</title>
+    <!-- Include math.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
     <style>
-        /* Existing styles */
+        /* Existing and updated CSS styles */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -15,104 +15,253 @@
             background-color: #f5f5f5;
             line-height: 1.6;
         }
-        /* ... (rest of your existing styles) ... */
-
-        /* New styles for interactive elements */
-        .term {
-            display: inline-block;
-            padding: 10px 15px;
-            margin: 5px;
-            background-color: #3498db;
-            color: #fff;
-            border-radius: 5px;
-            cursor: grab;
-            user-select: none;
-        }
-        .term.dragging {
-            opacity: 0.5;
-        }
-        .bucket {
-            min-height: 60px;
-            padding: 10px;
-            border: 2px dashed #ccc;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            background-color: #fafafa;
+        header, footer {
+            background-color: #000;
             text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        .bucket.over {
-            border-color: #3498db;
-            background-color: #e0f7ff;
-        }
-        .bucket-title {
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #333;
-        }
-        #result {
-            font-size: 1.2em;
-            margin-top: 20px;
-            background-color: #e8f5e9;
-            padding: 10px;
-            border-radius: 5px;
-            color: #2e7d32;
-        }
-        #combine-btn {
-            padding: 10px 20px;
-            font-size: 1em;
-            background-color: #2e7d32;
+        header h1, footer p {
             color: #fff;
+            margin: 0;
+        }
+        header h1 a, nav a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        nav a {
+            margin: 5px 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #calculator-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+        .calculator {
+            background-color: #f1f3f4;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 300px;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        .calculator-display {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+            font-size: 24px;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            overflow-x: auto;
+        }
+        .calculator-equation {
+            font-size: 14px;
+            color: #666;
+            min-height: 20px;
+        }
+        .calculator-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .calculator-key {
+            background-color: white;
             border: none;
             border-radius: 5px;
+            font-size: 18px;
+            padding: 15px;
             cursor: pointer;
+            transition: background-color 0.3s;
+            user-select: none;
+            outline: none;
+            position: relative;
         }
-        #combine-btn:hover {
-            background-color: #1b5e20;
+        .calculator-key:hover {
+            background-color: #e0e0e0;
+        }
+        .key-operator {
+            background-color: #dadce0;
+        }
+        .key-equal {
+            background-color: #4285f4;
+            color: white;
+        }
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .explanation h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .visual-math {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        #visualization-container {
+            width: 100%;
+            height: 300px;
+            background-color: #f0f0f0;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-radius: 10px;
+        }
+        .vis-object {
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+        #story-text {
+            font-size: 18px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        /* New styles for history panel */
+        .calculator-history {
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .calculator-history h3 {
+            margin-top: 0;
+        }
+        .history-item {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        /* Tooltip styles */
+        .calculator-key:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 5px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        /* Button animations */
+        .calculator-key:active {
+            transform: scale(0.95);
+        }
+        /* Responsive enhancements */
+        @media (max-width: 600px) {
+            .calculator {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Existing body content -->
     <header>
         <h1><a href="index.html">David Steckler</a></h1>
-        <button class="menu-toggle">&#9776;</button>
         <nav>
-            <!-- ... (navigation links) ... -->
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+            <a href="calculator.html" class="active">Calculator</a>
         </nav>
     </header>
 
     <div class="container">
-        <section id="main-content">
-            <h2>Combining Like Terms Interactive Activity</h2>
-            <p>Drag and drop the terms into the correct buckets to combine like terms.</p>
-
-            <div id="terms-container">
-                <!-- Terms to be dragged -->
-                <div class="term" draggable="true" data-term="2x">2x</div>
-                <div class="term" draggable="true" data-term="-3y">-3y</div>
-                <div class="term" draggable="true" data-term="5x">5x</div>
-                <div class="term" draggable="true" data-term="4">4</div>
-                <div class="term" draggable="true" data-term="6y">6y</div>
-                <div class="term" draggable="true" data-term="-2">-2</div>
+        <h2>Interactive Calculator</h2>
+        <p>Experience our sleek, interactive calculator. Perform calculations with ease using your mouse or keyboard. Type your calculations directly and press Enter to see the result!</p>
+        <div id="calculator-container">
+            <div class="calculator">
+                <div class="calculator-display">
+                    <div class="calculator-equation" id="equation"></div>
+                    <div id="display">0</div>
+                </div>
+                <div class="calculator-keys">
+                    <button class="calculator-key key-operator" data-tooltip="Left Parenthesis">(</button>
+                    <button class="calculator-key key-operator" data-tooltip="Right Parenthesis">)</button>
+                    <button class="calculator-key key-operator" data-tooltip="Percentage">%</button>
+                    <button class="calculator-key key-operator" data-tooltip="All Clear">AC</button>
+                    <button class="calculator-key" data-tooltip="Number 7">7</button>
+                    <button class="calculator-key" data-tooltip="Number 8">8</button>
+                    <button class="calculator-key" data-tooltip="Number 9">9</button>
+                    <button class="calculator-key key-operator" data-tooltip="Divide">÷</button>
+                    <button class="calculator-key" data-tooltip="Number 4">4</button>
+                    <button class="calculator-key" data-tooltip="Number 5">5</button>
+                    <button class="calculator-key" data-tooltip="Number 6">6</button>
+                    <button class="calculator-key key-operator" data-tooltip="Multiply">×</button>
+                    <button class="calculator-key" data-tooltip="Number 1">1</button>
+                    <button class="calculator-key" data-tooltip="Number 2">2</button>
+                    <button class="calculator-key" data-tooltip="Number 3">3</button>
+                    <button class="calculator-key key-operator" data-tooltip="Subtract">-</button>
+                    <button class="calculator-key" data-tooltip="Number 0">0</button>
+                    <button class="calculator-key" data-tooltip="Decimal Point">.</button>
+                    <button class="calculator-key key-equal" data-tooltip="Equals">=</button>
+                    <button class="calculator-key key-operator" data-tooltip="Add">+</button>
+                </div>
+                <!-- Calculation History Panel -->
+                <div class="calculator-history" id="history">
+                    <h3>History</h3>
+                    <!-- History items will be appended here -->
+                </div>
             </div>
+        </div>
 
-            <div id="buckets">
-                <!-- Buckets to drop terms into -->
-                <div class="bucket" data-type="x">
-                    <div class="bucket-title">x Terms</div>
-                </div>
-                <div class="bucket" data-type="y">
-                    <div class="bucket-title">y Terms</div>
-                </div>
-                <div class="bucket" data-type="constant">
-                    <div class="bucket-title">Constants</div>
-                </div>
-            </div>
-
-            <button id="combine-btn">Combine Like Terms</button>
-
-            <div id="result"></div>
-        </section>
+        <div class="explanation">
+            <h3>The Story Behind the Number</h3>
+            <div class="visual-math" id="visual-math"></div>
+            <div id="visualization-container"></div>
+            <p id="story-text"></p>
+        </div>
     </div>
 
     <footer>
@@ -120,112 +269,249 @@
     </footer>
 
     <script>
-        // Existing script for menu toggle
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('nav').classList.toggle('active');
-        });
+        // Ensure math.js is loaded before this script runs
+        const display = document.getElementById('display');
+        const equation = document.getElementById('equation');
+        const historyElement = document.getElementById('history');
+        let currentInput = '0';
+        let fullEquation = '';
+        let history = [];
 
-        // New script for interactive combining like terms
-        (function() {
-            const terms = document.querySelectorAll('.term');
-            const buckets = document.querySelectorAll('.bucket');
-            let draggedTerm = null;
+        document.querySelector('.calculator-keys').addEventListener('click', handleButtonClick);
+        document.addEventListener('keydown', handleKeyPress);
 
-            terms.forEach(term => {
-                term.addEventListener('dragstart', () => {
-                    draggedTerm = term;
-                    term.classList.add('dragging');
-                });
-
-                term.addEventListener('dragend', () => {
-                    term.classList.remove('dragging');
-                });
-            });
-
-            buckets.forEach(bucket => {
-                bucket.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    bucket.classList.add('over');
-                });
-
-                bucket.addEventListener('dragleave', () => {
-                    bucket.classList.remove('over');
-                });
-
-                bucket.addEventListener('drop', () => {
-                    bucket.classList.remove('over');
-                    if (draggedTerm) {
-                        const termType = getTermType(draggedTerm.dataset.term);
-                        if (termType === bucket.dataset.type) {
-                            bucket.appendChild(draggedTerm);
-                        } else {
-                            alert('This term does not belong in this bucket.');
-                        }
-                    }
-                });
-            });
-
-            document.getElementById('combine-btn').addEventListener('click', () => {
-                const result = combineTerms();
-                document.getElementById('result').textContent = 'Result: ' + result;
-            });
-
-            function getTermType(term) {
-                if (term.includes('x')) return 'x';
-                if (term.includes('y')) return 'y';
-                return 'constant';
+        function handleButtonClick(e) {
+            if (e.target.matches('button')) {
+                const key = e.target;
+                const action = key.textContent;
+                handleInput(action);
             }
+        }
 
-            function combineTerms() {
-                const bucketData = {};
-                buckets.forEach(bucket => {
-                    const type = bucket.dataset.type;
-                    const terms = bucket.querySelectorAll('.term');
-                    let sum = 0;
-                    terms.forEach(term => {
-                        const value = parseTerm(term.dataset.term);
-                        sum += value;
-                    });
-                    if (sum !== 0) {
-                        bucketData[type] = sum;
-                    }
-                });
+        function handleKeyPress(e) {
+            const key = e.key;
+            if (/^[0-9.+\-*/%()=]$/.test(key) || key === 'Enter' || key === 'Backspace') {
+                e.preventDefault();
+                handleInput(key === 'Enter' ? '=' : (key === '*' ? '×' : (key === '/' ? '÷' : key)));
+            }
+        }
 
-                let resultStr = '';
-                for (const [type, coeff] of Object.entries(bucketData)) {
-                    let termStr = '';
-                    if (type === 'constant') {
-                        termStr = coeff.toString();
-                    } else {
-                        if (coeff === 1) {
-                            termStr = type;
-                        } else if (coeff === -1) {
-                            termStr = '-' + type;
-                        } else {
-                            termStr = coeff + type;
-                        }
-                    }
-                    if (resultStr && coeff > 0) {
-                        resultStr += ' + ' + termStr;
-                    } else if (resultStr && coeff < 0) {
-                        resultStr += ' - ' + termStr.substring(1);
-                    } else {
-                        resultStr += termStr;
-                    }
+        function handleInput(value) {
+            if (value === 'AC') {
+                clear();
+            } else if (value === '=') {
+                calculate();
+            } else if (value === 'Backspace') {
+                backspace();
+            } else {
+                appendToEquation(value);
+            }
+            updateDisplay();
+        }
+
+        function appendToEquation(value) {
+            if (fullEquation === '0' || fullEquation === 'Error') {
+                fullEquation = value;
+            } else {
+                fullEquation += value;
+            }
+            currentInput = fullEquation;
+        }
+
+        function calculate() {
+            try {
+                let evalEquation = fullEquation.replace(/×/g, '*').replace(/÷/g, '/');
+                // Sanitize input using math.js
+                const result = math.evaluate(evalEquation);
+                currentInput = result.toString();
+                history.push(fullEquation + ' = ' + currentInput);
+                updateHistory();
+                explainResult(fullEquation + ' = ' + currentInput, result);
+                fullEquation = currentInput;
+            } catch (error) {
+                currentInput = 'Error';
+                fullEquation = 'Error';
+                document.getElementById('story-text').textContent = "Oops! That's not a valid calculation. Please try again.";
+                document.getElementById('visual-math').textContent = "";
+                clearVisualization();
+                console.error('Calculation Error:', error);
+            }
+        }
+
+        function clear() {
+            currentInput = '0';
+            fullEquation = '';
+            document.getElementById('story-text').textContent = "";
+            document.getElementById('visual-math').textContent = "";
+            clearVisualization();
+        }
+
+        function backspace() {
+            if (fullEquation.length > 0) {
+                fullEquation = fullEquation.slice(0, -1);
+                currentInput = fullEquation || '0';
+            }
+        }
+
+        function updateDisplay() {
+            display.textContent = currentInput;
+            equation.textContent = fullEquation;
+        }
+
+        function updateHistory() {
+            const historyContainer = document.getElementById('history');
+            // Clear existing history items
+            const existingItems = historyContainer.querySelectorAll('.history-item');
+            existingItems.forEach(item => item.remove());
+            // Add new history items
+            history.slice(-10).reverse().forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.textContent = item;
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        function explainResult(equation, result) {
+            const storyText = document.getElementById('story-text');
+            const visualMath = document.getElementById('visual-math');
+            const parts = equation.split(/([+\-×÷])/).filter(part => part.trim().length > 0);
+
+            let story = "";
+            let visualEquation = "";
+
+            if (parts.length === 3 && parts[1].match(/[+\-×÷]/)) {
+                const [a, operator, b] = parts.map(part => part.trim());
+                const numA = parseFloat(a);
+                const numB = parseFloat(b);
+
+                // Randomize stories and visuals
+                const additionStories = [
+                    `Imagine you have ${a} apples, and someone gives you ${b} more. Now you have ${result} apples.`,
+                    `You collected ${a} stamps and found ${b} more in an old album. Now you have ${result} stamps.`
+                ];
+
+                const subtractionStories = [
+                    `You had ${a} chocolates and ate ${b} of them. Now you have ${result} chocolates left.`,
+                    `There were ${a} birds on a tree, ${b} flew away. Now there are ${result} birds left.`
+                ];
+
+                const multiplicationStories = [
+                    `You have ${a} baskets with ${b} oranges each. In total, you have ${result} oranges.`,
+                    `A garden has ${a} rows with ${b} flowers each. That's a total of ${result} flowers.`
+                ];
+
+                const divisionStories = [
+                    `You have ${a} cookies and want to share them equally among ${b} friends. Each friend gets ${result} cookies.`,
+                    `A rope of ${a} meters is cut into ${b} equal parts. Each part is ${result} meters long.`
+                ];
+
+                switch(operator) {
+                    case '+':
+                        story = additionStories[Math.floor(Math.random() * additionStories.length)];
+                        visualEquation = `${a} + ${b} = ${result}`;
+                        visualizeAddition(numA, numB, result);
+                        break;
+                    case '-':
+                        story = subtractionStories[Math.floor(Math.random() * subtractionStories.length)];
+                        visualEquation = `${a} - ${b} = ${result}`;
+                        visualizeSubtraction(numA, numB, result);
+                        break;
+                    case '×':
+                        story = multiplicationStories[Math.floor(Math.random() * multiplicationStories.length)];
+                        visualEquation = `${a} × ${b} = ${result}`;
+                        visualizeMultiplication(numA, numB, result);
+                        break;
+                    case '÷':
+                        story = divisionStories[Math.floor(Math.random() * divisionStories.length)];
+                        visualEquation = `${a} ÷ ${b} = ${result}`;
+                        visualizeDivision(numA, numB, result);
+                        break;
                 }
-                return resultStr || '0';
+            } else {
+                story = `You calculated: ${equation}. The result is ${result}.`;
+                visualEquation = equation + ' = ' + result;
+                clearVisualization();
             }
 
-            function parseTerm(term) {
-                let coeff = term.replace(/[xy]/, '');
-                if (coeff === '') {
-                    coeff = '1';
-                } else if (coeff === '-') {
-                    coeff = '-1';
-                }
-                return parseFloat(coeff);
+            storyText.textContent = story;
+            visualMath.textContent = visualEquation;
+        }
+
+        // Visualizations
+        function visualizeAddition(a, b, result) {
+            clearVisualization();
+            const container = document.getElementById('visualization-container');
+            const total = a + b;
+            for (let i = 0; i < total; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'vis-object';
+                circle.style.width = '20px';
+                circle.style.height = '20px';
+                circle.style.borderRadius = '50%';
+                circle.style.backgroundColor = i < a ? '#4ECDC4' : '#FF6B6B';
+                circle.style.left = `${(i % 15) * 22 + 5}px`;
+                circle.style.top = `${Math.floor(i / 15) * 22 + 5}px`;
+                container.appendChild(circle);
             }
-        })();
+        }
+
+        function visualizeSubtraction(a, b, result) {
+            clearVisualization();
+            const container = document.getElementById('visualization-container');
+            for (let i = 0; i < a; i++) {
+                const square = document.createElement('div');
+                square.className = 'vis-object';
+                square.style.width = '20px';
+                square.style.height = '20px';
+                square.style.backgroundColor = i < result ? '#45B7D1' : '#D3D3D3';
+                square.style.left = `${(i % 15) * 22 + 5}px`;
+                square.style.top = `${Math.floor(i / 15) * 22 + 5}px`;
+                container.appendChild(square);
+            }
+        }
+
+        function visualizeMultiplication(a, b, result) {
+            clearVisualization();
+            const container = document.getElementById('visualization-container');
+            for (let i = 0; i < a; i++) {
+                for (let j = 0; j < b; j++) {
+                    const star = document.createElement('div');
+                    star.className = 'vis-object';
+                    star.style.width = '20px';
+                    star.style.height = '20px';
+                    star.innerHTML = '★';
+                    star.style.color = '#FFD700';
+                    star.style.fontSize = '20px';
+                    star.style.left = `${j * 22 + 5}px`;
+                    star.style.top = `${i * 22 + 5}px`;
+                    container.appendChild(star);
+                }
+            }
+        }
+
+        function visualizeDivision(a, b, result) {
+            clearVisualization();
+            const container = document.getElementById('visualization-container');
+            for (let i = 0; i < b; i++) {
+                for (let j = 0; j < result; j++) {
+                    const circle = document.createElement('div');
+                    circle.className = 'vis-object';
+                    circle.style.width = '20px';
+                    circle.style.height = '20px';
+                    circle.style.borderRadius = '50%';
+                    circle.style.backgroundColor = '#FFA07A';
+                    circle.style.left = `${j * 22 + 5}px`;
+                    circle.style.top = `${i * 22 + 5}px`;
+                    container.appendChild(circle);
+                }
+            }
+        }
+
+        function clearVisualization() {
+            const container = document.getElementById('visualization-container');
+            container.innerHTML = '';
+        }
     </script>
 </body>
 </html>
