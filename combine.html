@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Existing head content -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combining Like Terms - David Steckler</title>
+    <style>
+        /* Existing styles */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        /* ... (rest of your existing styles) ... */
+
+        /* New styles for interactive elements */
+        .term {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #3498db;
+            color: #fff;
+            border-radius: 5px;
+            cursor: grab;
+            user-select: none;
+        }
+        .term.dragging {
+            opacity: 0.5;
+        }
+        .bucket {
+            min-height: 60px;
+            padding: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+            text-align: center;
+        }
+        .bucket.over {
+            border-color: #3498db;
+            background-color: #e0f7ff;
+        }
+        .bucket-title {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        #result {
+            font-size: 1.2em;
+            margin-top: 20px;
+            background-color: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            color: #2e7d32;
+        }
+        #combine-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #2e7d32;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #combine-btn:hover {
+            background-color: #1b5e20;
+        }
+    </style>
+</head>
+<body>
+    <!-- Existing body content -->
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <!-- ... (navigation links) ... -->
+        </nav>
+    </header>
+
+    <div class="container">
+        <section id="main-content">
+            <h2>Combining Like Terms Interactive Activity</h2>
+            <p>Drag and drop the terms into the correct buckets to combine like terms.</p>
+
+            <div id="terms-container">
+                <!-- Terms to be dragged -->
+                <div class="term" draggable="true" data-term="2x">2x</div>
+                <div class="term" draggable="true" data-term="-3y">-3y</div>
+                <div class="term" draggable="true" data-term="5x">5x</div>
+                <div class="term" draggable="true" data-term="4">4</div>
+                <div class="term" draggable="true" data-term="6y">6y</div>
+                <div class="term" draggable="true" data-term="-2">-2</div>
+            </div>
+
+            <div id="buckets">
+                <!-- Buckets to drop terms into -->
+                <div class="bucket" data-type="x">
+                    <div class="bucket-title">x Terms</div>
+                </div>
+                <div class="bucket" data-type="y">
+                    <div class="bucket-title">y Terms</div>
+                </div>
+                <div class="bucket" data-type="constant">
+                    <div class="bucket-title">Constants</div>
+                </div>
+            </div>
+
+            <button id="combine-btn">Combine Like Terms</button>
+
+            <div id="result"></div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Existing script for menu toggle
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+
+        // New script for interactive combining like terms
+        (function() {
+            const terms = document.querySelectorAll('.term');
+            const buckets = document.querySelectorAll('.bucket');
+            let draggedTerm = null;
+
+            terms.forEach(term => {
+                term.addEventListener('dragstart', () => {
+                    draggedTerm = term;
+                    term.classList.add('dragging');
+                });
+
+                term.addEventListener('dragend', () => {
+                    term.classList.remove('dragging');
+                });
+            });
+
+            buckets.forEach(bucket => {
+                bucket.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    bucket.classList.add('over');
+                });
+
+                bucket.addEventListener('dragleave', () => {
+                    bucket.classList.remove('over');
+                });
+
+                bucket.addEventListener('drop', () => {
+                    bucket.classList.remove('over');
+                    if (draggedTerm) {
+                        const termType = getTermType(draggedTerm.dataset.term);
+                        if (termType === bucket.dataset.type) {
+                            bucket.appendChild(draggedTerm);
+                        } else {
+                            alert('This term does not belong in this bucket.');
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('combine-btn').addEventListener('click', () => {
+                const result = combineTerms();
+                document.getElementById('result').textContent = 'Result: ' + result;
+            });
+
+            function getTermType(term) {
+                if (term.includes('x')) return 'x';
+                if (term.includes('y')) return 'y';
+                return 'constant';
+            }
+
+            function combineTerms() {
+                const bucketData = {};
+                buckets.forEach(bucket => {
+                    const type = bucket.dataset.type;
+                    const terms = bucket.querySelectorAll('.term');
+                    let sum = 0;
+                    terms.forEach(term => {
+                        const value = parseTerm(term.dataset.term);
+                        sum += value;
+                    });
+                    if (sum !== 0) {
+                        bucketData[type] = sum;
+                    }
+                });
+
+                let resultStr = '';
+                for (const [type, coeff] of Object.entries(bucketData)) {
+                    let termStr = '';
+                    if (type === 'constant') {
+                        termStr = coeff.toString();
+                    } else {
+                        if (coeff === 1) {
+                            termStr = type;
+                        } else if (coeff === -1) {
+                            termStr = '-' + type;
+                        } else {
+                            termStr = coeff + type;
+                        }
+                    }
+                    if (resultStr && coeff > 0) {
+                        resultStr += ' + ' + termStr;
+                    } else if (resultStr && coeff < 0) {
+                        resultStr += ' - ' + termStr.substring(1);
+                    } else {
+                        resultStr += termStr;
+                    }
+                }
+                return resultStr || '0';
+            }
+
+            function parseTerm(term) {
+                let coeff = term.replace(/[xy]/, '');
+                if (coeff === '') {
+                    coeff = '1';
+                } else if (coeff === '-') {
+                    coeff = '-1';
+                }
+                return parseFloat(coeff);
+            }
+        })();
+    </script>
+</body>
+</html>
