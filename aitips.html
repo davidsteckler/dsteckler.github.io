@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Tips by David Steckler</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        header, footer {
+            background-color: #000;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            color: #fff;
+            margin: 0;
+        }
+        header h1 a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        nav a {
+            margin: 5px 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav.active {
+                display: flex;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+        /* Typography */
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        /* Practical Tips Styles */
+        .tip {
+            border-bottom: 1px solid #ccc;
+            padding: 15px 0;
+        }
+        .tip:last-child {
+            border-bottom: none;
+        }
+        .tip-title {
+            cursor: pointer;
+            position: relative;
+            padding-right: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        .tip-title::after {
+            content: '+';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            transition: transform 0.3s;
+            color: #2c3e50;
+        }
+        .tip-title.active::after {
+            transform: translateY(-50%) rotate(45deg);
+        }
+        .tip-content {
+            display: none;
+            padding: 10px 0 0 20px;
+        }
+        .tip-content p {
+            margin-bottom: 10px;
+        }
+        /* Emphasis Note */
+        .emphasis-note {
+            background-color: #eef;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            margin-top: 20px;
+            border-radius: 3px;
+            font-style: italic;
+        }
+        /* Additional Styles */
+        strong {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        em {
+            color: #2c3e50;
+            font-style: italic;
+        }
+        /* Prompt Display */
+        .prompt-display {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #e8f4fd;
+            border-left: 5px solid #3498db;
+            border-radius: 5px;
+            position: relative;
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background-color: #2980b9;
+        }
+        .prompt-display p {
+            margin: 0;
+        }
+        /* Table Styles */
+        table.example-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        table.example-table, th.example-th, td.example-td {
+            border: 1px solid #ccc;
+        }
+        th.example-th, td.example-td {
+            padding: 10px;
+            text-align: left;
+        }
+        th.example-th {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">David Steckler</a></h1>
+        <button class="menu-toggle">&#9776;</button>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="course.html">Course</a>
+            <a href="blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="testimonials.html">Testimonials</a>
+            <a href="search.html">Search</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Introduction Section -->
+        <section id="introduction">
+            <h2>Useful AI Tips</h2>
+            <p>
+                I've experimented with AI tools like ChatGPT, Gemini, Copilot, Claude, and Perplexity. Here are the universal tips I've learned. Hope they help you too.
+            </p>
+        </section>
+
+            <!-- Tip 1 -->
+            <div class="tip">
+                <div class="tip-title">1. Be Specific and Clear in Your Requests 📝</div>
+                <div class="tip-content">
+                    <p>Clearly state what you want to get precise answers.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip1-prompt-text')">Copy</button>
+                        <p id="tip1-prompt-text">"Tell me about programming."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip1-prompt-text2')">Copy</button>
+                        <p id="tip1-prompt-text2">"Explain the basics of programming in Python for a 7th-grade student."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 2 -->
+            <div class="tip">
+                <div class="tip-title">2. Provide Context When Necessary 🌍</div>
+                <div class="tip-content">
+                    <p>Giving background information helps the AI understand your request better.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip2-prompt-text')">Copy</button>
+                        <p id="tip2-prompt-text">"Explain variables."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip2-prompt-text2')">Copy</button>
+                        <p id="tip2-prompt-text2">"As a beginner in computer science, explain what variables are in programming."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 3 -->
+            <div class="tip">
+                <div class="tip-title">3. Break Complex Tasks into Smaller Steps 🧩</div>
+                <div class="tip-content">
+                    <p>Divide big questions into manageable parts.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip3-prompt-text')">Copy</button>
+                        <p id="tip3-prompt-text">"Teach me how to code."</p>
+                    </div>
+                    <!-- Improved Prompts -->
+                    <p><strong>Improved Prompts:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip3-prompt-text2')">Copy</button>
+                        <p id="tip3-prompt-text2">"What programming languages are suitable for beginners?"</p>
+                    </div>
+                    <div class="prompt-display" style="margin-top: 10px;">
+                        <button class="copy-button" onclick="copyPrompt('tip3-prompt-text3')">Copy</button>
+                        <p id="tip3-prompt-text3">"Provide a simple project idea to practice basic programming concepts."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 4 -->
+            <div class="tip">
+                <div class="tip-title">4. Use Examples to Illustrate Your Point 💡</div>
+                <div class="tip-content">
+                    <p>Examples help clarify your request and the AI's response.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip4-prompt-text')">Copy</button>
+                        <p id="tip4-prompt-text">"Explain loops."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip4-prompt-text2')">Copy</button>
+                        <p id="tip4-prompt-text2">"Explain how 'for loops' work in programming with an example in Python."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 5 -->
+            <div class="tip">
+                <div class="tip-title">5. Ask for Clarification if the Response is Unclear ❓</div>
+                <div class="tip-content">
+                    <p>If you don't understand the AI's answer, ask for more details.</p>
+                    <!-- Example Interaction -->
+                    <p><strong>AI's Response:</strong></p>
+                    <div class="prompt-display">
+                        <p>"Functions allow you to encapsulate code."</p>
+                    </div>
+                    <p><strong>Your Follow-up:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip5-prompt-text')">Copy</button>
+                        <p id="tip5-prompt-text">"Can you explain what 'encapsulate' means in this context?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 6 -->
+            <div class="tip">
+                <div class="tip-title">6. Specify the Desired Format or Structure 📄</div>
+                <div class="tip-content">
+                    <p>Let the AI know how you want the information presented.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip6-prompt-text')">Copy</button>
+                        <p id="tip6-prompt-text">"Tell me how to study effectively."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip6-prompt-text2')">Copy</button>
+                        <p id="tip6-prompt-text2">"List five bullet-point tips on how to study effectively for exams."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 7 -->
+            <div class="tip">
+                <div class="tip-title">7. Encourage Step-by-Step Reasoning for Complex Problems 🧮</div>
+                <div class="tip-content">
+                    <p>Ask the AI to break down the reasoning process.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip7-prompt-text')">Copy</button>
+                        <p id="tip7-prompt-text">"Solve this math problem: 3x + 5 = 20."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip7-prompt-text2')">Copy</button>
+                        <p id="tip7-prompt-text2">"Solve the equation 3x + 5 = 20 and explain each step."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 8 -->
+            <div class="tip">
+                <div class="tip-title">8. Be Aware of the Model's Knowledge Cutoff Date 📅</div>
+                <div class="tip-content">
+                    <p>The AI's knowledge may be limited to a certain date.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip8-prompt-text')">Copy</button>
+                        <p id="tip8-prompt-text">"Tell me about the latest advancements in AI."</p>
+                    </div>
+                    <!-- Adjusted Prompt -->
+                    <p><strong>Adjusted Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip8-prompt-text2')">Copy</button>
+                        <p id="tip8-prompt-text2">"As of your last update in 2021, what were the latest advancements in AI?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 9 -->
+            <div class="tip">
+                <div class="tip-title">9. Utilize System Prompts or Role-Playing 🎭</div>
+                <div class="tip-content">
+                    <p>Ask the AI to take on a role for specialized tasks.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip9-prompt-text')">Copy</button>
+                        <p id="tip9-prompt-text">"Give me study advice."</p>
+                    </div>
+                    <!-- Role-Playing Prompt -->
+                    <p><strong>Role-Playing Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip9-prompt-text2')">Copy</button>
+                        <p id="tip9-prompt-text2">"As an experienced teacher, provide me with study strategies for improving in mathematics."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 10 -->
+            <div class="tip">
+                <div class="tip-title">10. Explicitly State Any Constraints or Limitations 🚧</div>
+                <div class="tip-content">
+                    <p>Let the AI know about any specific requirements.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip10-prompt-text')">Copy</button>
+                        <p id="tip10-prompt-text">"Suggest some science projects."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip10-prompt-text2')">Copy</button>
+                        <p id="tip10-prompt-text2">"Suggest some computer science project ideas suitable for a 7th-grade student with limited resources."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 11 -->
+            <div class="tip">
+                <div class="tip-title">11. Ask for Alternative Viewpoints or Approaches 🔄</div>
+                <div class="tip-content">
+                    <p>Explore different perspectives by requesting them.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip11-prompt-text')">Copy</button>
+                        <p id="tip11-prompt-text">"Explain the importance of homework."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip11-prompt-text2')">Copy</button>
+                        <p id="tip11-prompt-text2">"Discuss both the advantages and disadvantages of homework for middle school students."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 12 -->
+            <div class="tip">
+                <div class="tip-title">12. Request Sources or References When Appropriate 📚</div>
+                <div class="tip-content">
+                    <p>Ask the AI to provide sources for its information.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip12-prompt-text')">Copy</button>
+                        <p id="tip12-prompt-text">"Tell me about the benefits of coding for students."</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip12-prompt-text2')">Copy</button>
+                        <p id="tip12-prompt-text2">"Provide information on the benefits of coding for students and cite your sources."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 13 -->
+            <div class="tip">
+                <div class="tip-title">13. Use Follow-Up Questions to Refine Responses 🔍</div>
+                <div class="tip-content">
+                    <p>Continue the conversation to get more detailed answers.</p>
+                    <!-- Example Interaction -->
+                    <p><strong>Initial Question:</strong></p>
+                    <div class="prompt-display">
+                        <p>"What is a function in programming?"</p>
+                    </div>
+                    <p><strong>AI's Response:</strong></p>
+                    <div class="prompt-display">
+                        <p>"A function is a block of code designed to perform a particular task."</p>
+                    </div>
+                    <p><strong>Follow-Up Question:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip13-prompt-text')">Copy</button>
+                        <p id="tip13-prompt-text">"Can you give me an example of a function in Python?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 14 -->
+            <div class="tip">
+                <div class="tip-title">14. Experiment with Different Phrasings of Your Question 📝</div>
+                <div class="tip-content">
+                    <p>If you're not getting the answer you need, try rewording your question.</p>
+                    <!-- Original Prompt -->
+                    <p><strong>Original Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip14-prompt-text')">Copy</button>
+                        <p id="tip14-prompt-text">"Why should I learn coding?"</p>
+                    </div>
+                    <!-- Rephrased Prompt -->
+                    <p><strong>Rephrased Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip14-prompt-text2')">Copy</button>
+                        <p id="tip14-prompt-text2">"Explain the benefits of learning to code for a middle school student."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 15 -->
+            <div class="tip">
+                <div class="tip-title">15. Be Mindful of Potential Biases in the Model's Responses ⚖️</div>
+                <div class="tip-content">
+                    <p>Acknowledge that AI might have biases based on its training data.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Regular Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip15-prompt-text')">Copy</button>
+                        <p id="tip15-prompt-text">"Are video games bad for students?"</p>
+                    </div>
+                    <!-- Improved Prompt -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip15-prompt-text2')">Copy</button>
+                        <p id="tip15-prompt-text2">"Discuss both the positive and negative effects of video games on students, considering potential biases."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 16 -->
+            <div class="tip">
+                <div class="tip-title">16. Utilize Formatting Options 🖋️</div>
+                <div class="tip-content">
+                    <p>Ask the AI to format its response with bold or italic text, bullet points, or tables.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Improved Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip16-prompt-text')">Copy</button>
+                        <p id="tip16-prompt-text">"List the benefits of learning programming using bullet points and bold the key terms."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 17 -->
+            <div class="tip">
+                <div class="tip-title">17. Customize the Tone or Style 🗣️</div>
+                <div class="tip-content">
+                    <p>Ask the AI to respond in the voice or style of someone you enjoy.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Example Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip17-prompt-text')">Copy</button>
+                        <p id="tip17-prompt-text">"Explain algebra concepts as if you're a middle schooler who hates math but loves basketball, in a funny but not cringe way."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 18 -->
+            <div class="tip">
+                <div class="tip-title">18. Generate Extensive Idea Lists 💡</div>
+                <div class="tip-content">
+                    <p>Ask the AI to create a list of 10-50 ideas on a topic you're interested in.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Example Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip18-prompt-text')">Copy</button>
+                        <p id="tip18-prompt-text">"Generate 20 project ideas for a 7th-grade computer science class."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 19 -->
+            <div class="tip">
+                <div class="tip-title">19. Seek Advice from Imagined Mentors 🎓</div>
+                <div class="tip-content">
+                    <p>Ask the AI to respond as if it were a mentor to gain new perspectives.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Example Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip19-prompt-text')">Copy</button>
+                        <p id="tip19-prompt-text">"As a wise mentor, convince me why I should work hard in school. I'm bored and need the real truth—no sugarcoating."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip 20 -->
+            <div class="tip">
+                <div class="tip-title">20. Use AI to Solve Un-Googleable Problems 🕵️‍♂️</div>
+                <div class="tip-content">
+                    <p>When you can't find answers through a regular search, turn to AI for help.</p>
+                    <!-- Prompt Display -->
+                    <p><strong>Example Prompt:</strong></p>
+                    <div class="prompt-display">
+                        <button class="copy-button" onclick="copyPrompt('tip20-prompt-text')">Copy</button>
+                        <p id="tip20-prompt-text">"I'm trying to understand why my code isn't working. Here's what I've written: [insert code]. Can you help me find the issue?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emphasis Note -->
+            <div class="emphasis-note">
+                💡 These tips will help you unlock the full potential of AI tools. Remember, the more effectively you communicate, the better the AI can assist you.
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 David Steckler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Function to toggle tip content visibility
+        document.querySelectorAll('.tip-title').forEach(function(title) {
+            title.addEventListener('click', function() {
+                this.classList.toggle('active');
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        });
+
+        // Copy prompt to clipboard
+        function copyPrompt(promptId) {
+            var promptText = document.getElementById(promptId).textContent;
+            navigator.clipboard.writeText(promptText).then(function() {
+                alert('Prompt copied to clipboard!');
+            }, function(err) {
+                alert('Could not copy prompt: ', err);
+            });
+        }
+
+        // Menu Toggle for Mobile
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('nav').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
