@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Cross-Platform Voice-to-Text Recorder - David Steckler</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Voice-to-Text Recorder - David Steckler</title>
     <style>
-        /* (Your existing CSS styles) */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -35,12 +34,89 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        h2 {
+        h1, h2, h3 {
             color: #333;
             margin-bottom: 10px;
         }
         p {
             margin-bottom: 20px;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin: 0 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+            position: relative;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .menu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            background-color: #fff;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            z-index: 1;
+        }
+        .menu a {
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .menu a:hover {
+            background-color: #f1f1f1;
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #fff;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        @media (max-width: 600px) {
+            nav {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            nav.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                background-color: #000;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                z-index: 1;
+            }
+            nav a {
+                flex: 1 0 100%;
+                margin: 5px 0;
+                padding: 10px;
+                color: #fff;
+            }
         }
         #output {
             width: 100%;
@@ -78,16 +154,16 @@
             animation: pulse 1s infinite;
         }
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
-        #status {
-            margin-top: 10px;
-            font-style: italic;
-            color: #666;
-        }
-        /* Add any additional styles as needed */
     </style>
 </head>
 <body>
@@ -95,7 +171,6 @@
         <h1><a href="index.html">David Steckler</a></h1>
         <button class="menu-toggle">&#9776;</button>
         <nav>
-            <!-- (Your existing navigation links) -->
             <a href="index.html" id="home-link">Home</a>
             <a href="about.html" id="about-link">About</a>
             <a href="course.html" id="course-link">Course</a>
@@ -107,14 +182,13 @@
     </header>
 
     <div class="container">
-        <h2>Cross-Platform Voice-to-Text Recorder</h2>
+        <h2>Real-time Voice-to-Text Recorder</h2>
         <p>Click "Start Recording" to begin speaking. Your words will appear in real-time below.</p>
         <div id="recordingIndicator"></div>
         <button id="startBtn">Start Recording</button>
         <button id="stopBtn" disabled>Stop Recording</button>
         <button id="copyBtn">Copy Text</button>
         <div id="output" contenteditable="true"></div>
-        <div id="status"></div>
     </div>
 
     <footer>
@@ -122,12 +196,10 @@
     </footer>
 
     <script>
-        // Toggle navigation menu on small screens
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('nav').classList.toggle('active');
         });
 
-        // Set the active link in the navigation
         function setActiveLink() {
             var path = window.location.pathname;
             var page = path.split("/").pop();
@@ -138,6 +210,7 @@
                 activeLink.classList.add('active');
             }
         }
+
         setActiveLink();
 
         const startBtn = document.getElementById('startBtn');
@@ -145,65 +218,75 @@
         const copyBtn = document.getElementById('copyBtn');
         const output = document.getElementById('output');
         const recordingIndicator = document.getElementById('recordingIndicator');
-        const statusDiv = document.getElementById('status');
 
         let recognition;
-        let isRecording = false;
+        let audioContext;
+        let analyser;
+        let microphone;
 
-        function initializeSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
-            if (!SpeechRecognition) {
-                startBtn.disabled = true;
-                statusDiv.textContent = 'Speech recognition is not supported in this browser. Please use the latest version of Chrome, Edge, or Firefox.';
-                return false;
-            }
-
-            recognition = new SpeechRecognition();
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'en-US';  // Set the language explicitly
 
-            recognition.onstart = function() {
-                statusDiv.textContent = 'Speech recognition started. Speak now.';
-                recordingIndicator.classList.add('active');
-                isRecording = true;
-            };
-
-            recognition.onerror = function(event) {
-                console.error('Speech recognition error', event.error);
-                statusDiv.textContent = 'Error: ' + event.error;
-                if (event.error === 'not-allowed') {
-                    statusDiv.textContent += ' Microphone access is required. Please allow microphone access and try again.';
-                }
-                stopRecording();
-            };
-
-            recognition.onend = function() {
-                statusDiv.textContent = 'Speech recognition ended.';
-                stopRecording();
-            };
-
-            recognition.onresult = function(event) {
+            recognition.onresult = (event) => {
                 let interimTranscript = '';
                 let finalTranscript = '';
 
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcript = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
+                        finalTranscript += transcript + ' ';
                     } else {
-                        interimTranscript += event.results[i][0].transcript;
+                        interimTranscript += transcript;
                     }
                 }
 
                 updateOutput(finalTranscript, interimTranscript);
             };
 
-            return true;
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
+            };
+
+            startBtn.onclick = () => {
+                recognition.start();
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                recordingIndicator.classList.add('active');
+                startAudioVisualization();
+            };
+
+            stopBtn.onclick = () => {
+                recognition.stop();
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                recordingIndicator.classList.remove('active');
+                stopAudioVisualization();
+            };
+
+            copyBtn.onclick = () => {
+                const range = document.createRange();
+                range.selectNodeContents(output);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('copy');
+                selection.removeAllRanges();
+                alert('Text copied to clipboard!');
+            };
+        } else {
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+            copyBtn.style.display = 'none';
+            output.textContent = 'Web Speech API is not supported in this browser. Please try using Google Chrome or Microsoft Edge.';
         }
 
         function updateOutput(finalTranscript, interimTranscript) {
             if (finalTranscript) {
-                output.innerHTML += finalTranscript + ' ';
+                const finalSpan = document.createElement('span');
+                finalSpan.textContent = finalTranscript;
+                output.appendChild(finalSpan);
             }
 
             let interimSpan = output.querySelector('#interimOutput');
@@ -214,44 +297,55 @@
             }
             interimSpan.textContent = interimTranscript;
 
+            // Place the cursor at the end of the text
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.setStart(output, output.childNodes.length);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            // Scroll to the bottom
             output.scrollTop = output.scrollHeight;
         }
 
-        function startRecording() {
-            if (!recognition && !initializeSpeechRecognition()) {
-                return;
+        function startAudioVisualization() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        visualize();
+                    })
+                    .catch(err => {
+                        console.error('Error accessing microphone:', err);
+                    });
             }
-            recognition.start();
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-            isRecording = true;
         }
 
-        function stopRecording() {
-            if (recognition && isRecording) {
-                recognition.stop();
+        function stopAudioVisualization() {
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+                analyser = null;
+                microphone = null;
             }
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            recordingIndicator.classList.remove('active');
-            isRecording = false;
         }
 
-        startBtn.addEventListener('click', startRecording);
-        stopBtn.addEventListener('click', stopRecording);
+        function visualize() {
+            if (!analyser) return;
 
-        copyBtn.addEventListener('click', function() {
-            const text = output.innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                statusDiv.textContent = 'Text copied to clipboard!';
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                statusDiv.textContent = 'Failed to copy text. Please try selecting and copying manually.';
-            });
-        });
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
 
-        // Initialize speech recognition
-        initializeSpeechRecognition();
+            const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+            const intensity = Math.min(average / 128, 1);
+            recordingIndicator.style.transform = `scale(${1 + intensity * 0.5})`;
+
+            requestAnimationFrame(visualize);
+        }
     </script>
 </body>
 </html>
