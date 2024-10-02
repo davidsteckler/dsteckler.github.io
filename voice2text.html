@@ -132,6 +132,30 @@
             margin: 10px;
             cursor: pointer;
         }
+        #recordingIndicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        #recordingIndicator.active {
+            background-color: #ff0000;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -152,8 +176,10 @@
     <div class="container">
         <h2>Voice-to-Text Recorder</h2>
         <p>Click "Start Recording" to begin speaking. Your words will appear in the text area below.</p>
+        <div id="recordingIndicator"></div>
         <button id="startBtn">Start Recording</button>
         <button id="stopBtn" disabled>Stop Recording</button>
+        <button id="copyBtn">Copy Text</button>
         <textarea id="output" readonly placeholder="Your recorded text will appear here..."></textarea>
     </div>
 
@@ -181,9 +207,14 @@
 
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const copyBtn = document.getElementById('copyBtn');
         const output = document.getElementById('output');
+        const recordingIndicator = document.getElementById('recordingIndicator');
 
         let recognition;
+        let audioContext;
+        let analyser;
+        let microphone;
 
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
@@ -191,18 +222,17 @@
             recognition.interimResults = true;
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
                 let finalTranscript = '';
 
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
+                        finalTranscript += event.results[i][0].transcript + ' ';
                     }
                 }
 
-                output.value = finalTranscript + interimTranscript;
+                if (finalTranscript) {
+                    output.value += finalTranscript;
+                }
             };
 
             recognition.onerror = (event) => {
@@ -213,17 +243,66 @@
                 recognition.start();
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
+                recordingIndicator.classList.add('active');
+                startAudioVisualization();
             };
 
             stopBtn.onclick = () => {
                 recognition.stop();
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
+                recordingIndicator.classList.remove('active');
+                stopAudioVisualization();
+            };
+
+            copyBtn.onclick = () => {
+                output.select();
+                document.execCommand('copy');
+                alert('Text copied to clipboard!');
             };
         } else {
             startBtn.style.display = 'none';
             stopBtn.style.display = 'none';
+            copyBtn.style.display = 'none';
             output.value = 'Web Speech API is not supported in this browser. Please try using Google Chrome or Microsoft Edge.';
+        }
+
+        function startAudioVisualization() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        visualize();
+                    })
+                    .catch(err => {
+                        console.error('Error accessing microphone:', err);
+                    });
+            }
+        }
+
+        function stopAudioVisualization() {
+            if (audioContext) {
+                audioContext.close();
+                audioContext = null;
+                analyser = null;
+                microphone = null;
+            }
+        }
+
+        function visualize() {
+            if (!analyser) return;
+
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(dataArray);
+
+            const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+            const intensity = Math.min(average / 128, 1);
+            recordingIndicator.style.transform = `scale(${1 + intensity * 0.5})`;
+
+            requestAnimationFrame(visualize);
         }
     </script>
 </body>
