@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-time Voice-to-Text Recorder - David Steckler</title>
+    <title>Cross-Platform Voice-to-Text Recorder - David Steckler</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -182,7 +182,7 @@
     </header>
 
     <div class="container">
-        <h2>Real-time Voice-to-Text Recorder</h2>
+        <h2>Cross-Platform Voice-to-Text Recorder</h2>
         <p>Click "Start Recording" to begin speaking. Your words will appear in real-time below.</p>
         <div id="recordingIndicator"></div>
         <button id="startBtn">Start Recording</button>
@@ -224,8 +224,10 @@
         let analyser;
         let microphone;
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
+        // Check for SpeechRecognition support
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
 
@@ -247,6 +249,9 @@
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error', event.error);
+                if (event.error === 'not-allowed') {
+                    alert('Microphone access is required for speech recognition. Please allow microphone access and try again.');
+                }
             };
 
             startBtn.onclick = () => {
@@ -266,20 +271,18 @@
             };
 
             copyBtn.onclick = () => {
-                const range = document.createRange();
-                range.selectNodeContents(output);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                document.execCommand('copy');
-                selection.removeAllRanges();
-                alert('Text copied to clipboard!');
+                const text = output.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Text copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
             };
         } else {
             startBtn.style.display = 'none';
             stopBtn.style.display = 'none';
             copyBtn.style.display = 'none';
-            output.textContent = 'Web Speech API is not supported in this browser. Please try using Google Chrome or Microsoft Edge.';
+            output.textContent = 'Speech recognition is not supported in this browser. Please try using Google Chrome or a more recent version of Microsoft Edge.';
         }
 
         function updateOutput(finalTranscript, interimTranscript) {
@@ -298,12 +301,14 @@
             interimSpan.textContent = interimTranscript;
 
             // Place the cursor at the end of the text
-            const range = document.createRange();
-            const sel = window.getSelection();
-            range.setStart(output, output.childNodes.length);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
+            if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+                var range = document.createRange();
+                range.selectNodeContents(output);
+                range.collapse(false);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
 
             // Scroll to the bottom
             output.scrollTop = output.scrollHeight;
@@ -321,6 +326,7 @@
                     })
                     .catch(err => {
                         console.error('Error accessing microphone:', err);
+                        alert('Microphone access is required for audio visualization. Please allow microphone access and try again.');
                     });
             }
         }
