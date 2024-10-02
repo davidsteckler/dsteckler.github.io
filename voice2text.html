@@ -212,12 +212,12 @@
         const recordingIndicator = document.getElementById('recordingIndicator');
 
         let recognition;
-        let audioContext;
-        let analyser;
-        let microphone;
 
-        if ('webkitSpeechRecognition' in window) {
-            recognition = new webkitSpeechRecognition();
+        // Check for SpeechRecognition support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
 
@@ -237,22 +237,19 @@
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error', event.error);
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                stopRecording();
             };
 
             startBtn.onclick = () => {
-                recognition.start();
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
-                recordingIndicator.classList.add('active');
-                startAudioVisualization();
+                startRecording();
             };
 
             stopBtn.onclick = () => {
-                recognition.stop();
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
-                recordingIndicator.classList.remove('active');
-                stopAudioVisualization();
+                stopRecording();
             };
 
             copyBtn.onclick = () => {
@@ -264,45 +261,21 @@
             startBtn.style.display = 'none';
             stopBtn.style.display = 'none';
             copyBtn.style.display = 'none';
-            output.value = 'Web Speech API is not supported in this browser. Please try using Google Chrome or Microsoft Edge.';
+            output.value = 'Speech recognition is not supported in this browser. Please try using Google Chrome, Microsoft Edge, or Safari.';
         }
 
-        function startAudioVisualization() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        microphone = audioContext.createMediaStreamSource(stream);
-                        microphone.connect(analyser);
-                        visualize();
-                    })
-                    .catch(err => {
-                        console.error('Error accessing microphone:', err);
-                    });
-            }
+        function startRecording() {
+            recognition.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            recordingIndicator.classList.add('active');
         }
 
-        function stopAudioVisualization() {
-            if (audioContext) {
-                audioContext.close();
-                audioContext = null;
-                analyser = null;
-                microphone = null;
-            }
-        }
-
-        function visualize() {
-            if (!analyser) return;
-
-            const dataArray = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(dataArray);
-
-            const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-            const intensity = Math.min(average / 128, 1);
-            recordingIndicator.style.transform = `scale(${1 + intensity * 0.5})`;
-
-            requestAnimationFrame(visualize);
+        function stopRecording() {
+            recognition.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            recordingIndicator.classList.remove('active');
         }
     </script>
 </body>
