@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracy's Grid World</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .grid-world {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #000;
+            position: relative;
+            margin: 20px auto;
+            cursor: crosshair;
+        }
+        .grid-line {
+            position: absolute;
+            background-color: #ccc;
+        }
+        .vertical {
+            width: 1px;
+            height: 100%;
+        }
+        .horizontal {
+            width: 100%;
+            height: 1px;
+        }
+        .axis-line {
+            background-color: #000;
+            z-index: 1;
+        }
+        .axis-label {
+            position: absolute;
+            font-size: 12px;
+        }
+        #quizContainer, #interactiveContainer {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #tracy {
+            width: 10px;
+            height: 10px;
+            background-color: green;
+            border-radius: 50%;
+            position: absolute;
+            top: 195px;
+            left: 195px;
+            transition: all 0.1s linear;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        #progressBar {
+            width: 100%;
+            background-color: #ddd;
+            margin-top: 10px;
+        }
+        #progressBar div {
+            width: 0;
+            height: 30px;
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+        #tracyCoordinates {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .learning-objective {
+            background-color: #e9f7ef;
+            padding: 10px;
+            border-left: 5px solid #27ae60;
+            margin-bottom: 15px;
+        }
+        .concept-explanation {
+            background-color: #eaf2f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tracy's Grid World</h1>
+    
+    <div class="learning-objective">
+        <h3>Learning Objectives:</h3>
+        <ol>
+            <li>Understand the coordinate system in Tracy's Grid World</li>
+            <li>Learn to locate and move Tracy using x and y coordinates</li>
+            <li>Visualize how coordinate changes affect Tracy's position</li>
+            <li>Apply knowledge of coordinates to solve practical problems</li>
+        </ol>
+    </div>
+
+    <h2>Understanding the Grid</h2>
+    <p>Tracy lives in a grid world that is 400 pixels wide x 400 pixels tall. Tracy always starts at the center of the canvas, at point (0,0). Click anywhere on the grid to move Tracy!</p>
+    
+    <div class="grid-world" id="gridWorld">
+        <div id="tracy"></div>
+        <div id="tracyCoordinates">(0, 0)</div>
+        <!-- Grid lines and labels will be added here by JavaScript -->
+    </div>
+    
+    <div id="interactiveContainer">
+        <p>Move Tracy using the sliders or input coordinates directly:</p>
+        <label for="xSlider">X: <span id="xValue">0</span></label>
+        <input type="range" id="xSlider" min="-200" max="200" value="0">
+        
+        <label for="ySlider">Y: <span id="yValue">0</span></label>
+        <input type="range" id="ySlider" min="-200" max="200" value="0">
+        
+        <p>Or input coordinates directly:</p>
+        <input type="number" id="xInput" placeholder="X coordinate">
+        <input type="number" id="yInput" placeholder="Y coordinate">
+        <button onclick="moveTracyToInput()">Move Tracy</button>
+        
+        <h3>Challenge</h3>
+        <p>Move Tracy to: <span id="targetCoords"></span></p>
+        <button onclick="startChallenge()">Start New Challenge</button>
+        <p id="challengeResult"></p>
+    </div>
+
+    <div class="concept-explanation">
+        <h3>Key Concepts:</h3>
+        <ul>
+            <li>The grid is 400x400 pixels, with each grid box being 20x20 pixels</li>
+            <li>The center (0,0) is in the middle of the grid</li>
+            <li>X-coordinates: Positive to the right, negative to the left</li>
+            <li>Y-coordinates: Positive upwards, negative downwards</li>
+            <li>Tracy can move beyond the visible grid (-200 to 200 for both x and y)</li>
+            <li>Each grid line represents a change of 20 in either x or y coordinate</li>
+            <li>You can use the command goto(x,y) to move Tracy to specific coordinates</li>
+        </ul>
+    </div>
+
+    <h2>Quiz</h2>
+    <div id="quizContainer">
+        <div id="question"></div>
+        <input type="text" id="answer" placeholder="Your answer">
+        <button onclick="checkAnswer()">Submit</button>
+        <button onclick="getHint()">Get Hint</button>
+        <div id="feedback"></div>
+        <div id="progressBar"><div></div></div>
+        <p id="questionCount"></p>
+    </div>
+
+    <script>
+        // Create grid lines and labels
+        function createGridLines() {
+            const gridWorld = document.getElementById('gridWorld');
+            for (let i = 0; i <= 20; i++) {
+                const vLine = document.createElement('div');
+                vLine.className = 'grid-line vertical';
+                vLine.style.left = `${i * 20}px`;
+                if (i === 10) vLine.classList.add('axis-line');
+                gridWorld.appendChild(vLine);
+
+                const hLine = document.createElement('div');
+                hLine.className = 'grid-line horizontal';
+                hLine.style.top = `${i * 20}px`;
+                if (i === 10) hLine.classList.add('axis-line');
+                gridWorld.appendChild(hLine);
+
+                if (i % 5 === 0 && i !== 10) {
+                    const xLabel = document.createElement('div');
+                    xLabel.className = 'axis-label';
+                    xLabel.style.left = `${i * 20}px`;
+                    xLabel.style.top = '205px';
+                    xLabel.textContent = (i - 10) * 20;
+                    gridWorld.appendChild(xLabel);
+
+                    const yLabel = document.createElement('div');
+                    yLabel.className = 'axis-label';
+                    yLabel.style.left = '205px';
+                    yLabel.style.top = `${400 - i * 20}px`;
+                    yLabel.textContent = (i - 10) * 20;
+                    gridWorld.appendChild(yLabel);
+                }
+            }
+        }
+
+        createGridLines();
+
+        // Interactive Tracy
+        const gridWorld = document.getElementById('gridWorld');
+        const tracy = document.getElementById('tracy');
+        const tracyCoords = document.getElementById('tracyCoordinates');
+        const xSlider = document.getElementById('xSlider');
+        const ySlider = document.getElementById('ySlider');
+        const xValue = document.getElementById('xValue');
+        const yValue = document.getElementById('yValue');
+
+        function updateTracyPosition(x, y) {
+            tracy.style.left = `${200 + x}px`;
+            tracy.style.top = `${200 - y}px`;
+            xValue.textContent = x;
+            yValue.textContent = y;
+            xSlider.value = x;
+            ySlider.value = y;
+            tracyCoords.textContent = `(${x}, ${y})`;
+
+            // Hide Tracy when she's off the grid
+            if (x < -200 || x > 200 || y < -200 || y > 200) {
+                tracy.style.opacity = '0';
+            } else {
+                tracy.style.opacity = '1';
+            }
+        }
+
+        xSlider.addEventListener('input', () => updateTracyPosition(parseInt(xSlider.value), parseInt(ySlider.value)));
+        ySlider.addEventListener('input', () => updateTracyPosition(parseInt(xSlider.value), parseInt(ySlider.value)));
+
+        function moveTracyToInput() {
+            const x = parseInt(document.getElementById('xInput').value);
+            const y = parseInt(document.getElementById('yInput').value);
+            if (!isNaN(x) && !isNaN(y)) {
+                updateTracyPosition(x, y);
+            } else {
+                alert("Please enter valid number coordinates.");
+            }
+        }
+
+        gridWorld.addEventListener('click', function(event) {
+            const rect = gridWorld.getBoundingClientRect();
+            const x = Math.round(event.clientX - rect.left - 200);
+            const y = Math.round(-(event.clientY - rect.top - 200));
+            updateTracyPosition(x, y);
+            alert(`Tracy moved to (${x}, ${y}) using goto(${x}, ${y})`);
+        });
+
+        // Challenge
+        let targetX, targetY;
+
+        function startChallenge() {
+            targetX = Math.floor(Math.random() * 401) - 200;
+            targetY = Math.floor(Math.random() * 401) - 200;
+            document.getElementById('targetCoords').textContent = `(${targetX}, ${targetY})`;
+            document.getElementById('challengeResult').textContent = '';
+        }
+
+        function checkChallenge() {
+            const currentX = parseInt(xSlider.value);
+            const currentY = parseInt(ySlider.value);
+            if (currentX === targetX && currentY === targetY) {
+                document.getElementById('challengeResult').textContent = "Congratulations! You've reached the target!";
+            }
+        }
+
+        xSlider.addEventListener('change', checkChallenge);
+        ySlider.addEventListener('change', checkChallenge);
+
+        // Quiz functionality
+        const questions = [
+            { 
+                q: "What is the x-coordinate of the right edge of the grid?", 
+                a: "200",
+                hint: "The grid is 400 pixels wide, and the center is at 0. How far is the edge from the center?"
+            },
+            { 
+                q: "What is the y-coordinate of the top edge of the grid?", 
+                a: "200",
+                hint: "The grid is 400 pixels tall, and the center is at 0. How far is the top edge from the center?"
+            },
+            { 
+                q: "How many pixels wide is each grid box?", 
+                a: "20",
+                hint: "The grid is 400 pixels wide and has 20 columns. What's 400 divided by 20?"
+            },
+            { 
+                q: "What are the coordinates of the center of the grid?", 
+                a: "0,0",
+                hint: "The center of the coordinate system is always at this point."
+            },
+            { 
+                q: "If Tracy moves 100 pixels to the right, what will her x-coordinate be?", 
+                a: "100",
+                hint: "Tracy starts at 0 and moves right. Right movement increases the x-coordinate."
+            },
+            { 
+                q: "How many grid boxes are there in total on the grid?", 
+                a: "400",
+                hint: "The grid is 20 boxes wide and 20 boxes tall. How many boxes is that in total?"
+            },
+            { 
+                q: "What is the y-coordinate of the bottom edge of the grid?", 
+                a: "-200",
+                hint: "The grid extends 200 pixels below the center. Remember, downward is negative for y-coordinates."
+            },
+            { 
+                q: "If Tracy is at (50, 30) and moves 70 pixels left, what will her new x-coordinate be?", 
+                a: "-20",
+                hint: "Start at 50, then move 70 units to the left (which means subtracting 70)."
+            },
+            { 
+                q: "How many pixels is it from the left edge to the right edge of the grid?", 
+                a: "400",
+                hint: "This is the total width of the grid."
+            },
+            { 
+                q: "If Tracy is at the point (-100, 150), in which quadrant of the grid is she located?", 
+                a: "2",
+                hint: "Remember: Quadrant 1 is (+,+), Quadrant 2 is (-,+), Quadrant 3 is (-,-), Quadrant 4 is (+,-)."
+            }
+        ];
+
+        let currentQuestion = 0;
+
+        function displayQuestion() {
+            document.getElementById('question').textContent = questions[currentQuestion].q;
+            document.getElementById('answer').value = '';
+            document.getElementById('feedback').textContent = '';
+            updateProgressBar();
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim().toLowerCase();
+            const correctAnswer = questions[currentQuestion].a.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                document.getElementById('feedback').textContent = "Correct! Great job!";
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    setTimeout(displayQuestion, 1000);
+                } else {
+                    document.getElementById('quizContainer').innerHTML = "<h3>Congratulations! You've completed the quiz. You've demonstrated a solid understanding of Tracy's Grid World!</h3>";
+                }
+            } else {
+                document.getElementById('feedback').textContent = "Not quite. Try again or use the hint for help!";
+            }
+        }
+
+        function getHint() {
+            document.getElementById('feedback').textContent = "Hint: " + questions[currentQuestion].hint;
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').firstChild.style.width = `${progress}%`;
+            document.getElementById('progressBar').firstChild.textContent = `${Math.round(progress)}%`;
+            document.getElementById('questionCount').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+        }
+
+        displayQuestion();
+        startChallenge();
+
+        // Initialize Tracy's position
+        updateTracyPosition(0, 0);
+
+        // Add event listener for grid clicks
+        gridWorld.addEventListener('click', function(event) {
+            const rect = gridWorld.getBoundingClientRect();
+            const x = Math.round(event.clientX - rect.left - 200);
+            const y = Math.round(-(event.clientY - rect.top - 200));
+            updateTracyPosition(x, y);
+            alert(`Tracy moved to (${x}, ${y}) using goto(${x}, ${y})`);
+        });
+
+        // Add event listeners for sliders with smooth movement
+        xSlider.addEventListener('input', function() {
+            updateTracyPosition(parseInt(this.value), parseInt(ySlider.value));
+        });
+
+        ySlider.addEventListener('input', function() {
+            updateTracyPosition(parseInt(xSlider.value), parseInt(this.value));
+        });
+
+        // Function to move Tracy based on input coordinates
+        function moveTracyToInput() {
+            const x = parseInt(document.getElementById('xInput').value);
+            const y = parseInt(document.getElementById('yInput').value);
+            if (!isNaN(x) && !isNaN(y)) {
+                updateTracyPosition(x, y);
+            } else {
+                alert("Please enter valid number coordinates.");
+            }
+        }
+
+        // Initialize the challenge
+        startChallenge();
+
+        // Add event listener for challenge completion
+        xSlider.addEventListener('change', checkChallenge);
+        ySlider.addEventListener('change', checkChallenge);
+    </script>
+</body>
+</html>
