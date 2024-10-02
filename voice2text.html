@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-time Voice-to-Text Recorder - David Steckler</title>
+    <title>Voice-to-Text Recorder - David Steckler</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -125,14 +125,6 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 16px;
-            line-height: 1.5;
-            text-align: left;
-            overflow-y: auto;
-        }
-        #interimOutput {
-            color: #888;
-            font-style: italic;
         }
         button {
             font-size: 16px;
@@ -182,13 +174,13 @@
     </header>
 
     <div class="container">
-        <h2>Real-time Voice-to-Text Recorder</h2>
-        <p>Click "Start Recording" to begin speaking. Your words will appear in real-time below.</p>
+        <h2>Voice-to-Text Recorder</h2>
+        <p>Click "Start Recording" to begin speaking. Your words will appear in the text area below.</p>
         <div id="recordingIndicator"></div>
         <button id="startBtn">Start Recording</button>
         <button id="stopBtn" disabled>Stop Recording</button>
         <button id="copyBtn">Copy Text</button>
-        <div id="output" contenteditable="true"></div>
+        <textarea id="output" readonly placeholder="Your recorded text will appear here..."></textarea>
     </div>
 
     <footer>
@@ -230,19 +222,17 @@
             recognition.interimResults = true;
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
                 let finalTranscript = '';
 
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const transcript = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
-                        finalTranscript += transcript + ' ';
-                    } else {
-                        interimTranscript += transcript;
+                        finalTranscript += event.results[i][0].transcript + ' ';
                     }
                 }
 
-                updateOutput(finalTranscript, interimTranscript);
+                if (finalTranscript) {
+                    output.value += finalTranscript;
+                }
             };
 
             recognition.onerror = (event) => {
@@ -266,38 +256,15 @@
             };
 
             copyBtn.onclick = () => {
-                const range = document.createRange();
-                range.selectNodeContents(output);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
+                output.select();
                 document.execCommand('copy');
-                selection.removeAllRanges();
                 alert('Text copied to clipboard!');
             };
         } else {
             startBtn.style.display = 'none';
             stopBtn.style.display = 'none';
             copyBtn.style.display = 'none';
-            output.textContent = 'Web Speech API is not supported in this browser. Please try using Google Chrome or Microsoft Edge.';
-        }
-
-        function updateOutput(finalTranscript, interimTranscript) {
-            if (finalTranscript) {
-                const finalSpan = document.createElement('span');
-                finalSpan.textContent = finalTranscript;
-                output.appendChild(finalSpan);
-            }
-
-            let interimSpan = output.querySelector('#interimOutput');
-            if (!interimSpan) {
-                interimSpan = document.createElement('span');
-                interimSpan.id = 'interimOutput';
-                output.appendChild(interimSpan);
-            }
-            interimSpan.textContent = interimTranscript;
-
-            output.scrollTop = output.scrollHeight;
+            output.value = 'Web Speech API is not supported in this browser. Please try using Google Chrome or Microsoft Edge.';
         }
 
         function startAudioVisualization() {
