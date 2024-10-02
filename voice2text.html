@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cross-Platform Voice-to-Text Recorder - David Steckler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* (Your existing CSS styles) */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -34,89 +35,12 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        h1, h2, h3 {
+        h2 {
             color: #333;
             margin-bottom: 10px;
         }
         p {
             margin-bottom: 20px;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin: 0 10px;
-            text-transform: uppercase;
-            font-weight: bold;
-            position: relative;
-            padding: 5px 8px;
-            border-radius: 5px;
-        }
-        .active {
-            background-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .menu {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            background-color: #fff;
-            position: absolute;
-            top: 60px;
-            left: 0;
-            z-index: 1;
-        }
-        .menu a {
-            padding: 10px;
-            width: 100%;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-        .menu a:hover {
-            background-color: #f1f1f1;
-        }
-        .menu-toggle {
-            display: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: #fff;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        @media (max-width: 600px) {
-            nav {
-                display: none;
-            }
-            .menu-toggle {
-                display: block;
-            }
-            nav.active {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-                background-color: #000;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                z-index: 1;
-            }
-            nav a {
-                flex: 1 0 100%;
-                margin: 5px 0;
-                padding: 10px;
-                color: #fff;
-            }
         }
         #output {
             width: 100%;
@@ -154,21 +78,16 @@
             animation: pulse 1s infinite;
         }
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         #status {
             margin-top: 10px;
             font-style: italic;
             color: #666;
         }
+        /* Add any additional styles as needed */
     </style>
 </head>
 <body>
@@ -176,6 +95,7 @@
         <h1><a href="index.html">David Steckler</a></h1>
         <button class="menu-toggle">&#9776;</button>
         <nav>
+            <!-- (Your existing navigation links) -->
             <a href="index.html" id="home-link">Home</a>
             <a href="about.html" id="about-link">About</a>
             <a href="course.html" id="course-link">Course</a>
@@ -202,10 +122,12 @@
     </footer>
 
     <script>
+        // Toggle navigation menu on small screens
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('nav').classList.toggle('active');
         });
 
+        // Set the active link in the navigation
         function setActiveLink() {
             var path = window.location.pathname;
             var page = path.split("/").pop();
@@ -216,7 +138,6 @@
                 activeLink.classList.add('active');
             }
         }
-
         setActiveLink();
 
         const startBtn = document.getElementById('startBtn');
@@ -227,18 +148,17 @@
         const statusDiv = document.getElementById('status');
 
         let recognition;
+        let isRecording = false;
 
         function initializeSpeechRecognition() {
-            if ('webkitSpeechRecognition' in window) {
-                recognition = new webkitSpeechRecognition();
-            } else if ('SpeechRecognition' in window) {
-                recognition = new SpeechRecognition();
-            } else {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
+            if (!SpeechRecognition) {
                 startBtn.disabled = true;
-                statusDiv.textContent = 'Speech recognition is not supported in this browser. Please try using Google Chrome or a more recent version of Microsoft Edge.';
+                statusDiv.textContent = 'Speech recognition is not supported in this browser. Please use the latest version of Chrome, Edge, or Firefox.';
                 return false;
             }
 
+            recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = 'en-US';  // Set the language explicitly
@@ -246,6 +166,7 @@
             recognition.onstart = function() {
                 statusDiv.textContent = 'Speech recognition started. Speak now.';
                 recordingIndicator.classList.add('active');
+                isRecording = true;
             };
 
             recognition.onerror = function(event) {
@@ -303,15 +224,17 @@
             recognition.start();
             startBtn.disabled = true;
             stopBtn.disabled = false;
+            isRecording = true;
         }
 
         function stopRecording() {
-            if (recognition) {
+            if (recognition && isRecording) {
                 recognition.stop();
             }
             startBtn.disabled = false;
             stopBtn.disabled = true;
             recordingIndicator.classList.remove('active');
+            isRecording = false;
         }
 
         startBtn.addEventListener('click', startRecording);
