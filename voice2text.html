@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice-to-Text Recorder - David Steckler</title>
+    <title>Speech-to-Text Transcription</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -32,7 +32,6 @@
             padding: 20px;
             background-color: #fff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-align: center;
         }
         h1, h2, h3 {
             color: #333;
@@ -118,43 +117,32 @@
                 color: #fff;
             }
         }
+        /* Speech-to-Text specific styles */
         #output {
             width: 100%;
             height: 200px;
-            margin-top: 20px;
+            margin-bottom: 20px;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
         }
-        button {
-            font-size: 16px;
+        #startStop, #copy {
             padding: 10px 20px;
-            margin: 10px;
+            font-size: 16px;
             cursor: pointer;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
         }
-        #recordingIndicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #ccc;
-            display: inline-block;
-            margin-right: 10px;
-            vertical-align: middle;
+        #startStop:hover, #copy:hover {
+            background-color: #2980b9;
         }
-        #recordingIndicator.active {
-            background-color: #ff0000;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-            }
+        #status {
+            margin-top: 10px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -174,13 +162,12 @@
     </header>
 
     <div class="container">
-        <h2>Voice-to-Text Recorder</h2>
-        <p>Click "Start Recording" to begin speaking. Your words will appear in the text area below.</p>
-        <div id="recordingIndicator"></div>
-        <button id="startBtn">Start Recording</button>
-        <button id="stopBtn" disabled>Stop Recording</button>
-        <button id="copyBtn">Copy Text</button>
-        <textarea id="output" readonly placeholder="Your recorded text will appear here..."></textarea>
+        <h1>Speech-to-Text Transcription</h1>
+        <p>Click the "Start Listening" button and speak. Your words will be transcribed in real-time. Click "Stop Listening" when you're done.</p>
+        <textarea id="output" readonly placeholder="Your transcribed text will appear here..."></textarea>
+        <button id="startStop">Start Listening</button>
+        <button id="copy">Copy Text</button>
+        <p id="status"></p>
     </div>
 
     <footer>
@@ -188,10 +175,68 @@
     </footer>
 
     <script>
+        // Menu toggle functionality
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('nav').classList.toggle('active');
         });
 
+        // Speech recognition setup
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        const output = document.getElementById('output');
+        const startStop = document.getElementById('startStop');
+        const copyButton = document.getElementById('copy');
+        const status = document.getElementById('status');
+
+        let isListening = false;
+
+        startStop.addEventListener('click', toggleListening);
+        copyButton.addEventListener('click', copyText);
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            output.value = finalTranscript + interimTranscript;
+        };
+
+        recognition.onerror = (event) => {
+            status.textContent = 'Error occurred in recognition: ' + event.error;
+        };
+
+        function toggleListening() {
+            if (isListening) {
+                recognition.stop();
+                startStop.textContent = 'Start Listening';
+                status.textContent = 'Listening stopped.';
+            } else {
+                recognition.start();
+                startStop.textContent = 'Stop Listening';
+                status.textContent = 'Listening...';
+            }
+            isListening = !isListening;
+        }
+
+        function copyText() {
+            output.select();
+            document.execCommand('copy');
+            status.textContent = 'Text copied to clipboard!';
+            setTimeout(() => {
+                status.textContent = '';
+            }, 2000);
+        }
+
+        // Function to set active link
         function setActiveLink() {
             var path = window.location.pathname;
             var page = path.split("/").pop();
@@ -203,80 +248,8 @@
             }
         }
 
+        // Call the function to set the active link
         setActiveLink();
-
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const output = document.getElementById('output');
-        const recordingIndicator = document.getElementById('recordingIndicator');
-
-        let recognition;
-
-        // Check for SpeechRecognition support
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-
-            recognition.onresult = (event) => {
-                let finalTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
-                    }
-                }
-
-                if (finalTranscript) {
-                    output.value += finalTranscript;
-                }
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error', event.error);
-                stopRecording();
-            };
-
-            recognition.onend = () => {
-                stopRecording();
-            };
-
-            startBtn.onclick = () => {
-                startRecording();
-            };
-
-            stopBtn.onclick = () => {
-                stopRecording();
-            };
-
-            copyBtn.onclick = () => {
-                output.select();
-                document.execCommand('copy');
-                alert('Text copied to clipboard!');
-            };
-        } else {
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'none';
-            copyBtn.style.display = 'none';
-            output.value = 'Speech recognition is not supported in this browser. Please try using Google Chrome, Microsoft Edge, or Safari.';
-        }
-
-        function startRecording() {
-            recognition.start();
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-            recordingIndicator.classList.add('active');
-        }
-
-        function stopRecording() {
-            recognition.stop();
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            recordingIndicator.classList.remove('active');
-        }
     </script>
 </body>
 </html>
