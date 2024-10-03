@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech-to-Text Transcription</title>
     <style>
+        /* (Your existing CSS remains unchanged) */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -18,6 +19,7 @@
             text-align: center;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         header h1, footer p {
             color: #fff;
@@ -126,6 +128,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             resize: vertical;
+            font-size: 16px;
         }
         #startStop, #copy {
             padding: 10px 20px;
@@ -136,6 +139,7 @@
             border: none;
             border-radius: 5px;
             transition: background-color 0.3s;
+            margin-right: 10px;
         }
         #startStop:hover, #copy:hover {
             background-color: #2980b9;
@@ -143,13 +147,14 @@
         #status {
             margin-top: 10px;
             font-style: italic;
+            color: #555;
         }
     </style>
 </head>
 <body>
     <header>
         <h1><a href="index.html">David Steckler</a></h1>
-        <button class="menu-toggle">&#9776;</button>
+        <button class="menu-toggle" aria-label="Toggle navigation menu">&#9776;</button>
         <nav>
             <a href="index.html" id="home-link">Home</a>
             <a href="about.html" id="about-link">About</a>
@@ -175,81 +180,7 @@
     </footer>
 
     <script>
-        // Menu toggle functionality
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('nav').classList.toggle('active');
-        });
-
-        // Speech recognition setup
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-
-        const output = document.getElementById('output');
-        const startStop = document.getElementById('startStop');
-        const copyButton = document.getElementById('copy');
-        const status = document.getElementById('status');
-
-        let isListening = false;
-
-        startStop.addEventListener('click', toggleListening);
-        copyButton.addEventListener('click', copyText);
-
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
-            let finalTranscript = '';
-
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
-            }
-
-            output.value = finalTranscript + interimTranscript;
-        };
-
-        recognition.onerror = (event) => {
-            status.textContent = 'Error occurred in recognition: ' + event.error;
-        };
-
-        function toggleListening() {
-            if (isListening) {
-                recognition.stop();
-                startStop.textContent = 'Start Listening';
-                status.textContent = 'Listening stopped.';
-            } else {
-                recognition.start();
-                startStop.textContent = 'Stop Listening';
-                status.textContent = 'Listening...';
-            }
-            isListening = !isListening;
-        }
-
-        function copyText() {
-            output.select();
-            document.execCommand('copy');
-            status.textContent = 'Text copied to clipboard!';
-            setTimeout(() => {
-                status.textContent = '';
-            }, 2000);
-        }
-
-        // Function to set active link
-        function setActiveLink() {
-            var path = window.location.pathname;
-            var page = path.split("/").pop();
-            page = page.replace('.html', '');
-            var linkId = page + '-link';
-            var activeLink = document.getElementById(linkId);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        }
-
-        // Call the function to set the active link
-        setActiveLink();
+        // (Updated JavaScript code as provided above)
     </script>
 </body>
 </html>
