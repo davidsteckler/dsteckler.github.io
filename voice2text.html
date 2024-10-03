@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speech-to-Text Test</title>
+    <title>Annyang Speech-to-Text Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -33,92 +33,63 @@
     </style>
 </head>
 <body>
-    <h1>Speech-to-Text Test</h1>
+    <h1>Annyang Speech-to-Text Test</h1>
     <textarea id="output" readonly placeholder="Your transcribed text will appear here..."></textarea><br>
     <button id="startStop">Start Listening</button>
     <p id="status"></p>
 
+    <!-- Include Annyang library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
             const output = document.getElementById('output');
             const startStop = document.getElementById('startStop');
             const status = document.getElementById('status');
 
-            if (!SpeechRecognition) {
-                status.textContent = 'Sorry, your browser does not support Speech Recognition.';
-                startStop.disabled = true;
-                console.error('SpeechRecognition API not supported in this browser.');
-            } else {
-                const recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = 'en-US';
+            if (annyang) {
+                // Define a command to capture all speech
+                const commands = {
+                    '*text': function(text) {
+                        output.value += text + ' ';
+                    }
+                };
+
+                // Add the commands to annyang
+                annyang.addCommands(commands);
 
                 let isListening = false;
 
                 startStop.addEventListener('click', () => {
                     if (isListening) {
-                        recognition.stop();
+                        annyang.abort();
                         startStop.textContent = 'Start Listening';
                         status.textContent = 'Listening stopped.';
-                        console.log('Speech recognition stopped by user.');
+                        console.log('Annyang stopped by user.');
                     } else {
-                        try {
-                            recognition.start();
-                            startStop.textContent = 'Stop Listening';
-                            status.textContent = 'Listening...';
-                            console.log('Speech recognition started by user.');
-                        } catch (err) {
-                            console.error('Error starting speech recognition:', err);
-                        }
+                        annyang.start({ continuous: true });
+                        startStop.textContent = 'Stop Listening';
+                        status.textContent = 'Listening...';
+                        console.log('Annyang started by user.');
                     }
                     isListening = !isListening;
                 });
 
-                recognition.onresult = (event) => {
-                    console.log('Speech recognition result received.');
-                    let interimTranscript = '';
-                    let finalTranscript = '';
+                annyang.addCallback('error', function(err) {
+                    console.error('Annyang error:', err);
+                    status.textContent = 'An error occurred: ' + err.error;
+                });
 
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) {
-                            finalTranscript += event.results[i][0].transcript;
-                        } else {
-                            interimTranscript += event.results[i][0].transcript;
-                        }
-                    }
+                annyang.addCallback('errorPermissionBlocked', function() {
+                    status.textContent = 'Permission to use microphone is blocked.';
+                });
 
-                    output.value = finalTranscript + interimTranscript;
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('Speech Recognition Error:', event.error);
-                    switch(event.error) {
-                        case 'no-speech':
-                            status.textContent = 'No speech was detected. Please try again.';
-                            break;
-                        case 'audio-capture':
-                            status.textContent = 'No microphone was found. Please ensure that a microphone is connected.';
-                            break;
-                        case 'not-allowed':
-                            status.textContent = 'Permission to use microphone is denied. Please allow access.';
-                            break;
-                        default:
-                            status.textContent = 'Error occurred in recognition: ' + event.error;
-                    }
-                };
-
-                recognition.onend = () => {
-                    console.log('Speech recognition ended.');
-                    if (isListening) {
-                        recognition.start(); // Restart recognition
-                    } else {
-                        status.textContent = 'Listening stopped.';
-                        startStop.textContent = 'Start Listening';
-                    }
-                };
+                annyang.addCallback('errorPermissionDenied', function() {
+                    status.textContent = 'Permission to use microphone was denied.';
+                });
+            } else {
+                status.textContent = 'Sorry, your browser does not support Speech Recognition.';
+                startStop.disabled = true;
+                console.error('Annyang is not supported in this browser.');
             }
         });
     </script>
