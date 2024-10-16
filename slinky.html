@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Python Rules Lesson</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .content-section, .question-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        select {
+            padding: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+        .incorrect {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        code {
+            background-color: #f9f9f9;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .tip {
+            background-color: #dff0d8;
+            border-left: 5px solid #3c763d;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Python Rules Lesson</h1>
+    
+    <div class="content-section">
+        <h2>Let's Learn Python Rules!</h2>
+        <p>Python is a powerful and fun programming language. But to use it effectively, we need to understand its rules. Let's explore some key concepts!</p>
+    </div>
+
+    <div class="content-section">
+        <h2>Rule #1: Case Sensitivity</h2>
+        <p>Python is case-sensitive. This means <code>circle</code> and <code>Circle</code> are different! Always pay attention to uppercase and lowercase letters.</p>
+    </div>
+
+    <div class="question-section">
+        <p>In Python, the command <select id="q1"><option value="">Choose...</option><option value="circle">circle</option><option value="Circle">Circle</option></select>(35) will draw a circle, but <select id="q1b"><option value="">Choose...</option><option value="circle">circle</option><option value="Circle">Circle</option></select>(35) will cause an error.</p>
+        <button onclick="checkAnswer('q1')">Check</button>
+        <div id="feedback-q1"></div>
+    </div>
+
+    <div class="content-section">
+        <h2>Rule #2: Parentheses Matter</h2>
+        <p>In Python, parentheses <code>()</code> are crucial. They're used to call functions and pass arguments. Remember: <code>circle(35)</code> works, but <code>circle35</code> doesn't!</p>
+    </div>
+
+    <div class="question-section">
+        <p>To draw a circle with radius 50, you should write: <select id="q2"><option value="">Choose...</option><option value="circle50">circle50</option><option value="circle(50)">circle(50)</option><option value="circle 50">circle 50</option></select></p>
+        <button onclick="checkAnswer('q2')">Check</button>
+        <div id="feedback-q2"></div>
+    </div>
+
+    <div class="content-section">
+        <h2>Rule #3: Syntax Precision</h2>
+        <p>Every character matters in Python. Missing a closing parenthesis or adding an extra space can change how your code behaves or cause errors.</p>
+    </div>
+
+    <div class="question-section">
+        <p>Which of these commands is syntactically correct in Python? <select id="q3"><option value="">Choose...</option><option value="circle(35">circle(35</option><option value="circle(35)">circle(35)</option><option value="circle (35)">circle (35)</option></select></p>
+        <button onclick="checkAnswer('q3')">Check</button>
+        <div id="feedback-q3"></div>
+    </div>
+
+    <div class="content-section">
+        <h2>Rule #4: Indentation</h2>
+        <p>Python uses indentation to define code blocks. Consistent indentation is crucial for your code to work correctly.</p>
+        <p>To create an indent:</p>
+        <ul>
+            <li>Press the Tab key once, OR</li>
+            <li>Press the Spacebar key four times</li>
+        </ul>
+        <p>Here's an example of indented code:</p>
+        <pre><code>if True:
+    print("This line is indented")
+print("This line is not indented")</code></pre>
+        <p>Notice how the second line is indented (it starts further to the right). This indentation is crucial in Python!</p>
+    </div>
+
+    <div class="question-section">
+        <p>In Python, how do you create an indent? <select id="q4"><option value="">Choose...</option><option value="tab">Press the Tab key once</option><option value="space">Press the Spacebar key once</option><option value="both">Either press Tab once or Spacebar four times</option></select></p>
+        <button onclick="checkAnswer('q4')">Check</button>
+        <div id="feedback-q4"></div>
+    </div>
+
+    <div class="content-section">
+        <h2>Practice Time!</h2>
+        <p>Let's reinforce what we've learned with some practice questions.</p>
+    </div>
+
+    <div class="question-section">
+        <div id="random-question"></div>
+        <select id="random-answer">
+            <option value="">Choose an answer...</option>
+        </select>
+        <button onclick="checkRandomAnswer()">Check</button>
+        <button onclick="nextRandomQuestion()">Next Question</button>
+        <div id="feedback-random"></div>
+    </div>
+
+    <script>
+        const questions = {
+            q1: {correct: "circle", incorrect: "Circle", explanation: "Python is case-sensitive. 'circle' is the correct command, while 'Circle' would cause an error."},
+            q1b: {correct: "Circle", incorrect: "circle", explanation: "Python is case-sensitive. 'Circle' would cause an error, while 'circle' is the correct command."},
+            q2: {correct: "circle(50)", incorrect: ["circle50", "circle 50"], explanation: "In Python, we use parentheses to call functions and pass arguments. 'circle(50)' is the correct syntax."},
+            q3: {correct: "circle(35)", incorrect: ["circle(35", "circle (35)"], explanation: "Syntax precision is crucial. 'circle(35)' is correct, with no missing parentheses or extra spaces."},
+            q4: {correct: "both", incorrect: ["tab", "space"], explanation: "In Python, you can create an indent by either pressing the Tab key once or the Spacebar key four times."}
+        };
+
+        function checkAnswer(questionId) {
+            const selected = document.getElementById(questionId).value;
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            
+            if (selected === questions[questionId].correct) {
+                feedback.innerHTML = "<div class='correct'>✅ Correct!</div><div class='tip'>" + questions[questionId].explanation + "</div>";
+            } else {
+                feedback.innerHTML = "<div class='incorrect'>❌ Incorrect.</div><div class='tip'>" + questions[questionId].explanation + "</div>";
+            }
+        }
+
+        const randomQuestions = [
+            {
+                question: "In Python, to move forward by 100 units, you would write:",
+                options: ["forward100", "forward(100)", "Forward(100)"],
+                correct: "forward(100)",
+                explanation: "The correct syntax is 'forward(100)'. Remember to use parentheses and keep the command lowercase."
+            },
+            {
+                question: "Which of these is the correct way to draw a circle in Python?",
+                options: ["Circle(50)", "circle(50)", "circle 50"],
+                correct: "circle(50)",
+                explanation: "In Python, we use lowercase 'circle' and include parentheses: circle(50)."
+            },
+            {
+                question: "How would you correctly indent a line of code in Python?",
+                options: ["Start the line with four spaces", "Start the line with a tab", "Both of the above are correct"],
+                correct: "Both of the above are correct",
+                explanation: "In Python, you can indent using either four spaces or a tab. Consistency is key!"
+            }
+        ];
+
+        let currentRandomQuestion = 0;
+
+        function loadRandomQuestion() {
+            const question = randomQuestions[currentRandomQuestion];
+            document.getElementById("random-question").textContent = question.question;
+            const selectElement = document.getElementById("random-answer");
+            selectElement.innerHTML = '<option value="">Choose an answer...</option>';
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement("option");
+                optionElement.value = index;
+                optionElement.textContent = option;
+                selectElement.appendChild(optionElement);
+            });
+            document.getElementById("feedback-random").textContent = "";
+        }
+
+        function checkRandomAnswer() {
+            const selected = document.getElementById("random-answer").value;
+            const question = randomQuestions[currentRandomQuestion];
+            const feedback = document.getElementById("feedback-random");
+            
+            if (question.options[selected] === question.correct) {
+                feedback.innerHTML = "<div class='correct'>✅ Correct!</div><div class='tip'>" + question.explanation + "</div>";
+            } else {
+                feedback.innerHTML = "<div class='incorrect'>❌ Incorrect.</div><div class='tip'>" + question.explanation + "</div>";
+            }
+        }
+
+        function nextRandomQuestion() {
+            currentRandomQuestion = (currentRandomQuestion + 1) % randomQuestions.length;
+            loadRandomQuestion();
+        }
+
+        loadRandomQuestion();
+    </script>
+</body>
+</html>
