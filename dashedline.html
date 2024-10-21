@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracy's Drawing Adventure Quiz</title>
+    <style>
+        /* -------------------- CSS Enhancements -------------------- */
+
+        /* Reset some default styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f5;
+        }
+
+        header, footer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 { 
+            color: #2c3e50; 
+        }
+
+        .section {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+        }
+
+        .code-line {
+            display: block;
+            padding-left: 10px;
+        }
+
+        .line-number {
+            display: inline-block;
+            width: 30px;
+            text-align: right;
+            margin-right: 10px;
+            color: #75715e;
+        }
+
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        select { 
+            margin: 10px 0; 
+            padding: 12px; 
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #2c3e50;
+            font-size: 1em;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .correct { 
+            background-color: #d4edda; 
+            color: #155724; 
+        }
+
+        .incorrect { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+        }
+
+        .skill-learned {
+            font-weight: bold;
+            margin-top: 10px;
+            color: #3498db;
+        }
+
+        .question {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        code {
+            background-color: #f8f8f8;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Progress Bar Styles */
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: #3498db;
+            transition: width 0.3s ease;
+        }
+
+        /* Hint Button Styles */
+        .hint-button {
+            margin-top: 5px;
+            padding: 6px 12px;
+            background-color: #f1c40f;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .hint-button:hover {
+            background-color: #d4ac0d;
+        }
+
+        .hint {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fcf3cf;
+            border-left: 4px solid #f1c40f;
+            border-radius: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            select, button {
+                font-size: 0.9em;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            pre {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- -------------------- HTML Enhancements -------------------- -->
+
+    <header>
+        <h1>Tracy's Drawing Adventure Quiz</h1>
+    </header>
+
+    <main>
+        <!-- Introduction to Basic Concepts -->
+        <section class="section" aria-labelledby="introduction-title">
+            <h2 id="introduction-title">Introduction to Basic Drawing Commands</h2>
+            <p>Welcome to <strong>Tracy's Drawing Adventure Quiz</strong>! Here, you'll learn and test your understanding of basic drawing commands used to control Tracy's movements and drawings.</p>
+            <p>Master these commands to create intricate drawings and ensure your map is accurate.</p>
+            <ul>
+                <li><strong>penup()</strong>: Lifts Tracy's pen, allowing her to move without drawing. <em>Think "Sky writing!"</em></li>
+                <li><strong>pendown()</strong>: Lowers Tracy's pen, enabling her to draw while moving. <em>Think "Ground painting!"</em></li>
+                <li><strong>forward(distance)</strong>: Moves Tracy forward by the specified distance. <em>Think "Tracy's dance steps!"</em></li>
+                <li><strong>backward(distance)</strong>: Moves Tracy backward by the specified distance.</li>
+            </ul>
+            <p>Understanding how these commands interact is key to creating seamless and accurate drawings.</p>
+        </section>
+
+        <!-- Original Code Section -->
+        <section class="section" aria-labelledby="code-title">
+            <h2 id="code-title">Original Code</h2>
+            <pre>
+<span class="code-line"><span class="line-number">1</span>penup()</span>
+<span class="code-line"><span class="line-number">2</span>backward(200)</span>
+<span class="code-line"><span class="line-number">3</span>pendown()</span>
+<span class="code-line"><span class="line-number">4</span>forward(100)</span>
+<span class="code-line"><span class="line-number">5</span>penup()</span>
+<span class="code-line"><span class="line-number">6</span>forward(100)</span>
+<span class="code-line"><span class="line-number">7</span>pendown()</span>
+<span class="code-line"><span class="line-number">8</span>forward(100)</span>
+<span class="code-line"><span class="line-number">9</span>penup()</span>
+<span class="code-line"><span class="line-number">10</span>forward(100)</span>
+<span class="code-line"><span class="line-number">11</span>pendown()</span>
+            </pre>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="section" aria-labelledby="quiz-title">
+            <h2 id="quiz-title">Quiz Time!</h2>
+            <!-- Questions will be inserted here by JavaScript -->
+        </section>
+
+        <!-- Progress Section -->
+        <section class="section" aria-labelledby="progress-title">
+            <h2 id="progress-title">Progress</h2>
+            <div class="progress-bar" aria-label="Quiz Progress">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p id="progress-text">0 / 11 Completed</p>
+        </section>
+
+        <!-- Score and Reset Section -->
+        <section class="section" aria-labelledby="score-title">
+            <h2 id="score-title">Your Score: <span id="score">0</span> / 11</h2>
+            <button id="reset-quiz" aria-label="Retake Quiz">Retake Quiz</button>
+        </section>
+
+        <!-- Summary Section -->
+        <section id="summary" class="section" hidden aria-labelledby="summary-title">
+            <h2 id="summary-title">Quiz Summary</h2>
+            <p id="summary-message"></p>
+            <button id="show-answers" aria-label="Show Correct Answers">Show Correct Answers</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Tracy's Drawing Adventure</p>
+    </footer>
+
+    <!-- -------------------- JavaScript Enhancements -------------------- -->
+    <script>
+        // Questions Array
+        const questions = [
+            {
+                changeDescription: "Change Line 1: Remove the penup().",
+                question: "What happens when Tracy moves backward without lifting the pen? Is a line drawn across the canvas?",
+                correctAnswer: "A line is drawn backward across the canvas.",
+                options: [
+                    "No line is drawn because the pen is up.",
+                    "A line is drawn backward across the canvas.",
+                    "Tracy stops moving.",
+                    "The canvas clears itself."
+                ],
+                explanations: {
+                    "A line is drawn backward across the canvas.": "Correct! Removing penup() means the pen stays down, so moving backward draws a line.",
+                    "No line is drawn because the pen is up.": "Incorrect. Removing penup() keeps the pen down.",
+                    "Tracy stops moving.": "Incorrect. Tracy continues moving.",
+                    "The canvas clears itself.": "Incorrect. The canvas remains as is; no clearing happens."
+                },
+                skillLearned: "Removing penup() keeps the pen down, allowing Tracy to draw while moving."
+            },
+            {
+                changeDescription: "Change Line 2: Comment out backward(200) by adding a # before it.",
+                question: "What happened when you put #backward(200)? Where does Tracy start drawing if she doesn't move backward first?",
+                correctAnswer: "Tracy starts drawing from the original starting point.",
+                options: [
+                    "Tracy starts drawing from the original starting point.",
+                    "Tracy moves forward instead.",
+                    "Tracy doesn't draw anything.",
+                    "Tracy draws a circle."
+                ],
+                explanations: {
+                    "Tracy starts drawing from the original starting point.": "Correct! Commenting out backward(200) means Tracy doesn't move backward, so she starts drawing from where she is.",
+                    "Tracy moves forward instead.": "Incorrect. The command was commented out; no forward movement is triggered by this change.",
+                    "Tracy doesn't draw anything.": "Incorrect. Since the pen is down, moving forward would draw.",
+                    "Tracy draws a circle.": "Incorrect. No circular movement is specified."
+                },
+                skillLearned: "# before a command comments it out, preventing its execution."
+            },
+            {
+                changeDescription: "Change Line 3: Remove the pendown().",
+                question: "What happens when Tracy doesn't put the pen down before moving forward? Does she draw the next line?",
+                correctAnswer: "Tracy moves forward without drawing the next line.",
+                options: [
+                    "Tracy moves forward without drawing the next line.",
+                    "Tracy draws a thicker line.",
+                    "Tracy changes direction.",
+                    "Tracy stops moving."
+                ],
+                explanations: {
+                    "Tracy moves forward without drawing the next line.": "Correct! Without pendown(), the pen remains up, so moving forward doesn't draw.",
+                    "Tracy draws a thicker line.": "Incorrect. Without pendown(), no line is drawn.",
+                    "Tracy changes direction.": "Incorrect. Direction remains unless specified.",
+                    "Tracy stops moving.": "Incorrect. Tracy continues moving."
+                },
+                skillLearned: "Without pendown(), moving doesn't result in drawing."
+            },
+            {
+                changeDescription: "Change Line 4: Remove the pendown() after the first forward(100).",
+                question: "How does missing this pendown() affect the drawing when Tracy moves forward again?",
+                correctAnswer: "There is a gap in the drawing when Tracy moves forward again.",
+                options: [
+                    "There is a gap in the drawing when Tracy moves forward again.",
+                    "Tracy draws a continuous line without gaps.",
+                    "Tracy draws a dashed line.",
+                    "Tracy draws a circle."
+                ],
+                explanations: {
+                    "There is a gap in the drawing when Tracy moves forward again.": "Correct! Missing pendown() means the pen remains up, resulting in no drawing during the subsequent forward movement.",
+                    "Tracy draws a continuous line without gaps.": "Incorrect. Without pendown(), no line is drawn during movement.",
+                    "Tracy draws a dashed line.": "Incorrect. Dashed lines require specific commands.",
+                    "Tracy draws a circle.": "Incorrect. Spiral or circular drawing requires rotational commands."
+                },
+                skillLearned: "Missing pendown() causes gaps in the drawing during movement."
+            },
+            {
+                changeDescription: "Change Line 5: Replace penup() with pendown().",
+                question: "What happens if Tracy keeps the pen down instead of lifting it before moving forward? How does this change the lines drawn?",
+                correctAnswer: "Tracy draws continuous lines without gaps.",
+                options: [
+                    "Tracy draws continuous lines without gaps.",
+                    "Tracy stops drawing altogether.",
+                    "Tracy draws dotted lines.",
+                    "Tracy draws lines in random colors."
+                ],
+                explanations: {
+                    "Tracy draws continuous lines without gaps.": "Correct! Keeping the pen down ensures that all forward movements result in drawing without interruptions.",
+                    "Tracy stops drawing altogether.": "Incorrect. Keeping the pen down means continuous drawing.",
+                    "Tracy draws dotted lines.": "Incorrect. Dashed or dotted lines require specific commands.",
+                    "Tracy draws lines in random colors.": "Incorrect. Pen state doesn't affect color."
+                },
+                skillLearned: "Keeping the pen down ensures continuous drawing during movements."
+            },
+            {
+                changeDescription: "Change Line 6: Remove the forward(100).",
+                question: "How does missing this movement affect the drawing pattern? Are there gaps or overlaps?",
+                correctAnswer: "There is a gap in the drawing pattern.",
+                options: [
+                    "There is a gap in the drawing pattern.",
+                    "The drawing pattern remains unchanged.",
+                    "Tracy draws overlapping lines.",
+                    "Tracy draws in a spiral."
+                ],
+                explanations: {
+                    "There is a gap in the drawing pattern.": "Correct! Removing forward(100) means Tracy doesn't move, resulting in a gap before the next drawing command.",
+                    "The drawing pattern remains unchanged.": "Incorrect. The absence of movement alters the pattern.",
+                    "Tracy draws overlapping lines.": "Incorrect. Without movement, no new lines are drawn to overlap.",
+                    "Tracy draws in a spiral.": "Incorrect. Spiral drawing requires rotational movement."
+                },
+                skillLearned: "Missing movement commands results in gaps in the drawing."
+            },
+            {
+                changeDescription: "Change Line 7: Add a penup() before the second forward(100).",
+                question: "How does lifting the pen before this move affect the lines Tracy draws? Are there gaps between the lines?",
+                correctAnswer: "Tracy moves forward without drawing, creating a gap between the lines.",
+                options: [
+                    "Tracy moves forward without drawing, creating a gap between the lines.",
+                    "Tracy draws a thicker line.",
+                    "Tracy changes direction.",
+                    "Tracy draws a curved line."
+                ],
+                explanations: {
+                    "Tracy moves forward without drawing, creating a gap between the lines.": "Correct! Using penup() before moving ensures no line is drawn during that movement, resulting in a gap.",
+                    "Tracy draws a thicker line.": "Incorrect. Pen state doesn't affect thickness.",
+                    "Tracy changes direction.": "Incorrect. Direction remains unless specified.",
+                    "Tracy draws a curved line.": "Incorrect. Curved lines require specific movement commands."
+                },
+                skillLearned: "Using penup() before movement prevents drawing, creating gaps."
+            },
+            {
+                changeDescription: "Change Line 8: Replace pendown() with penup().",
+                question: "What happens when Tracy lifts the pen instead of putting it down before the next move? Does she draw any lines?",
+                correctAnswer: "Tracy does not draw any lines during the next move.",
+                options: [
+                    "Tracy does not draw any lines during the next move.",
+                    "Tracy draws a line in a different color.",
+                    "Tracy draws a thicker line.",
+                    "Tracy starts drawing dashed lines."
+                ],
+                explanations: {
+                    "Tracy does not draw any lines during the next move.": "Correct! Replacing pendown() with penup() ensures that the next movement does not result in drawing.",
+                    "Tracy draws a line in a different color.": "Incorrect. Pen state doesn't affect color.",
+                    "Tracy draws a thicker line.": "Incorrect. Pen state doesn't affect thickness.",
+                    "Tracy starts drawing dashed lines.": "Incorrect. Dashed lines require specific commands."
+                },
+                skillLearned: "Replacing pendown() with penup() stops drawing during movement."
+            },
+            {
+                changeDescription: "Change Line 9: Switch forward(100) to backward(100).",
+                question: "How does moving backward instead of forward change the drawing? Is the map still correct?",
+                correctAnswer: "Tracy draws lines in the opposite direction, maintaining the map's correctness.",
+                options: [
+                    "Tracy draws lines in the opposite direction, maintaining the map's correctness.",
+                    "Tracy stops drawing altogether.",
+                    "Tracy draws in random directions.",
+                    "Tracy draws overlapping lines."
+                ],
+                explanations: {
+                    "Tracy draws lines in the opposite direction, maintaining the map's correctness.": "Correct! Changing forward to backward reverses the direction of the line drawn but maintains the overall map structure.",
+                    "Tracy stops drawing altogether.": "Incorrect. Movement continues unless pen is up.",
+                    "Tracy draws in random directions.": "Incorrect. Direction is controlled by the command.",
+                    "Tracy draws overlapping lines.": "Incorrect. Direction change doesn't cause overlapping unless intentional."
+                },
+                skillLearned: "Switching movement commands changes the drawing direction without affecting correctness."
+            },
+            {
+                changeDescription: "Change Line 10: Increase the value in forward(100) to forward(150).",
+                question: "How does changing the movement distance affect the size and spacing of the lines Tracy draws?",
+                correctAnswer: "The lines Tracy draws become longer, increasing the size and spacing.",
+                options: [
+                    "The lines Tracy draws become longer, increasing the size and spacing.",
+                    "The lines become thicker.",
+                    "The lines become curved.",
+                    "The lines disappear."
+                ],
+                explanations: {
+                    "The lines Tracy draws become longer, increasing the size and spacing.": "Correct! Increasing the movement distance results in longer lines and greater spacing between them.",
+                    "The lines become thicker.": "Incorrect. Movement distance doesn't affect thickness.",
+                    "The lines become curved.": "Incorrect. Movement commands determine straightness unless otherwise specified.",
+                    "The lines disappear.": "Incorrect. Longer distance results in longer lines, not disappearing."
+                },
+                skillLearned: "Increasing movement distance extends the length and spacing of drawn lines."
+            },
+            {
+                changeDescription: "Change Line 11: Remove the last pendown().",
+                question: "What happens to the final part of the map when Tracy doesn't put the pen down? Is the last line missing?",
+                correctAnswer: "The final part of the map is missing the last line.",
+                options: [
+                    "The final part of the map is missing the last line.",
+                    "The last line becomes dashed.",
+                    "The last line is drawn thicker.",
+                    "The last line is colored differently."
+                ],
+                explanations: {
+                    "The final part of the map is missing the last line.": "Correct! Without pendown(), the pen remains up, so the final movement doesn't result in drawing.",
+                    "The last line becomes dashed.": "Incorrect. Dashed lines require specific commands.",
+                    "The last line is drawn thicker.": "Incorrect. Pen state doesn't affect thickness.",
+                    "The last line is colored differently.": "Incorrect. Pen state doesn't affect color."
+                },
+                skillLearned: "Not putting the pen down before the final move results in the last line not being drawn."
+            }
+        ];
+
+        // Variables to track score and progress
+        let totalScore = 0;
+        let answeredQuestions = 0;
+        const questionStates = Array.from({ length: questions.length }, () => ({ answered: false, correct: false }));
+
+        // Function to display all questions
+        function displayQuestions() {
+            const quizContainer = document.getElementById('quiz');
+            const fragment = document.createDocumentFragment();
+
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.id = `question-${index}`;
+                questionDiv.innerHTML = `
+                    <h3>${index + 1}. ${q.question}</h3>
+                    <select id="answer-${index}" aria-label="Question ${index + 1}">
+                        <option value="">Choose your answer!</option>
+                        ${q.options.map(option => `<option value="${option}">${option}</option>`).join('')}
+                    </select>
+                    <button class="hint-button" data-index="${index}" aria-label="Give Hint for Question ${index + 1}">Give Hint</button>
+                    <div id="feedback-${index}" class="feedback" aria-live="polite"></div>
+                    <div id="skill-learned-${index}" class="skill-learned"></div>
+                    <div id="hint-${index}" class="hint" hidden></div>
+                `;
+                fragment.appendChild(questionDiv);
+            });
+
+            quizContainer.appendChild(fragment);
+        }
+
+        // Function to check the user's answer
+        function checkAnswer(index) {
+            const selectedAnswer = document.getElementById(`answer-${index}`).value;
+            const question = questions[index];
+            const feedbackElement = document.getElementById(`feedback-${index}`);
+            const skillLearnedElement = document.getElementById(`skill-learned-${index}`);
+            const prevState = questionStates[index];
+
+            if (selectedAnswer === question.correctAnswer) {
+                feedbackElement.textContent = question.explanations[selectedAnswer];
+                feedbackElement.className = "feedback correct";
+                skillLearnedElement.textContent = question.skillLearned;
+
+                if (!prevState.answered || !prevState.correct) {
+                    totalScore += 1;
+                    if (!prevState.answered) {
+                        answeredQuestions += 1;
+                    }
+                    questionStates[index] = { answered: true, correct: true };
+                }
+            } else if (selectedAnswer) {
+                feedbackElement.textContent = question.explanations[selectedAnswer];
+                feedbackElement.className = "feedback incorrect";
+                skillLearnedElement.textContent = question.skillLearned;
+
+                if (!prevState.answered) {
+                    answeredQuestions += 1;
+                }
+
+                if (prevState.correct) {
+                    totalScore -= 1;
+                }
+
+                questionStates[index] = { answered: true, correct: false };
+            } else {
+                // No answer selected
+                if (prevState.answered) {
+                    if (prevState.correct) {
+                        totalScore -= 1;
+                    }
+                    answeredQuestions -= 1;
+                    questionStates[index] = { answered: false, correct: false };
+                }
+                feedbackElement.textContent = "";
+                feedbackElement.className = "feedback";
+                skillLearnedElement.textContent = "";
+            }
+
+            updateScore();
+            updateProgress();
+
+            // Check if all questions are answered
+            if (answeredQuestions === questions.length) {
+                displaySummary();
+            }
+        }
+
+        // Function to update the score display
+        function updateScore() {
+            const scoreElement = document.getElementById('score');
+            scoreElement.textContent = totalScore;
+        }
+
+        // Function to update the progress bar and text
+        function updateProgress() {
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const progressPercentage = ((answeredQuestions / questions.length) * 100).toFixed(0);
+            progressFill.style.width = `${progressPercentage}%`;
+            progressText.textContent = `${answeredQuestions} / ${questions.length} Completed`;
+        }
+
+        // Function to display the summary after quiz completion
+        function displaySummary() {
+            const summarySection = document.getElementById('summary');
+            const summaryMessage = document.getElementById('summary-message');
+
+            let message = `You scored ${totalScore} out of ${questions.length}. `;
+            if (totalScore === questions.length) {
+                message += "Excellent work! You've mastered the drawing commands!";
+            } else if (totalScore > questions.length / 2) {
+                message += "Good job! Keep practicing to improve even more.";
+            } else {
+                message += "Don't worry! Review the materials and try again.";
+            }
+
+            summaryMessage.textContent = message;
+            summarySection.hidden = false;
+
+            // Smooth scroll to summary
+            summarySection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Function to reset the quiz
+        function resetQuiz() {
+            totalScore = 0;
+            answeredQuestions = 0;
+            questionStates.forEach((state, index) => {
+                questionStates[index] = { answered: false, correct: false };
+                const answerSelect = document.getElementById(`answer-${index}`);
+                answerSelect.value = "";
+                document.getElementById(`feedback-${index}`).textContent = "";
+                document.getElementById(`feedback-${index}`).className = "feedback";
+                document.getElementById(`skill-learned-${index}`).textContent = "";
+                document.getElementById(`hint-${index}`).hidden = true;
+                const hintButton = document.querySelector(`.hint-button[data-index="${index}"]`);
+                if (hintButton) hintButton.textContent = "Give Hint";
+            });
+
+            updateScore();
+            updateProgress();
+
+            // Hide summary section
+            const summarySection = document.getElementById('summary');
+            summarySection.hidden = true;
+        }
+
+        // Function to toggle hints
+        function toggleHint(index) {
+            const hintElement = document.getElementById(`hint-${index}`);
+            const hintButton = document.querySelector(`.hint-button[data-index="${index}"]`);
+            if (hintElement.hidden) {
+                hintElement.textContent = `🔍 Hint: ${questions[index].skillLearned}`;
+                hintElement.hidden = false;
+                hintButton.textContent = "Hide Hint";
+            } else {
+                hintElement.hidden = true;
+                hintButton.textContent = "Give Hint";
+            }
+        }
+
+        // Function to show correct answers
+        function showAnswers() {
+            questions.forEach((question, index) => {
+                const answerSelect = document.getElementById(`answer-${index}`);
+                answerSelect.value = question.correctAnswer;
+                const feedbackElement = document.getElementById(`feedback-${index}`);
+                const skillLearnedElement = document.getElementById(`skill-learned-${index}`);
+                const hintElement = document.getElementById(`hint-${index}`);
+
+                feedbackElement.textContent = question.explanations[question.correctAnswer];
+                feedbackElement.className = "feedback correct";
+                skillLearnedElement.textContent = question.skillLearned;
+                hintElement.hidden = true;
+                const hintButton = document.querySelector(`.hint-button[data-index="${index}"]`);
+                if (hintButton) hintButton.textContent = "Give Hint";
+
+                // Update question state
+                if (!questionStates[index].correct) {
+                    if (questionStates[index].answered && !questionStates[index].correct) {
+                        // If previously answered incorrectly, adjust the score
+                        // Remove incorrect answer impact
+                        // No need to decrement because incorrect was already handled
+                        // Now setting to correct
+                    } else if (!questionStates[index].answered) {
+                        answeredQuestions += 1;
+                    }
+                    totalScore += 1;
+                    questionStates[index] = { answered: true, correct: true };
+                }
+            });
+
+            updateScore();
+            updateProgress();
+
+            // Disable the Show Answers button after use
+            const showAnswersButton = document.getElementById('show-answers');
+            showAnswersButton.disabled = true;
+
+            // Display summary if not already done
+            displaySummary();
+        }
+
+        // Event Listener for when the DOM content is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            displayQuestions();
+            updateProgress(); // Initialize progress bar
+
+            // Event delegation for handling answer changes and hint button clicks
+            document.getElementById('quiz').addEventListener('change', (event) => {
+                if (event.target && event.target.matches('select')) {
+                    const index = parseInt(event.target.id.split('-')[1], 10);
+                    checkAnswer(index);
+                }
+            });
+
+            document.getElementById('quiz').addEventListener('click', (event) => {
+                if (event.target && event.target.matches('.hint-button')) {
+                    const index = event.target.getAttribute('data-index');
+                    toggleHint(index);
+                }
+            });
+
+            // Event listener for the Reset Quiz button
+            document.getElementById('reset-quiz').addEventListener('click', resetQuiz);
+
+            // Event listener for the Show Correct Answers button
+            document.getElementById('show-answers').addEventListener('click', showAnswers);
+        });
+    </script>
+</body>
+</html>
