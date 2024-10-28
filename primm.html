@@ -3,549 +3,487 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRIMM Spaced Repetition Game</title>
+    <title>Learn PRIMM with Tracy</title>
     <style>
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f5f5f5;
-            line-height: 1.6;
-        }
-        header, footer {
-            background-color: #000;
-            text-align: center;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        header h1, footer p {
-            color: #fff;
-        }
-        header h1 a, nav a {
-            color: #fff;
-            text-decoration: none;
-        }
-        .container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
-            margin: 20px auto;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #f0f2f5;
         }
-        h1, h2, h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        p {
-            margin-bottom: 20px;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin: 0 10px;
-            text-transform: uppercase;
-            font-weight: bold;
-            position: relative;
-            padding: 5px 8px;
-            border-radius: 5px;
-        }
-        .active {
-            background-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .menu-toggle {
-            display: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: #fff;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        @media (max-width: 600px) {
-            nav {
-                display: none;
-            }
-            .menu-toggle {
-                display: block;
-            }
-            nav.active {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-                background-color: #000;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                z-index: 1;
-            }
-            nav a {
-                flex: 1 0 100%;
-                margin: 5px 0;
-                padding: 10px;
-                color: #fff;
-            }
-        }
-        #game-container {
-            background-color: #f0f8ff;
+
+        .mode-info {
+            background: #e9d8fd;
+            padding: 15px;
             border-radius: 10px;
-            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #805ad5;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .reference-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .reference-section h2 {
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .reference-section h3 {
+            color: #4a5568;
             margin-top: 20px;
         }
-        #code-display {
-            background-color: #f4f4f4;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+
+        .reference-card {
+            background: #f7fafc;
             padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #4299e1;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 24px;
+            color: #2c3e50;
             margin-bottom: 20px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            position: relative;
         }
-        .highlight {
-            background-color: yellow;
-            position: absolute;
-            opacity: 0.5;
-            pointer-events: none;
+
+        .question {
+            font-size: 18px;
+            color: #34495e;
+            margin-bottom: 20px;
         }
-        #question {
-            font-weight: bold;
-            margin-bottom: 10px;
+
+        .options {
+            display: grid;
+            gap: 10px;
         }
-        #options {
-            display: flex;
-            flex-direction: column;
-        }
+
         .option {
-            margin: 5px 0;
-            padding: 10px;
-            background-color: #e0e0e0;
-            border: none;
-            border-radius: 5px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.2s;
         }
+
         .option:hover {
-            background-color: #d0d0d0;
+            background: #e9ecef;
         }
+
         .option.selected {
-            background-color: #3498db;
+            background: #4299e1;
+            color: white;
+            border-color: #4299e1;
+        }
+
+        .option.correct {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .option.wrong {
+            background: #f56565;
+            color: white;
+            border-color: #f56565;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .check-answer {
+            background: #4299e1;
             color: white;
         }
-        #feedback {
+
+        .next-question {
+            background: #48bb78;
+            color: white;
+        }
+
+        .mode-toggle {
+            background: #805ad5;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
             margin-top: 20px;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             display: none;
         }
-        #feedback.correct {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
+
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #2f855a;
         }
-        #feedback.incorrect {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+
+        .feedback.wrong {
+            background: #fed7d7;
+            color: #c53030;
         }
-        #next-btn, #reset-btn, #check-btn {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #next-btn:hover, #reset-btn:hover, #check-btn:hover {
-            background-color: #2980b9;
-        }
-        #visual-output {
-            width: 100%;
-            height: 300px;
-            border: 1px solid #ddd;
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .turtle {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 20px solid green;
-            transition: all 0.5s;
-        }
-        .circle {
-            position: absolute;
-            border: 2px solid blue;
-            border-radius: 50%;
-            transition: all 0.5s;
-        }
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            border-bottom: 1px dotted black;
-            cursor: help;
-        }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: #555;
-            color: #fff;
+
+        .mode-indicator {
             text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            font-size: 20px;
+            color: #805ad5;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-        #progress-bar {
-            width: 100%;
-            background-color: #e0e0e0;
-            margin-top: 20px;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        #progress {
-            width: 0;
-            height: 20px;
-            background-color: #4CAF50;
-            text-align: center;
-            line-height: 20px;
-            color: white;
-            transition: width 0.5s;
+
+        code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1><a href="index.html">David Steckler</a></h1>
-        <button class="menu-toggle">&#9776;</button>
-        <nav>
-            <a href="index.html" id="home-link">Home</a>
-            <a href="about.html" id="about-link">About</a>
-            <a href="course.html" id="course-link">Course</a>
-            <a href="blog.html" id="blog-link">Blog</a>
-            <a href="contact.html" id="contact-link">Contact</a>
-            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
-            <a href="search.html" id="search-link">Search</a>
-        </nav>
-    </header>
+    <div class="mode-info">
+        <h2>Choose Your Learning Mode:</h2>
+        <p><strong>Quiz Mode:</strong> Questions appear in order. Great for first-time learning and testing your knowledge.</p>
+        <p><strong>Practice Mode:</strong> Questions repeat until mastered. Great for memorization and reinforcement.</p>
+    </div>
 
-    <div class="container">
-        <h1>PRIMM Spaced Repetition Game</h1>
-        <p>Welcome to the PRIMM game! Learn computer science concepts through the PRIMM approach: 
-            <span class="tooltip">Predict<span class="tooltiptext">Guess what the code will do</span></span>, 
-            <span class="tooltip">Run<span class="tooltiptext">Execute the code and observe the results</span></span>, 
-            <span class="tooltip">Investigate<span class="tooltiptext">Explore how the code works</span></span>, 
-            <span class="tooltip">Modify<span class="tooltiptext">Change the code to achieve different results</span></span>, and 
-            <span class="tooltip">Make<span class="tooltiptext">Create your own code from scratch</span></span>.
-        </p>
-        <div id="game-container">
-            <div id="progress-bar"><div id="progress"></div></div>
-            <div id="code-display"></div>
-            <div id="visual-output"></div>
-            <div id="question"></div>
-            <div id="options"></div>
-            <button id="check-btn" style="display: none;">Check Answer</button>
-            <div id="feedback"></div>
-            <button id="next-btn" style="display: none;">Next</button>
-            <button id="reset-btn">Reset Game</button>
+    <div class="quiz-container">
+        <div class="mode-indicator" id="modeIndicator">Current Mode: Quiz Mode</div>
+        <div class="score-display">
+            Score: <span id="score">0</span>
+        </div>
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="button-container">
+            <button class="check-answer" id="checkAnswer" disabled>Check Answer</button>
+            <button class="mode-toggle" id="toggleMode">Switch to Practice Mode</button>
+            <button class="next-question" id="nextQuestion" disabled>Next Question</button>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2024 David Steckler. All rights reserved.</p>
-    </footer>
+    <div class="reference-section">
+        <h2>PRIMM Reference Guide</h2>
+        
+        <div class="reference-card">
+            <h3>P - Predict</h3>
+            <p>Look at code and try to figure out what it will do before running it.</p>
+            <p>Example: Looking at <code>circle(50)</code> and guessing it will draw a circle.</p>
+        </div>
+
+        <div class="reference-card">
+            <h3>R - Run</h3>
+            <p>Execute the code to see what actually happens. Compare with your prediction.</p>
+            <p>Example: Running <code>circle(50)</code> to see the actual circle Tracy draws.</p>
+        </div>
+
+        <div class="reference-card">
+            <h3>I - Investigate</h3>
+            <p>Study how the code works. What does each part do? Why does it work this way?</p>
+            <p>Example: Understanding that the number in <code>circle(50)</code> controls the size.</p>
+        </div>
+
+        <div class="reference-card">
+            <h3>M - Modify</h3>
+            <p>Change the existing code to do something slightly different.</p>
+            <p>Example: Changing <code>circle(50)</code> to <code>circle(100)</code> to make a bigger circle.</p>
+        </div>
+
+        <div class="reference-card">
+            <h3>M - Make</h3>
+            <p>Create your own new code using what you've learned.</p>
+            <p>Example: Writing your own program to draw a snowman using circles.</p>
+        </div>
+
+        <div class="reference-card">
+            <h3>Tracy Commands You Know:</h3>
+            <ul>
+                <li><code>circle(size)</code> - Draws a circle of given size</li>
+                <li><code>forward(steps)</code> - Moves Tracy forward</li>
+                <li><code>penup()</code> - Lifts Tracy's pen up</li>
+                <li><code>pendown()</code> - Puts Tracy's pen down</li>
+            </ul>
+        </div>
+    </div>
 
     <script>
-        const questions = [
+        const quizModeQuestions = [
             {
-                code: `circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)`,
-                question: "What shape will this code create?",
+                question: "What is the first thing you should do when seeing new code with Tracy?",
                 options: [
-                    "A straight line",
-                    "A spiral",
-                    "A stretched slinky",
-                    "A square"
+                    "Run it immediately to see what happens",
+                    "Predict what it will do before running it",
+                    "Change all the numbers to see what changes",
+                    "Ask someone else to explain it"
                 ],
-                correctAnswer: 2,
-                explanation: "This code creates a stretched slinky shape. It repeatedly draws a circle with radius 35, then moves forward by 20 units. This pattern creates a series of connected circles, resembling a stretched slinky.",
-                stage: "Predict",
-                highlight: [[0, 10], [11, 22], [23, 33], [34, 45], [46, 56], [57, 68], [69, 79], [80, 91], [92, 102], [103, 114]]
+                correct: 1,
+                explanation: "Always start with Predict! This helps you develop code reading skills before running the code."
             },
             {
-                code: `circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)`,
-                question: "How many circles will be drawn by this code?",
+                question: "After making a prediction, what should you do next?",
                 options: [
-                    "3",
-                    "4",
-                    "5",
-                    "6"
+                    "Make your own code",
+                    "Run the code to test your prediction",
+                    "Modify the code",
+                    "Start over with a new prediction"
                 ],
-                correctAnswer: 2,
-                explanation: "This code draws 5 circles. Each `circle(35)` command creates one circle, and there are 5 such commands in the code.",
-                stage: "Investigate",
-                highlight: [[0, 10], [23, 33], [46, 56], [69, 79], [92, 102]]
+                correct: 1,
+                explanation: "After predicting, we Run the code to check if our prediction was right!"
             },
             {
-                code: `circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)
-circle(35)
-forward(20)`,
-                question: "How would you modify this code to make the slinky longer?",
+                question: "You see this code:\nforward(100)\ncircle(50)\nWhat should you do first?",
                 options: [
-                    "Increase the number in circle()",
-                    "Decrease the number in forward()",
-                    "Increase the number in forward()",
-                    "Add more circle() and forward() pairs"
+                    "Change the numbers to different values",
+                    "Try to predict what shape it will make",
+                    "Run it to see what happens",
+                    "Ask for help"
                 ],
-                correctAnswer: 2,
-                explanation: "To make the slinky longer, you should increase the number in forward(). This will create more space between each circle, stretching out the slinky. Increasing the number in circle() would make the circles larger, not the slinky longer. Decreasing the number in forward() would compress the slinky.",
-                stage: "Modify",
-                highlight: [[11, 22], [34, 45], [57, 68], [80, 91], [103, 114]]
+                correct: 1,
+                explanation: "In PRIMM, we always start by Predicting what code will do, even with simple programs!"
             },
             {
-                code: `# Create a similar pattern but make the circles bigger
-circle(70)
-forward(20)
-circle(70)
-forward(20)
-circle(70)
-forward(20)
-circle(70)
-forward(20)
-circle(70)
-forward(20)`,
-                question: "What effect will this modification have on the slinky?",
+                question: "Which PRIMM step helps you understand HOW a program works?",
                 options: [
-                    "It will make the slinky longer",
-                    "It will make the slinky shorter",
-                    "It will make the circles in the slinky larger",
-                    "It will have no effect on the slinky"
+                    "Predict - guess what it does",
+                    "Run - test the code",
+                    "Investigate - study how it works",
+                    "Make - create new code"
                 ],
-                correctAnswer: 2,
-                explanation: "This modification will make the circles in the slinky larger. By changing circle(35) to circle(70), we've doubled the radius of each circle. The forward distance remains the same, so the overall length of the slinky won't change significantly, but each circle will be much bigger.",
-                stage: "Make",
-                highlight: [[38, 48], [61, 71], [84, 94], [107, 117], [130, 140]]
+                correct: 2,
+                explanation: "The Investigate step is when we study HOW code works, not just WHAT it does."
+            },
+            {
+                question: "When should you use the Modify step?",
+                options: [
+                    "Before running the code",
+                    "After investigating how it works",
+                    "Before making predictions",
+                    "Before investigating"
+                ],
+                correct: 1,
+                explanation: "Modify comes after we understand how the code works (Investigate) - this way we can make informed changes!"
             }
         ];
 
-        let currentQuestionIndex = 0;
+        const practiceModeQuestions = [
+            {
+                question: "Which PRIMM step involves looking at code and guessing what it will do?",
+                options: [
+                    "Run",
+                    "Predict",
+                    "Investigate",
+                    "Modify"
+                ],
+                correct: 1,
+                explanation: "Predict means looking at code and trying to figure out what it will do before running it."
+            },
+            {
+                question: "What should you do after your program doesn't work as predicted?",
+                options: [
+                    "Give up and start over",
+                    "Immediately ask for help",
+                    "Investigate why it's different",
+                    "Make a new program"
+                ],
+                correct: 2,
+                explanation: "When predictions don't match reality, that's a perfect time to Investigate why!"
+            },
+            {
+                question: "You want to change circle(50) to make a bigger circle. Which PRIMM step is this?",
+                options: [
+                    "Predict",
+                    "Run",
+                    "Modify",
+                    "Make"
+                ],
+                correct: 2,
+                explanation: "When we change existing code (like adjusting numbers), we're in the Modify step."
+            },
+            {
+                question: "In Tracy code: forward(100)\nWhat should you do FIRST?",
+                options: [
+                    "Run it to see what happens",
+                    "Predict it will move Tracy forward",
+                    "Change 100 to a different number",
+                    "Add more commands"
+                ],
+                correct: 1,
+                explanation: "Always Predict first! Try to imagine Tracy moving forward before running the code."
+            },
+            {
+                question: "When are you ready to Make your own Tracy program?",
+                options: [
+                    "Right at the beginning",
+                    "After only predicting",
+                    "After understanding through P-R-I-M steps",
+                    "After running someone else's code"
+                ],
+                correct: 2,
+                explanation: "Make comes last - after you've learned from the other steps!"
+            },
+            {
+                question: "What's the purpose of the Run step?",
+                options: [
+                    "To test if our prediction was right",
+                    "To skip the predict step",
+                    "To start creating new code",
+                    "To modify existing code"
+                ],
+                correct: 0,
+                explanation: "Run lets us check if our prediction was correct - it's how we learn!"
+            },
+            {
+                question: "When investigating Tracy's forward(100) command, what should you focus on?",
+                options: [
+                    "Making it go backward",
+                    "Understanding what the 100 means",
+                    "Adding new commands",
+                    "Running it multiple times"
+                ],
+                correct: 1,
+                explanation: "Investigate means understanding HOW code works - like how the number affects Tracy's movement."
+            }
+        ];
+
+        let currentQuestion = 0;
         let score = 0;
+        let selectedOption = null;
+        let gameMode = false;
+        let questionPool = [...quizModeQuestions];
 
-        function displayQuestion() {
-            const question = questions[currentQuestionIndex];
-            const codeDisplay = document.getElementById('code-display');
-            codeDisplay.textContent = question.code;
-            
-            // Add highlights
-            codeDisplay.innerHTML = '';
-            let lastIndex = 0;
-            question.highlight.forEach(([start, end]) => {
-                codeDisplay.appendChild(document.createTextNode(question.code.substring(lastIndex, start)));
-                const highlight = document.createElement('span');
-                highlight.className = 'highlight';
-                highlight.textContent = question.code.substring(start, end);
-                codeDisplay.appendChild(highlight);
-                lastIndex = end;
-            });
-            codeDisplay.appendChild(document.createTextNode(question.code.substring(lastIndex)));
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const checkButton = document.getElementById('checkAnswer');
+        const nextButton = document.getElementById('nextQuestion');
+        const scoreElement = document.getElementById('score');
+        const feedbackElement = document.getElementById('feedback');
+        const toggleModeButton = document.getElementById('toggleMode');
+        const modeIndicator = document.getElementById('modeIndicator');
 
-            document.getElementById('question').textContent = `[${question.stage}] ${question.question}`;
+        function displayQuestion(index) {
+            const questions = gameMode ? questionPool : quizModeQuestions;
+            const question = questions[index];
+            questionElement.textContent = question.question;
+            optionsElement.innerHTML = '';
             
-            const optionsContainer = document.getElementById('options');
-            optionsContainer.innerHTML = '';
-            question.options.forEach((option, index) => {
-                const button = document.createElement('button');
+            question.options.forEach((option, i) => {
+                const button = document.createElement('div');
+                button.className = 'option';
                 button.textContent = option;
-                button.classList.add('option');
-                button.onclick = () => selectOption(index);
-                optionsContainer.appendChild(button);
+                button.onclick = () => selectOption(i);
+                optionsElement.appendChild(button);
             });
 
-            document.getElementById('feedback').style.display = 'none';
-            document.getElementById('next-btn').style.display = 'none';
-            document.getElementById('check-btn').style.display = 'inline-block';
-            
-            // Clear previous visual output
-            document.getElementById('visual-output').innerHTML = '';
-
-            // Update progress bar
-            updateProgressBar();
+            selectedOption = null;
+            checkButton.disabled = true;
+            nextButton.disabled = true;
+            feedbackElement.style.display = 'none';
         }
 
         function selectOption(index) {
             const options = document.querySelectorAll('.option');
             options.forEach(option => option.classList.remove('selected'));
             options[index].classList.add('selected');
+            selectedOption = index;
+            checkButton.disabled = false;
         }
 
         function checkAnswer() {
-            const question = questions[currentQuestionIndex];
-            const selectedOption = document.querySelector('.option.selected');
-            if (!selectedOption) {
-                alert("Please select an answer before checking.");
-                return;
-            }
+            const questions = gameMode ? questionPool : quizModeQuestions;
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const correct = question.correct;
 
-            const selectedIndex = Array.from(selectedOption.parentNode.children).indexOf(selectedOption);
-            const feedbackElement = document.getElementById('feedback');
-            
-            if (selectedIndex === question.correctAnswer) {
-                feedbackElement.textContent = `Correct! ${question.explanation}`;
-                feedbackElement.className = 'correct';
+            options[selectedOption].classList.remove('selected');
+            if (selectedOption === correct) {
+                options[selectedOption].classList.add('correct');
                 score++;
+                scoreElement.textContent = score;
+                feedbackElement.textContent = "Correct! " + question.explanation;
+                feedbackElement.className = 'feedback correct';
             } else {
-                feedbackElement.textContent = `Incorrect. ${question.explanation}`;
-                feedbackElement.className = 'incorrect';
+                options[selectedOption].classList.add('wrong');
+                options[correct].classList.add('correct');
+                feedbackElement.textContent = "Not quite! " + question.explanation;
+                feedbackElement.className = 'feedback wrong';
             }
-
             feedbackElement.style.display = 'block';
-            document.getElementById('next-btn').style.display = 'inline-block';
-            document.getElementById('check-btn').style.display = 'none';
 
-            // Visualize the code execution
-            visualizeCode(question.code);
-        }
-
-        function visualizeCode(code) {
-            const visualOutput = document.getElementById('visual-output');
-            visualOutput.innerHTML = '';
-            let x = 150, y = 150, angle = 0;
-            const turtle = document.createElement('div');
-            turtle.className = 'turtle';
-            turtle.style.left = `${x}px`;
-            turtle.style.top = `${y}px`;
-            visualOutput.appendChild(turtle);
-
-            const commands = code.split('\n');
-            commands.forEach((command, index) => {
-                setTimeout(() => {
-                    if (command.startsWith('circle')) {
-                        const radius = parseInt(command.match(/\d+/)[0]);
-                        const circle = document.createElement('div');
-                        circle.className = 'circle';
-                        circle.style.width = `${radius * 2}px`;
-                        circle.style.height = `${radius * 2}px`;
-                        circle.style.left = `${x - radius}px`;
-                        circle.style.top = `${y - radius}px`;
-                        visualOutput.appendChild(circle);
-                    } else if (command.startsWith('forward')) {
-                        const distance = parseInt(command.match(/\d+/)[0]);
-                        x += distance * Math.cos(angle);
-                        y += distance * Math.sin(angle);
-                        turtle.style.left = `${x}px`;
-                        turtle.style.top = `${y}px`;
-                    }
-                }, index * 500);
-            });
+            checkButton.disabled = true;
+            nextButton.disabled = false;
         }
 
         function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                displayQuestion();
+            if (gameMode) {
+                // In practice mode, remove correctly answered questions
+                if (selectedOption === questionPool[currentQuestion].correct) {
+                    questionPool.splice(currentQuestion, 1);
+                    if (questionPool.length === 0) {
+                        questionPool = [...practiceModeQuestions];
+                    }
+                }
+                currentQuestion = Math.floor(Math.random() * questionPool.length);
             } else {
-                endGame();
+                currentQuestion = (currentQuestion + 1) % quizModeQuestions.length;
             }
+            displayQuestion(currentQuestion);
         }
 
-        function endGame() {
-            const gameContainer = document.getElementById('game-container');
-            gameContainer.innerHTML = `
-                <h2>Game Over!</h2>
-                <p>Your score: ${score} out of ${questions.length}</p>
-                <button id="reset-btn" onclick="resetGame()">Play Again</button>
-            `;
-        }
-
-        function resetGame() {
-            currentQuestionIndex = 0;
+        function toggleMode() {
+            gameMode = !gameMode;
+            modeIndicator.textContent = `Current Mode: ${gameMode ? 'Practice Mode' : 'Quiz Mode'}`;
+            toggleModeButton.textContent = gameMode ? "Switch to Quiz Mode" : "Switch to Practice Mode";
             score = 0;
-            questions.sort(() => Math.random() - 0.5);
-            displayQuestion();
+            scoreElement.textContent = score;
+            questionPool = gameMode ? [...practiceModeQuestions] : [...quizModeQuestions];
+            currentQuestion = gameMode ? Math.floor(Math.random() * questionPool.length) : 0;
+            displayQuestion(currentQuestion);
         }
 
-        function updateProgressBar() {
-            const progress = document.getElementById('progress');
-            const percentage = ((currentQuestionIndex + 1) / questions.length) * 100;
-            progress.style.width = `${percentage}%`;
-            progress.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-        }
+        checkButton.onclick = checkAnswer;
+        nextButton.onclick = nextQuestion;
+        toggleModeButton.onclick = toggleMode;
 
-        document.getElementById('check-btn').addEventListener('click', checkAnswer);
-        document.getElementById('next-btn').addEventListener('click', nextQuestion);
-        document.getElementById('reset-btn').addEventListener('click', resetGame);
-
-        // Initialize the game
-        resetGame();
-
-        // Menu toggle functionality
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('nav').classList.toggle('active');
-        });
-
-        // Function to set active link
-        function setActiveLink() {
-            var path = window.location.pathname;
-            var page = path.split("/").pop();
-            page = page.replace('.html', '');
-            var linkId = page + '-link';
-            var activeLink = document.getElementById(linkId);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        }
-
-        // Call the function to set the active link
-        setActiveLink();
+        // Start the quiz
+        displayQuestion(0);
     </script>
 </body>
 </html>
