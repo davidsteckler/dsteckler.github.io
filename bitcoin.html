@@ -5,348 +5,577 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cryptography & Bitcoin Scavenger Hunt</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+        /* Reset and Basic Styles */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #f0f0f0;
+            line-height: 1.6;
+        }
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2c2c2c;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        /* Header */
         header {
-            background-color: #2c3e50;
-            color: #fff;
-            padding: 20px 0;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        main {
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 20px;
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00bfff;
         }
-        section {
-            margin-bottom: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        header p {
+            font-size: 1.2em;
+            color: #ccc;
+        }
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: #444;
+            border-radius: 20px;
             overflow: hidden;
+            margin-bottom: 30px;
         }
-        section h2 {
-            background-color: #34495e;
-            color: #fff;
-            margin: 0;
-            padding: 15px;
-            cursor: pointer;
-            position: relative;
+        .progress-bar {
+            height: 20px;
+            width: 0%;
+            background: #00bfff;
+            transition: width 0.4s ease;
         }
-        section h2::after {
-            content: '▼';
-            position: absolute;
-            right: 20px;
-            transition: transform 0.3s ease;
-        }
-        section.open h2::after {
-            transform: rotate(-180deg);
-        }
-        .content {
+        /* Steps */
+        .step {
             display: none;
-            padding: 15px;
+            animation: fadeIn 0.5s ease-in-out;
         }
-        section.open .content {
+        .step.active {
             display: block;
         }
-        details {
-            margin-bottom: 10px;
-            border-bottom: 1px solid #ddd;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        details summary {
-            font-weight: bold;
+        /* Step Content */
+        .step h2 {
+            margin-bottom: 15px;
+            color: #00bfff;
+        }
+        .step p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .step button {
+            padding: 10px 20px;
+            background: #00bfff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
             cursor: pointer;
-            padding: 10px 0;
-            position: relative;
+            font-size: 1em;
+            transition: background 0.3s ease;
         }
-        details summary::after {
-            content: '▶';
-            position: absolute;
-            right: 0;
-            transition: transform 0.3s ease;
+        .step button:hover {
+            background: #009acd;
         }
-        details[open] summary::after {
-            transform: rotate(90deg);
+        /* Reveal Answer */
+        .answer {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #333;
+            border-left: 5px solid #00bfff;
+            border-radius: 5px;
         }
-        details div {
-            padding: 10px 0 10px 20px;
-            color: #555;
+        .reveal-btn {
+            background: #28a745;
         }
+        .reveal-btn:hover {
+            background: #218838;
+        }
+        /* Footer */
         footer {
             text-align: center;
-            padding: 20px 0;
-            color: #777;
-            border-top: 1px solid #ddd;
             margin-top: 40px;
+            color: #777;
+            font-size: 0.9em;
         }
+        footer a {
+            color: #00bfff;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        /* Responsive */
         @media (max-width: 600px) {
-            section h2 {
-                padding: 10px;
+            .container {
+                margin: 20px;
             }
-            details summary {
-                padding: 8px 0;
+            header h1 {
+                font-size: 2em;
             }
-            details div {
-                padding: 8px 0 8px 15px;
+            .step p {
+                font-size: 1em;
             }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Cryptography & Bitcoin Scavenger Hunt</h1>
-    </header>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🔍 Cryptography & Bitcoin Scavenger Hunt</h1>
+            <p>Embark on a journey to uncover the secrets of cryptography and Bitcoin!</p>
+        </header>
 
-    <main>
-        <!-- Cryptography Basics Section -->
-        <section>
-            <h2>Cryptography Basics</h2>
-            <div class="content">
-                <details>
-                    <summary>What is cryptography, and what is it used for?</summary>
-                    <div>
-                        Cryptography is the art of creating secret codes to protect information. It ensures that only the intended people can read messages, keeping data safe in things like passwords, online chats, and banking.
-                    </div>
-                </details>
-                <details>
-                    <summary>How do secret codes (like shifting letters) help keep messages private?</summary>
-                    <div>
-                        Secret codes change letters or numbers in a message so it looks like gibberish. Only people who know the special rules (the key) can turn it back into the original message.
-                    </div>
-                </details>
-                <details>
-                    <summary>What is the difference between encryption and decryption?</summary>
-                    <div>
-                        Encryption is the process of scrambling a message to keep it secret. Decryption is turning that scrambled message back into its original form using a key.
-                    </div>
-                </details>
-                <details>
-                    <summary>What does a password do, and why is it an example of cryptography?</summary>
-                    <div>
-                        A password acts like a secret code that only you know. It verifies your identity and protects your information from others, making it a form of cryptography.
-                    </div>
-                </details>
-                <details>
-                    <summary>How does cryptography keep your emails or messages secure?</summary>
-                    <div>
-                        Cryptography turns your messages into a scrambled format. Only the person you send it to, who has the key, can unscramble and read the message, keeping it safe from eavesdroppers.
-                    </div>
-                </details>
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- Steps -->
+        <div class="steps">
+            <!-- Step 1 -->
+            <div class="step active" id="step1">
+                <h2>🌟 Welcome to the Scavenger Hunt!</h2>
+                <p>Are you ready to explore the fascinating world of cryptography and Bitcoin? Click the button below to begin your adventure.</p>
+                <button onclick="nextStep()">Start the Hunt</button>
             </div>
-        </section>
 
-        <!-- Bitcoin Fundamentals Section -->
-        <section>
-            <h2>Bitcoin Fundamentals</h2>
-            <div class="content">
-                <details>
-                    <summary>What is Bitcoin? Describe it in one sentence.</summary>
-                    <div>
-                        Bitcoin is a type of digital money that uses secret codes to stay secure and operates without the need for banks.
-                    </div>
-                </details>
-                <details>
-                    <summary>Who created Bitcoin, and what name is used for its creator?</summary>
-                    <div>
-                        Bitcoin was created by someone or a group using the name Satoshi Nakamoto, but no one knows their true identity.
-                    </div>
-                </details>
-                <details>
-                    <summary>What problem was Bitcoin designed to solve?</summary>
-                    <div>
-                        Bitcoin was created to allow people to send money directly to each other without needing banks, making transactions faster and more secure.
-                    </div>
-                </details>
-                <details>
-                    <summary>What does it mean that Bitcoin is decentralized?</summary>
-                    <div>
-                        Decentralized means that no single person, bank, or company controls Bitcoin. Instead, it’s maintained by many computers around the world working together.
-                    </div>
-                </details>
-                <details>
-                    <summary>How does a blockchain work, and why is it important for Bitcoin?</summary>
-                    <div>
-                        A blockchain is like a public ledger that records every Bitcoin transaction. It ensures transparency and security because everyone can see the transactions, but no one can change them.
-                    </div>
-                </details>
+            <!-- Step 2: Cryptography Basics -->
+            <div class="step" id="step2">
+                <h2>🔐 Cryptography Basics</h2>
+                <p>Let's start by understanding the basics. What is cryptography, and what is it used for?</p>
+                <button onclick="revealAnswer('answer1')">Reveal Answer</button>
+                <div class="answer" id="answer1">
+                    <p><strong>Answer:</strong> Cryptography is the art of creating secret codes to protect information. It ensures that only the intended people can read messages, keeping data safe in things like passwords, online chats, and banking.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
             </div>
-        </section>
 
-        <!-- Digital Money & Deflation Section -->
-        <section>
-            <h2>Digital Money & Deflation</h2>
-            <div class="content">
-                <details>
-                    <summary>What does it mean that Bitcoin is a deflationary asset?</summary>
-                    <div>
-                        Being deflationary means there’s a limited number of Bitcoin (21 million), so as more people want it, its value can increase over time.
-                    </div>
-                </details>
-                <details>
-                    <summary>How many total Bitcoin will ever exist?</summary>
-                    <div>
-                        Only 21 million Bitcoin will ever exist. This limit ensures that Bitcoin remains scarce.
-                    </div>
-                </details>
-                <details>
-                    <summary>What is the difference between Bitcoin and regular cash (like the dollar)?</summary>
-                    <div>
-                        Bitcoin is digital, has a limited supply, and isn’t controlled by any single entity, while regular cash is physical, can be printed in unlimited amounts by governments, and is centrally controlled.
-                    </div>
-                </details>
-                <details>
-                    <summary>Why do some people call Bitcoin “digital gold”?</summary>
-                    <div>
-                        Bitcoin is called “digital gold” because, like gold, it is scarce and valuable. However, Bitcoin is easier to transfer and use online.
-                    </div>
-                </details>
-                <details>
-                    <summary>What happens to the value of money during inflation?</summary>
-                    <div>
-                        During inflation, the prices of things go up, which means the money you have can buy less than before.
-                    </div>
-                </details>
+            <!-- Step 3 -->
+            <div class="step" id="step3">
+                <h2>🔐 Cryptography Basics</h2>
+                <p>How do secret codes (like shifting letters) help keep messages private?</p>
+                <button onclick="revealAnswer('answer2')">Reveal Answer</button>
+                <div class="answer" id="answer2">
+                    <p><strong>Answer:</strong> Secret codes change letters or numbers in a message so it looks like gibberish. Only people who know the special rules (the key) can turn it back into the original message.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
             </div>
-        </section>
 
-        <!-- Real-World Applications Section -->
-        <section>
-            <h2>Real-World Applications</h2>
-            <div class="content">
-                <details>
-                    <summary>How does Bitcoin help people who don’t have access to a bank?</summary>
-                    <div>
-                        Bitcoin allows anyone with internet access to send and receive money without needing a traditional bank, effectively acting as a portable bank.
-                    </div>
-                </details>
-                <details>
-                    <summary>What are some countries or companies using Bitcoin today?</summary>
-                    <div>
-                        Countries like El Salvador use Bitcoin as official money, and companies like Tesla and MicroStrategy hold Bitcoin as an investment.
-                    </div>
-                </details>
-                <details>
-                    <summary>How can Bitcoin be used to send money across the world?</summary>
-                    <div>
-                        Bitcoin can be sent instantly to anyone, anywhere in the world, without waiting for banks to process the transaction, making it faster and often cheaper.
-                    </div>
-                </details>
-                <details>
-                    <summary>Why is Bitcoin considered secure even though it’s online?</summary>
-                    <div>
-                        Bitcoin uses strong cryptography and a decentralized network to protect transactions, making it very secure and hard to hack.
-                    </div>
-                </details>
-                <details>
-                    <summary>Name one limitation or challenge of using Bitcoin.</summary>
-                    <div>
-                        One challenge of using Bitcoin is that its price can be very volatile, meaning it can go up and down a lot in a short time.
-                    </div>
-                </details>
+            <!-- Step 4 -->
+            <div class="step" id="step4">
+                <h2>🔐 Cryptography Basics</h2>
+                <p>What is the difference between encryption and decryption?</p>
+                <button onclick="revealAnswer('answer3')">Reveal Answer</button>
+                <div class="answer" id="answer3">
+                    <p><strong>Answer:</strong> Encryption is the process of scrambling a message to keep it secret. Decryption is turning that scrambled message back into its original form using a key.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
             </div>
-        </section>
 
-        <!-- MicroStrategy & Digital Manhattan Section -->
-        <section>
-            <h2>MicroStrategy & Digital Manhattan</h2>
-            <div class="content">
-                <details>
-                    <summary>What is MicroStrategy, and who leads the company?</summary>
-                    <div>
-                        MicroStrategy is a technology company that invests in Bitcoin, and it is led by Michael Saylor, who is a big believer in Bitcoin’s future.
-                    </div>
-                </details>
-                <details>
-                    <summary>Why did MicroStrategy decide to invest in Bitcoin?</summary>
-                    <div>
-                        MicroStrategy invested in Bitcoin because they believe it’s a better way to protect their money compared to holding cash, which loses value over time.
-                    </div>
-                </details>
-                <details>
-                    <summary>How much Bitcoin has MicroStrategy acquired so far?</summary>
-                    <div>
-                        MicroStrategy has bought hundreds of thousands of Bitcoin, making it one of the largest companies holding Bitcoin.
-                    </div>
-                </details>
-                <details>
-                    <summary>What is MicroStrategy’s main argument for holding Bitcoin instead of cash or bonds?</summary>
-                    <div>
-                        Michael Saylor argues that cash loses value due to inflation, and bonds aren’t performing well, whereas Bitcoin has the potential to grow in value.
-                    </div>
-                </details>
-                <details>
-                    <summary>What does Michael Saylor mean when he says Bitcoin is “digital capital”?</summary>
-                    <div>
-                        Saylor refers to Bitcoin as “digital capital” because it’s a valuable asset that exists online, easy to transfer, and cannot be destroyed.
-                    </div>
-                </details>
-                <details>
-                    <summary>What is the idea of “Digital Manhattan” that Michael Saylor talks about?</summary>
-                    <div>
-                        “Digital Manhattan” is the concept that owning Bitcoin is like owning prime digital real estate, similar to having valuable property in a prestigious location like Manhattan.
-                    </div>
-                </details>
-                <details>
-                    <summary>How is Bitcoin like owning a piece of real estate in a city like Manhattan?</summary>
-                    <div>
-                        Just as land in Manhattan is limited and highly sought after, Bitcoin is scarce and valuable, making it a desirable asset to own.
-                    </div>
-                </details>
-                <details>
-                    <summary>Why does Saylor believe Bitcoin has advantages over traditional real estate (like buildings)?</summary>
-                    <div>
-                        Bitcoin doesn’t have issues like taxes, maintenance, or weather damage. It’s also easy to transfer and can be used globally without physical limitations.
-                    </div>
-                </details>
-                <details>
-                    <summary>What are some benefits of Bitcoin that make it “digital, indestructible, and global”?</summary>
-                    <div>
-                        Bitcoin is digital, meaning it exists online; indestructible, as it can’t be physically damaged or erased; and global, allowing it to be used anywhere in the world without intermediaries.
-                    </div>
-                </details>
-                <details>
-                    <summary>Why does Saylor call Bitcoin the next wave of technology, following trends like the internet and AI?</summary>
-                    <div>
-                        Saylor believes Bitcoin will revolutionize money and capital just as the internet changed communication and AI is transforming technology, making it a pivotal advancement for the future.
-                    </div>
-                </details>
+            <!-- Step 5 -->
+            <div class="step" id="step5">
+                <h2>🔐 Cryptography Basics</h2>
+                <p>What does a password do, and why is it an example of cryptography?</p>
+                <button onclick="revealAnswer('answer4')">Reveal Answer</button>
+                <div class="answer" id="answer4">
+                    <p><strong>Answer:</strong> A password acts like a secret code that only you know. It verifies your identity and protects your information from others, making it a form of cryptography.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
             </div>
-        </section>
 
-        <!-- Total Question Breakdown Section -->
-        <section>
-            <h2>Total Question Breakdown</h2>
-            <div class="content">
+            <!-- Step 6 -->
+            <div class="step" id="step6">
+                <h2>🔐 Cryptography Basics</h2>
+                <p>How does cryptography keep your emails or messages secure?</p>
+                <button onclick="revealAnswer('answer5')">Reveal Answer</button>
+                <div class="answer" id="answer5">
+                    <p><strong>Answer:</strong> Cryptography turns your messages into a scrambled format. Only the person you send it to, who has the key, can unscramble and read the message, keeping it safe from eavesdroppers.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 7: Bitcoin Fundamentals -->
+            <div class="step" id="step7">
+                <h2>💰 Bitcoin Fundamentals</h2>
+                <p>Great job on cryptography! Now, let's dive into Bitcoin. What is Bitcoin? Describe it in one sentence.</p>
+                <button onclick="revealAnswer('answer6')">Reveal Answer</button>
+                <div class="answer" id="answer6">
+                    <p><strong>Answer:</strong> Bitcoin is a type of digital money that uses secret codes to stay secure and operates without the need for banks.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 8 -->
+            <div class="step" id="step8">
+                <h2>💰 Bitcoin Fundamentals</h2>
+                <p>Who created Bitcoin, and what name is used for its creator?</p>
+                <button onclick="revealAnswer('answer7')">Reveal Answer</button>
+                <div class="answer" id="answer7">
+                    <p><strong>Answer:</strong> Bitcoin was created by someone or a group using the name Satoshi Nakamoto, but no one knows their true identity.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="step" id="step9">
+                <h2>💰 Bitcoin Fundamentals</h2>
+                <p>What problem was Bitcoin designed to solve?</p>
+                <button onclick="revealAnswer('answer8')">Reveal Answer</button>
+                <div class="answer" id="answer8">
+                    <p><strong>Answer:</strong> Bitcoin was created to allow people to send money directly to each other without needing banks, making transactions faster and more secure.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 10 -->
+            <div class="step" id="step10">
+                <h2>💰 Bitcoin Fundamentals</h2>
+                <p>What does it mean that Bitcoin is decentralized?</p>
+                <button onclick="revealAnswer('answer9')">Reveal Answer</button>
+                <div class="answer" id="answer9">
+                    <p><strong>Answer:</strong> Decentralized means that no single person, bank, or company controls Bitcoin. Instead, it’s maintained by many computers around the world working together.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 11 -->
+            <div class="step" id="step11">
+                <h2>💰 Bitcoin Fundamentals</h2>
+                <p>How does a blockchain work, and why is it important for Bitcoin?</p>
+                <button onclick="revealAnswer('answer10')">Reveal Answer</button>
+                <div class="answer" id="answer10">
+                    <p><strong>Answer:</strong> A blockchain is like a public ledger that records every Bitcoin transaction. It ensures transparency and security because everyone can see the transactions, but no one can change them.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 12: Digital Money & Deflation -->
+            <div class="step" id="step12">
+                <h2>📉 Digital Money & Deflation</h2>
+                <p>Bitcoin is known as a deflationary asset. What does this mean?</p>
+                <button onclick="revealAnswer('answer11')">Reveal Answer</button>
+                <div class="answer" id="answer11">
+                    <p><strong>Answer:</strong> Being deflationary means there’s a limited number of Bitcoin (21 million), so as more people want it, its value can increase over time.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 13 -->
+            <div class="step" id="step13">
+                <h2>📉 Digital Money & Deflation</h2>
+                <p>How many total Bitcoin will ever exist?</p>
+                <button onclick="revealAnswer('answer12')">Reveal Answer</button>
+                <div class="answer" id="answer12">
+                    <p><strong>Answer:</strong> Only 21 million Bitcoin will ever exist. This limit ensures that Bitcoin remains scarce.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 14 -->
+            <div class="step" id="step14">
+                <h2>📉 Digital Money & Deflation</h2>
+                <p>What is the difference between Bitcoin and regular cash (like the dollar)?</p>
+                <button onclick="revealAnswer('answer13')">Reveal Answer</button>
+                <div class="answer" id="answer13">
+                    <p><strong>Answer:</strong> Bitcoin is digital, has a limited supply, and isn’t controlled by any single entity, while regular cash is physical, can be printed in unlimited amounts by governments, and is centrally controlled.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 15 -->
+            <div class="step" id="step15">
+                <h2>📉 Digital Money & Deflation</h2>
+                <p>Why do some people call Bitcoin “digital gold”?</p>
+                <button onclick="revealAnswer('answer14')">Reveal Answer</button>
+                <div class="answer" id="answer14">
+                    <p><strong>Answer:</strong> Bitcoin is called “digital gold” because, like gold, it is scarce and valuable. However, Bitcoin is easier to transfer and use online.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 16 -->
+            <div class="step" id="step16">
+                <h2>📉 Digital Money & Deflation</h2>
+                <p>What happens to the value of money during inflation?</p>
+                <button onclick="revealAnswer('answer15')">Reveal Answer</button>
+                <div class="answer" id="answer15">
+                    <p><strong>Answer:</strong> During inflation, the prices of things go up, which means the money you have can buy less than before.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 17: Real-World Applications -->
+            <div class="step" id="step17">
+                <h2>🌍 Real-World Applications</h2>
+                <p>How does Bitcoin help people who don’t have access to a bank?</p>
+                <button onclick="revealAnswer('answer16')">Reveal Answer</button>
+                <div class="answer" id="answer16">
+                    <p><strong>Answer:</strong> Bitcoin allows anyone with internet access to send and receive money without needing a traditional bank, effectively acting as a portable bank.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 18 -->
+            <div class="step" id="step18">
+                <h2>🌍 Real-World Applications</h2>
+                <p>What are some countries or companies using Bitcoin today?</p>
+                <button onclick="revealAnswer('answer17')">Reveal Answer</button>
+                <div class="answer" id="answer17">
+                    <p><strong>Answer:</strong> Countries like El Salvador use Bitcoin as official money, and companies like Tesla and MicroStrategy hold Bitcoin as an investment.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 19 -->
+            <div class="step" id="step19">
+                <h2>🌍 Real-World Applications</h2>
+                <p>How can Bitcoin be used to send money across the world?</p>
+                <button onclick="revealAnswer('answer18')">Reveal Answer</button>
+                <div class="answer" id="answer18">
+                    <p><strong>Answer:</strong> Bitcoin can be sent instantly to anyone, anywhere in the world, without waiting for banks to process the transaction, making it faster and often cheaper.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 20 -->
+            <div class="step" id="step20">
+                <h2>🌍 Real-World Applications</h2>
+                <p>Why is Bitcoin considered secure even though it’s online?</p>
+                <button onclick="revealAnswer('answer19')">Reveal Answer</button>
+                <div class="answer" id="answer19">
+                    <p><strong>Answer:</strong> Bitcoin uses strong cryptography and a decentralized network to protect transactions, making it very secure and hard to hack.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 21 -->
+            <div class="step" id="step21">
+                <h2>🌍 Real-World Applications</h2>
+                <p>Name one limitation or challenge of using Bitcoin.</p>
+                <button onclick="revealAnswer('answer20')">Reveal Answer</button>
+                <div class="answer" id="answer20">
+                    <p><strong>Answer:</strong> One challenge of using Bitcoin is that its price can be very volatile, meaning it can go up and down a lot in a short time.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 22: MicroStrategy & Digital Manhattan -->
+            <div class="step" id="step22">
+                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
+                <p>What is MicroStrategy, and who leads the company?</p>
+                <button onclick="revealAnswer('answer21')">Reveal Answer</button>
+                <div class="answer" id="answer21">
+                    <p><strong>Answer:</strong> MicroStrategy is a technology company that invests in Bitcoin, and it is led by Michael Saylor, who is a big believer in Bitcoin’s future.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 23 -->
+            <div class="step" id="step23">
+                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
+                <p>Why did MicroStrategy decide to invest in Bitcoin?</p>
+                <button onclick="revealAnswer('answer22')">Reveal Answer</button>
+                <div class="answer" id="answer22">
+                    <p><strong>Answer:</strong> MicroStrategy invested in Bitcoin because they believe it’s a better way to protect their money compared to holding cash, which loses value over time.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 24 -->
+            <div class="step" id="step24">
+                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
+                <p>How much Bitcoin has MicroStrategy acquired so far?</p>
+                <button onclick="revealAnswer('answer23')">Reveal Answer</button>
+                <div class="answer" id="answer23">
+                    <p><strong>Answer:</strong> MicroStrategy has bought hundreds of thousands of Bitcoin, making it one of the largest companies holding Bitcoin.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 25 -->
+            <div class="step" id="step25">
+                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
+                <p>What is MicroStrategy’s main argument for holding Bitcoin instead of cash or bonds?</p>
+                <button onclick="revealAnswer('answer24')">Reveal Answer</button>
+                <div class="answer" id="answer24">
+                    <p><strong>Answer:</strong> Michael Saylor argues that cash loses value due to inflation, and bonds aren’t performing well, whereas Bitcoin has the potential to grow in value.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 26 -->
+            <div class="step" id="step26">
+                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
+                <p>What does Michael Saylor mean when he says Bitcoin is “digital capital”?</p>
+                <button onclick="revealAnswer('answer25')">Reveal Answer</button>
+                <div class="answer" id="answer25">
+                    <p><strong>Answer:</strong> Saylor refers to Bitcoin as “digital capital” because it’s a valuable asset that exists online, easy to transfer, and cannot be destroyed.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 27: Digital Manhattan -->
+            <div class="step" id="step27">
+                <h2>🏙️ The Idea of Digital Manhattan</h2>
+                <p>What is the idea of “Digital Manhattan” that Michael Saylor talks about?</p>
+                <button onclick="revealAnswer('answer26')">Reveal Answer</button>
+                <div class="answer" id="answer26">
+                    <p><strong>Answer:</strong> “Digital Manhattan” is the concept that owning Bitcoin is like owning prime digital real estate, similar to having valuable property in a prestigious location like Manhattan.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 28 -->
+            <div class="step" id="step28">
+                <h2>🏙️ The Idea of Digital Manhattan</h2>
+                <p>How is Bitcoin like owning a piece of real estate in a city like Manhattan?</p>
+                <button onclick="revealAnswer('answer27')">Reveal Answer</button>
+                <div class="answer" id="answer27">
+                    <p><strong>Answer:</strong> Just as land in Manhattan is limited and highly sought after, Bitcoin is scarce and valuable, making it a desirable asset to own.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 29 -->
+            <div class="step" id="step29">
+                <h2>🏙️ The Idea of Digital Manhattan</h2>
+                <p>Why does Saylor believe Bitcoin has advantages over traditional real estate (like buildings)?</p>
+                <button onclick="revealAnswer('answer28')">Reveal Answer</button>
+                <div class="answer" id="answer28">
+                    <p><strong>Answer:</strong> Bitcoin doesn’t have issues like taxes, maintenance, or weather damage. It’s also easy to transfer and can be used globally without physical limitations.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 30 -->
+            <div class="step" id="step30">
+                <h2>🏙️ The Idea of Digital Manhattan</h2>
+                <p>What are some benefits of Bitcoin that make it “digital, indestructible, and global”?</p>
+                <button onclick="revealAnswer('answer29')">Reveal Answer</button>
+                <div class="answer" id="answer29">
+                    <p><strong>Answer:</strong> Bitcoin is digital, meaning it exists online; indestructible, as it can’t be physically damaged or erased; and global, allowing it to be used anywhere in the world without intermediaries.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 31 -->
+            <div class="step" id="step31">
+                <h2>🏙️ The Idea of Digital Manhattan</h2>
+                <p>Why does Saylor call Bitcoin the next wave of technology, following trends like the internet and AI?</p>
+                <button onclick="revealAnswer('answer30')">Reveal Answer</button>
+                <div class="answer" id="answer30">
+                    <p><strong>Answer:</strong> Saylor believes Bitcoin will revolutionize money and capital just as the internet changed communication and AI is transforming technology, making it a pivotal advancement for the future.</p>
+                </div>
+                <button onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- Step 32: Total Question Breakdown -->
+            <div class="step" id="step32">
+                <h2>📊 Total Question Breakdown</h2>
+                <p>Here's a summary of the scavenger hunt you just completed:</p>
                 <ul>
-                    <li>Cryptography Basics: 5 questions</li>
-                    <li>Bitcoin Fundamentals: 5 questions</li>
-                    <li>Digital Money & Deflation: 5 questions</li>
-                    <li>Real-World Applications: 5 questions</li>
-                    <li>MicroStrategy & Bitcoin Strategy: 5 questions</li>
-                    <li>Digital Manhattan: 5 questions</li>
+                    <li>🔐 Cryptography Basics: 5 questions</li>
+                    <li>💰 Bitcoin Fundamentals: 5 questions</li>
+                    <li>📉 Digital Money & Deflation: 5 questions</li>
+                    <li>🌍 Real-World Applications: 5 questions</li>
+                    <li>🏢 MicroStrategy & Digital Manhattan: 5 questions</li>
+                    <li>🏙️ The Idea of Digital Manhattan: 5 questions</li>
                 </ul>
-                <p>This expanded scavenger hunt ensures students explore Bitcoin in the context of corporate strategy and visionary ideas like Digital Manhattan while reinforcing foundational concepts.</p>
+                <p>Congratulations! You've successfully navigated through the scavenger hunt, gaining valuable insights into cryptography and Bitcoin.</p>
+                <button onclick="nextStep()">Finish</button>
             </div>
-        </section>
-    </main>
 
+            <!-- Final Step -->
+            <div class="step" id="finalStep">
+                <h2>🎉 Well Done!</h2>
+                <p>You've completed the Cryptography & Bitcoin Scavenger Hunt. We hope you enjoyed the journey and learned something new!</p>
+                <p>Feel free to revisit any section if you want to explore further.</p>
+                <button onclick="restart()">Restart Hunt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <footer>
-        &copy; 2024 Your Name | <a href="https://github.com/yourusername/yourrepo" target="_blank" style="color: #3498db; text-decoration: none;">GitHub Repository</a>
+        &copy; 2024 Your Name | 
+        <a href="https://github.com/yourusername/yourrepo" target="_blank">GitHub Repository</a>
     </footer>
 
+    <!-- JavaScript for Interactivity -->
     <script>
-        // Toggle sections open and closed when header is clicked
-        document.querySelectorAll('section h2').forEach(header => {
-            header.addEventListener('click', () => {
-                header.parentElement.classList.toggle('open');
-            });
-        });
+        let currentStep = 1;
+        const totalSteps = 32;
+
+        function revealAnswer(id) {
+            const answer = document.getElementById(id);
+            if (answer.style.display === "block") {
+                answer.style.display = "none";
+            } else {
+                answer.style.display = "block";
+            }
+        }
+
+        function nextStep() {
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+
+            // Increment step
+            currentStep++;
+
+            // Show next step
+            if (currentStep <= totalSteps) {
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                updateProgress();
+            } else {
+                // Show final step
+                document.getElementById('finalStep').classList.add('active');
+                document.getElementById(`step${currentStep - 1}`).classList.remove('active');
+                updateProgress(true);
+            }
+        }
+
+        function restart() {
+            // Hide all steps
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById(`step${i}`).classList.remove('active');
+            }
+            document.getElementById('finalStep').classList.remove('active');
+
+            // Reset step counter
+            currentStep = 1;
+
+            // Show first step
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgress();
+        }
+
+        function updateProgress(final = false) {
+            const progressBar = document.getElementById('progressBar');
+            if (final) {
+                progressBar.style.width = `100%`;
+            } else {
+                const percentage = ((currentStep - 1) / totalSteps) * 100;
+                progressBar.style.width = `${percentage}%`;
+            }
+        }
+
+        // Initialize Progress Bar
+        updateProgress();
     </script>
 
 </body>
