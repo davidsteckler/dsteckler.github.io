@@ -1,371 +1,506 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Catch the Ball</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-        #gameArea {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #f0f0f0;
-        }
-        #ball {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.1s ease-out;
-        }
-        #scoreBoard, #timer, #powerUp {
-            position: absolute;
-            font-size: 18px;
-        }
-        #scoreBoard { top: 10px; left: 10px; }
-        #timer { top: 10px; right: 10px; }
-        #powerUp { 
-            bottom: 10px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background-color: rgba(255,255,255,0.7);
-            padding: 5px 10px;
-            border-radius: 15px;
-            cursor: pointer;
-        }
-        #startButton {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 10px 20px;
-            font-size: 18px;
-        }
-        #themeElement {
-            position: absolute;
-            font-size: 24px;
-        }
-        #dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: none;
-        }
-        #easterEggHint {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-        #highScoreBoard {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 18px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Catch the Ball</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #f0f0f0;
+    }
+    #ball {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.1s ease-out;
+    }
+    /* Pop animation for visual feedback */
+    .pop {
+      animation: popEffect 0.2s forwards;
+    }
+    @keyframes popEffect {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.8); }
+      100% { transform: scale(1.2); opacity: 0.5; }
+    }
+    /* Particle styling */
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 1;
+      animation: particleFade 0.6s forwards;
+    }
+    @keyframes particleFade {
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+    #scoreBoard, #timer, #levelBoard, #powerUp {
+      position: absolute;
+      font-size: 18px;
+      background-color: rgba(255,255,255,0.8);
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+    #scoreBoard { top: 10px; left: 10px; }
+    #levelBoard { top: 10px; left: 150px; }
+    #timer { top: 10px; right: 10px; }
+    #highScoreBoard {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 18px;
+      background-color: rgba(255,255,255,0.8);
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+    #powerUp {
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    /* Power-up timer bar */
+    .powerUpTimer {
+      width: 100%;
+      height: 4px;
+      background-color: #ff0000;
+      margin-top: 3px;
+    }
+    #themeElement {
+      position: absolute;
+      font-size: 24px;
+      bottom: 10px;
+      left: 10px;
+    }
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+    #easterEggHint {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    #dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: none;
+      z-index: 10;
+    }
+  </style>
 </head>
 <body>
-    <div id="gameArea">
-        <div id="scoreBoard">Score: 0</div>
-        <div id="timer">Time: 60</div>
-        <div id="ball"></div>
-        <div id="powerUp"></div>
-        <div id="themeElement"></div>
-        <button id="startButton">Start Game</button>
-        <div id="easterEggHint">Secrets await... 🕵️</div>
-        <div id="highScoreBoard">High Score: 0</div>
-    </div>
-    <div id="dialog">
-        <h2 id="dialogTitle"></h2>
-        <p id="dialogContent"></p>
-        <button onclick="closeDialog()">OK</button>
-    </div>
+  <div id="gameArea">
+    <div id="scoreBoard">Score: 0</div>
+    <div id="levelBoard">Level: 1</div>
+    <div id="timer">Time: 60</div>
+    <div id="ball"></div>
+    <div id="powerUp"></div>
+    <div id="themeElement"></div>
+    <button id="startButton">Start Game</button>
+    <div id="easterEggHint">Secrets await... 🕵️</div>
+    <div id="highScoreBoard">High Score: 0</div>
+  </div>
+  <div id="dialog">
+    <h2 id="dialogTitle"></h2>
+    <p id="dialogContent"></p>
+    <button onclick="closeDialog()">OK</button>
+  </div>
 
-    <script>
-        const gameArea = document.getElementById('gameArea');
-        const ball = document.getElementById('ball');
-        const scoreBoard = document.getElementById('scoreBoard');
-        const timer = document.getElementById('timer');
-        const startButton = document.getElementById('startButton');
-        const powerUpElement = document.getElementById('powerUp');
-        const themeElement = document.getElementById('themeElement');
-        const dialog = document.getElementById('dialog');
-        const dialogTitle = document.getElementById('dialogTitle');
-        const dialogContent = document.getElementById('dialogContent');
-        const highScoreBoard = document.getElementById('highScoreBoard');
+  <!-- Audio Elements for sound effects -->
+  <audio id="popSound" src="pop.mp3" preload="auto"></audio>
+  <audio id="powerUpSound" src="powerup.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="background.mp3" preload="auto" loop></audio>
 
-        let score = 0;
-        let timeLeft = 60;
-        let ballSize = 50;
-        let ballSpeed = 1000;
-        let gameInterval;
-        let powerUp = null;
-        let gameStarted = false;
-        let highScore = 0;
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    const ball = document.getElementById('ball');
+    const scoreBoard = document.getElementById('scoreBoard');
+    const timer = document.getElementById('timer');
+    const levelBoard = document.getElementById('levelBoard');
+    const startButton = document.getElementById('startButton');
+    const powerUpElement = document.getElementById('powerUp');
+    const themeElement = document.getElementById('themeElement');
+    const dialog = document.getElementById('dialog');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogContent = document.getElementById('dialogContent');
+    const highScoreBoard = document.getElementById('highScoreBoard');
+    const popSound = document.getElementById('popSound');
+    const powerUpSound = document.getElementById('powerUpSound');
+    const bgMusic = document.getElementById('bgMusic');
 
-        const themes = ['pastel', 'forest', 'ocean', 'sunset'];
-        let currentTheme = themes[Math.floor(Math.random() * themes.length)];
+    let score = 0;
+    let timeLeft = 60;
+    let ballSize = 50;
+    let ballSpeed = 1000;
+    let gameInterval;
+    let timerInterval;
+    let powerUp = null;
+    let gameStarted = false;
+    let highScore = localStorage.getItem('highScore') || 0;
+    let lastCatchTime = 0;
+    let comboCount = 0;
+    let comboTimeout;
 
-        function setTheme(theme) {
-            switch (theme) {
-                case 'pastel':
-                    gameArea.style.backgroundColor = '#FFE5E5';
-                    gameArea.style.color = '#6E7582';
-                    ball.style.backgroundColor = '#92A8D1';
-                    themeElement.innerHTML = '🍭🎨🌸';
-                    break;
-                case 'forest':
-                    gameArea.style.backgroundColor = '#E8F3E8';
-                    gameArea.style.color = '#2C4A2C';
-                    ball.style.backgroundColor = '#6B8E23';
-                    themeElement.innerHTML = '🌳🍃🌿';
-                    break;
-                case 'ocean':
-                    gameArea.style.backgroundColor = '#E0F0FF';
-                    gameArea.style.color = '#00008B';
-                    ball.style.backgroundColor = '#4682B4';
-                    themeElement.innerHTML = '🌊🐠🐚';
-                    break;
-                case 'sunset':
-                    gameArea.style.backgroundColor = '#FFF0E5';
-                    gameArea.style.color = '#8B4513';
-                    ball.style.backgroundColor = '#FFA07A';
-                    themeElement.innerHTML = '🌅🌴🏖️';
-                    break;
-            }
-            themeElement.style.bottom = '10px';
-            themeElement.style.left = '10px';
-        }
+    // Play background music on start
+    bgMusic.volume = 0.3;
 
-        function getRandomPosition(max) {
-            return Math.floor(Math.random() * max);
-        }
+    const themes = ['pastel', 'forest', 'ocean', 'sunset'];
+    let currentTheme = themes[Math.floor(Math.random() * themes.length)];
 
-        function moveBall() {
-            const maxX = gameArea.clientWidth - ballSize;
-            const maxY = gameArea.clientHeight - ballSize;
-            ball.style.left = `${getRandomPosition(maxX)}px`;
-            ball.style.top = `${getRandomPosition(maxY)}px`;
-        }
+    function setTheme(theme) {
+      switch (theme) {
+        case 'pastel':
+          gameArea.style.backgroundColor = '#FFE5E5';
+          gameArea.style.color = '#6E7582';
+          ball.style.backgroundColor = '#92A8D1';
+          themeElement.innerHTML = '🍭🎨🌸';
+          break;
+        case 'forest':
+          gameArea.style.backgroundColor = '#E8F3E8';
+          gameArea.style.color = '#2C4A2C';
+          ball.style.backgroundColor = '#6B8E23';
+          themeElement.innerHTML = '🌳🍃🌿';
+          break;
+        case 'ocean':
+          gameArea.style.backgroundColor = '#E0F0FF';
+          gameArea.style.color = '#00008B';
+          ball.style.backgroundColor = '#4682B4';
+          themeElement.innerHTML = '🌊🐠🐚';
+          break;
+        case 'sunset':
+          gameArea.style.backgroundColor = '#FFF0E5';
+          gameArea.style.color = '#8B4513';
+          ball.style.backgroundColor = '#FFA07A';
+          themeElement.innerHTML = '🌅🌴🏖️';
+          break;
+      }
+    }
 
-        function handleCatch() {
-            if (!gameStarted) return;
-            score++;
-            scoreBoard.textContent = `Score: ${score}`;
-            moveBall();
+    function getRandomPosition(max) {
+      return Math.floor(Math.random() * max);
+    }
 
-            if (score % 10 === 0) {
-                showRandomDialog();
-            }
+    function moveBall() {
+      const maxX = gameArea.clientWidth - ballSize;
+      const maxY = gameArea.clientHeight - ballSize;
+      ball.style.left = `${getRandomPosition(maxX)}px`;
+      ball.style.top = `${getRandomPosition(maxY)}px`;
+    }
 
-            if (score % 5 === 0) {
-                ballSize = Math.max(ballSize - 5, 20);
-                ballSpeed = Math.max(ballSpeed - 50, 500);
-                ball.style.width = `${ballSize}px`;
-                ball.style.height = `${ballSize}px`;
-                clearInterval(gameInterval);
-                gameInterval = setInterval(moveBall, ballSpeed);
-            }
+    function spawnParticles(x, y) {
+      // Create a few small particles for a burst effect.
+      for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        gameArea.appendChild(particle);
+        // Remove the particle after animation
+        setTimeout(() => particle.remove(), 600);
+      }
+    }
 
-            if (Math.random() < 0.2) {  // Increased chance of power-up
-                const powerUps = ['freeze', 'double', 'magnet', 'shrink', 'slow'];
-                powerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
-                powerUpElement.innerHTML = getPowerUpEmoji() + " Click to activate!";
-            }
-        }
+    function updateLevel() {
+      // Level increases every 20 points.
+      const level = Math.floor(score / 20) + 1;
+      levelBoard.textContent = `Level: ${level}`;
+    }
 
-        function getPowerUpEmoji() {
-            switch (powerUp) {
-                case 'freeze': return '❄️';
-                case 'double': return '2️⃣';
-                case 'magnet': return '🧲';
-                case 'shrink': return '🔍';
-                case 'slow': return '🐌';
-            }
-        }
+    function animateBall() {
+      ball.classList.add('pop');
+      setTimeout(() => ball.classList.remove('pop'), 200);
+    }
 
-        function applyPowerUp() {
-            switch (powerUp) {
-                case 'freeze':
-                    timeLeft += 5;
-                    showDialog("Time Freeze!", "You've gained 5 extra seconds!");
-                    break;
-                case 'double':
-                    score += 5;
-                    scoreBoard.textContent = `Score: ${score}`;
-                    showDialog("Double Points!", "You've earned 5 bonus points!");
-                    break;
-                case 'magnet':
-                    const originalSize = ballSize;
-                    ballSize *= 1.5;
-                    ball.style.width = `${ballSize}px`;
-                    ball.style.height = `${ballSize}px`;
-                    setTimeout(() => {
-                        ballSize = originalSize;
-                        ball.style.width = `${ballSize}px`;
-                        ball.style.height = `${ballSize}px`;
-                    }, 5000);
-                    showDialog("Magnet Power!", "The ball is larger for 5 seconds!");
-                    break;
-                case 'shrink':
-                    ballSize = Math.max(ballSize - 10, 10);
-                    ball.style.width = `${ballSize}px`;
-                    ball.style.height = `${ballSize}px`;
-                    showDialog("Shrink Ray!", "The ball has shrunk! Be quick!");
-                    break;
-                case 'slow':
-                    const originalSpeed = ballSpeed;
-                    ballSpeed *= 1.5;
-                    clearInterval(gameInterval);
-                    gameInterval = setInterval(moveBall, ballSpeed);
-                    setTimeout(() => {
-                        ballSpeed = originalSpeed;
-                        clearInterval(gameInterval);
-                        gameInterval = setInterval(moveBall, ballSpeed);
-                    }, 5000);
-                    showDialog("Slow Motion!", "The ball moves slower for 5 seconds!");
-                    break;
-            }
+    function handleCatch() {
+      if (!gameStarted) return;
+      
+      // Play pop sound and animate
+      popSound.currentTime = 0;
+      popSound.play();
+      animateBall();
+
+      // Combo logic: if caught within 1 second, increment combo.
+      const now = Date.now();
+      if (now - lastCatchTime < 1000) {
+        comboCount++;
+      } else {
+        comboCount = 1;
+      }
+      lastCatchTime = now;
+      
+      // Award score plus bonus multiplier if in a combo streak.
+      const comboBonus = comboCount > 1 ? comboCount : 1;
+      score += 1 * comboBonus;
+      scoreBoard.textContent = `Score: ${score} ${comboCount > 1 ? ` (Combo x${comboCount})` : ''}`;
+      updateLevel();
+      moveBall();
+      spawnParticles(ball.offsetLeft + ballSize / 2, ball.offsetTop + ballSize / 2);
+
+      // Show fun dialog every 10 points
+      if (score % 10 === 0) {
+        showRandomDialog();
+      }
+
+      // Progressive difficulty: decrease ball size and speed every 5 points.
+      if (score % 5 === 0) {
+        ballSize = Math.max(ballSize - 5, 20);
+        ballSpeed = Math.max(ballSpeed - 50, 500);
+        ball.style.width = `${ballSize}px`;
+        ball.style.height = `${ballSize}px`;
+        clearInterval(gameInterval);
+        gameInterval = setInterval(moveBall, ballSpeed);
+      }
+
+      // Reset combo timeout
+      clearTimeout(comboTimeout);
+      comboTimeout = setTimeout(() => { comboCount = 0; }, 1500);
+
+      // Chance to spawn a power-up
+      if (Math.random() < 0.2 && !powerUp) {
+        const powerUps = ['freeze', 'double', 'magnet', 'shrink', 'slow'];
+        powerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
+        powerUpElement.innerHTML = getPowerUpEmoji() + " Click to activate!";
+        // Add a visual timer bar for the power-up (lasting 5 seconds to click)
+        const timerBar = document.createElement('div');
+        timerBar.classList.add('powerUpTimer');
+        powerUpElement.appendChild(timerBar);
+        let width = 100;
+        const barInterval = setInterval(() => {
+          width -= 2;
+          timerBar.style.width = width + "%";
+          if (width <= 0) {
+            clearInterval(barInterval);
             powerUp = null;
-            powerUpElement.innerHTML = '';
-        }
+            powerUpElement.innerHTML = "";
+          }
+        }, 100);
+      }
+    }
 
-        function startGame() {
-            gameStarted = true;
-            score = 0;
-            timeLeft = 60;
-            ballSize = 50;
+    function getPowerUpEmoji() {
+      switch (powerUp) {
+        case 'freeze': return '❄️';
+        case 'double': return '2️⃣';
+        case 'magnet': return '🧲';
+        case 'shrink': return '🔍';
+        case 'slow': return '🐌';
+      }
+    }
 
-
-            ballSpeed = 1000;
-            scoreBoard.textContent = 'Score: 0';
-            timer.textContent = 'Time: 60';
-            startButton.style.display = 'none';
-            ball.style.display = 'block';
+    function applyPowerUp() {
+      if (!powerUp) return;
+      powerUpSound.currentTime = 0;
+      powerUpSound.play();
+      switch (powerUp) {
+        case 'freeze':
+          timeLeft += 5;
+          showDialog("Time Freeze!", "Extra 5 seconds added. Time is on your side!");
+          break;
+        case 'double':
+          score += 5;
+          scoreBoard.textContent = `Score: ${score}`;
+          showDialog("Double Points!", "5 bonus points – your score just doubled its charm!");
+          break;
+        case 'magnet':
+          const originalSize = ballSize;
+          ballSize *= 1.5;
+          ball.style.width = `${ballSize}px`;
+          ball.style.height = `${ballSize}px`;
+          showDialog("Magnet Power!", "The ball is larger for 5 seconds. Catch it while you can!");
+          setTimeout(() => {
+            ballSize = originalSize;
             ball.style.width = `${ballSize}px`;
             ball.style.height = `${ballSize}px`;
-            setTheme(currentTheme);
-            moveBall();
+          }, 5000);
+          break;
+        case 'shrink':
+          ballSize = Math.max(ballSize - 10, 10);
+          ball.style.width = `${ballSize}px`;
+          ball.style.height = `${ballSize}px`;
+          showDialog("Shrink Ray!", "The ball shrinks – quicker reflexes required!");
+          break;
+        case 'slow':
+          const originalSpeed = ballSpeed;
+          ballSpeed *= 1.5;
+          clearInterval(gameInterval);
+          gameInterval = setInterval(moveBall, ballSpeed);
+          showDialog("Slow Motion!", "Ball slowed down for 5 seconds. Enjoy the ease!");
+          setTimeout(() => {
+            ballSpeed = originalSpeed;
+            clearInterval(gameInterval);
             gameInterval = setInterval(moveBall, ballSpeed);
-            
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                timer.textContent = `Time: ${timeLeft}`;
-                if (timeLeft === 0) {
-                    clearInterval(timerInterval);
-                    clearInterval(gameInterval);
-                    gameStarted = false;
-                    ball.style.display = 'none';
-                    startButton.style.display = 'block';
-                    if (score > highScore) {
-                        highScore = score;
-                        highScoreBoard.textContent = `High Score: ${highScore}`;
-                        showDialog("Game Over!", `New High Score: ${score}. Can you beat it next time?`);
-                    } else {
-                        showDialog("Game Over!", `Your final score is ${score}. Can you beat it next time?`);
-                    }
-                }
-            }, 1000);
+          }, 5000);
+          break;
+      }
+      powerUp = null;
+      powerUpElement.innerHTML = "";
+    }
+
+    function startGame() {
+      gameStarted = true;
+      score = 0;
+      timeLeft = 60;
+      ballSize = 50;
+      ballSpeed = 1000;
+      comboCount = 0;
+      scoreBoard.textContent = 'Score: 0';
+      levelBoard.textContent = 'Level: 1';
+      timer.textContent = 'Time: 60';
+      startButton.style.display = 'none';
+      ball.style.display = 'block';
+      ball.style.width = `${ballSize}px`;
+      ball.style.height = `${ballSize}px`;
+      setTheme(currentTheme);
+      moveBall();
+      gameInterval = setInterval(moveBall, ballSpeed);
+      
+      // Play background music
+      bgMusic.play();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timer.textContent = `Time: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          endGame();
         }
+      }, 1000);
+    }
 
-        function showDialog(title, content) {
-            dialogTitle.textContent = title;
-            dialogContent.textContent = content;
-            dialog.style.display = 'block';
+    function endGame() {
+      clearInterval(timerInterval);
+      clearInterval(gameInterval);
+      gameStarted = false;
+      ball.style.display = 'none';
+      startButton.style.display = 'block';
+      bgMusic.pause();
+      // Update high score using localStorage
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+        highScoreBoard.textContent = `High Score: ${highScore}`;
+        showDialog("Game Over!", `New High Score: ${score}. Ready for a rematch?`);
+      } else {
+        showDialog("Game Over!", `Your final score is ${score}. Can you beat it next time?`);
+      }
+    }
+
+    function showDialog(title, content) {
+      dialogTitle.textContent = title;
+      dialogContent.textContent = content;
+      dialog.style.display = 'block';
+    }
+
+    function closeDialog() {
+      dialog.style.display = 'none';
+    }
+
+    function showRandomDialog() {
+      const dialogs = [
+        { title: "Ball Catcher Extraordinaire!", content: "You're on fire! Keep those reflexes sharp." },
+        { title: "Reflexes of a Cat!", content: "Your quick moves are making the ball dance." },
+        { title: "Ball Whisperer", content: "The ball listens to your click – it can't resist." },
+        { title: "Gravity Defier", content: "Catching balls like you're in zero-G. Awesome!" },
+        { title: "Click Master", content: "Your clicking skills are off the charts!" },
+        { title: "Digital Acrobat", content: "That combo streak deserves a standing ovation." }
+      ];
+      const randomDialog = dialogs[Math.floor(Math.random() * dialogs.length)];
+      showDialog(randomDialog.title, randomDialog.content);
+    }
+
+    // Easter Eggs (clearer feedback)
+    const easterEggs = [
+      { 
+        code: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'], 
+        action: () => { 
+          score *= 2; 
+          scoreBoard.textContent = `Score: ${score}`;
+          showDialog("Konami Code Activated!", "You've unlocked the legendary code! Your score has been doubled!");
         }
-
-        function closeDialog() {
-            dialog.style.display = 'none';
+      },
+      { 
+        code: ['s', 'u', 'p', 'e', 'r'], 
+        action: () => { 
+          ballSize *= 2; 
+          ball.style.width = `${ballSize}px`; 
+          ball.style.height = `${ballSize}px`;
+          showDialog("Super Size!", "The ball has grown to super size!");
         }
-
-        function showRandomDialog() {
-            const dialogs = [
-                { title: "Ball Catcher Extraordinaire!", content: "You're on fire! Keep up the great work!" },
-                { title: "Reflexes of a Cat!", content: "Your quick moves are impressive. Are you part feline?" },
-                { title: "Ball Whisperer", content: "The balls seem drawn to your cursor. What's your secret?" },
-                { title: "Gravity Defier", content: "You're catching balls like they're in zero-G!" },
-                { title: "Click Master", content: "Your clicking skills are off the charts! Well done!" },
-                { title: "Ball Magnet", content: "Are you using a hidden magnet? Your catches are magnetic!" },
-                { title: "Cursor Virtuoso", content: "Your cursor control is like a beautifully choreographed dance!" },
-                { title: "Pixel Perfect", content: "You're catching those balls with pixel-perfect precision!" },
-                { title: "Spherical Sorcerer", content: "You must be using some kind of ball-catching magic!" },
-                { title: "Digital Acrobat", content: "The way you navigate those pixels is simply acrobatic!" }
-            ];
-            const randomDialog = dialogs[Math.floor(Math.random() * dialogs.length)];
-            showDialog(randomDialog.title, randomDialog.content);
+      },
+      { 
+        code: ['t', 'i', 'm', 'e'], 
+        action: () => { 
+          timeLeft += 30; 
+          showDialog("Time Warp!", "Extra 30 seconds granted!");
         }
+      },
+      { 
+        code: ['r', 'a', 'i', 'n', 'b', 'o', 'w'], 
+        action: () => { 
+          ball.style.background = 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
+          showDialog("Rainbow Mode!", "Catch the rainbow!");
+        }
+      },
+      { 
+        code: ['g', 'r', 'a', 'v', 'i', 't', 'y'], 
+        action: () => { 
+          gameArea.style.transform = 'rotate(180deg)';
+          showDialog("Gravity Flip!", "Everything's upside down!");
+          setTimeout(() => { gameArea.style.transform = 'rotate(0deg)'; }, 10000);
+        }
+      }
+    ];
 
-        ball.addEventListener('click', handleCatch);
-        startButton.addEventListener('click', startGame);
-        powerUpElement.addEventListener('click', applyPowerUp);
+    let currentEasterEgg = 0;
+    document.addEventListener('keydown', (e) => {
+      if (e.key === easterEggs[currentEasterEgg].code[0]) {
+        easterEggs[currentEasterEgg].code.shift();
+        if (easterEggs[currentEasterEgg].code.length === 0) {
+          easterEggs[currentEasterEgg].action();
+          currentEasterEgg = (currentEasterEgg + 1) % easterEggs.length;
+        }
+      } else {
+        // Reset the code sequence if wrong key pressed.
+        easterEggs[currentEasterEgg].code = [...(easterEggs[currentEasterEgg].original || easterEggs[currentEasterEgg].code)];
+      }
+    });
 
-        // Easter Eggs
-        const easterEggs = [
-            { code: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'], 
-              action: () => { 
-                  score *= 2; 
-                  scoreBoard.textContent = `Score: ${score}`; 
-                  showDialog("Konami Code Activated!", "You've unlocked the legendary code! Your score has been doubled!");
-              }
-            },
-            { code: ['s', 'u', 'p', 'e', 'r'], 
-              action: () => { 
-                  ballSize *= 2; 
-                  ball.style.width = `${ballSize}px`; 
-                  ball.style.height = `${ballSize}px`; 
-                  showDialog("Super Size!", "The ball has grown to super size!");
-              }
-            },
-            { code: ['t', 'i', 'm', 'e'], 
-              action: () => { 
-                  timeLeft += 30; 
-                  showDialog("Time Warp!", "You've gained an extra 30 seconds!");
-              }
-            },
-            { code: ['r', 'a', 'i', 'n', 'b', 'o', 'w'], 
-              action: () => { 
-                  ball.style.background = 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
-                  showDialog("Rainbow Mode!", "Catch the rainbow!");
-              }
-            },
-            { code: ['g', 'r', 'a', 'v', 'i', 't', 'y'], 
-              action: () => { 
-                  gameArea.style.transform = 'rotate(180deg)';
-                  showDialog("Gravity Flip!", "Everything's upside down!");
-                  setTimeout(() => { gameArea.style.transform = 'rotate(0deg)'; }, 10000);
-              }
-            }
-        ];
-
-        let currentEasterEgg = 0;
-        document.addEventListener('keydown', (e) => {
-            if (e.key === easterEggs[currentEasterEgg].code[0]) {
-                easterEggs[currentEasterEgg].code.shift();
-                if (easterEggs[currentEasterEgg].code.length === 0) {
-                    easterEggs[currentEasterEgg].action();
-                    currentEasterEgg = (currentEasterEgg + 1) % easterEggs.length;
-                }
-            } else {
-                easterEggs[currentEasterEgg].code = [...easterEggs[currentEasterEgg].code];
-            }
-        });
-    </script>
+    ball.addEventListener('click', handleCatch);
+    startButton.addEventListener('click', startGame);
+    powerUpElement.addEventListener('click', applyPowerUp);
+  </script>
 </body>
 </html>
-```
