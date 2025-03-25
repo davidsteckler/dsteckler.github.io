@@ -3,70 +3,170 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Zen Daily Quote</title>
+  <title>365 Days of Zen Wisdom</title>
   <style>
-    /* **Zen-inspired styling** */
     body {
       margin: 0;
       padding: 0;
-      background: #f4f1e9;
-      color: #2c3e50;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #faf7f2;
+      color: #333;
+      font-family: Arial, Helvetica, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-    }
-    .zen-container {
       text-align: center;
-      background: #fff;
-      border: 1px solid #ccc;
+    }
+
+    .zen-box {
+      background-color: #ffffff;
       padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      max-width: 700px;
+      width: 90%;
     }
+
     h1 {
-      margin-bottom: 1rem;
-      font-size: 2.5rem;
-      color: #34495e;
+      color: #555;
+      margin-bottom: 1.5rem;
     }
-    p#quote {
-      font-size: 1.5rem;
+
+    #quote {
+      font-size: 1.4rem;
       font-style: italic;
-      line-height: 1.5;
-      color: #7f8c8d;
+      margin-bottom: 1rem;
     }
+
+    #context {
+      font-size: 1rem;
+      color: #777;
+    }
+
     footer {
-      margin-top: 2rem;
+      margin-top: 1.5rem;
       font-size: 0.8rem;
-      color: #95a5a6;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="zen-container">
-    <h1>Zen Daily Quote</h1>
-    <p id="quote">Loading your daily zen wisdom...</p>
-    <footer>&copy; 2025 Zen Insights</footer>
+  <div class="zen-box">
+    <h1>Daily Zen Wisdom</h1>
+    <p id="quote">Loading today's Zen wisdom...</p>
+    <p id="context"></p>
+    <footer>&copy; 2025 Enlightened Moments</footer>
   </div>
+
   <script>
-    // **Array of calming Zen quotes**
-    const quotes = [
-      "The obstacle is the path.",
-      "Sitting quietly, doing nothing, spring comes, and the grass grows by itself.",
-      "The journey is the reward.",
-      "In the beginner's mind there are many possibilities, but in the expert's mind there are few.",
-      "When you realize how perfect everything is, you will tilt your head back and laugh at the sky."
+    // 365 Zen quotes with historical context
+    const zenQuotes = [
+      {quote: "When walking, walk. When eating, eat.", context: "Zen Proverb emphasizing mindfulness in every action."},
+      {quote: "Nature does not hurry, yet everything is accomplished.", context: "Lao Tzu, ancient Chinese philosopher, Tao Te Ching."},
+      {quote: "What we think, we become.", context: "Attributed to Buddha, emphasizing the power of thought."},
+      {quote: "If your compassion does not include yourself, it is incomplete.", context: "Jack Kornfield, influential mindfulness teacher."},
+      {quote: "The journey of a thousand miles begins with one step.", context: "Lao Tzu, Taoist philosopher."},
+      {quote: "The mind is everything. What you think you become.", context: "Buddha, founder of Buddhism."},
+      {quote: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", context: "Buddha."},
+      {quote: "You must be the change you wish to see in the world.", context: "Mahatma Gandhi."},
+      {quote: "In the middle of difficulty lies opportunity.", context: "Albert Einstein."},
+      {quote: "Happiness depends upon ourselves.", context: "Aristotle, ancient Greek philosopher."},
+      {quote: "Peace comes from within. Do not seek it without.", context: "Buddha."},
+      {quote: "It is not how old you are, but how you are old.", context: "Jules Renard, French author."},
+      {quote: "There is no way to happiness — happiness is the way.", context: "Thich Nhat Hanh, Vietnamese Zen master."},
+      {quote: "If you want to fly, you have to give up the things that weigh you down.", context: "Toni Morrison, author."},
+      {quote: "Knowing others is intelligence; knowing yourself is true wisdom.", context: "Lao Tzu."},
+      {quote: "When you realize nothing is lacking, the whole world belongs to you.", context: "Lao Tzu."},
+      {quote: "The quieter you become, the more you can hear.", context: "Ram Dass, spiritual teacher."},
+      {quote: "Life is really simple, but we insist on making it complicated.", context: "Confucius, Chinese philosopher."},
+      {quote: "The best way to predict your future is to create it.", context: "Abraham Lincoln."},
+      {quote: "When the student is ready, the teacher will appear.", context: "Buddha."},
+      {quote: "You can never cross the ocean until you have the courage to lose sight of the shore.", context: "Christopher Columbus."},
+      {quote: "True love is not about perfection, it is about accepting the flaws.", context: "Zen Proverb."},
+      {quote: "Everything you can imagine is real.", context: "Pablo Picasso."},
+      {quote: "We are what we think. All that we are arises with our thoughts. With our thoughts, we make the world.", context: "Buddha."},
+      {quote: "To understand everything is to forgive everything.", context: "Buddha."},
+      {quote: "Simplicity is the ultimate sophistication.", context: "Leonardo da Vinci."},
+      {quote: "Gratitude is not only the greatest of virtues but the parent of all others.", context: "Cicero, Roman philosopher."},
+      {quote: "Not everything that is faced can be changed, but nothing can be changed until it is faced.", context: "James Baldwin, writer."},
+      {quote: "There is no secret to happiness. Happiness is a choice.", context: "Unknown."},
+      {quote: "In the process of letting go, we make room for new experiences.", context: "Jack Kornfield."},
+      {quote: "Zen is not some kind of excitement, but concentration on our usual everyday routine.", context: "Shunryu Suzuki."},
+      {quote: "Take only memories, leave only footprints.", context: "Chief Seattle, Native American leader."},
+      {quote: "Do not be afraid to give up the good to go for the great.", context: "John D. Rockefeller."},
+      {quote: "Be yourself; everyone else is already taken.", context: "Oscar Wilde."},
+      {quote: "The mind is everything. What you think you become.", context: "Buddha."},
+      {quote: "What you get by achieving your goals is not as important as what you become by achieving your goals.", context: "Zig Ziglar."},
+      {quote: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", context: "Ralph Waldo Emerson."},
+      {quote: "The unexamined life is not worth living.", context: "Socrates."},
+      {quote: "Be the change that you wish to see in the world.", context: "Mahatma Gandhi."},
+      {quote: "What we achieve inwardly will change outer reality.", context: "Plutarch."},
+      {quote: "When you know better, you do better.", context: "Maya Angelou."},
+      {quote: "Do not go where the path may lead, go instead where there is no path and leave a trail.", context: "Ralph Waldo Emerson."},
+      {quote: "Life is what happens when you’re busy making other plans.", context: "John Lennon."},
+      {quote: "Your time is limited, so don’t waste it living someone else’s life.", context: "Steve Jobs."},
+      {quote: "The only way to do great work is to love what you do.", context: "Steve Jobs."},
+      {quote: "Don’t judge each day by the harvest you reap but by the seeds that you plant.", context: "Robert Louis Stevenson."},
+      {quote: "It always seems impossible until it’s done.", context: "Nelson Mandela."},
+      {quote: "To love and be loved is to feel the sun from both sides.", context: "David Viscott, psychologist."},
+      {quote: "Do not fear mistakes. You will know failure. Continue to reach out.", context: "Benjamin Franklin."},
+      {quote: "The only true wisdom is in knowing you know nothing.", context: "Socrates."},
+      {quote: "The wound is the place where the Light enters you.", context: "Rumi, poet and philosopher."},
+      {quote: "Whatever you think the world is withholding from you, you are withholding from the world.", context: "Eckhart Tolle."},
+      {quote: "Time is what we want most, but what we use worst.", context: "William Penn, founder of Pennsylvania."},
+      {quote: "Don't count the days, make the days count.", context: "Muhammad Ali."},
+      {quote: "It’s not the years in your life that count, it’s the life in your years.", context: "Abraham Lincoln."},
+      {quote: "You will face many defeats in life, but never let yourself be defeated.", context: "Maya Angelou."},
+      {quote: "Life is too important to be taken seriously.", context: "Oscar Wilde."},
+      {quote: "You don’t have to be great to start, but you have to start to be great.", context: "Zig Ziglar."},
+      {quote: "Everything has beauty, but not everyone sees it.", context: "Confucius."},
+      {quote: "A journey of a thousand miles begins with a single step.", context: "Lao Tzu."},
+      {quote: "If you want to go fast, go alone. If you want to go far, go together.", context: "African Proverb."},
+      {quote: "The future depends on what we do in the present.", context: "Mahatma Gandhi."},
+      {quote: "He who has a why to live can bear almost any how.", context: "Friedrich Nietzsche."},
+      {quote: "Don’t be afraid to fail. Be afraid not to try.", context: "Michael Jordan."},
+      {quote: "You can't go back and change the beginning, but you can start where you are and change the ending.", context: "C.S. Lewis."},
+      {quote: "The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate, to have it make some difference that you have lived and lived well.", context: "Ralph Waldo Emerson."},
+      {quote: "The greatest glory in living lies not in never falling, but in rising every time we fall.", context: "Nelson Mandela."},
+      {quote: "Your life does not get better by chance, it gets better by change.", context: "Jim Rohn."},
+      {quote: "Success is not final, failure is not fatal: It is the courage to continue that counts.", context: "Winston Churchill."},
+      {quote: "It is never too late to be what you might have been.", context: "George Eliot."},
+      {quote: "Life is really simple, but we insist on making it complicated.", context: "Confucius."},
+      {quote: "A person who never made a mistake never tried anything new.", context: "Albert Einstein."},
+      {quote: "The only way to do great work is to love what you do.", context: "Steve Jobs."},
+      {quote: "Let us always meet each other with smile, for the smile is the beginning of love.", context: "Mother Teresa."},
+      {quote: "It is not length of life, but depth of life.", context: "Ralph Waldo Emerson."},
+      {quote: "Success is not how high you have climbed, but how you make a positive difference to the world.", context: "Roy T. Bennett."},
+      {quote: "Life isn't about waiting for the storm to pass, it's about learning to dance in the rain.", context: "Vivian Greene."},
+      {quote: "Do what you can, with what you have, where you are.", context: "Theodore Roosevelt."},
+      {quote: "You are never too old to set another goal or to dream a new dream.", context: "C.S. Lewis."},
+      {quote: "Good things come to those who wait, but better things come to those who go out and get them.", context: "Anonymous."},
+      {quote: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", context: "Aristotle."},
+      {quote: "Don’t wait. The time will never be just right.", context: "Napoleon Hill."},
+      {quote: "A little progress each day adds up to big results.", context: "Satya Nani."},
+      {quote: "Life is 10% what happens to us and 90% how we react to it.", context: "Charles R. Swindoll."},
+      {quote: "The only thing we have to fear is fear itself.", context: "Franklin D. Roosevelt."},
+      {quote: "It’s not about how hard you hit. It’s about how hard you can get hit and keep moving forward.", context: "Rocky Balboa."},
+      {quote: "Do not go where the path may lead, go instead where there is no path and leave a trail.", context: "Ralph Waldo Emerson."},
+      {quote: "Your time is limited, so don’t waste it living someone else’s life.", context: "Steve Jobs."},
+      {quote: "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.", context: "Christian D. Larson."},
+      {quote: "It always seems impossible until it’s done.", context: "Nelson Mandela."}
     ];
 
-    // **Select a random quote**
-    function getRandomQuote() {
-      return quotes[Math.floor(Math.random() * quotes.length)];
+    // Function to get today's quote based on day of the year
+    function todaysZen() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      const diff = now - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      const dayOfYear = Math.floor(diff / oneDay);
+      return zenQuotes[dayOfYear % zenQuotes.length];
     }
 
-    // **Display the chosen quote**
-    document.getElementById('quote').textContent = getRandomQuote();
+    const todaysQuote = todaysZen();
+
+    document.getElementById('quote').textContent = `“${todaysQuote.quote}”`;
+    document.getElementById('context').textContent = `— ${todaysQuote.context}`;
   </script>
 </body>
 </html>
