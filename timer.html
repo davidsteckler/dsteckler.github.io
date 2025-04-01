@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Countdown Timer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    #timer {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    button {
+      font-size: 16px;
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    input {
+      font-size: 16px;
+      padding: 5px;
+      width: 100px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Countdown Timer</h1>
+  <div id="timer">00:00</div>
+  <div>
+    <input type="number" id="timeInput" placeholder="Seconds" />
+  </div>
+  <div>
+    <button id="startButton"><b>Start</b></button>
+    <button id="stopButton"><b>Stop</b></button>
+    <button id="resetButton"><b>Reset</b></button>
+  </div>
+
+  <script>
+    let timerInterval;
+    let initialTime = 0;
+    let timeLeft = 0;
+
+    const timerDisplay = document.getElementById('timer');
+    const timeInput = document.getElementById('timeInput');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const resetButton = document.getElementById('resetButton');
+
+    // Update the timer display in MM:SS format.
+    function updateDisplay(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerDisplay.textContent =
+        (minutes < 10 ? '0' + minutes : minutes) + ':' +
+        (secs < 10 ? '0' + secs : secs);
+    }
+
+    // Start the countdown.
+    startButton.addEventListener('click', function() {
+      // Prevent multiple intervals.
+      if (timerInterval) return;
+
+      // Initialize time if not already set.
+      if (timeLeft <= 0) {
+        const inputTime = parseInt(timeInput.value, 10);
+        if (isNaN(inputTime) || inputTime <= 0) {
+          alert('Enter a positive number of seconds.');
+          return;
+        }
+        initialTime = inputTime;
+        timeLeft = initialTime;
+        updateDisplay(timeLeft);
+      }
+
+      timerInterval = setInterval(function() {
+        timeLeft--;
+        updateDisplay(timeLeft);
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          alert('Time is up!');
+        }
+      }, 1000);
+    });
+
+    // Stop the countdown.
+    stopButton.addEventListener('click', function() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    });
+
+    // Reset the countdown to the initial value.
+    resetButton.addEventListener('click', function() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timeLeft = initialTime;
+      updateDisplay(timeLeft);
+    });
+
+    // Initialize display.
+    updateDisplay(0);
+  </script>
+</body>
+</html>
