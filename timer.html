@@ -2,12 +2,13 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Classroom Countdown Timer</title>
+  <title>Advanced Classroom Countdown Timer</title>
   <!-- Import Nunito font -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Nunito', sans-serif;
+      font-weight: bold;
       text-align: center;
       margin-top: 50px;
       background: #f7f7f7;
@@ -19,7 +20,6 @@
       font-size: 100px;
       margin-bottom: 30px;
       color: #333;
-      /* A subtle pulse to remind us that time moves */
       animation: pulse 1s infinite;
     }
     @keyframes pulse {
@@ -27,7 +27,7 @@
       50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
-    .timer-controls, .button-group {
+    .timer-controls, .button-group, .instructions {
       margin-bottom: 20px;
     }
     input {
@@ -53,19 +53,46 @@
     button:hover {
       background-color: #45a049;
     }
+    /* Progress bar container */
+    #progressContainer {
+      width: 80%;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 0 auto 30px auto;
+      height: 20px;
+    }
+    /* Progress bar fill */
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: #4CAF50;
+      border-radius: 10px;
+      transition: width 1s linear;
+    }
+    .instructions {
+      font-size: 16px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-  <h1>Classroom Countdown Timer</h1>
+  <h1>Advanced Classroom Countdown Timer</h1>
   <div id="timer">00:00</div>
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
   <div class="timer-controls">
     <input type="number" id="minutesInput" placeholder="Minutes" min="0">
     <input type="number" id="secondsInput" placeholder="Seconds" min="0" max="59">
   </div>
   <div class="button-group">
-    <button id="startButton"><b>Start</b></button>
-    <button id="stopButton"><b>Stop</b></button>
-    <button id="resetButton"><b>Reset</b></button>
+    <button id="startButton">Start</button>
+    <button id="stopButton">Stop</button>
+    <button id="resetButton">Reset</button>
+  </div>
+  <div class="instructions">
+    <p><b>Keyboard Shortcuts:</b> Press <b>Enter</b> to <b>Start</b> and <b>Backspace</b> to <b>Stop</b> the timer.</p>
+    <p>You can update the timer values even while it's running. Enjoy the countdown!</p>
   </div>
 
   <script>
@@ -79,17 +106,29 @@
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
     const resetButton = document.getElementById('resetButton');
+    const progressBar = document.getElementById('progressBar');
 
-    // Format and update the timer display.
+    // Update timer display and progress bar.
     function updateDisplay(seconds) {
       const minutes = Math.floor(seconds / 60);
       const secs = seconds % 60;
       timerDisplay.textContent =
         (minutes < 10 ? '0' + minutes : minutes) + ':' +
         (secs < 10 ? '0' + secs : secs);
+      updateProgressBar();
     }
 
-    // Update the input fields based on current time.
+    // Update the progress bar based on time left.
+    function updateProgressBar() {
+      if (initialTime > 0) {
+        const percent = (timeLeft / initialTime) * 100;
+        progressBar.style.width = percent + "%";
+      } else {
+        progressBar.style.width = "0%";
+      }
+    }
+
+    // Update input fields to reflect current time.
     function updateInputs(seconds) {
       const minutes = Math.floor(seconds / 60);
       const secs = seconds % 60;
@@ -97,19 +136,35 @@
       secondsInput.value = secs;
     }
 
-    // Get total seconds from minutes and seconds input.
+    // Calculate total time from input fields.
     function getTimeFromInputs() {
       const mins = parseInt(minutesInput.value, 10) || 0;
       const secs = parseInt(secondsInput.value, 10) || 0;
       return mins * 60 + secs;
     }
 
-    // Start the countdown.
-    startButton.addEventListener('click', function() {
-      // Prevent multiple intervals.
-      if (timerInterval) return;
+    // Play a beep sound using the Web Audio API.
+    function beep() {
+      try {
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, context.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 1);
+        oscillator.stop(context.currentTime + 1);
+      } catch (e) {
+        console.log("AudioContext not supported");
+      }
+    }
 
-      // Use current input values to initialize time.
+    // Start the countdown.
+    function startTimer() {
+      if (timerInterval) return; // Prevent multiple intervals.
+
       initialTime = getTimeFromInputs();
       if (initialTime <= 0) {
         alert('Please enter a positive time.');
@@ -118,47 +173,69 @@
       timeLeft = initialTime;
       updateDisplay(timeLeft);
 
-      timerInterval = setInterval(function() {
+      timerInterval = setInterval(() => {
         timeLeft--;
         if (timeLeft < 0) {
           clearInterval(timerInterval);
           timerInterval = null;
           updateDisplay(0);
+          beep();
           alert('Time is up!');
         } else {
           updateDisplay(timeLeft);
           updateInputs(timeLeft);
         }
       }, 1000);
-    });
+    }
 
     // Stop the countdown.
-    stopButton.addEventListener('click', function() {
+    function stopTimer() {
       if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
       }
-    });
+    }
 
     // Reset the countdown to the current input values.
-    resetButton.addEventListener('click', function() {
-      clearInterval(timerInterval);
-      timerInterval = null;
+    function resetTimer() {
+      stopTimer();
       timeLeft = getTimeFromInputs();
+      initialTime = timeLeft;
+      updateDisplay(timeLeft);
+    }
+
+    // Button event listeners.
+    startButton.addEventListener('click', startTimer);
+    stopButton.addEventListener('click', stopTimer);
+    resetButton.addEventListener('click', resetTimer);
+
+    // Live update display when input values change.
+    minutesInput.addEventListener('input', () => {
+      timeLeft = getTimeFromInputs();
+      initialTime = timeLeft;
+      updateDisplay(timeLeft);
+    });
+    secondsInput.addEventListener('input', () => {
+      timeLeft = getTimeFromInputs();
+      initialTime = timeLeft;
       updateDisplay(timeLeft);
     });
 
-    // Allow live updating: as you change the inputs, the timer updates.
-    minutesInput.addEventListener('input', function() {
-      timeLeft = getTimeFromInputs();
-      updateDisplay(timeLeft);
-    });
-    secondsInput.addEventListener('input', function() {
-      timeLeft = getTimeFromInputs();
-      updateDisplay(timeLeft);
+    // Keyboard shortcuts: Enter to start, Backspace to stop.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") {
+        startTimer();
+      }
+      if (e.key === "Backspace") {
+        // Prevent default Backspace behavior outside input fields.
+        if (document.activeElement.tagName !== 'INPUT') {
+          e.preventDefault();
+        }
+        stopTimer();
+      }
     });
 
-    // Initialize display.
+    // Initialize the display.
     updateDisplay(0);
   </script>
 </body>
