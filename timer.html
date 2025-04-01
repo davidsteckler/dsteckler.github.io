@@ -2,38 +2,67 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Custom Countdown Timer</title>
+  <title>Classroom Countdown Timer</title>
+  <!-- Import Nunito font -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Nunito', sans-serif;
       text-align: center;
       margin-top: 50px;
+      background: #f7f7f7;
+    }
+    h1 {
+      margin-bottom: 40px;
     }
     #timer {
-      font-size: 48px;
+      font-size: 100px;
+      margin-bottom: 30px;
+      color: #333;
+      /* A subtle pulse to remind us that time moves */
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .timer-controls, .button-group {
       margin-bottom: 20px;
     }
+    input {
+      font-size: 24px;
+      padding: 10px;
+      width: 100px;
+      text-align: center;
+      margin: 0 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
     button {
-      font-size: 16px;
+      font-size: 20px;
       margin: 5px;
       padding: 10px 20px;
       cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      transition: background-color 0.3s;
     }
-    input {
-      font-size: 16px;
-      padding: 5px;
-      width: 100px;
-      text-align: center;
+    button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <h1>Custom Countdown Timer</h1>
+  <h1>Classroom Countdown Timer</h1>
   <div id="timer">00:00</div>
-  <div>
-    <input type="number" id="timeInput" placeholder="Seconds" />
+  <div class="timer-controls">
+    <input type="number" id="minutesInput" placeholder="Minutes" min="0">
+    <input type="number" id="secondsInput" placeholder="Seconds" min="0" max="59">
   </div>
-  <div>
+  <div class="button-group">
     <button id="startButton"><b>Start</b></button>
     <button id="stopButton"><b>Stop</b></button>
     <button id="resetButton"><b>Reset</b></button>
@@ -45,12 +74,13 @@
     let timeLeft = 0;
 
     const timerDisplay = document.getElementById('timer');
-    const timeInput = document.getElementById('timeInput');
+    const minutesInput = document.getElementById('minutesInput');
+    const secondsInput = document.getElementById('secondsInput');
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
     const resetButton = document.getElementById('resetButton');
 
-    // Update the timer display in MM:SS format.
+    // Format and update the timer display.
     function updateDisplay(seconds) {
       const minutes = Math.floor(seconds / 60);
       const secs = seconds % 60;
@@ -59,30 +89,45 @@
         (secs < 10 ? '0' + secs : secs);
     }
 
+    // Update the input fields based on current time.
+    function updateInputs(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      minutesInput.value = minutes;
+      secondsInput.value = secs;
+    }
+
+    // Get total seconds from minutes and seconds input.
+    function getTimeFromInputs() {
+      const mins = parseInt(minutesInput.value, 10) || 0;
+      const secs = parseInt(secondsInput.value, 10) || 0;
+      return mins * 60 + secs;
+    }
+
     // Start the countdown.
     startButton.addEventListener('click', function() {
       // Prevent multiple intervals.
       if (timerInterval) return;
 
-      // Initialize time if not already set.
-      if (timeLeft <= 0) {
-        const inputTime = parseInt(timeInput.value, 10);
-        if (isNaN(inputTime) || inputTime <= 0) {
-          alert('Enter a positive number of seconds.');
-          return;
-        }
-        initialTime = inputTime;
-        timeLeft = initialTime;
-        updateDisplay(timeLeft);
+      // Use current input values to initialize time.
+      initialTime = getTimeFromInputs();
+      if (initialTime <= 0) {
+        alert('Please enter a positive time.');
+        return;
       }
+      timeLeft = initialTime;
+      updateDisplay(timeLeft);
 
       timerInterval = setInterval(function() {
         timeLeft--;
-        updateDisplay(timeLeft);
-        if (timeLeft <= 0) {
+        if (timeLeft < 0) {
           clearInterval(timerInterval);
           timerInterval = null;
+          updateDisplay(0);
           alert('Time is up!');
+        } else {
+          updateDisplay(timeLeft);
+          updateInputs(timeLeft);
         }
       }, 1000);
     });
@@ -95,11 +140,21 @@
       }
     });
 
-    // Reset the countdown to the initial value.
+    // Reset the countdown to the current input values.
     resetButton.addEventListener('click', function() {
       clearInterval(timerInterval);
       timerInterval = null;
-      timeLeft = initialTime;
+      timeLeft = getTimeFromInputs();
+      updateDisplay(timeLeft);
+    });
+
+    // Allow live updating: as you change the inputs, the timer updates.
+    minutesInput.addEventListener('input', function() {
+      timeLeft = getTimeFromInputs();
+      updateDisplay(timeLeft);
+    });
+    secondsInput.addEventListener('input', function() {
+      timeLeft = getTimeFromInputs();
       updateDisplay(timeLeft);
     });
 
