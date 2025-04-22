@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Web Calculator</title>
+  <style>
+    :root {
+      --bg: #f2f2f2;
+      --fg: #222;
+      --key-bg: #fff;
+      --key-hover: #e6e6e6;
+      --accent: #3b82f6;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1e;
+        --fg: #f2f2f2;
+        --key-bg: #2c2c2c;
+        --key-hover: #3a3a3a;
+        --accent: #60a5fa;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: sans-serif;
+    }
+    .calculator {
+      width: 320px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--key-bg);
+    }
+    .display {
+      background: var(--bg);
+      padding: 16px;
+      text-align: right;
+    }
+    .expression {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      color: var(--fg);
+    }
+    .result {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .history {
+      max-height: 80px;
+      overflow-y: auto;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      background: var(--key-bg);
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+    .memory,
+    .keys {
+      display: grid;
+      gap: 1px;
+      background: #999;
+    }
+    .memory {
+      grid-template-columns: repeat(4,1fr);
+    }
+    .keys {
+      grid-template-columns: repeat(4,1fr);
+    }
+    button {
+      background: var(--key-bg);
+      border: none;
+      padding: 20px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      outline: none;
+      transition: background 0.1s;
+    }
+    button:hover {
+      background: var(--key-hover);
+    }
+    button:focus {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    button.zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator" role="application" aria-label="Calculator">
+    <div class="display">
+      <input type="text" class="expression" aria-label="Expression" readonly />
+      <div class="result" aria-label="Result">0</div>
+    </div>
+    <section class="history" aria-label="Calculation History"></section>
+    <section class="memory" aria-label="Memory Functions">
+      <button data-action="mc" aria-label="Memory Clear">MC</button>
+      <button data-action="mr" aria-label="Memory Recall">MR</button>
+      <button data-action="mplus" aria-label="Memory Add">M+</button>
+      <button data-action="mminus" aria-label="Memory Subtract">M−</button>
+    </section>
+    <section class="keys" aria-label="Calculator Keys">
+      <button data-action="clear" aria-label="Clear All">C</button>
+      <button data-action="delete" aria-label="Backspace">⌫</button>
+      <button data-action="percent" aria-label="Percent">%</button>
+      <button data-value="/" aria-label="Divide">÷</button>
+      <button data-value="(" aria-label="Open Parenthesis">(</button>
+      <button data-value=")" aria-label="Close Parenthesis">)</button>
+      <button data-action="negate" aria-label="Negate">±</button>
+      <button data-value="*" aria-label="Multiply">×</button>
+      <button data-value="7">7</button><button data-value="8">8</button><button data-value="9">9</button><button data-value="-" aria-label="Subtract">−</button>
+      <button data-value="4">4</button><button data-value="5">5</button><button data-value="6">6</button><button data-value="+" aria-label="Add">+</button>
+      <button data-value="1">1</button><button data-value="2">2</button><button data-value="3">3</button><button data-action="calculate" aria-label="Equals">=</button>
+      <button class="zero" data-value="0">0</button><button data-value=".">.</button><div></div><div></div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const exprInput = document.querySelector(".expression");
+      const resultDiv = document.querySelector(".result");
+      const historyDiv = document.querySelector(".history");
+      let memory = 0, history = [];
+
+      function update(expr = "") {
+        exprInput.value = expr;
+        try { resultDiv.textContent = expr ? eval(expr) : 0; }
+        catch { resultDiv.textContent = "Err"; }
+      }
+
+      function addHistory(expr) {
+        history.unshift(expr + " = " + resultDiv.textContent);
+        if (history.length > 10) history.pop();
+        historyDiv.innerHTML = "";
+        history.forEach(item => {
+          const btn = document.createElement("button");
+          btn.textContent = item;
+          btn.onclick = () => update(item.split(" = ")[0]);
+          historyDiv.appendChild(btn);
+        });
+      }
+
+      function handle(btn) {
+        let expr = exprInput.value;
+        const { action, value } = btn.dataset;
+
+        switch (action) {
+          case "clear": expr = ""; break;
+          case "delete": expr = expr.slice(0,-1); break;
+          case "calculate": addHistory(expr); expr = resultDiv.textContent; break;
+          case "percent": expr = expr ? (eval(expr)/100).toString() : ""; break;
+          case "negate": expr = expr ? `(${eval(expr)*-1})` : ""; break;
+          case "mc": memory = 0; break;
+          case "mr": expr += memory; break;
+          case "mplus": memory += eval(expr)||0; break;
+          case "mminus": memory -= eval(expr)||0; break;
+          default: if (value) expr += value;
+        }
+        update(expr);
+      }
+
+      document.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>handle(b)));
+
+      document.addEventListener("keydown", e => {
+        if (/[0-9+\-*/().%]/.test(e.key)) handle({ dataset:{ value:e.key } });
+        else if (e.key==="Enter") handle({ dataset:{ action:"calculate" } });
+        else if (e.key==="Backspace") handle({ dataset:{ action:"delete" } });
+        else if (e.key==="Escape") handle({ dataset:{ action:"clear" } });
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>
