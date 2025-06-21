@@ -6,149 +6,395 @@
   <title>David Steckler</title>
   <style>
     :root {
-      --text: #000;
-      --link: #007aff;
-      --bg: #fff;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent: #007aff;
+      --bg: #fbfbfd;
+      --surface: #ffffff;
+      --border: rgba(0, 0, 0, 0.1);
+      --hover: rgba(0, 122, 255, 0.04);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text-primary: #f5f5f7;
+        --text-secondary: #a1a1a6;
+        --accent: #007aff;
+        --bg: #000000;
+        --surface: #1d1d1f;
+        --border: rgba(255, 255, 255, 0.1);
+        --hover: rgba(255, 255, 255, 0.04);
+      }
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+
     body {
-      font-family:
-        -apple-system, BlinkMacSystemFont,
-        "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
-      color: var(--text);
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
+      transition: all 0.3s ease;
+    }
+
+    .hero {
+      min-height: 40vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--bg) 0%, var(--surface) 100%);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 2.5rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .subtitle {
+      font-size: clamp(1rem, 2vw, 1.1rem);
+      color: var(--text-secondary);
+      font-weight: 500;
+      max-width: 500px;
+      margin-bottom: 1rem;
       line-height: 1.4;
     }
-    header {
-      text-align: center;
-      padding: 2rem 1rem 1rem;
-    }
-    header h1 {
-      font-size: 2.5rem;
-      font-weight: 400;
-    }
+
     nav {
-      margin-top: 1rem;
-      border-top: 1px solid #ddd;
-      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      background: rgba(251, 251, 253, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 1rem 0;
     }
+
+    @media (prefers-color-scheme: dark) {
+      nav {
+        background: rgba(0, 0, 0, 0.8);
+      }
+    }
+
+    .nav-container {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 2rem;
+    }
+
     nav a {
       display: inline-block;
-      padding: 1rem 1.5rem;
+      padding: 0.5rem 1.5rem;
       text-decoration: none;
-      color: var(--text);
-      font-size: 0.875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 400;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      margin: 0 0.25rem;
     }
+
+    nav a:hover {
+      background: var(--hover);
+      color: var(--accent);
+    }
+
     .container {
-      max-width: 36rem;
-      margin: 2rem auto;
-      padding: 0 1rem;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
     }
-    h2 {
-      font-size: 1.25rem;
+
+    .section {
+      margin-bottom: 4rem;
+      padding: 2rem 0;
+    }
+
+    .section h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
       font-weight: 600;
-      margin-top: 2rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
     }
-    p {
-      margin-bottom: 1.25rem;
+
+    .section p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
     }
+
+    .section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .highlight {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    .highlight p {
+      color: var(--text-primary);
+      font-size: 19px;
+      font-weight: 500;
+    }
+
     a {
-      color: var(--link);
+      color: var(--accent);
       text-decoration: none;
+      transition: all 0.2s ease;
     }
-    ul.pages {
-      list-style: none;
-      margin-top: 0.75rem;
+
+    a:hover {
+      opacity: 0.7;
     }
-    ul.pages li {
+
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .page-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .page-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border-color: var(--accent);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .page-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    .page-card h3 {
+      font-size: 16px;
+      font-weight: 600;
       margin-bottom: 0.5rem;
     }
+
+    .page-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 1rem 0;
+    }
+
+    .page-sublinks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .page-sublink {
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(0, 122, 255, 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .page-sublink:hover {
+      background: rgba(0, 122, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
     footer {
       text-align: center;
-      padding: 2rem 1rem;
-      font-size: 0.75rem;
-      color: #666;
-      border-top: 1px solid #ddd;
+      padding: 3rem 2rem;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 20px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      margin-top: 1rem;
+    }
+
+    .cta-button:hover {
+      background: #0056cc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .nav-container {
+        flex-wrap: wrap;
+        padding: 0 1rem;
+      }
+      
+      nav a {
+        margin: 0.25rem;
+        font-size: 14px;
+      }
+      
+      .container {
+        padding: 2rem 1rem;
+      }
+      
+      .section {
+        margin-bottom: 3rem;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
+  <div class="hero">
     <h1>David Steckler</h1>
-    <nav>
+    <p class="subtitle">Think different. Code better.</p>
+  </div>
+
+  <nav>
+    <div class="nav-container">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
       <a href="blog.html">Blog</a>
+      <a href="course.html">Course</a>
       <a href="search.html">Search</a>
-    </nav>
-  </header>
+    </div>
+  </nav>
 
   <div class="container">
-    <h2>Me in 10 seconds</h2>
-    <p>
-      7th grade computer science educator. Math origin. Embracer of challenges. Philosopher in the classroom. Game strategist. Lifelong learner. Seeker of difficult paths. Problem-solver. Curiosity-driven. Always open to new perspectives.
-    </p>
+    <div class="section">
+      <h2>The Classroom Truth</h2>
+      <div class="highlight">
+        <p>Great teachers aren't born with the answers. They're built by embracing questions they can't yet solve.</p>
+      </div>
+      <p>Most people think teaching is about knowing everything. It's actually about modeling curiosity. Every day I walk into class with 7th graders who challenge me in ways I never expected—and that's exactly the point.</p>
+      <p>The students who struggle the most often teach me the most. They force me to find new paths, different explanations, better metaphors. They reveal the gaps in my thinking before I even know they exist.</p>
+    </div>
 
-    <h2>About Me</h2>
-    <p>
-      I teach 7th grade computer science, blending math, robotics, and philosophy. No CS degree—just a passion for turning puzzles into lessons. Inspired by ethical dilemmas I once studied, I challenge students to learn at their own pace—there’s no speed limit to knowledge.
-    </p>
+    <div class="section">
+      <h2>The Long Game</h2>
+      <p>Nine years at Highlands has taught me something unexpected: the most important lessons happen in the margins. Between the curriculum and the conversations. Between the code and the coffee breaks with my dog Pixie.</p>
+      <p>Travel changes perspective. Puerto Vallarta reminded me that learning happens everywhere—not just in classrooms. The best educators steal ideas from everywhere: street vendors, sunset conversations, failed experiments.</p>
+      <p>AI is just another tool in the workshop. I use it to solve real problems, but I don't pretend it's magic. It's helpful, sometimes brilliant, often frustrating. Like most useful things.</p>
+      <a href="https://www.youtube.com/@davesteckler" target="_blank" rel="noopener" class="cta-button">Watch on YouTube</a>
+    </div>
 
-    <h2>What I’m Doing Now</h2>
-    <p>
-      Though in my 9th year at Highlands, I’m as curious as day one. Fresh from Puerto Vallarta, I’m designing lessons that merge travel stories, code, and Pixie-powered breaks with my dog.
-    </p>
-
-    <h2>My Stance on AI</h2>
-    <p>
-      I use AI to solve real problems—efficiently but thoughtfully. It’s not magic yet, but it’s part of my toolkit. This site was drafted with an AI partner.
-    </p>
-
-    <h2>YouTube</h2>
-    <p>
-      Check out my channel on <a href="https://www.youtube.com/@davesteckler" target="_blank" rel="noopener">YouTube</a>.
-    </p>
-
-    <h2>All Pages</h2>
-    <ul class="pages">
-      <li><a href="about.html">About</a></li>
-      <li><a href="binary1.html">Binary 1</a></li>
-      <li><a href="binary2.html">Binary 2</a></li>
-      <li><a href="binary3.html">Binary 3</a></li>
-      <li><a href="binary4.html">Binary 4</a></li>
-      <li><a href="blog.html">Blog</a></li>
-      <li><a href="catchtheball.html">Catch the Ball</a></li>
-      <li><a href="catchtheball2.html">Catch the Ball 2</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li><a href="course.html">Course</a></li>
-      <li><a href="ctrlclick.html">Ctrl Click</a></li>
-      <li><a href="helloworld.html">Hello World</a></li>
-      <li><a href="index2.html">Home 2</a></li>
-      <li><a href="june19.html">June 19</a></li>
-      <li><a href="june20.html">June 20</a></li>
-      <li><a href="ks.html">KS</a></li>
-      <li><a href="ksg.html">KSG</a></li>
-      <li><a href="login.html">Login</a></li>
-      <li><a href="post1.html">Post 1</a></li>
-      <li><a href="primm.html">PRIMM</a></li>
-      <li><a href="register.html">Register</a></li>
-      <li><a href="rs.html">RS</a></li>
-      <li><a href="search.html">Search</a></li>
-      <li><a href="ss.html">SS</a></li>
-      <li><a href="targetpractice.html">Target Practice</a></li>
-      <li><a href="targetpracticeinteractive.html">Interactive Target Practice</a></li>
-      <li><a href="testimonials.html">Testimonials</a></li>
-      <li><a href="tp1.html">TP1</a></li>
-    </ul>
+    <div class="section">
+      <h2>Explore</h2>
+      <div class="pages-grid">
+        <a href="about.html" class="page-card">
+          <h3>About</h3>
+          <p>The stories behind the classroom</p>
+        </a>
+        
+        <div class="page-card">
+          <h3>Learning</h3>
+          <p>How we think about thinking</p>
+          <div class="page-sublinks">
+            <a href="course.html" class="page-sublink">Course</a>
+            <a href="primm.html" class="page-sublink">PRIMM</a>
+            <a href="binary1.html" class="page-sublink">Binary 1</a>
+            <a href="binary2.html" class="page-sublink">Binary 2</a>
+            <a href="binary3.html" class="page-sublink">Binary 3</a>
+            <a href="binary4.html" class="page-sublink">Binary 4</a>
+          </div>
+        </div>
+        
+        <div class="page-card">
+          <h3>Practice</h3>
+          <p>Learning through play and repetition</p>
+          <div class="page-sublinks">
+            <a href="catchtheball.html" class="page-sublink">Catch Ball</a>
+            <a href="catchtheball2.html" class="page-sublink">Catch Ball 2</a>
+            <a href="targetpractice.html" class="page-sublink">Target</a>
+            <a href="targetpracticeinteractive.html" class="page-sublink">Interactive Target</a>
+            <a href="helloworld.html" class="page-sublink">Hello World</a>
+            <a href="tp1.html" class="page-sublink">TP1</a>
+          </div>
+        </div>
+        
+        <div class="page-card">
+          <h3>Blog & Posts</h3>
+          <p>Recent thoughts and experiments</p>
+          <div class="page-sublinks">
+            <a href="blog.html" class="page-sublink">Blog</a>
+            <a href="post1.html" class="page-sublink">Post 1</a>
+            <a href="june19.html" class="page-sublink">June 19</a>
+            <a href="june20.html" class="page-sublink">June 20</a>
+          </div>
+        </div>
+        
+        <div class="page-card">
+          <h3>Systems</h3>
+          <p>Different approaches and shortcuts</p>
+          <div class="page-sublinks">
+            <a href="ks.html" class="page-sublink">KS</a>
+            <a href="ksg.html" class="page-sublink">KSG</a>
+            <a href="rs.html" class="page-sublink">RS</a>
+            <a href="ss.html" class="page-sublink">SS</a>
+            <a href="ctrlclick.html" class="page-sublink">Ctrl Click</a>
+          </div>
+        </div>
+        
+        <div class="page-card">
+          <h3>Site Tools</h3>
+          <p>Navigation and account features</p>
+          <div class="page-sublinks">
+            <a href="search.html" class="page-sublink">Search</a>
+            <a href="login.html" class="page-sublink">Login</a>
+            <a href="register.html" class="page-sublink">Register</a>
+            <a href="contact.html" class="page-sublink">Contact</a>
+            <a href="index2.html" class="page-sublink">Home 2</a>
+          </div>
+        </div>
+        
+        <a href="testimonials.html" class="page-card">
+          <h3>Voices</h3>
+          <p>What students and parents say</p>
+        </a>
+      </div>
+    </div>
   </div>
 
   <footer>
-    &copy; 2025 David Steckler. All rights reserved.
+    &copy; 2025 David Steckler. Made with curiosity and code.
   </footer>
 </body>
 </html>
