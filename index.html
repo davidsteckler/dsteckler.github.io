@@ -25,8 +25,11 @@
         --hover: rgba(255, 255, 255, 0.04);
       }
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
@@ -35,13 +38,10 @@
       font-size: 17px;
       -webkit-font-smoothing: antialiased;
       transition: all 0.3s ease;
-      /* clear sticky nav */
       padding-top: calc(0.25rem + 1px);
     }
-
     .hero {
-      /* remove fixed height/centering to let content sit tightly */
-      padding: 1rem 1rem 0.5rem; 
+      padding: 1rem 1rem 0.5rem;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -53,20 +53,20 @@
       font-size: clamp(2rem, 4vw, 2.5rem);
       font-weight: 600;
       letter-spacing: -0.02em;
-      margin-bottom: 0.25rem; /* tighten gap */
+      margin-bottom: 0.25rem;
       background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .hero .subtitle {
       font-size: clamp(1rem, 2vw, 1.1rem);
       color: var(--text-secondary);
       font-weight: 500;
       max-width: 500px;
-      margin-bottom: 0; /* zero gap to nav */
+      margin-bottom: 0;
       line-height: 1.4;
     }
-
     nav {
       position: sticky;
       top: 0;
@@ -75,10 +75,12 @@
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
       z-index: 100;
-      padding: 0.25rem 0; /* slimmed */
+      padding: 0.25rem 0;
     }
     @media (prefers-color-scheme: dark) {
-      nav { background: rgba(0, 0, 0, 0.8); }
+      nav {
+        background: rgba(0, 0, 0, 0.8);
+      }
     }
     .nav-container {
       max-width: 980px;
@@ -91,22 +93,27 @@
     nav a {
       display: inline-block;
       padding: 0.5rem 1.5rem;
-      color: var(--text-primary);
       text-decoration: none;
+      color: var(--text-primary);
       font-size: 16px;
       font-weight: 400;
       border-radius: 12px;
       transition: all 0.2s ease;
       margin: 0 0.25rem;
     }
-    nav a:hover { background: var(--hover); color: var(--accent); }
-
+    nav a:hover {
+      background: var(--hover);
+      color: var(--accent);
+    }
     .container {
       max-width: 680px;
       margin: 0 auto;
       padding: 4rem 2rem;
     }
-    .section { margin-bottom: 4rem; padding: 2rem 0; }
+    .section {
+      margin-bottom: 4rem;
+      padding: 2rem 0;
+    }
     .section h2 {
       font-size: clamp(1.5rem, 3vw, 2rem);
       font-weight: 600;
@@ -120,6 +127,9 @@
       color: var(--text-secondary);
       margin-bottom: 1.5rem;
     }
+    .section p:last-child {
+      margin-bottom: 0;
+    }
     .highlight {
       background: var(--surface);
       border-radius: 16px;
@@ -132,9 +142,14 @@
       font-size: 19px;
       font-weight: 500;
     }
-    a { color: var(--accent); text-decoration: none; transition: all 0.2s ease; }
-    a:hover { opacity: 0.7; }
-
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    a:hover {
+      opacity: 0.7;
+    }
     .pages-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -149,6 +164,7 @@
       transition: all 0.3s ease;
       text-decoration: none;
       color: var(--text-primary);
+      display: block;
     }
     .page-card:hover {
       transform: translateY(-2px);
@@ -156,10 +172,20 @@
       border-color: var(--accent);
     }
     @media (prefers-color-scheme: dark) {
-      .page-card:hover { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3); }
+      .page-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      }
     }
-    .page-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 0.5rem; }
-    .page-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 1rem; }
+    .page-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .page-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0 0 1rem 0;
+    }
     .page-sublinks {
       display: flex;
       flex-wrap: wrap;
@@ -179,14 +205,6 @@
       background: rgba(0, 122, 255, 0.2);
       transform: translateY(-1px);
     }
-
-    footer {
-      text-align: center;
-      padding: 3rem 2rem;
-      color: var(--text-secondary);
-      font-size: 14px;
-      border-top: 1px solid var(--border);
-    }
     .cta-button {
       display: inline-block;
       background: var(--accent);
@@ -203,11 +221,28 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
     }
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-secondary);
+      font-size: 14px;
+      border-top: 1px solid var(--border);
+    }
     @media (max-width: 768px) {
-      .nav-container { flex-wrap: wrap; padding: 0 1rem; }
-      nav a { margin: 0.25rem; font-size: 14px; }
-      .container { padding: 2rem 1rem; }
-      .section { margin-bottom: 3rem; }
+      .nav-container {
+        flex-wrap: wrap;
+        padding: 0 1rem;
+      }
+      nav a {
+        margin: 0.25rem;
+        font-size: 14px;
+      }
+      .container {
+        padding: 2rem 1rem;
+      }
+      .section {
+        margin-bottom: 3rem;
+      }
     }
   </style>
 </head>
@@ -228,11 +263,102 @@
   </nav>
 
   <div class="container">
-    <!-- (rest of your content) -->
+    <div class="section">
+      <h2>The Classroom Truth</h2>
+      <div class="highlight">
+        <p>Great teachers aren't born with the answers. They're built by embracing questions they can't yet solve.</p>
+      </div>
+      <p>Most people think teaching is about knowing everything. It's actually about modeling curiosity. Every day I walk into class with 7th graders who challenge me in ways I never expected—and that's exactly the point.</p>
+      <p>The students who struggle the most often teach me the most. They force me to find new paths, different explanations, better metaphors. They reveal the gaps in my thinking before I even know they exist.</p>
+    </div>
+
+    <div class="section">
+      <h2>The Long Game</h2>
+      <p>Nine years at Highlands has taught me something unexpected: the most important lessons happen in the margins. Between the curriculum and the conversations. Between the code and the coffee breaks with my dog Pixie.</p>
+      <p>Travel changes perspective. Puerto Vallarta reminded me that learning happens everywhere—not just in classrooms. The best educators steal ideas from everywhere: street vendors, sunset conversations, failed experiments.</p>
+      <p>AI is just another tool in the workshop. I use it to solve real problems, but I don't pretend it's magic. It's helpful, sometimes brilliant, often frustrating. Like most useful things.</p>
+      <a href="https://www.youtube.com/@davesteckler" target="_blank" rel="noopener" class="cta-button">Watch on YouTube</a>
+    </div>
+
+    <div class="section">
+      <h2>Explore</h2>
+      <div class="pages-grid">
+        <a href="about.html" class="page-card">
+          <h3>About</h3>
+          <p>The stories behind the classroom</p>
+        </a>
+
+        <div class="page-card">
+          <h3>Learning</h3>
+          <p>How we think about thinking</p>
+          <div class="page-sublinks">
+            <a href="course.html" class="page-sublink">Course</a>
+            <a href="primm.html" class="page-sublink">PRIMM</a>
+            <a href="binary1.html" class="page-sublink">Binary 1</a>
+            <a href="binary2.html" class="page-sublink">Binary 2</a>
+            <a href="binary3.html" class="page-sublink">Binary 3</a>
+            <a href="binary4.html" class="page-sublink">Binary 4</a>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <h3>Practice</h3>
+          <p>Learning through play and repetition</p>
+          <div class="page-sublinks">
+            <a href="catchtheball.html" class="page-sublink">Catch Ball</a>
+            <a href="catchtheball2.html" class="page-sublink">Catch Ball 2</a>
+            <a href="targetpractice.html" class="page-sublink">Target</a>
+            <a href="targetpracticeinteractive.html" class="page-sublink">Interactive Target</a>
+            <a href="helloworld.html" class="page-sublink">Hello World</a>
+            <a href="tp1.html" class="page-sublink">TP1</a>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <h3>Blog & Posts</h3>
+          <p>Recent thoughts and experiments</p>
+          <div class="page-sublinks">
+            <a href="blog.html" class="page-sublink">Blog</a>
+            <a href="post1.html" class="page-sublink">Post 1</a>
+            <a href="june19.html" class="page-sublink">June 19</a>
+            <a href="june20.html" class="page-sublink">June 20</a>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <h3>Systems</h3>
+          <p>Different approaches and shortcuts</p>
+          <div class="page-sublinks">
+            <a href="ks.html" class="page-sublink">KS</a>
+            <a href="ksg.html" class="page-sublink">KSG</a>
+            <a href="rs.html" class="page-sublink">RS</a>
+            <a href="ss.html" class="page-sublink">SS</a>
+            <a href="ctrlclick.html" class="page-sublink">Ctrl Click</a>
+          </div>
+        </div>
+
+        <div class="page-card">
+          <h3>Site Tools</h3>
+          <p>Navigation and account features</p>
+          <div class="page-sublinks">
+            <a href="search.html" class="page-sublink">Search</a>
+            <a href="login.html" class="page-sublink">Login</a>
+            <a href="register.html" class="page-sublink">Register</a>
+            <a href="contact.html" class="page-sublink">Contact</a>
+            <a href="index2.html" class="page-sublink">Home 2</a>
+          </div>
+        </div>
+
+        <a href="testimonials.html" class="page-card">
+          <h3>Voices</h3>
+          <p>What students and parents say</p>
+        </a>
+      </div>
+    </div>
   </div>
 
   <footer>
-    © 2025 David Steckler. Made with curiosity and code.
+    &copy; 2025 David Steckler. Made with curiosity and code.
   </footer>
 </body>
 </html>
