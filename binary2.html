@@ -1,821 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary: The Hidden Language</title>
-    <script src="https://chir.ag/projects/ntc/ntc.js"></script>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f5f5f5;
-            line-height: 1.6;
-        }
-        header, footer {
-            background-color: #000;
-            text-align: center;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        header h1, footer p {
-            color: #fff;
-        }
-        header h1 a, nav a {
-            color: #fff;
-            text-decoration: none;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2, h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        p {
-            margin-bottom: 20px;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin: 0 10px;
-            text-transform: uppercase;
-            font-weight: bold;
-            position: relative;
-            padding: 5px 8px;
-            border-radius: 5px;
-        }
-        .active {
-            background-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .menu {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            background-color: #fff;
-            position: absolute;
-            top: 60px;
-            left: 0;
-            z-index: 1;
-        }
-        .menu a {
-            padding: 10px;
-            width: 100%;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-        .menu a:hover {
-            background-color: #f1f1f1;
-        }
-        .menu-toggle {
-            display: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: #fff;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        @media (max-width: 600px) {
-            nav {
-                display: none;
-            }
-            .menu-toggle {
-                display: block;
-            }
-            nav.active {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-                background-color: #000;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                z-index: 1;
-            }
-            nav a {
-                flex: 1 0 100%;
-                margin: 5px 0;
-                padding: 10px;
-                color: #fff;
-            }
-        }
-        .profile-img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        /* Additional styles for Binary page */
-        .demo, .challenge {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #2196F3;
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        .light-bulb {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #f1c40f;
-            display: inline-block;
-            margin-left: 20px;
-            transition: .4s;
-        }
-        .light-off {
-            background-color: #34495e;
-        }
-        .color-preview {
-            width: 150px;
-            height: 150px;
-            border: 1px solid #000;
-            margin-top: 10px;
-        }
-        input[type="range"] {
-            width: 200px;
-        }
-        .explanation {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
-        .bulb {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #333;
-            border-radius: 50%;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .bulb.on {
-            background-color: yellow;
-            box-shadow: 0 0 10px yellow;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .place-value {
-            font-size: 0.8em;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        .mini-bulb-container {
-            display: inline-block;
-            position: relative;
-            margin: 0 5px;
-        }
-        .mini-bulb-label {
-            position: absolute;
-            top: -20px;
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            color: #333;
-            font-size: 0.8em;
-        }
-        .mini-bulb {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #333;
-            border-radius: 50%;
-            line-height: 40px;
-            font-size: 1em;
-            font-weight: bold;
-            background-color: #f0f0f0;
-            color: #333;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .mini-bulb.on {
-            background-color: yellow;
-            box-shadow: 0 0 20px yellow;
-        }
-        em {
-            font-style: italic;
-        }
-        strong {
-            font-weight: bold;
-        }
-        .reflection-question {
-            background-color: #f8f9fa;
-            border-left: 4px solid #2c3e50;
-            padding: 15px;
-            margin-top: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-        }
-        .question-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .option-button {
-            padding: 10px;
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-align: left;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-            color: #333;
-        }
-        .option-button:hover {
-            background-color: #f0f0f0;
-        }
-        #questionResult {
-            margin-top: 15px;
-            font-style: italic;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Binary: The Hidden Language</title>
+
+  <style>
+    :root{
+      --bg0:#0b0f17;
+      --bg1:#0f1626;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(0,0,0,0.20);
+      --stroke: rgba(255,255,255,0.12);
+      --stroke2: rgba(255,255,255,0.18);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --muted2: rgba(255,255,255,0.55);
+      --radius: 18px;
+      --shadow: 0 22px 70px rgba(0,0,0,0.45);
+      --focus: 0 0 0 4px rgba(255,255,255,0.08);
+    }
+
+    *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1100px 700px at 20% -10%, rgba(120,160,255,0.28), transparent 55%),
+        radial-gradient(900px 650px at 90% 10%, rgba(255,170,120,0.20), transparent 55%),
+        radial-gradient(800px 700px at 50% 110%, rgba(140,255,210,0.14), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 14px 52px;
+    }
+
+    .hero{
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 16px;
+      overflow:hidden;
+    }
+
+    .heroTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    h1{
+      margin:0;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+    .subtitle{
+      margin-top:6px;
+      color:var(--muted);
+      line-height:1.45;
+      max-width: 75ch;
+      font-size: 14px;
+    }
+
+    section{
+      margin-top: 14px;
+      scroll-margin-top: 12px;
+    }
+
+    .sectionCard{
+      background: var(--card);
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .sectionHeader{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+
+    h2{
+      margin:0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+    .tag{
+      color: var(--muted2);
+      font-size: 12px;
+    }
+
+    .explain{
+      margin-top: 10px;
+      background: var(--card2);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 12px;
+      color: rgba(255,255,255,0.82);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 920px){
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(0,0,0,0.18);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 14px;
+      overflow:hidden;
+    }
+
+    .cardTitle{
+      font-weight: 750;
+      margin: 2px 0 6px;
+      letter-spacing: 0.2px;
+    }
+    .small{
+      color: var(--muted2);
+      font-size: 12px;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:10px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.22);
+      color: var(--text);
+      font-size: 13px;
+      max-width: 100%;
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.2px;
+      word-break: break-word;
+    }
+
+    .btnRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top: 12px;
+    }
+
+    button{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    button:hover{
+      background: rgba(255,255,255,0.10);
+      border-color: var(--stroke2);
+      transform: translateY(-1px);
+    }
+    button:active{ transform: translateY(0px); }
+    button:focus{ outline:none; box-shadow: var(--focus); }
+
+    textarea{
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.24);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+      width: 100%;
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.4;
+    }
+    textarea:focus{ box-shadow: var(--focus); }
+
+    select, input[type="checkbox"]{
+      accent-color: rgba(255,255,255,0.85);
+    }
+
+    .line{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .result{
+      margin-top: 10px;
+      color: rgba(255,255,255,0.82);
+      font-size: 14px;
+    }
+
+    /* Switch */
+    .switchRow{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .switch{
+      position: relative;
+      display: inline-block;
+      width: 62px;
+      height: 36px;
+    }
+    .switch input{
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .switchTrack{
+      position: absolute;
+      inset: 0;
+      background-color: rgba(255,255,255,0.20);
+      transition: .2s;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      cursor: pointer;
+    }
+    .switchTrack:before{
+      position: absolute;
+      content: "";
+      height: 28px;
+      width: 28px;
+      left: 4px;
+      bottom: 3px;
+      background-color: rgba(255,255,255,0.92);
+      transition: .2s;
+      border-radius: 999px;
+    }
+    .switch input:checked + .switchTrack{
+      background-color: rgba(120,160,255,0.45);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .switch input:checked + .switchTrack:before{ transform: translateX(26px); }
+
+    .bulbBig{
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.22);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.30);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: rgba(255,255,255,0.88);
+    }
+    .bulbBig.on{
+      background: rgba(255,220,80,0.92);
+      color: rgba(0,0,0,0.75);
+      box-shadow: 0 0 30px rgba(255,220,80,0.35);
+    }
+
+    .srOnly{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      border:0;
+    }
+
+    .mutedBlock{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 8px;
+    }
+  </style>
 </head>
+
 <body>
-    <header>
-        <h1><a href="index.html">David Steckler</a></h1>
-        <button class="menu-toggle">&#9776;</button>
-        <nav>
-            <a href="index.html" id="home-link">Home</a>
-            <a href="about.html" id="about-link">About</a>
-            <a href="course.html" id="course-link">Course</a>
-            <a href="blog.html" id="blog-link">Blog</a>
-            <a href="contact.html" id="contact-link">Contact</a>
-            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
-            <a href="search.html" id="search-link">Search</a>
-        </nav>
+  <div class="wrap">
+    <header class="hero">
+      <div class="heroTop">
+        <div>
+          <h1>Binary: The Hidden Language</h1>
+          <div class="subtitle">
+            Two states. One alphabet for machines. Type a message and watch it turn into bytes.
+          </div>
+        </div>
+        <div class="small">Standalone interactive page</div>
+      </div>
     </header>
 
-    <div class="container">
-        <h1>Binary: The Hidden Language</h1>
-    
-        <section id="introduction">
-            <h2>The Power of Two Choices</h2>
-            <p>Imagine if you could build an entire universe with just two words: "yes" and "no". That's essentially what binary does. It's the foundational language of all digital technology, from the smartphone in your pocket to the most powerful supercomputers.</p>
-            <div class="explanation">
-                <h3>Explanation Depth: <input type="range" id="binaryExplanationLevel" min="1" max="3" value="1"></h3>
-                <div id="binaryExplanation"></div>
-            </div>
-            <div class="challenge">
-                <h3>Challenge: Binary Switch Patterns</h3>
-                <p>Flip the switch up to 8 times and observe the binary pattern:</p>
-                <label class="switch">
-                    <input type="checkbox" id="patternSwitch">
-                    <span class="slider"></span>
-                </label>
-                <div id="lightBulb" class="light-bulb light-off"></div>
-                <p>Switch state: <span id="switchState">0</span></p>
-                <p>Flip count: <span id="flipCount">0</span>/8</p>
-                <p>Pattern: <span id="binaryPattern"></span></p>
-                <button id="resetPattern">Reset</button>
+    <!-- BASICS -->
+    <section id="intro">
+      <div class="sectionCard">
+        <div class="sectionHeader">
+          <h2>The power of two choices</h2>
+          <div class="tag">0 / 1</div>
+        </div>
+
+        <div class="explain">
+          Hardware can reliably detect two distinct states. That becomes a bit. Stack bits and you get numbers. Use numbers as codes and suddenly you can store letters, images, anything.
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <div class="small">Mini challenge</div>
+            <div class="cardTitle">Binary switch pattern</div>
+            <div class="small">Flip up to 8 times and watch your pattern build.</div>
+
+            <div class="switchRow">
+              <label class="switch" aria-label="Binary switch">
+                <input type="checkbox" id="patternSwitch" />
+                <span class="switchTrack"></span>
+              </label>
+              <div id="lightBulb" class="bulbBig">0</div>
             </div>
 
-            <div class="reflection-question">
-                <h3>Observing the Switch Pattern</h3>
-                <p>After flipping the switch 8 times, what pattern did you notice in the resulting binary sequence?</p>
-                <div class="question-options">
-                    <button class="option-button" onclick="checkAnswer('random')">The 0s and 1s appear in a random order</button>
-                    <button class="option-button" onclick="checkAnswer('alternating')">It strictly alternates between 0 and 1</button>
-                    <button class="option-button" onclick="checkAnswer('allZeros')">All the digits are 0</button>
-                    <button class="option-button" onclick="checkAnswer('allOnes')">All the digits are 1</button>
-                </div>
-                <p id="questionResult"></p>
+            <div class="row">
+              <span class="chip"><span class="small">State</span> <span id="switchState" class="mono">0</span></span>
+              <span class="chip"><span class="small">Flips</span> <span id="flipCount" class="mono">0</span><span class="small">/8</span></span>
             </div>
-        </section>
 
-        <section id="text-representation">
-            <h2>From Letters to Binary</h2>
-            <p>Every text message you send, every email you write, begins its journey as a series of 1s and 0s. Let's peek behind the curtain and see how it works.</p>
-            <div class="explanation">
-                <h3>Explanation Depth: <input type="range" id="textExplanationLevel" min="1" max="3" value="1"></h3>
-                <div id="textExplanation"></div>
+            <div class="row">
+              <span class="chip"><span class="small">Pattern</span> <span id="binaryPattern" class="mono"></span></span>
             </div>
-            <div class="demo">
-                <input type="text" id="asciiInput" maxlength="1" placeholder="Type a character">
-                <p>ASCII: <span id="asciiOutput"></span></p>
-                <p>Binary: <span id="binaryOutput"></span></p>
-            </div>
-            <div class="challenge">
-                <h3>Challenge: Decode a Binary Message</h3>
-                <p>Decode this binary message: <span id="binaryMessage"></span></p>
-                <div id="decodeBulbs"></div>
-                <p>Decimal Value: <span id="decimalValue">0</span></p>
-                <input type="text" id="binaryInput" maxlength="8" placeholder="Type a binary number (8 bits)">
-                <p>Character: <span id="binaryCharOutput"></span></p>
-                <input type="text" id="decodedMessage" placeholder="Your answer">
-                <button id="checkMessageAnswer">Check Answer</button>
-                <p id="messageResult"></p>
-            </div>
-        </section>
 
-        <section id="color-representation">
-            <h2>Colors in Binary</h2>
-            <p>The vibrant world on your screen is painted with numbers. Each color is a unique recipe of red, green, and blue, all written in binary.</p>
-            <div class="explanation">
-                <h3>Explanation Depth: <input type="range" id="colorExplanationLevel" min="1" max="3" value="1"></h3>
-                <div id="colorExplanation"></div>
+            <div class="btnRow">
+              <button id="resetPattern" type="button">Reset</button>
             </div>
-            <div class="demo">
-                <label>Red: <input type="range" id="redSlider" min="0" max="255"> <input type="number" id="redInput" min="0" max="255"></label><br>
-                <label>Green: <input type="range" id="greenSlider" min="0" max="255"> <input type="number" id="greenInput" min="0" max="255"></label><br>
-                <label>Blue: <input type="range" id="blueSlider" min="0" max="255"> <input type="number" id="blueInput" min="0" max="255"></label><br>
-                <div class="color-preview" id="colorPreview"></div>
-                <p>RGB Binary: <span id="rgbBinary"></span></p>
-                <p>Color: <span id="colorName"></span></p>
-            </div>
-            <div class="challenge">
-                <h3>Challenge: Create a Specific Color</h3>
-                <p>Use the sliders to create this color: <span id="targetColor" style="display:inline-block; width: 50px; height: 50px;"></span> <span id="targetColorName"></span></p>
-                <button id="checkColorChallenge">Check Answer</button>
-                <button id="newColorChallenge">Try Again</button>
-                <p id="colorChallengeResult"></p>
-            </div>
-        </section>
+          </div>
 
-        <section id="image-representation">
-            <h2>Pictures: A Sea of Tiny Lights</h2>
-            <p>Every digital image is a mosaic of tiny colored dots, each one a binary number. Let's zoom in and see how it works.</p>
-            <div class="explanation">
-                <h3>Explanation Depth: <input type="range" id="imageExplanationLevel" min="1" max="3" value="1"></h3>
-                <div id="imageExplanation"></div>
+          <div class="card">
+            <div class="small">Quick check</div>
+            <div class="cardTitle">What rule is running it?</div>
+            <div class="btnRow" style="flex-direction:column; align-items:stretch;">
+              <button class="optionBtn" data-answer="random" type="button">It is random</button>
+              <button class="optionBtn" data-answer="alternating" type="button">Each flip toggles the state (predictable rule)</button>
+              <button class="optionBtn" data-answer="allZeros" type="button">All digits are 0</button>
+              <button class="optionBtn" data-answer="allOnes" type="button">All digits are 1</button>
             </div>
-            <div class="demo">
-                <canvas id="pixelCanvas" width="150" height="150" style="border:1px solid #000;"></canvas>
-                <br>
-                <button id="randomizePixels">Randomize Pixels</button>
-                <p>Hover over pixels to see their binary representation.</p>
-                <p>Binary of selected pixel: <span id="pixelBinary"></span></p>
-                <p>Color: <span id="pixelColorName"></span></p>
-            </div>
-            <div class="challenge">
-                <h3>Challenge: Color Depth and Binary</h3>
-                <p>Let's explore how many unique colors can be represented with 24-bit color depth.</p>
-                <ol>
-                    <li>How many bits are used for each color channel (Red, Green, Blue)?</li>
-                    <input type="number" id="bitsPerChannel" min="1" max="8">
-                    <button onclick="checkBitsPerChannel()">Check</button>
-                    <p id="bitsResult"></p>
-                    
-                    <li>How many unique values can each channel represent?</li>
-                    <input type="number" id="valuesPerChannel" min="1" max="256">
-                    <button onclick="checkValuesPerChannel()">Check</button>
-                    <p id="valuesResult"></p>
-                    
-                    <li>Calculate the total number of unique colors by multiplying the values per channel for each channel.</li>
-                    <input type="number" id="totalColorsInput" min="1" value="">
-                    <button onclick="checkTotalColors()">Check</button>
-                    <p id="totalColorsResult"></p>
-                </ol>
-            </div>
-        </section>
+            <div id="questionResult" class="result"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <section id="summary">
-            <h2>Why Binary It Matters</h2>
-            <div class="explanation">
-                <h3>Explanation Depth: <input type="range" id="summaryExplanationLevel" min="1" max="3" value="1"></h3>
-                <div id="summaryExplanation"></div>
-            </div>
-            <div class="summary-part">
-                <p>Binary is everywhere. It's not just the language of computers; it's the foundation of our digital world. Every email, every text, every app relies on binary. <em>Understanding binary means understanding the heart of digital technology.</em></p>
-            </div>
-            <div class="summary-part">
-                <p>At its core, binary is simple. Yet, this simplicity powers the most complex systems in our world. <strong>It's this elegance and efficiency that makes binary so powerful.</strong></p>
-            </div>
-            <div class="summary-part">
-                <p>As technology evolves, binary remains at the center. The future of computing, from quantum computers to AI, still relies on the fundamental principles of binary. <em>Embracing binary is embracing the future.</em></p>
-            </div>
-        </section>
-    </div>
+    <!-- TEXT FOCUS -->
+    <section id="text">
+      <div class="sectionCard">
+        <div class="sectionHeader">
+          <h2>Text to binary</h2>
+          <div class="tag">Bytes you can copy</div>
+        </div>
 
-    <footer>
-        <p>&copy; 2024 David Steckler. All rights reserved.</p>
-    </footer>
+        <div class="explain">
+          One common rule is ASCII: each character becomes a number, then that number is written in 8-bit binary.
+          Type a whole message and you will get the full byte string.
+        </div>
 
-    <script>
-        // Explanation levels
-        const explanations = {
-            binary: [
-                "Binary is like a <em>light switch</em>: it's either <strong>on or off</strong>, <strong>1 or 0</strong>.",
-                "Binary uses <strong>two digits</strong>, 0 and 1, to represent <em>all information</em> in computers. It's the <strong>foundation</strong> of all digital data.",
-                "Binary is a <strong>base-2 number system</strong> where each digit represents a <em>power of 2</em>. This system allows <strong>complex data</strong> to be encoded using only <em>two states</em>, forming the basis of all digital computing and data storage."
-            ],
-            text: [
-                "Letters are turned into numbers, then into binary.",
-                "ASCII assigns a unique number to each character, which is then converted to binary. This allows computers to represent text.",
-                "ASCII uses 7 bits to represent 128 characters. Extended ASCII and Unicode expand this to include more characters, symbols, and emoji, using more bits per character. This allows computers to represent and process text in virtually any language or script."
-            ],
-            color: [
-                "Colors are made by mixing red, green, and blue light.",
-                "Each color is represented by three numbers (0-255) for red, green, and blue intensity. These numbers are then converted to binary.",
-                "24-bit color uses 8 bits each for red, green, and blue, allowing for over 16 million unique colors. This binary representation enables computers to display and process a wide spectrum of colors, forming the basis of digital imaging and displays."
-            ],
-            image: [
-                "Images are made up of many tiny colored dots called pixels.",
-                "Each pixel's color is stored as a combination of red, green, and blue values. These values are represented in binary.",
-                "A typical image uses 24 bits per pixel. For a 1920x1080 image, that's over 6 million pixels, each with its own binary code. This allows for high-resolution images but also requires significant data storage and processing power."
-            ],
-            summary: [
-                "Binary is the language that powers all digital technology.",
-                "Binary's simplicity allows for complex data to be stored, processed, and transmitted efficiently across all kinds of digital devices and networks.",
-                "The binary system's elegance lies in its ability to represent virtually anything - text, images, sounds, videos, and even abstract concepts - using only two states. This universality has revolutionized how we create, share, and interact with information, fundamentally reshaping our world in the digital age."
-            ]
-        };
+        <div class="grid2">
+          <div class="card">
+            <div class="small">Main tool</div>
+            <div class="cardTitle">Type multiple letters</div>
 
-        function updateExplanation(sectionId, level) {
-            const explanationElement = document.getElementById(`${sectionId}Explanation`);
-            explanationElement.innerHTML = explanations[sectionId][level - 1];
+            <div class="line">
+              <span class="small">Message</span>
+              <span class="small">letters, spaces, punctuation</span>
+            </div>
+
+            <label class="srOnly" for="messageInput">Message input</label>
+            <textarea id="messageInput" placeholder="Type a message, like: HELLO WORLD"></textarea>
+
+            <div class="btnRow">
+              <button id="copyBinaryString" type="button">Copy binary</button>
+              <button id="copyBytesCsv" type="button">Copy decimals</button>
+              <button id="clearMessage" type="button">Clear</button>
+              <button id="tryExample" type="button">Example</button>
+            </div>
+
+            <div class="row">
+              <span class="chip"><span class="small">Characters</span> <span id="charCount" class="mono">0</span></span>
+              <span class="chip"><span class="small">Bytes</span> <span id="byteCount" class="mono">0</span></span>
+            </div>
+
+            <div class="mutedBlock">
+              Tip: this uses 8-bit bytes (0–255). For basic English, ASCII matches nicely. For emoji or many non-English characters, a wider encoding like UTF-8 is used in real systems.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="small">Output</div>
+            <div class="cardTitle">Binary string</div>
+
+            <div class="row" style="margin-top:0;">
+              <span class="chip"><span class="small">Format</span>
+                <span class="mono" id="formatLabel">8-bit groups separated by spaces</span>
+              </span>
+            </div>
+
+            <div class="explain" style="margin-top:12px;">
+              <div class="line">
+                <span class="small">Binary</span>
+                <span class="small">ready to copy</span>
+              </div>
+              <div id="binaryOut" class="mono" style="margin-top:10px; white-space:pre-wrap;"></div>
+            </div>
+
+            <div class="explain" style="margin-top:12px;">
+              <div class="line">
+                <span class="small">Decimal bytes</span>
+                <span class="small">same data, different base</span>
+              </div>
+              <div id="decimalOut" class="mono" style="margin-top:10px; white-space:pre-wrap;"></div>
+            </div>
+
+            <div class="explain" style="margin-top:12px;">
+              <div class="line">
+                <span class="small">Per-character breakdown</span>
+                <span class="small">what each byte means</span>
+              </div>
+              <div id="breakdownOut" class="mono" style="margin-top:10px; white-space:pre-wrap;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const toBinary8 = (n) => clamp(Number(n), 0, 255).toString(2).padStart(8, "0");
+
+    async function copyText(text, btnEl){
+      try{
+        await navigator.clipboard.writeText(text);
+        if(btnEl){
+          const old = btnEl.textContent;
+          btnEl.textContent = "Copied";
+          setTimeout(() => btnEl.textContent = old, 900);
         }
+      }catch(e){
+        alert("Copy failed. Your browser may block clipboard access.");
+      }
+    }
 
-        // Set up explanation level sliders
-        ['binary', 'text', 'color', 'image', 'summary'].forEach(section => {
-            const slider = document.getElementById(`${section}ExplanationLevel`);
-            slider.addEventListener('input', function() {
-                updateExplanation(section, this.value);
-            });
-            updateExplanation(section, 1); // Initialize with level 1
-        });
+    // -------------------------
+    // Basics: switch pattern
+    // -------------------------
+    let flipCount = 0;
+    const patternSwitch = document.getElementById("patternSwitch");
+    const switchState = document.getElementById("switchState");
+    const flipCountDisplay = document.getElementById("flipCount");
+    const binaryPattern = document.getElementById("binaryPattern");
+    const lightBulb = document.getElementById("lightBulb");
+    const questionResult = document.getElementById("questionResult");
 
-        // Binary switch pattern challenge
-        let flipCount = 0;
-        const patternSwitch = document.getElementById('patternSwitch');
-        const switchState = document.getElementById('switchState');
-        const flipCountDisplay = document.getElementById('flipCount');
-        const binaryPattern = document.getElementById('binaryPattern');
-        const lightBulb = document.getElementById('lightBulb');
+    function renderBigBulb(isOn){
+      lightBulb.classList.toggle("on", isOn);
+      lightBulb.textContent = isOn ? "1" : "0";
+    }
+    renderBigBulb(false);
 
-        patternSwitch.addEventListener('change', function() {
-            if (flipCount < 8) {
-                flipCount++;
-                const state = this.checked ? '1' : '0';
-                switchState.textContent = state;
-                flipCountDisplay.textContent = flipCount;
-                binaryPattern.textContent += state;
-                lightBulb.classList.toggle('light-off', !this.checked);
-                
-                if (flipCount === 8) {
-                    alert("You've completed 8 flips! The pattern you've created is: " + binaryPattern.textContent);
-                }
-            }
-        });
+    patternSwitch.addEventListener("change", function(){
+      if(flipCount >= 8){
+        patternSwitch.checked = !patternSwitch.checked;
+        return;
+      }
+      flipCount++;
+      const state = this.checked ? "1" : "0";
+      switchState.textContent = state;
+      flipCountDisplay.textContent = flipCount;
+      binaryPattern.textContent += state;
+      renderBigBulb(this.checked);
 
-        document.getElementById('resetPattern').addEventListener('click', function() {
-            flipCount = 0;
-            patternSwitch.checked = false;
-            switchState.textContent = '0';
-            flipCountDisplay.textContent = '0';
-            binaryPattern.textContent = '';
-            lightBulb.classList.add('light-off');
-        });
+      if(flipCount === 8){
+        alert("8 flips complete. Your pattern: " + binaryPattern.textContent);
+      }
+    });
 
-        // Reflection question for switch pattern
-        function checkAnswer(answer) {
-            const resultElement = document.getElementById('questionResult');
-            if (answer === 'alternating') {
-                resultElement.textContent = "Correct! The switch creates a predictable, alternating pattern of 0s and 1s. Each flip changes the state from 0 to 1 or 1 to 0. This demonstrates how binary uses two distinct states to represent information in a clear, predictable manner.";
-            } else {
-                resultElement.textContent = "Not quite. Look closely at how the pattern changes with each flip. Is there a consistent rule to how it changes from one flip to the next?";
-            }
-        }
+    document.getElementById("resetPattern").addEventListener("click", function(){
+      flipCount = 0;
+      patternSwitch.checked = false;
+      switchState.textContent = "0";
+      flipCountDisplay.textContent = "0";
+      binaryPattern.textContent = "";
+      questionResult.textContent = "";
+      renderBigBulb(false);
+    });
 
-        // ASCII to binary converter
-        const asciiInput = document.getElementById('asciiInput');
-        const asciiOutput = document.getElementById('asciiOutput');
-        const binaryOutput = document.getElementById('binaryOutput');
-        asciiInput.addEventListener('input', function() {
-            if (this.value) {
-                const ascii = this.value.charCodeAt(0);
-                asciiOutput.textContent = ascii;
-                binaryOutput.textContent = ascii.toString(2).padStart(8, '0');
-            } else {
-                asciiOutput.textContent = '';
-                binaryOutput.textContent = '';
-            }
-        });
+    document.querySelectorAll(".optionBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const answer = btn.dataset.answer;
+        questionResult.textContent = (answer === "alternating")
+          ? "Correct. Each flip toggles the state, so the sequence follows a rule instead of being random."
+          : "Not quite. Watch what happens every time you flip. The switch always toggles between two states.";
+      });
+    });
 
-        // Binary to ASCII character converter
-        const binaryInput = document.getElementById('binaryInput');
-        const binaryCharOutput = document.getElementById('binaryCharOutput');
+    // -------------------------
+    // Text to binary (multi-letter)
+    // -------------------------
+    const messageInput = document.getElementById("messageInput");
+    const binaryOut = document.getElementById("binaryOut");
+    const decimalOut = document.getElementById("decimalOut");
+    const breakdownOut = document.getElementById("breakdownOut");
+    const charCount = document.getElementById("charCount");
+    const byteCount = document.getElementById("byteCount");
 
-        binaryInput.addEventListener('input', function() {
-            const binary = this.value;
-            if (/^[01]{8}$/.test(binary)) {
-                const decimal = parseInt(binary, 2);
-                binaryCharOutput.textContent = String.fromCharCode(decimal);
-            } else {
-                binaryCharOutput.textContent = '';
-            }
-        });
+    function asPrintable(ch){
+      if(ch === " ") return "␠";
+      if(ch === "\n") return "\\n";
+      if(ch === "\t") return "\\t";
+      return ch;
+    }
 
-        // Decode Binary Message Challenge
-        const words = ['HELLO', 'WORLD', 'BINARY', 'CODING', 'FUN', 'LEARN', 'BITS', 'BYTES'];
-        function getRandomWord() {
-            return words[Math.floor(Math.random() * words.length)];
-        }
+    function renderMessage(){
+      const text = messageInput.value || "";
+      charCount.textContent = String(text.length);
 
-        function wordToBinary(word) {
-            return word.split('').map(char => char.charCodeAt(0).toString(2).padStart(8, '0')).join(' ');
-        }
+      const bytes = [];
+      const bins = [];
+      const lines = [];
 
-        const binaryMessage = document.getElementById('binaryMessage');
-        const decodeBulbs = document.getElementById('decodeBulbs');
-        let currentWord = getRandomWord();
-        binaryMessage.textContent = wordToBinary(currentWord);
+      for(let i = 0; i < text.length; i++){
+        const ch = text[i];
+        const code = text.charCodeAt(i);
 
-        // Create mini binary bulbs for decoding with place values
-        const placeValues = [128, 64, 32, 16, 8, 4, 2, 1];
-        for (let i = 0; i < 8; i++) {
-            const container = document.createElement('div');
-            container.className = 'mini-bulb-container';
-            
-            const label = document.createElement('div');
-            label.className = 'mini-bulb-label';
-            label.textContent = placeValues[i];
-            
-            const bulb = document.createElement('div');
-            bulb.className = 'mini-bulb';
-            bulb.textContent = '0';
-            
-            bulb.addEventListener('click', function() {
-                this.textContent = this.textContent === '0' ? '1' : '0';
-                this.classList.toggle('on');
-                calculateDecimalValue();
-            });
-            
-            container.appendChild(label);
-            container.appendChild(bulb);
-            decodeBulbs.appendChild(container);
-        }
+        // Keeping it simple and consistent with "8-bit bytes"
+        // If code > 255 (emoji etc), we still show the code but clamp for binary.
+        // This keeps the UI simple for your lesson.
+        const byte = clamp(code, 0, 255);
+        bytes.push(byte);
+        const bin = toBinary8(byte);
+        bins.push(bin);
 
-        function calculateDecimalValue() {
-            const bulbs = document.querySelectorAll('.mini-bulb');
-            let decimalValue = 0;
-            bulbs.forEach((bulb, index) => {
-                if (bulb.textContent === '1') {
-                    decimalValue += placeValues[index];
-                }
-            });
-            document.getElementById('decimalValue').textContent = decimalValue;
-        }
+        const shown = asPrintable(ch);
+        lines.push(`${shown}  →  ${byte.toString().padStart(3," ")}  →  ${bin}`);
+      }
 
-        document.getElementById('checkMessageAnswer').addEventListener('click', function() {
-            const userAnswer = document.getElementById('decodedMessage').value.toUpperCase();
-            const result = document.getElementById('messageResult');
-            if (userAnswer === currentWord) {
-                result.innerHTML = "<strong>Correct!</strong> You've successfully <em>decoded</em> the binary message!";
-            } else {
-                result.innerHTML = "<strong>Not quite.</strong> Try again! <em>Hint:</em> Use the decimal value to find the corresponding ASCII character.";
-            }
-        });
+      byteCount.textContent = String(bytes.length);
 
-        // RGB color picker
-        const redSlider = document.getElementById('redSlider');
-        const greenSlider = document.getElementById('greenSlider');
-        const blueSlider = document.getElementById('blueSlider');
-        const redInput = document.getElementById('redInput');
-        const greenInput = document.getElementById('greenInput');
-        const blueInput = document.getElementById('blueInput');
-        const colorPreview = document.getElementById('colorPreview');
-        const rgbBinary = document.getElementById('rgbBinary');
-        const colorName = document.getElementById('colorName');
+      binaryOut.textContent = bins.join(" ");
+      decimalOut.textContent = bytes.join(", ");
+      breakdownOut.textContent = lines.join("\n");
 
-        function updateColor() {
-            const r = redSlider.value;
-            const g = greenSlider.value;
-            const b = blueSlider.value;
-            const color = `rgb(${r},${g},${b})`;
-            colorPreview.style.backgroundColor = color;
-            rgbBinary.textContent = `${parseInt(r).toString(2).padStart(8, '0')} ${parseInt(g).toString(2).padStart(8, '0')} ${parseInt(b).toString(2).padStart(8, '0')}`;
-            redInput.value = r;
-            greenInput.value = g;
-            blueInput.value = b;
-            const colorNameResult = ntc.name(color)[1];
-            colorName.textContent = `RGB(${r}, ${g}, ${b})`;
-        }
+      if(text.length === 0){
+        binaryOut.textContent = "";
+        decimalOut.textContent = "";
+        breakdownOut.textContent = "";
+      }
+    }
 
-        redSlider.addEventListener('input', updateColor);
-        greenSlider.addEventListener('input', updateColor);
-        blueSlider.addEventListener('input', updateColor);
-        redInput.addEventListener('input', function() {
-            redSlider.value = this.value;
-            updateColor();
-        });
-        greenInput.addEventListener('input', function() {
-            greenSlider.value = this.value;
-            updateColor();
-        });
-        blueInput.addEventListener('input', function() {
-            blueSlider.value = this.value;
-            updateColor();
-        });
+    messageInput.addEventListener("input", renderMessage);
 
-        updateColor(); // Initialize color preview
-        // Color Challenge
-        function getRandomColor() {
-            return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
-        }
+    document.getElementById("copyBinaryString").addEventListener("click", (e) => {
+      const text = binaryOut.textContent || "";
+      if(text) copyText(text, e.currentTarget);
+    });
 
-        const targetColor = document.getElementById('targetColor');
-        const targetColorName = document.getElementById('targetColorName');
-        let randomColor = getRandomColor();
-        targetColor.style.backgroundColor = randomColor;
-        const targetColorNameResult = ntc.name(randomColor)[1];
-        targetColorName.textContent = `RGB(${randomColor.match(/\d+/g).join(', ')})`;
+    document.getElementById("copyBytesCsv").addEventListener("click", (e) => {
+      const text = decimalOut.textContent || "";
+      if(text) copyText(text, e.currentTarget);
+    });
 
-        document.getElementById('checkColorChallenge').addEventListener('click', function() {
-            const userColor = colorPreview.style.backgroundColor;
-            const result = document.getElementById('colorChallengeResult');
-            if (userColor === randomColor) {
-                result.textContent = "Perfect match! You've recreated the color exactly!";
-            } else {
-                result.textContent = "Close, but not quite. Try adjusting your values a bit more.";
-            }
-        });
+    document.getElementById("clearMessage").addEventListener("click", () => {
+      messageInput.value = "";
+      renderMessage();
+      messageInput.focus();
+    });
 
-        document.getElementById('newColorChallenge').addEventListener('click', function() {
-            randomColor = getRandomColor();
-            targetColor.style.backgroundColor = randomColor;
-            const newTargetColorNameResult = ntc.name(randomColor)[1];
-            targetColorName.textContent = `RGB(${randomColor.match(/\d+/g).join(', ')})`;
-            document.getElementById('colorChallengeResult').textContent = '';
-        });
+    document.getElementById("tryExample").addEventListener("click", () => {
+      messageInput.value = "HELLO WORLD";
+      renderMessage();
+      messageInput.focus();
+    });
 
-        // Pixel canvas
-        const canvas = document.getElementById('pixelCanvas');
-        const ctx = canvas.getContext('2d');
-        const pixelSize = 30;
-        const gridSize = 5;
-        const randomizeButton = document.getElementById('randomizePixels');
-        const pixelBinary = document.getElementById('pixelBinary');
-        const pixelColorName = document.getElementById('pixelColorName');
-        const rgbValues = document.getElementById('rgbValues');
-
-        function drawPixelGrid() {
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    const r = Math.floor(Math.random() * 256);
-                    const g = Math.floor(Math.random() * 256);
-                    const b = Math.floor(Math.random() * 256);
-                    ctx.fillStyle = `rgb(${r},${g},${b})`;
-                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-                }
-            }
-        }
-
-        canvas.addEventListener('mousemove', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const x = Math.floor((event.clientX - rect.left) / pixelSize);
-            const y = Math.floor((event.clientY - rect.top) / pixelSize);
-            const pixel = ctx.getImageData(x * pixelSize, y * pixelSize, 1, 1).data;
-            const binary = pixel.slice(0, 3).map(v => v.toString(2).padStart(8, '0')).join(' ');
-            pixelBinary.textContent = `${pixel[0]} ${pixel[1]} ${pixel[2]} (${binary})`;
-            const pixelColorNameResult = ntc.name(`rgb(${pixel[0]},${pixel[1]},${pixel[2]})`)[1];
-            pixelColorName.textContent = `RGB(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
-            rgbValues.textContent = `R: ${pixel[0]}, G: ${pixel[1]}, B: ${pixel[2]}`;
-        });
-
-        randomizeButton.addEventListener('click', drawPixelGrid);
-
-        drawPixelGrid();
-
-        // Color depth challenge
-        function checkBitsPerChannel() {
-            const answer = document.getElementById('bitsPerChannel').value;
-            const result = document.getElementById('bitsResult');
-            if (answer === '8') {
-                result.textContent = "Correct! Each channel (R, G, B) uses 8 bits in 24-bit color.";
-            } else {
-                result.textContent = "Not quite. Hint: 24 bits total, divided equally among 3 channels.";
-            }
-        }
-
-        function checkValuesPerChannel() {
-            const answer = document.getElementById('valuesPerChannel').value;
-            const result = document.getElementById('valuesResult');
-            if (answer === '256') {
-                result.textContent = "Correct! 8 bits can represent 2^8 = 256 different values (0-255).";
-            } else {
-                result.textContent = "Not quite. Hint: Think about how many unique numbers you can make with 8 binary digits.";
-            }
-        }
-
-        function checkTotalColors() {
-            const totalColorsInput = document.getElementById('totalColorsInput').value;
-            const result = document.getElementById('totalColorsResult');
-            if (totalColorsInput == 16777216) {
-                result.textContent = "Correct! 24-bit color allows for 256 * 256 * 256 = 16,777,216 unique colors.";
-            } else {
-                result.textContent = "Not quite. Hint: Multiply the number of values per channel for each of the three channels (R, G, B).";
-            }
-        }
-
-        // Initialize explanations
-        updateExplanation('binary', 1);
-        updateExplanation('text', 1);
-        updateExplanation('color', 1);
-        updateExplanation('image', 1);
-        updateExplanation('summary', 1);
-
-        // Menu toggle for mobile
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('nav').classList.toggle('active');
-        });
-
-        // Function to set active link
-        function setActiveLink() {
-            // Get the current page name from the URL
-            var path = window.location.pathname;
-            var page = path.split("/").pop();
-
-            // Remove .html extension if present
-            page = page.replace('.html', '');
-
-            // Create an ID from the page name
-            var linkId = page + '-link';
-
-            // Get the link element and add the 'active' class
-            var activeLink = document.getElementById(linkId);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        }
-
-        // Call the function to set the active link
-        setActiveLink();
-    </script>
+    renderMessage();
+  </script>
 </body>
 </html>
