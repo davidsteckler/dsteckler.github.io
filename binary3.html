@@ -1,665 +1,1072 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Binary Representations - David Steckler</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f5f5f5;
-            line-height: 1.6;
-        }
-        header, footer {
-            background-color: #000;
-            text-align: center;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        header h1, footer p {
-            color: #fff;
-        }
-        header h1 a, nav a {
-            color: #fff;
-            text-decoration: none;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2, h3, h4 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        p {
-            margin-bottom: 20px;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        nav {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin: 0 10px;
-            text-transform: uppercase;
-            font-weight: bold;
-            position: relative;
-            padding: 5px 8px;
-            border-radius: 5px;
-        }
-        .active {
-            background-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .menu {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            background-color: #fff;
-            position: absolute;
-            top: 60px;
-            left: 0;
-            z-index: 1;
-        }
-        .menu a {
-            padding: 10px;
-            width: 100%;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-        .menu a:hover {
-            background-color: #f1f1f1;
-        }
-        .menu-toggle {
-            display: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: #fff;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        @media (max-width: 600px) {
-            nav {
-                display: none;
-            }
-            .menu-toggle {
-                display: block;
-            }
-            nav.active {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-                background-color: #000;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                z-index: 1;
-            }
-            nav a {
-                flex: 1 0 100%;
-                margin: 5px 0;
-                padding: 10px;
-                color: #fff;
-            }
-        }
-        .profile-img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        /* Styles specific to the Interactive Binary Representations content */
-        .section {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .dropdown {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .content {
-            display: none;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
-        .preview {
-            width: 50px;
-            height: 50px;
-            margin: 10px 0;
-        }
-        .explanation {
-            margin-top: 10px;
-            background-color: #d9dee4;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .explanation p {
-            margin: 0;
-            display: none;
-        }
-        .explanation p.level-1 {
-            font-weight: bold;
-            color: #000;
-        }
-        .explanation p.level-2 {
-            color: #000;
-        }
-        .explanation p.level-3 {
-            color: #555;
-        }
-        input[type="range"].explanation-slider {
-            width: 20%;
-            margin: 10px 0;
-            height: 24px;
-        }
-        button {
-            padding: 10px 15px;
-            margin: 10px 0;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .ascii-section {
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        .ascii-chart {
-            display: grid;
-            grid-template-columns: repeat(16, minmax(40px, 1fr));
-            gap: 2px;
-            margin-top: 10px;
-            font-size: 10px;
-        }
-        .ascii-item {
-            border: 1px solid #ddd;
-            padding: 2px;
-            text-align: center;
-            position: relative;
-        }
-        .ascii-char {
-            font-weight: bold;
-            font-size: 12px;
-        }
-        .ascii-explanation {
-            margin-top: 20px;
-            line-height: 1.6;
-        }
-        .extended-ascii {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 2px dashed #888;
-        }
-        .tooltip {
-            visibility: hidden;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            width: 120px;
-        }
-        .ascii-item:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Binary Representations</title>
+  <style>
+    :root{
+      --bg: #0b0f17;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.085);
+      --stroke: rgba(255,255,255,0.12);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --muted2: rgba(255,255,255,0.55);
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+    }
 
-        /* Mobile-specific styles */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            .section {
-                padding: 10px;
-            }
-            .dropdown {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .content {
-                padding: 8px;
-            }
-            .preview {
-                width: 40px;
-                height: 40px;
-            }
-            button {
-                padding: 14px 20px;
-                font-size: 18px;
-            }
-            input[type="range"] {
-                width: 100%;
-                height: 28px;
-            }
-            input[type="range"].explanation-slider {
-                width: 80%;
-            }
-            .ascii-chart {
-                grid-template-columns: repeat(8, minmax(40px, 1fr));
-            }
-            .ascii-char {
-                font-size: 10px;
-            }
-            .ascii-explanation {
-                font-size: 14px;
-            }
-            .ascii-item {
-                cursor: pointer;
-            }
-            .ascii-item.active .tooltip {
-                visibility: visible;
-                opacity: 1;
-            }
-        }
-    </style>
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 700px at 20% -10%, rgba(120,160,255,0.30), transparent 55%),
+        radial-gradient(900px 650px at 90% 10%, rgba(255,170,120,0.22), transparent 55%),
+        radial-gradient(800px 700px at 50% 110%, rgba(140,255,210,0.16), transparent 60%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap{
+      min-height: 100%;
+      padding: 28px 14px 40px;
+      display: grid;
+      place-items: start center;
+    }
+
+    .app{
+      width: 100%;
+      max-width: 1020px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .top{
+      padding: 18px 18px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+    }
+
+    .titleRow{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title{
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.2px;
+    }
+
+    .hint{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .controls{
+      padding: 14px 18px 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+    @media (max-width: 760px){
+      .controls{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      display: block;
+      font-size: 12px;
+      color: var(--muted2);
+      margin-bottom: 8px;
+      letter-spacing: 0.2px;
+    }
+
+    select{
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,0.24);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+    select:focus{
+      border-color: rgba(255,255,255,0.22);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.08);
+    }
+
+    .btnRow{
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    button{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+      user-select: none;
+    }
+    button:hover{
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.18);
+      transform: translateY(-1px);
+    }
+    button:active{ transform: translateY(0px); }
+    button:focus{
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.08);
+    }
+
+    .main{ padding: 0 18px 18px; }
+
+    .panel{
+      display: none;
+      background: rgba(255,255,255,0.055);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .panel.active{
+      display: block;
+      animation: fadeIn 180ms ease;
+    }
+    @keyframes fadeIn{
+      from{ opacity: 0; transform: translateY(6px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+
+    .panelHead{
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .panel h3{ margin: 0; font-size: 16px; }
+
+    .grid2{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (max-width: 860px){
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .row{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin: 10px 0 0;
+    }
+
+    .chip{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.22);
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      font-size: 13px;
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing: 0.2px;
+    }
+
+    .previewRow{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .preview{
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.30);
+      flex: 0 0 auto;
+    }
+
+    .explanation{
+      margin-top: 12px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 12px 12px;
+      color: rgba(255,255,255,0.80);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .field{
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .field .line{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .small{ color: var(--muted2); font-size: 12px; }
+
+    input[type="range"]{
+      width: 100%;
+      height: 34px;
+      accent-color: rgba(255,255,255,0.85);
+      cursor: pointer;
+    }
+
+    input[type="number"]{
+      width: 120px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.24);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+    input[type="number"]:focus{
+      border-color: rgba(255,255,255,0.22);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.08);
+    }
+
+    .ascii-section{
+      margin-top: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      border-radius: var(--radius);
+      padding: 14px;
+      overflow: hidden;
+    }
+    .ascii-section h4{
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.86);
+      letter-spacing: 0.2px;
+    }
+    .ascii-explanation{
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .ascii-chart{
+      display: grid;
+      grid-template-columns: repeat(16, minmax(44px, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    @media (max-width: 720px){
+      .ascii-chart{ grid-template-columns: repeat(8, minmax(44px, 1fr)); }
+    }
+
+    .ascii-item{
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+      position: relative;
+      cursor: default;
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+    .ascii-item:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.075);
+      border-color: rgba(255,255,255,0.16);
+    }
+
+    .ascii-char{
+      font-weight: 750;
+      font-size: 12px;
+      color: rgba(255,255,255,0.92);
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    .tooltip{
+      visibility: hidden;
+      background: rgba(0,0,0,0.85);
+      color: rgba(255,255,255,0.92);
+      text-align: center;
+      border-radius: 12px;
+      padding: 8px 10px;
+      position: absolute;
+      z-index: 2;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      width: 180px;
+      border: 1px solid rgba(255,255,255,0.14);
+      pointer-events: none;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .ascii-item:hover .tooltip{
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .extended-ascii{
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(255,255,255,0.20);
+    }
+
+    .srOnly{
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
 </head>
+
 <body>
-    <header>
-        <h1><a href="index.html">David Steckler</a></h1>
-        <button class="menu-toggle">&#9776;</button>
-        <nav>
-            <a href="index.html" id="home-link">Home</a>
-            <a href="about.html" id="about-link">About</a>
-            <a href="course.html" id="course-link">Course</a>
-            <a href="blog.html" id="blog-link">Blog</a>
-            <a href="contact.html" id="contact-link">Contact</a>
-            <a href="testimonials.html" id="testimonials-link">Testimonials</a>
-            <a href="search.html" id="search-link">Search</a>
-        </nav>
-    </header>
-
-    <div class="container">
-        <h1>Interactive Binary Representations</h1>
-
-        <p>Select a category to see how binary numbers can be interpreted:</p>
-
-        <div class="section">
-            <select id="representationDropdown" class="dropdown">
-                <option value="">Choose a representation</option>
-                <option value="pixel">As a Grayscale Pixel</option>
-                <option value="color">As a Color Component</option>
-                <option value="text">As Text</option>
-                <option value="audio">In Audio</option>
-            </select>
-
-            <div id="pixelContent" class="content">
-                <h3>As a Grayscale Pixel</h3>
-                <div id="pixelPreview" class="preview"></div>
-                <p>Binary: <span id="pixelBinary">10101010</span></p>
-                <p>Grayscale value: <span id="pixelValue">170</span> (out of 255)</p>
-                <button id="randomizePixel">Randomize</button>
-                <input type="range" min="1" max="3" value="1" class="explanation-slider">
-                <div class="explanation">
-                    <p id="pixelExplanation1" class="level-1">This binary number represents a medium gray pixel.</p>
-                    <p id="pixelExplanation2" class="level-2">In 8-bit grayscale, this binary number translates to a decimal value between 0 (black) and 255 (white).</p>
-                    <p id="pixelExplanation3" class="level-3">Each bit in the binary number represents a power of 2. This system allows 256 shades of gray to be represented with just 8 bits.</p>
-                </div>
-            </div>
-
-            <div id="colorContent" class="content">
-                <h3>As a Color Component (Green)</h3>
-                <div id="colorPreview" class="preview"></div>
-                <p>Binary (Green component): <span id="colorBinary">10101010</span></p>
-                <p>RGB: (0, <span id="colorGreen">170</span>, 0)</p>
-                <button id="randomizeColor">Randomize Green</button>
-                <input type="range" min="1" max="3" value="1" class="explanation-slider">
-                <div class="explanation">
-                    <p id="colorExplanation1" class="level-1">This binary number represents the green component in this RGB color.</p>
-                    <p id="colorExplanation2" class="level-2">In the RGB color model, this value is being used for the green channel, while red and blue remain at 0.</p>
-                    <p id="colorExplanation3" class="level-3">24-bit color uses 8 bits each for red, green, and blue, allowing for 16,777,216 possible colors using just three bytes of data.</p>
-                </div>
-            </div>
-
-            <div id="textContent" class="content">
-                <h3>As Text (ASCII)</h3>
-                <p>Binary: <span id="textBinary">10101010</span></p>
-                <p>ASCII character: <span id="textChar">ª</span></p>
-                <p>Decimal value: <span id="textDecimal">170</span></p>
-                <button id="randomizeText">Randomize</button>
-                <input type="range" min="1" max="3" value="1" class="explanation-slider">
-                <div class="explanation">
-                    <p id="textExplanation1" class="level-1">This binary number represents a character in ASCII encoding.</p>
-                    <p id="textExplanation2" class="level-2">ASCII uses 7 bits to represent 128 characters. Values above 127 fall into the extended ASCII range.</p>
-                    <p id="textExplanation3" class="level-3">Extended ASCII, which uses all 8 bits, allows for 256 characters, including special symbols and characters from other languages.</p>
-                </div>
-
-                <div class="ascii-section">
-                    <h4>ASCII Chart: The Digital Alphabet</h4>
-                    <div class="ascii-chart" id="asciiChart"></div>
-                    
-                    <p class="ascii-explanation">
-                        ASCII, born in 1963, became computing's universal language. It uses 7 bits to represent 128 characters.
-                        The first 32 numbers (0-31) are control characters for behind-the-scenes tasks.
-                        The rest (32-127) are the visible characters you type.
-                        Hover over the control characters to learn their specific purposes.
-                    </p>
-
-                    <div class="extended-ascii">
-                        <h4>Extended ASCII: The International Upgrade</h4>
-                        <div class="ascii-chart" id="extendedAsciiChart"></div>
-                        
-                        <p class="ascii-explanation">
-                            By the 1980s, 128 characters weren't enough. Extended ASCII used an 8th bit to add 128 more characters (128-255).
-                            Numbers 128-159 are additional control characters.
-                            160-255 brought in characters like é, ñ, and ╔═══╗ for international text and simple drawings.
-                            Hover over the control characters to see their purposes. Note that different systems may interpret these differently.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="audioContent" class="content">
-                <h3>In Audio</h3>
-                <p>Binary: <span id="audioBinary">10101010</span></p>
-                <p>Frequency: <span id="audioFrequency">440</span> Hz</p>
-                <button id="playAudio">Play Sound</button>
-                <button id="randomizeAudio">Randomize</button>
-                <input type="range" min="1" max="3" value="1" class="explanation-slider">
-                <div class="explanation">
-                    <p id="audioExplanation1" class="level-1">This binary number could represent part of an audio waveform.</p>
-                    <p id="audioExplanation2" class="level-2">In digital audio, this might represent the amplitude of a sound wave at a specific moment.</p>
-                    <p id="audioExplanation3" class="level-3">8-bit audio uses values from 0 to 255 to represent sound wave amplitude. The pattern of bits affects the tone's frequency and timbre.</p>
-                </div>
-            </div>
+  <div class="wrap">
+    <main class="app" aria-label="Interactive Binary Representations">
+      <section class="top">
+        <div class="titleRow">
+          <h1 class="title">Interactive Binary Representations</h1>
         </div>
-    </div>
+        <p class="hint">Pick a category, then tweak values with sliders or randomize. Everything stays in 8-bit (0–255).</p>
+      </section>
 
-    <footer>
-        <p>&copy; 2024 David Steckler. All rights reserved.</p>
-    </footer>
+      <section class="controls">
+        <div>
+          <label for="representationDropdown">Representation</label>
+          <select id="representationDropdown">
+            <option value="">Choose a representation</option>
+            <option value="pixel">As a Grayscale Pixel</option>
+            <option value="color">As a Color Component (Green)</option>
+            <option value="text">As Text</option>
+            <option value="audio">In Audio</option>
+          </select>
+        </div>
 
-    <script>
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        <div class="btnRow">
+          <button id="randomizeCurrent" type="button">Randomize</button>
+          <button id="copyBinary" type="button">Copy Binary</button>
+        </div>
+      </section>
 
-        function updatePixel(binary) {
-            const decimal = parseInt(binary, 2);
-            document.getElementById('pixelBinary').textContent = binary;
-            document.getElementById('pixelValue').textContent = decimal;
-            document.getElementById('pixelPreview').style.backgroundColor = `rgb(${decimal},${decimal},${decimal})`;
-            document.getElementById('pixelExplanation1').textContent = `This binary number represents a ${decimal < 85 ? 'dark' : decimal > 170 ? 'light' : 'medium'} gray pixel.`;
+      <section class="main">
+        <!-- Pixel -->
+        <div id="pixelContent" class="panel" role="region" aria-label="Grayscale Pixel">
+          <div class="panelHead">
+            <h3>As a Grayscale Pixel</h3>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <div class="previewRow">
+                <div id="pixelPreview" class="preview" aria-label="Pixel preview"></div>
+                <div class="row">
+                  <span class="chip"><span class="small">Binary</span> <span id="pixelBinary" class="mono">10101010</span></span>
+                  <span class="chip"><span class="small">Value</span> <span id="pixelValue" class="mono">170</span> <span class="small">/ 255</span></span>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Brightness (0–255)</span>
+                  <span class="small"><span id="pixelSliderVal" class="mono">170</span></span>
+                </div>
+                <input id="pixelSlider" type="range" min="0" max="255" value="170" />
+              </div>
+
+              <div class="explanation">
+                An 8-bit grayscale pixel is just a number from 0 to 255. Lower numbers look darker, higher numbers look lighter.
+                The binary and decimal are the same value written in different bases.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="field" style="margin-top:0;">
+                <div class="line">
+                  <span class="small">Quick presets</span>
+                  <span class="small">one click</span>
+                </div>
+                <div class="btnRow" style="justify-content:flex-start;">
+                  <button id="pixelBlack" type="button">0</button>
+                  <button id="pixelMid" type="button">128</button>
+                  <button id="pixelWhite" type="button">255</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Set exact value</span>
+                  <span class="small">0–255</span>
+                </div>
+                <div class="btnRow" style="justify-content:flex-start;">
+                  <input id="pixelNumber" type="number" min="0" max="255" value="170" />
+                  <button id="pixelApply" type="button">Apply</button>
+                </div>
+              </div>
+
+              <div class="explanation">
+                Use the slider for fast exploration. Use the number box when you want a precise value for a demo or a worksheet.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Color -->
+        <div id="colorContent" class="panel" role="region" aria-label="Color Component">
+          <div class="panelHead">
+            <h3>As a Color (RGB)</h3>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <div class="previewRow">
+                <div id="colorPreview" class="preview" aria-label="Color preview"></div>
+                <div class="row">
+                  <span class="chip"><span class="small">Binary (G)</span> <span id="colorBinary" class="mono">10101010</span></span>
+                  <span class="chip"><span class="small">RGB</span> <span class="mono">(<span id="rVal">0</span>, <span id="gVal">170</span>, <span id="bVal">0</span>)</span></span>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Red (0–255)</span>
+                  <span class="small"><span id="rShow" class="mono">0</span></span>
+                </div>
+                <input id="rSlider" type="range" min="0" max="255" value="0" />
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Green (0–255)</span>
+                  <span class="small"><span id="gShow" class="mono">170</span></span>
+                </div>
+                <input id="gSlider" type="range" min="0" max="255" value="170" />
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Blue (0–255)</span>
+                  <span class="small"><span id="bShow" class="mono">0</span></span>
+                </div>
+                <input id="bSlider" type="range" min="0" max="255" value="0" />
+              </div>
+
+              <div class="explanation">
+                In 24-bit color, each channel is 8 bits. That means each channel is a number from 0 to 255.
+                The final color is just three numbers side-by-side: red, green, blue.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="field" style="margin-top:0;">
+                <div class="line">
+                  <span class="small">Quick presets</span>
+                  <span class="small">one click</span>
+                </div>
+                <div class="btnRow" style="justify-content:flex-start;">
+                  <button data-preset="0,0,0" class="colorPreset" type="button">Black</button>
+                  <button data-preset="255,255,255" class="colorPreset" type="button">White</button>
+                  <button data-preset="255,0,0" class="colorPreset" type="button">Red</button>
+                  <button data-preset="0,255,0" class="colorPreset" type="button">Green</button>
+                  <button data-preset="0,0,255" class="colorPreset" type="button">Blue</button>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Copy values</span>
+                  <span class="small">for notes</span>
+                </div>
+                <div class="btnRow" style="justify-content:flex-start;">
+                  <button id="copyRGB" type="button">Copy RGB</button>
+                  <button id="copyHex" type="button">Copy HEX</button>
+                </div>
+              </div>
+
+              <div class="explanation">
+                The “Copy Binary” button copies the 8-bit binary for the green channel. Use Copy RGB or HEX when you want the full color.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text -->
+        <div id="textContent" class="panel" role="region" aria-label="ASCII Text">
+          <div class="panelHead">
+            <h3>As Text (ASCII)</h3>
+          </div>
+
+          <div class="card">
+            <div class="row" style="margin-top:0;">
+              <span class="chip"><span class="small">Binary</span> <span id="textBinary" class="mono">10101010</span></span>
+              <span class="chip"><span class="small">Decimal</span> <span id="textDecimal" class="mono">170</span></span>
+              <span class="chip"><span class="small">Char</span> <span id="textChar" class="mono">ª</span></span>
+            </div>
+
+            <div class="field">
+              <div class="line">
+                <span class="small">Character code (0–255)</span>
+                <span class="small"><span id="textSliderVal" class="mono">170</span></span>
+              </div>
+              <input id="textSlider" type="range" min="0" max="255" value="170" />
+            </div>
+
+            <div class="explanation">
+              Characters can be stored as numbers. ASCII is the classic mapping for the first 128 values.
+              The 128–255 range depends on the system (older “extended ASCII” code pages).
+            </div>
+
+            <div class="ascii-section">
+              <h4>ASCII Chart</h4>
+              <div class="ascii-chart" id="asciiChart"></div>
+
+              <p class="ascii-explanation">
+                Control codes (like line feed) exist for behind-the-scenes tasks. Printable characters start at 32 (space).
+              </p>
+
+              <div class="extended-ascii">
+                <h4>Extended Range (128–255)</h4>
+                <div class="ascii-chart" id="extendedAsciiChart"></div>
+
+                <p class="ascii-explanation">
+                  This range can display different symbols depending on your OS and fonts, but the underlying idea stays the same.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio -->
+        <div id="audioContent" class="panel" role="region" aria-label="Audio">
+          <div class="panelHead">
+            <h3>In Audio (Frequency + Tone)</h3>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <div class="row" style="margin-top:0;">
+                <span class="chip"><span class="small">Binary</span> <span id="audioBinary" class="mono">10101010</span></span>
+                <span class="chip"><span class="small">Hz</span> <span id="audioHz" class="mono">440</span></span>
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Frequency (Hz)</span>
+                  <span class="small"><span id="hzShow" class="mono">440</span></span>
+                </div>
+                <input id="hzSlider" type="range" min="80" max="1200" value="440" />
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Volume</span>
+                  <span class="small"><span id="volShow" class="mono">0.35</span></span>
+                </div>
+                <input id="volSlider" type="range" min="0" max="100" value="35" />
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Wave type</span>
+                  <span class="small">tone color</span>
+                </div>
+                <div class="btnRow" style="justify-content:flex-start;">
+                  <button class="waveBtn" data-wave="sine" type="button">Sine</button>
+                  <button class="waveBtn" data-wave="square" type="button">Square</button>
+                  <button class="waveBtn" data-wave="triangle" type="button">Triangle</button>
+                  <button class="waveBtn" data-wave="sawtooth" type="button">Saw</button>
+                </div>
+              </div>
+
+              <div class="btnRow" style="justify-content:flex-start; margin-top:12px;">
+                <button id="playTone" type="button">Play</button>
+                <button id="stopTone" type="button">Stop</button>
+              </div>
+
+              <div class="explanation">
+                You can map numbers to sound. Here, the slider directly controls frequency in Hertz.
+                Try different wave types: they keep the same pitch but change the texture of the sound.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="field" style="margin-top:0;">
+                <div class="line">
+                  <span class="small">Map an 8-bit value (0–255) to frequency</span>
+                  <span class="small">binary stays meaningful</span>
+                </div>
+                <div class="row" style="margin-top:0;">
+                  <span class="chip"><span class="small">8-bit value</span> <span id="audioByte" class="mono">170</span></span>
+                  <span class="chip"><span class="small">Mapped Hz</span> <span id="mappedHz" class="mono">540</span></span>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">8-bit value (0–255)</span>
+                  <span class="small"><span id="byteShow" class="mono">170</span></span>
+                </div>
+                <input id="byteSlider" type="range" min="0" max="255" value="170" />
+              </div>
+
+              <div class="field">
+                <div class="line">
+                  <span class="small">Map range</span>
+                  <span class="small"><span id="mapRangeShow" class="mono">200–710</span> Hz</span>
+                </div>
+                <div class="btnRow" style="justify-content:flex-start;">
+                  <input id="minHz" type="number" min="20" max="4000" value="200" />
+                  <input id="maxHz" type="number" min="20" max="4000" value="710" />
+                  <button id="applyMap" type="button">Apply</button>
+                </div>
+              </div>
+
+              <div class="explanation">
+                This keeps the “8-bit number” story intact: you pick a byte (0–255), then map it into an audible frequency range.
+                Great for showing how raw numbers become real-world signals.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ---------- Audio engine (continuous tone) ----------
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let osc = null;
+    let gain = null;
+    let currentWave = "sine";
+
+    function ensureAudio(){
+      if(!osc){
+        osc = audioContext.createOscillator();
+        gain = audioContext.createGain();
+        osc.type = currentWave;
+        gain.gain.value = 0.0;
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+      }
+    }
+
+    function setTone(freqHz, vol01){
+      ensureAudio();
+      const now = audioContext.currentTime;
+      osc.frequency.setValueAtTime(freqHz, now);
+      gain.gain.setTargetAtTime(vol01, now, 0.015);
+    }
+
+    function stopTone(){
+      if(!gain) return;
+      const now = audioContext.currentTime;
+      gain.gain.setTargetAtTime(0.0, now, 0.02);
+    }
+
+    // ---------- Shared helpers ----------
+    let currentSection = "";
+    const state = {
+      pixel: 170,
+      r: 0, g: 170, b: 0,
+      text: 170,
+      audioByte: 170,
+      mapMin: 200,
+      mapMax: 710,
+      hz: 440,
+      vol: 0.35,
+    };
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function toBinary8(n){
+      return clamp(n, 0, 255).toString(2).padStart(8, "0");
+    }
+
+    function randomByte(){
+      return Math.floor(Math.random() * 256);
+    }
+
+    async function copyText(text, btnEl){
+      try{
+        await navigator.clipboard.writeText(text);
+        if(btnEl){
+          const old = btnEl.textContent;
+          btnEl.textContent = "Copied";
+          setTimeout(() => btnEl.textContent = old, 900);
         }
+      }catch(e){
+        alert("Copy failed. Your browser may block clipboard access.");
+      }
+    }
 
-        function updateColor(binary) {
-            const green = parseInt(binary, 2);
-            document.getElementById('colorBinary').textContent = binary;
-            document.getElementById('colorGreen').textContent = green;
-            document.getElementById('colorPreview').style.backgroundColor = `rgb(0,${green},0)`;
-            updateExplanations('colorExplanation', green);
+    function showPanel(key){
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      currentSection = key || "";
+      if(!key) return;
+      const panel = document.getElementById(key + "Content");
+      if(panel) panel.classList.add("active");
+    }
+
+    // ---------- Pixel (grayscale) ----------
+    function renderPixel(){
+      const v = clamp(state.pixel, 0, 255);
+      document.getElementById("pixelValue").textContent = v;
+      document.getElementById("pixelBinary").textContent = toBinary8(v);
+      document.getElementById("pixelPreview").style.backgroundColor = `rgb(${v},${v},${v})`;
+      document.getElementById("pixelSlider").value = v;
+      document.getElementById("pixelSliderVal").textContent = v;
+      document.getElementById("pixelNumber").value = v;
+    }
+
+    // ---------- Color (RGB) ----------
+    function renderColor(){
+      const r = clamp(state.r, 0, 255);
+      const g = clamp(state.g, 0, 255);
+      const b = clamp(state.b, 0, 255);
+
+      state.r = r; state.g = g; state.b = b;
+
+      document.getElementById("rVal").textContent = r;
+      document.getElementById("gVal").textContent = g;
+      document.getElementById("bVal").textContent = b;
+
+      document.getElementById("rShow").textContent = r;
+      document.getElementById("gShow").textContent = g;
+      document.getElementById("bShow").textContent = b;
+
+      document.getElementById("rSlider").value = r;
+      document.getElementById("gSlider").value = g;
+      document.getElementById("bSlider").value = b;
+
+      document.getElementById("colorBinary").textContent = toBinary8(g);
+      document.getElementById("colorPreview").style.backgroundColor = `rgb(${r},${g},${b})`;
+    }
+
+    function rgbToHex(r,g,b){
+      const to2 = (n) => n.toString(16).padStart(2,"0");
+      return "#" + to2(r) + to2(g) + to2(b);
+    }
+
+    // ---------- Text ----------
+    function renderText(){
+      const v = clamp(state.text, 0, 255);
+      state.text = v;
+
+      let char = String.fromCharCode(v);
+      if(char === " ") char = "(space)";
+      if(v < 32 || (v >= 127 && v <= 159)) char = `(control: ${v})`;
+
+      document.getElementById("textBinary").textContent = toBinary8(v);
+      document.getElementById("textDecimal").textContent = v;
+      document.getElementById("textChar").textContent = char;
+
+      document.getElementById("textSlider").value = v;
+      document.getElementById("textSliderVal").textContent = v;
+    }
+
+    // ---------- Audio (byte mapping + direct Hz) ----------
+    function mapByteToHz(byteVal){
+      const b = clamp(byteVal, 0, 255);
+      const minHz = Number(state.mapMin);
+      const maxHz = Number(state.mapMax);
+      const lo = Math.min(minHz, maxHz);
+      const hi = Math.max(minHz, maxHz);
+      return Math.round(lo + (b / 255) * (hi - lo));
+    }
+
+    function renderAudio(){
+      // Direct Hz controls
+      document.getElementById("hzSlider").value = state.hz;
+      document.getElementById("hzShow").textContent = state.hz;
+      document.getElementById("audioHz").textContent = state.hz;
+
+      const volPct = Math.round(state.vol * 100);
+      document.getElementById("volSlider").value = volPct;
+      document.getElementById("volShow").textContent = state.vol.toFixed(2);
+
+      // Byte mapping controls
+      document.getElementById("byteSlider").value = state.audioByte;
+      document.getElementById("byteShow").textContent = state.audioByte;
+      document.getElementById("audioByte").textContent = state.audioByte;
+
+      document.getElementById("minHz").value = state.mapMin;
+      document.getElementById("maxHz").value = state.mapMax;
+      document.getElementById("mapRangeShow").textContent = `${state.mapMin}–${state.mapMax}`;
+
+      const mapped = mapByteToHz(state.audioByte);
+      document.getElementById("mappedHz").textContent = mapped;
+
+      // Binary displayed follows the byte (keeps the 8-bit story consistent)
+      document.getElementById("audioBinary").textContent = toBinary8(state.audioByte);
+    }
+
+    // ---------- ASCII charts ----------
+    function generateASCIIChart() {
+      const controlCharacters = {
+        0:"Null",1:"Start of Heading",2:"Start of Text",3:"End of Text",4:"End of Transmission",5:"Enquiry",
+        6:"Acknowledgment",7:"Bell",8:"Backspace",9:"Horizontal Tab",10:"Line Feed",11:"Vertical Tab",
+        12:"Form Feed",13:"Carriage Return",14:"Shift Out",15:"Shift In",16:"Data Link Escape",
+        17:"Device Control 1",18:"Device Control 2",19:"Device Control 3",20:"Device Control 4",
+        21:"Negative Ack",22:"Synchronous Idle",23:"End of Transmission Block",24:"Cancel",25:"End of Medium",
+        26:"Substitute",27:"Escape",28:"File Separator",29:"Group Separator",30:"Record Separator",
+        31:"Unit Separator",127:"Delete"
+      };
+
+      const extendedControlCharacters = {
+        128:"Padding",129:"High Octet Preset",130:"Break Permitted",131:"No Break",132:"Index",
+        133:"Next Line",134:"Start Selected Area",135:"End Selected Area",136:"HT Set",
+        137:"HT with Justification",138:"VT Set",139:"Partial Line Down",140:"Partial Line Up",
+        141:"Reverse Line Feed",142:"Single Shift 2",143:"Single Shift 3",144:"Device Control String",
+        145:"Private Use 1",146:"Private Use 2",147:"Set Transmit State",148:"Cancel Character",
+        149:"Message Waiting",150:"Start Protected Area",151:"End Protected Area",152:"Start of String",
+        153:"Single Graphic Char Introducer",154:"Single Char Introducer",155:"Control Sequence Introducer",
+        156:"String Terminator",157:"Operating System Command",158:"Privacy Message",159:"App Program Command"
+      };
+
+      const chart = document.getElementById("asciiChart");
+      chart.innerHTML = "";
+      for (let i = 0; i < 128; i++) {
+        const item = document.createElement("div");
+        item.className = "ascii-item";
+        let char = String.fromCharCode(i);
+
+        if (i < 32 || i === 127) {
+          char = "CTRL";
+          const tooltip = document.createElement("span");
+          tooltip.className = "tooltip";
+          tooltip.textContent = controlCharacters[i] || "Control";
+          item.appendChild(tooltip);
         }
+        if (char === " ") char = "␠";
+        item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
+        chart.appendChild(item);
+      }
 
-        function updateText(binary) {
-            const decimal = parseInt(binary, 2);
-            let char = String.fromCharCode(decimal);
-            if (char === ' ') char = '(space)';
-            if (decimal < 32 || (decimal >= 127 && decimal <= 159)) char = `(control: ${decimal})`;
-            document.getElementById('textBinary').textContent = binary;
-            document.getElementById('textChar').textContent = char;
-            document.getElementById('textDecimal').textContent = decimal;
-            updateExplanations('textExplanation', decimal);
+      const extendedChart = document.getElementById("extendedAsciiChart");
+      extendedChart.innerHTML = "";
+      for (let i = 128; i < 256; i++) {
+        const item = document.createElement("div");
+        item.className = "ascii-item";
+        let char = String.fromCharCode(i);
+
+        if (i < 160) {
+          char = "CTRL";
+          const tooltip = document.createElement("span");
+          tooltip.className = "tooltip";
+          tooltip.textContent = extendedControlCharacters[i] || "Control";
+          item.appendChild(tooltip);
         }
+        item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
+        extendedChart.appendChild(item);
+      }
+    }
 
-        function updateAudio(binary) {
-            const decimal = parseInt(binary, 2);
-            const frequency = 200 + (decimal * 2); // Map 0-255 to 200-710 Hz
-            document.getElementById('audioBinary').textContent = binary;
-            document.getElementById('audioFrequency').textContent = frequency;
-            updateExplanations('audioExplanation', frequency);
-        }
+    // ---------- Events ----------
+    document.getElementById("representationDropdown").addEventListener("change", function(){
+      showPanel(this.value);
+    });
 
-        function randomBinary() {
-            return Math.floor(Math.random() * 256).toString(2).padStart(8, '0');
-        }
+    document.getElementById("randomizeCurrent").addEventListener("click", () => {
+      if(!currentSection) return;
 
-        function updateExplanations(idPrefix, value) {
-            document.querySelectorAll(`.${idPrefix}`).forEach(p => p.style.display = 'none');
-            document.getElementById(`${idPrefix}1`).style.display = 'block';
-        }
+      if(currentSection === "pixel"){
+        state.pixel = randomByte();
+        renderPixel();
+        return;
+      }
 
-        document.getElementById('randomizePixel').addEventListener('click', () => updatePixel(randomBinary()));
-        document.getElementById('randomizeColor').addEventListener('click', () => updateColor(randomBinary()));
-        document.getElementById('randomizeText').addEventListener('click', () => updateText(randomBinary()));
-        document.getElementById('randomizeAudio').addEventListener('click', () => updateAudio(randomBinary()));
+      if(currentSection === "color"){
+        state.r = randomByte();
+        state.g = randomByte();
+        state.b = randomByte();
+        renderColor();
+        return;
+      }
 
-        document.getElementById('representationDropdown').addEventListener('change', function() {
-            document.querySelectorAll('.content').forEach(div => div.style.display = 'none');
-            const selectedContent = document.getElementById(this.value + 'Content');
-            if (selectedContent) {
-                selectedContent.style.display = 'block';
-                const slider = selectedContent.querySelector('.explanation-slider');
-                slider.value = 1;
-                const explanations = slider.nextElementSibling.querySelectorAll('p');
-                explanations.forEach((p, index) => {
-                    p.style.display = index < slider.value ? 'block' : 'none';
-                });
-            }
-        });
+      if(currentSection === "text"){
+        state.text = randomByte();
+        renderText();
+        return;
+      }
 
-        document.querySelectorAll('.explanation-slider').forEach(slider => {
-            slider.addEventListener('input', function() {
-                const explanations = this.nextElementSibling.querySelectorAll('p');
-                explanations.forEach((p, index) => {
-                    p.style.display = index < this.value ? 'block' : 'none';
-                });
-            });
-        });
+      if(currentSection === "audio"){
+        state.audioByte = randomByte();
+        const mapped = mapByteToHz(state.audioByte);
+        state.hz = mapped;
+        renderAudio();
+        setTone(state.hz, state.vol);
+        return;
+      }
+    });
 
-        document.getElementById('playAudio').addEventListener('click', function() {
-            const frequency = parseFloat(document.getElementById('audioFrequency').textContent);
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.5);
-        });
+    document.getElementById("copyBinary").addEventListener("click", (e) => {
+      if(!currentSection) return;
 
-        function generateASCIIChart() {
-            const controlCharacters = {
-                0: "Null character",
-                1: "Start of Heading",
-                2: "Start of Text",
-                3: "End of Text",
-                4: "End of Transmission",
-                5: "Enquiry",
-                6: "Acknowledgment",
-                7: "Bell",
-                8: "Backspace",
-                9: "Horizontal Tab",
-                10: "Line Feed",
-                11: "Vertical Tab",
-                12: "Form Feed",
-                13: "Carriage Return",
-                14: "Shift Out",
-                15: "Shift In",
-                16: "Data Link Escape",
-                17: "Device Control 1",
-                18: "Device Control 2",
-                19: "Device Control 3",
-                20: "Device Control 4",
-                21: "Negative Acknowledgment",
-                22: "Synchronous Idle",
-                23: "End of Transmission Block",
-                24: "Cancel",
-                25: "End of Medium",
-                26: "Substitute",
-                27: "Escape",
-                28: "File Separator",
-                29: "Group Separator",
-                30: "Record Separator",
-                31: "Unit Separator",
-                127: "Delete"
-            };
+      let binary = "";
+      if(currentSection === "pixel") binary = toBinary8(state.pixel);
+      if(currentSection === "color") binary = toBinary8(state.g); // green channel binary
+      if(currentSection === "text")  binary = toBinary8(state.text);
+      if(currentSection === "audio") binary = toBinary8(state.audioByte);
 
-            const extendedControlCharacters = {
-                128: "Padding Character",
-                129: "High Octet Preset",
-                130: "Break Permitted Here",
-                131: "No Break Here",
-                132: "Index",
-                133: "Next Line",
-                134: "Start of Selected Area",
-                135: "End of Selected Area",
-                136: "Horizontal Tab Set",
-                137: "Horizontal Tab with Justification",
-                138: "Vertical Tab Set",
-                139: "Partial Line Down",
-                140: "Partial Line Up",
-                141: "Reverse Line Feed",
-                142: "Single Shift Two",
-                143: "Single Shift Three",
-                144: "Device Control String",
-                145: "Private Use One",
-                146: "Private Use Two",
-                147: "Set Transmit State",
-                148: "Cancel Character",
-                149: "Message Waiting",
-                150: "Start of Protected Area",
-                151: "End of Protected Area",
-                152: "Start of String",
-                153: "Single Graphic Character Introducer",
-                154: "Single Character Introducer",
-                155: "Control Sequence Introducer",
-                156: "String Terminator",
-                157: "Operating System Command",
-                158: "Privacy Message",
-                159: "Application Program Command"
-            };
+      copyText(binary, e.currentTarget);
+    });
 
-            const chart = document.getElementById('asciiChart');
-            for (let i = 0; i < 128; i++) {
-                const item = document.createElement('div');
-                item.className = 'ascii-item';
-                let char = String.fromCharCode(i);
-                if (i < 32 || i === 127) {
-                    char = 'CTRL';
-                    const tooltip = document.createElement('span');
-                    tooltip.className = 'tooltip';
-                    tooltip.textContent = controlCharacters[i];
-                    item.appendChild(tooltip);
-                }
-                if (char === ' ') char = '␠';
-                item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
-                chart.appendChild(item);
-            }
+    // Pixel controls
+    document.getElementById("pixelSlider").addEventListener("input", (e) => {
+      state.pixel = Number(e.target.value);
+      renderPixel();
+    });
+    document.getElementById("pixelBlack").addEventListener("click", () => { state.pixel = 0; renderPixel(); });
+    document.getElementById("pixelMid").addEventListener("click", () => { state.pixel = 128; renderPixel(); });
+    document.getElementById("pixelWhite").addEventListener("click", () => { state.pixel = 255; renderPixel(); });
+    document.getElementById("pixelApply").addEventListener("click", () => {
+      state.pixel = clamp(Number(document.getElementById("pixelNumber").value), 0, 255);
+      renderPixel();
+    });
 
-            const extendedChart = document.getElementById('extendedAsciiChart');
-            for (let i = 128; i < 256; i++) {
-                const item = document.createElement('div');
-                item.className = 'ascii-item';
-                let char = String.fromCharCode(i);
-                if (i < 160) {
-                    char = 'CTRL';
-                    const tooltip = document.createElement('span');
-                    tooltip.className = 'tooltip';
-                    tooltip.textContent = extendedControlCharacters[i];
-                    item.appendChild(tooltip);
-                }
-                item.innerHTML += `<span class="ascii-char">${char}</span><br>${i}`;
-                extendedChart.appendChild(item);
-            }
-        }
+    // Color controls
+    document.getElementById("rSlider").addEventListener("input", (e) => { state.r = Number(e.target.value); renderColor(); });
+    document.getElementById("gSlider").addEventListener("input", (e) => { state.g = Number(e.target.value); renderColor(); });
+    document.getElementById("bSlider").addEventListener("input", (e) => { state.b = Number(e.target.value); renderColor(); });
 
-        // Mobile-specific tooltip toggle and timeout
-        function handleMobileTooltips() {
-            const isMobile = window.matchMedia("(max-width: 600px)").matches;
+    document.querySelectorAll(".colorPreset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const [r,g,b] = btn.dataset.preset.split(",").map(Number);
+        state.r = r; state.g = g; state.b = b;
+        renderColor();
+      });
+    });
 
-            if (isMobile) {
-                document.addEventListener('click', function(event) {
-                    const asciiItems = document.querySelectorAll('.ascii-item');
-                    let clickedItem = event.target.closest('.ascii-item');
+    document.getElementById("copyRGB").addEventListener("click", (e) => {
+      copyText(`rgb(${state.r}, ${state.g}, ${state.b})`, e.currentTarget);
+    });
 
-                    asciiItems.forEach(item => {
-                        const tooltip = item.querySelector('.tooltip');
-                        if (item === clickedItem) {
-                            if (tooltip.style.visibility === 'visible') {
-                                tooltip.style.visibility = 'hidden';
-                                tooltip.style.opacity = '0';
-                            } else {
-                                tooltip.style.visibility = 'visible';
-                                tooltip.style.opacity = '1';
-                            }
-                        } else {
-                            tooltip.style.visibility = 'hidden';
-                            tooltip.style.opacity = '0';
-                        }
-                    });
-                });
-            }
-        }
+    document.getElementById("copyHex").addEventListener("click", (e) => {
+      copyText(rgbToHex(state.r, state.g, state.b), e.currentTarget);
+    });
 
-        window.addEventListener('resize', handleMobileTooltips);
-        window.addEventListener('load', handleMobileTooltips);
+    // Text controls
+    document.getElementById("textSlider").addEventListener("input", (e) => {
+      state.text = Number(e.target.value);
+      renderText();
+    });
 
-        // Initialize
-        updatePixel('10101010');
-        updateColor('10101010');
-        updateText('10101010');
-        updateAudio('10101010');
-        generateASCIIChart();
+    // Audio controls
+    document.querySelectorAll(".waveBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentWave = btn.dataset.wave;
+        if(osc) osc.type = currentWave;
+      });
+    });
 
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('nav').classList.toggle('active');
-        });
+    document.getElementById("hzSlider").addEventListener("input", (e) => {
+      state.hz = Number(e.target.value);
+      renderAudio();
+      setTone(state.hz, state.vol);
+    });
 
-        // Function to set active link
-        function setActiveLink() {
-            // Get the current page name from the URL
-            var path = window.location.pathname;
-            var page = path.split("/").pop();
+    document.getElementById("volSlider").addEventListener("input", (e) => {
+      state.vol = Number(e.target.value) / 100;
+      renderAudio();
+      setTone(state.hz, state.vol);
+    });
 
-            // Remove .html extension if present
-            page = page.replace('.html', '');
+    document.getElementById("playTone").addEventListener("click", async () => {
+      await audioContext.resume();
+      setTone(state.hz, state.vol);
+    });
 
-            // Create an ID from the page name
-            var linkId = page + '-link';
+    document.getElementById("stopTone").addEventListener("click", () => {
+      stopTone();
+    });
 
-            // Get the link element and add the 'active' class
-            var activeLink = document.getElementById(linkId);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        }
+    document.getElementById("byteSlider").addEventListener("input", (e) => {
+      state.audioByte = Number(e.target.value);
+      const mapped = mapByteToHz(state.audioByte);
+      state.hz = mapped;
+      renderAudio();
+      setTone(state.hz, state.vol);
+    });
 
-        // Call the function to set the active link
-        setActiveLink();
-    </script>
+    document.getElementById("applyMap").addEventListener("click", () => {
+      const minHz = clamp(Number(document.getElementById("minHz").value), 20, 4000);
+      const maxHz = clamp(Number(document.getElementById("maxHz").value), 20, 4000);
+      state.mapMin = minHz;
+      state.mapMax = maxHz;
+      const mapped = mapByteToHz(state.audioByte);
+      state.hz = mapped;
+      renderAudio();
+      setTone(state.hz, state.vol);
+    });
+
+    // Init
+    renderPixel();
+    renderColor();
+    renderText();
+    renderAudio();
+    generateASCIIChart();
+    showPanel("");
+  </script>
 </body>
 </html>
+
