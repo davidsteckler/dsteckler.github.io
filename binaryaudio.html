@@ -1,0 +1,624 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>8 Bit Note Player with Binary</title>
+  <style>
+    :root{
+      --bg0:#070a12;
+      --bg1:#0b1230;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(0,0,0,0.22);
+      --border: rgba(255,255,255,0.14);
+      --border2: rgba(255,255,255,0.10);
+      --text:#eaf0ff;
+      --muted:#aab7db;
+      --accent:#7cf7c1;
+      --accent2:#7cc7ff;
+      --danger:#ff6b6b;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Helvetica, sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:
+        radial-gradient(1100px 700px at 20% 10%, #14235a, var(--bg0)),
+        radial-gradient(900px 600px at 80% 30%, #0f2b3a, transparent),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .container{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap:18px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.03));
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:0.2px;
+    }
+
+    .sub{
+      margin:8px 0 0 0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+      max-width:60ch;
+    }
+
+    .badge{
+      border:1px solid rgba(124,199,255,0.35);
+      background: rgba(124,199,255,0.10);
+      color:var(--text);
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12px;
+      white-space:nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    button{
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+      letter-spacing:0.2px;
+      transition: transform 0.05s ease, background 0.2s ease, border 0.2s ease, opacity 0.2s ease;
+      user-select:none;
+    }
+
+    button:hover{
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.26);
+    }
+
+    button:active{ transform: translateY(1px); }
+
+    button:disabled{
+      opacity:0.55;
+      cursor:not-allowed;
+    }
+
+    .primary{
+      border-color: rgba(124,247,193,0.38);
+      background: rgba(124,247,193,0.12);
+    }
+    .primary:hover{ background: rgba(124,247,193,0.18); }
+
+    .secondary{
+      border-color: rgba(124,199,255,0.38);
+      background: rgba(124,199,255,0.10);
+    }
+    .secondary:hover{ background: rgba(124,199,255,0.16); }
+
+    .danger{
+      border-color: rgba(255,107,107,0.38);
+      background: rgba(255,107,107,0.10);
+    }
+    .danger:hover{ background: rgba(255,107,107,0.16); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .stat{
+      background: var(--card2);
+      border:1px solid var(--border2);
+      border-radius:16px;
+      padding:12px 12px;
+    }
+
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:0.9px;
+      margin-bottom:6px;
+    }
+
+    .value{
+      font-size:18px;
+      font-weight:800;
+    }
+
+    .binaryBox{
+      margin-top:14px;
+      background: rgba(124,199,255,0.08);
+      border:1px dashed rgba(124,199,255,0.40);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:16px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .hint{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .tape{
+      margin-top:10px;
+      max-height: 420px;
+      overflow:auto;
+      padding-right:6px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.09);
+      background: rgba(0,0,0,0.18);
+      margin-bottom:10px;
+    }
+
+    .row strong{ color:var(--accent); }
+
+    .pill{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      white-space:nowrap;
+    }
+
+    .splitTitle{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .smallTitle{
+      margin:0;
+      font-size:18px;
+      letter-spacing:0.2px;
+    }
+
+    .rightNote{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media (max-width: 900px){
+      .container{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card" aria-label="Player">
+      <div class="header">
+        <div>
+          <h1>8 Bit Note Player</h1>
+          <p class="sub">
+            Click <b>Play next note</b> to step through one note at a time.
+            Click <b>Play full melody</b> to run the whole sequence automatically.
+            Each note shows its <b>8 bit MIDI binary</b>.
+          </p>
+        </div>
+        <div class="badge" id="statusBadge">status: ready</div>
+      </div>
+
+      <div class="controls">
+        <button id="nextBtn" class="primary">Play next note</button>
+        <button id="playAllBtn" class="secondary">Play full melody</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="resetBtn">Reset</button>
+        <button id="stopBtn" class="danger">Stop sound</button>
+      </div>
+
+      <div class="grid">
+        <div class="stat">
+          <div class="label">Index</div>
+          <div class="value" id="idxVal">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Total notes</div>
+          <div class="value" id="totalVal">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Note</div>
+          <div class="value" id="noteVal">Ready</div>
+        </div>
+        <div class="stat">
+          <div class="label">Frequency</div>
+          <div class="value" id="freqVal">0 Hz</div>
+        </div>
+
+        <div class="stat">
+          <div class="label">MIDI number</div>
+          <div class="value" id="midiVal">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Duration</div>
+          <div class="value" id="durVal">0 ms</div>
+        </div>
+      </div>
+
+      <div class="binaryBox">
+        <div class="label">8 bit binary for this note (MIDI)</div>
+        <div class="mono" id="binVal">00000000</div>
+        <div class="hint">
+          MIDI ranges 0 to 127, so the first bit is often 0. Rests show 00000000.
+          If your browser blocks audio, click any play button once to unlock it.
+        </div>
+      </div>
+    </section>
+
+    <aside class="card" aria-label="Log">
+      <div class="splitTitle">
+        <h2 class="smallTitle">Played notes</h2>
+        <div class="rightNote" id="logHint">Newest first</div>
+      </div>
+      <p class="sub" style="margin-top:0;">
+        Each entry logs the note, its frequency, duration, and the 8 bit MIDI binary.
+      </p>
+      <div class="tape" id="tape"></div>
+    </aside>
+  </main>
+
+  <script>
+    // --------------------------------------------
+    // Melody (original adventure style sequence)
+    // Replace this with your own notes you have rights to use.
+    // note: "E5", "F#4", "Bb3", or "REST"
+    // durMs: duration in milliseconds
+    // vel: 0..1 amplitude target
+    // --------------------------------------------
+    const melody = [
+      { note: "E5", durMs: 160, vel: 0.18 },
+      { note: "G5", durMs: 160, vel: 0.18 },
+      { note: "A5", durMs: 220, vel: 0.20 },
+      { note: "B5", durMs: 220, vel: 0.20 },
+      { note: "A5", durMs: 160, vel: 0.18 },
+      { note: "G5", durMs: 160, vel: 0.18 },
+      { note: "E5", durMs: 220, vel: 0.20 },
+      { note: "REST", durMs: 140, vel: 0.00 },
+
+      { note: "D5", durMs: 160, vel: 0.18 },
+      { note: "F#5", durMs: 160, vel: 0.18 },
+      { note: "G5", durMs: 220, vel: 0.20 },
+      { note: "A5", durMs: 220, vel: 0.20 },
+      { note: "G5", durMs: 160, vel: 0.18 },
+      { note: "F#5", durMs: 160, vel: 0.18 },
+      { note: "D5", durMs: 220, vel: 0.20 },
+      { note: "REST", durMs: 140, vel: 0.00 },
+
+      { note: "C5", durMs: 160, vel: 0.18 },
+      { note: "E5", durMs: 160, vel: 0.18 },
+      { note: "F#5", durMs: 220, vel: 0.20 },
+      { note: "G5", durMs: 220, vel: 0.20 },
+      { note: "F#5", durMs: 160, vel: 0.18 },
+      { note: "E5", durMs: 160, vel: 0.18 },
+      { note: "C5", durMs: 260, vel: 0.20 },
+      { note: "REST", durMs: 160, vel: 0.00 },
+
+      { note: "D5", durMs: 160, vel: 0.18 },
+      { note: "E5", durMs: 160, vel: 0.18 },
+      { note: "G5", durMs: 220, vel: 0.20 },
+      { note: "E5", durMs: 220, vel: 0.20 },
+      { note: "D5", durMs: 220, vel: 0.20 },
+      { note: "B4", durMs: 320, vel: 0.22 },
+    ];
+
+    // --------------------------------------------
+    // Audio
+    // --------------------------------------------
+    let audioCtx = null;
+    let masterGain = null;
+    let activeNodes = [];
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.55;
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    }
+
+    function stopAll() {
+      for (const n of activeNodes) {
+        try { n.stop(); } catch (e) {}
+        try { n.disconnect(); } catch (e) {}
+      }
+      activeNodes = [];
+    }
+
+    function playFrequency(freqHz, durMs, vel) {
+      ensureAudio();
+
+      const now = audioCtx.currentTime;
+      const dur = Math.max(0.03, durMs / 1000);
+
+      const osc = audioCtx.createOscillator();
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freqHz, now);
+
+      const gain = audioCtx.createGain();
+      const peak = Math.min(0.35, Math.max(0.02, vel || 0.18));
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(peak, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start(now);
+      osc.stop(now + dur + 0.02);
+
+      activeNodes.push(osc, gain);
+
+      osc.onended = () => {
+        activeNodes = activeNodes.filter(x => x !== osc && x !== gain);
+        try { osc.disconnect(); } catch (e) {}
+        try { gain.disconnect(); } catch (e) {}
+      };
+    }
+
+    // --------------------------------------------
+    // Note parsing and conversion
+    // --------------------------------------------
+    const NOTE_TO_SEMITONE = {
+      "C": 0, "C#": 1, "DB": 1,
+      "D": 2, "D#": 3, "EB": 3,
+      "E": 4,
+      "F": 5, "F#": 6, "GB": 6,
+      "G": 7, "G#": 8, "AB": 8,
+      "A": 9, "A#": 10, "BB": 10,
+      "B": 11
+    };
+
+    function parseNoteName(noteStr) {
+      const s = String(noteStr || "").trim();
+      if (!s || s.toUpperCase() === "REST") return { isRest: true };
+
+      const m = s.match(/^([A-Ga-g])([#bB]?)(-?\d+)$/);
+      if (!m) return { isRest: true };
+
+      const letter = m[1].toUpperCase();
+      const accidentalRaw = m[2] || "";
+      const accidental = accidentalRaw === "b" ? "B" : accidentalRaw.toUpperCase();
+      const octave = parseInt(m[3], 10);
+
+      const key = (letter + accidental).toUpperCase();
+      const semitone = NOTE_TO_SEMITONE[key];
+      if (semitone === undefined || Number.isNaN(octave)) return { isRest: true };
+
+      return { isRest: false, octave, semitone, pretty: `${letter}${accidentalRaw}${octave}` };
+    }
+
+    function midiFromParsed(p) {
+      return (p.octave + 1) * 12 + p.semitone;
+    }
+
+    function freqFromMidi(midi) {
+      return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function to8BitBinary(n) {
+      const clamped = Math.max(0, Math.min(255, n | 0));
+      return clamped.toString(2).padStart(8, "0");
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // --------------------------------------------
+    // UI and play logic
+    // --------------------------------------------
+    const nextBtn = document.getElementById("nextBtn");
+    const playAllBtn = document.getElementById("playAllBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    const idxVal = document.getElementById("idxVal");
+    const totalVal = document.getElementById("totalVal");
+    const noteVal = document.getElementById("noteVal");
+    const freqVal = document.getElementById("freqVal");
+    const midiVal = document.getElementById("midiVal");
+    const durVal = document.getElementById("durVal");
+    const binVal = document.getElementById("binVal");
+    const tape = document.getElementById("tape");
+    const statusBadge = document.getElementById("statusBadge");
+
+    totalVal.textContent = melody.length;
+
+    let i = 0;
+    let isPlayingAll = false;
+    let playAllTimer = null;
+
+    function setStatus(text) {
+      statusBadge.textContent = `status: ${text}`;
+    }
+
+    function setButtons() {
+      nextBtn.disabled = isPlayingAll;
+      playAllBtn.disabled = isPlayingAll;
+      pauseBtn.disabled = !isPlayingAll;
+    }
+
+    function updateHeader(index, item, parsed, midi, freq, bin) {
+      idxVal.textContent = String(index);
+      noteVal.textContent = parsed.isRest ? "REST" : parsed.pretty;
+      freqVal.textContent = parsed.isRest ? "0 Hz" : `${Math.round(freq)} Hz`;
+      midiVal.textContent = String(parsed.isRest ? 0 : midi);
+      durVal.textContent = `${item.durMs} ms`;
+      binVal.textContent = bin;
+    }
+
+    function logRow(noteText, midi, bin, freq, dur) {
+      const div = document.createElement("div");
+      div.className = "row";
+
+      const left = document.createElement("div");
+      left.innerHTML = `<strong>${escapeHtml(noteText)}</strong>
+        <div class="hint">midi ${midi}   freq ${freq} hz   dur ${dur} ms</div>`;
+
+      const right = document.createElement("div");
+      right.className = "pill";
+      right.textContent = bin;
+
+      div.appendChild(left);
+      div.appendChild(right);
+
+      tape.prepend(div);
+    }
+
+    function playIndex(index) {
+      if (index >= melody.length) index = 0;
+
+      const item = melody[index];
+      const parsed = parseNoteName(item.note);
+
+      let midi = 0;
+      let freq = 0;
+      let bin = "00000000";
+
+      if (!parsed.isRest) {
+        midi = midiFromParsed(parsed);
+        freq = freqFromMidi(midi);
+        bin = to8BitBinary(midi);
+        playFrequency(freq, item.durMs, item.vel);
+      } else {
+        stopAll();
+        midi = 0;
+        freq = 0;
+        bin = "00000000";
+      }
+
+      updateHeader(index + 1, item, parsed, midi, freq, bin);
+      logRow(parsed.isRest ? "REST" : parsed.pretty, parsed.isRest ? 0 : midi, bin, parsed.isRest ? 0 : Math.round(freq), item.durMs);
+
+      i = index + 1;
+      if (i >= melody.length) i = 0;
+
+      return item.durMs;
+    }
+
+    function stepOnce() {
+      ensureAudio();
+      setStatus("stepping");
+      const dur = playIndex(i);
+      setTimeout(() => setStatus("ready"), Math.min(400, dur + 40));
+    }
+
+    function playAll() {
+      ensureAudio();
+      if (isPlayingAll) return;
+
+      isPlayingAll = true;
+      setButtons();
+      setStatus("playing full melody");
+
+      const loop = () => {
+        if (!isPlayingAll) return;
+        const dur = playIndex(i);
+        playAllTimer = setTimeout(loop, dur);
+      };
+
+      loop();
+    }
+
+    function pauseAll() {
+      if (!isPlayingAll) return;
+      isPlayingAll = false;
+      if (playAllTimer) clearTimeout(playAllTimer);
+      playAllTimer = null;
+      setButtons();
+      setStatus("paused");
+    }
+
+    function reset() {
+      pauseAll();
+      stopAll();
+      i = 0;
+      idxVal.textContent = "0";
+      noteVal.textContent = "Ready";
+      freqVal.textContent = "0 Hz";
+      midiVal.textContent = "0";
+      durVal.textContent = "0 ms";
+      binVal.textContent = "00000000";
+      tape.innerHTML = "";
+      setStatus("ready");
+    }
+
+    nextBtn.addEventListener("click", stepOnce);
+    playAllBtn.addEventListener("click", playAll);
+    pauseBtn.addEventListener("click", pauseAll);
+    resetBtn.addEventListener("click", reset);
+    stopBtn.addEventListener("click", stopAll);
+
+    setButtons();
+    reset();
+  </script>
+</body>
+</html>
+
