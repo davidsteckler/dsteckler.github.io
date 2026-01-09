@@ -4,257 +4,404 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>8 Bit Note Player with Binary</title>
+  <title>8 Bit Note Stepper with Binary Music Maker</title>
   <style>
-    :root{
-      --bg0:#070a12;
-      --bg1:#0b1230;
-      --card: rgba(255,255,255,0.06);
-      --card2: rgba(0,0,0,0.22);
-      --border: rgba(255,255,255,0.14);
-      --border2: rgba(255,255,255,0.10);
-      --text:#eaf0ff;
-      --muted:#aab7db;
-      --accent:#7cf7c1;
-      --accent2:#7cc7ff;
-      --danger:#ff6b6b;
+    :root {
+      --bg: #0b0f1a;
+      --text: #e8eefc;
+      --muted: #a9b6d6;
+      --accent: #7cf7c1;
+      --accent2: #7cc7ff;
+      --danger: #ff6b6b;
+
+      --cardA: rgba(255,255,255,0.06);
+      --cardB: rgba(255,255,255,0.02);
+      --border: rgba(255,255,255,0.12);
+      --panel: rgba(0,0,0,0.22);
+      --panelBorder: rgba(255,255,255,0.10);
     }
 
-    *{ box-sizing:border-box; }
+    * { box-sizing: border-box; }
 
-    body{
-      margin:0;
+    body {
+      margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, Helvetica, sans-serif;
-      color:var(--text);
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-      background:
-        radial-gradient(1100px 700px at 20% 10%, #14235a, var(--bg0)),
-        radial-gradient(900px 600px at 80% 30%, #0f2b3a, transparent),
-        linear-gradient(180deg, var(--bg1), var(--bg0));
+      background: radial-gradient(1200px 700px at 30% 20%, #162347, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
     }
 
-    .container{
-      width:min(980px, 100%);
-      display:grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap:18px;
+    .wrap {
+      width: min(1400px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      align-items: start;
     }
 
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.03));
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:18px;
-      box-shadow: 0 18px 48px rgba(0,0,0,0.45);
+    .card {
+      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
     }
 
-    .header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:14px;
-      margin-bottom:12px;
+    .full {
+      grid-column: 1 / -1;
     }
 
-    h1{
-      margin:0;
-      font-size:22px;
-      letter-spacing:0.2px;
+    h1 {
+      font-size: 22px;
+      margin: 0 0 10px 0;
+      letter-spacing: 0.2px;
     }
 
-    .sub{
-      margin:8px 0 0 0;
-      color:var(--muted);
-      line-height:1.5;
-      font-size:14px;
-      max-width:60ch;
+    p {
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      line-height: 1.45;
     }
 
-    .badge{
-      border:1px solid rgba(124,199,255,0.35);
-      background: rgba(124,199,255,0.10);
-      color:var(--text);
-      border-radius:999px;
-      padding:8px 10px;
-      font-size:12px;
-      white-space:nowrap;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
     }
 
-    .controls{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    button{
-      border:1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.06);
-      color:var(--text);
-      padding:12px 14px;
-      border-radius:14px;
-      cursor:pointer;
-      font-weight:700;
-      letter-spacing:0.2px;
-      transition: transform 0.05s ease, background 0.2s ease, border 0.2s ease, opacity 0.2s ease;
-      user-select:none;
-    }
-
-    button:hover{
-      background: rgba(255,255,255,0.10);
-      border-color: rgba(255,255,255,0.26);
-    }
-
-    button:active{ transform: translateY(1px); }
-
-    button:disabled{
-      opacity:0.55;
-      cursor:not-allowed;
-    }
-
-    .primary{
-      border-color: rgba(124,247,193,0.38);
-      background: rgba(124,247,193,0.12);
-    }
-    .primary:hover{ background: rgba(124,247,193,0.18); }
-
-    .secondary{
-      border-color: rgba(124,199,255,0.38);
-      background: rgba(124,199,255,0.10);
-    }
-    .secondary:hover{ background: rgba(124,199,255,0.16); }
-
-    .danger{
-      border-color: rgba(255,107,107,0.38);
-      background: rgba(255,107,107,0.10);
-    }
-    .danger:hover{ background: rgba(255,107,107,0.16); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-      margin-top:14px;
-    }
-
-    .stat{
-      background: var(--card2);
-      border:1px solid var(--border2);
-      border-radius:16px;
-      padding:12px 12px;
-    }
-
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:0.9px;
-      margin-bottom:6px;
-    }
-
-    .value{
-      font-size:18px;
-      font-weight:800;
-    }
-
-    .binaryBox{
-      margin-top:14px;
-      background: rgba(124,199,255,0.08);
-      border:1px dashed rgba(124,199,255,0.40);
-      border-radius:16px;
-      padding:12px;
-    }
-
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:16px;
-      line-height:1.35;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-
-    .hint{
-      margin-top:8px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.45;
-    }
-
-    .tape{
-      margin-top:10px;
-      max-height: 420px;
-      overflow:auto;
-      padding-right:6px;
-    }
-
-    .row{
-      display:grid;
-      grid-template-columns: 1fr auto;
-      gap:10px;
-      align-items:center;
-      padding:10px 10px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.09);
-      background: rgba(0,0,0,0.18);
-      margin-bottom:10px;
-    }
-
-    .row strong{ color:var(--accent); }
-
-    .pill{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.12);
+    button {
+      border: 1px solid rgba(255,255,255,0.16);
       background: rgba(255,255,255,0.06);
       color: var(--text);
-      white-space:nowrap;
+      padding: 12px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+      transition: transform 0.05s ease, background 0.2s ease, border 0.2s ease, opacity 0.2s ease;
+      user-select: none;
     }
 
-    .splitTitle{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:10px;
+    button:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.22);
     }
 
-    .smallTitle{
-      margin:0;
-      font-size:18px;
-      letter-spacing:0.2px;
+    button:active { transform: translateY(1px); }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
-    .rightNote{
-      color:var(--muted);
-      font-size:12px;
+    .primary {
+      border-color: rgba(124, 247, 193, 0.35);
+      background: rgba(124, 247, 193, 0.10);
     }
 
-    @media (max-width: 900px){
-      .container{ grid-template-columns: 1fr; }
+    .primary:hover { background: rgba(124, 247, 193, 0.16); }
+
+    .secondary {
+      border-color: rgba(124, 199, 255, 0.35);
+      background: rgba(124, 199, 255, 0.10);
+    }
+
+    .secondary:hover { background: rgba(124, 199, 255, 0.16); }
+
+    .danger {
+      border-color: rgba(255, 107, 107, 0.35);
+      background: rgba(255, 107, 107, 0.10);
+    }
+
+    .danger:hover { background: rgba(255, 107, 107, 0.16); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--panelBorder);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 15px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .binaryBox {
+      border: 1px dashed rgba(124, 199, 255, 0.35);
+      background: rgba(124, 199, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .tape {
+      margin-top: 12px;
+      max-height: 330px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.18);
+      margin-bottom: 10px;
+    }
+
+    .row strong { color: var(--accent); }
+
+    .pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      white-space: nowrap;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.45;
+    }
+
+    .topRow {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.28);
+      color: var(--text);
+      font-weight: 650;
+      letter-spacing: 0.2px;
+      outline: none;
+    }
+
+    .status {
+      border: 1px solid rgba(124, 199, 255, 0.35);
+      background: rgba(124, 199, 255, 0.10);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .binInput {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0;
+      align-items: center;
+    }
+
+    .binInput input {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.3);
+      color: var(--text);
+      font-family: ui-monospace, monospace;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .keypad button {
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .sequence {
+      margin-top: 14px;
+      max-height: 220px;
+      overflow: auto;
+      padding: 10px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .seqItem {
+      display: inline-block;
+      margin: 4px;
+      padding: 8px 12px;
+      background: rgba(124, 247, 193, 0.15);
+      border: 1px solid rgba(124, 247, 193, 0.3);
+      border-radius: 8px;
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+    }
+
+    .seqItem .note {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .seqItem .bin {
+      color: var(--muted);
+      font-size: 11px;
+      margin-left: 6px;
+    }
+
+    .paletteHeader {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .paletteControls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .paletteGrid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 8px;
+    }
+
+    .bitCell {
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 10px 10px;
+      cursor: pointer;
+      transition: transform 0.05s ease, background 0.2s ease, border 0.2s ease;
+      user-select: none;
+      min-height: 58px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .bitCell:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    .bitCell:active { transform: translateY(1px); }
+
+    .bitTop {
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      color: var(--text);
+      opacity: 0.95;
+    }
+
+    .bitBottom {
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .bitCell.active {
+      border-color: rgba(124, 247, 193, 0.50);
+      background: rgba(124, 247, 193, 0.10);
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.22);
+      color: var(--text);
+      font-weight: 650;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle input { accent-color: #7cf7c1; }
+
+    @media (max-width: 1200px) {
+      .wrap { grid-template-columns: 1fr 1fr; }
+      .paletteGrid { grid-template-columns: repeat(12, 1fr); }
+    }
+
+    @media (max-width: 860px) {
+      .wrap { grid-template-columns: 1fr; }
+      .paletteGrid { grid-template-columns: repeat(8, 1fr); }
+      body { padding: 16px; }
     }
   </style>
 </head>
 <body>
-  <main class="container">
-    <section class="card" aria-label="Player">
-      <div class="header">
+  <div class="wrap">
+    <!-- Card 1 -->
+    <div class="card">
+      <div class="topRow">
         <div>
-          <h1>8 Bit Note Player</h1>
-          <p class="sub">
-            Click <b>Play next note</b> to step through one note at a time.
-            Click <b>Play full melody</b> to run the whole sequence automatically.
-            Each note shows its <b>8 bit MIDI binary</b>.
+          <h1>8 bit note stepper</h1>
+          <p>
+            Step one note at a time, or play the whole melody.
+            Each note shows its 8 bit MIDI binary.
           </p>
         </div>
-        <div class="badge" id="statusBadge">status: ready</div>
+        <div class="status" id="statusBadge">status: ready</div>
       </div>
+
+      <div class="label">Choose a prebuilt melody</div>
+      <select id="songSelect" aria-label="Select a melody"></select>
 
       <div class="controls">
         <button id="nextBtn" class="primary">Play next note</button>
@@ -293,75 +440,276 @@
         </div>
       </div>
 
-      <div class="binaryBox">
+      <div style="margin-top: 14px;" class="binaryBox">
         <div class="label">8 bit binary for this note (MIDI)</div>
         <div class="mono" id="binVal">00000000</div>
-        <div class="hint">
-          MIDI ranges 0 to 127, so the first bit is often 0. Rests show 00000000.
-          If your browser blocks audio, click any play button once to unlock it.
+        <div class="small">
+          MIDI fits 0 to 127, so the first bit is usually 0. Rests show 00000000.
+          If audio does not start, click a play button once to unlock it.
         </div>
       </div>
-    </section>
+    </div>
 
-    <aside class="card" aria-label="Log">
-      <div class="splitTitle">
-        <h2 class="smallTitle">Played notes</h2>
-        <div class="rightNote" id="logHint">Newest first</div>
-      </div>
-      <p class="sub" style="margin-top:0;">
-        Each entry logs the note, its frequency, duration, and the 8 bit MIDI binary.
-      </p>
+    <!-- Card 2 -->
+    <div class="card">
+      <h1>Played notes tape</h1>
+      <p>Each row logs what just played, plus the 8 bit MIDI binary.</p>
       <div class="tape" id="tape"></div>
-    </aside>
-  </main>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card">
+      <h1>Binary music maker</h1>
+      <p>
+        Enter any number 0 to 255 to play a note mapped to a pleasant scale.
+        Your sequence is recorded below.
+      </p>
+
+      <div class="binInput">
+        <input type="number" id="binInputField" min="0" max="255" placeholder="0 to 255" />
+        <button id="playBinBtn" class="primary">Play</button>
+      </div>
+
+      <div class="keypad">
+        <button class="binKey" data-val="0">0</button>
+        <button class="binKey" data-val="1">1</button>
+        <button class="binKey" data-val="2">2</button>
+        <button class="binKey" data-val="3">3</button>
+        <button class="binKey" data-val="4">4</button>
+        <button class="binKey" data-val="5">5</button>
+        <button class="binKey" data-val="6">6</button>
+        <button class="binKey" data-val="7">7</button>
+        <button class="binKey" data-val="8">8</button>
+        <button class="binKey" data-val="9">9</button>
+        <button class="binKey" data-val="127">127</button>
+        <button class="binKey" data-val="255">255</button>
+      </div>
+
+      <div class="controls">
+        <button id="clearSeqBtn" class="danger">Clear sequence</button>
+        <button id="playSeqBtn" class="secondary">Play sequence</button>
+      </div>
+
+      <div class="binaryBox" style="margin-top: 14px;">
+        <div class="label">Your sequence</div>
+        <div class="sequence" id="sequence">
+          <div class="small" style="color: var(--muted);">Play notes to build your sequence...</div>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top: 10px;">
+        Values map into a pentatonic scale so most combinations sound decent.
+      </div>
+    </div>
+
+    <!-- Full width palette -->
+    <div class="card full">
+      <div class="paletteHeader">
+        <div>
+          <h1>0 to 255 binary palette</h1>
+          <p>
+            Click any value to play it and add it to your sequence.
+            Each tile shows decimal and its 8 bit binary.
+          </p>
+        </div>
+
+        <div class="paletteControls">
+          <label class="toggle" title="When on, clicking a tile plays audio. When off, it only adds to the sequence.">
+            <input type="checkbox" id="paletteSoundToggle" checked />
+            <span>Sound on click</span>
+          </label>
+          <button id="paletteClearActiveBtn">Clear highlight</button>
+        </div>
+      </div>
+
+      <div class="binaryBox">
+        <div class="label">Tip</div>
+        <div class="small" style="margin-top: 0;">
+          The highlight marks the last value you clicked. Use this like a keyboard for building patterns.
+        </div>
+      </div>
+
+      <div class="paletteGrid" id="paletteGrid" aria-label="Binary palette grid"></div>
+    </div>
+  </div>
 
   <script>
-    // --------------------------------------------
-    // Melody (original adventure style sequence)
-    // Replace this with your own notes you have rights to use.
-    // note: "E5", "F#4", "Bb3", or "REST"
-    // durMs: duration in milliseconds
-    // vel: 0..1 amplitude target
-    // --------------------------------------------
-    const melody = [
-      { note: "E5", durMs: 160, vel: 0.18 },
-      { note: "G5", durMs: 160, vel: 0.18 },
-      { note: "A5", durMs: 220, vel: 0.20 },
-      { note: "B5", durMs: 220, vel: 0.20 },
-      { note: "A5", durMs: 160, vel: 0.18 },
-      { note: "G5", durMs: 160, vel: 0.18 },
-      { note: "E5", durMs: 220, vel: 0.20 },
-      { note: "REST", durMs: 140, vel: 0.00 },
+    // ============================================================
+    // Prebuilt melodies
+    // ============================================================
+    const SONGS = [
+      {
+        name: "Epic Melody",
+        notes: [
+          // Epic intro riff
+          { note: "E5", durMs: 120, vel: 0.22 },
+          { note: "E5", durMs: 120, vel: 0.20 },
+          { note: "E5", durMs: 120, vel: 0.22 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "E5", durMs: 120, vel: 0.22 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "C5", durMs: 120, vel: 0.20 },
+          { note: "E5", durMs: 240, vel: 0.24 },
 
-      { note: "D5", durMs: 160, vel: 0.18 },
-      { note: "F#5", durMs: 160, vel: 0.18 },
-      { note: "G5", durMs: 220, vel: 0.20 },
-      { note: "A5", durMs: 220, vel: 0.20 },
-      { note: "G5", durMs: 160, vel: 0.18 },
-      { note: "F#5", durMs: 160, vel: 0.18 },
-      { note: "D5", durMs: 220, vel: 0.20 },
-      { note: "REST", durMs: 140, vel: 0.00 },
+          { note: "G5", durMs: 240, vel: 0.26 },
+          { note: "REST", durMs: 240, vel: 0.00 },
+          { note: "G4", durMs: 240, vel: 0.20 },
+          { note: "REST", durMs: 240, vel: 0.00 },
 
-      { note: "C5", durMs: 160, vel: 0.18 },
-      { note: "E5", durMs: 160, vel: 0.18 },
-      { note: "F#5", durMs: 220, vel: 0.20 },
-      { note: "G5", durMs: 220, vel: 0.20 },
-      { note: "F#5", durMs: 160, vel: 0.18 },
-      { note: "E5", durMs: 160, vel: 0.18 },
-      { note: "C5", durMs: 260, vel: 0.20 },
-      { note: "REST", durMs: 160, vel: 0.00 },
+          // Main melody section
+          { note: "C5", durMs: 180, vel: 0.22 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "G4", durMs: 180, vel: 0.18 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "E4", durMs: 180, vel: 0.18 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "A4", durMs: 160, vel: 0.20 },
+          { note: "B4", durMs: 160, vel: 0.20 },
+          { note: "Bb4", durMs: 140, vel: 0.18 },
+          { note: "A4", durMs: 240, vel: 0.22 },
 
-      { note: "D5", durMs: 160, vel: 0.18 },
-      { note: "E5", durMs: 160, vel: 0.18 },
-      { note: "G5", durMs: 220, vel: 0.20 },
-      { note: "E5", durMs: 220, vel: 0.20 },
-      { note: "D5", durMs: 220, vel: 0.20 },
-      { note: "B4", durMs: 320, vel: 0.22 },
+          { note: "G4", durMs: 140, vel: 0.18 },
+          { note: "E5", durMs: 140, vel: 0.20 },
+          { note: "G5", durMs: 140, vel: 0.20 },
+          { note: "A5", durMs: 180, vel: 0.22 },
+          { note: "F5", durMs: 140, vel: 0.20 },
+          { note: "G5", durMs: 140, vel: 0.20 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "E5", durMs: 180, vel: 0.20 },
+          { note: "C5", durMs: 140, vel: 0.18 },
+          { note: "D5", durMs: 140, vel: 0.18 },
+          { note: "B4", durMs: 240, vel: 0.22 },
+
+          // Power section
+          { note: "C5", durMs: 180, vel: 0.22 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "G4", durMs: 180, vel: 0.18 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "E4", durMs: 180, vel: 0.18 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "A4", durMs: 160, vel: 0.20 },
+          { note: "B4", durMs: 160, vel: 0.20 },
+          { note: "Bb4", durMs: 140, vel: 0.18 },
+          { note: "A4", durMs: 240, vel: 0.22 },
+
+          { note: "G4", durMs: 140, vel: 0.18 },
+          { note: "E5", durMs: 140, vel: 0.20 },
+          { note: "G5", durMs: 140, vel: 0.20 },
+          { note: "A5", durMs: 180, vel: 0.22 },
+          { note: "F5", durMs: 140, vel: 0.20 },
+          { note: "G5", durMs: 140, vel: 0.20 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "E5", durMs: 180, vel: 0.20 },
+          { note: "C5", durMs: 140, vel: 0.18 },
+          { note: "D5", durMs: 140, vel: 0.18 },
+          { note: "B4", durMs: 240, vel: 0.22 },
+
+          // Epic finale
+          { note: "G5", durMs: 120, vel: 0.24 },
+          { note: "F#5", durMs: 120, vel: 0.22 },
+          { note: "F5", durMs: 120, vel: 0.22 },
+          { note: "D#5", durMs: 180, vel: 0.24 },
+          { note: "E5", durMs: 140, vel: 0.22 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "G#4", durMs: 140, vel: 0.18 },
+          { note: "A4", durMs: 140, vel: 0.20 },
+          { note: "C5", durMs: 140, vel: 0.20 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+          { note: "A4", durMs: 140, vel: 0.20 },
+          { note: "C5", durMs: 140, vel: 0.20 },
+          { note: "D5", durMs: 180, vel: 0.22 },
+
+          { note: "C5", durMs: 360, vel: 0.26 },
+          { note: "REST", durMs: 240, vel: 0.00 },
+        ]
+      },
+      {
+        name: "Overworld Walk",
+        notes: [
+          { note: "E5", durMs: 160, vel: 0.18 },
+          { note: "G5", durMs: 160, vel: 0.18 },
+          { note: "A5", durMs: 220, vel: 0.20 },
+          { note: "B5", durMs: 220, vel: 0.20 },
+          { note: "A5", durMs: 160, vel: 0.18 },
+          { note: "G5", durMs: 160, vel: 0.18 },
+          { note: "E5", durMs: 220, vel: 0.20 },
+          { note: "REST", durMs: 140, vel: 0.00 },
+
+          { note: "D5", durMs: 160, vel: 0.18 },
+          { note: "F#5", durMs: 160, vel: 0.18 },
+          { note: "G5", durMs: 220, vel: 0.20 },
+          { note: "A5", durMs: 220, vel: 0.20 },
+          { note: "G5", durMs: 160, vel: 0.18 },
+          { note: "F#5", durMs: 160, vel: 0.18 },
+          { note: "D5", durMs: 220, vel: 0.20 },
+          { note: "REST", durMs: 140, vel: 0.00 },
+
+          { note: "C5", durMs: 160, vel: 0.18 },
+          { note: "E5", durMs: 160, vel: 0.18 },
+          { note: "F#5", durMs: 220, vel: 0.20 },
+          { note: "G5", durMs: 220, vel: 0.20 },
+          { note: "F#5", durMs: 160, vel: 0.18 },
+          { note: "E5", durMs: 160, vel: 0.18 },
+          { note: "C5", durMs: 260, vel: 0.20 },
+          { note: "REST", durMs: 160, vel: 0.00 },
+
+          { note: "D5", durMs: 160, vel: 0.18 },
+          { note: "E5", durMs: 160, vel: 0.18 },
+          { note: "G5", durMs: 220, vel: 0.20 },
+          { note: "E5", durMs: 220, vel: 0.20 },
+          { note: "D5", durMs: 220, vel: 0.20 },
+          { note: "B4", durMs: 320, vel: 0.22 },
+        ]
+      },
+      {
+        name: "Dungeon Pulse",
+        notes: [
+          { note: "A4", durMs: 160, vel: 0.20 },
+          { note: "REST", durMs: 60, vel: 0.00 },
+          { note: "A4", durMs: 160, vel: 0.20 },
+          { note: "REST", durMs: 60, vel: 0.00 },
+          { note: "C5", durMs: 180, vel: 0.20 },
+          { note: "A4", durMs: 180, vel: 0.20 },
+          { note: "G4", durMs: 220, vel: 0.20 },
+          { note: "REST", durMs: 100, vel: 0.00 },
+
+          { note: "F4", durMs: 160, vel: 0.20 },
+          { note: "REST", durMs: 60, vel: 0.00 },
+          { note: "F4", durMs: 160, vel: 0.20 },
+          { note: "REST", durMs: 60, vel: 0.00 },
+          { note: "A4", durMs: 180, vel: 0.20 },
+          { note: "F4", durMs: 180, vel: 0.20 },
+          { note: "E4", durMs: 240, vel: 0.20 },
+          { note: "REST", durMs: 120, vel: 0.00 },
+
+          { note: "D4", durMs: 160, vel: 0.20 },
+          { note: "F4", durMs: 160, vel: 0.20 },
+          { note: "G4", durMs: 160, vel: 0.20 },
+          { note: "A4", durMs: 200, vel: 0.22 },
+          { note: "G4", durMs: 160, vel: 0.20 },
+          { note: "F4", durMs: 160, vel: 0.20 },
+          { note: "D4", durMs: 280, vel: 0.22 },
+        ]
+      },
+      {
+        name: "Victory Jingle",
+        notes: [
+          { note: "C5", durMs: 140, vel: 0.22 },
+          { note: "E5", durMs: 140, vel: 0.22 },
+          { note: "G5", durMs: 180, vel: 0.24 },
+          { note: "C6", durMs: 240, vel: 0.26 },
+          { note: "REST", durMs: 90, vel: 0.00 },
+          { note: "B5", durMs: 140, vel: 0.22 },
+          { note: "G5", durMs: 140, vel: 0.22 },
+          { note: "E5", durMs: 200, vel: 0.22 },
+          { note: "C5", durMs: 260, vel: 0.22 }
+        ]
+      }
     ];
 
-    // --------------------------------------------
+    // ============================================================
     // Audio
-    // --------------------------------------------
+    // ============================================================
     let audioCtx = null;
     let masterGain = null;
     let activeNodes = [];
@@ -416,9 +764,9 @@
       };
     }
 
-    // --------------------------------------------
-    // Note parsing and conversion
-    // --------------------------------------------
+    // ============================================================
+    // Notes to MIDI and frequency
+    // ============================================================
     const NOTE_TO_SEMITONE = {
       "C": 0, "C#": 1, "DB": 1,
       "D": 2, "D#": 3, "EB": 3,
@@ -470,9 +818,12 @@
         .replaceAll("'", "&#039;");
     }
 
-    // --------------------------------------------
-    // UI and play logic
-    // --------------------------------------------
+    // ============================================================
+    // Stepper UI and playback
+    // ============================================================
+    const songSelect = document.getElementById("songSelect");
+    const statusBadge = document.getElementById("statusBadge");
+
     const nextBtn = document.getElementById("nextBtn");
     const playAllBtn = document.getElementById("playAllBtn");
     const pauseBtn = document.getElementById("pauseBtn");
@@ -487,9 +838,9 @@
     const durVal = document.getElementById("durVal");
     const binVal = document.getElementById("binVal");
     const tape = document.getElementById("tape");
-    const statusBadge = document.getElementById("statusBadge");
 
-    totalVal.textContent = melody.length;
+    let currentSongIndex = 0;
+    let melody = SONGS[currentSongIndex].notes;
 
     let i = 0;
     let isPlayingAll = false;
@@ -505,6 +856,23 @@
       pauseBtn.disabled = !isPlayingAll;
     }
 
+    function logRow(noteText, midi, bin, freq, dur) {
+      const div = document.createElement("div");
+      div.className = "row";
+
+      const left = document.createElement("div");
+      left.innerHTML = `<strong>${escapeHtml(noteText)}</strong>
+        <div class="small">midi ${midi} &nbsp;&nbsp; freq ${freq} hz &nbsp;&nbsp; dur ${dur} ms</div>`;
+
+      const right = document.createElement("div");
+      right.className = "pill";
+      right.textContent = bin;
+
+      div.appendChild(left);
+      div.appendChild(right);
+      tape.prepend(div);
+    }
+
     function updateHeader(index, item, parsed, midi, freq, bin) {
       idxVal.textContent = String(index);
       noteVal.textContent = parsed.isRest ? "REST" : parsed.pretty;
@@ -514,25 +882,8 @@
       binVal.textContent = bin;
     }
 
-    function logRow(noteText, midi, bin, freq, dur) {
-      const div = document.createElement("div");
-      div.className = "row";
-
-      const left = document.createElement("div");
-      left.innerHTML = `<strong>${escapeHtml(noteText)}</strong>
-        <div class="hint">midi ${midi}   freq ${freq} hz   dur ${dur} ms</div>`;
-
-      const right = document.createElement("div");
-      right.className = "pill";
-      right.textContent = bin;
-
-      div.appendChild(left);
-      div.appendChild(right);
-
-      tape.prepend(div);
-    }
-
     function playIndex(index) {
+      if (melody.length === 0) return 120;
       if (index >= melody.length) index = 0;
 
       const item = melody[index];
@@ -567,7 +918,7 @@
       ensureAudio();
       setStatus("stepping");
       const dur = playIndex(i);
-      setTimeout(() => setStatus("ready"), Math.min(400, dur + 40));
+      setTimeout(() => setStatus("ready"), Math.min(450, dur + 40));
     }
 
     function playAll() {
@@ -596,28 +947,208 @@
       setStatus("paused");
     }
 
-    function reset() {
+    function resetStepper(alsoClearTape = true) {
       pauseAll();
       stopAll();
       i = 0;
+
       idxVal.textContent = "0";
       noteVal.textContent = "Ready";
       freqVal.textContent = "0 Hz";
       midiVal.textContent = "0";
       durVal.textContent = "0 ms";
       binVal.textContent = "00000000";
-      tape.innerHTML = "";
+
+      if (alsoClearTape) tape.innerHTML = "";
+
+      totalVal.textContent = melody.length;
       setStatus("ready");
+      setButtons();
     }
+
+    function loadSongsIntoSelect() {
+      songSelect.innerHTML = "";
+      SONGS.forEach((s, idx) => {
+        const opt = document.createElement("option");
+        opt.value = String(idx);
+        opt.textContent = s.name;
+        songSelect.appendChild(opt);
+      });
+      songSelect.value = String(currentSongIndex);
+    }
+
+    songSelect.addEventListener("change", () => {
+      currentSongIndex = parseInt(songSelect.value, 10) || 0;
+      melody = SONGS[currentSongIndex].notes;
+      resetStepper(true);
+    });
 
     nextBtn.addEventListener("click", stepOnce);
     playAllBtn.addEventListener("click", playAll);
     pauseBtn.addEventListener("click", pauseAll);
-    resetBtn.addEventListener("click", reset);
-    stopBtn.addEventListener("click", stopAll);
+    resetBtn.addEventListener("click", () => resetStepper(true));
+    stopBtn.addEventListener("click", () => { stopAll(); setStatus("ready"); });
 
-    setButtons();
-    reset();
+    loadSongsIntoSelect();
+    resetStepper(true);
+
+    // ============================================================
+    // Binary music maker logic
+    // ============================================================
+    const binInputField = document.getElementById("binInputField");
+    const playBinBtn = document.getElementById("playBinBtn");
+    const clearSeqBtn = document.getElementById("clearSeqBtn");
+    const playSeqBtn = document.getElementById("playSeqBtn");
+    const sequence = document.getElementById("sequence");
+    const binKeys = document.querySelectorAll(".binKey");
+
+    let userSequence = [];
+
+    const PENTATONIC_INTERVALS = [0, 2, 4, 7, 9];
+
+    function mapValueToMidi(val) {
+      const clamped = Math.max(0, Math.min(255, val | 0));
+      const baseOctave = 2;
+      const totalSteps = 60;
+      const step = Math.floor((clamped / 255) * totalSteps);
+      const octaveOffset = Math.floor(step / 5);
+      const noteInScale = step % 5;
+
+      const semitone = PENTATONIC_INTERVALS[noteInScale];
+      const midi = (baseOctave + octaveOffset + 1) * 12 + semitone;
+      return midi;
+    }
+
+    function noteNameFromMidi(midi) {
+      const octave = Math.floor(midi / 12) - 1;
+      const semitone = midi % 12;
+      const noteNames = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+      return noteNames[semitone] + octave;
+    }
+
+    function updateSequenceDisplay() {
+      if (userSequence.length === 0) {
+        sequence.innerHTML = '<div class="small" style="color: var(--muted);">Play notes to build your sequence...</div>';
+        return;
+      }
+
+      sequence.innerHTML = "";
+      for (const item of userSequence) {
+        const div = document.createElement("div");
+        div.className = "seqItem";
+        div.innerHTML = `<span class="note">${escapeHtml(item.noteName)}</span><span class="bin">${item.bin} (${item.val})</span>`;
+        sequence.appendChild(div);
+      }
+    }
+
+    function addValueToSequence(val, shouldSound = true) {
+      ensureAudio();
+
+      const v = Math.max(0, Math.min(255, val | 0));
+      const midi = mapValueToMidi(v);
+      const freq = freqFromMidi(midi);
+      const bin = to8BitBinary(v);
+      const noteName = noteNameFromMidi(midi);
+
+      if (shouldSound) playFrequency(freq, 180, 0.20);
+
+      userSequence.push({ val: v, midi, bin, noteName, freq });
+      updateSequenceDisplay();
+      return { v, midi, bin, noteName, freq };
+    }
+
+    function clearSequence() {
+      userSequence = [];
+      updateSequenceDisplay();
+    }
+
+    async function playSequence() {
+      if (userSequence.length === 0) return;
+      ensureAudio();
+
+      for (const item of userSequence) {
+        playFrequency(item.freq, 180, 0.20);
+        await new Promise(r => setTimeout(r, 200));
+      }
+    }
+
+    playBinBtn.addEventListener("click", () => {
+      const val = parseInt(binInputField.value, 10);
+      if (Number.isNaN(val) || val < 0 || val > 255) {
+        alert("Please enter a number between 0 and 255");
+        return;
+      }
+      addValueToSequence(val, true);
+    });
+
+    binInputField.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") playBinBtn.click();
+    });
+
+    binKeys.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const val = parseInt(btn.dataset.val, 10);
+        binInputField.value = String(val);
+        addValueToSequence(val, true);
+      });
+    });
+
+    clearSeqBtn.addEventListener("click", clearSequence);
+    playSeqBtn.addEventListener("click", playSequence);
+
+    // ============================================================
+    // 0 to 255 palette grid
+    // ============================================================
+    const paletteGrid = document.getElementById("paletteGrid");
+    const paletteSoundToggle = document.getElementById("paletteSoundToggle");
+    const paletteClearActiveBtn = document.getElementById("paletteClearActiveBtn");
+
+    let lastActiveCell = null;
+
+    function setActiveCell(cell) {
+      if (lastActiveCell) lastActiveCell.classList.remove("active");
+      lastActiveCell = cell;
+      if (lastActiveCell) lastActiveCell.classList.add("active");
+    }
+
+    function buildPalette() {
+      const frag = document.createDocumentFragment();
+
+      for (let v = 0; v <= 255; v++) {
+        const cell = document.createElement("div");
+        cell.className = "bitCell";
+        cell.dataset.val = String(v);
+
+        const top = document.createElement("div");
+        top.className = "bitTop";
+        top.textContent = String(v).padStart(3, "0");
+
+        const bottom = document.createElement("div");
+        bottom.className = "bitBottom";
+        bottom.textContent = to8BitBinary(v);
+
+        cell.appendChild(top);
+        cell.appendChild(bottom);
+
+        cell.addEventListener("click", () => {
+          const value = parseInt(cell.dataset.val, 10);
+          binInputField.value = String(value);
+
+          const soundOn = paletteSoundToggle.checked;
+          addValueToSequence(value, soundOn);
+
+          setActiveCell(cell);
+        });
+
+        frag.appendChild(cell);
+      }
+
+      paletteGrid.innerHTML = "";
+      paletteGrid.appendChild(frag);
+    }
+
+    paletteClearActiveBtn.addEventListener("click", () => setActiveCell(null));
+    buildPalette();
   </script>
 </body>
 </html>
