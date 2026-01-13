@@ -1,582 +1,1430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cryptography & Bitcoin Scavenger Hunt</title>
-    <style>
-        /* Reset and Basic Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1e1e1e;
-            color: #f0f0f0;
-            line-height: 1.6;
-        }
-        /* Container */
-        .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #2c2c2c;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        /* Header */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            color: #00bfff;
-        }
-        header p {
-            font-size: 1.2em;
-            color: #ccc;
-        }
-        /* Progress Bar */
-        .progress-container {
-            width: 100%;
-            background: #444;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-        .progress-bar {
-            height: 20px;
-            width: 0%;
-            background: #00bfff;
-            transition: width 0.4s ease;
-        }
-        /* Steps */
-        .step {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        .step.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Step Content */
-        .step h2 {
-            margin-bottom: 15px;
-            color: #00bfff;
-        }
-        .step p {
-            margin-bottom: 20px;
-            font-size: 1.1em;
-        }
-        .step button {
-            padding: 10px 20px;
-            background: #00bfff;
-            border: none;
-            border-radius: 5px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background 0.3s ease;
-        }
-        .step button:hover {
-            background: #009acd;
-        }
-        /* Reveal Answer */
-        .answer {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: #333;
-            border-left: 5px solid #00bfff;
-            border-radius: 5px;
-        }
-        .reveal-btn {
-            background: #28a745;
-        }
-        .reveal-btn:hover {
-            background: #218838;
-        }
-        /* Footer */
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #777;
-            font-size: 0.9em;
-        }
-        footer a {
-            color: #00bfff;
-            text-decoration: none;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        /* Responsive */
-        @media (max-width: 600px) {
-            .container {
-                margin: 20px;
-            }
-            header h1 {
-                font-size: 2em;
-            }
-            .step p {
-                font-size: 1em;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Broken Money Lab: Understanding Bitcoin Through Monetary History</title>
+  <style>
+    :root{
+      --bg:#0a0e1a;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.035);
+      --border: rgba(255,255,255,0.10);
+      --text:#e8f0ff;
+      --muted: rgba(232,240,255,0.72);
+
+      --accent:#7cf7c1;
+      --accent2:#7cc7ff;
+      --warn:#ffcc66;
+      --bad:#ff6b6b;
+
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+      --mono: ui-monospace, SF Mono, Menlo, Monaco, Consolas, monospace;
+
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body{
+      margin:0;
+      font-family: var(--serif);
+      color: var(--text);
+      background:
+        radial-gradient(1400px 800px at 15% 8%, rgba(124,199,255,0.14), transparent 52%),
+        radial-gradient(1100px 850px at 88% 22%, rgba(124,247,193,0.12), transparent 56%),
+        radial-gradient(1000px 900px at 45% 92%, rgba(255,204,102,0.07), transparent 58%),
+        linear-gradient(180deg, #060912, var(--bg));
+      line-height: 1.8;
+      font-size: 18px;
+    }
+
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .progress{
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      width: 0%;
+      z-index: 100;
+      transition: width 0.15s ease;
+    }
+
+    .container{
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 22px 120px;
+    }
+
+    header{
+      padding: 86px 0 44px;
+      text-align: center;
+    }
+
+    .kicker{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(232,240,255,0.62);
+      margin-bottom: 14px;
+    }
+
+    h1{
+      margin: 0 0 18px;
+      font-size: clamp(34px, 5.2vw, 52px);
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      line-height: 1.14;
+    }
+
+    .subtitle{
+      margin: 0 auto;
+      max-width: 620px;
+      font-size: 20px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .mini-note{
+      margin: 22px auto 0;
+      max-width: 640px;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: rgba(232,240,255,0.58);
+    }
+
+    section{
+      margin: 92px 0;
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    section.visible{
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    h2{
+      margin: 0 0 26px;
+      font-size: 32px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+
+    h3{
+      margin: 44px 0 16px;
+      font-size: 24px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      font-family: var(--sans);
+    }
+
+    p{
+      margin: 0 0 22px;
+      color: var(--text);
+    }
+
+    .story-intro{
+      font-size: 22px;
+      font-style: italic;
+      color: var(--accent2);
+      margin-bottom: 26px;
+      border-left: 3px solid var(--accent2);
+      padding-left: 20px;
+    }
+
+    .panel{
+      background: linear-gradient(135deg, var(--panel), var(--panel2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .money-card{
+      background: linear-gradient(135deg, var(--panel), var(--panel2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      margin: 34px 0;
+    }
+
+    .money-header{
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .money-name{
+      margin: 0;
+      font-family: var(--sans);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .money-era{
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(232,240,255,0.60);
+      padding: 4px 10px;
+      background: rgba(0,0,0,0.28);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .money-story{
+      font-size: 19px;
+      line-height: 1.78;
+      margin-bottom: 18px;
+    }
+
+    .timeline-dot{
+      width: 11px;
+      height: 11px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 10px;
+      box-shadow: 0 0 0 4px rgba(124,247,193,0.14);
+      transform: translateY(-1px);
+    }
+
+    .insight, .problem{
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin: 26px 0 0;
+    }
+
+    .insight{
+      background: rgba(124,199,255,0.08);
+      border-left: 3px solid var(--accent2);
+    }
+
+    .problem{
+      background: rgba(255,107,107,0.085);
+      border-left: 3px solid var(--bad);
+    }
+
+    .box-label{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .insight .box-label{ color: var(--accent2); }
+    .problem .box-label{ color: var(--bad); }
+
+    .insight p, .problem p{
+      margin: 0;
+      font-size: 17px;
+      color: rgba(232,240,255,0.90);
+    }
+
+    strong{
+      color: var(--accent);
+      font-weight: 700;
+    }
+    em{
+      color: var(--accent2);
+      font-style: italic;
+    }
+    .mono{
+      font-family: var(--mono);
+      font-size: 0.92em;
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: var(--accent2);
+    }
+
+    .properties{
+      margin: 24px 0 4px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .prop-row{
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .prop-row:last-child{ border-bottom: none; }
+
+    .prop-label{
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 190px;
+      flex-shrink: 0;
+    }
+
+    .prop-bar{
+      flex:1;
+      height: 9px;
+      background: rgba(0,0,0,0.40);
+      border-radius: 999px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .prop-fill{
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 999px;
+      transition: width 0.9s ease;
+    }
+
+    .prop-score{
+      font-family: var(--mono);
+      font-size: 13px;
+      color: rgba(232,240,255,0.65);
+      min-width: 46px;
+      text-align: right;
+    }
+
+    .defs{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .def{
+      padding: 16px 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.22);
+    }
+
+    .def .term{
+      font-family: var(--sans);
+      font-weight: 750;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+      color: rgba(232,240,255,0.96);
+    }
+
+    .def .meaning{
+      margin: 0;
+      color: rgba(232,240,255,0.76);
+      font-size: 15px;
+      font-family: var(--sans);
+      line-height: 1.6;
+    }
+
+    nav{
+      position: fixed;
+      top: 50%;
+      right: 28px;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: none;
+      padding: 10px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+    }
+    @media (min-width: 1180px){
+      nav{ display: block; }
+    }
+
+    .nav-dot{
+      width: 10px;
+      height: 10px;
+      background: rgba(255,255,255,0.20);
+      border-radius: 50%;
+      margin: 12px 0;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+      border: 1px solid transparent;
+    }
+    .nav-dot:hover{
+      background: rgba(124,199,255,0.52);
+      transform: scale(1.18);
+    }
+    .nav-dot.active{
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(124,247,193,0.14);
+    }
+
+    footer{
+      margin-top: 80px;
+      padding-top: 36px;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      text-align:center;
+      color: rgba(232,240,255,0.56);
+      font-size: 15px;
+      font-family: var(--sans);
+    }
+
+    .smallcaps{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(232,240,255,0.62);
+    }
+
+    @media (max-width: 780px){
+      body{ font-size: 17px; }
+      h2{ font-size: 28px; }
+      .money-card{ padding: 24px; }
+      .prop-label{ min-width: 160px; font-size: 12px; }
+      header{ padding-top: 72px; }
+    }
+  </style>
 </head>
+
 <body>
+  <div class="progress" id="progress"></div>
+  <nav id="nav" aria-label="Section navigation"></nav>
 
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <h1>🔍 Cryptography & Bitcoin Scavenger Hunt</h1>
-            <p>Embark on a journey to uncover the secrets of cryptography and Bitcoin!</p>
-        </header>
+  <div class="container">
+    <header>
+      <div class="kicker">Broken Money Lab</div>
+      <h1>Understanding Bitcoin Through the Lens of Monetary History</h1>
+      <p class="subtitle">
+        One scroll. Many centuries. A simple question that keeps returning:
+        how do humans keep score fairly when the world gets bigger?
+      </p>
+      <p class="mini-note">
+        Inspired by Lyn Alden’s <em>Broken Money</em>. Written in a narrative style that assumes you can handle real ideas without being talked down to.
+      </p>
+    </header>
 
-        <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
+    <section id="intro">
+      <p class="story-intro">Money is a ledger. The arguments start when we forget that.</p>
+
+      <p>
+        Picture a small town where everybody knows everybody. You borrow a ladder from your neighbor, you help them move a couch, you remember who did what.
+        No receipts needed. The ledger lives inside the group.
+      </p>
+
+      <p>
+        Now scale that town to a city, then a country, then a planet. The ladder and couch favors do not work anymore.
+        You need a ledger that travels farther than trust. Money is the tool humans invented for that job.
+      </p>
+
+      <p>
+        The twist is that money is never finished. It keeps changing because trade keeps changing.
+        Each era picks a form of money that fits its constraints, then breaks when the world outgrows it.
+      </p>
+    </section>
+
+    <section id="props">
+      <h2><span class="timeline-dot"></span>What Makes Something Good Money</h2>
+
+      <div class="panel">
+        <p class="money-story" style="margin-bottom:14px;">
+          The world keeps replaying the same test. Different objects. Same scoreboard. These properties are the reasons one form of money outlasts another.
+        </p>
+
+        <div class="defs">
+          <div class="def">
+            <div class="term">Durability</div>
+            <p class="meaning">It survives time, weather, and accidents without falling apart.</p>
+          </div>
+          <div class="def">
+            <div class="term">Portability</div>
+            <p class="meaning">It moves easily through space. Across town is one test. Across oceans is a harder one.</p>
+          </div>
+          <div class="def">
+            <div class="term">Divisibility</div>
+            <p class="meaning">It splits into small pieces without losing value, so it can handle both a candy bar and a house.</p>
+          </div>
+          <div class="def">
+            <div class="term">Fungibility</div>
+            <p class="meaning">One unit is interchangeable with another unit of the same type, with no special preference.</p>
+          </div>
+          <div class="def">
+            <div class="term">Verifiability</div>
+            <p class="meaning">People can check it is real without needing a priest, a king, or a corporation to vouch for it.</p>
+          </div>
+          <div class="def">
+            <div class="term">Scarcity</div>
+            <p class="meaning">New supply is hard to create. Easy supply eventually corrupts the ledger.</p>
+          </div>
+          <div class="def">
+            <div class="term">Settlement finality</div>
+            <p class="meaning">When a payment is done, it stays done. No months later reversals. No fragile promises.</p>
+          </div>
+          <div class="def">
+            <div class="term">Censorship resistance</div>
+            <p class="meaning">A powerful gatekeeper cannot casually block who is allowed to use it.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">The pattern to watch</div>
+        <p>
+          Monetary history is mostly a story of tradeoffs. One era chooses portability, another chooses scarcity, another chooses speed.
+          Then a new technology arrives and changes what is possible.
+        </p>
+      </div>
+    </section>
+
+    <section id="shells">
+      <h2><span class="timeline-dot"></span>Shell Beads: When Trust Was Local</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Shell beads</h3>
+          <span class="money-era">Early exchange</span>
         </div>
 
-        <!-- Steps -->
-        <div class="steps">
-            <!-- Step 1 -->
-            <div class="step active" id="step1">
-                <h2>🌟 Welcome to the Scavenger Hunt!</h2>
-                <p>Are you ready to explore the fascinating world of cryptography and Bitcoin? Click the button below to begin your adventure.</p>
-                <button onclick="nextStep()">Start the Hunt</button>
-            </div>
+        <p class="money-story">
+          Imagine an island where certain shells are rare enough to feel special. People start accepting them in trade.
+          It is not complicated. The shells look nice, they travel in a pocket, and everyone agrees they count.
+        </p>
 
-            <!-- Step 2: Cryptography Basics -->
-            <div class="step" id="step2">
-                <h2>🔐 Cryptography Basics</h2>
-                <p>Let's start by understanding the basics. What is cryptography, and what is it used for?</p>
-                <button onclick="revealAnswer('answer1')">Reveal Answer</button>
-                <div class="answer" id="answer1">
-                    <p><strong>Answer:</strong> Cryptography is the art of creating secret codes to protect information. It ensures that only the intended people can read messages, keeping data safe in things like passwords, online chats, and banking.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
+        <p class="money-story">
+          Then a trader arrives from somewhere else with a bag full of the same shells.
+          On their island these shells wash up like pebbles. Overnight, the “rare” money becomes an ordinary object.
+        </p>
 
-            <!-- Step 3 -->
-            <div class="step" id="step3">
-                <h2>🔐 Cryptography Basics</h2>
-                <p>How do secret codes (like shifting letters) help keep messages private?</p>
-                <button onclick="revealAnswer('answer2')">Reveal Answer</button>
-                <div class="answer" id="answer2">
-                    <p><strong>Answer:</strong> Secret codes change letters or numbers in a message so it looks like gibberish. Only people who know the special rules (the key) can turn it back into the original message.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 4 -->
-            <div class="step" id="step4">
-                <h2>🔐 Cryptography Basics</h2>
-                <p>What is the difference between encryption and decryption?</p>
-                <button onclick="revealAnswer('answer3')">Reveal Answer</button>
-                <div class="answer" id="answer3">
-                    <p><strong>Answer:</strong> Encryption is the process of scrambling a message to keep it secret. Decryption is turning that scrambled message back into its original form using a key.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 5 -->
-            <div class="step" id="step5">
-                <h2>🔐 Cryptography Basics</h2>
-                <p>What does a password do, and why is it an example of cryptography?</p>
-                <button onclick="revealAnswer('answer4')">Reveal Answer</button>
-                <div class="answer" id="answer4">
-                    <p><strong>Answer:</strong> A password acts like a secret code that only you know. It verifies your identity and protects your information from others, making it a form of cryptography.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 6 -->
-            <div class="step" id="step6">
-                <h2>🔐 Cryptography Basics</h2>
-                <p>How does cryptography keep your emails or messages secure?</p>
-                <button onclick="revealAnswer('answer5')">Reveal Answer</button>
-                <div class="answer" id="answer5">
-                    <p><strong>Answer:</strong> Cryptography turns your messages into a scrambled format. Only the person you send it to, who has the key, can unscramble and read the message, keeping it safe from eavesdroppers.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 7: Bitcoin Fundamentals -->
-            <div class="step" id="step7">
-                <h2>💰 Bitcoin Fundamentals</h2>
-                <p>Great job on cryptography! Now, let's dive into Bitcoin. What is Bitcoin? Describe it in one sentence.</p>
-                <button onclick="revealAnswer('answer6')">Reveal Answer</button>
-                <div class="answer" id="answer6">
-                    <p><strong>Answer:</strong> Bitcoin is a type of digital money that uses secret codes to stay secure and operates without the need for banks.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 8 -->
-            <div class="step" id="step8">
-                <h2>💰 Bitcoin Fundamentals</h2>
-                <p>Who created Bitcoin, and what name is used for its creator?</p>
-                <button onclick="revealAnswer('answer7')">Reveal Answer</button>
-                <div class="answer" id="answer7">
-                    <p><strong>Answer:</strong> Bitcoin was created by someone or a group using the name Satoshi Nakamoto, but no one knows their true identity.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 9 -->
-            <div class="step" id="step9">
-                <h2>💰 Bitcoin Fundamentals</h2>
-                <p>What problem was Bitcoin designed to solve?</p>
-                <button onclick="revealAnswer('answer8')">Reveal Answer</button>
-                <div class="answer" id="answer8">
-                    <p><strong>Answer:</strong> Bitcoin was created to allow people to send money directly to each other without needing banks, making transactions faster and more secure.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 10 -->
-            <div class="step" id="step10">
-                <h2>💰 Bitcoin Fundamentals</h2>
-                <p>What does it mean that Bitcoin is decentralized?</p>
-                <button onclick="revealAnswer('answer9')">Reveal Answer</button>
-                <div class="answer" id="answer9">
-                    <p><strong>Answer:</strong> Decentralized means that no single person, bank, or company controls Bitcoin. Instead, it’s maintained by many computers around the world working together.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 11 -->
-            <div class="step" id="step11">
-                <h2>💰 Bitcoin Fundamentals</h2>
-                <p>How does a blockchain work, and why is it important for Bitcoin?</p>
-                <button onclick="revealAnswer('answer10')">Reveal Answer</button>
-                <div class="answer" id="answer10">
-                    <p><strong>Answer:</strong> A blockchain is like a public ledger that records every Bitcoin transaction. It ensures transparency and security because everyone can see the transactions, but no one can change them.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 12: Digital Money & Deflation -->
-            <div class="step" id="step12">
-                <h2>📉 Digital Money & Deflation</h2>
-                <p>Bitcoin is known as a deflationary asset. What does this mean?</p>
-                <button onclick="revealAnswer('answer11')">Reveal Answer</button>
-                <div class="answer" id="answer11">
-                    <p><strong>Answer:</strong> Being deflationary means there’s a limited number of Bitcoin (21 million), so as more people want it, its value can increase over time.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 13 -->
-            <div class="step" id="step13">
-                <h2>📉 Digital Money & Deflation</h2>
-                <p>How many total Bitcoin will ever exist?</p>
-                <button onclick="revealAnswer('answer12')">Reveal Answer</button>
-                <div class="answer" id="answer12">
-                    <p><strong>Answer:</strong> Only 21 million Bitcoin will ever exist. This limit ensures that Bitcoin remains scarce.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 14 -->
-            <div class="step" id="step14">
-                <h2>📉 Digital Money & Deflation</h2>
-                <p>What is the difference between Bitcoin and regular cash (like the dollar)?</p>
-                <button onclick="revealAnswer('answer13')">Reveal Answer</button>
-                <div class="answer" id="answer13">
-                    <p><strong>Answer:</strong> Bitcoin is digital, has a limited supply, and isn’t controlled by any single entity, while regular cash is physical, can be printed in unlimited amounts by governments, and is centrally controlled.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 15 -->
-            <div class="step" id="step15">
-                <h2>📉 Digital Money & Deflation</h2>
-                <p>Why do some people call Bitcoin “digital gold”?</p>
-                <button onclick="revealAnswer('answer14')">Reveal Answer</button>
-                <div class="answer" id="answer14">
-                    <p><strong>Answer:</strong> Bitcoin is called “digital gold” because, like gold, it is scarce and valuable. However, Bitcoin is easier to transfer and use online.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 16 -->
-            <div class="step" id="step16">
-                <h2>📉 Digital Money & Deflation</h2>
-                <p>What happens to the value of money during inflation?</p>
-                <button onclick="revealAnswer('answer15')">Reveal Answer</button>
-                <div class="answer" id="answer15">
-                    <p><strong>Answer:</strong> During inflation, the prices of things go up, which means the money you have can buy less than before.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 17: Real-World Applications -->
-            <div class="step" id="step17">
-                <h2>🌍 Real-World Applications</h2>
-                <p>How does Bitcoin help people who don’t have access to a bank?</p>
-                <button onclick="revealAnswer('answer16')">Reveal Answer</button>
-                <div class="answer" id="answer16">
-                    <p><strong>Answer:</strong> Bitcoin allows anyone with internet access to send and receive money without needing a traditional bank, effectively acting as a portable bank.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 18 -->
-            <div class="step" id="step18">
-                <h2>🌍 Real-World Applications</h2>
-                <p>What are some countries or companies using Bitcoin today?</p>
-                <button onclick="revealAnswer('answer17')">Reveal Answer</button>
-                <div class="answer" id="answer17">
-                    <p><strong>Answer:</strong> Countries like El Salvador use Bitcoin as official money, and companies like Tesla and MicroStrategy hold Bitcoin as an investment.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 19 -->
-            <div class="step" id="step19">
-                <h2>🌍 Real-World Applications</h2>
-                <p>How can Bitcoin be used to send money across the world?</p>
-                <button onclick="revealAnswer('answer18')">Reveal Answer</button>
-                <div class="answer" id="answer18">
-                    <p><strong>Answer:</strong> Bitcoin can be sent instantly to anyone, anywhere in the world, without waiting for banks to process the transaction, making it faster and often cheaper.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 20 -->
-            <div class="step" id="step20">
-                <h2>🌍 Real-World Applications</h2>
-                <p>Why is Bitcoin considered secure even though it’s online?</p>
-                <button onclick="revealAnswer('answer19')">Reveal Answer</button>
-                <div class="answer" id="answer19">
-                    <p><strong>Answer:</strong> Bitcoin uses strong cryptography and a decentralized network to protect transactions, making it very secure and hard to hack.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 21 -->
-            <div class="step" id="step21">
-                <h2>🌍 Real-World Applications</h2>
-                <p>Name one limitation or challenge of using Bitcoin.</p>
-                <button onclick="revealAnswer('answer20')">Reveal Answer</button>
-                <div class="answer" id="answer20">
-                    <p><strong>Answer:</strong> One challenge of using Bitcoin is that its price can be very volatile, meaning it can go up and down a lot in a short time.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 22: MicroStrategy & Digital Manhattan -->
-            <div class="step" id="step22">
-                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
-                <p>What is MicroStrategy, and who leads the company?</p>
-                <button onclick="revealAnswer('answer21')">Reveal Answer</button>
-                <div class="answer" id="answer21">
-                    <p><strong>Answer:</strong> MicroStrategy is a technology company that invests in Bitcoin, and it is led by Michael Saylor, who is a big believer in Bitcoin’s future.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 23 -->
-            <div class="step" id="step23">
-                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
-                <p>Why did MicroStrategy decide to invest in Bitcoin?</p>
-                <button onclick="revealAnswer('answer22')">Reveal Answer</button>
-                <div class="answer" id="answer22">
-                    <p><strong>Answer:</strong> MicroStrategy invested in Bitcoin because they believe it’s a better way to protect their money compared to holding cash, which loses value over time.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 24 -->
-            <div class="step" id="step24">
-                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
-                <p>How much Bitcoin has MicroStrategy acquired so far?</p>
-                <button onclick="revealAnswer('answer23')">Reveal Answer</button>
-                <div class="answer" id="answer23">
-                    <p><strong>Answer:</strong> MicroStrategy has bought hundreds of thousands of Bitcoin, making it one of the largest companies holding Bitcoin.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 25 -->
-            <div class="step" id="step25">
-                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
-                <p>What is MicroStrategy’s main argument for holding Bitcoin instead of cash or bonds?</p>
-                <button onclick="revealAnswer('answer24')">Reveal Answer</button>
-                <div class="answer" id="answer24">
-                    <p><strong>Answer:</strong> Michael Saylor argues that cash loses value due to inflation, and bonds aren’t performing well, whereas Bitcoin has the potential to grow in value.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 26 -->
-            <div class="step" id="step26">
-                <h2>🏢 MicroStrategy & Digital Manhattan</h2>
-                <p>What does Michael Saylor mean when he says Bitcoin is “digital capital”?</p>
-                <button onclick="revealAnswer('answer25')">Reveal Answer</button>
-                <div class="answer" id="answer25">
-                    <p><strong>Answer:</strong> Saylor refers to Bitcoin as “digital capital” because it’s a valuable asset that exists online, easy to transfer, and cannot be destroyed.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 27: Digital Manhattan -->
-            <div class="step" id="step27">
-                <h2>🏙️ The Idea of Digital Manhattan</h2>
-                <p>What is the idea of “Digital Manhattan” that Michael Saylor talks about?</p>
-                <button onclick="revealAnswer('answer26')">Reveal Answer</button>
-                <div class="answer" id="answer26">
-                    <p><strong>Answer:</strong> “Digital Manhattan” is the concept that owning Bitcoin is like owning prime digital real estate, similar to having valuable property in a prestigious location like Manhattan.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 28 -->
-            <div class="step" id="step28">
-                <h2>🏙️ The Idea of Digital Manhattan</h2>
-                <p>How is Bitcoin like owning a piece of real estate in a city like Manhattan?</p>
-                <button onclick="revealAnswer('answer27')">Reveal Answer</button>
-                <div class="answer" id="answer27">
-                    <p><strong>Answer:</strong> Just as land in Manhattan is limited and highly sought after, Bitcoin is scarce and valuable, making it a desirable asset to own.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 29 -->
-            <div class="step" id="step29">
-                <h2>🏙️ The Idea of Digital Manhattan</h2>
-                <p>Why does Saylor believe Bitcoin has advantages over traditional real estate (like buildings)?</p>
-                <button onclick="revealAnswer('answer28')">Reveal Answer</button>
-                <div class="answer" id="answer28">
-                    <p><strong>Answer:</strong> Bitcoin doesn’t have issues like taxes, maintenance, or weather damage. It’s also easy to transfer and can be used globally without physical limitations.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 30 -->
-            <div class="step" id="step30">
-                <h2>🏙️ The Idea of Digital Manhattan</h2>
-                <p>What are some benefits of Bitcoin that make it “digital, indestructible, and global”?</p>
-                <button onclick="revealAnswer('answer29')">Reveal Answer</button>
-                <div class="answer" id="answer29">
-                    <p><strong>Answer:</strong> Bitcoin is digital, meaning it exists online; indestructible, as it can’t be physically damaged or erased; and global, allowing it to be used anywhere in the world without intermediaries.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 31 -->
-            <div class="step" id="step31">
-                <h2>🏙️ The Idea of Digital Manhattan</h2>
-                <p>Why does Saylor call Bitcoin the next wave of technology, following trends like the internet and AI?</p>
-                <button onclick="revealAnswer('answer30')">Reveal Answer</button>
-                <div class="answer" id="answer30">
-                    <p><strong>Answer:</strong> Saylor believes Bitcoin will revolutionize money and capital just as the internet changed communication and AI is transforming technology, making it a pivotal advancement for the future.</p>
-                </div>
-                <button onclick="nextStep()">Next</button>
-            </div>
-
-            <!-- Step 32: Total Question Breakdown -->
-            <div class="step" id="step32">
-                <h2>📊 Total Question Breakdown</h2>
-                <p>Here's a summary of the scavenger hunt you just completed:</p>
-                <ul>
-                    <li>🔐 Cryptography Basics: 5 questions</li>
-                    <li>💰 Bitcoin Fundamentals: 5 questions</li>
-                    <li>📉 Digital Money & Deflation: 5 questions</li>
-                    <li>🌍 Real-World Applications: 5 questions</li>
-                    <li>🏢 MicroStrategy & Digital Manhattan: 5 questions</li>
-                    <li>🏙️ The Idea of Digital Manhattan: 5 questions</li>
-                </ul>
-                <p>Congratulations! You've successfully navigated through the scavenger hunt, gaining valuable insights into cryptography and Bitcoin.</p>
-                <button onclick="nextStep()">Finish</button>
-            </div>
-
-            <!-- Final Step -->
-            <div class="step" id="finalStep">
-                <h2>🎉 Well Done!</h2>
-                <p>You've completed the Cryptography & Bitcoin Scavenger Hunt. We hope you enjoyed the journey and learned something new!</p>
-                <p>Feel free to revisit any section if you want to explore further.</p>
-                <button onclick="restart()">Restart Hunt</button>
-            </div>
+        <div class="properties">
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="1">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">1/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Verifiability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Footer -->
-    <footer>
-        &copy; 2024 Your Name | 
-        <a href="https://github.com/yourusername/yourrepo" target="_blank">GitHub Repository</a>
-    </footer>
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Scarcity has to survive contact with the outside world.</strong>
+          A local shortage is not the same thing as a global shortage.
+          Money that depends on geography eventually meets a bigger map.
+        </p>
+      </div>
 
-    <!-- JavaScript for Interactivity -->
-    <script>
-        let currentStep = 1;
-        const totalSteps = 32;
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          Shell beads fail the moment someone discovers an easier source.
+          The ledger stops being trusted because the score can be inflated with a beachcombing trip.
+        </p>
+      </div>
+    </section>
 
-        function revealAnswer(id) {
-            const answer = document.getElementById(id);
-            if (answer.style.display === "block") {
-                answer.style.display = "none";
-            } else {
-                answer.style.display = "block";
-            }
+    <section id="cattle">
+      <h2><span class="timeline-dot"></span>Cattle: The Divisibility Problem</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Cattle</h3>
+          <span class="money-era">Living wealth</span>
+        </div>
+
+        <p class="money-story">
+          In farming societies, cattle made sense as wealth. They produce milk, they produce meat, they reproduce.
+          A herd is a life plan. Ancient cultures measured value in animals because the animals did not feel abstract.
+        </p>
+
+        <p class="money-story">
+          Then you try to buy something small. A loaf of bread. A day of labor.
+          A cow does not make good change. You can divide it, but you destroy the thing you were counting on.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="1">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">1/5</div>
+          </div>
+          <div class="prop-row" data-score="1">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">1/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Verifiability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Money has to work at different magnitudes.</strong>
+          Big deals, tiny deals, everything in between.
+          If a system only works for big transactions, the everyday economy splinters into workarounds.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          Cattle are slow to move, hard to divide, and expensive to secure.
+          Great for storing value in a village. Bad for scaling trade across distance.
+        </p>
+      </div>
+    </section>
+
+    <section id="salt">
+      <h2><span class="timeline-dot"></span>Salt: Commodity Money Meets Technology</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Salt</h3>
+          <span class="money-era">Commodity money</span>
+        </div>
+
+        <p class="money-story">
+          Salt is boring until you need it. For much of history it preserved food and kept populations alive.
+          When something is essential and not easily available, it turns into a currency almost by accident.
+        </p>
+
+        <p class="money-story">
+          Then production improves. Mines expand. Trade routes stabilize. The supply increases.
+          Salt becomes a product again instead of a monetary base.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="4">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">4/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Fungibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Technology changes scarcity.</strong>
+          Something can feel scarce for centuries, then become abundant after one discovery.
+          Commodity money survives only if production stays meaningfully hard.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          Salt’s monetary premium disappears when supply becomes easy.
+          A ledger built on a commodity is always one invention away from surprise inflation.
+        </p>
+      </div>
+    </section>
+
+    <section id="silver">
+      <h2><span class="timeline-dot"></span>Silver: The Metal Standard Arrives</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Silver coins</h3>
+          <span class="money-era">Metal standards</span>
+        </div>
+
+        <p class="money-story">
+          Metals were a leap forward because they were hard in the specific way money needs.
+          You cannot wish them into existence. You have to dig, refine, and transport them.
+          The work shows up in the supply curve.
+        </p>
+
+        <p class="money-story">
+          Silver was widely used because it was scarce enough to matter and common enough to circulate.
+          Coins could travel farther than families. They could pass between strangers and still be trusted by weight and purity.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Verifiability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Physical limits create monetary strength.</strong>
+          Metals work because supply is slow and costly.
+          The ledger becomes harder to manipulate when increasing supply requires real effort.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          Silver is heavy. Moving large value across long distances is expensive.
+          As trade expands, the friction of physical settlement becomes the bottleneck.
+        </p>
+      </div>
+    </section>
+
+    <section id="gold">
+      <h2><span class="timeline-dot"></span>Gold: Excellent Money, Awkward Physics</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Gold</h3>
+          <span class="money-era">Hard money</span>
+        </div>
+
+        <p class="money-story">
+          Gold feels like it was designed for money. It resists corrosion. It concentrates a lot of value in a small space.
+          Most of the gold ever mined still exists because it does not decay.
+        </p>
+
+        <p class="money-story">
+          That is the win. The problem is that the win comes with a bill.
+          Gold is heavy, easy to steal, and slow to move.
+          The moment your economy wants internet speed, a physical metal has to be wrapped in layers.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Fungibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="4">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">4/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Verifiability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Gold stores value across time.</strong>
+          It struggles across distance, especially when distance becomes digital.
+          The moment you need speed, you invent claims.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          Gold cannot move at the speed of information.
+          So society builds a faster money on top of it, which quietly changes what you are trusting.
+        </p>
+      </div>
+    </section>
+
+    <section id="banknotes">
+      <h2><span class="timeline-dot"></span>Bank Notes: Speed, Then Fragility</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Bank notes</h3>
+          <span class="money-era">Banking layers</span>
+        </div>
+
+        <p class="money-story">
+          A merchant deposits gold with a bank and receives a paper claim.
+          The paper circulates because it is lighter than metal and easier to divide.
+          The gold stays in one place while the economy moves around it.
+        </p>
+
+        <p class="money-story">
+          This is a great trade until the system learns a dangerous trick.
+          Banks realize most people will not redeem at the same time.
+          So they issue more paper than the gold they hold.
+          It works until the day it does not, which is when everyone runs for the vault.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="4">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">4/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Settlement finality</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Censorship resistance</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Layers buy speed by adding trust.</strong>
+          You stop holding the asset and start holding a claim.
+          That difference is invisible in good times and loud in crises.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          Bank notes concentrate risk in institutions.
+          When promises outrun reserves, the ledger becomes political and fragile.
+        </p>
+      </div>
+    </section>
+
+    <section id="bretton">
+      <h2><span class="timeline-dot"></span>Bretton Woods: A Global Promise</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Bretton Woods system</h3>
+          <span class="money-era">Dollar and gold link</span>
+        </div>
+
+        <p class="money-story">
+          After World War II, the world wanted stability.
+          The compromise was coordination: currencies would link to the US dollar, and the dollar would link to gold at a fixed rate.
+          Governments could redeem dollars for gold, which made the promise feel real.
+        </p>
+
+        <p class="money-story">
+          Then the incentives changed.
+          The US could print dollars faster than it could add gold.
+          Other countries noticed the mismatch and began redeeming.
+          In 1971, the gold window closed.
+          The promise ended because the math stopped working.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="3">
+            <div class="prop-label">Settlement finality</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">3/5</div>
+          </div>
+          <div class="prop-row" data-score="2">
+            <div class="prop-label">Censorship resistance</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">2/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Coordination works until it collides with incentives.</strong>
+          Agreements built on trust between sovereign nations carry a built in weakness.
+          When pressure rises, somebody breaks the rule.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          A global system that requires sustained restraint fails when restraint becomes costly.
+          The world moves toward money that is managed through policy instead of anchors.
+        </p>
+      </div>
+    </section>
+
+    <section id="fiat">
+      <h2><span class="timeline-dot"></span>Modern Fiat: Money as Policy</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Modern fiat currency</h3>
+          <span class="money-era">State ledgers</span>
+        </div>
+
+        <p class="money-story">
+          After 1971, money becomes a policy instrument.
+          Central banks can expand supply to fight crises, smooth recessions, and support financial plumbing.
+          The benefits are real. Flexibility saves systems from collapse.
+        </p>
+
+        <p class="money-story">
+          The cost is also real.
+          If supply can expand, it eventually does.
+          Sometimes slowly, sometimes suddenly, often with good intentions.
+          Savers pay the bill through purchasing power erosion.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="4">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">4/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="1">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">1/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Liquidity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="1">
+            <div class="prop-label">Censorship resistance</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">1/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Fiat is brilliant for payments.</strong>
+          It is less reliable for preserving value across decades, because scarcity depends on governance and incentives.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The break</div>
+        <p>
+          When the ledger can be rewritten by committees, long term holders look for escape valves.
+          Real estate, equities, commodities, and eventually a new kind of asset.
+        </p>
+      </div>
+    </section>
+
+    <section id="bitcoin">
+      <h2><span class="timeline-dot"></span>Bitcoin: Digital Scarcity Without a Ruler</h2>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Bitcoin</h3>
+          <span class="money-era">Open commodity ledger</span>
+        </div>
+
+        <p class="money-story">
+          In 2008, in the shadow of a financial crisis, someone using the name Satoshi Nakamoto described a system that sounds contradictory:
+          digital scarcity without a trusted institution.
+        </p>
+
+        <p class="money-story">
+          Digital things are easy to copy. That is the feature of digital.
+          Bitcoin’s trick is that it does not try to make the file scarce.
+          It makes the <em>ledger</em> scarce.
+          It is a public record where the rules are enforced by a network of computers that do not need to trust each other.
+        </p>
+
+        <p class="money-story">
+          The supply is capped at 21 million. New issuance follows a schedule that anyone can calculate.
+          Ownership is controlled by private keys. If you hold the keys, you hold the asset, without needing a bank’s permission.
+        </p>
+
+        <div class="properties">
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Durability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Portability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Divisibility</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Scarcity</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="5">
+            <div class="prop-label">Verifiability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">5/5</div>
+          </div>
+          <div class="prop-row" data-score="4">
+            <div class="prop-label">Settlement finality</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">4/5</div>
+          </div>
+          <div class="prop-row" data-score="4">
+            <div class="prop-label">Censorship resistance</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">4/5</div>
+          </div>
+          <div class="prop-row" data-score="1">
+            <div class="prop-label">Price stability</div>
+            <div class="prop-bar"><div class="prop-fill"></div></div>
+            <div class="prop-score">1/5</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="box-label">Key insight</div>
+        <p>
+          <strong>Bitcoin separates ownership from institutions.</strong>
+          That is the novelty. A bearer style asset that can move over the internet while staying scarce.
+        </p>
+      </div>
+
+      <div class="problem">
+        <div class="box-label">The tradeoffs</div>
+        <p>
+          Bitcoin is volatile because it is young and still being adopted.
+          It demands personal responsibility for key security.
+          It is not built to feel like a credit card swipe.
+          Those tradeoffs are not hidden. They are the price of what it offers.
+        </p>
+      </div>
+    </section>
+
+    <section id="solves">
+      <h2><span class="timeline-dot"></span>What Bitcoin Actually Solves</h2>
+
+      <p class="story-intro">
+        Bitcoin is easier to understand when you treat it as a tool for specific failures, not as a replacement for everything.
+      </p>
+
+      <h3>Inflation and supply drift</h3>
+      <p>
+        When money supply can expand, it eventually expands.
+        Sometimes for emergencies, sometimes for convenience, sometimes because the politics demand it.
+        The long arc tends to punish savers and reward proximity to issuance.
+      </p>
+      <div class="insight">
+        <div class="box-label">What changes with bitcoin</div>
+        <p>
+          Bitcoin’s supply rules are hard coded and globally auditable.
+          You can disagree with the design, but you cannot quietly change it from inside a conference room.
+        </p>
+      </div>
+
+      <h3>Portability across borders</h3>
+      <p>
+        Gold is portable in theory and awkward in practice.
+        Bank wires are fast sometimes and slow when the chain of intermediaries stretches.
+        Cash is simple and becomes suspicious the moment you travel with it.
+      </p>
+      <div class="insight">
+        <div class="box-label">What changes with bitcoin</div>
+        <p>
+          Bitcoin is information secured by cryptography.
+          Value can move like a message, without requiring permission from a stack of institutions.
+        </p>
+      </div>
+
+      <h3>Censorship and chokepoints</h3>
+      <p>
+        In a centralized system, the system has a hand on the valve.
+        Accounts can be frozen. Payments can be blocked. Access can be revoked.
+        Sometimes that is a feature. Sometimes it becomes a weapon.
+      </p>
+      <div class="insight">
+        <div class="box-label">What changes with bitcoin</div>
+        <p>
+          The network does not have a CEO to call.
+          Censorship requires broad coordinated control, which is expensive and difficult at global scale.
+        </p>
+      </div>
+
+      <h3>Settlement finality</h3>
+      <p>
+        Many modern payments are not final for a while.
+        They can be reversed, disputed, clawed back, or held.
+        That flexibility is convenient until you need certainty.
+      </p>
+      <div class="insight">
+        <div class="box-label">What changes with bitcoin</div>
+        <p>
+          Bitcoin can provide settlement without a middleman.
+          It is slower than tapping a phone, and stronger than a promise that can be rewritten later.
+        </p>
+      </div>
+    </section>
+
+    <!-- SAYLOR INSPIRED CLOSER SECTION -->
+    <section id="why-young-people-bitcoin">
+      <h2><span class="timeline-dot"></span>Why Young People Keep Finding Bitcoin</h2>
+
+      <p class="story-intro">
+        Imagine you are 17. You are not trying to get rich. You are trying to make sure your effort still counts ten years from now.
+      </p>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">A simple story about a treadmill</h3>
+          <span class="money-era">Time and purchasing power</span>
+        </div>
+
+        <p class="money-story">
+          You get your first job. You save a little each month. It feels like building a foundation.
+          Then life does what life does. Rent rises. Tuition rises. Food rises. Everything creeps up.
+          The scoreboard you are saving in keeps changing the rules.
+        </p>
+
+        <p class="money-story">
+          Michael Saylor’s argument starts here, not with charts, but with a feeling.
+          He says most people are unknowingly running on a treadmill where the belt speed keeps increasing.
+          You can sprint and still end up in the same place if the unit you are measuring in is melting.
+        </p>
+
+        <div class="insight">
+          <div class="box-label">The point he keeps returning to</div>
+          <p>
+            If the money itself can be created in unlimited quantities, then saving in that money is like saving ice cubes in a warm room.
+            You might keep adding more, but the form is working against you.
+          </p>
+        </div>
+      </div>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Why “just buy the stock market” can still feel like running in place</h3>
+          <span class="money-era">Competing ledgers</span>
+        </div>
+
+        <p class="money-story">
+          People give a smart sounding answer: buy the stock market.
+          And to be fair, ownership in productive companies has historically been one of the best long term ways to outpace inflation.
+          Saylor’s lens is harsher. He says young people are being pushed into risk just to protect purchasing power.
+        </p>
+
+        <p class="money-story">
+          In his framing, it is strange that you need to become a part time investor to defend the value of your work.
+          It is strange that the default option, saving dollars, can quietly lose ground.
+          It is strange that you need to climb a wall simply to stand still.
+        </p>
+
+        <div class="problem">
+          <div class="box-label">The tension</div>
+          <p>
+            Stocks can be volatile and they carry business risk, valuation risk, and timing risk.
+            If your goal is a clean savings tool, the stock market is not designed to feel clean.
+          </p>
+        </div>
+      </div>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">Bitcoin as a new kind of savings technology</h3>
+          <span class="money-era">Digital property</span>
+        </div>
+
+        <p class="money-story">
+          Saylor treats Bitcoin less like a tech gadget and more like a property right.
+          Not a claim on a company. Not a promise from a bank. Not a policy instrument.
+          A scarce digital asset that you can hold directly.
+        </p>
+
+        <p class="money-story">
+          If you grew up online, this is the part that clicks.
+          You already live in a world where information moves instantly.
+          Bitcoin tries to make value move like information while staying scarce like a commodity.
+        </p>
+
+        <div class="insight">
+          <div class="box-label">The story he is telling</div>
+          <p>
+            Young people are playing a long game. The long game needs a unit that does not change because a committee changed its mind.
+            Bitcoin is an attempt at a ledger with rules that are difficult to rewrite.
+          </p>
+        </div>
+      </div>
+
+      <div class="money-card">
+        <div class="money-header">
+          <h3 class="money-name">A grounded way to think about the choice</h3>
+          <span class="money-era">Tradeoffs, not slogans</span>
+        </div>
+
+        <p class="money-story">
+          If you keep most of your savings in fiat, your biggest risk is slow loss of purchasing power over time.
+          If you buy productive assets like stocks, you take market and business risk in exchange for potential real growth.
+          If you hold some Bitcoin, you take volatility and adoption risk in exchange for an asset engineered for scarcity and self custody.
+        </p>
+
+        <p class="money-story">
+          Saylor’s conclusion is not that Bitcoin is a magic spell.
+          It is that, for the first time, ordinary people can choose a form of money that is scarce by design and portable by nature.
+          For someone with decades ahead, he sees that as a once per generation option.
+        </p>
+
+        <div class="insight">
+          <div class="box-label">A clean closing line for students</div>
+          <p>
+            The real question is not whether Bitcoin is cool.
+            The real question is whether your savings should live in a ledger that can expand endlessly, or a ledger that resists expansion.
+          </p>
+        </div>
+
+        <p class="money-story" style="margin-top:18px; color: rgba(232,240,255,0.72); font-family: var(--sans); font-size: 14px;">
+          Note: This is educational storytelling, not financial advice. Bitcoin can be volatile and risky. Never invest money you cannot afford to lose.
+        </p>
+      </div>
+    </section>
+
+    <section id="pattern">
+      <h2><span class="timeline-dot"></span>The Pattern</h2>
+
+      <p>
+        The story is less mysterious when you zoom out.
+        Money evolves because trade evolves.
+        When the world is local, local money works.
+        When the world becomes global, money has to survive global reality.
+      </p>
+
+      <p>
+        Shells fail when scarcity turns out to be a regional illusion.
+        Cattle fail when the economy needs small change and fast movement.
+        Commodity money fails when technology makes production easy.
+        Metals succeed at scarcity and durability, then struggle with speed and distance.
+        Banking layers solve speed and add fragility.
+        Fiat maximizes flexibility and pays for it with long term scarcity.
+      </p>
+
+      <p>
+        Bitcoin sits in a specific place in that arc.
+        It aims at the properties that repeatedly break when money becomes a managed promise.
+        Scarcity that does not rely on a ruler.
+        Portability that works at internet scale.
+        Verification that is public rather than institutional.
+      </p>
+
+      <div class="insight">
+        <div class="box-label">A clean way to frame it</div>
+        <p>
+          Fiat is optimized for daily spending and policy flexibility.
+          Bitcoin is optimized for long term scarcity and independent settlement.
+          They solve different constraints, which is why both can exist at the same time.
+        </p>
+      </div>
+
+      <p>
+        The open question is not whether Bitcoin becomes everything.
+        The question is simpler: in a world where the ledger can be edited, is there value in a ledger that resists editing?
+      </p>
+
+      <footer>
+        <div class="smallcaps">Inspired by Lyn Alden’s <em>Broken Money</em></div>
+        <p style="margin:10px 0 0;">
+          Built as a single scroll learning page for curious readers.
+        </p>
+      </footer>
+    </section>
+  </div>
+
+  <script>
+    const progress = document.getElementById('progress');
+    const nav = document.getElementById('nav');
+    const sections = Array.from(document.querySelectorAll('section'));
+
+    // Build nav dots
+    sections.forEach((section) => {
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot';
+      const h2 = section.querySelector('h2');
+      dot.title = h2 ? h2.innerText.replace(/\s+/g,' ').trim() : section.id;
+      dot.addEventListener('click', () => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      nav.appendChild(dot);
+    });
+
+    const navDots = Array.from(document.querySelectorAll('.nav-dot'));
+
+    function updateProgress(){
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+      progress.style.width = pct.toFixed(2) + '%';
+    }
+
+    window.addEventListener('scroll', updateProgress);
+    updateProgress();
+
+    // Reveal sections and keep nav in sync
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+
+          const idx = sections.indexOf(entry.target);
+          navDots.forEach((d,i) => d.classList.toggle('active', i === idx));
         }
+      });
+    }, { threshold: 0.18, rootMargin: '-90px 0px' });
 
-        function nextStep() {
-            // Hide current step
-            document.getElementById(`step${currentStep}`).classList.remove('active');
+    sections.forEach(s => sectionObserver.observe(s));
 
-            // Increment step
-            currentStep++;
-
-            // Show next step
-            if (currentStep <= totalSteps) {
-                document.getElementById(`step${currentStep}`).classList.add('active');
-                updateProgress();
-            } else {
-                // Show final step
-                document.getElementById('finalStep').classList.add('active');
-                document.getElementById(`step${currentStep - 1}`).classList.remove('active');
-                updateProgress(true);
-            }
+    // Animate property bars on first view
+    const barObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          const rows = entry.target.querySelectorAll('.prop-row');
+          rows.forEach(row => {
+            const score = parseInt(row.getAttribute('data-score') || '0', 10);
+            const pct = Math.max(0, Math.min(5, score)) / 5 * 100;
+            const fill = row.querySelector('.prop-fill');
+            if(fill) fill.style.width = pct + '%';
+          });
+          barObserver.unobserve(entry.target);
         }
+      });
+    }, { threshold: 0.35 });
 
-        function restart() {
-            // Hide all steps
-            for (let i = 1; i <= totalSteps; i++) {
-                document.getElementById(`step${i}`).classList.remove('active');
-            }
-            document.getElementById('finalStep').classList.remove('active');
-
-            // Reset step counter
-            currentStep = 1;
-
-            // Show first step
-            document.getElementById(`step${currentStep}`).classList.add('active');
-            updateProgress();
-        }
-
-        function updateProgress(final = false) {
-            const progressBar = document.getElementById('progressBar');
-            if (final) {
-                progressBar.style.width = `100%`;
-            } else {
-                const percentage = ((currentStep - 1) / totalSteps) * 100;
-                progressBar.style.width = `${percentage}%`;
-            }
-        }
-
-        // Initialize Progress Bar
-        updateProgress();
-    </script>
-
+    document.querySelectorAll('.money-card').forEach(card => barObserver.observe(card));
+  </script>
 </body>
 </html>
