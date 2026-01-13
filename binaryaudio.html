@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -498,7 +497,7 @@
       </div>
 
       <div class="small" style="margin-top: 10px;">
-        Values map into a pentatonic scale so most combinations sound decent.
+        Values map into a pentatonic scale in a retro friendly pitch range.
       </div>
     </div>
 
@@ -535,13 +534,28 @@
 
   <script>
     // ============================================================
+    // Pitch policy (retro friendly)
+    // ============================================================
+    // Drop the prebuilt melodies down so they sit in a comfy chiptune register.
+    // -2 octaves means midi -24 (E5 -> E3, C6 -> C4, etc.)
+    const MELODY_TRANSPOSE_OCTAVES = -2;
+    const MELODY_TRANSPOSE_SEMITONES = MELODY_TRANSPOSE_OCTAVES * 12;
+
+    function clampMidi(m) {
+      return Math.max(0, Math.min(127, m | 0));
+    }
+
+    function transposeMidi(midi, semitoneShift) {
+      return clampMidi(midi + (semitoneShift | 0));
+    }
+
+    // ============================================================
     // Prebuilt melodies
     // ============================================================
     const SONGS = [
       {
         name: "Epic Melody",
         notes: [
-          // Epic intro riff
           { note: "E5", durMs: 120, vel: 0.22 },
           { note: "E5", durMs: 120, vel: 0.20 },
           { note: "E5", durMs: 120, vel: 0.22 },
@@ -556,7 +570,6 @@
           { note: "G4", durMs: 240, vel: 0.20 },
           { note: "REST", durMs: 240, vel: 0.00 },
 
-          // Main melody section
           { note: "C5", durMs: 180, vel: 0.22 },
           { note: "REST", durMs: 120, vel: 0.00 },
           { note: "G4", durMs: 180, vel: 0.18 },
@@ -580,7 +593,6 @@
           { note: "D5", durMs: 140, vel: 0.18 },
           { note: "B4", durMs: 240, vel: 0.22 },
 
-          // Power section
           { note: "C5", durMs: 180, vel: 0.22 },
           { note: "REST", durMs: 120, vel: 0.00 },
           { note: "G4", durMs: 180, vel: 0.18 },
@@ -604,7 +616,6 @@
           { note: "D5", durMs: 140, vel: 0.18 },
           { note: "B4", durMs: 240, vel: 0.22 },
 
-          // Epic finale
           { note: "G5", durMs: 120, vel: 0.24 },
           { note: "F#5", durMs: 120, vel: 0.22 },
           { note: "F5", durMs: 120, vel: 0.22 },
@@ -735,12 +746,15 @@
     function playFrequency(freqHz, durMs, vel) {
       ensureAudio();
 
+      // Just in case, keep it in a sane audible range.
+      const safeFreq = Math.max(40, Math.min(6000, freqHz || 0));
+
       const now = audioCtx.currentTime;
       const dur = Math.max(0.03, durMs / 1000);
 
       const osc = audioCtx.createOscillator();
       osc.type = "square";
-      osc.frequency.setValueAtTime(freqHz, now);
+      osc.frequency.setValueAtTime(safeFreq, now);
 
       const gain = audioCtx.createGain();
       const peak = Math.min(0.35, Math.max(0.02, vel || 0.18));
@@ -793,7 +807,7 @@
       const semitone = NOTE_TO_SEMITONE[key];
       if (semitone === undefined || Number.isNaN(octave)) return { isRest: true };
 
-      return { isRest: false, octave, semitone, pretty: `${letter}${accidentalRaw}${octave}` };
+      return { isRest: false, octave, semitone, letter, accidentalRaw, pretty: `${letter}${accidentalRaw}${octave}` };
     }
 
     function midiFromParsed(p) {
@@ -873,11 +887,11 @@
       tape.prepend(div);
     }
 
-    function updateHeader(index, item, parsed, midi, freq, bin) {
+    function updateHeader(index, item, displayNote, midi, freq, bin) {
       idxVal.textContent = String(index);
-      noteVal.textContent = parsed.isRest ? "REST" : parsed.pretty;
-      freqVal.textContent = parsed.isRest ? "0 Hz" : `${Math.round(freq)} Hz`;
-      midiVal.textContent = String(parsed.isRest ? 0 : midi);
+      noteVal.textContent = displayNote;
+      freqVal.textContent = displayNote === "REST" ? "0 Hz" : `${Math.round(freq)} Hz`;
+      midiVal.textContent = String(displayNote === "REST" ? 0 : midi);
       durVal.textContent = `${item.durMs} ms`;
       binVal.textContent = bin;
     }
@@ -892,21 +906,25 @@
       let midi = 0;
       let freq = 0;
       let bin = "00000000";
+      let displayNote = "REST";
 
       if (!parsed.isRest) {
-        midi = midiFromParsed(parsed);
-        freq = freqFromMidi(midi);
-        bin = to8BitBinary(midi);
+        const rawMidi = midiFromParsed(parsed);
+        const playedMidi = transposeMidi(rawMidi, MELODY_TRANSPOSE_SEMITONES);
+        const playedOctave = (parsed.octave + MELODY_TRANSPOSE_OCTAVES);
+
+        midi = playedMidi;
+        freq = freqFromMidi(playedMidi);
+        bin = to8BitBinary(playedMidi);
+        displayNote = `${parsed.letter}${parsed.accidentalRaw}${playedOctave}`;
+
         playFrequency(freq, item.durMs, item.vel);
       } else {
         stopAll();
-        midi = 0;
-        freq = 0;
-        bin = "00000000";
       }
 
-      updateHeader(index + 1, item, parsed, midi, freq, bin);
-      logRow(parsed.isRest ? "REST" : parsed.pretty, parsed.isRest ? 0 : midi, bin, parsed.isRest ? 0 : Math.round(freq), item.durMs);
+      updateHeader(index + 1, item, displayNote, midi, freq, bin);
+      logRow(displayNote, displayNote === "REST" ? 0 : midi, bin, displayNote === "REST" ? 0 : Math.round(freq), item.durMs);
 
       i = index + 1;
       if (i >= melody.length) i = 0;
@@ -993,7 +1011,7 @@
     resetStepper(true);
 
     // ============================================================
-    // Binary music maker logic
+    // Binary music maker logic (retro pitch range)
     // ============================================================
     const binInputField = document.getElementById("binInputField");
     const playBinBtn = document.getElementById("playBinBtn");
@@ -1006,17 +1024,23 @@
 
     const PENTATONIC_INTERVALS = [0, 2, 4, 7, 9];
 
+    // Keep notes in a comfy retro band: C3 (130.81 Hz) up to A5 (880 Hz)
+    const MAKER_BASE_OCTAVE = 3;     // C3
+    const MAKER_OCTAVES = 3;         // C3..A5 across pentatonic
+    const MAKER_STEPS_MAX = (MAKER_OCTAVES * 5) - 1; // 0..14 (15 distinct notes)
+
     function mapValueToMidi(val) {
-      const clamped = Math.max(0, Math.min(255, val | 0));
-      const baseOctave = 2;
-      const totalSteps = 60;
-      const step = Math.floor((clamped / 255) * totalSteps);
+      const v = Math.max(0, Math.min(255, val | 0));
+
+      const step = Math.floor((v / 255) * MAKER_STEPS_MAX);
       const octaveOffset = Math.floor(step / 5);
       const noteInScale = step % 5;
 
       const semitone = PENTATONIC_INTERVALS[noteInScale];
-      const midi = (baseOctave + octaveOffset + 1) * 12 + semitone;
-      return midi;
+      const octave = MAKER_BASE_OCTAVE + octaveOffset;
+      const midi = (octave + 1) * 12 + semitone;
+
+      return clampMidi(midi);
     }
 
     function noteNameFromMidi(midi) {
@@ -1152,4 +1176,3 @@
   </script>
 </body>
 </html>
-
