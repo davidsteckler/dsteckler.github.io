@@ -41,16 +41,14 @@
     }
 
     .card {
-      background: linear-gradient(180deg, var(--cardA), var(--cardB));
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 18px;
       box-shadow: 0 16px 40px rgba(0,0,0,0.35);
     }
 
-    .full {
-      grid-column: 1 / -1;
-    }
+    .full { grid-column: 1 / -1; }
 
     h1 {
       font-size: 22px;
@@ -82,6 +80,7 @@
       letter-spacing: 0.2px;
       transition: transform 0.05s ease, background 0.2s ease, border 0.2s ease, opacity 0.2s ease;
       user-select: none;
+      touch-action: manipulation;
     }
 
     button:hover {
@@ -100,21 +99,18 @@
       border-color: rgba(124, 247, 193, 0.35);
       background: rgba(124, 247, 193, 0.10);
     }
-
     .primary:hover { background: rgba(124, 247, 193, 0.16); }
 
     .secondary {
       border-color: rgba(124, 199, 255, 0.35);
       background: rgba(124, 199, 255, 0.10);
     }
-
     .secondary:hover { background: rgba(124, 199, 255, 0.16); }
 
     .danger {
       border-color: rgba(255, 107, 107, 0.35);
       background: rgba(255, 107, 107, 0.10);
     }
-
     .danger:hover { background: rgba(255, 107, 107, 0.16); }
 
     .grid {
@@ -139,10 +135,7 @@
       margin-bottom: 6px;
     }
 
-    .value {
-      font-size: 18px;
-      font-weight: 750;
-    }
+    .value { font-size: 18px; font-weight: 750; }
 
     .mono {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -329,6 +322,7 @@
       flex-direction: column;
       justify-content: center;
       gap: 4px;
+      touch-action: manipulation;
     }
 
     .bitCell:hover {
@@ -368,6 +362,7 @@
       font-weight: 650;
       cursor: pointer;
       user-select: none;
+      touch-action: manipulation;
     }
 
     .toggle input { accent-color: #7cf7c1; }
@@ -392,7 +387,7 @@
         <div>
           <h1>8 bit note stepper</h1>
           <p>
-            Step one note at a time, or play the whole melody.
+            Tap for quick notes. Press and hold for long notes.
             Each note shows its 8 bit MIDI binary.
           </p>
         </div>
@@ -403,7 +398,7 @@
       <select id="songSelect" aria-label="Select a melody"></select>
 
       <div class="controls">
-        <button id="nextBtn" class="primary">Play next note</button>
+        <button id="nextBtn" class="primary" title="Press and hold to sustain the next note">Play next note (hold)</button>
         <button id="playAllBtn" class="secondary">Play full melody</button>
         <button id="pauseBtn">Pause</button>
         <button id="resetBtn">Reset</button>
@@ -460,13 +455,14 @@
     <div class="card">
       <h1>Binary music maker</h1>
       <p>
-        Enter any number 0 to 255 to play a note mapped to a pleasant scale.
-        Your sequence is recorded below.
+        Press and hold Play to control duration.
+        Add REST the same way, hold for how long you want the silence.
       </p>
 
       <div class="binInput">
         <input type="number" id="binInputField" min="0" max="255" placeholder="0 to 255" />
-        <button id="playBinBtn" class="primary">Play</button>
+        <button id="playBinBtn" class="primary" title="Press and hold to set note length">Play (hold)</button>
+        <button id="restBtn" class="secondary" title="Press and hold to set rest length">REST (hold)</button>
       </div>
 
       <div class="keypad">
@@ -497,7 +493,7 @@
       </div>
 
       <div class="small" style="margin-top: 10px;">
-        Values map into a pentatonic scale in a retro friendly pitch range.
+        Tip: hold longer for that classic chiptune sustain, or tap for quick blips.
       </div>
     </div>
 
@@ -507,13 +503,13 @@
         <div>
           <h1>0 to 255 binary palette</h1>
           <p>
-            Click any value to play it and add it to your sequence.
+            Press and hold a tile to control note duration.
             Each tile shows decimal and its 8 bit binary.
           </p>
         </div>
 
         <div class="paletteControls">
-          <label class="toggle" title="When on, clicking a tile plays audio. When off, it only adds to the sequence.">
+          <label class="toggle" title="When on, holding a tile plays audio. When off, holding a tile only adds to the sequence with a default duration.">
             <input type="checkbox" id="paletteSoundToggle" checked />
             <span>Sound on click</span>
           </label>
@@ -536,8 +532,6 @@
     // ============================================================
     // Pitch policy (retro friendly)
     // ============================================================
-    // Drop the prebuilt melodies down so they sit in a comfy chiptune register.
-    // -2 octaves means midi -24 (E5 -> E3, C6 -> C4, etc.)
     const MELODY_TRANSPOSE_OCTAVES = -2;
     const MELODY_TRANSPOSE_SEMITONES = MELODY_TRANSPOSE_OCTAVES * 12;
 
@@ -593,42 +587,12 @@
           { note: "D5", durMs: 140, vel: 0.18 },
           { note: "B4", durMs: 240, vel: 0.22 },
 
-          { note: "C5", durMs: 180, vel: 0.22 },
-          { note: "REST", durMs: 120, vel: 0.00 },
-          { note: "G4", durMs: 180, vel: 0.18 },
-          { note: "REST", durMs: 120, vel: 0.00 },
-          { note: "E4", durMs: 180, vel: 0.18 },
-          { note: "REST", durMs: 120, vel: 0.00 },
-          { note: "A4", durMs: 160, vel: 0.20 },
-          { note: "B4", durMs: 160, vel: 0.20 },
-          { note: "Bb4", durMs: 140, vel: 0.18 },
-          { note: "A4", durMs: 240, vel: 0.22 },
-
-          { note: "G4", durMs: 140, vel: 0.18 },
-          { note: "E5", durMs: 140, vel: 0.20 },
-          { note: "G5", durMs: 140, vel: 0.20 },
-          { note: "A5", durMs: 180, vel: 0.22 },
-          { note: "F5", durMs: 140, vel: 0.20 },
-          { note: "G5", durMs: 140, vel: 0.20 },
-          { note: "REST", durMs: 120, vel: 0.00 },
-          { note: "E5", durMs: 180, vel: 0.20 },
-          { note: "C5", durMs: 140, vel: 0.18 },
-          { note: "D5", durMs: 140, vel: 0.18 },
-          { note: "B4", durMs: 240, vel: 0.22 },
-
           { note: "G5", durMs: 120, vel: 0.24 },
           { note: "F#5", durMs: 120, vel: 0.22 },
           { note: "F5", durMs: 120, vel: 0.22 },
           { note: "D#5", durMs: 180, vel: 0.24 },
           { note: "E5", durMs: 140, vel: 0.22 },
           { note: "REST", durMs: 120, vel: 0.00 },
-          { note: "G#4", durMs: 140, vel: 0.18 },
-          { note: "A4", durMs: 140, vel: 0.20 },
-          { note: "C5", durMs: 140, vel: 0.20 },
-          { note: "REST", durMs: 120, vel: 0.00 },
-          { note: "A4", durMs: 140, vel: 0.20 },
-          { note: "C5", durMs: 140, vel: 0.20 },
-          { note: "D5", durMs: 180, vel: 0.22 },
 
           { note: "C5", durMs: 360, vel: 0.26 },
           { note: "REST", durMs: 240, vel: 0.00 },
@@ -743,14 +707,11 @@
       activeNodes = [];
     }
 
-    function playFrequency(freqHz, durMs, vel) {
+    function startTone(freqHz, vel) {
       ensureAudio();
 
-      // Just in case, keep it in a sane audible range.
       const safeFreq = Math.max(40, Math.min(6000, freqHz || 0));
-
       const now = audioCtx.currentTime;
-      const dur = Math.max(0.03, durMs / 1000);
 
       const osc = audioCtx.createOscillator();
       osc.type = "square";
@@ -761,21 +722,34 @@
 
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.exponentialRampToValueAtTime(peak, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
       osc.connect(gain);
       gain.connect(masterGain);
 
       osc.start(now);
-      osc.stop(now + dur + 0.02);
 
       activeNodes.push(osc, gain);
 
-      osc.onended = () => {
-        activeNodes = activeNodes.filter(x => x !== osc && x !== gain);
-        try { osc.disconnect(); } catch (e) {}
-        try { gain.disconnect(); } catch (e) {}
-      };
+      return { osc, gain, startTimeMs: performance.now() };
+    }
+
+    function stopTone(handle) {
+      if (!handle) return 0;
+      const heldMs = Math.max(30, Math.round(performance.now() - handle.startTimeMs));
+
+      const now = audioCtx ? audioCtx.currentTime : 0;
+      try {
+        handle.gain.gain.cancelScheduledValues(now);
+        handle.gain.gain.setValueAtTime(Math.max(0.0001, handle.gain.gain.value), now);
+        handle.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+      } catch (e) {}
+
+      try { handle.osc.stop(now + 0.04); } catch (e) {}
+      try { handle.osc.disconnect(); } catch (e) {}
+      try { handle.gain.disconnect(); } catch (e) {}
+
+      activeNodes = activeNodes.filter(x => x !== handle.osc && x !== handle.gain);
+      return heldMs;
     }
 
     // ============================================================
@@ -807,7 +781,7 @@
       const semitone = NOTE_TO_SEMITONE[key];
       if (semitone === undefined || Number.isNaN(octave)) return { isRest: true };
 
-      return { isRest: false, octave, semitone, letter, accidentalRaw, pretty: `${letter}${accidentalRaw}${octave}` };
+      return { isRest: false, octave, semitone, letter, accidentalRaw };
     }
 
     function midiFromParsed(p) {
@@ -887,57 +861,120 @@
       tape.prepend(div);
     }
 
-    function updateHeader(index, item, displayNote, midi, freq, bin) {
+    function updateHeader(index, displayNote, midi, freq, dur, bin) {
       idxVal.textContent = String(index);
       noteVal.textContent = displayNote;
       freqVal.textContent = displayNote === "REST" ? "0 Hz" : `${Math.round(freq)} Hz`;
       midiVal.textContent = String(displayNote === "REST" ? 0 : midi);
-      durVal.textContent = `${item.durMs} ms`;
+      durVal.textContent = `${dur} ms`;
       binVal.textContent = bin;
     }
 
-    function playIndex(index) {
-      if (melody.length === 0) return 120;
+    function getPlayedNoteForIndex(index) {
+      if (melody.length === 0) return null;
       if (index >= melody.length) index = 0;
 
       const item = melody[index];
       const parsed = parseNoteName(item.note);
 
-      let midi = 0;
-      let freq = 0;
-      let bin = "00000000";
-      let displayNote = "REST";
-
-      if (!parsed.isRest) {
-        const rawMidi = midiFromParsed(parsed);
-        const playedMidi = transposeMidi(rawMidi, MELODY_TRANSPOSE_SEMITONES);
-        const playedOctave = (parsed.octave + MELODY_TRANSPOSE_OCTAVES);
-
-        midi = playedMidi;
-        freq = freqFromMidi(playedMidi);
-        bin = to8BitBinary(playedMidi);
-        displayNote = `${parsed.letter}${parsed.accidentalRaw}${playedOctave}`;
-
-        playFrequency(freq, item.durMs, item.vel);
-      } else {
-        stopAll();
+      if (parsed.isRest) {
+        return {
+          type: "REST",
+          item,
+          displayNote: "REST",
+          midi: 0,
+          freq: 0,
+          bin: "00000000",
+          vel: 0.0
+        };
       }
 
-      updateHeader(index + 1, item, displayNote, midi, freq, bin);
-      logRow(displayNote, displayNote === "REST" ? 0 : midi, bin, displayNote === "REST" ? 0 : Math.round(freq), item.durMs);
+      const rawMidi = midiFromParsed(parsed);
+      const playedMidi = transposeMidi(rawMidi, MELODY_TRANSPOSE_SEMITONES);
+      const playedOctave = (parsed.octave + MELODY_TRANSPOSE_OCTAVES);
 
-      i = index + 1;
+      const displayNote = `${parsed.letter}${parsed.accidentalRaw}${playedOctave}`;
+      const freq = freqFromMidi(playedMidi);
+      const bin = to8BitBinary(playedMidi);
+
+      return {
+        type: "NOTE",
+        item,
+        displayNote,
+        midi: playedMidi,
+        freq,
+        bin,
+        vel: item.vel || 0.18
+      };
+    }
+
+    // Hold logic for stepper
+    let stepHold = null;
+
+    function beginStepHold() {
+      ensureAudio();
+      if (isPlayingAll) return;
+
+      if (stepHold) return;
+
+      setStatus("holding");
+
+      const n = getPlayedNoteForIndex(i);
+      if (!n) return;
+
+      updateHeader(i + 1, n.displayNote, n.midi, n.freq, 0, n.bin);
+
+      if (n.type === "NOTE") {
+        const tone = startTone(n.freq, n.vel);
+        stepHold = { kind: "NOTE", tone, meta: n, indexAtPress: i };
+      } else {
+        stepHold = { kind: "REST", meta: n, startTimeMs: performance.now(), indexAtPress: i };
+      }
+    }
+
+    function endStepHold() {
+      if (!stepHold) return;
+
+      let heldMs = 0;
+
+      if (stepHold.kind === "NOTE") {
+        heldMs = stopTone(stepHold.tone);
+      } else {
+        heldMs = Math.max(30, Math.round(performance.now() - stepHold.startTimeMs));
+      }
+
+      const meta = stepHold.meta;
+
+      updateHeader(stepHold.indexAtPress + 1, meta.displayNote, meta.midi, meta.freq, heldMs, meta.bin);
+      logRow(meta.displayNote, meta.displayNote === "REST" ? 0 : meta.midi, meta.bin, meta.displayNote === "REST" ? 0 : Math.round(meta.freq), heldMs);
+
+      i = stepHold.indexAtPress + 1;
       if (i >= melody.length) i = 0;
 
-      return item.durMs;
+      stepHold = null;
+      setStatus("ready");
     }
 
-    function stepOnce() {
-      ensureAudio();
-      setStatus("stepping");
-      const dur = playIndex(i);
-      setTimeout(() => setStatus("ready"), Math.min(450, dur + 40));
-    }
+    // Prevent context menu on long press
+    nextBtn.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // Pointer events: works for mouse and touch
+    nextBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      beginStepHold();
+      try { nextBtn.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    nextBtn.addEventListener("pointerup", (e) => {
+      e.preventDefault();
+      endStepHold();
+    });
+
+    nextBtn.addEventListener("pointercancel", () => endStepHold());
+    nextBtn.addEventListener("pointerleave", () => {
+      // Only end if mouse is down style hold, pointerleave can happen for mouse drag out
+      // Safer to keep it simple: do nothing here.
+    });
 
     function playAll() {
       ensureAudio();
@@ -949,7 +986,24 @@
 
       const loop = () => {
         if (!isPlayingAll) return;
-        const dur = playIndex(i);
+
+        const n = getPlayedNoteForIndex(i);
+        if (!n) return;
+
+        const dur = Math.max(30, n.item.durMs || 150);
+
+        if (n.type === "NOTE") {
+          // Use scheduled short note for the prebuilt playback
+          const tone = startTone(n.freq, n.vel);
+          setTimeout(() => { stopTone(tone); }, dur);
+        }
+
+        updateHeader(i + 1, n.displayNote, n.midi, n.freq, dur, n.bin);
+        logRow(n.displayNote, n.displayNote === "REST" ? 0 : n.midi, n.bin, n.displayNote === "REST" ? 0 : Math.round(n.freq), dur);
+
+        i = i + 1;
+        if (i >= melody.length) i = 0;
+
         playAllTimer = setTimeout(loop, dur);
       };
 
@@ -968,6 +1022,8 @@
     function resetStepper(alsoClearTape = true) {
       pauseAll();
       stopAll();
+      stepHold = null;
+
       i = 0;
 
       idxVal.textContent = "0";
@@ -1001,20 +1057,20 @@
       resetStepper(true);
     });
 
-    nextBtn.addEventListener("click", stepOnce);
     playAllBtn.addEventListener("click", playAll);
     pauseBtn.addEventListener("click", pauseAll);
     resetBtn.addEventListener("click", () => resetStepper(true));
-    stopBtn.addEventListener("click", () => { stopAll(); setStatus("ready"); });
+    stopBtn.addEventListener("click", () => { stopAll(); stepHold = null; setStatus("ready"); });
 
     loadSongsIntoSelect();
     resetStepper(true);
 
     // ============================================================
-    // Binary music maker logic (retro pitch range)
+    // Binary music maker logic (retro pitch range + hold durations)
     // ============================================================
     const binInputField = document.getElementById("binInputField");
     const playBinBtn = document.getElementById("playBinBtn");
+    const restBtn = document.getElementById("restBtn");
     const clearSeqBtn = document.getElementById("clearSeqBtn");
     const playSeqBtn = document.getElementById("playSeqBtn");
     const sequence = document.getElementById("sequence");
@@ -1024,10 +1080,9 @@
 
     const PENTATONIC_INTERVALS = [0, 2, 4, 7, 9];
 
-    // Keep notes in a comfy retro band: C3 (130.81 Hz) up to A5 (880 Hz)
     const MAKER_BASE_OCTAVE = 3;     // C3
-    const MAKER_OCTAVES = 3;         // C3..A5 across pentatonic
-    const MAKER_STEPS_MAX = (MAKER_OCTAVES * 5) - 1; // 0..14 (15 distinct notes)
+    const MAKER_OCTAVES = 3;         // C3..A5
+    const MAKER_STEPS_MAX = (MAKER_OCTAVES * 5) - 1; // 0..14
 
     function mapValueToMidi(val) {
       const v = Math.max(0, Math.min(255, val | 0));
@@ -1060,13 +1115,29 @@
       for (const item of userSequence) {
         const div = document.createElement("div");
         div.className = "seqItem";
-        div.innerHTML = `<span class="note">${escapeHtml(item.noteName)}</span><span class="bin">${item.bin} (${item.val})</span>`;
+
+        if (item.type === "REST") {
+          div.innerHTML = `<span class="note">REST</span><span class="bin">dur ${item.durMs} ms</span>`;
+        } else {
+          div.innerHTML = `<span class="note">${escapeHtml(item.noteName)}</span><span class="bin">${item.bin} (${item.val}) dur ${item.durMs} ms</span>`;
+        }
+
         sequence.appendChild(div);
       }
     }
 
-    function addValueToSequence(val, shouldSound = true) {
+    // Hold state for maker plays
+    let makerHold = null;
+
+    function commitMakerNote(noteObj, heldMs) {
+      const durMs = Math.max(30, heldMs | 0);
+      userSequence.push({ ...noteObj, durMs });
+      updateSequenceDisplay();
+    }
+
+    function beginMakerHoldForValue(val) {
       ensureAudio();
+      if (makerHold) return;
 
       const v = Math.max(0, Math.min(255, val | 0));
       const midi = mapValueToMidi(v);
@@ -1074,12 +1145,73 @@
       const bin = to8BitBinary(v);
       const noteName = noteNameFromMidi(midi);
 
-      if (shouldSound) playFrequency(freq, 180, 0.20);
+      const tone = startTone(freq, 0.20);
 
-      userSequence.push({ val: v, midi, bin, noteName, freq });
-      updateSequenceDisplay();
-      return { v, midi, bin, noteName, freq };
+      makerHold = {
+        kind: "NOTE",
+        tone,
+        noteObj: { type: "NOTE", val: v, midi, bin, noteName, freq }
+      };
     }
+
+    function beginMakerHoldRest() {
+      ensureAudio();
+      if (makerHold) return;
+
+      makerHold = {
+        kind: "REST",
+        startTimeMs: performance.now(),
+        noteObj: { type: "REST" }
+      };
+    }
+
+    function endMakerHold() {
+      if (!makerHold) return;
+
+      let heldMs = 0;
+
+      if (makerHold.kind === "NOTE") {
+        heldMs = stopTone(makerHold.tone);
+      } else {
+        heldMs = Math.max(30, Math.round(performance.now() - makerHold.startTimeMs));
+      }
+
+      commitMakerNote(makerHold.noteObj, heldMs);
+      makerHold = null;
+    }
+
+    // Play (hold) button
+    playBinBtn.addEventListener("contextmenu", (e) => e.preventDefault());
+    playBinBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      const val = parseInt(binInputField.value, 10);
+      if (Number.isNaN(val) || val < 0 || val > 255) {
+        alert("Please enter a number between 0 and 255");
+        return;
+      }
+      beginMakerHoldForValue(val);
+      try { playBinBtn.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    playBinBtn.addEventListener("pointerup", (e) => { e.preventDefault(); endMakerHold(); });
+    playBinBtn.addEventListener("pointercancel", () => endMakerHold());
+
+    // REST (hold) button
+    restBtn.addEventListener("contextmenu", (e) => e.preventDefault());
+    restBtn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      beginMakerHoldRest();
+      try { restBtn.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    restBtn.addEventListener("pointerup", (e) => { e.preventDefault(); endMakerHold(); });
+    restBtn.addEventListener("pointercancel", () => endMakerHold());
+
+    // Keypad: tap sets value, still uses hold on Play
+    binKeys.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const val = parseInt(btn.dataset.val, 10);
+        binInputField.value = String(val);
+      });
+    });
 
     function clearSequence() {
       userSequence = [];
@@ -1090,49 +1222,85 @@
       if (userSequence.length === 0) return;
       ensureAudio();
 
+      // Stop any hold before playing back
+      if (makerHold) { endMakerHold(); }
+
       for (const item of userSequence) {
-        playFrequency(item.freq, 180, 0.20);
-        await new Promise(r => setTimeout(r, 200));
+        const dur = Math.max(30, item.durMs || 180);
+
+        if (item.type === "REST") {
+          await new Promise(r => setTimeout(r, dur));
+          continue;
+        }
+
+        const tone = startTone(item.freq, 0.20);
+        await new Promise(r => setTimeout(r, dur));
+        stopTone(tone);
+        await new Promise(r => setTimeout(r, 20));
       }
     }
-
-    playBinBtn.addEventListener("click", () => {
-      const val = parseInt(binInputField.value, 10);
-      if (Number.isNaN(val) || val < 0 || val > 255) {
-        alert("Please enter a number between 0 and 255");
-        return;
-      }
-      addValueToSequence(val, true);
-    });
-
-    binInputField.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") playBinBtn.click();
-    });
-
-    binKeys.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const val = parseInt(btn.dataset.val, 10);
-        binInputField.value = String(val);
-        addValueToSequence(val, true);
-      });
-    });
 
     clearSeqBtn.addEventListener("click", clearSequence);
     playSeqBtn.addEventListener("click", playSequence);
 
+    updateSequenceDisplay();
+
     // ============================================================
-    // 0 to 255 palette grid
+    // 0 to 255 palette grid (hold to control duration)
     // ============================================================
     const paletteGrid = document.getElementById("paletteGrid");
     const paletteSoundToggle = document.getElementById("paletteSoundToggle");
     const paletteClearActiveBtn = document.getElementById("paletteClearActiveBtn");
 
     let lastActiveCell = null;
-
     function setActiveCell(cell) {
       if (lastActiveCell) lastActiveCell.classList.remove("active");
       lastActiveCell = cell;
       if (lastActiveCell) lastActiveCell.classList.add("active");
+    }
+
+    let paletteHold = null;
+
+    function beginPaletteHold(value, cell) {
+      ensureAudio();
+      if (paletteHold) return;
+
+      setActiveCell(cell);
+      binInputField.value = String(value);
+
+      const soundOn = paletteSoundToggle.checked;
+
+      if (!soundOn) {
+        // No sound mode: add immediately with a default duration.
+        const v = Math.max(0, Math.min(255, value | 0));
+        const midi = mapValueToMidi(v);
+        const freq = freqFromMidi(midi);
+        const bin = to8BitBinary(v);
+        const noteName = noteNameFromMidi(midi);
+        userSequence.push({ type: "NOTE", val: v, midi, bin, noteName, freq, durMs: 180 });
+        updateSequenceDisplay();
+        return;
+      }
+
+      const v = Math.max(0, Math.min(255, value | 0));
+      const midi = mapValueToMidi(v);
+      const freq = freqFromMidi(midi);
+      const bin = to8BitBinary(v);
+      const noteName = noteNameFromMidi(midi);
+
+      const tone = startTone(freq, 0.20);
+
+      paletteHold = {
+        tone,
+        noteObj: { type: "NOTE", val: v, midi, bin, noteName, freq }
+      };
+    }
+
+    function endPaletteHold() {
+      if (!paletteHold) return;
+      const heldMs = stopTone(paletteHold.tone);
+      commitMakerNote(paletteHold.noteObj, heldMs);
+      paletteHold = null;
     }
 
     function buildPalette() {
@@ -1154,15 +1322,21 @@
         cell.appendChild(top);
         cell.appendChild(bottom);
 
-        cell.addEventListener("click", () => {
+        cell.addEventListener("contextmenu", (e) => e.preventDefault());
+
+        cell.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
           const value = parseInt(cell.dataset.val, 10);
-          binInputField.value = String(value);
-
-          const soundOn = paletteSoundToggle.checked;
-          addValueToSequence(value, soundOn);
-
-          setActiveCell(cell);
+          beginPaletteHold(value, cell);
+          try { cell.setPointerCapture(e.pointerId); } catch (err) {}
         });
+
+        cell.addEventListener("pointerup", (e) => {
+          e.preventDefault();
+          endPaletteHold();
+        });
+
+        cell.addEventListener("pointercancel", () => endPaletteHold());
 
         frag.appendChild(cell);
       }
