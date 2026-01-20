@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>—</title>
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+
+      --panel: rgba(255,255,255,0.055);
+      --border: rgba(255,255,255,0.12);
+
+      --text: rgba(245,248,255,0.90);
+
+      /* electricity palette */
+      --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffd07a;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 980px;
+      --r: 18px;
+      --shadow: 0 22px 90px rgba(0,0,0,0.62);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 16px 70px;
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(620px 260px at 15% 0%, rgba(125,182,255,0.18), transparent 55%),
+        radial-gradient(620px 260px at 85% 0%, rgba(134,243,198,0.16), transparent 55%);
+      opacity: 0.30;
+      pointer-events:none;
+      filter: blur(7px);
+    }
+
+    .content{
+      position:relative;
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    /* TOP ELECTRIC “BUS” (now ABOVE the binary, not over it) */
+    .busRow{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap: 10px;
+      padding: 6px 2px 0;
+    }
+
+    .bus{
+      display:flex;
+      gap:6px;
+      align-items:center;
+
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.035);
+
+      cursor:pointer;
+      user-select:none;
+
+      opacity:0.78;
+      transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+    }
+
+    .bus:hover{
+      opacity:0.98;
+      transform: translateY(-1px);
+      border-color: rgba(134,243,198,0.26);
+    }
+
+    .led{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.05);
+      transition: background 120ms ease, box-shadow 120ms ease, border-color 120ms ease, transform 120ms ease;
+    }
+
+    /* idle “current” breath on hover */
+    .bus:hover .led{
+      animation: breathe 1.2s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 70ms);
+    }
+    @keyframes breathe{
+      0%, 100%{ transform: translateY(0px); }
+      50%{ transform: translateY(-1px); }
+    }
+
+    .led.on{
+      background: rgba(134,243,198,0.65);
+      border-color: rgba(134,243,198,0.40);
+      box-shadow: 0 0 14px rgba(134,243,198,0.25);
+      animation:none;
+      transform: translateY(-1px);
+    }
+
+    .led.off{
+      background: rgba(125,182,255,0.12);
+      border-color: rgba(125,182,255,0.20);
+      box-shadow:none;
+      animation:none;
+      transform: translateY(0px);
+    }
+
+    .trace{
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
+      opacity:0.40;
+      border-radius: 999px;
+    }
+
+    .binaryBox{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.30);
+      padding: 16px;
+      position:relative;
+    }
+
+    pre{
+      margin:0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.65;
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      color: rgba(245,248,255,0.88);
+      user-select:text;
+    }
+
+    ::selection{ background: rgba(134,243,198,0.22); }
+
+    @media (max-width: 520px){
+      pre{ font-size: 13px; line-height: 1.6; }
+      .wrap{ padding-top: 24px; }
+      .content{ padding: 14px; }
+      .binaryBox{ padding: 14px; }
+      .bus{ padding: 7px 9px; }
+      .trace{ display:none; }
+      .busRow{ justify-content:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="content">
+        <!-- (egg) If you're hunting for meaning, start by grouping what repeats. -->
+
+        <!-- Electricity “first”: sits ABOVE the binary -->
+        <div class="busRow">
+          <div class="trace" aria-hidden="true"></div>
+          <div class="bus" id="bus" title="(click an 8-bit chunk)">
+            <span class="led" style="--i:0"></span>
+            <span class="led" style="--i:1"></span>
+            <span class="led" style="--i:2"></span>
+            <span class="led" style="--i:3"></span>
+            <span class="led" style="--i:4"></span>
+            <span class="led" style="--i:5"></span>
+            <span class="led" style="--i:6"></span>
+            <span class="led" style="--i:7"></span>
+          </div>
+        </div>
+
+        <div class="binaryBox">
+<pre id="b" aria-label="binary message">
+01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010 01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100 01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000 01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100 01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111 01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111 01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010 01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111 01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101 01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000 01000010 01000101 00100000 01011001 01001111 01010101 01010010 01010011 00101100 00100000 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110 01000111 00101110 00001010 01001110 01001111 01010111 00100000 01000111 01001111 00100000 01000010 01010101 01001001 01001100 01000100 00101110 00001010
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const pre = document.getElementById("b");
+      const bus = document.getElementById("bus");
+      const leds = Array.from(bus.querySelectorAll(".led"));
+
+      const raw = pre.textContent.trim();
+      const chunks = raw.split(/\s+/);
+
+      // (egg) Inspect Element reward
+      pre.dataset.bytes = String(chunks.length);
+      pre.dataset.format = "8-bit";
+      pre.dataset.suggest = "ASCII";
+
+      // (egg) Console breadcrumb
+      console.log("%cIf it’s electricity, think 1/0. If it’s 8 at a time, think bytes.", "color: rgba(125,182,255,0.55); font-family: ui-monospace; font-size: 12px;");
+
+      // ROT13 “view source” stored as body attribute
+      document.body.setAttribute("data-aux", "ivrj fbhpr");
+
+      function showByte(bits){
+        for(let i=0;i<8;i++){
+          const bit = bits[i];
+          leds[i].classList.remove("on","off");
+          leds[i].classList.add(bit === "1" ? "on" : "off");
+        }
+      }
+
+      function clearBus(){
+        leds.forEach(l => l.classList.remove("on","off"));
+      }
+
+      // Click any 8-bit chunk in the text: light the bus accordingly.
+      // Works with wrapping by grabbing the 8-bit word at click point.
+      pre.addEventListener("click", (e) => {
+        let range = null;
+
+        if(document.caretRangeFromPoint){
+          range = document.caretRangeFromPoint(e.clientX, e.clientY);
+        }else if(document.caretPositionFromPoint){
+          const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+          if(pos){
+            range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+            range.setEnd(pos.offsetNode, pos.offset);
+          }
+        }
+
+        if(!range) return;
+
+        const node = range.startContainer;
+        const text = node && node.nodeType === 3 ? node.textContent : "";
+        const idx = range.startOffset;
+
+        let left = idx, right = idx;
+        while(left > 0 && /[01]/.test(text[left-1])) left--;
+        while(right < text.length && /[01]/.test(text[right])) right++;
+
+        const word = text.slice(left, right).trim();
+        if(/^[01]{8}$/.test(word)){
+          showByte(word);
+          bus.title = word;
+        }
+      });
+
+      // Double click selects all (findable)
+      pre.addEventListener("dblclick", () => {
+        const range = document.createRange();
+        range.selectNodeContents(pre);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      });
+
+      // Clicking the bus cycles tooltip hints (no visible text)
+      const tip = [
+        "(click an 8-bit chunk)",
+        "8 bits = 1 byte",
+        "base-2 → number → character",
+        "00001010 is a line break"
+      ];
+      let t = 0;
+      bus.addEventListener("click", (e) => {
+        e.stopPropagation();
+        t = (t + 1) % tip.length;
+        bus.title = tip[t];
+      });
+
+      // If they click outside, clear back to “idle”
+      window.addEventListener("click", (e) => {
+        if(!pre.contains(e.target) && !bus.contains(e.target)){
+          clearBus();
+          bus.title = "(click an 8-bit chunk)";
+        }
+      });
+    })();
+  </script>
+
+  <!--
+    NOTES
+    Findable eggs:
+    1) View Source comment: “grouping what repeats”
+    2) Click a byte: 8-LED bus shows bits as electricity (1 lit, 0 dim)
+    3) Bus click cycles tooltip hints (no on-screen text)
+    4) Inspect Element: pre[data-bytes], pre[data-format], pre[data-suggest]
+    5) Console breadcrumb (DevTools)
+    6) body[data-aux] ROT13 “view source” (ivrj fbhpr)
+  -->
+</body>
+</html>
