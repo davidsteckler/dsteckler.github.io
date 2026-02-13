@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Flappy Fish</title>
+  <style>
+    :root{
+      --bg0:#051b2e;
+      --bg1:#07324d;
+      --bg2:#0a5170;
+      --ui:#c8f7ff;
+      --ui2:#7ee7ff;
+      --warn:#ffd36b;
+      --good:#88ffb6;
+      --bad:#ff6b6b;
+      --shadow: rgba(0,0,0,0.35);
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: radial-gradient(circle at 50% 25%, var(--bg2), var(--bg0) 60%, #02101b 100%);
+      color: var(--ui);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      image-rendering: pixelated;
+      overflow: hidden;
+    }
+
+    .wrap{
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      box-sizing: border-box;
+    }
+
+    .frame{
+      width: min(980px, 96vw);
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .topbar{
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .title{
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .title h1{
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 1px;
+      color: var(--ui);
+      text-shadow: 0 2px 0 var(--shadow);
+    }
+
+    .title .tag{
+      font-size: 12px;
+      color: var(--ui2);
+      opacity: 0.9;
+    }
+
+    .buttons{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button{
+      appearance: none;
+      border: 2px solid rgba(200,247,255,0.4);
+      background: rgba(6, 38, 58, 0.7);
+      color: var(--ui);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+      transition: transform 0.05s ease;
+      user-select: none;
+    }
+
+    button:active{ transform: translateY(1px); }
+
+    .card{
+      width: 100%;
+      border-radius: 18px;
+      border: 2px solid rgba(200,247,255,0.18);
+      background: linear-gradient(180deg, rgba(7, 52, 77, 0.38), rgba(2, 16, 27, 0.35));
+      box-shadow: 0 18px 36px rgba(0,0,0,0.25);
+      padding: 12px;
+      box-sizing: border-box;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      align-items: start;
+      justify-items: center;
+    }
+
+    canvas{
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      max-height: 70vh;
+      border-radius: 14px;
+      background: transparent;
+      border: 2px solid rgba(200,247,255,0.18);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,0.18);
+      touch-action: none;
+    }
+
+    .hud{
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .hint{
+      font-size: 12px;
+      color: rgba(200,247,255,0.85);
+      line-height: 1.35;
+    }
+
+    .stats{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: rgba(200,247,255,0.92);
+    }
+
+    .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 2px solid rgba(200,247,255,0.16);
+      background: rgba(0,0,0,0.18);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .pill b{ color: var(--warn); }
+    .pill .dot{ width: 10px; height: 10px; border-radius: 3px; background: rgba(200,247,255,0.45); display: inline-block; }
+    .pill .dot.good{ background: rgba(136,255,182,0.75); }
+    .pill .dot.bad{ background: rgba(255,107,107,0.75); }
+    .pill .dot.warn{ background: rgba(255,211,107,0.75); }
+
+    .footer{
+      opacity: 0.8;
+      font-size: 11px;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* Achievements panel */
+    .panel{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      width: min(380px, calc(100vw - 28px));
+      border-radius: 16px;
+      border: 2px solid rgba(200,247,255,0.18);
+      background: rgba(2,16,27,0.72);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.28);
+      padding: 12px;
+      box-sizing: border-box;
+      display: none;
+      z-index: 10;
+    }
+
+    .panel.show{ display: block; }
+
+    .panel h3{
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: rgba(200,247,255,0.95);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel .close{
+      border: 2px solid rgba(200,247,255,0.25);
+      background: rgba(6, 38, 58, 0.55);
+      padding: 4px 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .ach-list{
+      max-height: 260px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .ach{
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 8px;
+      border-radius: 12px;
+      border: 2px solid rgba(200,247,255,0.10);
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 8px;
+    }
+
+    .ach .badge{
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: rgba(200,247,255,0.15);
+      border: 2px solid rgba(200,247,255,0.18);
+    }
+
+    .ach.unlocked .badge{
+      background: rgba(136,255,182,0.20);
+      border-color: rgba(136,255,182,0.45);
+    }
+
+    .ach .name{
+      font-size: 12px;
+      color: rgba(200,247,255,0.92);
+    }
+
+    .ach .desc{
+      font-size: 11px;
+      color: rgba(200,247,255,0.65);
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+
+    .ach .status{
+      font-size: 11px;
+      color: rgba(200,247,255,0.60);
+    }
+
+    .ach.unlocked .status{
+      color: rgba(136,255,182,0.85);
+    }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 14px;
+      bottom: 14px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(200,247,255,0.18);
+      background: rgba(2,16,27,0.78);
+      box-shadow: 0 18px 36px rgba(0,0,0,0.28);
+      font-size: 12px;
+      color: rgba(200,247,255,0.95);
+      display: none;
+      z-index: 11;
+      max-width: min(420px, calc(100vw - 28px));
+    }
+    .toast.show{ display: block; }
+    .toast b{ color: var(--good); }
+
+    @media (max-width: 520px){
+      .title h1{ font-size: 16px; }
+      button{ font-size: 11px; padding: 7px 9px; }
+      .hud{ grid-template-columns: 1fr; }
+      .stats{ justify-content: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="frame">
+      <div class="topbar">
+        <div class="title">
+          <h1>FLAPPY FISH</h1>
+          <div class="tag">underwater retro pixel runner</div>
+        </div>
+        <div class="buttons">
+          <button id="btnStart">Start</button>
+          <button id="btnRestart">Restart</button>
+          <button id="btnMute">Sound: On</button>
+          <button id="btnAch">Achievements</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <canvas id="game" width="960" height="540" aria-label="Flappy Fish game"></canvas>
+
+          <div class="hud">
+            <div class="hint">
+              Space or click or tap to swim. Avoid the coral gates. Grab powerups and bonus bubbles.
+              <br />R restarts. M toggles sound.
+            </div>
+            <div class="stats">
+              <div class="pill"><span class="dot warn"></span>Score: <b id="score">0</b></div>
+              <div class="pill"><span class="dot good"></span>Best: <b id="best">0</b></div>
+              <div class="pill"><span class="dot"></span>Mode: <b id="mode">Ready</b></div>
+              <div class="pill"><span class="dot good"></span>Shield: <b id="shield">0</b></div>
+              <div class="pill"><span class="dot"></span>Buffs: <b id="buffs">—</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">Save as flappy-fish.html and open it. Achievements persist in your browser.</div>
+    </div>
+  </div>
+
+  <div id="panel" class="panel" role="dialog" aria-label="Achievements">
+    <h3>
+      <span>ACHIEVEMENTS</span>
+      <span class="close" id="panelClose">Close</span>
+    </h3>
+    <div class="ach-list" id="achList"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+
+      const scoreEl = document.getElementById("score");
+      const bestEl = document.getElementById("best");
+      const modeEl = document.getElementById("mode");
+      const shieldEl = document.getElementById("shield");
+      const buffsEl = document.getElementById("buffs");
+
+      const btnStart = document.getElementById("btnStart");
+      const btnRestart = document.getElementById("btnRestart");
+      const btnMute = document.getElementById("btnMute");
+      const btnAch = document.getElementById("btnAch");
+
+      const panel = document.getElementById("panel");
+      const panelClose = document.getElementById("panelClose");
+      const achListEl = document.getElementById("achList");
+
+      const toast = document.getElementById("toast");
+
+      ctx.imageSmoothingEnabled = false;
+
+      const W = canvas.width;
+      const H = canvas.height;
+
+      const GROUND_Y = H - 54;
+
+      const GRAVITY = 1800;
+      const SWIM_V = -520;
+
+      const PIPE_W = 72;
+      const PIPE_GAP_MIN = 150;
+      const PIPE_GAP_MAX = 190;
+      const PIPE_SPACING = 250;
+      const PIPE_SPEED_START = 260;
+      const SPEED_RAMP = 0.018;
+
+      const POWERUP_SPAWN_CHANCE = 0.22; // per pipe spawn
+      const POWERUP_SIZE = 14;
+
+      const FISH = {
+        x: 190,
+        y: H * 0.5,
+        r: 14,
+        vy: 0
+      };
+
+      const RNG = (min, max) => min + Math.random() * (max - min);
+
+      // Audio
+      let audioOn = true;
+      let audioCtx = null;
+
+      function beep(freq = 440, duration = 0.06, type = "square", gain = 0.03) {
+        if (!audioOn) return;
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const now = audioCtx.currentTime;
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = type;
+          o.frequency.setValueAtTime(freq, now);
+          g.gain.setValueAtTime(gain, now);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.start(now);
+          o.stop(now + duration);
+        } catch (e) {}
+      }
+
+      const STATE = {
+        ready: "Ready",
+        playing: "Playing",
+        over: "Game Over"
+      };
+
+      let state = STATE.ready;
+
+      let pipes = [];
+      let bubbles = [];
+      let powerups = [];
+
+      let t = 0;
+      let last = performance.now();
+
+      let score = 0;
+      let best = 0;
+
+      // Run tracking for achievements
+      let run = {
+        swims: 0,
+        bonusBubbles: 0,
+        usedPowerups: 0,
+        lastSwimTime: 0,
+        gatesSinceSwim: 0,
+        shieldSavedYou: false
+      };
+
+      // Buffs and inventory
+      const buffs = {
+        shieldCharges: 0,
+        slowTime: 0,   // seconds remaining
+        magnet: 0,     // seconds remaining
+        x2: 0          // seconds remaining
+      };
+
+      function activeBuffList() {
+        const a = [];
+        if (buffs.slowTime > 0) a.push("Slow");
+        if (buffs.magnet > 0) a.push("Magnet");
+        if (buffs.x2 > 0) a.push("x2");
+        return a.length ? a.join(", ") : "—";
+      }
+
+      // Achievements (persist)
+      const ACH = [
+        { id:"first_swim", name:"First Swim", desc:"Swim for the first time.", check: () => run.swims >= 1 },
+        { id:"first_bubble", name:"Bubble Popper", desc:"Collect your first bonus bubble.", check: () => run.bonusBubbles >= 1 },
+        { id:"score_10", name:"Ten Deep", desc:"Reach score 10 in a run.", check: () => score >= 10 },
+        { id:"score_25", name:"Sea Veteran", desc:"Reach score 25 in a run.", check: () => score >= 25 },
+        { id:"score_50", name:"Trench Legend", desc:"Reach score 50 in a run.", check: () => score >= 50 },
+        { id:"survivor_5", name:"No Panic", desc:"Pass 5 gates without swimming.", check: () => run.gatesSinceSwim >= 5 },
+        { id:"clean_15", name:"Clean Run", desc:"Score 15 without using any powerups.", check: () => score >= 15 && run.usedPowerups === 0 },
+        { id:"bubble_10", name:"Bubble Hunter", desc:"Collect 10 bonus bubbles in one run.", check: () => run.bonusBubbles >= 10 },
+        { id:"shield_save", name:"Unbreakable", desc:"Let a shield save you from a crash.", check: () => run.shieldSavedYou }
+      ];
+
+      let unlocked = {};
+      try {
+        unlocked = JSON.parse(localStorage.getItem("flappyFishAchievements") || "{}");
+      } catch (e) {
+        unlocked = {};
+      }
+
+      function saveAchievements() {
+        try { localStorage.setItem("flappyFishAchievements", JSON.stringify(unlocked)); } catch (e) {}
+      }
+
+      function showToast(html, ms = 2200) {
+        toast.innerHTML = html;
+        toast.classList.add("show");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove("show"), ms);
+      }
+
+      function unlockIfNeeded() {
+        let any = false;
+        for (const a of ACH) {
+          if (unlocked[a.id]) continue;
+          if (a.check()) {
+            unlocked[a.id] = { at: Date.now() };
+            saveAchievements();
+            any = true;
+            beep(1200, 0.06, "square", 0.02);
+            beep(1600, 0.05, "square", 0.015);
+            showToast(`Achievement unlocked: <b>${a.name}</b>`);
+          }
+        }
+        if (any) renderAchievementsList();
+      }
+
+      function renderAchievementsList() {
+        achListEl.innerHTML = "";
+        for (const a of ACH) {
+          const isOn = !!unlocked[a.id];
+          const div = document.createElement("div");
+          div.className = "ach" + (isOn ? " unlocked" : "");
+          div.innerHTML = `
+            <div class="badge"></div>
+            <div>
+              <div class="name">${a.name}</div>
+              <div class="desc">${a.desc}</div>
+            </div>
+            <div class="status">${isOn ? "UNLOCKED" : "LOCKED"}</div>
+          `;
+          achListEl.appendChild(div);
+        }
+      }
+
+      // Best score
+      try {
+        best = Number(localStorage.getItem("flappyFishBest") || "0");
+      } catch (e) {
+        best = 0;
+      }
+      bestEl.textContent = String(best);
+
+      function setState(s) {
+        state = s;
+        modeEl.textContent = s;
+      }
+
+      function reset() {
+        FISH.y = H * 0.5;
+        FISH.vy = 0;
+
+        pipes = [];
+        bubbles = [];
+        powerups = [];
+
+        t = 0;
+        score = 0;
+
+        run = {
+          swims: 0,
+          bonusBubbles: 0,
+          usedPowerups: 0,
+          lastSwimTime: 0,
+          gatesSinceSwim: 0,
+          shieldSavedYou: false
+        };
+
+        buffs.shieldCharges = 0;
+        buffs.slowTime = 0;
+        buffs.magnet = 0;
+        buffs.x2 = 0;
+
+        scoreEl.textContent = "0";
+        shieldEl.textContent = "0";
+        buffsEl.textContent = "—";
+
+        const firstX = W + 120;
+        for (let i = 0; i < 5; i++) spawnPipe(firstX + i * PIPE_SPACING);
+
+        spawnBubbleBurst(W + 200, true);
+        renderAchievementsList();
+      }
+
+      function spawnPipe(x) {
+        const gap = RNG(PIPE_GAP_MIN, PIPE_GAP_MAX);
+        const topMin = 60;
+        const topMax = GROUND_Y - 70 - gap;
+        const topH = Math.floor(RNG(topMin, Math.max(topMin + 1, topMax)));
+
+        pipes.push({ x, topH, gap, passed: false });
+
+        // Bonus bubble near the gap center sometimes
+        if (Math.random() < 0.55) {
+          const bx = x + PIPE_W * 0.5 + RNG(-18, 18);
+          const by = topH + gap * 0.5 + RNG(-28, 28);
+          bubbles.push(makeBubble(bx, by, 10, true));
+        }
+
+        // Powerup sometimes
+        if (Math.random() < POWERUP_SPAWN_CHANCE) {
+          const px = x + PIPE_W * 0.5;
+          const py = topH + gap * 0.5 + RNG(-38, 38);
+          const kind = pickPowerupKind();
+          powerups.push(makePowerup(px, py, kind));
+        }
+      }
+
+      function pickPowerupKind() {
+        const roll = Math.random();
+        if (roll < 0.32) return "shield";
+        if (roll < 0.56) return "slow";
+        if (roll < 0.80) return "magnet";
+        return "x2";
+      }
+
+      function makePowerup(x, y, kind) {
+        return {
+          x, y,
+          r: POWERUP_SIZE,
+          kind,
+          spin: RNG(0, Math.PI * 2),
+          wob: RNG(0, 10),
+          alive: true
+        };
+      }
+
+      function applyPowerup(kind) {
+        run.usedPowerups += 1;
+
+        if (kind === "shield") {
+          buffs.shieldCharges += 1;
+          beep(740, 0.06, "square", 0.02);
+          showToast(`Powerup: <b>Shield</b> (+1)`);
+        }
+
+        if (kind === "slow") {
+          buffs.slowTime = Math.max(buffs.slowTime, 6.5);
+          beep(520, 0.06, "square", 0.02);
+          showToast(`Powerup: <b>Slow Time</b>`);
+        }
+
+        if (kind === "magnet") {
+          buffs.magnet = Math.max(buffs.magnet, 7.0);
+          beep(900, 0.05, "square", 0.02);
+          showToast(`Powerup: <b>Magnet</b>`);
+        }
+
+        if (kind === "x2") {
+          buffs.x2 = Math.max(buffs.x2, 7.0);
+          beep(1200, 0.05, "square", 0.02);
+          showToast(`Powerup: <b>x2 Score</b>`);
+        }
+      }
+
+      function makeBubble(x, y, size, bonus=false) {
+        return {
+          x, y,
+          r: size,
+          vx: RNG(-10, 18),
+          vy: RNG(-40, -110),
+          life: RNG(2.0, 4.0),
+          bonus
+        };
+      }
+
+      function spawnBubbleBurst(x, gentle=false) {
+        const n = gentle ? 6 : 12;
+        for (let i = 0; i < n; i++) {
+          bubbles.push(makeBubble(
+            x + RNG(-40, 40),
+            RNG(GROUND_Y - 120, GROUND_Y - 40),
+            RNG(5, 12),
+            false
+          ));
+        }
+      }
+
+      function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+      function circleRectCollide(cx, cy, cr, rx, ry, rw, rh) {
+        const nx = clamp(cx, rx, rx + rw);
+        const ny = clamp(cy, ry, ry + rh);
+        const dx = cx - nx;
+        const dy = cy - ny;
+        return (dx * dx + dy * dy) <= cr * cr;
+      }
+
+      function fishCollectsCircle(x, y, r) {
+        const dx = FISH.x - x;
+        const dy = FISH.y - y;
+        const rr = (FISH.r + r) * (FISH.r + r);
+        return dx * dx + dy * dy <= rr;
+      }
+
+      function fishCollidesPipe(p) {
+        const cx = FISH.x;
+        const cy = FISH.y;
+        const cr = FISH.r;
+
+        const topRect = { x: p.x, y: 0, w: PIPE_W, h: p.topH };
+        const bottomY = p.topH + p.gap;
+        const bottomRect = { x: p.x, y: bottomY, w: PIPE_W, h: (GROUND_Y - bottomY) };
+
+        if (circleRectCollide(cx, cy, cr, topRect.x, topRect.y, topRect.w, topRect.h)) return true;
+        if (circleRectCollide(cx, cy, cr, bottomRect.x, bottomRect.y, bottomRect.w, bottomRect.h)) return true;
+
+        if (cy + cr > GROUND_Y) return true;
+        if (cy - cr < 0) return true;
+
+        return false;
+      }
+
+      // Background layers
+      const bg = {
+        farX: 0, midX: 0, nearX: 0,
+        sprites: Array.from({ length: 14 }, () => ({
+          x: RNG(0, W), y: RNG(40, GROUND_Y - 120),
+          s: RNG(0.8, 1.8), v: RNG(8, 24)
+        }))
+      };
+
+      // Pixel helpers
+      function pxRect(x, y, w, h, c) {
+        ctx.fillStyle = c;
+        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      }
+
+      function pxText(txt, x, y, c, size = 14) {
+        ctx.fillStyle = c;
+        ctx.font = `${size}px ui-monospace, Menlo, Consolas, monospace`;
+        ctx.textBaseline = "top";
+        ctx.fillText(txt, Math.round(x), Math.round(y));
+      }
+
+      function drawTinyFish(x, y, s, c) {
+        const w = Math.round(12 * s);
+        const h = Math.round(6 * s);
+        pxRect(x, y, w, h, c);
+        pxRect(x + w, y + Math.floor(h/2) - 1, 4, 3, c);
+        pxRect(x - 4, y + 1, 4, 4, c);
+      }
+
+      function drawSilhouetteLayer(offsetX, alpha) {
+        ctx.globalAlpha = alpha;
+        for (let i = 0; i < 9; i++) {
+          const x = offsetX + i * 120;
+          const y = 90 + Math.floor((i % 3) * 18);
+          const w = Math.floor(110 * (1.2 - (i % 3) * 0.1));
+          const h = Math.floor(60 * (1.0 - (i % 2) * 0.1));
+          pxRect(x, y, w, h, "rgba(0,0,0,1)");
+          for (let k = 0; k < w; k += 10) pxRect(x + k, y - 8, 8, 8, "rgba(0,0,0,1)");
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawSeaweedLayer(offsetX, alpha) {
+        ctx.globalAlpha = alpha;
+        for (let i = 0; i < 14; i++) {
+          const x = offsetX + i * 76 + (i % 2) * 12;
+          const base = GROUND_Y - 4;
+          const height = 50 + (i % 5) * 22;
+          const sway = Math.floor(6 * Math.sin(t * 2 + i));
+          for (let y = 0; y < height; y += 8) {
+            pxRect(x + Math.floor(sway * (y / height)), base - y, 8, 8, "rgba(35,160,140,1)");
+            if (i % 3 === 0) pxRect(x + 8 + Math.floor(sway * (y / height)), base - y + 4, 6, 6, "rgba(22,110,96,1)");
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawRockLayer(offsetX) {
+        for (let i = 0; i < 8; i++) {
+          const x = offsetX + i * 130;
+          const y = GROUND_Y - 22;
+          const w = 90 + (i % 3) * 26;
+          const h = 28 + (i % 2) * 14;
+          pxRect(x, y, w, h, "rgba(0,0,0,0.35)");
+          pxRect(x + 6, y + 6, w - 12, h - 10, "rgba(10,40,58,0.65)");
+          pxRect(x + 12, y + 12, Math.max(10, w - 34), 8, "rgba(200,247,255,0.08)");
+        }
+      }
+
+      function drawBackground(dt, speed) {
+        for (let i = 0; i < 18; i++) {
+          const y = i * (H / 18);
+          const k = i / 18;
+          const r = Math.floor(5 + 20 * (1 - k));
+          const g = Math.floor(25 + 80 * (1 - k));
+          const b = Math.floor(46 + 100 * (1 - k));
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(0, Math.round(y), W, Math.ceil(H / 18));
+        }
+
+        ctx.globalAlpha = 0.10;
+        for (let i = 0; i < 7; i++) {
+          const x = (i * 160 + (t * 30) % 160) - 120;
+          ctx.fillStyle = "rgba(200,247,255,1)";
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x + 70, 0);
+          ctx.lineTo(x + 190, H);
+          ctx.lineTo(x + 120, H);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        bg.farX -= dt * (speed * 0.10);
+        if (bg.farX < -W) bg.farX += W;
+        drawSilhouetteLayer(Math.round(bg.farX), 0.18);
+        drawSilhouetteLayer(Math.round(bg.farX + W), 0.18);
+
+        bg.midX -= dt * (speed * 0.22);
+        if (bg.midX < -W) bg.midX += W;
+        drawSeaweedLayer(Math.round(bg.midX), 0.25);
+        drawSeaweedLayer(Math.round(bg.midX + W), 0.25);
+
+        bg.nearX -= dt * (speed * 0.36);
+        if (bg.nearX < -W) bg.nearX += W;
+        drawRockLayer(Math.round(bg.nearX));
+        drawRockLayer(Math.round(bg.nearX + W));
+
+        ctx.globalAlpha = 0.35;
+        for (const s of bg.sprites) {
+          s.x -= dt * s.v;
+          if (s.x < -20) {
+            s.x = W + RNG(0, 120);
+            s.y = RNG(40, GROUND_Y - 120);
+            s.s = RNG(0.8, 1.8);
+            s.v = RNG(8, 24);
+          }
+          drawTinyFish(s.x, s.y, s.s, "rgba(0,0,0,0.85)");
+        }
+        ctx.globalAlpha = 1;
+
+        pxRect(0, GROUND_Y, W, H - GROUND_Y, "rgba(2,12,18,0.85)");
+        for (let i = 0; i < W; i += 18) {
+          const h = 6 + Math.floor(6 * Math.sin((i + t * 40) * 0.02));
+          pxRect(i, GROUND_Y + 2, 10, Math.max(2, h), "rgba(20,90,92,0.30)");
+        }
+      }
+
+      function drawFish() {
+        const x = Math.round(FISH.x);
+        const y = Math.round(FISH.y);
+
+        const tilt = clamp(FISH.vy / 700, -0.7, 0.7);
+
+        // Shield ring
+        if (buffs.shieldCharges > 0) {
+          ctx.globalAlpha = 0.18;
+          pxRect(x - 28, y - 28, 56, 56, "rgba(136,255,182,1)");
+          ctx.globalAlpha = 1;
+        }
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(tilt);
+
+        ctx.globalAlpha = 0.25;
+        pxRect(-16, 18, 32, 6, "rgba(0,0,0,1)");
+        ctx.globalAlpha = 1;
+
+        pxRect(-18, -10, 30, 20, "#ffd36b");
+        pxRect(-14, -14, 18, 6, "#ffe6a3");
+        pxRect(-10, 8, 18, 6, "#f7b23b");
+
+        pxRect(12, -6, 10, 12, "#ff9a6b");
+        pxRect(22, -10, 6, 20, "#ff6b6b");
+        pxRect(28, -6, 4, 12, "#ff9a6b");
+
+        pxRect(-2, 2, 10, 8, "#ff9a6b");
+        pxRect(4, 8, 6, 4, "#ff6b6b");
+
+        pxRect(-8, -4, 6, 6, "#0b1a2a");
+        pxRect(-6, -2, 2, 2, "#c8f7ff");
+
+        if (state === STATE.playing && Math.random() < 0.25) {
+          bubbles.push(makeBubble(
+            FISH.x - 14,
+            FISH.y + RNG(-8, 10),
+            RNG(4, 8),
+            false
+          ));
+        }
+
+        ctx.restore();
+      }
+
+      function drawPipe(p) {
+        const x = Math.round(p.x);
+        const topH = Math.round(p.topH);
+        const gap = Math.round(p.gap);
+
+        const c0 = "#ff6bd6";
+        const c1 = "#b84cff";
+        const c2 = "#6bffea";
+        const c3 = "#2dd6ff";
+
+        pxRect(x, 0, PIPE_W, topH, "rgba(0,0,0,0.25)");
+        pxRect(x + 4, 4, PIPE_W - 8, topH - 8, c1);
+
+        for (let i = 0; i < PIPE_W; i += 12) {
+          pxRect(x + i + 2, topH - 12, 10, 10, c0);
+          if (i % 24 === 0) pxRect(x + i + 4, topH - 22, 8, 8, c2);
+        }
+
+        const by = topH + gap;
+        const bh = GROUND_Y - by;
+
+        pxRect(x, by, PIPE_W, bh, "rgba(0,0,0,0.25)");
+        pxRect(x + 4, by + 4, PIPE_W - 8, bh - 8, c3);
+
+        for (let i = 0; i < PIPE_W; i += 12) {
+          pxRect(x + i + 2, by + 2, 10, 10, c2);
+          if (i % 24 === 0) pxRect(x + i + 4, by + 14, 8, 8, c0);
+        }
+
+        ctx.globalAlpha = 0.25;
+        pxRect(x - 2, topH - 2, PIPE_W + 4, 4, "#c8f7ff");
+        pxRect(x - 2, by - 2, PIPE_W + 4, 4, "#c8f7ff");
+        ctx.globalAlpha = 1;
+      }
+
+      function drawBubbles() {
+        for (const b of bubbles) {
+          ctx.globalAlpha = 0.85;
+          pxRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2, "rgba(200,247,255,0.18)");
+
+          ctx.globalAlpha = 0.9;
+          pxRect(b.x - Math.floor(b.r/2), b.y - Math.floor(b.r/2), Math.max(2, Math.floor(b.r/2)), Math.max(2, Math.floor(b.r/2)), "rgba(200,247,255,0.55)");
+
+          if (b.bonus) {
+            ctx.globalAlpha = 0.55;
+            pxRect(b.x - b.r + 2, b.y - b.r + 2, b.r * 2 - 4, b.r * 2 - 4, "rgba(255,211,107,0.35)");
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function drawPowerups() {
+        for (const p of powerups) {
+          if (!p.alive) continue;
+
+          const x = Math.round(p.x);
+          const y = Math.round(p.y);
+
+          const pulse = 0.65 + 0.35 * Math.sin(t * 5 + p.wob);
+
+          let base = "rgba(200,247,255,0.18)";
+          let core = "rgba(200,247,255,0.55)";
+          let tint = "rgba(200,247,255,0.20)";
+          let label = "?";
+
+          if (p.kind === "shield") { tint = "rgba(136,255,182,0.25)"; label = "S"; }
+          if (p.kind === "slow") { tint = "rgba(126,231,255,0.25)"; label = "T"; }
+          if (p.kind === "magnet") { tint = "rgba(255,211,107,0.22)"; label = "M"; }
+          if (p.kind === "x2") { tint = "rgba(255,107,107,0.20)"; label = "2"; }
+
+          ctx.globalAlpha = 0.9;
+          pxRect(x - p.r, y - p.r, p.r * 2, p.r * 2, base);
+
+          ctx.globalAlpha = 0.85 * pulse;
+          pxRect(x - p.r + 2, y - p.r + 2, p.r * 2 - 4, p.r * 2 - 4, tint);
+
+          ctx.globalAlpha = 0.95;
+          pxRect(x - 5, y - 6, 10, 12, core);
+          ctx.globalAlpha = 1;
+
+          pxText(label, x - 4, y - 8, "rgba(2,16,27,0.85)", 16);
+        }
+      }
+
+      function drawOverlay() {
+        if (state === STATE.playing) return;
+
+        ctx.globalAlpha = 0.92;
+        pxRect(0, 0, W, H, "rgba(0,0,0,0.18)");
+        ctx.globalAlpha = 1;
+
+        const bx = 70;
+        const by = 84;
+        const bw = W - 140;
+        const bh = 205;
+
+        pxRect(bx, by, bw, bh, "rgba(0,0,0,0.32)");
+        pxRect(bx + 6, by + 6, bw - 12, bh - 12, "rgba(6,38,58,0.70)");
+        pxRect(bx + 6, by + 6, bw - 12, 4, "rgba(200,247,255,0.25)");
+        pxRect(bx + 6, by + bh - 10, bw - 12, 4, "rgba(200,247,255,0.12)");
+
+        const headline = state === STATE.over ? "GAME OVER" : "FLAPPY FISH";
+        const sub = state === STATE.over ? "Press R to restart" : "Space or tap to swim";
+
+        pxText(headline, bx + 36, by + 30, "#c8f7ff", 34);
+        pxText(sub, bx + 36, by + 82, "rgba(200,247,255,0.90)", 16);
+
+        pxText("Powerups: S shield, T slow time, M magnet, 2 x2 score", bx + 36, by + 118, "rgba(200,247,255,0.78)", 13);
+        pxText("Press Achievements to see your unlocks", bx + 36, by + 142, "rgba(200,247,255,0.78)", 13);
+
+        if (state === STATE.over) {
+          const sx = bx + bw - 240;
+          const sy = by + 40;
+          pxRect(sx, sy, 200, 120, "rgba(0,0,0,0.30)");
+          pxRect(sx + 6, sy + 6, 188, 108, "rgba(2,16,27,0.35)");
+          pxText("Score", sx + 18, sy + 18, "rgba(200,247,255,0.85)", 14);
+          pxText(String(score), sx + 18, sy + 42, "#ffd36b", 26);
+          pxText("Best", sx + 18, sy + 78, "rgba(200,247,255,0.85)", 14);
+          pxText(String(best), sx + 76, sy + 78, "#7ee7ff", 14);
+        }
+      }
+
+      function swim() {
+        if (state === STATE.ready) {
+          setState(STATE.playing);
+          reset();
+          beep(740, 0.05, "square", 0.03);
+        }
+        if (state === STATE.playing) {
+          FISH.vy = SWIM_V;
+          run.swims += 1;
+          run.lastSwimTime = t;
+          run.gatesSinceSwim = 0;
+          beep(620, 0.04, "square", 0.025);
+          unlockIfNeeded();
+        }
+      }
+
+      function restart() {
+        setState(STATE.ready);
+        reset();
+      }
+
+      function toggleSound() {
+        audioOn = !audioOn;
+        btnMute.textContent = audioOn ? "Sound: On" : "Sound: Off";
+        if (audioOn) beep(880, 0.05, "square", 0.03);
+      }
+
+      function toggleAchievementsPanel() {
+        panel.classList.toggle("show");
+        renderAchievementsList();
+      }
+
+      btnStart.addEventListener("click", () => swim());
+      btnRestart.addEventListener("click", () => restart());
+      btnMute.addEventListener("click", () => toggleSound());
+      btnAch.addEventListener("click", () => toggleAchievementsPanel());
+      panelClose.addEventListener("click", () => panel.classList.remove("show"));
+
+      window.addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if (k === " " || k === "arrowup" || k === "w") { e.preventDefault(); swim(); }
+        if (k === "r") restart();
+        if (k === "m") toggleSound();
+        if (k === "a") toggleAchievementsPanel();
+      }, { passive: false });
+
+      canvas.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        swim();
+      }, { passive: false });
+
+      // Update loop
+      function update(dt) {
+        t += dt;
+
+        // Buff countdowns
+        buffs.slowTime = Math.max(0, buffs.slowTime - dt);
+        buffs.magnet = Math.max(0, buffs.magnet - dt);
+        buffs.x2 = Math.max(0, buffs.x2 - dt);
+
+        shieldEl.textContent = String(buffs.shieldCharges);
+        buffsEl.textContent = activeBuffList();
+
+        // Bubbles drift always
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+
+          // Magnet effect toward fish for bonus bubbles
+          if (state === STATE.playing && buffs.magnet > 0 && b.bonus) {
+            const dx = FISH.x - b.x;
+            const dy = FISH.y - b.y;
+            const d = Math.max(40, Math.hypot(dx, dy));
+            b.vx += (dx / d) * 55 * dt;
+            b.vy += (dy / d) * 55 * dt;
+          }
+
+          b.x += b.vx * dt;
+          b.y += b.vy * dt;
+          b.life -= dt;
+
+          b.vy -= 18 * dt;
+
+          if (b.life <= 0 || b.y < -30) bubbles.splice(i, 1);
+        }
+
+        if (state !== STATE.playing) return;
+
+        const baseSpeed = PIPE_SPEED_START + (t * (PIPE_SPEED_START * SPEED_RAMP));
+        const speed = buffs.slowTime > 0 ? baseSpeed * 0.62 : baseSpeed;
+
+        // Physics
+        FISH.vy += GRAVITY * dt;
+        FISH.y += FISH.vy * dt;
+
+        // Powerups move with the world
+        for (const p of powerups) {
+          if (!p.alive) continue;
+          p.x -= speed * dt;
+          p.spin += dt * 6;
+
+          if (p.x < -60) p.alive = false;
+
+          if (fishCollectsCircle(p.x, p.y, p.r)) {
+            p.alive = false;
+            applyPowerup(p.kind);
+            unlockIfNeeded();
+          }
+        }
+
+        // Pipes
+        for (const p of pipes) {
+          p.x -= speed * dt;
+
+          if (!p.passed && p.x + PIPE_W < FISH.x) {
+            p.passed = true;
+
+            // Achievement tracker: gates without swim
+            run.gatesSinceSwim += 1;
+
+            // Scoring with x2
+            const add = buffs.x2 > 0 ? 2 : 1;
+            score += add;
+            scoreEl.textContent = String(score);
+            beep(980, 0.04, "square", 0.02);
+
+            unlockIfNeeded();
+          }
+
+          // Collision check, but allow shield
+          if (fishCollidesPipe(p)) {
+            if (buffs.shieldCharges > 0) {
+              buffs.shieldCharges -= 1;
+              run.shieldSavedYou = true;
+
+              // push fish into safe-ish zone
+              FISH.vy = SWIM_V * 0.55;
+              FISH.y = clamp(FISH.y, 40, GROUND_Y - 40);
+
+              spawnBubbleBurst(FISH.x, true);
+              beep(220, 0.08, "square", 0.03);
+              beep(520, 0.06, "square", 0.02);
+
+              unlockIfNeeded();
+            } else {
+              endGame();
+              return;
+            }
+          }
+        }
+
+        // Recycle pipes
+        while (pipes.length && pipes[0].x < -PIPE_W - 10) {
+          pipes.shift();
+          const lastX = pipes.length ? pipes[pipes.length - 1].x : W;
+          spawnPipe(Math.max(lastX + PIPE_SPACING, W + 220));
+        }
+
+        // Bonus bubble collection
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+          if (b.bonus && fishCollectsCircle(b.x, b.y, b.r)) {
+            bubbles.splice(i, 1);
+
+            run.bonusBubbles += 1;
+
+            const add = buffs.x2 > 0 ? 4 : 2;
+            score += add;
+            scoreEl.textContent = String(score);
+
+            beep(1200, 0.05, "square", 0.02);
+            beep(1500, 0.04, "square", 0.015);
+
+            unlockIfNeeded();
+          }
+        }
+
+        // Ambient bubbles
+        if (Math.random() < 0.06) {
+          bubbles.push(makeBubble(
+            W + 18,
+            RNG(GROUND_Y - 120, GROUND_Y - 30),
+            RNG(4, 10),
+            false
+          ));
+        }
+
+        // Keep within bounds
+        if (FISH.y + FISH.r > GROUND_Y || FISH.y - FISH.r < 0) {
+          if (buffs.shieldCharges > 0) {
+            buffs.shieldCharges -= 1;
+            run.shieldSavedYou = true;
+            FISH.vy = SWIM_V * 0.55;
+            FISH.y = clamp(FISH.y, 40, GROUND_Y - 40);
+            beep(220, 0.08, "square", 0.03);
+            unlockIfNeeded();
+          } else {
+            endGame();
+          }
+        }
+      }
+
+      function endGame() {
+        setState(STATE.over);
+        spawnBubbleBurst(FISH.x, false);
+        beep(140, 0.12, "square", 0.03);
+        beep(90, 0.16, "square", 0.03);
+
+        // Best score
+        if (score > best) {
+          best = score;
+          bestEl.textContent = String(best);
+          try { localStorage.setItem("flappyFishBest", String(best)); } catch (e) {}
+        }
+
+        // Final unlock pass
+        unlockIfNeeded();
+      }
+
+      function render(dt) {
+        ctx.clearRect(0, 0, W, H);
+
+        const baseSpeed = PIPE_SPEED_START + (t * (PIPE_SPEED_START * SPEED_RAMP));
+        const speed = buffs.slowTime > 0 ? baseSpeed * 0.62 : baseSpeed;
+
+        drawBackground(dt, speed);
+
+        for (const p of pipes) drawPipe(p);
+        drawPowerups();
+        drawBubbles();
+        drawFish();
+
+        if (Math.random() < 0.09) {
+          const x = RNG(0, W);
+          const y = RNG(0, GROUND_Y - 30);
+          ctx.globalAlpha = 0.22;
+          pxRect(x, y, 2, 2, "rgba(200,247,255,1)");
+          ctx.globalAlpha = 1;
+        }
+
+        pxText("Space or tap to swim", 14, 12, "rgba(200,247,255,0.55)", 12);
+        pxText("R restart   M sound   A achievements", 14, 28, "rgba(200,247,255,0.45)", 12);
+
+        drawOverlay();
+      }
+
+      function loop(now) {
+        const dt = Math.min(0.032, (now - last) / 1000);
+        last = now;
+
+        update(dt);
+        render(dt);
+
+        requestAnimationFrame(loop);
+      }
+
+      // Boot
+      setState(STATE.ready);
+      renderAchievementsList();
+      reset();
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
