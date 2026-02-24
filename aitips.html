@@ -3,676 +3,757 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tips — David Steckler</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>AI Prompting — Best Practices Tier List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,600;0,800;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --ink: #1a1a1a;
-            --mid: #6b6b6b;
-            --faint: #e8e4de;
-            --paper: #f7f4ef;
-            --cream: #fdfbf8;
-            --accent: #c94f2a;
-            --rule: #d4cec6;
+            --bg:     #0f0f0f;
+            --surface: #181818;
+            --border: #2a2a2a;
+            --mid:    #6e6e6e;
+            --light:  #b0b0b0;
+            --white:  #f0ede8;
+
+            --s:  #e8c547;
+            --a:  #e07b3f;
+            --b:  #6dba8e;
+            --c:  #5a9fd4;
+            --d:  #9b7ec8;
+
+            --s-bg: rgba(232,197,71,0.08);
+            --a-bg: rgba(224,123,63,0.08);
+            --b-bg: rgba(109,186,142,0.08);
+            --c-bg: rgba(90,159,212,0.08);
+            --d-bg: rgba(155,126,200,0.08);
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'DM Sans', sans-serif;
-            background-color: var(--paper);
-            color: var(--ink);
-            line-height: 1.7;
-            padding: 60px 20px 100px;
+            font-family: 'Libre Baskerville', Georgia, serif;
+            background: var(--bg);
+            color: var(--white);
+            line-height: 1.65;
+            min-height: 100vh;
         }
 
-        .page {
-            max-width: 680px;
+        /* ── HERO ── */
+        .hero {
+            padding: 70px 24px 56px;
+            max-width: 900px;
             margin: 0 auto;
+            border-bottom: 1px solid var(--border);
         }
 
-        /* Masthead */
-        .masthead {
-            border-top: 3px solid var(--ink);
-            border-bottom: 1px solid var(--rule);
-            padding: 28px 0 24px;
-            margin-bottom: 50px;
-        }
-
-        .masthead h1 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: clamp(2rem, 5vw, 2.8rem);
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            line-height: 1.15;
-            color: var(--ink);
-        }
-
-        .masthead p {
-            margin-top: 12px;
-            font-size: 0.95rem;
-            color: var(--mid);
-            font-weight: 300;
-            max-width: 480px;
-        }
-
-        /* Tip items */
-        .tip {
-            border-bottom: 1px solid var(--rule);
-        }
-
-        .tip-title {
-            display: flex;
-            align-items: baseline;
-            gap: 16px;
-            padding: 22px 0;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .tip-title:hover .tip-label {
-            color: var(--accent);
-        }
-
-        .tip-num {
+        .hero-eyebrow {
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.72rem;
-            color: var(--mid);
-            min-width: 24px;
-            padding-top: 2px;
-        }
-
-        .tip-label {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--ink);
-            flex: 1;
-            transition: color 0.2s;
-        }
-
-        .tip-toggle {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 1.1rem;
-            color: var(--mid);
-            transition: transform 0.25s ease, color 0.2s;
-            line-height: 1;
-        }
-
-        .tip-title.open .tip-toggle {
-            transform: rotate(45deg);
-            color: var(--accent);
-        }
-
-        .tip-body {
-            display: none;
-            padding: 0 0 28px 40px;
-        }
-
-        .tip-body.open {
-            display: block;
-        }
-
-        .tip-body > p:first-child {
-            font-size: 0.95rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
             color: var(--mid);
             margin-bottom: 20px;
         }
 
-        /* Prompt blocks */
-        .prompt-pair {
-            margin-bottom: 18px;
-        }
-
-        .prompt-pair + .prompt-pair {
-            margin-top: 8px;
-        }
-
-        .prompt-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.68rem;
+        .hero h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: clamp(3.2rem, 9vw, 6.5rem);
+            line-height: 0.95;
+            letter-spacing: -0.01em;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--mid);
-            margin-bottom: 6px;
+            color: var(--white);
+            margin-bottom: 28px;
         }
 
-        .prompt-label.better {
-            color: var(--accent);
+        .hero h1 em {
+            font-style: italic;
+            font-weight: 600;
+            color: var(--s);
         }
 
-        .prompt-block {
-            background: var(--cream);
-            border: 1px solid var(--rule);
-            border-left: 3px solid var(--faint);
-            padding: 12px 16px;
+        .hero-desc {
+            max-width: 540px;
+            font-size: 0.95rem;
+            color: var(--light);
+            line-height: 1.75;
+            font-style: italic;
+        }
+
+        /* ── LEGEND ── */
+        .legend {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 36px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.82rem;
-            color: var(--ink);
-            line-height: 1.6;
-            position: relative;
-        }
-
-        .prompt-block.better {
-            border-left-color: var(--accent);
-            background: #fdf6f3;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: none;
-            border: 1px solid var(--rule);
+            font-size: 0.72rem;
             color: var(--mid);
+        }
+
+        .legend-badge {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ── TIERS LAYOUT ── */
+        .tiers {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        .tier {
+            margin-top: 4px;
+        }
+
+        .tier-header {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            margin-bottom: 3px;
+            margin-top: 36px;
+        }
+
+        .tier-badge {
+            width: 56px;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: 1.9rem;
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .tier-meta {
+            flex: 1;
+            padding: 12px 18px;
+            border-radius: 0 4px 4px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tier-name {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .tier-desc {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--mid);
+            margin-top: 2px;
+        }
+
+        /* ── CARDS ── */
+        .cards {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left-width: 3px;
+            padding: 0;
+            border-radius: 3px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover { border-right-color: var(--border); }
+
+        .card-head {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            user-select: none;
+        }
+
+        .card-rank {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.65rem;
-            padding: 3px 7px;
-            cursor: pointer;
+            color: var(--mid);
+            min-width: 20px;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+            color: var(--white);
+            flex: 1;
+            line-height: 1.25;
+        }
+
+        .card-new {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 2px 6px;
             border-radius: 2px;
-            transition: all 0.15s;
+            flex-shrink: 0;
         }
 
-        .copy-btn:hover {
-            border-color: var(--ink);
-            color: var(--ink);
+        .card-chevron {
+            font-size: 0.75rem;
+            color: var(--mid);
+            transition: transform 0.22s ease;
+            flex-shrink: 0;
+            font-style: normal;
         }
 
-        .copy-btn.copied {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
+        .card.open .card-chevron { transform: rotate(180deg); }
 
-        /* Footer note */
-        .footer-note {
-            margin-top: 60px;
-            padding-top: 28px;
-            border-top: 1px solid var(--rule);
+        .card-body {
+            display: none;
+            padding: 0 18px 18px 52px;
             font-size: 0.88rem;
+            line-height: 1.75;
+            color: var(--light);
+        }
+
+        .card.open .card-body { display: block; }
+
+        .card-body p { margin-bottom: 12px; }
+        .card-body p:last-child { margin-bottom: 0; }
+
+        .card-body strong {
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .prompt-ex {
+            margin-top: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            background: #111;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            color: var(--light);
+            border-radius: 3px;
+            line-height: 1.6;
+        }
+
+        .prompt-ex-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            opacity: 0.5;
+        }
+
+        /* tier-specific colors */
+        .tier-s .tier-badge      { background: var(--s);    color: #0f0f0f; }
+        .tier-s .tier-meta       { background: var(--s-bg); }
+        .tier-s .tier-name       { color: var(--s); }
+        .tier-s .card            { border-left-color: var(--s); }
+        .tier-s .card-rank       { color: var(--s); opacity: 0.6; }
+        .tier-s .legend-badge    { background: var(--s-bg); color: var(--s); border: 1px solid var(--s); }
+
+        .tier-a .tier-badge      { background: var(--a);    color: #0f0f0f; }
+        .tier-a .tier-meta       { background: var(--a-bg); }
+        .tier-a .tier-name       { color: var(--a); }
+        .tier-a .card            { border-left-color: var(--a); }
+        .tier-a .card-rank       { color: var(--a); opacity: 0.6; }
+        .tier-a .legend-badge    { background: var(--a-bg); color: var(--a); border: 1px solid var(--a); }
+
+        .tier-b .tier-badge      { background: var(--b);    color: #0f0f0f; }
+        .tier-b .tier-meta       { background: var(--b-bg); }
+        .tier-b .tier-name       { color: var(--b); }
+        .tier-b .card            { border-left-color: var(--b); }
+        .tier-b .card-rank       { color: var(--b); opacity: 0.6; }
+        .tier-b .legend-badge    { background: var(--b-bg); color: var(--b); border: 1px solid var(--b); }
+
+        .tier-c .tier-badge      { background: var(--c);    color: #0f0f0f; }
+        .tier-c .tier-meta       { background: var(--c-bg); }
+        .tier-c .tier-name       { color: var(--c); }
+        .tier-c .card            { border-left-color: var(--c); }
+        .tier-c .card-rank       { color: var(--c); opacity: 0.6; }
+        .tier-c .legend-badge    { background: var(--c-bg); color: var(--c); border: 1px solid var(--c); }
+
+        .tier-d .tier-badge      { background: var(--d);    color: #0f0f0f; }
+        .tier-d .tier-meta       { background: var(--d-bg); }
+        .tier-d .tier-name       { color: var(--d); }
+        .tier-d .card            { border-left-color: var(--d); }
+        .tier-d .card-rank       { color: var(--d); opacity: 0.6; }
+        .tier-d .legend-badge    { background: var(--d-bg); color: var(--d); border: 1px solid var(--d); }
+
+
+
+        /* ── FOOTNOTE ── */
+        .footnote {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+            border-top: 1px solid var(--border);
+            font-size: 0.82rem;
             color: var(--mid);
             font-style: italic;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-6px); }
+        /* ── ANIMATIONS ── */
+        .tier { opacity: 0; transform: translateY(18px); animation: rise 0.45s ease forwards; }
+        .tier:nth-child(1) { animation-delay: 0.05s; }
+        .tier:nth-child(2) { animation-delay: 0.12s; }
+        .tier:nth-child(3) { animation-delay: 0.19s; }
+        .tier:nth-child(4) { animation-delay: 0.26s; }
+        .tier:nth-child(5) { animation-delay: 0.33s; }
+
+        @keyframes rise {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-body { animation: none; }
+        .card.open .card-body {
+            display: block;
+            animation: fadeBody 0.18s ease;
+        }
+        @keyframes fadeBody {
+            from { opacity: 0; transform: translateY(-4px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        .tip-body.open {
-            display: block;
-            animation: fadeIn 0.2s ease;
+        @media (max-width: 600px) {
+            .hero h1 { font-size: clamp(2.6rem, 12vw, 4rem); }
+            .card-body { padding-left: 18px; }
         }
     </style>
 </head>
 <body>
-<div class="page">
 
-    <div class="masthead">
-        <h1>Things I've Learned<br><em>Using AI Tools</em></h1>
-        <p>After a lot of trial and error with ChatGPT, Gemini, Copilot, Claude, and Perplexity — here's what actually makes a difference.</p>
+<div class="hero">
+    <div class="hero-eyebrow">David Steckler &nbsp;/&nbsp; AI Best Practices</div>
+    <h1>Prompting<br><em>Tier List</em></h1>
+    <p class="hero-desc">Not all prompting habits are equal. These are ranked by how much they actually change the quality of your results — starting with the ones that matter most.</p>
+</div>
+
+<div class="legend">
+    <div class="legend-item tier-s"><span class="legend-badge">S</span> Must-know. These alone will double your results.</div>
+    <div class="legend-item tier-a"><span class="legend-badge">A</span> High-impact habits worth building early.</div>
+    <div class="legend-item tier-b"><span class="legend-badge">B</span> Solid techniques once you have the basics.</div>
+    <div class="legend-item tier-c"><span class="legend-badge">C</span> Situational. Useful for specific use cases.</div>
+    <div class="legend-item tier-d"><span class="legend-badge">D</span> Nice to know, rarely changes the outcome.</div>
+</div>
+
+<div class="tiers">
+
+    <!-- ═══════════ S TIER ═══════════ -->
+    <div class="tier tier-s">
+        <div class="tier-header">
+            <div class="tier-badge">S</div>
+            <div class="tier-meta">
+                <div class="tier-name">Essential</div>
+                <div class="tier-desc">The foundations. Ignore these and everything else is a waste of time.</div>
+            </div>
+        </div>
+        <div class="cards">
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">01</span>
+                    <span class="card-title">Be specific. Vague questions get vague answers.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>This is the single highest-leverage thing you can do. The model is trying to find the most likely useful response to your words — every ambiguous word is a guess it has to make on your behalf. Nail down who you are, what you want, and what format you expect, and almost everything else gets better automatically.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Instead of</div>
+                        "Tell me about marketing."
+                    </div>
+                    <div class="prompt-ex" style="margin-top:6px;">
+                        <div class="prompt-ex-label">Try</div>
+                        "I run a small online pottery shop. What are three low-cost marketing channels that work well for handmade goods, and why?"
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">02</span>
+                    <span class="card-title">Give it context about yourself and your goal.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>The AI has no idea who you are. It doesn't know if you're a student, a doctor, or a professional with twenty years of experience. Without that, it defaults to some imaginary average person — which is probably not you. A single sentence of background reorients the entire response.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Try opening with</div>
+                        "I'm a high school teacher with no coding background. I want to understand enough about APIs to explain them to students in plain English..."
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">03</span>
+                    <span class="card-title">Treat it like a conversation, not a search box.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Most people write one prompt, get one answer, and move on. That's the least effective way to use it. Follow up. Push back. Ask it to expand on one part and simplify another. The second and third responses are almost always better than the first — and the model remembers everything said earlier in the thread.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">After any response, try</div>
+                        "That third point is interesting — go deeper on that one specifically."
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">04</span>
+                    <span class="card-title">Push back when the answer is wrong or weak.</span>
+                    
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>AI models are inclined to be agreeable, which means they'll sometimes confidently give you a mediocre answer rather than admit uncertainty. If something feels off — say so, and explain why. <strong>Don't just say "try again."</strong> Tell it what was wrong. "That answer assumed I had a budget — I don't. Try again with that constraint." This is one of the fastest ways to dramatically improve output quality.</p>
+                    <p>One caveat: the model can also be too easily swayed in the other direction. If you push back and it caves completely without explanation, ask it to defend its original answer — that'll tell you whether it was wrong or just being agreeable.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">05</span>
+                    <span class="card-title">Ask for step-by-step reasoning on anything complex.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>When you ask the model to think through a problem step by step, it actually produces better answers — not just for your benefit. Forcing it to reason through steps reduces errors in math, logic, and analysis. This is called chain-of-thought prompting and there's real research behind it.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Add to any complex question</div>
+                        "...think through this step by step before giving me your answer."
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div id="tips">
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">01</span>
-                <span class="tip-label">Be specific. Vague questions get vague answers.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>The more precise your question, the more useful the response. Generic prompts produce generic output — narrow it down before you hit send.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Tell me about programming."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Explain the basics of Python programming for a 7th-grade student."
-                    </div>
-                </div>
+    <!-- ═══════════ A TIER ═══════════ -->
+    <div class="tier tier-a">
+        <div class="tier-header">
+            <div class="tier-badge">A</div>
+            <div class="tier-meta">
+                <div class="tier-name">High Impact</div>
+                <div class="tier-desc">Worth building into your habits early. You'll notice the difference immediately.</div>
             </div>
         </div>
+        <div class="cards">
 
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">02</span>
-                <span class="tip-label">Give it context. The AI doesn't know who you are.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>A little background information dramatically changes the quality of responses. Tell it your level, your purpose, or your situation.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Explain variables."</div>
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">06</span>
+                    <span class="card-title">Give it a role to play — it changes the response quality.</span>
+                    <span class="card-chevron">▼</span>
                 </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "As a beginner in computer science, explain what variables are in programming."
+                <div class="card-body">
+                    <p>Framing the AI as an expert in a specific domain shifts the tone, depth, and vocabulary of the response. It also helps the model decide which assumptions to make about your needs. "As a senior software engineer" produces different output than "As a computer science teacher for 7th graders" — even for the exact same question.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Example</div>
+                        "As a no-nonsense personal finance advisor, give me honest feedback on this budget: [paste budget]."
                     </div>
                 </div>
             </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">07</span>
+                    <span class="card-title">Break big tasks into smaller steps.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>One massive prompt asking for everything at once usually produces a bloated, shallow response. Decompose the problem — first ask what approach to take, then go deeper into each piece. You'll get more useful output for the same total effort, and it's easier to redirect when one part goes wrong.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">08</span>
+                    <span class="card-title">Ask it to critique your own work.</span>
+                    
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>One of the most underused prompts is simply: "What's wrong with this?" Paste in an email, a plan, a piece of code, an argument — and ask the AI to find the weaknesses, gaps, or errors. You'll often get feedback that's more useful than anything you'd get from a generic "improve this" request.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Try</div>
+                        "Read this email draft and tell me what's unclear, what might land badly, and what I've probably left out: [paste draft]"
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">09</span>
+                    <span class="card-title">State your constraints upfront.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Time, budget, skill level, tools available, audience — the more constraints you name, the more practical the output. Without them, the model tends to produce idealized solutions that assume unlimited resources. The real world has constraints; tell it what yours are.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Instead of</div>
+                        "How do I grow my newsletter?"
+                    </div>
+                    <div class="prompt-ex" style="margin-top:6px;">
+                        <div class="prompt-ex-label">Try</div>
+                        "I have 200 subscribers, post twice a month, and have no marketing budget. What are realistic ways to grow to 1,000?"
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">10</span>
+                    <span class="card-title">Start a new conversation when things go sideways.</span>
+                    
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>AI models carry the full context of a conversation forward — which is usually great, but becomes a liability when earlier exchanges were confused or went off the rails. If the model is stuck in a weird pattern, producing poor responses, or has been corrected so many times it seems disoriented, don't keep fighting it. Start fresh. Copy your best prompt and try again clean.</p>
+                </div>
+            </div>
+
         </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">03</span>
-                <span class="tip-label">Break big tasks into smaller ones.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Asking "teach me to code" is like asking someone to teach you to cook — it's not a single question. Slice it into concrete, answerable pieces.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Teach me how to code."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What programming languages are easiest to learn for a complete beginner?"
-                    </div>
-                </div>
-                <div class="prompt-pair" style="margin-top:10px;">
-                    <div class="prompt-label better">Then</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Give me a simple beginner project to practice basic programming concepts."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">04</span>
-                <span class="tip-label">Use examples to show what you mean.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Concrete examples remove ambiguity — both in what you're asking for and in what you get back.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Explain loops."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Explain how 'for loops' work in Python, using a real-world example."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">05</span>
-                <span class="tip-label">When the answer is confusing, just ask.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>There's no embarrassment here — if the response uses a term you don't understand, ask it to clarify. That's the whole point of the conversation.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">AI says</div>
-                    <div class="prompt-block">"Functions allow you to encapsulate code."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">You follow up</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What does 'encapsulate' mean in this context? Give me a simple example."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">06</span>
-                <span class="tip-label">Tell it how you want the answer formatted.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>You're in control of the output format. Want a list? A table? A short paragraph? Just say so.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Tell me how to study effectively."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Give me five study tips in a bulleted list, each with a one-sentence explanation."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">07</span>
-                <span class="tip-label">Ask it to show its work on hard problems.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>For anything involving logic, math, or reasoning — asking for step-by-step explanations both improves accuracy and helps you actually understand the answer.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Solve this: 3x + 5 = 20."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Solve 3x + 5 = 20 and explain each step so I can follow the logic."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">08</span>
-                <span class="tip-label">Its knowledge has a cutoff — recent events are a blind spot.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>AI models don't have access to today's news. For anything recent, either use a tool with web access (like Perplexity) or be explicit about the timeframe.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"What are the latest AI developments?"</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What were the major AI developments up through your knowledge cutoff? Flag anything that may have changed since."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">09</span>
-                <span class="tip-label">Give it a role to play — the response quality shifts.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>When you frame the AI as an expert or a specific kind of person, the tone, depth, and relevance of responses tends to improve. It's a small trick with a real effect.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Give me study advice."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "As an experienced math teacher, what study strategies would you recommend for a student who keeps making careless mistakes?"
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">10</span>
-                <span class="tip-label">State your constraints upfront.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Budget, time, skill level, available materials — the more limitations you name, the more useful the suggestions will be.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Suggest some science projects."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Suggest five computer science project ideas for a 7th grader with no budget and only a school laptop."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">11</span>
-                <span class="tip-label">Ask for both sides, not just one.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>By default, the AI will often give you the most agreeable or popular take. Push it to consider the other side — it makes the output more useful and honest.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Explain the importance of homework."</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What are the strongest arguments both for and against homework in middle school? Don't lean either way."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">12</span>
-                <span class="tip-label">Ask for sources — but verify them yourself.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Asking for citations is a good habit, but AI tools sometimes invent references that sound plausible. Always double-check anything important before relying on it.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"What are the benefits of coding for students?"</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What are the benefits of learning to code for students? Cite any studies or sources you're drawing from."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">13</span>
-                <span class="tip-label">Keep the conversation going — follow-ups work.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>You don't have to fit everything into one prompt. AI handles back-and-forth well — treat it like a conversation, not a search box.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">First ask</div>
-                    <div class="prompt-block">"What is a function in programming?"</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Then follow up</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Can you walk me through a real example of that function in Python, with comments?"
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">14</span>
-                <span class="tip-label">If the answer is off, try rewording the question.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Sometimes the AI just doesn't understand what you're really after. Rather than repeating yourself, rephrase — a different angle often unlocks a much better response.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Why should I learn coding?"</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What are the practical benefits of learning to code for a middle school student who's interested in sports and games?"
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">15</span>
-                <span class="tip-label">AI has biases baked in — worth keeping in mind.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>These models are trained on human-generated text, which means they carry the biases of that data. On anything nuanced or contested, actively prompt for balance.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label">Instead of</div>
-                    <div class="prompt-block">"Are video games bad for students?"</div>
-                </div>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Try</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "What do researchers say about how video games affect students — positive and negative? Include findings from both camps."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">16</span>
-                <span class="tip-label">Request specific formatting when it matters.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>If you're copying output into a document or presentation, asking for a specific format saves a lot of cleanup. You can even specify markdown, HTML, or plain text.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Example</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "List the benefits of learning programming as bullet points. Bold the key term in each one. Keep each point to one sentence."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">17</span>
-                <span class="tip-label">Adjust the tone — it'll match whatever style you need.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Formal, casual, funny, blunt — the AI will adapt its voice to whatever you describe. Getting the tone right makes responses far more usable.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Example</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Explain algebra as if you're a middle schooler who loves basketball and hates math class. Keep it real, not corny."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">18</span>
-                <span class="tip-label">Use it as an idea machine — ask for a long list.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>One of AI's genuine superpowers is volume. Ask for 20 or 30 ideas and you'll almost always find a few genuinely useful ones you wouldn't have thought of yourself.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Example</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "Give me 25 project ideas for a 7th-grade computer science class. Include a mix of easy, medium, and ambitious ones."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">19</span>
-                <span class="tip-label">Get advice through a specific mentor's lens.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Asking "what would a seasoned entrepreneur say about this?" produces a different response than asking for generic advice — and usually a more useful one.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Example</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "As a mentor who's been brutally honest with students their whole career, make a real case for why I should work hard in school. Skip the platitudes."
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tip">
-            <div class="tip-title">
-                <span class="tip-num">20</span>
-                <span class="tip-label">Use it for things that are hard to Google.</span>
-                <span class="tip-toggle">+</span>
-            </div>
-            <div class="tip-body">
-                <p>Search engines are great for finding information that exists somewhere. AI is better at synthesizing, reasoning, and tackling messy problems that don't have a clean answer page.</p>
-                <div class="prompt-pair">
-                    <div class="prompt-label better">Example</div>
-                    <div class="prompt-block better">
-                        <button class="copy-btn">copy</button>
-                        "My code is supposed to print the numbers 1 to 10 but it only prints 1. Here it is: [paste code]. What's wrong and why?"
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div><!-- /tips -->
-
-    <div class="footer-note">
-        The better you communicate, the better the output. These aren't rules — they're patterns worth building into the habit.
     </div>
 
-</div><!-- /page -->
+    <!-- ═══════════ B TIER ═══════════ -->
+    <div class="tier tier-b">
+        <div class="tier-header">
+            <div class="tier-badge">B</div>
+            <div class="tier-meta">
+                <div class="tier-name">Solid Technique</div>
+                <div class="tier-desc">Good habits once the fundamentals are down. Situationally very useful.</div>
+            </div>
+        </div>
+        <div class="cards">
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">11</span>
+                    <span class="card-title">Ask it to rephrase or simplify when confused.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>If an explanation isn't clicking, don't reread it hoping it'll click — ask for a different angle. "Explain that like I'm 12" or "Give me an analogy" or "Can you use a concrete example?" almost always helps more than rereading the same abstract explanation.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">12</span>
+                    <span class="card-title">Specify the output format you want.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Want a table? A numbered list? A short paragraph, not an essay? Say so. The default format is often longer and more padded than necessary. Specifying format also reduces the cleanup work after you get the answer.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Example</div>
+                        "Give me the answer as a two-column table: left column is the action, right column is why it matters. No intro text, just the table."
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">13</span>
+                    <span class="card-title">Use it as a brainstorming engine — ask for volume.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Generating a lot of ideas fast is genuinely one of AI's strongest suits. Ask for 20 or 30 ideas on any topic and you'll almost always find a handful that are worth keeping — ones you wouldn't have reached on your own. Don't filter while generating; ask for quantity first, then refine.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Example</div>
+                        "Give me 30 newsletter topic ideas for a freelance illustrator. Be creative, include some unusual angles, and don't repeat yourself."
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">14</span>
+                    <span class="card-title">Rephrase the question when the answer is off.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Sometimes the model just didn't understand what you actually meant. Rather than repeating yourself or typing the same prompt harder, try coming at it from a completely different angle. Change the framing, add a concrete example of what you're looking for, or strip it down to the core question.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">15</span>
+                    <span class="card-title">Ask for the opposing view, not just confirmation.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>The AI will naturally produce responses that feel balanced but often lean toward the popular or expected view. For anything important — decisions, arguments, analysis — explicitly ask it to steelman the opposite position. "Now argue against the advice you just gave me" is a surprisingly useful follow-up.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">16</span>
+                    <span class="card-title">Adjust the tone to fit where the output will be used.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>The default AI writing voice is often a bit too formal and polished to sound like a real person. If you're writing something that needs to sound human — a casual email, a social post, a Slack message — ask it to dial down the corporate sheen. Describe the audience and the context.</p>
+                    <div class="prompt-ex">
+                        <div class="prompt-ex-label">Example</div>
+                        "Rewrite this in a warmer, more direct tone. Cut the filler phrases. It should sound like it came from a real person, not a template."
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════ C TIER ═══════════ -->
+    <div class="tier tier-c">
+        <div class="tier-header">
+            <div class="tier-badge">C</div>
+            <div class="tier-meta">
+                <div class="tier-name">Situational</div>
+                <div class="tier-desc">Useful in specific contexts. Won't move the needle for everyday use.</div>
+            </div>
+        </div>
+        <div class="cards">
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">17</span>
+                    <span class="card-title">Use the mentor framing to get blunter advice.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Asking the AI to respond "as a mentor who won't sugarcoat things" tends to produce feedback that's more actionable and less hedged than default responses. Useful for evaluating ideas, getting career advice, or when you specifically want someone to tell you what's wrong with your plan.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">18</span>
+                    <span class="card-title">Ask for sources — but verify them yourself.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Requesting citations is a reasonable habit, but AI models sometimes fabricate references that sound credible. Treat any cited study or article as unconfirmed until you've checked it yourself. This isn't a reason to skip asking — it's just a reason to always double-check before you repeat something in your own work.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">19</span>
+                    <span class="card-title">Use it for things that are hard to Google.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Search engines are good at finding information that exists somewhere as a clean document. AI is better at synthesizing, reasoning through messy situations, and answering questions that are too specific or too contextual for search. The classic example: debugging code where the error depends on your specific logic, not a known bug.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">20</span>
+                    <span class="card-title">Know that its knowledge has a cutoff date.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>For anything time-sensitive — recent events, current prices, who currently holds a position — the AI may be working with outdated information and won't always flag this proactively. If recency matters, use a tool with web access (like Perplexity or Claude with web search enabled) or verify the answer elsewhere.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════ D TIER ═══════════ -->
+    <div class="tier tier-d">
+        <div class="tier-header">
+            <div class="tier-badge">D</div>
+            <div class="tier-meta">
+                <div class="tier-name">Minor Gains</div>
+                <div class="tier-desc">Fine to know. Rarely changes the outcome in practice.</div>
+            </div>
+        </div>
+        <div class="cards">
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">21</span>
+                    <span class="card-title">Use examples to illustrate your request.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Showing the AI an example of what you want — a sample email, a formatting style, a tone of voice — is genuinely useful when the output needs to match something specific. In practice, for most everyday prompts, being specific (Tier S) achieves the same thing. This becomes more important for creative work or when you need output to match an existing style exactly.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">22</span>
+                    <span class="card-title">Ask for bold, bullets, or tables when it helps readability.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Formatting requests are useful for cleanup, but they don't change the substance of an answer. "Bold the key terms" or "put this in a table" is useful mainly when you're copying output directly into another document. In most conversational contexts, the information matters more than the formatting.</p>
+                </div>
+            </div>
+
+            <div class="card" onclick="toggle(this)">
+                <div class="card-head">
+                    <span class="card-rank">23</span>
+                    <span class="card-title">Be aware of potential bias in AI responses.</span>
+                    <span class="card-chevron">▼</span>
+                </div>
+                <div class="card-body">
+                    <p>Worth keeping in mind, but this is more of a general epistemic habit than a prompting technique. The practical version of this advice is already captured elsewhere: ask for both sides, ask for counterarguments, and verify anything important before relying on it. "Be aware of bias" on its own doesn't give you a concrete thing to do differently.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /tiers -->
+
+
 
 <script>
-    document.querySelectorAll('.tip-title').forEach(function(title) {
-        title.addEventListener('click', function() {
-            this.classList.toggle('open');
-            var body = this.nextElementSibling;
-            body.classList.toggle('open');
-        });
-    });
-
-    document.querySelectorAll('.copy-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var text = this.parentElement.textContent.trim();
-            navigator.clipboard.writeText(text).then(function() {
-                btn.textContent = 'copied';
-                btn.classList.add('copied');
-                setTimeout(function() {
-                    btn.textContent = 'copy';
-                    btn.classList.remove('copied');
-                }, 1800);
-            });
-        });
-    });
+    function toggle(card) {
+        card.classList.toggle('open');
+    }
 </script>
 </body>
 </html>
