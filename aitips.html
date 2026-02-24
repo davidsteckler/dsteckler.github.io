@@ -2,650 +2,677 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Tips by David Steckler</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tips — David Steckler</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        /* Global Styles */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #1a1a1a;
+            --mid: #6b6b6b;
+            --faint: #e8e4de;
+            --paper: #f7f4ef;
+            --cream: #fdfbf8;
+            --accent: #c94f2a;
+            --rule: #d4cec6;
+        }
+
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-color: #f5f5f5;
-            line-height: 1.6;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink);
+            line-height: 1.7;
+            padding: 60px 20px 100px;
         }
-        header, footer {
-            background-color: #000;
-            text-align: center;
-            padding: 20px;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        .page {
+            max-width: 680px;
+            margin: 0 auto;
         }
-        header h1 {
-            color: #fff;
-            margin: 0;
+
+        /* Masthead */
+        .masthead {
+            border-top: 3px solid var(--ink);
+            border-bottom: 1px solid var(--rule);
+            padding: 28px 0 24px;
+            margin-bottom: 50px;
         }
-        header h1 a {
-            color: #fff;
-            text-decoration: none;
+
+        .masthead h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+            color: var(--ink);
         }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
+
+        .masthead p {
+            margin-top: 12px;
+            font-size: 0.95rem;
+            color: var(--mid);
+            font-weight: 300;
+            max-width: 480px;
         }
-        nav {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        nav a {
-            margin: 5px 10px;
-            text-transform: uppercase;
-            font-weight: bold;
-            color: #fff;
-            position: relative;
-            padding: 5px 8px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-        nav a:hover, nav a.active {
-            background-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .menu-toggle {
-            display: none;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            color: #fff;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-        @media (max-width: 600px) {
-            nav {
-                display: none;
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-                background-color: #000;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                z-index: 1;
-            }
-            nav.active {
-                display: flex;
-            }
-            nav a {
-                flex: 1 0 100%;
-                margin: 5px 0;
-                padding: 10px;
-                color: #fff;
-            }
-            .menu-toggle {
-                display: block;
-            }
-        }
-        /* Typography */
-        h1, h2, h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: normal;
-        }
-        p {
-            margin-bottom: 20px;
-        }
-        a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        /* Practical Tips Styles */
+
+        /* Tip items */
         .tip {
-            border-bottom: 1px solid #ccc;
-            padding: 15px 0;
+            border-bottom: 1px solid var(--rule);
         }
-        .tip:last-child {
-            border-bottom: none;
-        }
+
         .tip-title {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            padding: 22px 0;
             cursor: pointer;
-            position: relative;
-            padding-right: 25px;
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #2c3e50;
+            user-select: none;
         }
-        .tip-title::after {
-            content: '+';
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            transition: transform 0.3s;
-            color: #2c3e50;
+
+        .tip-title:hover .tip-label {
+            color: var(--accent);
         }
-        .tip-title.active::after {
-            transform: translateY(-50%) rotate(45deg);
+
+        .tip-num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--mid);
+            min-width: 24px;
+            padding-top: 2px;
         }
-        .tip-content {
+
+        .tip-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--ink);
+            flex: 1;
+            transition: color 0.2s;
+        }
+
+        .tip-toggle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--mid);
+            transition: transform 0.25s ease, color 0.2s;
+            line-height: 1;
+        }
+
+        .tip-title.open .tip-toggle {
+            transform: rotate(45deg);
+            color: var(--accent);
+        }
+
+        .tip-body {
             display: none;
-            padding: 10px 0 0 20px;
+            padding: 0 0 28px 40px;
         }
-        .tip-content p {
-            margin-bottom: 10px;
+
+        .tip-body.open {
+            display: block;
         }
-        /* Emphasis Note */
-        .emphasis-note {
-            background-color: #eef;
-            padding: 15px;
-            border-left: 5px solid #3498db;
-            margin-top: 20px;
-            border-radius: 3px;
-            font-style: italic;
+
+        .tip-body > p:first-child {
+            font-size: 0.95rem;
+            color: var(--mid);
+            margin-bottom: 20px;
         }
-        /* Additional Styles */
-        strong {
-            font-weight: bold;
-            color: #2c3e50;
+
+        /* Prompt blocks */
+        .prompt-pair {
+            margin-bottom: 18px;
         }
-        em {
-            color: #2c3e50;
-            font-style: italic;
+
+        .prompt-pair + .prompt-pair {
+            margin-top: 8px;
         }
-        /* Prompt Display */
-        .prompt-display {
-            margin-top: 10px;
-            padding: 15px;
-            background-color: #e8f4fd;
-            border-left: 5px solid #3498db;
-            border-radius: 5px;
+
+        .prompt-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--mid);
+            margin-bottom: 6px;
+        }
+
+        .prompt-label.better {
+            color: var(--accent);
+        }
+
+        .prompt-block {
+            background: var(--cream);
+            border: 1px solid var(--rule);
+            border-left: 3px solid var(--faint);
+            padding: 12px 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--ink);
+            line-height: 1.6;
             position: relative;
-            font-family: monospace;
-            font-size: 1.1em;
-            color: #2c3e50;
         }
-        .copy-button {
+
+        .prompt-block.better {
+            border-left-color: var(--accent);
+            background: #fdf6f3;
+        }
+
+        .copy-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 3px;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: 1px solid var(--rule);
+            color: var(--mid);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            padding: 3px 7px;
             cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.15s;
         }
-        .copy-button:hover {
-            background-color: #2980b9;
+
+        .copy-btn:hover {
+            border-color: var(--ink);
+            color: var(--ink);
         }
-        .prompt-display p {
-            margin: 0;
+
+        .copy-btn.copied {
+            border-color: var(--accent);
+            color: var(--accent);
         }
-        /* Table Styles */
-        table.example-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+
+        /* Footer note */
+        .footer-note {
+            margin-top: 60px;
+            padding-top: 28px;
+            border-top: 1px solid var(--rule);
+            font-size: 0.88rem;
+            color: var(--mid);
+            font-style: italic;
         }
-        table.example-table, th.example-th, td.example-td {
-            border: 1px solid #ccc;
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        th.example-th, td.example-td {
-            padding: 10px;
-            text-align: left;
-        }
-        th.example-th {
-            background-color: #f9f9f9;
+
+        .tip-body.open {
+            display: block;
+            animation: fadeIn 0.2s ease;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1><a href="index.html">David Steckler</a></h1>
-        <button class="menu-toggle">&#9776;</button>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="about.html">About</a>
-            <a href="course.html">Course</a>
-            <a href="blog.html">Blog</a>
-            <a href="contact.html">Contact</a>
-            <a href="testimonials.html">Testimonials</a>
-            <a href="search.html">Search</a>
-        </nav>
-    </header>
+<div class="page">
 
-    <div class="container">
-        <!-- Introduction Section -->
-        <section id="introduction">
-            <h2>Useful AI Tips</h2>
-            <p>
-                I've experimented with AI tools like ChatGPT, Gemini, Copilot, Claude, and Perplexity. Here are the universal tips I've learned. Hope they help you too.
-            </p>
-        </section>
-
-            <!-- Tip 1 -->
-            <div class="tip">
-                <div class="tip-title">1. Be Specific and Clear in Your Requests 📝</div>
-                <div class="tip-content">
-                    <p>Clearly state what you want to get precise answers.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip1-prompt-text')">Copy</button>
-                        <p id="tip1-prompt-text">"Tell me about programming."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip1-prompt-text2')">Copy</button>
-                        <p id="tip1-prompt-text2">"Explain the basics of programming in Python for a 7th-grade student."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 2 -->
-            <div class="tip">
-                <div class="tip-title">2. Provide Context When Necessary 🌍</div>
-                <div class="tip-content">
-                    <p>Giving background information helps the AI understand your request better.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip2-prompt-text')">Copy</button>
-                        <p id="tip2-prompt-text">"Explain variables."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip2-prompt-text2')">Copy</button>
-                        <p id="tip2-prompt-text2">"As a beginner in computer science, explain what variables are in programming."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 3 -->
-            <div class="tip">
-                <div class="tip-title">3. Break Complex Tasks into Smaller Steps 🧩</div>
-                <div class="tip-content">
-                    <p>Divide big questions into manageable parts.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip3-prompt-text')">Copy</button>
-                        <p id="tip3-prompt-text">"Teach me how to code."</p>
-                    </div>
-                    <!-- Improved Prompts -->
-                    <p><strong>Improved Prompts:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip3-prompt-text2')">Copy</button>
-                        <p id="tip3-prompt-text2">"What programming languages are suitable for beginners?"</p>
-                    </div>
-                    <div class="prompt-display" style="margin-top: 10px;">
-                        <button class="copy-button" onclick="copyPrompt('tip3-prompt-text3')">Copy</button>
-                        <p id="tip3-prompt-text3">"Provide a simple project idea to practice basic programming concepts."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 4 -->
-            <div class="tip">
-                <div class="tip-title">4. Use Examples to Illustrate Your Point 💡</div>
-                <div class="tip-content">
-                    <p>Examples help clarify your request and the AI's response.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip4-prompt-text')">Copy</button>
-                        <p id="tip4-prompt-text">"Explain loops."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip4-prompt-text2')">Copy</button>
-                        <p id="tip4-prompt-text2">"Explain how 'for loops' work in programming with an example in Python."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 5 -->
-            <div class="tip">
-                <div class="tip-title">5. Ask for Clarification if the Response is Unclear ❓</div>
-                <div class="tip-content">
-                    <p>If you don't understand the AI's answer, ask for more details.</p>
-                    <!-- Example Interaction -->
-                    <p><strong>AI's Response:</strong></p>
-                    <div class="prompt-display">
-                        <p>"Functions allow you to encapsulate code."</p>
-                    </div>
-                    <p><strong>Your Follow-up:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip5-prompt-text')">Copy</button>
-                        <p id="tip5-prompt-text">"Can you explain what 'encapsulate' means in this context?"</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 6 -->
-            <div class="tip">
-                <div class="tip-title">6. Specify the Desired Format or Structure 📄</div>
-                <div class="tip-content">
-                    <p>Let the AI know how you want the information presented.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip6-prompt-text')">Copy</button>
-                        <p id="tip6-prompt-text">"Tell me how to study effectively."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip6-prompt-text2')">Copy</button>
-                        <p id="tip6-prompt-text2">"List five bullet-point tips on how to study effectively for exams."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 7 -->
-            <div class="tip">
-                <div class="tip-title">7. Encourage Step-by-Step Reasoning for Complex Problems 🧮</div>
-                <div class="tip-content">
-                    <p>Ask the AI to break down the reasoning process.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip7-prompt-text')">Copy</button>
-                        <p id="tip7-prompt-text">"Solve this math problem: 3x + 5 = 20."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip7-prompt-text2')">Copy</button>
-                        <p id="tip7-prompt-text2">"Solve the equation 3x + 5 = 20 and explain each step."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 8 -->
-            <div class="tip">
-                <div class="tip-title">8. Be Aware of the Model's Knowledge Cutoff Date 📅</div>
-                <div class="tip-content">
-                    <p>The AI's knowledge may be limited to a certain date.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip8-prompt-text')">Copy</button>
-                        <p id="tip8-prompt-text">"Tell me about the latest advancements in AI."</p>
-                    </div>
-                    <!-- Adjusted Prompt -->
-                    <p><strong>Adjusted Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip8-prompt-text2')">Copy</button>
-                        <p id="tip8-prompt-text2">"As of your last update in 2021, what were the latest advancements in AI?"</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 9 -->
-            <div class="tip">
-                <div class="tip-title">9. Utilize System Prompts or Role-Playing 🎭</div>
-                <div class="tip-content">
-                    <p>Ask the AI to take on a role for specialized tasks.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip9-prompt-text')">Copy</button>
-                        <p id="tip9-prompt-text">"Give me study advice."</p>
-                    </div>
-                    <!-- Role-Playing Prompt -->
-                    <p><strong>Role-Playing Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip9-prompt-text2')">Copy</button>
-                        <p id="tip9-prompt-text2">"As an experienced teacher, provide me with study strategies for improving in mathematics."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 10 -->
-            <div class="tip">
-                <div class="tip-title">10. Explicitly State Any Constraints or Limitations 🚧</div>
-                <div class="tip-content">
-                    <p>Let the AI know about any specific requirements.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip10-prompt-text')">Copy</button>
-                        <p id="tip10-prompt-text">"Suggest some science projects."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip10-prompt-text2')">Copy</button>
-                        <p id="tip10-prompt-text2">"Suggest some computer science project ideas suitable for a 7th-grade student with limited resources."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 11 -->
-            <div class="tip">
-                <div class="tip-title">11. Ask for Alternative Viewpoints or Approaches 🔄</div>
-                <div class="tip-content">
-                    <p>Explore different perspectives by requesting them.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip11-prompt-text')">Copy</button>
-                        <p id="tip11-prompt-text">"Explain the importance of homework."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip11-prompt-text2')">Copy</button>
-                        <p id="tip11-prompt-text2">"Discuss both the advantages and disadvantages of homework for middle school students."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 12 -->
-            <div class="tip">
-                <div class="tip-title">12. Request Sources or References When Appropriate 📚</div>
-                <div class="tip-content">
-                    <p>Ask the AI to provide sources for its information.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip12-prompt-text')">Copy</button>
-                        <p id="tip12-prompt-text">"Tell me about the benefits of coding for students."</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip12-prompt-text2')">Copy</button>
-                        <p id="tip12-prompt-text2">"Provide information on the benefits of coding for students and cite your sources."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 13 -->
-            <div class="tip">
-                <div class="tip-title">13. Use Follow-Up Questions to Refine Responses 🔍</div>
-                <div class="tip-content">
-                    <p>Continue the conversation to get more detailed answers.</p>
-                    <!-- Example Interaction -->
-                    <p><strong>Initial Question:</strong></p>
-                    <div class="prompt-display">
-                        <p>"What is a function in programming?"</p>
-                    </div>
-                    <p><strong>AI's Response:</strong></p>
-                    <div class="prompt-display">
-                        <p>"A function is a block of code designed to perform a particular task."</p>
-                    </div>
-                    <p><strong>Follow-Up Question:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip13-prompt-text')">Copy</button>
-                        <p id="tip13-prompt-text">"Can you give me an example of a function in Python?"</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 14 -->
-            <div class="tip">
-                <div class="tip-title">14. Experiment with Different Phrasings of Your Question 📝</div>
-                <div class="tip-content">
-                    <p>If you're not getting the answer you need, try rewording your question.</p>
-                    <!-- Original Prompt -->
-                    <p><strong>Original Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip14-prompt-text')">Copy</button>
-                        <p id="tip14-prompt-text">"Why should I learn coding?"</p>
-                    </div>
-                    <!-- Rephrased Prompt -->
-                    <p><strong>Rephrased Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip14-prompt-text2')">Copy</button>
-                        <p id="tip14-prompt-text2">"Explain the benefits of learning to code for a middle school student."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 15 -->
-            <div class="tip">
-                <div class="tip-title">15. Be Mindful of Potential Biases in the Model's Responses ⚖️</div>
-                <div class="tip-content">
-                    <p>Acknowledge that AI might have biases based on its training data.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Regular Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip15-prompt-text')">Copy</button>
-                        <p id="tip15-prompt-text">"Are video games bad for students?"</p>
-                    </div>
-                    <!-- Improved Prompt -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip15-prompt-text2')">Copy</button>
-                        <p id="tip15-prompt-text2">"Discuss both the positive and negative effects of video games on students, considering potential biases."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 16 -->
-            <div class="tip">
-                <div class="tip-title">16. Utilize Formatting Options 🖋️</div>
-                <div class="tip-content">
-                    <p>Ask the AI to format its response with bold or italic text, bullet points, or tables.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Improved Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip16-prompt-text')">Copy</button>
-                        <p id="tip16-prompt-text">"List the benefits of learning programming using bullet points and bold the key terms."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 17 -->
-            <div class="tip">
-                <div class="tip-title">17. Customize the Tone or Style 🗣️</div>
-                <div class="tip-content">
-                    <p>Ask the AI to respond in the voice or style of someone you enjoy.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Example Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip17-prompt-text')">Copy</button>
-                        <p id="tip17-prompt-text">"Explain algebra concepts as if you're a middle schooler who hates math but loves basketball, in a funny but not cringe way."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 18 -->
-            <div class="tip">
-                <div class="tip-title">18. Generate Extensive Idea Lists 💡</div>
-                <div class="tip-content">
-                    <p>Ask the AI to create a list of 10-50 ideas on a topic you're interested in.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Example Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip18-prompt-text')">Copy</button>
-                        <p id="tip18-prompt-text">"Generate 20 project ideas for a 7th-grade computer science class."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 19 -->
-            <div class="tip">
-                <div class="tip-title">19. Seek Advice from Imagined Mentors 🎓</div>
-                <div class="tip-content">
-                    <p>Ask the AI to respond as if it were a mentor to gain new perspectives.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Example Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip19-prompt-text')">Copy</button>
-                        <p id="tip19-prompt-text">"As a wise mentor, convince me why I should work hard in school. I'm bored and need the real truth—no sugarcoating."</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tip 20 -->
-            <div class="tip">
-                <div class="tip-title">20. Use AI to Solve Un-Googleable Problems 🕵️‍♂️</div>
-                <div class="tip-content">
-                    <p>When you can't find answers through a regular search, turn to AI for help.</p>
-                    <!-- Prompt Display -->
-                    <p><strong>Example Prompt:</strong></p>
-                    <div class="prompt-display">
-                        <button class="copy-button" onclick="copyPrompt('tip20-prompt-text')">Copy</button>
-                        <p id="tip20-prompt-text">"I'm trying to understand why my code isn't working. Here's what I've written: [insert code]. Can you help me find the issue?"</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Emphasis Note -->
-            <div class="emphasis-note">
-                💡 These tips will help you unlock the full potential of AI tools. Remember, the more effectively you communicate, the better the AI can assist you.
-            </div>
-        </section>
+    <div class="masthead">
+        <h1>Things I've Learned<br><em>Using AI Tools</em></h1>
+        <p>After a lot of trial and error with ChatGPT, Gemini, Copilot, Claude, and Perplexity — here's what actually makes a difference.</p>
     </div>
 
-    <footer>
-        <p>&copy; 2024 David Steckler. All rights reserved.</p>
-    </footer>
+    <div id="tips">
 
-    <script>
-        // Function to toggle tip content visibility
-        document.querySelectorAll('.tip-title').forEach(function(title) {
-            title.addEventListener('click', function() {
-                this.classList.toggle('active');
-                var content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">01</span>
+                <span class="tip-label">Be specific. Vague questions get vague answers.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>The more precise your question, the more useful the response. Generic prompts produce generic output — narrow it down before you hit send.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Tell me about programming."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Explain the basics of Python programming for a 7th-grade student."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">02</span>
+                <span class="tip-label">Give it context. The AI doesn't know who you are.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>A little background information dramatically changes the quality of responses. Tell it your level, your purpose, or your situation.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Explain variables."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "As a beginner in computer science, explain what variables are in programming."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">03</span>
+                <span class="tip-label">Break big tasks into smaller ones.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Asking "teach me to code" is like asking someone to teach you to cook — it's not a single question. Slice it into concrete, answerable pieces.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Teach me how to code."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What programming languages are easiest to learn for a complete beginner?"
+                    </div>
+                </div>
+                <div class="prompt-pair" style="margin-top:10px;">
+                    <div class="prompt-label better">Then</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Give me a simple beginner project to practice basic programming concepts."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">04</span>
+                <span class="tip-label">Use examples to show what you mean.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Concrete examples remove ambiguity — both in what you're asking for and in what you get back.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Explain loops."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Explain how 'for loops' work in Python, using a real-world example."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">05</span>
+                <span class="tip-label">When the answer is confusing, just ask.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>There's no embarrassment here — if the response uses a term you don't understand, ask it to clarify. That's the whole point of the conversation.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">AI says</div>
+                    <div class="prompt-block">"Functions allow you to encapsulate code."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">You follow up</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What does 'encapsulate' mean in this context? Give me a simple example."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">06</span>
+                <span class="tip-label">Tell it how you want the answer formatted.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>You're in control of the output format. Want a list? A table? A short paragraph? Just say so.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Tell me how to study effectively."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Give me five study tips in a bulleted list, each with a one-sentence explanation."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">07</span>
+                <span class="tip-label">Ask it to show its work on hard problems.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>For anything involving logic, math, or reasoning — asking for step-by-step explanations both improves accuracy and helps you actually understand the answer.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Solve this: 3x + 5 = 20."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Solve 3x + 5 = 20 and explain each step so I can follow the logic."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">08</span>
+                <span class="tip-label">Its knowledge has a cutoff — recent events are a blind spot.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>AI models don't have access to today's news. For anything recent, either use a tool with web access (like Perplexity) or be explicit about the timeframe.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"What are the latest AI developments?"</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What were the major AI developments up through your knowledge cutoff? Flag anything that may have changed since."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">09</span>
+                <span class="tip-label">Give it a role to play — the response quality shifts.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>When you frame the AI as an expert or a specific kind of person, the tone, depth, and relevance of responses tends to improve. It's a small trick with a real effect.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Give me study advice."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "As an experienced math teacher, what study strategies would you recommend for a student who keeps making careless mistakes?"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">10</span>
+                <span class="tip-label">State your constraints upfront.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Budget, time, skill level, available materials — the more limitations you name, the more useful the suggestions will be.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Suggest some science projects."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Suggest five computer science project ideas for a 7th grader with no budget and only a school laptop."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">11</span>
+                <span class="tip-label">Ask for both sides, not just one.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>By default, the AI will often give you the most agreeable or popular take. Push it to consider the other side — it makes the output more useful and honest.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Explain the importance of homework."</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What are the strongest arguments both for and against homework in middle school? Don't lean either way."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">12</span>
+                <span class="tip-label">Ask for sources — but verify them yourself.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Asking for citations is a good habit, but AI tools sometimes invent references that sound plausible. Always double-check anything important before relying on it.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"What are the benefits of coding for students?"</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What are the benefits of learning to code for students? Cite any studies or sources you're drawing from."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">13</span>
+                <span class="tip-label">Keep the conversation going — follow-ups work.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>You don't have to fit everything into one prompt. AI handles back-and-forth well — treat it like a conversation, not a search box.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">First ask</div>
+                    <div class="prompt-block">"What is a function in programming?"</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Then follow up</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Can you walk me through a real example of that function in Python, with comments?"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">14</span>
+                <span class="tip-label">If the answer is off, try rewording the question.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Sometimes the AI just doesn't understand what you're really after. Rather than repeating yourself, rephrase — a different angle often unlocks a much better response.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Why should I learn coding?"</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What are the practical benefits of learning to code for a middle school student who's interested in sports and games?"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">15</span>
+                <span class="tip-label">AI has biases baked in — worth keeping in mind.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>These models are trained on human-generated text, which means they carry the biases of that data. On anything nuanced or contested, actively prompt for balance.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label">Instead of</div>
+                    <div class="prompt-block">"Are video games bad for students?"</div>
+                </div>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Try</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "What do researchers say about how video games affect students — positive and negative? Include findings from both camps."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">16</span>
+                <span class="tip-label">Request specific formatting when it matters.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>If you're copying output into a document or presentation, asking for a specific format saves a lot of cleanup. You can even specify markdown, HTML, or plain text.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Example</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "List the benefits of learning programming as bullet points. Bold the key term in each one. Keep each point to one sentence."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">17</span>
+                <span class="tip-label">Adjust the tone — it'll match whatever style you need.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Formal, casual, funny, blunt — the AI will adapt its voice to whatever you describe. Getting the tone right makes responses far more usable.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Example</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Explain algebra as if you're a middle schooler who loves basketball and hates math class. Keep it real, not corny."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">18</span>
+                <span class="tip-label">Use it as an idea machine — ask for a long list.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>One of AI's genuine superpowers is volume. Ask for 20 or 30 ideas and you'll almost always find a few genuinely useful ones you wouldn't have thought of yourself.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Example</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "Give me 25 project ideas for a 7th-grade computer science class. Include a mix of easy, medium, and ambitious ones."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">19</span>
+                <span class="tip-label">Get advice through a specific mentor's lens.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Asking "what would a seasoned entrepreneur say about this?" produces a different response than asking for generic advice — and usually a more useful one.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Example</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "As a mentor who's been brutally honest with students their whole career, make a real case for why I should work hard in school. Skip the platitudes."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip">
+            <div class="tip-title">
+                <span class="tip-num">20</span>
+                <span class="tip-label">Use it for things that are hard to Google.</span>
+                <span class="tip-toggle">+</span>
+            </div>
+            <div class="tip-body">
+                <p>Search engines are great for finding information that exists somewhere. AI is better at synthesizing, reasoning, and tackling messy problems that don't have a clean answer page.</p>
+                <div class="prompt-pair">
+                    <div class="prompt-label better">Example</div>
+                    <div class="prompt-block better">
+                        <button class="copy-btn">copy</button>
+                        "My code is supposed to print the numbers 1 to 10 but it only prints 1. Here it is: [paste code]. What's wrong and why?"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /tips -->
+
+    <div class="footer-note">
+        The better you communicate, the better the output. These aren't rules — they're patterns worth building into the habit.
+    </div>
+
+</div><!-- /page -->
+
+<script>
+    document.querySelectorAll('.tip-title').forEach(function(title) {
+        title.addEventListener('click', function() {
+            this.classList.toggle('open');
+            var body = this.nextElementSibling;
+            body.classList.toggle('open');
+        });
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var text = this.parentElement.textContent.trim();
+            navigator.clipboard.writeText(text).then(function() {
+                btn.textContent = 'copied';
+                btn.classList.add('copied');
+                setTimeout(function() {
+                    btn.textContent = 'copy';
+                    btn.classList.remove('copied');
+                }, 1800);
             });
         });
-
-        // Copy prompt to clipboard
-        function copyPrompt(promptId) {
-            var promptText = document.getElementById(promptId).textContent;
-            navigator.clipboard.writeText(promptText).then(function() {
-                alert('Prompt copied to clipboard!');
-            }, function(err) {
-                alert('Could not copy prompt: ', err);
-            });
-        }
-
-        // Menu Toggle for Mobile
-        document.querySelector('.menu-toggle').addEventListener('click', function() {
-            document.querySelector('nav').classList.toggle('active');
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
