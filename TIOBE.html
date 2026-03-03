@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TIOBE Index — Educational Guide</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --card: #1a2236;
+      --border: #1e2d45;
+      --accent1: #6366f1;
+      --accent2: #22d3ee;
+      --accent3: #f59e0b;
+      --accent4: #10b981;
+      --accent5: #f43f5e;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3rem 2rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(99,102,241,0.18) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 40% at 80% 70%, rgba(34,211,238,0.1) 0%, transparent 50%),
+                  linear-gradient(180deg, #0a0e1a 0%, #0d1525 100%);
+    }
+
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.4);
+      color: #a5b4fc;
+      font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+      padding: .35rem 1rem; border-radius: 999px; margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, #6366f1, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.2rem; color: #94a3b8; max-width: 600px; margin: 0 auto 2.5rem;
+    }
+
+    .hero-stats {
+      display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap;
+      margin-top: 3rem;
+    }
+
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; }
+    .stat-label { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+    .scroll-hint {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      color: var(--muted); font-size: .8rem; animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* SECTIONS */
+    section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+    section + section { border-top: 1px solid var(--border); }
+
+    .section-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--accent2); margin-bottom: .75rem;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -.02em; margin-bottom: 1rem; line-height: 1.1;
+    }
+
+    .lead { font-size: 1.1rem; color: #94a3b8; max-width: 680px; margin-bottom: 3rem; }
+
+    /* CARDS */
+    .explain-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;
+    }
+
+    .explain-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 2rem;
+      transition: transform .2s, border-color .2s;
+    }
+    .explain-card:hover { transform: translateY(-4px); border-color: var(--accent1); }
+
+    .explain-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1.2rem;
+    }
+
+    .explain-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+    .explain-card p { font-size: .9rem; color: #94a3b8; line-height: 1.6; }
+
+    /* TABLE */
+    .table-wrap {
+      background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: grid; grid-template-columns: 60px 80px 1fr 180px 110px;
+      padding: 1rem 1.5rem; font-size: .75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table-row {
+      display: grid; grid-template-columns: 60px 80px 1fr 180px 110px;
+      padding: .9rem 1.5rem; border-bottom: 1px solid rgba(30,45,69,.6);
+      align-items: center; transition: background .15s;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .table-row:hover { background: rgba(99,102,241,.07); }
+
+    .rank { font-size: 1rem; font-weight: 800; color: #94a3b8; }
+    .rank.gold { color: #f59e0b; }
+    .rank.silver { color: #94a3b8; }
+    .rank.bronze { color: #c87533; }
+
+    .change-badge {
+      font-size: .7rem; font-weight: 700; padding: .15rem .5rem;
+      border-radius: 6px; display: inline-flex; align-items: center; gap: .2rem;
+    }
+    .up { background: rgba(16,185,129,.15); color: #10b981; }
+    .down { background: rgba(244,63,94,.15); color: #f43f5e; }
+    .same { background: rgba(100,116,139,.15); color: #64748b; }
+
+    .lang-name {
+      display: flex; align-items: center; gap: .75rem;
+      font-weight: 600; font-size: .95rem;
+    }
+    .lang-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .rating-bar-wrap { display: flex; align-items: center; gap: .75rem; }
+    .rating-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+    .rating-bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+    .rating-val { font-family: 'JetBrains Mono', monospace; font-size: .85rem; color: #e2e8f0; min-width: 52px; text-align: right; }
+
+    .ychange { font-family: 'JetBrains Mono', monospace; font-size: .8rem; }
+    .yup { color: #10b981; }
+    .ydown { color: #f43f5e; }
+
+    /* SPOTLIGHT */
+    .spotlight {
+      background: linear-gradient(135deg, rgba(59,130,246,.1), rgba(99,102,241,.08));
+      border: 1px solid rgba(99,102,241,.25);
+      border-radius: 24px; padding: 3rem;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    }
+    @media (max-width: 700px) { .spotlight { grid-template-columns: 1fr; } }
+
+    .spotlight h3 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+    .python-stats { display: flex; flex-direction: column; gap: 1rem; }
+    .py-stat {
+      background: rgba(255,255,255,.05); border-radius: 12px; padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .py-stat-icon { font-size: 1.5rem; }
+    .py-stat-label { font-size: .8rem; color: var(--muted); }
+    .py-stat-val { font-size: 1.1rem; font-weight: 700; }
+
+    /* TIMELINE */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(180deg, var(--accent1), var(--accent2), transparent);
+    }
+    .timeline-item { position: relative; margin-bottom: 2rem; padding-left: 1.5rem; }
+    .timeline-dot {
+      position: absolute; left: -2rem; top: .3rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent1); border: 2px solid var(--bg);
+      transform: translateX(-6px);
+    }
+    .timeline-item h4 { font-weight: 700; margin-bottom: .3rem; }
+    .timeline-item p { font-size: .9rem; color: #94a3b8; }
+    .timeline-year { font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--accent2); margin-bottom: .4rem; }
+
+    /* HALL OF FAME */
+    .hof-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+    .hof-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.25rem; text-align: center; transition: transform .2s, border-color .2s;
+    }
+    .hof-card:hover { transform: translateY(-3px); border-color: var(--accent3); }
+    .hof-year { font-size: .75rem; color: var(--muted); margin-bottom: .4rem; }
+    .hof-lang { font-weight: 700; font-size: .95rem; }
+    .hof-medal { font-size: 1.5rem; margin-bottom: .4rem; }
+    .python-win { background: linear-gradient(135deg, rgba(59,130,246,.15), rgba(99,102,241,.1)); border-color: rgba(99,102,241,.35); }
+
+    /* STEPS */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; counter-reset: steps; }
+    .step {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2rem; position: relative; counter-increment: steps;
+    }
+    .step::before {
+      content: counter(steps);
+      position: absolute; top: -14px; left: 1.5rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white; font-size: .75rem; font-weight: 800;
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step h4 { font-weight: 700; margin-bottom: .5rem; }
+    .step p { font-size: .88rem; color: #94a3b8; }
+
+    /* WARN BOX */
+    .warn-box {
+      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.3);
+      border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem;
+    }
+    .warn-box h4 { color: #f59e0b; font-weight: 700; margin-bottom: .75rem; }
+    .warn-box ul { padding-left: 1.25rem; color: #94a3b8; font-size: .9rem; }
+    .warn-box li { margin-bottom: .5rem; }
+
+    .chip {
+      display: inline-block; font-size: .72rem; font-weight: 600; padding: .2rem .65rem;
+      border-radius: 999px; margin: .2rem;
+    }
+
+    footer {
+      text-align: center; padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: .85rem;
+      max-width: 1200px; margin: 0 auto;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .table-header, .table-row { grid-template-columns: 40px 1fr 90px; }
+      .table-header :nth-child(2), .table-row :nth-child(2),
+      .table-header :nth-child(5), .table-row :nth-child(5) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="badge">
+      <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#6366f1"/><circle cx="5" cy="5" r="2" fill="#a5b4fc"/></svg>
+      Educational Guide &middot; February 2026
+    </div>
+    <h1>The <span>TIOBE Index</span><br/>Explained</h1>
+    <p>Your complete guide to understanding how programming languages are ranked, what the data means, and why it matters for developers and students.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">150+</span><span class="stat-label">Languages Tracked</span></div>
+      <div class="stat"><span class="stat-num">25+</span><span class="stat-label">Years of Data</span></div>
+      <div class="stat"><span class="stat-num">20+</span><span class="stat-label">Search Engines Used</span></div>
+      <div class="stat"><span class="stat-num">#1</span><span class="stat-label">Python Feb 2026</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <svg width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</div>
+
+<!-- CHAPTER 1: WHAT IS TIOBE -->
+<section>
+  <div class="section-label">Chapter 1</div>
+  <h2>What is the TIOBE Index?</h2>
+  <p class="lead">TIOBE is a monthly ranking of programming languages based on their worldwide popularity — essentially a pulse check on the software development world.</p>
+  <div class="explain-grid">
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(99,102,241,.15)">📡</div>
+      <h3>A Popularity Meter</h3>
+      <p>TIOBE measures how often programming languages appear in web searches, courses, and third-party vendor materials across major search engines like Google, Amazon, Wikipedia, and Bing.</p>
+    </div>
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(34,211,238,.15)">📅</div>
+      <h3>Updated Monthly</h3>
+      <p>The index is refreshed every month, allowing developers, educators, and companies to track trends in real time rather than relying on outdated annual surveys.</p>
+    </div>
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(245,158,11,.15)">🎓</div>
+      <h3>A Learning Guide</h3>
+      <p>The index helps you decide which language to learn next or whether your current skills are still in demand — it's not about the "best" language, just the most talked-about ones.</p>
+    </div>
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(16,185,129,.15)">🏢</div>
+      <h3>A Strategic Tool</h3>
+      <p>Organizations use TIOBE data when selecting a technology stack for new projects, weighing community size, talent availability, and long-term ecosystem support.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 2: HOW IT WORKS -->
+<section>
+  <div class="section-label">Chapter 2</div>
+  <h2>How Is It Calculated?</h2>
+  <p class="lead">The TIOBE score comes from a structured web-search methodology — not from lines of code written or job postings.</p>
+  <div class="steps">
+    <div class="step">
+      <h4>Query Construction</h4>
+      <p>For each language, TIOBE builds search queries like <em>"Python programming"</em>, <em>"programming with Python"</em>, and <em>"Python development"</em>.</p>
+    </div>
+    <div class="step">
+      <h4>Multi-Engine Search</h4>
+      <p>These queries are submitted to 20+ popular search engines including Google, Bing, Yahoo, Wikipedia, and Amazon to count result hits.</p>
+    </div>
+    <div class="step">
+      <h4>Hit Count Aggregation</h4>
+      <p>The total number of results returned for each language is summed. More search results = assumed larger engineer community.</p>
+    </div>
+    <div class="step">
+      <h4>Normalization & Ranking</h4>
+      <p>Raw counts are normalized so all languages' scores sum to 100%, then ranked from most to least popular.</p>
+    </div>
+    <div class="step">
+      <h4>Monthly Publication</h4>
+      <p>The completed index is published on the first Tuesday of each month, enabling month-over-month and year-over-year comparisons.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 3: RANKINGS TABLE -->
+<section>
+  <div class="section-label">Chapter 3</div>
+  <h2>February 2026 Rankings</h2>
+  <p class="lead">The top 20 programming languages this month, showing current market share and year-over-year movement.</p>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <span>Rank</span>
+      <span>Change</span>
+      <span>Language</span>
+      <span>Market Share</span>
+      <span>YoY</span>
+    </div>
+    <div id="table-body"></div>
+  </div>
+</section>
+
+<!-- CHAPTER 4: PYTHON SPOTLIGHT -->
+<section>
+  <div class="section-label">Chapter 4</div>
+  <h2>Python in the Spotlight</h2>
+  <p class="lead">Python's story is one of the most dramatic rises in programming language history — from rank #13 in 2003 to a dominant #1 today.</p>
+
+  <div class="spotlight">
+    <div>
+      <h3>🐍 Python's Historic Rise</h3>
+      <p style="color:#94a3b8; margin-bottom:1.5rem; font-size:.95rem;">
+        Python stayed below 5% for most of the 2000s and early 2010s. Everything changed around 2018–2019 as AI and data science exploded. Python peaked at <strong style="color:#fff">26.98%</strong> in July 2025 — but has since pulled back slightly as domain-specific languages like <strong style="color:#10b981">R</strong> and <strong style="color:#f59e0b">Perl</strong> reclaim niche audiences.
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:.5rem;">
+        <span class="chip" style="background:rgba(59,130,246,.15);color:#93c5fd;">AI / ML</span>
+        <span class="chip" style="background:rgba(16,185,129,.15);color:#6ee7b7;">Data Science</span>
+        <span class="chip" style="background:rgba(245,158,11,.15);color:#fde68a;">Automation</span>
+        <span class="chip" style="background:rgba(99,102,241,.15);color:#a5b4fc;">Web Backend</span>
+        <span class="chip" style="background:rgba(244,63,94,.15);color:#fca5a5;">Education</span>
+      </div>
+    </div>
+    <div class="python-stats">
+      <div class="py-stat">
+        <div class="py-stat-icon">🏆</div>
+        <div>
+          <div class="py-stat-label">Highest position (since 2001)</div>
+          <div class="py-stat-val">#1 — February 2026</div>
+        </div>
+      </div>
+      <div class="py-stat">
+        <div class="py-stat-icon">📉</div>
+        <div>
+          <div class="py-stat-label">Lowest position (since 2001)</div>
+          <div class="py-stat-val">#13 — February 2003</div>
+        </div>
+      </div>
+      <div class="py-stat">
+        <div class="py-stat-icon">🚀</div>
+        <div>
+          <div class="py-stat-label">Peak market share</div>
+          <div class="py-stat-val">26.98% — July 2025</div>
+        </div>
+      </div>
+      <div class="py-stat">
+        <div class="py-stat-icon">🥇</div>
+        <div>
+          <div class="py-stat-label">Language of the Year wins</div>
+          <div class="py-stat-val">6× (2007, 2010, 2018, 2020, 2021, 2024)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 5: LONG TERM HISTORY -->
+<section>
+  <div class="section-label">Chapter 5</div>
+  <h2>Long-Term Trends</h2>
+  <p class="lead">Watching rankings over decades reveals how technology shifts — from systems programming dominance to the modern AI era.</p>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:#f97316"></div>
+      <div class="timeline-year">1986 – 2000</div>
+      <h4>C Reigns Supreme</h4>
+      <p>C held the #1 spot for virtually the entire period, reflecting its dominance in operating systems, embedded hardware, and early internet infrastructure. Lisp and Ada were strong academic and defence choices.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:#a855f7"></div>
+      <div class="timeline-year">2001 – 2010</div>
+      <h4>Java's Golden Decade</h4>
+      <p>Java took over with the rise of enterprise software and the web. C++ stayed strong for games and system software. Python quietly climbed from #27 to the top 10, fuelled by its clean syntax and growing library ecosystem.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:#22c55e"></div>
+      <div class="timeline-year">2011 – 2017</div>
+      <h4>Java vs C vs C++</h4>
+      <p>Java held #1 through 2015–2016, but faced pressure from C and C++ in embedded and performance-sensitive domains. Go emerged as a modern systems language, winning Language of the Year in 2009 and 2016.</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:#3b82f6"></div>
+      <div class="timeline-year">2018 – Present</div>
+      <h4>The Python Era &amp; AI Boom</h4>
+      <p>The explosion of machine learning, data science, and AI research drove Python from ~4% in 2017 to nearly 27% by 2025. It overtook Java (2019), then C (2021), achieving a lead no language has held in decades. Domain-specific competitors like R and Perl are now slowly reclaiming specialised audiences.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 6: HALL OF FAME -->
+<section>
+  <div class="section-label">Chapter 6</div>
+  <h2>Hall of Fame</h2>
+  <p class="lead">"Language of the Year" is awarded to the language with the highest rise in ratings that year. Python has won it 6 times — more than any other language.</p>
+  <div class="hof-grid">
+    <div class="hof-card python-win"><div class="hof-medal">🥇</div><div class="hof-year">2024</div><div class="hof-lang" style="color:#93c5fd">Python</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2023</div><div class="hof-lang" style="color:#ec4899">C#</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2022</div><div class="hof-lang" style="color:#22c55e">C++</div></div>
+    <div class="hof-card python-win"><div class="hof-medal">🥇</div><div class="hof-year">2021</div><div class="hof-lang" style="color:#93c5fd">Python</div></div>
+    <div class="hof-card python-win"><div class="hof-medal">🥇</div><div class="hof-year">2020</div><div class="hof-lang" style="color:#93c5fd">Python</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2019</div><div class="hof-lang" style="color:#f97316">C</div></div>
+    <div class="hof-card python-win"><div class="hof-medal">🥇</div><div class="hof-year">2018</div><div class="hof-lang" style="color:#93c5fd">Python</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2017</div><div class="hof-lang" style="color:#f97316">C</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2016</div><div class="hof-lang" style="color:#67e8f9">Go</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2015</div><div class="hof-lang" style="color:#a855f7">Java</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2014</div><div class="hof-lang" style="color:#facc15">JavaScript</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2013</div><div class="hof-lang">Transact-SQL</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2012</div><div class="hof-lang">Objective-C</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2011</div><div class="hof-lang">Objective-C</div></div>
+    <div class="hof-card python-win"><div class="hof-medal">🥇</div><div class="hof-year">2010</div><div class="hof-lang" style="color:#93c5fd">Python</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2009</div><div class="hof-lang" style="color:#67e8f9">Go</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2008</div><div class="hof-lang" style="color:#f97316">C</div></div>
+    <div class="hof-card python-win"><div class="hof-medal">🥇</div><div class="hof-year">2007</div><div class="hof-lang" style="color:#93c5fd">Python</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2006</div><div class="hof-lang" style="color:#f43f5e">Ruby</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2005</div><div class="hof-lang" style="color:#a855f7">Java</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2004</div><div class="hof-lang">PHP</div></div>
+    <div class="hof-card"><div class="hof-medal">🥇</div><div class="hof-year">2003</div><div class="hof-lang" style="color:#22c55e">C++</div></div>
+  </div>
+</section>
+
+<!-- CHAPTER 7: LIMITATIONS -->
+<section>
+  <div class="section-label">Chapter 7</div>
+  <h2>Important Limitations</h2>
+  <p class="lead">TIOBE is a valuable signal, but it should never be used in isolation. Understanding what it <em>doesn't</em> measure is just as important.</p>
+
+  <div class="warn-box">
+    <h4>⚠️ What TIOBE Does NOT Measure</h4>
+    <ul>
+      <li><strong>Code volume</strong> — it doesn't count lines of code written in each language.</li>
+      <li><strong>Job market demand</strong> — search hits ≠ number of open jobs. Use LinkedIn or Stack Overflow surveys for hiring data.</li>
+      <li><strong>Quality or suitability</strong> — a high ranking doesn't mean a language is the best choice for your use case.</li>
+      <li><strong>Real production usage</strong> — a language can have high search interest from learners without widespread enterprise adoption.</li>
+      <li><strong>New or niche languages</strong> — emerging languages like Mojo or Zig are under-represented because they don't yet have large search footprints.</li>
+    </ul>
+  </div>
+
+  <div class="explain-grid">
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(16,185,129,.15)">✅</div>
+      <h3>Good Uses of TIOBE</h3>
+      <p>Tracking long-term language trends, comparing the relative size of communities, deciding which language to learn for maximum career reach, or choosing a tech stack with broad hiring potential.</p>
+    </div>
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(244,63,94,.15)">🚫</div>
+      <h3>Don't Use TIOBE For…</h3>
+      <p>Choosing the "best" language for a specific technical problem, measuring developer productivity, or drawing conclusions from a single month's snapshot without examining multi-year trends.</p>
+    </div>
+    <div class="explain-card">
+      <div class="explain-icon" style="background:rgba(99,102,241,.15)">🔍</div>
+      <h3>Complement With…</h3>
+      <p>Stack Overflow Developer Survey, GitHub's Octoverse, RedMonk Language Rankings, and job board data for a well-rounded picture of the programming language landscape.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Data sourced from <a href="https://www.tiobe.com/tiobe-index/" target="_blank">TIOBE Index — February 2026</a>. Educational summary for classroom and self-study use.</p>
+  <p style="margin-top:.5rem">The TIOBE index is a trademark of TIOBE Software BV. This page is an independent educational interpretation.</p>
+</footer>
+
+<script>
+  const langs = [
+    { rank:1,  prev:1,  name:"Python",              color:"#3b82f6", share:21.81, yoy:2.08,  yoyPos:false },
+    { rank:2,  prev:4,  name:"C",                   color:"#f97316", share:11.05, yoy:1.22,  yoyPos:true  },
+    { rank:3,  prev:2,  name:"C++",                 color:"#22c55e", share:8.55,  yoy:2.82,  yoyPos:false },
+    { rank:4,  prev:3,  name:"Java",                color:"#a855f7", share:8.12,  yoy:2.54,  yoyPos:false },
+    { rank:5,  prev:5,  name:"C#",                  color:"#ec4899", share:6.83,  yoy:2.71,  yoyPos:true  },
+    { rank:6,  prev:6,  name:"JavaScript",          color:"#facc15", share:2.92,  yoy:0.85,  yoyPos:false },
+    { rank:7,  prev:10, name:"Visual Basic",        color:"#06b6d4", share:2.85,  yoy:0.81,  yoyPos:true  },
+    { rank:8,  prev:15, name:"R",                   color:"#10b981", share:2.19,  yoy:1.14,  yoyPos:true  },
+    { rank:9,  prev:7,  name:"SQL",                 color:"#f43f5e", share:1.93,  yoy:0.93,  yoyPos:false },
+    { rank:10, prev:9,  name:"Delphi/Object Pascal",color:"#8b5cf6", share:1.88,  yoy:0.29,  yoyPos:false },
+    { rank:11, prev:30, name:"Perl",                color:"#f59e0b", share:1.67,  yoy:1.19,  yoyPos:true  },
+    { rank:12, prev:11, name:"Fortran",             color:"#6ee7b7", share:1.64,  yoy:0.12,  yoyPos:false },
+    { rank:13, prev:14, name:"PHP",                 color:"#818cf8", share:1.34,  yoy:0.20,  yoyPos:true  },
+    { rank:14, prev:13, name:"Rust",                color:"#fb923c", share:1.32,  yoy:0.14,  yoyPos:false },
+    { rank:15, prev:12, name:"Scratch",             color:"#fde68a", share:1.30,  yoy:0.25,  yoyPos:false },
+    { rank:16, prev:8,  name:"Go",                  color:"#67e8f9", share:1.23,  yoy:1.03,  yoyPos:false },
+    { rank:17, prev:24, name:"Ada",                 color:"#c084fc", share:1.14,  yoy:0.43,  yoyPos:true  },
+    { rank:18, prev:16, name:"MATLAB",              color:"#fca5a5", share:1.13,  yoy:0.14,  yoyPos:true  },
+    { rank:19, prev:17, name:"Assembly Language",   color:"#86efac", share:1.10,  yoy:0.15,  yoyPos:true  },
+    { rank:20, prev:23, name:"Kotlin",              color:"#a78bfa", share:1.05,  yoy:0.29,  yoyPos:true  },
+  ];
+
+  const maxShare = 21.81;
+  const tbody = document.getElementById('table-body');
+
+  langs.forEach(l => {
+    const diff = l.rank - l.prev;
+    let changeBadge;
+    if (diff < 0)      changeBadge = `<span class="change-badge up">&#9650; ${Math.abs(diff)}</span>`;
+    else if (diff > 0) changeBadge = `<span class="change-badge down">&#9660; ${Math.abs(diff)}</span>`;
+    else               changeBadge = `<span class="change-badge same">&#8212;</span>`;
+
+    let rankClass = '';
+    if (l.rank === 1) rankClass = 'gold';
+    else if (l.rank === 2) rankClass = 'silver';
+    else if (l.rank === 3) rankClass = 'bronze';
+
+    const barWidth = (l.share / maxShare * 100).toFixed(1);
+    const sign = l.yoyPos ? '+' : '-';
+    const yoyClass = l.yoyPos ? 'yup' : 'ydown';
+
+    const row = document.createElement('div');
+    row.className = 'table-row';
+    row.innerHTML = `
+      <span class="rank ${rankClass}">${l.rank}</span>
+      <span>${changeBadge}</span>
+      <span class="lang-name">
+        <span class="lang-dot" style="background:${l.color}"></span>
+        ${l.name}
+      </span>
+      <span class="rating-bar-wrap">
+        <span class="rating-bar-bg">
+          <span class="rating-bar-fill" style="width:${barWidth}%;background:linear-gradient(90deg,${l.color},${l.color}88)"></span>
+        </span>
+        <span class="rating-val">${l.share}%</span>
+      </span>
+      <span class="ychange ${yoyClass}">${sign}${l.yoy}%</span>
+    `;
+    tbody.appendChild(row);
+  });
+</script>
+
+</body>
+</html>
