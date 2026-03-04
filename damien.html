@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 20 Languages That Built The World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0c0a;
+    --paper: #f5f0e8;
+    --cream: #ede8dc;
+    --gold: #b8860b;
+    --gold-light: #d4a843;
+    --amber: #c17f24;
+    --rust: #8b3a2a;
+    --sage: #4a6741;
+    --slate: #3d4a5c;
+    --text: #1a1612;
+    --muted: #6b6056;
+    --rule: #d4c9b0;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(184,134,11,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(139,58,42,0.06) 0%, transparent 60%);
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 1.05;
+    text-align: center;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+    color: var(--paper);
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 1.15rem;
+    color: #a09585;
+    max-width: 560px;
+    text-align: center;
+    font-style: italic;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.65s forwards;
+  }
+
+  .hero-rule {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 2.5rem auto 0;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.85s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.4s forwards;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: pulse 2s infinite;
+  }
+
+  /* ── INTRO ESSAY ── */
+  .intro-section {
+    background: var(--paper);
+    color: var(--text);
+    padding: 6rem 2rem;
+  }
+
+  .essay-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .essay-container h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+
+  .essay-container p {
+    color: #2d2820;
+    margin-bottom: 1.4rem;
+    font-size: 1.05rem;
+  }
+
+  .pullquote {
+    border-left: 3px solid var(--gold);
+    padding: 0.5rem 0 0.5rem 1.8rem;
+    margin: 2.5rem 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    line-height: 1.45;
+    color: var(--gold);
+  }
+
+  /* ── TIMELINE ── */
+  .timeline-section {
+    background: #111009;
+    padding: 6rem 2rem;
+  }
+
+  .timeline-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--paper);
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-section .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 4rem;
+  }
+
+  .timeline {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold) 10%, var(--gold) 90%, transparent);
+    transform: translateX(-50%);
+  }
+
+  .timeline-era {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 3.5rem;
+    gap: 2rem;
+    position: relative;
+  }
+
+  .timeline-era:nth-child(odd) { flex-direction: row-reverse; }
+  .timeline-era:nth-child(odd) .era-content { text-align: right; }
+  .timeline-era:nth-child(odd) .era-langs { justify-content: flex-end; }
+
+  .era-content {
+    flex: 1;
+    padding: 0 1rem;
+  }
+
+  .era-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+    box-shadow: 0 0 15px rgba(184,134,11,0.5);
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    margin-top: 1rem;
+  }
+
+  .era-year {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .era-title {
+    font-size: 1rem;
+    color: var(--paper);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .era-desc {
+    font-size: 0.88rem;
+    color: #8a7e72;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .era-langs {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.7rem;
+  }
+
+  .lang-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid rgba(184,134,11,0.4);
+    color: var(--gold-light);
+    border-radius: 2px;
+    background: rgba(184,134,11,0.05);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── USAGE BARS ── */
+  .usage-section {
+    background: var(--paper);
+    color: var(--text);
+    padding: 6rem 2rem;
+  }
+
+  .usage-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .usage-section .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 3.5rem;
+  }
+
+  .bar-chart {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 50px;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .bar-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    text-align: right;
+    padding-right: 0.5rem;
+  }
+
+  .bar-track {
+    height: 28px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.4);
+  }
+
+  .bar-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── LANGUAGE CARDS ── */
+  .cards-section {
+    background: #0e0c0a;
+    padding: 6rem 2rem;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--paper);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header p {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .cards-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .lang-card {
+    background: #161410;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  .lang-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .lang-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(184,134,11,0.25);
+  }
+
+  .lang-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+
+  .lang-card.tier-1::before { background: linear-gradient(90deg, var(--gold), var(--amber)); }
+  .lang-card.tier-2::before { background: linear-gradient(90deg, var(--slate), #5a7a9c); }
+  .lang-card.tier-3::before { background: linear-gradient(90deg, var(--sage), #6a9460); }
+  .lang-card.tier-4::before { background: linear-gradient(90deg, var(--rust), #b05a48); }
+
+  .card-rank {
+    position: absolute;
+    top: 1.4rem;
+    right: 1.6rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--paper);
+    font-weight: 700;
+  }
+
+  .card-birth {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--gold-light);
+    letter-spacing: 0.1em;
+    margin-top: 0.1rem;
+  }
+
+  .card-tagline {
+    font-style: italic;
+    color: var(--gold-light);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    line-height: 1.4;
+  }
+
+  .card-body {
+    font-size: 0.92rem;
+    color: #9a8e82;
+    line-height: 1.65;
+    margin-bottom: 1.2rem;
+  }
+
+  .card-users {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 1rem;
+  }
+
+  .user-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    color: #7a6e62;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  /* ── WHEEL INFOGRAPHIC ── */
+  .wheel-section {
+    background: var(--paper);
+    padding: 6rem 2rem;
+  }
+
+  .wheel-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .wheel-section .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 4rem;
+  }
+
+  .domain-grid {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .domain-card {
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.4rem;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .domain-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  .domain-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  .domain-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  .domain-langs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── CLOSING ESSAY ── */
+  .close-section {
+    background: #0e0c0a;
+    padding: 7rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .close-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(184,134,11,0.05) 0%, transparent 70%);
+  }
+
+  .close-inner {
+    max-width: 660px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .close-inner h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--paper);
+    margin-bottom: 2rem;
+    line-height: 1.2;
+  }
+
+  .close-inner p {
+    color: #9a8e82;
+    margin-bottom: 1.4rem;
+    font-size: 1rem;
+  }
+
+  .close-inner .big-quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--gold-light);
+    line-height: 1.45;
+    margin: 3rem 0;
+    padding-left: 1.8rem;
+    border-left: 2px solid var(--gold);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #080706;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  footer p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #4a4035;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s, transform 0.7s;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* mobile */
+  @media (max-width: 640px) {
+    .timeline::before { left: 14px; }
+    .timeline-era, .timeline-era:nth-child(odd) {
+      flex-direction: row;
+    }
+    .timeline-era:nth-child(odd) .era-content { text-align: left; }
+    .timeline-era:nth-child(odd) .era-langs { justify-content: flex-start; }
+    .era-dot { margin-left: 7px; }
+    .bar-row { grid-template-columns: 90px 1fr 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <span class="hero-label">TIOBE Index · 2026 Edition</span>
+  <h1>The 20 Languages That <em>Built</em> The World</h1>
+  <p class="hero-sub">Every great tool was invented to solve a problem someone else said didn't exist yet.</p>
+  <div class="hero-rule"></div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ══ INTRO ESSAY ══ -->
+<section class="intro-section">
+  <div class="essay-container">
+    <span class="section-label">I. The Setup</span>
+    <h2>Nobody builds a language because it's fun. They build it because they're furious.</h2>
+    <p>In 1972, Dennis Ritchie was trying to write an operating system. The tools available were either too slow, too cumbersome, or too tied to a specific machine. So he did what frustrated engineers do: he built his own. He called it C. He had no idea it would still be running the world's most critical infrastructure fifty years later.</p>
+
+    <p>That's the pattern. Every major programming language starts not as an academic exercise but as a scream of frustration. Java was built because developers were tired of rewriting software for every new operating system. Python was built because Guido van Rossum wanted something he could actually enjoy using. JavaScript was built in ten days because Netscape needed web pages to move.</p>
+
+    <div class="pullquote">
+      "The most important inventions aren't made by people who imagined the future. They're made by people who were annoyed by the present."
+    </div>
+
+    <p>The TIOBE Index doesn't measure which language is "best." It measures which languages are talked about, searched for, and used. That's actually more interesting. Popularity reflects something real: the accumulated weight of millions of decisions made by people trying to solve problems under pressure.</p>
+
+    <p>What follows is a tour of the twenty most influential programming languages alive today — where they came from, who uses them, and what they reveal about how we think about problems. The story is less about code than it is about human nature.</p>
+  </div>
+</section>
+
+<!-- ══ TIMELINE ══ -->
+<section class="timeline-section">
+  <h2>A History Written in Frustration</h2>
+  <p class="subtitle">Each era solved the previous era's problem — then created the next one</p>
+
+  <div class="timeline">
+    <div class="timeline-era reveal">
+      <div class="era-content">
+        <div class="era-year">1957</div>
+        <div class="era-title">The Hardware Age</div>
+        <div class="era-desc">Scientists were tired of writing in machine code. They wanted to write math, not binary. The first high-level languages let humans stop talking to machines and start thinking.</div>
+        <div class="era-langs">
+          <span class="lang-chip">Fortran</span>
+          <span class="lang-chip">Assembly</span>
+          <span class="lang-chip">COBOL</span>
+        </div>
+      </div>
+      <div class="era-dot"></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="timeline-era reveal">
+      <div style="flex:1"></div>
+      <div class="era-dot"></div>
+      <div class="era-content">
+        <div class="era-year">1972</div>
+        <div class="era-title">The Systems Age</div>
+        <div class="era-desc">Bell Labs invented Unix. To build Unix, they needed C. C gave programmers hardware control with human-readable code. It became the DNA of modern computing.</div>
+        <div class="era-langs">
+          <span class="lang-chip">C</span>
+          <span class="lang-chip">Pascal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-era reveal">
+      <div class="era-content">
+        <div class="era-year">1985–1994</div>
+        <div class="era-title">The Objects Age</div>
+        <div class="era-desc">Software grew complex. Single functions couldn't tame it. Object-oriented thinking — bundling data with behavior — became the dominant paradigm. C++ added it to C. Java built on it from scratch.</div>
+        <div class="era-langs">
+          <span class="lang-chip">C++</span>
+          <span class="lang-chip">Visual Basic</span>
+          <span class="lang-chip">Perl</span>
+          <span class="lang-chip">MATLAB</span>
+        </div>
+      </div>
+      <div class="era-dot"></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="timeline-era reveal">
+      <div style="flex:1"></div>
+      <div class="era-dot"></div>
+      <div class="era-content">
+        <div class="era-year">1995</div>
+        <div class="era-title">The Internet Age</div>
+        <div class="era-desc">The web exploded. Java promised "write once, run anywhere." PHP accidentally became the backbone of millions of sites. JavaScript put code in the browser. R gave statisticians a voice. Python emerged quietly.</div>
+        <div class="era-langs">
+          <span class="lang-chip">Java</span>
+          <span class="lang-chip">JavaScript</span>
+          <span class="lang-chip">PHP</span>
+          <span class="lang-chip">Python</span>
+          <span class="lang-chip">Ruby</span>
+          <span class="lang-chip">R</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-era reveal">
+      <div class="era-content">
+        <div class="era-year">2000–2014</div>
+        <div class="era-title">The Enterprise & Mobile Age</div>
+        <div class="era-desc">Microsoft built C# to fight Java. Apple replaced Objective-C with Swift. Google built Android on Java, then blessed Kotlin. The smartphone created a billion-device audience overnight.</div>
+        <div class="era-langs">
+          <span class="lang-chip">C#</span>
+          <span class="lang-chip">Swift</span>
+          <span class="lang-chip">Kotlin</span>
+          <span class="lang-chip">Go</span>
+        </div>
+      </div>
+      <div class="era-dot"></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="timeline-era reveal">
+      <div style="flex:1"></div>
+      <div class="era-dot"></div>
+      <div class="era-content">
+        <div class="era-year">2010–Now</div>
+        <div class="era-title">The AI & Safety Age</div>
+        <div class="era-desc">Python became the language of intelligence. The world's critical systems kept running on C and C++, but the vulnerabilities piled up. Rust arrived to fix safety without sacrificing speed.</div>
+        <div class="era-langs">
+          <span class="lang-chip">Python</span>
+          <span class="lang-chip">Rust</span>
+          <span class="lang-chip">TypeScript</span>
+          <span class="lang-chip">SQL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BAR CHART ══ -->
+<section class="usage-section">
+  <h2>How They Stack Up Today</h2>
+  <p class="subtitle">TIOBE Index ratings — share of search activity across the web</p>
+
+  <div class="bar-chart" id="barChart">
+    <!-- bars injected by JS -->
+  </div>
+</section>
+
+<!-- ══ DOMAIN MAP ══ -->
+<section class="wheel-section">
+  <h2>Which Language Lives Where</h2>
+  <p class="subtitle">Every language found its kingdom. Few cross borders.</p>
+
+  <div class="domain-grid">
+    <div class="domain-card reveal">
+      <div class="domain-icon">🧠</div>
+      <div class="domain-title">AI & Data Science</div>
+      <div class="domain-langs">Python · R · MATLAB · Julia</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🌐</div>
+      <div class="domain-title">Web Frontend</div>
+      <div class="domain-langs">JavaScript · TypeScript</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🖥️</div>
+      <div class="domain-title">Web Backend</div>
+      <div class="domain-langs">Python · PHP · Ruby · Go · Java</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">⚙️</div>
+      <div class="domain-title">Systems & OS</div>
+      <div class="domain-langs">C · C++ · Rust · Assembly</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">📱</div>
+      <div class="domain-title">Mobile</div>
+      <div class="domain-langs">Swift · Kotlin · Java · Dart</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🏢</div>
+      <div class="domain-title">Enterprise</div>
+      <div class="domain-langs">Java · C# · Visual Basic · SQL</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🎮</div>
+      <div class="domain-title">Game Dev</div>
+      <div class="domain-langs">C++ · C# · Lua</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">☁️</div>
+      <div class="domain-title">Cloud & DevOps</div>
+      <div class="domain-langs">Go · Python · Bash</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🔬</div>
+      <div class="domain-title">Science & Research</div>
+      <div class="domain-langs">Fortran · Python · R · MATLAB</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🗄️</div>
+      <div class="domain-title">Databases</div>
+      <div class="domain-langs">SQL · PL/SQL · T-SQL</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LANGUAGE CARDS ══ -->
+<section class="cards-section">
+  <div class="section-header">
+    <span class="section-label" style="color:var(--gold-light)">III. The Cast</span>
+    <h2>Twenty Languages, Twenty Stories</h2>
+    <p>Each one was someone's answer to a question that hadn't been asked yet</p>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid"></div>
+</section>
+
+<!-- ══ CLOSING ESSAY ══ -->
+<section class="close-section">
+  <div class="close-inner">
+    <span class="section-label" style="color:var(--gold-light)">IV. The Lesson</span>
+    <h2>Why None of This Is Going Away</h2>
+
+    <p>There is a recurring fantasy in technology: the idea that a new, superior language will make all the old ones obsolete. It never happens. Not because the old languages are secretly good, but because the cost of replacing them is incalculable.</p>
+
+    <p>COBOL runs U.S. Social Security. It processes more transactions daily than any modern system. Fortran code written in the 1970s still calculates weather forecasts that protect millions of lives. These aren't artifacts — they're load-bearing walls. You don't tear out load-bearing walls just because the architecture is old.</p>
+
+    <div class="big-quote">"The most dangerous phrase in technology is 'we'll just rewrite it.' The second most dangerous is 'nobody uses that anymore.'"</div>
+
+    <p>Python dominates today because it sits at the intersection of three enormous forces: the data explosion, the AI revolution, and the desperate demand for code that humans can actually read. But Python didn't win by being the fastest or the safest. It won by being the most useful to the most people at the right moment in history.</p>
+
+    <p>That's what the TIOBE Index actually measures. Not elegance. Not correctness. Usefulness. And usefulness is messy, contextual, and deeply human.</p>
+
+    <p>The programmers who will matter most in the next twenty years aren't the ones who master any single language. They're the ones who understand <em>why</em> languages exist — what problem each one was built to solve — and have the judgment to reach for the right tool when the moment comes.</p>
+
+    <p style="color: var(--gold-light); font-family: 'Playfair Display', serif; font-style: italic; margin-top: 2rem;">The best investment you can make is in understanding the problem before you reach for a solution.</p>
+  </div>
+</section>
+
+<footer>
+  <p>DATA SOURCE: TIOBE INDEX · MARCH 2026 &nbsp;·&nbsp; WRITTEN IN THE SPIRIT OF MORGAN HOUSEL</p>
+</footer>
+
+<script>
+  // ─── BAR CHART DATA ───
+  const langs = [
+    { name: 'Python',       pct: 21.8, color: '#3776ab' },
+    { name: 'C++',          pct: 10.6, color: '#00599C' },
+    { name: 'C',            pct: 9.5,  color: '#555555' },
+    { name: 'Java',         pct: 8.8,  color: '#f89820' },
+    { name: 'C#',           pct: 6.7,  color: '#9b4f96' },
+    { name: 'JavaScript',   pct: 5.8,  color: '#f7df1e', textColor: '#111' },
+    { name: 'Go',           pct: 4.2,  color: '#00acd7' },
+    { name: 'SQL',          pct: 3.9,  color: '#e38c00' },
+    { name: 'Visual Basic', pct: 3.2,  color: '#945db7' },
+    { name: 'Fortran',      pct: 2.8,  color: '#734f96' },
+    { name: 'Delphi',       pct: 2.5,  color: '#b22222' },
+    { name: 'MATLAB',       pct: 2.3,  color: '#e16737' },
+    { name: 'PHP',          pct: 2.1,  color: '#8892be' },
+    { name: 'Swift',        pct: 1.9,  color: '#fa7343' },
+    { name: 'Rust',         pct: 1.8,  color: '#dea584' },
+    { name: 'R',            pct: 1.7,  color: '#276dc3' },
+    { name: 'Kotlin',       pct: 1.6,  color: '#7f52ff' },
+    { name: 'Ruby',         pct: 1.2,  color: '#cc342d' },
+    { name: 'Assembly',     pct: 1.1,  color: '#6e4c13' },
+    { name: 'Perl',         pct: 0.95, color: '#39457e' },
+  ];
+
+  const maxPct = langs[0].pct;
+  const chart = document.getElementById('barChart');
+  langs.forEach(l => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-name">${l.name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" data-pct="${(l.pct/maxPct)*100}" style="background:${l.color};width:0%"></div>
+      </div>
+      <div class="bar-val">${l.pct}%</div>
+    `;
+    chart.appendChild(row);
+  });
+
+  // ─── LANGUAGE CARDS DATA ───
+  const cards = [
+    { rank:1, icon:'🐍', name:'Python', born:'1991', tier:'tier-1',
+      tagline:'"I wanted a language I actually enjoyed using." — Guido van Rossum',
+      body:'Built as an antidote to complex, arcane languages, Python reads almost like English. That readability turned out to be its superpower. When the AI revolution needed a language anyone could pick up and experiment in, Python was waiting. Today it is the lingua franca of data science, machine learning, and rapid prototyping.',
+      users:['Data Scientists','ML Engineers','Researchers','Startups','Beginners'] },
+    { rank:2, icon:'⚙️', name:'C', born:'1972', tier:'tier-2',
+      tagline:'"We needed to write an OS. So we built the language to write it."',
+      body:"C is the bedrock. Linux, Windows, macOS — all written in C. The microcontroller in your car's ABS system runs C. The firmware in your router runs C. When you absolutely must control what the hardware does at every single step, C is the only honest answer.",
+      users:['Kernel Developers','Embedded Engineers','Firmware Teams','Hardware Manufacturers'] },
+    { rank:3, icon:'🔩', name:'C++', born:'1985', tier:'tier-2',
+      tagline:'"C is great — but I need objects too." — Bjarne Stroustrup',
+      body:'C++ is C with the ability to structure enormous codebases. The Unreal Engine that powers thousands of blockbuster games is C++. Chrome\'s rendering engine is C++. Every financial trading system that needs microsecond execution runs C++. It is complex and unforgiving, which is exactly why the people who need it, love it.',
+      users:['Game Developers','Browser Teams','HFT Systems','Adobe','Embedded Systems'] },
+    { rank:4, icon:'☕', name:'Java', born:'1995', tier:'tier-1',
+      tagline:'"Write once, run anywhere." — Sun Microsystems, 1995',
+      body:"The internet was fragmenting across incompatible operating systems. Java's virtual machine let one codebase run on any platform. Banks, insurance companies, and enterprises adopted it for exactly that reason — and then never left. 3 billion Android devices run Java. Legacy bank systems written in 2001 still run it today without a single change.",
+      users:['Android Developers','Enterprise Teams','Banks','Amazon','LinkedIn'] },
+    { rank:5, icon:'🔷', name:'C#', born:'2000', tier:'tier-1',
+      tagline:"Microsoft's answer to Java — and TIOBE's Language of the Year 2025",
+      body:"Microsoft built C# for the .NET ecosystem: cleaner than Java, deeply integrated with Windows, and the primary language for Unity game development. If you have ever played an indie game on Steam, there is a high probability it was written in C#. TIOBE named it language of the year in 2025 for its remarkable growth.",
+      users:['Unity Game Devs','Enterprise Devs','Azure Teams','Healthcare IT'] },
+    { rank:6, icon:'🌐', name:'JavaScript', born:'1995', tier:'tier-1',
+      tagline:'"Built in 10 days. Still running the entire web." — Brendan Eich',
+      body:"The only language that runs natively in every web browser on Earth. There was no alternative, so developers adapted — and then thrived. With Node.js, it conquered the server too. Entire companies (GitHub, Airbnb, LinkedIn) run on JavaScript from front to back. It is not a perfect language; it is a universal one.",
+      users:['Front-end Developers','Full-stack Devs','Node.js Teams','Every Web Company'] },
+    { rank:7, icon:'🐹', name:'Go', born:'2009', tier:'tier-3',
+      tagline:'"We were frustrated by C++ build times and Java verbosity." — Google',
+      body:"Google engineers were fighting slow build times and bloated code. Go was their solution: compiled like C, readable like Python, built for multi-core processors from the start. Docker and Kubernetes — the tools that power modern cloud infrastructure — are written in Go. If code is running in the cloud, Go is probably nearby.",
+      users:['DevOps Engineers','Platform Teams','Cloudflare','Dropbox','Uber'] },
+    { rank:8, icon:'🗄️', name:'SQL', born:'1974', tier:'tier-1',
+      tagline:'"Let non-programmers ask questions of data." — IBM, 1974',
+      body:"SQL was designed so that scientists, not just engineers, could query data. It is the only language on this list that never tried to be a programming language — and that restraint made it immortal. Every time Amazon shows you your order history, SQL ran. Every medical record retrieval, every bank transaction, every analytics dashboard.",
+      users:['Data Analysts','Data Engineers','Back-end Devs','Business Intelligence','Every Company'] },
+    { rank:9, icon:'📊', name:'Visual Basic', born:'1991', tier:'tier-4',
+      tagline:'"Making Windows programming accessible to everyone."',
+      body:"VBA lives in every corporate Excel file ever written. The accountant automating month-end reports, the HR team building a custom employee tracker, the small business managing inventory — all of them, probably using VBA. Developers sneer at it. Businesses depend on it. That tension is a feature of technology, not a bug.",
+      users:['Accountants','Business Analysts','Excel Power Users','Legacy App Teams'] },
+    { rank:10, icon:'🌲', name:'Fortran', born:'1957', tier:'tier-3',
+      tagline:'"The first language that let scientists stop thinking like machines."',
+      body:'Fortran is 68 years old and still running. The Global Forecast System — which predicts tomorrow\'s weather for the entire planet — runs on Fortran code. Climate models that simulate ocean currents use it. Quantum chemistry simulations use it. When raw numerical computation is the task, nothing has ever matched Fortran\'s performance per line of code.',
+      users:['NASA Engineers','Climate Scientists','Physicists','National Labs'] },
+    { rank:11, icon:'📈', name:'R', born:'1993', tier:'tier-3',
+      tagline:'"A language for people who think in statistics." — Ross Ihaka',
+      body:"R does not try to be a general language. It tries to be the best statistical tool ever built — and largely succeeds. The COVID pandemic modelling that shaped global policy was done primarily in R. Clinical trials at Pfizer and Moderna were analyzed in R. Academic papers across economics, epidemiology, and ecology run on it.",
+      users:['Biostatisticians','Economists','Academic Researchers','Pharma Companies','Epidemiologists'] },
+    { rank:12, icon:'🐪', name:'Perl', born:'1987', tier:'tier-4',
+      tagline:'"The Swiss Army chainsaw of text processing." — Larry Wall',
+      body:"Larry Wall needed to generate reports from log files. He wrote Perl in an afternoon, and a million sysadmins' lives changed. The BLAST algorithm that powers gene sequence searching in biology? Perl. The legacy web backends of every large institution built before 2005? Often Perl. It's not coming back — but it never fully left either.",
+      users:['Sysadmins','Bioinformaticians','Legacy Web Teams'] },
+    { rank:13, icon:'🐘', name:'PHP', born:'1994', tier:'tier-4',
+      tagline:'"It was never meant to be a language. It just became one." — Rasmus Lerdorf',
+      body:"PHP powers WordPress, which runs 43% of every website on the internet. Wikipedia runs PHP. Facebook started on PHP. It is perhaps the most accidentally successful language ever built. Its reputation among engineers is unkind; its contribution to the web is undeniable.",
+      users:['WordPress Developers','CMS Teams','Legacy Web Apps','Independent Bloggers'] },
+    { rank:14, icon:'🍎', name:'Swift', born:'2014', tier:'tier-1',
+      tagline:'"We needed something modern. Objective-C was not it." — Apple, 2014',
+      body:"Apple looked at Objective-C — clunky, verbose, dated — and decided to start over. Swift is the result: safe, fast, expressive, and designed for humans. Every iPhone app, every Mac app, every Apple Watch app going forward is written in Swift. With 1 billion active iPhones, the commercial weight of this language is extraordinary.",
+      users:['iOS Developers','Mac Developers','watchOS Devs','Apple'] },
+    { rank:15, icon:'🦀', name:'Rust', born:'2010', tier:'tier-3',
+      tagline:'"All of C\'s speed. None of its memory bugs." — Mozilla',
+      body:"The most admired language among developers nine years running. Rust guarantees at compile time that you cannot create certain classes of memory bugs — the bugs that have caused countless security vulnerabilities in C and C++ code. The Linux kernel now accepts Rust. Microsoft is rewriting Windows components in it. The US government recommends it.",
+      users:['Systems Programmers','Security Engineers','WebAssembly Devs','Mozilla','AWS'] },
+    { rank:16, icon:'🔬', name:'MATLAB', born:'1984', tier:'tier-3',
+      tagline:'"A calculator that thinks." — Cleve Moler',
+      body:"MATLAB is where engineers test ideas before committing them to production code. Boeing tests aerodynamics in MATLAB. Signal processing engineers design filters in it. Control systems for industrial robots are prototyped in it. Universities require it in every engineering curriculum. It is expensive, proprietary — and absolutely indispensable in its domain.",
+      users:['Aerospace Engineers','Signal Processing','Control Systems','University Research'] },
+    { rank:17, icon:'🤖', name:'Kotlin', born:'2011', tier:'tier-1',
+      tagline:'"Java, but the version you actually want to write." — JetBrains',
+      body:"JetBrains built the tools that Java developers used every day. They knew exactly what annoyed them about Java. Kotlin fixes those things while staying fully compatible with every existing Java library. Google made it the preferred Android language in 2019. 80% of its developers use it for Android. The other 20% use it for back-end services.",
+      users:['Android Developers','Back-end Teams','SDK Builders','JetBrains Users'] },
+    { rank:18, icon:'💻', name:'Assembly', born:'1940s', tier:'tier-4',
+      tagline:'"When you need to speak to the machine directly."',
+      body:"Assembly is not popular. It is necessary. Every CPU boots in assembly. Every piece of malware that exploits hardware vulnerabilities is analyzed in assembly. Cryptographers write performance-critical routines in it. Speedrunners who exploit exact CPU behavior study it. It is the floor beneath every other language on this list.",
+      users:['Firmware Engineers','Security Researchers','Malware Analysts','Chip Designers'] },
+    { rank:19, icon:'💎', name:'Ruby', born:'1995', tier:'tier-4',
+      tagline:'"Designed for programmer happiness, above all else." — Matz',
+      body:"Yukihiro Matsumoto made a conscious choice: optimize for the developer, not the machine. Ruby on Rails made web development faster than anyone thought possible. GitHub, Shopify, Basecamp, and Airbnb were all built on Rails. Ruby has lost ground to Python and JavaScript — but the developers who use it are fiercely loyal, because writing it is genuinely pleasant.",
+      users:['Web Developers','Shopify Devs','Startups','GitHub Team'] },
+    { rank:20, icon:'🧩', name:'Delphi/Pascal', born:'1970/1995', tier:'tier-4',
+      tagline:'"The language hiding inside every insurance company."',
+      body:"Delphi never got fashionable. It got practical. Hospitals, insurance firms, government agencies, and small businesses built Windows applications in Delphi throughout the 1990s and 2000s. Those applications still run. They still matter. Delphi's continued presence in the TIOBE top 20 is a quiet testament to the longevity of software that just works.",
+      users:['Legacy Enterprise Apps','Healthcare IT','Insurance Systems','Government Software'] },
+  ];
+
+  const grid = document.getElementById('cardsGrid');
+  cards.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = `lang-card ${c.tier}`;
+    el.style.transitionDelay = `${(i % 3) * 0.1}s`;
+    el.innerHTML = `
+      <div class="card-rank">${c.rank}</div>
+      <div class="card-header">
+        <div class="card-icon">${c.icon}</div>
+        <div>
+          <div class="card-title">${c.name}</div>
+          <div class="card-birth">Born ${c.born}</div>
+        </div>
+      </div>
+      <div class="card-tagline">${c.tagline}</div>
+      <div class="card-body">${c.body}</div>
+      <div class="card-users">
+        ${c.users.map(u => `<span class="user-tag">${u}</span>`).join('')}
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+
+  // ─── INTERSECTION OBSERVER ───
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // animate bar fills
+        if (e.target.id === 'barChart' || e.target.closest('#barChart')) {
+          document.querySelectorAll('.bar-fill').forEach(b => {
+            b.style.width = b.dataset.pct + '%';
+          });
+        }
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal, .lang-card').forEach(el => io.observe(el));
+  io.observe(document.getElementById('barChart'));
+</script>
+</body>
+</html>
