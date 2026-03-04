@@ -1,460 +1,1075 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>TIOBE Index — Educational Guide</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 20 Languages That Built The World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
-:root{--bg:#0a0e1a;--card:#1a2236;--border:#1e2d45;--a1:#6366f1;--a2:#22d3ee;--a3:#f59e0b;--a4:#10b981;--a5:#f43f5e;--txt:#e2e8f0;--mut:#64748b}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 2rem;overflow:hidden}
-.hbg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(99,102,241,.18) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 70%,rgba(34,211,238,.1) 0%,transparent 50%),linear-gradient(180deg,#0a0e1a,#0d1525)}
-.hgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.05) 1px,transparent 1px);background-size:60px 60px}
-.hc{position:relative;z-index:2;max-width:900px}
-.badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.35rem 1rem;border-radius:999px;margin-bottom:1.5rem}
-.hero h1{font-size:clamp(2.6rem,7vw,5rem);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:1rem}
-.hero h1 span{background:linear-gradient(135deg,#6366f1,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{font-size:1.15rem;color:#94a3b8;max-width:580px;margin:0 auto}
-.hstats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-top:3rem}
-.sn{font-size:2.3rem;font-weight:900;background:linear-gradient(135deg,#6366f1,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block}
-.sl{font-size:.75rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
-.scrollhint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;color:var(--mut);font-size:.78rem;animation:bob 2s infinite}
-@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
-section{padding:5.5rem 2rem;max-width:1200px;margin:0 auto}
-section+section{border-top:1px solid var(--border)}
-.slabel{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--a2);margin-bottom:.7rem}
-h2{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:900;letter-spacing:-.02em;margin-bottom:.9rem;line-height:1.1}
-.lead{font-size:1.05rem;color:#94a3b8;max-width:660px;margin-bottom:2.75rem}
-.gc{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1.5rem}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:transform .2s,border-color .2s}
-.card:hover{transform:translateY(-4px);border-color:var(--a1)}
-.ico{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.1rem}
-.card h3{font-size:1.05rem;font-weight:700;margin-bottom:.45rem}
-.card p{font-size:.88rem;color:#94a3b8;line-height:1.6}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.5rem;counter-reset:st}
-.step{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;position:relative;counter-increment:st}
-.step::before{content:counter(st);position:absolute;top:-13px;left:1.4rem;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;font-size:.73rem;font-weight:800;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.step h4{font-weight:700;margin-bottom:.45rem}
-.step p{font-size:.86rem;color:#94a3b8}
-.tw{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
-.th,.tr{display:grid;grid-template-columns:56px 76px 1fr 170px 100px;padding:.85rem 1.4rem;align-items:center}
-.th{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);border-bottom:1px solid var(--border)}
-.tr{border-bottom:1px solid rgba(30,45,69,.6);transition:background .15s}
-.tr:last-child{border-bottom:none}
-.tr:hover{background:rgba(99,102,241,.07)}
-.rk{font-size:.95rem;font-weight:800;color:#94a3b8}
-.rk.g{color:#f59e0b}.rk.s{color:#94a3b8}.rk.b{color:#c87533}
-.cb{font-size:.68rem;font-weight:700;padding:.13rem .45rem;border-radius:6px;display:inline-flex;align-items:center;gap:.2rem}
-.up{background:rgba(16,185,129,.15);color:#10b981}
-.dn{background:rgba(244,63,94,.15);color:#f43f5e}
-.sm{background:rgba(100,116,139,.15);color:#64748b}
-.ln{display:flex;align-items:center;gap:.7rem;font-weight:600;font-size:.92rem}
-.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.rb{display:flex;align-items:center;gap:.7rem}
-.rbg{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
-.rbf{height:100%;border-radius:99px}
-.rv{font-family:'JetBrains Mono',monospace;font-size:.83rem;min-width:50px;text-align:right}
-.yc{font-family:'JetBrains Mono',monospace;font-size:.78rem}
-.yu{color:#10b981}.yd{color:#f43f5e}
-.spot{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(99,102,241,.08));border:1px solid rgba(99,102,241,.25);border-radius:24px;padding:2.75rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
-@media(max-width:680px){.spot{grid-template-columns:1fr}}
-.spot h3{font-size:1.85rem;font-weight:900;margin-bottom:.9rem}
-.pstats{display:flex;flex-direction:column;gap:.9rem}
-.ps{background:rgba(255,255,255,.05);border-radius:12px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem}
-.psi{font-size:1.4rem}
-.psl{font-size:.78rem;color:var(--mut)}
-.psv{font-size:1.05rem;font-weight:700}
-.tl{position:relative;padding-left:2rem}
-.tl::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--a1),var(--a2),transparent)}
-.tli{position:relative;margin-bottom:2rem;padding-left:1.5rem}
-.tld{position:absolute;left:-2rem;top:.3rem;width:14px;height:14px;border-radius:50%;background:var(--a1);border:2px solid var(--bg);transform:translateX(-6px)}
-.tli h4{font-weight:700;margin-bottom:.3rem}
-.tli p{font-size:.88rem;color:#94a3b8}
-.tly{font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--a2);margin-bottom:.35rem}
-.hof{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem}
-.hc2{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;text-align:center;transition:transform .2s,border-color .2s}
-.hc2:hover{transform:translateY(-3px);border-color:var(--a3)}
-.hy{font-size:.73rem;color:var(--mut);margin-bottom:.35rem}
-.hl{font-weight:700;font-size:.92rem}
-.hm{font-size:1.4rem;margin-bottom:.35rem}
-.pw{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(99,102,241,.1));border-color:rgba(99,102,241,.35)}
-.chip{display:inline-block;font-size:.7rem;font-weight:600;padding:.18rem .6rem;border-radius:999px;margin:.18rem}
+  :root {
+    --ink: #0e0c0a;
+    --paper: #f5f0e8;
+    --cream: #ede8dc;
+    --gold: #b8860b;
+    --gold-light: #d4a843;
+    --amber: #c17f24;
+    --rust: #8b3a2a;
+    --sage: #4a6741;
+    --slate: #3d4a5c;
+    --text: #1a1612;
+    --muted: #6b6056;
+    --rule: #d4c9b0;
+  }
 
-/* WHY PYTHON */
-.why-hero{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(99,102,241,.1),rgba(34,211,238,.08));border:1px solid rgba(99,102,241,.3);border-radius:24px;padding:2.75rem;margin-bottom:3rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
-@media(max-width:660px){.why-hero{grid-template-columns:1fr}}
-.why-hero h3{font-size:1.75rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.7rem;line-height:1.2}
-.why-hero h3 em{font-style:normal;background:linear-gradient(135deg,#3b82f6,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.why-hero p{color:#94a3b8;font-size:.95rem;max-width:540px}
-.rbadge{background:linear-gradient(135deg,#6366f1,#22d3ee);border-radius:18px;padding:1.4rem 1.75rem;text-align:center;white-space:nowrap;flex-shrink:0}
-.rbadge .big{font-size:3.2rem;font-weight:900;color:#fff;display:block;line-height:1}
-.rbadge .sub{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.1em;margin-top:.25rem;display:block}
-.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.2rem;margin-bottom:3.5rem}
-.rc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;border-top:3px solid transparent;transition:transform .2s}
-.rc:hover{transform:translateY(-3px)}
-.rc .ico2{font-size:1.5rem;margin-bottom:.7rem}
-.rc h4{font-weight:700;margin-bottom:.45rem}
-.rc p{font-size:.86rem;color:#94a3b8;line-height:1.6}
-.ladder{display:flex;flex-direction:column;position:relative}
-.ladder::before{content:'';position:absolute;left:34px;top:48px;bottom:48px;width:3px;background:linear-gradient(180deg,#fde68a,#86efac,#22d3ee,#a5b4fc,#fde68a,#fca5a5);border-radius:99px}
-.rung{display:grid;grid-template-columns:70px 1fr;gap:1.4rem;margin-bottom:1.5rem;position:relative}
-.ri{display:flex;align-items:flex-start;justify-content:center;position:relative;z-index:2}
-.ric{width:68px;height:68px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;border:2px solid transparent;flex-shrink:0}
-.rb2{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:1.4rem 1.65rem;transition:border-color .2s,transform .2s}
-.rb2:hover{border-color:var(--a1);transform:translateX(4px)}
-.rlv{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem}
-.rt{font-size:1.1rem;font-weight:800;margin-bottom:.4rem}
-.rd{font-size:.87rem;color:#94a3b8;margin-bottom:.8rem;line-height:1.6}
-.rex{display:flex;flex-wrap:wrap;gap:.35rem}
-.cb2{background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:.8rem 1.1rem;margin:.6rem 0;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#e2e8f0;line-height:1.8;overflow-x:auto}
-.ck{color:#a78bfa}.cf{color:#22d3ee}.cs{color:#86efac}.cn2{color:#fde68a}.cc{color:#4a5568}
-.cog{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.9rem;margin-top:1.5rem}
-.coc{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:1.1rem;display:flex;flex-direction:column;gap:.4rem;transition:transform .2s,border-color .2s}
-.coc:hover{transform:translateY(-3px);border-color:var(--a2)}
-.col{font-size:1.5rem}
-.con{font-weight:700;font-size:.92rem}
-.cou{font-size:.76rem;color:#94a3b8}
-.sb{display:flex;flex-direction:column;gap:.8rem;margin-top:1.4rem}
-.sr{display:grid;grid-template-columns:155px 1fr 50px;gap:.9rem;align-items:center}
-.srl{font-size:.86rem;font-weight:600}
-.sbg{background:rgba(255,255,255,.06);border-radius:99px;height:7px;overflow:hidden}
-.sff{height:100%;border-radius:99px}
-.spc{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--mut);text-align:right}
-.wb{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:16px;padding:1.75rem;margin-bottom:1.5rem}
-.wb h4{color:#f59e0b;font-weight:700;margin-bottom:.7rem}
-.wb ul{padding-left:1.2rem;color:#94a3b8;font-size:.88rem}
-.wb li{margin-bottom:.45rem}
-footer{text-align:center;padding:2.75rem 2rem;border-top:1px solid var(--border);color:var(--mut);font-size:.83rem;max-width:1200px;margin:0 auto}
-footer a{color:var(--a2);text-decoration:none}
-@media(max-width:620px){
-  .th,.tr{grid-template-columns:40px 1fr 85px}
-  .th :nth-child(2),.tr :nth-child(2),.th :nth-child(5),.tr :nth-child(5){display:none}
-  .ladder::before{left:28px}
-  .rung{grid-template-columns:60px 1fr}
-  .ric{width:58px;height:58px;font-size:1.4rem}
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(184,134,11,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(139,58,42,0.06) 0%, transparent 60%);
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-weight: 900;
+    line-height: 1.05;
+    text-align: center;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+    color: var(--paper);
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 1.15rem;
+    color: #a09585;
+    max-width: 560px;
+    text-align: center;
+    font-style: italic;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.65s forwards;
+  }
+
+  .hero-rule {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 2.5rem auto 0;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.85s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.4s forwards;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: pulse 2s infinite;
+  }
+
+  /* ── INTRO ESSAY ── */
+  .intro-section {
+    background: var(--paper);
+    color: var(--text);
+    padding: 6rem 2rem;
+  }
+
+  .essay-container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .essay-container h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+
+  .essay-container p {
+    color: #2d2820;
+    margin-bottom: 1.4rem;
+    font-size: 1.05rem;
+  }
+
+  .pullquote {
+    border-left: 3px solid var(--gold);
+    padding: 0.5rem 0 0.5rem 1.8rem;
+    margin: 2.5rem 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    line-height: 1.45;
+    color: var(--gold);
+  }
+
+  /* ── TIMELINE ── */
+  .timeline-section {
+    background: #111009;
+    padding: 6rem 2rem;
+  }
+
+  .timeline-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--paper);
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-section .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 4rem;
+  }
+
+  .timeline {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold) 10%, var(--gold) 90%, transparent);
+    transform: translateX(-50%);
+  }
+
+  .timeline-era {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 3.5rem;
+    gap: 2rem;
+    position: relative;
+  }
+
+  .timeline-era:nth-child(odd) { flex-direction: row-reverse; }
+  .timeline-era:nth-child(odd) .era-content { text-align: right; }
+  .timeline-era:nth-child(odd) .era-langs { justify-content: flex-end; }
+
+  .era-content {
+    flex: 1;
+    padding: 0 1rem;
+  }
+
+  .era-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+    box-shadow: 0 0 15px rgba(184,134,11,0.5);
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    margin-top: 1rem;
+  }
+
+  .era-year {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .era-title {
+    font-size: 1rem;
+    color: var(--paper);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .era-desc {
+    font-size: 0.88rem;
+    color: #8a7e72;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .era-langs {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.7rem;
+  }
+
+  .lang-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid rgba(184,134,11,0.4);
+    color: var(--gold-light);
+    border-radius: 2px;
+    background: rgba(184,134,11,0.05);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── USAGE BARS ── */
+  .usage-section {
+    background: var(--paper);
+    color: var(--text);
+    padding: 6rem 2rem;
+  }
+
+  .usage-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .usage-section .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 3.5rem;
+  }
+
+  .bar-chart {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 50px;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .bar-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    text-align: right;
+    padding-right: 0.5rem;
+  }
+
+  .bar-track {
+    height: 28px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.4);
+  }
+
+  .bar-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── LANGUAGE CARDS ── */
+  .cards-section {
+    background: #0e0c0a;
+    padding: 6rem 2rem;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--paper);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header p {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .cards-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .lang-card {
+    background: #161410;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  .lang-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .lang-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(184,134,11,0.25);
+  }
+
+  .lang-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+
+  .lang-card.tier-1::before { background: linear-gradient(90deg, var(--gold), var(--amber)); }
+  .lang-card.tier-2::before { background: linear-gradient(90deg, var(--slate), #5a7a9c); }
+  .lang-card.tier-3::before { background: linear-gradient(90deg, var(--sage), #6a9460); }
+  .lang-card.tier-4::before { background: linear-gradient(90deg, var(--rust), #b05a48); }
+
+  .card-rank {
+    position: absolute;
+    top: 1.4rem;
+    right: 1.6rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--paper);
+    font-weight: 700;
+  }
+
+  .card-birth {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--gold-light);
+    letter-spacing: 0.1em;
+    margin-top: 0.1rem;
+  }
+
+  .card-tagline {
+    font-style: italic;
+    color: var(--gold-light);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    line-height: 1.4;
+  }
+
+  .card-body {
+    font-size: 0.92rem;
+    color: #9a8e82;
+    line-height: 1.65;
+    margin-bottom: 1.2rem;
+  }
+
+  .card-users {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 1rem;
+  }
+
+  .user-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    color: #7a6e62;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  /* ── WHEEL INFOGRAPHIC ── */
+  .wheel-section {
+    background: var(--paper);
+    padding: 6rem 2rem;
+  }
+
+  .wheel-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .wheel-section .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 4rem;
+  }
+
+  .domain-grid {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .domain-card {
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1.4rem;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .domain-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  .domain-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  .domain-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  .domain-langs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── CLOSING ESSAY ── */
+  .close-section {
+    background: #0e0c0a;
+    padding: 7rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .close-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(184,134,11,0.05) 0%, transparent 70%);
+  }
+
+  .close-inner {
+    max-width: 660px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .close-inner h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--paper);
+    margin-bottom: 2rem;
+    line-height: 1.2;
+  }
+
+  .close-inner p {
+    color: #9a8e82;
+    margin-bottom: 1.4rem;
+    font-size: 1rem;
+  }
+
+  .close-inner .big-quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--gold-light);
+    line-height: 1.45;
+    margin: 3rem 0;
+    padding-left: 1.8rem;
+    border-left: 2px solid var(--gold);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #080706;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  footer p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #4a4035;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s, transform 0.7s;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* mobile */
+  @media (max-width: 640px) {
+    .timeline::before { left: 14px; }
+    .timeline-era, .timeline-era:nth-child(odd) {
+      flex-direction: row;
+    }
+    .timeline-era:nth-child(odd) .era-content { text-align: left; }
+    .timeline-era:nth-child(odd) .era-langs { justify-content: flex-start; }
+    .era-dot { margin-left: 7px; }
+    .bar-row { grid-template-columns: 90px 1fr 40px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="hbg"></div><div class="hgrid"></div>
-  <div class="hc">
-    <div class="badge"><svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#6366f1"/><circle cx="5" cy="5" r="2" fill="#a5b4fc"/></svg>Educational Guide &middot; February 2026</div>
-    <h1>The <span>TIOBE Index</span><br/>Explained</h1>
-    <p>Your complete guide to understanding how programming languages are ranked, what the data means, and why it matters for developers and students.</p>
-    <div class="hstats">
-      <div><span class="sn">150+</span><span class="sl">Languages Tracked</span></div>
-      <div><span class="sn">25+</span><span class="sl">Years of Data</span></div>
-      <div><span class="sn">20+</span><span class="sl">Search Engines</span></div>
-      <div><span class="sn">#1</span><span class="sl">Python Feb 2026</span></div>
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <span class="hero-label">TIOBE Index · 2026 Edition</span>
+  <h1>The 20 Languages That <em>Built</em> The World</h1>
+  <p class="hero-sub">Every great tool was invented to solve a problem someone else said didn't exist yet.</p>
+  <div class="hero-rule"></div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ══ INTRO ESSAY ══ -->
+<section class="intro-section">
+  <div class="essay-container">
+    <span class="section-label">I. The Setup</span>
+    <h2>Nobody builds a language because it's fun. They build it because they're furious.</h2>
+    <p>In 1972, Dennis Ritchie was trying to write an operating system. The tools available were either too slow, too cumbersome, or too tied to a specific machine. So he did what frustrated engineers do: he built his own. He called it C. He had no idea it would still be running the world's most critical infrastructure fifty years later.</p>
+
+    <p>That's the pattern. Every major programming language starts not as an academic exercise but as a scream of frustration. Java was built because developers were tired of rewriting software for every new operating system. Python was built because Guido van Rossum wanted something he could actually enjoy using. JavaScript was built in ten days because Netscape needed web pages to move.</p>
+
+    <div class="pullquote">
+      "The most important inventions aren't made by people who imagined the future. They're made by people who were annoyed by the present."
     </div>
-  </div>
-  <div class="scrollhint"><span>Scroll to explore</span><svg width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
-</div>
 
-<section>
-  <div class="slabel">Chapter 1</div><h2>What is the TIOBE Index?</h2>
-  <p class="lead">TIOBE is a monthly ranking of programming languages based on their worldwide popularity — a pulse check on the software development world.</p>
-  <div class="gc">
-    <div class="card"><div class="ico" style="background:rgba(99,102,241,.15)">📡</div><h3>A Popularity Meter</h3><p>TIOBE measures how often languages appear in web searches, courses, and vendor materials across Google, Amazon, Wikipedia, Bing and 20+ others.</p></div>
-    <div class="card"><div class="ico" style="background:rgba(34,211,238,.15)">📅</div><h3>Updated Monthly</h3><p>Refreshed every month so developers, educators, and companies can track trends in real time rather than relying on outdated annual surveys.</p></div>
-    <div class="card"><div class="ico" style="background:rgba(245,158,11,.15)">🎓</div><h3>A Learning Guide</h3><p>Helps you decide which language to learn next or whether your current skills are still in demand — it's about popularity, not which language is "best."</p></div>
-    <div class="card"><div class="ico" style="background:rgba(16,185,129,.15)">🏢</div><h3>A Strategic Tool</h3><p>Organizations use it when selecting a tech stack for new projects, weighing community size, talent availability, and long-term ecosystem support.</p></div>
+    <p>The TIOBE Index doesn't measure which language is "best." It measures which languages are talked about, searched for, and used. That's actually more interesting. Popularity reflects something real: the accumulated weight of millions of decisions made by people trying to solve problems under pressure.</p>
+
+    <p>What follows is a tour of the twenty most influential programming languages alive today — where they came from, who uses them, and what they reveal about how we think about problems. The story is less about code than it is about human nature.</p>
   </div>
 </section>
 
-<section>
-  <div class="slabel">Chapter 2</div><h2>How Is It Calculated?</h2>
-  <p class="lead">The TIOBE score comes from a structured web-search methodology — not lines of code written or job postings.</p>
-  <div class="steps">
-    <div class="step"><h4>Query Construction</h4><p>Queries like <em>"Python programming"</em>, <em>"programming with Python"</em>, and <em>"Python development"</em> are built for each language.</p></div>
-    <div class="step"><h4>Multi-Engine Search</h4><p>Queries are submitted to 20+ search engines — Google, Bing, Yahoo, Wikipedia, Amazon — to count result hits.</p></div>
-    <div class="step"><h4>Hit Count Aggregation</h4><p>Results are summed per language. More results = assumed larger community of engineers and learners.</p></div>
-    <div class="step"><h4>Normalization &amp; Ranking</h4><p>Raw counts are normalized so all scores sum to 100%, then ranked from most to least popular.</p></div>
-    <div class="step"><h4>Monthly Publication</h4><p>Published on the first Tuesday of each month, enabling month-over-month and year-over-year comparisons.</p></div>
-  </div>
-</section>
+<!-- ══ TIMELINE ══ -->
+<section class="timeline-section">
+  <h2>A History Written in Frustration</h2>
+  <p class="subtitle">Each era solved the previous era's problem — then created the next one</p>
 
-<section>
-  <div class="slabel">Chapter 3</div><h2>February 2026 Rankings</h2>
-  <p class="lead">The top 20 programming languages, showing current market share and year-over-year movement.</p>
-  <div class="tw">
-    <div class="th"><span>Rank</span><span>Change</span><span>Language</span><span>Market Share</span><span>YoY</span></div>
-    <div id="tb"></div>
-  </div>
-</section>
-
-<section>
-  <div class="slabel">Chapter 4</div><h2>Python in the Spotlight</h2>
-  <p class="lead">Python's story is one of the most dramatic rises in history — from rank #13 in 2003 to a dominant #1 today.</p>
-  <div class="spot">
-    <div>
-      <h3>🐍 Python's Historic Rise</h3>
-      <p style="color:#94a3b8;margin-bottom:1.4rem;font-size:.93rem">Python stayed below 5% for most of the 2000s and early 2010s. The AI and data science explosion drove it to a peak of <strong style="color:#fff">26.98%</strong> in July 2025 — pulling back slightly as domain-specific languages like <strong style="color:#10b981">R</strong> and <strong style="color:#f59e0b">Perl</strong> reclaim niche audiences.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:.4rem">
-        <span class="chip" style="background:rgba(59,130,246,.15);color:#93c5fd">AI / ML</span>
-        <span class="chip" style="background:rgba(16,185,129,.15);color:#6ee7b7">Data Science</span>
-        <span class="chip" style="background:rgba(245,158,11,.15);color:#fde68a">Automation</span>
-        <span class="chip" style="background:rgba(99,102,241,.15);color:#a5b4fc">Web Backend</span>
-        <span class="chip" style="background:rgba(244,63,94,.15);color:#fca5a5">Education</span>
+  <div class="timeline">
+    <div class="timeline-era reveal">
+      <div class="era-content">
+        <div class="era-year">1957</div>
+        <div class="era-title">The Hardware Age</div>
+        <div class="era-desc">Scientists were tired of writing in machine code. They wanted to write math, not binary. The first high-level languages let humans stop talking to machines and start thinking.</div>
+        <div class="era-langs">
+          <span class="lang-chip">Fortran</span>
+          <span class="lang-chip">Assembly</span>
+          <span class="lang-chip">COBOL</span>
+        </div>
       </div>
+      <div class="era-dot"></div>
+      <div style="flex:1"></div>
     </div>
-    <div class="pstats">
-      <div class="ps"><div class="psi">🏆</div><div><div class="psl">Highest position (since 2001)</div><div class="psv">#1 — February 2026</div></div></div>
-      <div class="ps"><div class="psi">📉</div><div><div class="psl">Lowest position (since 2001)</div><div class="psv">#13 — February 2003</div></div></div>
-      <div class="ps"><div class="psi">🚀</div><div><div class="psl">Peak market share</div><div class="psv">26.98% — July 2025</div></div></div>
-      <div class="ps"><div class="psi">🥇</div><div><div class="psl">Language of the Year wins</div><div class="psv">6× (2007, 2010, 2018, 2020, 2021, 2024)</div></div></div>
-    </div>
-  </div>
-</section>
 
-<section>
-  <div class="slabel">Chapter 5</div><h2>Long-Term Trends</h2>
-  <p class="lead">Watching rankings over decades reveals how technology shifts — from systems programming dominance to the modern AI era.</p>
-  <div class="tl">
-    <div class="tli"><div class="tld" style="background:#f97316"></div><div class="tly">1986 – 2000</div><h4>C Reigns Supreme</h4><p>C held #1 for virtually the entire period, reflecting its dominance in operating systems, embedded hardware, and early internet infrastructure. Lisp and Ada were strong academic and defence choices.</p></div>
-    <div class="tli"><div class="tld" style="background:#a855f7"></div><div class="tly">2001 – 2010</div><h4>Java's Golden Decade</h4><p>Java took over with enterprise software and the web. C++ stayed strong for games. Python quietly climbed from #27 to the top 10, fuelled by its clean syntax and growing library ecosystem.</p></div>
-    <div class="tli"><div class="tld" style="background:#22c55e"></div><div class="tly">2011 – 2017</div><h4>Java vs C vs C++</h4><p>Java held #1 through 2015–2016, facing pressure from C and C++ in performance domains. Go emerged as a modern systems language, winning Language of the Year in 2009 and 2016.</p></div>
-    <div class="tli"><div class="tld" style="background:#3b82f6"></div><div class="tly">2018 – Present</div><h4>The Python Era &amp; AI Boom</h4><p>The machine learning explosion drove Python from ~4% in 2017 to nearly 27% by 2025. It overtook Java (2019), then C (2021). Domain-specific competitors like R and Perl are now slowly reclaiming specialised niches.</p></div>
-  </div>
-</section>
-
-<section>
-  <div class="slabel">Chapter 6</div><h2>Hall of Fame</h2>
-  <p class="lead">"Language of the Year" goes to the language with the highest ratings rise. Python has won 6 times — more than any other.</p>
-  <div class="hof">
-    <div class="hc2 pw"><div class="hm">🥇</div><div class="hy">2024</div><div class="hl" style="color:#93c5fd">Python</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2023</div><div class="hl" style="color:#ec4899">C#</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2022</div><div class="hl" style="color:#22c55e">C++</div></div>
-    <div class="hc2 pw"><div class="hm">🥇</div><div class="hy">2021</div><div class="hl" style="color:#93c5fd">Python</div></div>
-    <div class="hc2 pw"><div class="hm">🥇</div><div class="hy">2020</div><div class="hl" style="color:#93c5fd">Python</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2019</div><div class="hl" style="color:#f97316">C</div></div>
-    <div class="hc2 pw"><div class="hm">🥇</div><div class="hy">2018</div><div class="hl" style="color:#93c5fd">Python</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2017</div><div class="hl" style="color:#f97316">C</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2016</div><div class="hl" style="color:#67e8f9">Go</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2015</div><div class="hl" style="color:#a855f7">Java</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2014</div><div class="hl" style="color:#facc15">JavaScript</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2013</div><div class="hl">Transact-SQL</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2012</div><div class="hl">Objective-C</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2011</div><div class="hl">Objective-C</div></div>
-    <div class="hc2 pw"><div class="hm">🥇</div><div class="hy">2010</div><div class="hl" style="color:#93c5fd">Python</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2009</div><div class="hl" style="color:#67e8f9">Go</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2008</div><div class="hl" style="color:#f97316">C</div></div>
-    <div class="hc2 pw"><div class="hm">🥇</div><div class="hy">2007</div><div class="hl" style="color:#93c5fd">Python</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2006</div><div class="hl" style="color:#f43f5e">Ruby</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2005</div><div class="hl" style="color:#a855f7">Java</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2004</div><div class="hl">PHP</div></div>
-    <div class="hc2"><div class="hm">🥇</div><div class="hy">2003</div><div class="hl" style="color:#22c55e">C++</div></div>
-  </div>
-</section>
-
-<!-- ═══ CH7: WHY WE CHOSE PYTHON ═══ -->
-<section id="why-python">
-  <div class="slabel">Chapter 7 — For Our 7th Grade Class</div>
-  <h2>Why We Learn Python</h2>
-  <p class="lead">With Python ranked <strong style="color:#fff">#1 in the world</strong> at 21.81% — more than double its closest competitor — the data backs up what educators have known for years: Python is the ideal first language.</p>
-
-  <div class="why-hero">
-    <div>
-      <h3>One language.<br/><em>A lifetime of possibilities.</em></h3>
-      <p>Python is the rare language you can learn with a turtle on screen in 7th grade, and use to train AI models at Google a decade later. The exact same concepts you master today — loops, functions, logic — are what professional engineers use at the highest levels of the industry. Nothing is wasted. Everything compounds.</p>
-    </div>
-    <div class="rbadge">
-      <span class="big">#1</span>
-      <span class="sub">TIOBE Index</span>
-      <span class="sub" style="margin-top:.15rem">Feb 2026</span>
-    </div>
-  </div>
-
-  <h3 style="font-size:1.35rem;font-weight:800;margin-bottom:1.15rem">Why Python is the Perfect First Language</h3>
-  <div class="rg">
-    <div class="rc" style="border-top-color:#3b82f6"><div class="ico2">📖</div><h4>Reads Like English</h4><p>Python code is designed to look like plain sentences. No confusing semicolons or curly brackets required just to say "Hello" — beginners can focus on thinking like a programmer, not memorizing complex punctuation rules.</p></div>
-    <div class="rc" style="border-top-color:#10b981"><div class="ico2">🐢</div><h4>Built for Learning</h4><p>Tracy Turtle (Python's built-in <code style="color:#22d3ee;font-size:.82rem">turtle</code> module) lets you see your code draw shapes instantly on screen. Immediate visual feedback is one of the most powerful ways humans learn new skills.</p></div>
-    <div class="rc" style="border-top-color:#f59e0b"><div class="ico2">🔁</div><h4>Same Language, Every Level</h4><p>You don't "graduate" away from Python. The same language learned in 7th grade is used by NASA, Netflix, and OpenAI. Skills compound — nothing you learn here gets thrown away.</p></div>
-    <div class="rc" style="border-top-color:#6366f1"><div class="ico2">📦</div><h4>A Library for Everything</h4><p>Python has hundreds of thousands of free add-ons called libraries. Make a game, analyze sports data, build a website, train an AI — there's a library for every goal at every skill level.</p></div>
-    <div class="rc" style="border-top-color:#ec4899"><div class="ico2">💼</div><h4>The #1 Job Skill</h4><p>Python consistently tops employer wish-lists in tech, finance, science, and medicine. Learning it now gives you a head start on the single most in-demand skill in the modern workforce.</p></div>
-    <div class="rc" style="border-top-color:#22d3ee"><div class="ico2">🌍</div><h4>Massive Community</h4><p>With 21.81% of the world's developer search activity, Python has the largest community of any language. More tutorials, free tools, forum answers, and people to learn from at every stage.</p></div>
-  </div>
-
-  <h3 style="font-size:1.35rem;font-weight:800;margin-bottom:.45rem">The Python Learning Ladder</h3>
-  <p style="color:#94a3b8;font-size:.93rem;margin-bottom:2.4rem;max-width:620px">Every rung below uses the same Python you're learning right now. The ladder never breaks — it only gets taller.</p>
-
-  <div class="ladder">
-
-    <div class="rung">
-      <div class="ri"><div class="ric" style="background:rgba(253,230,138,.12);border-color:#fde68a">🐢</div></div>
-      <div class="rb2">
-        <div class="rlv" style="color:#fde68a">Level 1 &mdash; Beginner &nbsp;·&nbsp; <em style="font-style:normal;opacity:.7">You Are Here!</em></div>
-        <div class="rt">Tracy Turtle &amp; First Programs</div>
-        <div class="rd">Using Python's built-in <code style="color:#22d3ee">turtle</code> module, you command a little turtle to draw shapes by giving it directions. This teaches sequences, loops, and functions — the three building blocks of every program ever written — with immediate, colorful results on screen.</div>
-        <div class="cb2"><span class="ck">import</span> turtle<br>tracy = turtle.Turtle()<br><span class="ck">for</span> i <span class="ck">in</span> <span class="cf">range</span>(<span class="cn2">4</span>):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cc"># repeat 4 times</span><br>&nbsp;&nbsp;&nbsp;&nbsp;tracy.forward(<span class="cn2">100</span>)&nbsp;&nbsp;&nbsp;<span class="cc"># move forward</span><br>&nbsp;&nbsp;&nbsp;&nbsp;tracy.right(<span class="cn2">90</span>)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cc"># turn right → draws a square!</span></div>
-        <div class="rex">
-          <span class="chip" style="background:rgba(253,230,138,.12);color:#fde68a">Drawing shapes</span>
-          <span class="chip" style="background:rgba(253,230,138,.12);color:#fde68a">Loops &amp; functions</span>
-          <span class="chip" style="background:rgba(253,230,138,.12);color:#fde68a">Variables</span>
-          <span class="chip" style="background:rgba(253,230,138,.12);color:#fde68a">If / else logic</span>
+    <div class="timeline-era reveal">
+      <div style="flex:1"></div>
+      <div class="era-dot"></div>
+      <div class="era-content">
+        <div class="era-year">1972</div>
+        <div class="era-title">The Systems Age</div>
+        <div class="era-desc">Bell Labs invented Unix. To build Unix, they needed C. C gave programmers hardware control with human-readable code. It became the DNA of modern computing.</div>
+        <div class="era-langs">
+          <span class="lang-chip">C</span>
+          <span class="lang-chip">Pascal</span>
         </div>
       </div>
     </div>
 
-    <div class="rung">
-      <div class="ri"><div class="ric" style="background:rgba(134,239,172,.12);border-color:#86efac">🎮</div></div>
-      <div class="rb2">
-        <div class="rlv" style="color:#86efac">Level 2 &mdash; Elementary Projects</div>
-        <div class="rt">Simple Games &amp; Interactive Programs</div>
-        <div class="rd">Once you know the basics, you can build text-based games — number guessers, quizzes, calculators, choose-your-own-adventure stories. You'll learn how to take input from users and make programs actually respond to real people, which is the foundation of every app ever made.</div>
-        <div class="cb2"><span class="ck">import</span> random<br>secret = random.<span class="cf">randint</span>(<span class="cn2">1</span>, <span class="cn2">100</span>)<br>guess = <span class="cf">int</span>(<span class="cf">input</span>(<span class="cs">"Guess a number: "</span>))<br><span class="ck">if</span> guess == secret:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">print</span>(<span class="cs">"&#127881; You got it!"</span>)<br><span class="ck">else</span>:<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">print</span>(<span class="cs">"Try again!"</span>)</div>
-        <div class="rex">
-          <span class="chip" style="background:rgba(134,239,172,.12);color:#86efac">Text games</span>
-          <span class="chip" style="background:rgba(134,239,172,.12);color:#86efac">User input</span>
-          <span class="chip" style="background:rgba(134,239,172,.12);color:#86efac">Random numbers</span>
-          <span class="chip" style="background:rgba(134,239,172,.12);color:#86efac">Lists &amp; strings</span>
+    <div class="timeline-era reveal">
+      <div class="era-content">
+        <div class="era-year">1985–1994</div>
+        <div class="era-title">The Objects Age</div>
+        <div class="era-desc">Software grew complex. Single functions couldn't tame it. Object-oriented thinking — bundling data with behavior — became the dominant paradigm. C++ added it to C. Java built on it from scratch.</div>
+        <div class="era-langs">
+          <span class="lang-chip">C++</span>
+          <span class="lang-chip">Visual Basic</span>
+          <span class="lang-chip">Perl</span>
+          <span class="lang-chip">MATLAB</span>
+        </div>
+      </div>
+      <div class="era-dot"></div>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="timeline-era reveal">
+      <div style="flex:1"></div>
+      <div class="era-dot"></div>
+      <div class="era-content">
+        <div class="era-year">1995</div>
+        <div class="era-title">The Internet Age</div>
+        <div class="era-desc">The web exploded. Java promised "write once, run anywhere." PHP accidentally became the backbone of millions of sites. JavaScript put code in the browser. R gave statisticians a voice. Python emerged quietly.</div>
+        <div class="era-langs">
+          <span class="lang-chip">Java</span>
+          <span class="lang-chip">JavaScript</span>
+          <span class="lang-chip">PHP</span>
+          <span class="lang-chip">Python</span>
+          <span class="lang-chip">Ruby</span>
+          <span class="lang-chip">R</span>
         </div>
       </div>
     </div>
 
-    <div class="rung">
-      <div class="ri"><div class="ric" style="background:rgba(34,211,238,.12);border-color:#22d3ee">🌐</div></div>
-      <div class="rb2">
-        <div class="rlv" style="color:#22d3ee">Level 3 &mdash; Intermediate</div>
-        <div class="rt">Data, Files &amp; Talking to the Internet</div>
-        <div class="rd">By high school, you'll be reading and writing files, working with spreadsheets, and pulling live data from the internet automatically. Imagine writing a script that checks tonight's weather, your favorite team's score, or today's news — every single morning, without you touching a button.</div>
-        <div class="cb2"><span class="ck">import</span> requests<br>data = requests.<span class="cf">get</span>(<span class="cs">"https://api.weather.com/today"</span>).<span class="cf">json</span>()<br><span class="cf">print</span>(<span class="cs">f"Today: {data['temp']}&#176;F, {data['condition']}"</span>)</div>
-        <div class="rex">
-          <span class="chip" style="background:rgba(34,211,238,.12);color:#22d3ee">File I/O</span>
-          <span class="chip" style="background:rgba(34,211,238,.12);color:#22d3ee">APIs &amp; JSON</span>
-          <span class="chip" style="background:rgba(34,211,238,.12);color:#22d3ee">Web scraping</span>
-          <span class="chip" style="background:rgba(34,211,238,.12);color:#22d3ee">CSV / Excel</span>
+    <div class="timeline-era reveal">
+      <div class="era-content">
+        <div class="era-year">2000–2014</div>
+        <div class="era-title">The Enterprise & Mobile Age</div>
+        <div class="era-desc">Microsoft built C# to fight Java. Apple replaced Objective-C with Swift. Google built Android on Java, then blessed Kotlin. The smartphone created a billion-device audience overnight.</div>
+        <div class="era-langs">
+          <span class="lang-chip">C#</span>
+          <span class="lang-chip">Swift</span>
+          <span class="lang-chip">Kotlin</span>
+          <span class="lang-chip">Go</span>
         </div>
       </div>
+      <div class="era-dot"></div>
+      <div style="flex:1"></div>
     </div>
 
-    <div class="rung">
-      <div class="ri"><div class="ric" style="background:rgba(99,102,241,.12);border-color:#6366f1">📊</div></div>
-      <div class="rb2">
-        <div class="rlv" style="color:#a5b4fc">Level 4 &mdash; Advanced</div>
-        <div class="rt">Data Science &amp; Visualization</div>
-        <div class="rd">College students and early-career developers use Python's powerful libraries — pandas, NumPy, and matplotlib — to analyze real datasets and turn raw numbers into charts, graphs, and insights. This is where Python overtook every other language in university research and STEM curricula worldwide, and why R (now ranked #8 on TIOBE) is Python's main competition in this space.</div>
-        <div class="cb2"><span class="ck">import</span> pandas <span class="ck">as</span> pd<br><span class="ck">import</span> matplotlib.pyplot <span class="ck">as</span> plt<br>df = pd.<span class="cf">read_csv</span>(<span class="cs">"class_scores.csv"</span>)<br>df.<span class="cf">plot</span>(kind=<span class="cs">"bar"</span>, title=<span class="cs">"Test Results"</span>)<br>plt.<span class="cf">show</span>()</div>
-        <div class="rex">
-          <span class="chip" style="background:rgba(99,102,241,.12);color:#a5b4fc">pandas</span>
-          <span class="chip" style="background:rgba(99,102,241,.12);color:#a5b4fc">NumPy</span>
-          <span class="chip" style="background:rgba(99,102,241,.12);color:#a5b4fc">matplotlib</span>
-          <span class="chip" style="background:rgba(99,102,241,.12);color:#a5b4fc">Statistical analysis</span>
+    <div class="timeline-era reveal">
+      <div style="flex:1"></div>
+      <div class="era-dot"></div>
+      <div class="era-content">
+        <div class="era-year">2010–Now</div>
+        <div class="era-title">The AI & Safety Age</div>
+        <div class="era-desc">Python became the language of intelligence. The world's critical systems kept running on C and C++, but the vulnerabilities piled up. Rust arrived to fix safety without sacrificing speed.</div>
+        <div class="era-langs">
+          <span class="lang-chip">Python</span>
+          <span class="lang-chip">Rust</span>
+          <span class="lang-chip">TypeScript</span>
+          <span class="lang-chip">SQL</span>
         </div>
       </div>
-    </div>
-
-    <div class="rung">
-      <div class="ri"><div class="ric" style="background:rgba(245,158,11,.12);border-color:#f59e0b">🤖</div></div>
-      <div class="rb2">
-        <div class="rlv" style="color:#fde68a">Level 5 &mdash; Professional</div>
-        <div class="rt">Machine Learning &amp; AI Development</div>
-        <div class="rd">Python is the undisputed language of artificial intelligence. This is the field that pushed Python to #1 on TIOBE. Professional ML engineers use TensorFlow, PyTorch, and scikit-learn — all Python libraries — to build the AI behind facial recognition, recommendation engines, self-driving cars, and tools like ChatGPT. The AI revolution is written in Python.</div>
-        <div class="cb2"><span class="ck">from</span> sklearn.ensemble <span class="ck">import</span> RandomForestClassifier<br>model = <span class="cf">RandomForestClassifier</span>()<br>model.<span class="cf">fit</span>(X_train, y_train)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cc"># train the AI</span><br>predictions = model.<span class="cf">predict</span>(X_test) <span class="cc"># make predictions</span></div>
-        <div class="rex">
-          <span class="chip" style="background:rgba(245,158,11,.12);color:#fde68a">TensorFlow</span>
-          <span class="chip" style="background:rgba(245,158,11,.12);color:#fde68a">PyTorch</span>
-          <span class="chip" style="background:rgba(245,158,11,.12);color:#fde68a">scikit-learn</span>
-          <span class="chip" style="background:rgba(245,158,11,.12);color:#fde68a">Neural networks</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="rung">
-      <div class="ri"><div class="ric" style="background:rgba(244,63,94,.12);border-color:#f43f5e">🏙️</div></div>
-      <div class="rb2">
-        <div class="rlv" style="color:#fca5a5">Level 6 &mdash; Corporate &amp; Enterprise</div>
-        <div class="rt">Industry at Scale — The Top of the Ladder</div>
-        <div class="rd">At the highest levels, Python powers the infrastructure of the world's most valuable companies. From Instagram's backend serving over a billion users, to NASA's telescope data pipelines, to the algorithms deciding what you hear on Spotify next — Python at enterprise scale is what separates good engineers from exceptional ones.</div>
-        <div class="cog">
-          <div class="coc"><div class="col">🔍</div><div class="con">Google</div><div class="cou">Search algorithms, YouTube recommendations &amp; AI research (Gemini)</div></div>
-          <div class="coc"><div class="col">🎬</div><div class="con">Netflix</div><div class="cou">Recommendation engine, data pipelines &amp; A/B testing at scale</div></div>
-          <div class="coc"><div class="col">📸</div><div class="con">Instagram</div><div class="cou">Entire backend runs on Django, a Python web framework</div></div>
-          <div class="coc"><div class="col">🚀</div><div class="con">NASA</div><div class="cou">Telescope imaging, mission data analysis &amp; space simulations</div></div>
-          <div class="coc"><div class="col">🎵</div><div class="con">Spotify</div><div class="cou">Music recommendations, data science &amp; backend services</div></div>
-          <div class="coc"><div class="col">🤖</div><div class="con">OpenAI</div><div class="cou">ChatGPT and all AI research built primarily in Python</div></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem;margin-top:3rem">
-    <h3 style="font-size:1.15rem;font-weight:800;margin-bottom:.35rem">How Much of What You Learn in 7th Grade Carries Forward?</h3>
-    <p style="color:#94a3b8;font-size:.86rem;margin-bottom:1.1rem">Every concept you master now is still used at the professional level. Nothing is wasted.</p>
-    <div class="sb">
-      <div class="sr"><span class="srl">Variables &amp; Logic</span><div class="sbg"><div class="sff" style="width:100%;background:linear-gradient(90deg,#3b82f6,#22d3ee)"></div></div><span class="spc">100%</span></div>
-      <div class="sr"><span class="srl">Loops &amp; Functions</span><div class="sbg"><div class="sff" style="width:100%;background:linear-gradient(90deg,#3b82f6,#22d3ee)"></div></div><span class="spc">100%</span></div>
-      <div class="sr"><span class="srl">Python Syntax</span><div class="sbg"><div class="sff" style="width:95%;background:linear-gradient(90deg,#6366f1,#a78bfa)"></div></div><span class="spc">95%</span></div>
-      <div class="sr"><span class="srl">Problem-Solving</span><div class="sbg"><div class="sff" style="width:100%;background:linear-gradient(90deg,#10b981,#22d3ee)"></div></div><span class="spc">100%</span></div>
-      <div class="sr"><span class="srl">Debugging Skills</span><div class="sbg"><div class="sff" style="width:90%;background:linear-gradient(90deg,#f59e0b,#fde68a)"></div></div><span class="spc">90%</span></div>
     </div>
   </div>
 </section>
 
-<section>
-  <div class="slabel">Chapter 8</div><h2>Important Limitations</h2>
-  <p class="lead">TIOBE is a valuable signal, but should never be used in isolation. Understanding what it <em>doesn't</em> measure is just as important.</p>
-  <div class="wb">
-    <h4>⚠️ What TIOBE Does NOT Measure</h4>
-    <ul>
-      <li><strong>Code volume</strong> — it doesn't count lines of code written in each language.</li>
-      <li><strong>Job market demand</strong> — search hits ≠ open jobs. Use LinkedIn or Stack Overflow surveys for hiring data.</li>
-      <li><strong>Quality or suitability</strong> — a high ranking doesn't mean a language is the best choice for every use case.</li>
-      <li><strong>Real production usage</strong> — a language can have high search interest from learners without widespread enterprise adoption.</li>
-      <li><strong>Emerging languages</strong> — languages like Mojo or Zig are under-represented because they don't yet have large search footprints.</li>
-    </ul>
+<!-- ══ BAR CHART ══ -->
+<section class="usage-section">
+  <h2>How They Stack Up Today</h2>
+  <p class="subtitle">TIOBE Index ratings — share of search activity across the web</p>
+
+  <div class="bar-chart" id="barChart">
+    <!-- bars injected by JS -->
   </div>
-  <div class="gc">
-    <div class="card"><div class="ico" style="background:rgba(16,185,129,.15)">✅</div><h3>Good Uses of TIOBE</h3><p>Tracking long-term language trends, comparing community sizes, deciding which language to learn for maximum career reach, or choosing a tech stack with broad hiring potential.</p></div>
-    <div class="card"><div class="ico" style="background:rgba(244,63,94,.15)">🚫</div><h3>Don't Use TIOBE For…</h3><p>Choosing the "best" language for a specific technical problem, measuring developer productivity, or drawing conclusions from a single month without looking at multi-year trends.</p></div>
-    <div class="card"><div class="ico" style="background:rgba(99,102,241,.15)">🔍</div><h3>Complement With…</h3><p>Stack Overflow Developer Survey, GitHub's Octoverse, RedMonk Language Rankings, and job board data for a well-rounded picture of the landscape.</p></div>
+</section>
+
+<!-- ══ DOMAIN MAP ══ -->
+<section class="wheel-section">
+  <h2>Which Language Lives Where</h2>
+  <p class="subtitle">Every language found its kingdom. Few cross borders.</p>
+
+  <div class="domain-grid">
+    <div class="domain-card reveal">
+      <div class="domain-icon">🧠</div>
+      <div class="domain-title">AI & Data Science</div>
+      <div class="domain-langs">Python · R · MATLAB · Julia</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🌐</div>
+      <div class="domain-title">Web Frontend</div>
+      <div class="domain-langs">JavaScript · TypeScript</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🖥️</div>
+      <div class="domain-title">Web Backend</div>
+      <div class="domain-langs">Python · PHP · Ruby · Go · Java</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">⚙️</div>
+      <div class="domain-title">Systems & OS</div>
+      <div class="domain-langs">C · C++ · Rust · Assembly</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">📱</div>
+      <div class="domain-title">Mobile</div>
+      <div class="domain-langs">Swift · Kotlin · Java · Dart</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🏢</div>
+      <div class="domain-title">Enterprise</div>
+      <div class="domain-langs">Java · C# · Visual Basic · SQL</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🎮</div>
+      <div class="domain-title">Game Dev</div>
+      <div class="domain-langs">C++ · C# · Lua</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">☁️</div>
+      <div class="domain-title">Cloud & DevOps</div>
+      <div class="domain-langs">Go · Python · Bash</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🔬</div>
+      <div class="domain-title">Science & Research</div>
+      <div class="domain-langs">Fortran · Python · R · MATLAB</div>
+    </div>
+    <div class="domain-card reveal">
+      <div class="domain-icon">🗄️</div>
+      <div class="domain-title">Databases</div>
+      <div class="domain-langs">SQL · PL/SQL · T-SQL</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LANGUAGE CARDS ══ -->
+<section class="cards-section">
+  <div class="section-header">
+    <span class="section-label" style="color:var(--gold-light)">III. The Cast</span>
+    <h2>Twenty Languages, Twenty Stories</h2>
+    <p>Each one was someone's answer to a question that hadn't been asked yet</p>
+  </div>
+
+  <div class="cards-grid" id="cardsGrid"></div>
+</section>
+
+<!-- ══ CLOSING ESSAY ══ -->
+<section class="close-section">
+  <div class="close-inner">
+    <span class="section-label" style="color:var(--gold-light)">IV. The Lesson</span>
+    <h2>Why None of This Is Going Away</h2>
+
+    <p>There is a recurring fantasy in technology: the idea that a new, superior language will make all the old ones obsolete. It never happens. Not because the old languages are secretly good, but because the cost of replacing them is incalculable.</p>
+
+    <p>COBOL runs U.S. Social Security. It processes more transactions daily than any modern system. Fortran code written in the 1970s still calculates weather forecasts that protect millions of lives. These aren't artifacts — they're load-bearing walls. You don't tear out load-bearing walls just because the architecture is old.</p>
+
+    <div class="big-quote">"The most dangerous phrase in technology is 'we'll just rewrite it.' The second most dangerous is 'nobody uses that anymore.'"</div>
+
+    <p>Python dominates today because it sits at the intersection of three enormous forces: the data explosion, the AI revolution, and the desperate demand for code that humans can actually read. But Python didn't win by being the fastest or the safest. It won by being the most useful to the most people at the right moment in history.</p>
+
+    <p>That's what the TIOBE Index actually measures. Not elegance. Not correctness. Usefulness. And usefulness is messy, contextual, and deeply human.</p>
+
+    <p>The programmers who will matter most in the next twenty years aren't the ones who master any single language. They're the ones who understand <em>why</em> languages exist — what problem each one was built to solve — and have the judgment to reach for the right tool when the moment comes.</p>
+
+    <p style="color: var(--gold-light); font-family: 'Playfair Display', serif; font-style: italic; margin-top: 2rem;">The best investment you can make is in understanding the problem before you reach for a solution.</p>
   </div>
 </section>
 
 <footer>
-  <p>Data sourced from <a href="https://www.tiobe.com/tiobe-index/" target="_blank">TIOBE Index — February 2026</a>. Educational summary for classroom and self-study use.</p>
-  <p style="margin-top:.4rem">The TIOBE index is a trademark of TIOBE Software BV. This page is an independent educational interpretation.</p>
+  <p>DATA SOURCE: TIOBE INDEX · MARCH 2026 &nbsp;·&nbsp; WRITTEN IN THE SPIRIT OF MORGAN HOUSEL</p>
 </footer>
 
 <script>
-const langs=[
-  {rank:1,prev:1,name:"Python",color:"#3b82f6",share:21.81,yoy:2.08,yoyPos:false},
-  {rank:2,prev:4,name:"C",color:"#f97316",share:11.05,yoy:1.22,yoyPos:true},
-  {rank:3,prev:2,name:"C++",color:"#22c55e",share:8.55,yoy:2.82,yoyPos:false},
-  {rank:4,prev:3,name:"Java",color:"#a855f7",share:8.12,yoy:2.54,yoyPos:false},
-  {rank:5,prev:5,name:"C#",color:"#ec4899",share:6.83,yoy:2.71,yoyPos:true},
-  {rank:6,prev:6,name:"JavaScript",color:"#facc15",share:2.92,yoy:0.85,yoyPos:false},
-  {rank:7,prev:10,name:"Visual Basic",color:"#06b6d4",share:2.85,yoy:0.81,yoyPos:true},
-  {rank:8,prev:15,name:"R",color:"#10b981",share:2.19,yoy:1.14,yoyPos:true},
-  {rank:9,prev:7,name:"SQL",color:"#f43f5e",share:1.93,yoy:0.93,yoyPos:false},
-  {rank:10,prev:9,name:"Delphi/Object Pascal",color:"#8b5cf6",share:1.88,yoy:0.29,yoyPos:false},
-  {rank:11,prev:30,name:"Perl",color:"#f59e0b",share:1.67,yoy:1.19,yoyPos:true},
-  {rank:12,prev:11,name:"Fortran",color:"#6ee7b7",share:1.64,yoy:0.12,yoyPos:false},
-  {rank:13,prev:14,name:"PHP",color:"#818cf8",share:1.34,yoy:0.20,yoyPos:true},
-  {rank:14,prev:13,name:"Rust",color:"#fb923c",share:1.32,yoy:0.14,yoyPos:false},
-  {rank:15,prev:12,name:"Scratch",color:"#fde68a",share:1.30,yoy:0.25,yoyPos:false},
-  {rank:16,prev:8,name:"Go",color:"#67e8f9",share:1.23,yoy:1.03,yoyPos:false},
-  {rank:17,prev:24,name:"Ada",color:"#c084fc",share:1.14,yoy:0.43,yoyPos:true},
-  {rank:18,prev:16,name:"MATLAB",color:"#fca5a5",share:1.13,yoy:0.14,yoyPos:true},
-  {rank:19,prev:17,name:"Assembly Language",color:"#86efac",share:1.10,yoy:0.15,yoyPos:true},
-  {rank:20,prev:23,name:"Kotlin",color:"#a78bfa",share:1.05,yoy:0.29,yoyPos:true}
-];
-const mx=21.81,tb=document.getElementById('tb');
-langs.forEach(l=>{
-  const d=l.rank-l.prev;
-  const c=d<0?`<span class="cb up">&#9650; ${Math.abs(d)}</span>`:d>0?`<span class="cb dn">&#9660; ${Math.abs(d)}</span>`:`<span class="cb sm">&#8212;</span>`;
-  const rc=l.rank===1?'g':l.rank===2?'s':l.rank===3?'b':'';
-  const bw=(l.share/mx*100).toFixed(1);
-  const sg=l.yoyPos?'+':'-',yc=l.yoyPos?'yu':'yd';
-  const r=document.createElement('div');r.className='tr';
-  r.innerHTML=`<span class="rk ${rc}">${l.rank}</span><span>${c}</span><span class="ln"><span class="ld" style="background:${l.color}"></span>${l.name}</span><span class="rb"><span class="rbg"><span class="rbf" style="width:${bw}%;background:linear-gradient(90deg,${l.color},${l.color}88)"></span></span><span class="rv">${l.share}%</span></span><span class="yc ${yc}">${sg}${l.yoy}%</span>`;
-  tb.appendChild(r);
-});
+  // ─── BAR CHART DATA ───
+  const langs = [
+    { name: 'Python',       pct: 21.8, color: '#3776ab' },
+    { name: 'C++',          pct: 10.6, color: '#00599C' },
+    { name: 'C',            pct: 9.5,  color: '#555555' },
+    { name: 'Java',         pct: 8.8,  color: '#f89820' },
+    { name: 'C#',           pct: 6.7,  color: '#9b4f96' },
+    { name: 'JavaScript',   pct: 5.8,  color: '#f7df1e', textColor: '#111' },
+    { name: 'Go',           pct: 4.2,  color: '#00acd7' },
+    { name: 'SQL',          pct: 3.9,  color: '#e38c00' },
+    { name: 'Visual Basic', pct: 3.2,  color: '#945db7' },
+    { name: 'Fortran',      pct: 2.8,  color: '#734f96' },
+    { name: 'Delphi',       pct: 2.5,  color: '#b22222' },
+    { name: 'MATLAB',       pct: 2.3,  color: '#e16737' },
+    { name: 'PHP',          pct: 2.1,  color: '#8892be' },
+    { name: 'Swift',        pct: 1.9,  color: '#fa7343' },
+    { name: 'Rust',         pct: 1.8,  color: '#dea584' },
+    { name: 'R',            pct: 1.7,  color: '#276dc3' },
+    { name: 'Kotlin',       pct: 1.6,  color: '#7f52ff' },
+    { name: 'Ruby',         pct: 1.2,  color: '#cc342d' },
+    { name: 'Assembly',     pct: 1.1,  color: '#6e4c13' },
+    { name: 'Perl',         pct: 0.95, color: '#39457e' },
+  ];
+
+  const maxPct = langs[0].pct;
+  const chart = document.getElementById('barChart');
+  langs.forEach(l => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-name">${l.name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" data-pct="${(l.pct/maxPct)*100}" style="background:${l.color};width:0%"></div>
+      </div>
+      <div class="bar-val">${l.pct}%</div>
+    `;
+    chart.appendChild(row);
+  });
+
+  // ─── LANGUAGE CARDS DATA ───
+  const cards = [
+    { rank:1, icon:'🐍', name:'Python', born:'1991', tier:'tier-1',
+      tagline:'"I wanted a language I actually enjoyed using." — Guido van Rossum',
+      body:'Built as an antidote to complex, arcane languages, Python reads almost like English. That readability turned out to be its superpower. When the AI revolution needed a language anyone could pick up and experiment in, Python was waiting. Today it is the lingua franca of data science, machine learning, and rapid prototyping.',
+      users:['Data Scientists','ML Engineers','Researchers','Startups','Beginners'] },
+    { rank:2, icon:'⚙️', name:'C', born:'1972', tier:'tier-2',
+      tagline:'"We needed to write an OS. So we built the language to write it."',
+      body:"C is the bedrock. Linux, Windows, macOS — all written in C. The microcontroller in your car's ABS system runs C. The firmware in your router runs C. When you absolutely must control what the hardware does at every single step, C is the only honest answer.",
+      users:['Kernel Developers','Embedded Engineers','Firmware Teams','Hardware Manufacturers'] },
+    { rank:3, icon:'🔩', name:'C++', born:'1985', tier:'tier-2',
+      tagline:'"C is great — but I need objects too." — Bjarne Stroustrup',
+      body:'C++ is C with the ability to structure enormous codebases. The Unreal Engine that powers thousands of blockbuster games is C++. Chrome\'s rendering engine is C++. Every financial trading system that needs microsecond execution runs C++. It is complex and unforgiving, which is exactly why the people who need it, love it.',
+      users:['Game Developers','Browser Teams','HFT Systems','Adobe','Embedded Systems'] },
+    { rank:4, icon:'☕', name:'Java', born:'1995', tier:'tier-1',
+      tagline:'"Write once, run anywhere." — Sun Microsystems, 1995',
+      body:"The internet was fragmenting across incompatible operating systems. Java's virtual machine let one codebase run on any platform. Banks, insurance companies, and enterprises adopted it for exactly that reason — and then never left. 3 billion Android devices run Java. Legacy bank systems written in 2001 still run it today without a single change.",
+      users:['Android Developers','Enterprise Teams','Banks','Amazon','LinkedIn'] },
+    { rank:5, icon:'🔷', name:'C#', born:'2000', tier:'tier-1',
+      tagline:"Microsoft's answer to Java — and TIOBE's Language of the Year 2025",
+      body:"Microsoft built C# for the .NET ecosystem: cleaner than Java, deeply integrated with Windows, and the primary language for Unity game development. If you have ever played an indie game on Steam, there is a high probability it was written in C#. TIOBE named it language of the year in 2025 for its remarkable growth.",
+      users:['Unity Game Devs','Enterprise Devs','Azure Teams','Healthcare IT'] },
+    { rank:6, icon:'🌐', name:'JavaScript', born:'1995', tier:'tier-1',
+      tagline:'"Built in 10 days. Still running the entire web." — Brendan Eich',
+      body:"The only language that runs natively in every web browser on Earth. There was no alternative, so developers adapted — and then thrived. With Node.js, it conquered the server too. Entire companies (GitHub, Airbnb, LinkedIn) run on JavaScript from front to back. It is not a perfect language; it is a universal one.",
+      users:['Front-end Developers','Full-stack Devs','Node.js Teams','Every Web Company'] },
+    { rank:7, icon:'🐹', name:'Go', born:'2009', tier:'tier-3',
+      tagline:'"We were frustrated by C++ build times and Java verbosity." — Google',
+      body:"Google engineers were fighting slow build times and bloated code. Go was their solution: compiled like C, readable like Python, built for multi-core processors from the start. Docker and Kubernetes — the tools that power modern cloud infrastructure — are written in Go. If code is running in the cloud, Go is probably nearby.",
+      users:['DevOps Engineers','Platform Teams','Cloudflare','Dropbox','Uber'] },
+    { rank:8, icon:'🗄️', name:'SQL', born:'1974', tier:'tier-1',
+      tagline:'"Let non-programmers ask questions of data." — IBM, 1974',
+      body:"SQL was designed so that scientists, not just engineers, could query data. It is the only language on this list that never tried to be a programming language — and that restraint made it immortal. Every time Amazon shows you your order history, SQL ran. Every medical record retrieval, every bank transaction, every analytics dashboard.",
+      users:['Data Analysts','Data Engineers','Back-end Devs','Business Intelligence','Every Company'] },
+    { rank:9, icon:'📊', name:'Visual Basic', born:'1991', tier:'tier-4',
+      tagline:'"Making Windows programming accessible to everyone."',
+      body:"VBA lives in every corporate Excel file ever written. The accountant automating month-end reports, the HR team building a custom employee tracker, the small business managing inventory — all of them, probably using VBA. Developers sneer at it. Businesses depend on it. That tension is a feature of technology, not a bug.",
+      users:['Accountants','Business Analysts','Excel Power Users','Legacy App Teams'] },
+    { rank:10, icon:'🌲', name:'Fortran', born:'1957', tier:'tier-3',
+      tagline:'"The first language that let scientists stop thinking like machines."',
+      body:'Fortran is 68 years old and still running. The Global Forecast System — which predicts tomorrow\'s weather for the entire planet — runs on Fortran code. Climate models that simulate ocean currents use it. Quantum chemistry simulations use it. When raw numerical computation is the task, nothing has ever matched Fortran\'s performance per line of code.',
+      users:['NASA Engineers','Climate Scientists','Physicists','National Labs'] },
+    { rank:11, icon:'📈', name:'R', born:'1993', tier:'tier-3',
+      tagline:'"A language for people who think in statistics." — Ross Ihaka',
+      body:"R does not try to be a general language. It tries to be the best statistical tool ever built — and largely succeeds. The COVID pandemic modelling that shaped global policy was done primarily in R. Clinical trials at Pfizer and Moderna were analyzed in R. Academic papers across economics, epidemiology, and ecology run on it.",
+      users:['Biostatisticians','Economists','Academic Researchers','Pharma Companies','Epidemiologists'] },
+    { rank:12, icon:'🐪', name:'Perl', born:'1987', tier:'tier-4',
+      tagline:'"The Swiss Army chainsaw of text processing." — Larry Wall',
+      body:"Larry Wall needed to generate reports from log files. He wrote Perl in an afternoon, and a million sysadmins' lives changed. The BLAST algorithm that powers gene sequence searching in biology? Perl. The legacy web backends of every large institution built before 2005? Often Perl. It's not coming back — but it never fully left either.",
+      users:['Sysadmins','Bioinformaticians','Legacy Web Teams'] },
+    { rank:13, icon:'🐘', name:'PHP', born:'1994', tier:'tier-4',
+      tagline:'"It was never meant to be a language. It just became one." — Rasmus Lerdorf',
+      body:"PHP powers WordPress, which runs 43% of every website on the internet. Wikipedia runs PHP. Facebook started on PHP. It is perhaps the most accidentally successful language ever built. Its reputation among engineers is unkind; its contribution to the web is undeniable.",
+      users:['WordPress Developers','CMS Teams','Legacy Web Apps','Independent Bloggers'] },
+    { rank:14, icon:'🍎', name:'Swift', born:'2014', tier:'tier-1',
+      tagline:'"We needed something modern. Objective-C was not it." — Apple, 2014',
+      body:"Apple looked at Objective-C — clunky, verbose, dated — and decided to start over. Swift is the result: safe, fast, expressive, and designed for humans. Every iPhone app, every Mac app, every Apple Watch app going forward is written in Swift. With 1 billion active iPhones, the commercial weight of this language is extraordinary.",
+      users:['iOS Developers','Mac Developers','watchOS Devs','Apple'] },
+    { rank:15, icon:'🦀', name:'Rust', born:'2010', tier:'tier-3',
+      tagline:'"All of C\'s speed. None of its memory bugs." — Mozilla',
+      body:"The most admired language among developers nine years running. Rust guarantees at compile time that you cannot create certain classes of memory bugs — the bugs that have caused countless security vulnerabilities in C and C++ code. The Linux kernel now accepts Rust. Microsoft is rewriting Windows components in it. The US government recommends it.",
+      users:['Systems Programmers','Security Engineers','WebAssembly Devs','Mozilla','AWS'] },
+    { rank:16, icon:'🔬', name:'MATLAB', born:'1984', tier:'tier-3',
+      tagline:'"A calculator that thinks." — Cleve Moler',
+      body:"MATLAB is where engineers test ideas before committing them to production code. Boeing tests aerodynamics in MATLAB. Signal processing engineers design filters in it. Control systems for industrial robots are prototyped in it. Universities require it in every engineering curriculum. It is expensive, proprietary — and absolutely indispensable in its domain.",
+      users:['Aerospace Engineers','Signal Processing','Control Systems','University Research'] },
+    { rank:17, icon:'🤖', name:'Kotlin', born:'2011', tier:'tier-1',
+      tagline:'"Java, but the version you actually want to write." — JetBrains',
+      body:"JetBrains built the tools that Java developers used every day. They knew exactly what annoyed them about Java. Kotlin fixes those things while staying fully compatible with every existing Java library. Google made it the preferred Android language in 2019. 80% of its developers use it for Android. The other 20% use it for back-end services.",
+      users:['Android Developers','Back-end Teams','SDK Builders','JetBrains Users'] },
+    { rank:18, icon:'💻', name:'Assembly', born:'1940s', tier:'tier-4',
+      tagline:'"When you need to speak to the machine directly."',
+      body:"Assembly is not popular. It is necessary. Every CPU boots in assembly. Every piece of malware that exploits hardware vulnerabilities is analyzed in assembly. Cryptographers write performance-critical routines in it. Speedrunners who exploit exact CPU behavior study it. It is the floor beneath every other language on this list.",
+      users:['Firmware Engineers','Security Researchers','Malware Analysts','Chip Designers'] },
+    { rank:19, icon:'💎', name:'Ruby', born:'1995', tier:'tier-4',
+      tagline:'"Designed for programmer happiness, above all else." — Matz',
+      body:"Yukihiro Matsumoto made a conscious choice: optimize for the developer, not the machine. Ruby on Rails made web development faster than anyone thought possible. GitHub, Shopify, Basecamp, and Airbnb were all built on Rails. Ruby has lost ground to Python and JavaScript — but the developers who use it are fiercely loyal, because writing it is genuinely pleasant.",
+      users:['Web Developers','Shopify Devs','Startups','GitHub Team'] },
+    { rank:20, icon:'🧩', name:'Delphi/Pascal', born:'1970/1995', tier:'tier-4',
+      tagline:'"The language hiding inside every insurance company."',
+      body:"Delphi never got fashionable. It got practical. Hospitals, insurance firms, government agencies, and small businesses built Windows applications in Delphi throughout the 1990s and 2000s. Those applications still run. They still matter. Delphi's continued presence in the TIOBE top 20 is a quiet testament to the longevity of software that just works.",
+      users:['Legacy Enterprise Apps','Healthcare IT','Insurance Systems','Government Software'] },
+  ];
+
+  const grid = document.getElementById('cardsGrid');
+  cards.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = `lang-card ${c.tier}`;
+    el.style.transitionDelay = `${(i % 3) * 0.1}s`;
+    el.innerHTML = `
+      <div class="card-rank">${c.rank}</div>
+      <div class="card-header">
+        <div class="card-icon">${c.icon}</div>
+        <div>
+          <div class="card-title">${c.name}</div>
+          <div class="card-birth">Born ${c.born}</div>
+        </div>
+      </div>
+      <div class="card-tagline">${c.tagline}</div>
+      <div class="card-body">${c.body}</div>
+      <div class="card-users">
+        ${c.users.map(u => `<span class="user-tag">${u}</span>`).join('')}
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+
+  // ─── INTERSECTION OBSERVER ───
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        // animate bar fills
+        if (e.target.id === 'barChart' || e.target.closest('#barChart')) {
+          document.querySelectorAll('.bar-fill').forEach(b => {
+            b.style.width = b.dataset.pct + '%';
+          });
+        }
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal, .lang-card').forEach(el => io.observe(el));
+  io.observe(document.getElementById('barChart'));
 </script>
 </body>
 </html>
