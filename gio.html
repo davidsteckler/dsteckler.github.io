@@ -4,910 +4,1260 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cursive Quest Font Picker</title>
+  <title>Cursive Quest</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
   <style>
-    :root{
-      --bg:#0b1020;
-      --panel:#121a33;
-      --panel2:#172246;
-      --text:#f5f7fb;
-      --muted:#a8b2d4;
-      --line:#2e3f77;
-      --accent:#7dd3fc;
-      --accent2:#a78bfa;
-      --good:#34d399;
-      --warn:#fbbf24;
-      --bad:#fb7185;
+    :root {
+      --ink: #1a1208;
+      --paper: #fdf8f0;
+      --paper2: #f5ede0;
+      --paper3: #ede0cc;
+      --amber: #c8832a;
+      --amber-light: #e8a84a;
+      --amber-glow: rgba(200,131,42,0.15);
+      --green: #2d7a4a;
+      --green-glow: rgba(45,122,74,0.2);
+      --red: #c0392b;
+      --red-glow: rgba(192,57,43,0.15);
+      --purple: #7c4d9e;
+      --line: rgba(26,18,8,0.12);
+      --line-dark: rgba(26,18,8,0.25);
+      --shadow: rgba(26,18,8,0.15);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:
-        radial-gradient(circle at top, rgba(125,211,252,.12), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(167,139,250,.12), transparent 25%),
-        var(--bg);
-      color:var(--text);
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
     }
-    .app{max-width:1320px;margin:0 auto;padding:20px;display:grid;gap:18px}
-    .hero,.layout{display:grid;gap:18px}
-    .hero{grid-template-columns:1.15fr .85fr}
-    .layout{grid-template-columns:360px minmax(0,1fr)}
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:24px;
-      box-shadow:0 20px 50px rgba(0,0,0,.22);
+
+    /* — HEADER — */
+    .header {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 3px solid var(--amber);
     }
-    .pad{padding:20px}
-    .eyebrow{display:inline-block;padding:8px 12px;border-radius:999px;background:rgba(125,211,252,.12);color:var(--accent);font-weight:800;font-size:13px;margin-bottom:12px}
-    h1{margin:0 0 10px;font-size:clamp(34px, 5vw, 60px);line-height:.95;letter-spacing:-.04em}
-    .sub{color:var(--muted);font-size:18px;line-height:1.45}
-    .mini{display:grid;gap:10px}
-    .mini-item{padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
-    .mini-item strong{display:block;margin-bottom:6px}
-    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-    button,input,select{font:inherit}
-    .tab,.btn,.alpha-btn{
-      border:none;border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--text);
-      background:#1a2445;font-weight:800;
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .tab.active,.alpha-btn.active,.tab:hover{background:linear-gradient(180deg, rgba(125,211,252,.22), rgba(167,139,250,.16));outline:1px solid rgba(125,211,252,.2)}
-    .btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#08111f}
-    .btn.ghost{background:#192445}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
-    .sidebar .section-title{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 10px}
-    .lesson-box,.info-box,.font-box{background:#10182f;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px}
-    .focus{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:10px}
-    .focus .big{font-size:64px;font-weight:900;color:var(--accent);line-height:.8}
-    .focus .tag{font-size:13px;color:var(--muted);background:rgba(255,255,255,.05);border-radius:999px;padding:8px 10px}
-    .hint{color:var(--muted);font-size:14px;line-height:1.45}
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-    .progress-meta{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--muted);margin:14px 0 10px}
-    .bar{height:14px;border-radius:999px;background:#0f1730;border:1px solid rgba(255,255,255,.06);overflow:hidden}
-    .bar > div{height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--accent),var(--accent2));transition:width .2s ease}
-    .alpha-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
-    .alpha-btn.done{box-shadow:inset 0 0 0 1px rgba(52,211,153,.28);color:#b5f6de}
-    .name-box,.font-box{display:grid;gap:10px}
-    .name-box input,.font-box select{width:100%;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:#0d1730;color:var(--text)}
-    .board-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
-    .board-title{font-size:28px;font-weight:900;letter-spacing:-.03em;margin:0 0 4px}
-    .board-copy{font-size:14px;color:var(--muted)}
-    .score{display:flex;gap:10px;flex-wrap:wrap}
-    .chip{background:#121c38;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 12px;min-width:120px}
-    .chip .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
-    .chip .v{font-size:24px;font-weight:900}
-    .canvas-frame{background:#0c1429;border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:18px}
-    .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-    .legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
-    .legend span{display:inline-flex;align-items:center;gap:8px}
-    .sw{width:14px;height:14px;border-radius:999px;display:inline-block}
-    .stage-wrap{
-      position:relative;
-      width:100%;
-      aspect-ratio:16/9;
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.08);
-      background:
-        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(125,211,252,.06), rgba(167,139,250,.05));
-      background-size:40px 40px,40px 40px,100% 100%;
+    .logo span { color: var(--amber-light); }
+    .header-score {
+      display: flex;
+      gap: 16px;
     }
-    .guide-svg,.trace-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-    .trace-canvas{touch-action:none;cursor:crosshair}
-    .preview-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end;margin-bottom:10px}
-    .font-preview{padding:14px 16px;border-radius:18px;background:#101831;border:1px solid rgba(255,255,255,.06);min-height:78px;display:flex;align-items:center;font-size:36px;color:#eef3ff;overflow:hidden;white-space:nowrap}
-    .font-meta{font-size:13px;color:var(--muted)}
-    .pill{display:inline-flex;align-items:center;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-size:12px;color:var(--muted)}
-    .status{margin-top:12px;padding:14px 16px;border-radius:16px;background:#12213e;border:1px solid rgba(255,255,255,.06);font-weight:800}
-    .status.good{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.2);color:#b7f4dc}
-    .status.warn{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.2);color:#fde8ac}
-    .status.bad{background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.2);color:#ffd0da}
-    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
-    .step{background:#101831;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px}
-    .step .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-    .step .v{font-weight:800;line-height:1.35}
-    .tiny{color:var(--muted);font-size:13px;line-height:1.5;margin-top:12px}
-    .loading{color:#fde8ac}
-    .success{color:#b7f4dc}
-    @media (max-width:980px){.hero,.layout{grid-template-columns:1fr}}
-    @media (max-width:720px){
-      .app{padding:14px}
-      .tabs,.actions,.steps{grid-template-columns:1fr}
-      .alpha-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
-      .preview-row{grid-template-columns:1fr}
-      .font-preview{font-size:28px;white-space:normal}
+    .score-chip {
+      text-align: center;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 8px 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .score-chip .label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+    .score-chip .val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--amber-light); }
+
+    /* — LAYOUT — */
+    .app { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 63px); }
+
+    /* — SIDEBAR — */
+    .sidebar {
+      background: var(--paper2);
+      border-right: 2px solid var(--line-dark);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+    }
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* Tabs */
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--paper3); border-radius: 10px; padding: 4px; }
+    .tab {
+      padding: 9px 6px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      color: rgba(26,18,8,0.5);
+      transition: all 0.15s;
+    }
+    .tab.active { background: var(--ink); color: var(--paper); }
+    .tab:not(.active):hover { background: rgba(26,18,8,0.08); color: var(--ink); }
+
+    /* Font selector */
+    .font-select-wrap select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--line-dark);
+      border-radius: 10px;
+      background: var(--paper);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231a1208' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .font-status { font-size: 12px; color: var(--amber); margin-top: 6px; font-style: italic; }
+
+    /* Current letter focus */
+    .letter-focus {
+      background: var(--ink);
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--paper);
+      text-align: center;
+    }
+    .letter-display {
+      font-size: 90px;
+      line-height: 1;
+      color: var(--amber-light);
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    .letter-name { font-size: 13px; opacity: 0.6; margin-bottom: 14px; }
+    .letter-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 9px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-amber { background: var(--amber); color: white; }
+    .btn-amber:hover { background: var(--amber-light); }
+    .btn-ghost { background: rgba(255,255,255,0.1); color: var(--paper); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.2); }
+    .btn-full { grid-column: 1/-1; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Instructions panel */
+    .instructions-panel {
+      background: var(--paper);
+      border: 2px solid var(--line-dark);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .instr-step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .instr-step:last-child { margin-bottom: 0; }
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-num.green { background: var(--green); color: white; }
+    .step-num.amber { background: var(--amber); color: white; }
+    .step-num.purple { background: var(--purple); color: white; }
+    .step-text { font-size: 13px; line-height: 1.45; }
+    .step-text strong { display: block; font-weight: 700; margin-bottom: 2px; }
+    .step-text span { color: rgba(26,18,8,0.6); font-size: 12px; }
+
+    /* Progress */
+    .progress-row { display: flex; justify-content: space-between; font-size: 12px; color: rgba(26,18,8,0.6); margin-bottom: 6px; }
+    .progress-bar { height: 10px; background: var(--paper3); border-radius: 999px; overflow: hidden; border: 1px solid var(--line-dark); }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--amber)); border-radius: 999px; transition: width 0.4s ease; }
+
+    /* Alphabet grid */
+    .alpha-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+    .alpha-btn {
+      aspect-ratio: 1;
+      border: 2px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--ink);
+      transition: all 0.15s;
+    }
+    .alpha-btn:hover { border-color: var(--amber); background: var(--amber-glow); }
+    .alpha-btn.active { background: var(--ink); color: var(--amber-light); border-color: var(--ink); }
+    .alpha-btn.mastered { background: var(--green-glow); border-color: var(--green); color: var(--green); }
+    .alpha-btn.mastered.active { background: var(--green); color: white; }
+
+    /* Name mode */
+    .name-input-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .name-input {
+      padding: 12px 14px;
+      border: 2px solid var(--line-dark);
+      border-radius: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      background: var(--paper);
+      color: var(--ink);
+      width: 100%;
+    }
+    .name-input:focus { outline: none; border-color: var(--amber); }
+
+    /* — MAIN CANVAS AREA — */
+    .main {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 14px;
+      background: var(--paper);
+    }
+    .canvas-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .canvas-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; }
+    .canvas-subtitle { font-size: 13px; color: rgba(26,18,8,0.55); margin-top: 2px; }
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    /* Canvas stage */
+    .stage-wrapper {
+      position: relative;
+      background: #fffdf7;
+      border: 2px solid var(--line-dark);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 12px rgba(26,18,8,0.05), 0 4px 24px var(--shadow);
+      flex: 1;
+      min-height: 380px;
+    }
+    /* Ruled lines behind canvas */
+    .ruled-lines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .guide-svg, .trace-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .trace-canvas {
+      touch-action: none;
+      cursor: crosshair;
+      z-index: 10;
+    }
+
+    /* Stroke order overlay */
+    .stroke-order-panel {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .stroke-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--paper2);
+      border: 1px solid var(--line-dark);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .stroke-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+    .stroke-badge.done .dot { background: var(--green); }
+    .stroke-badge.active { border-color: var(--amber); background: var(--amber-glow); }
+
+    /* Status bar */
+    .status-bar {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .status-bar.ready { background: var(--paper2); border-color: var(--line); color: rgba(26,18,8,0.7); }
+    .status-bar.good { background: var(--green-glow); border-color: rgba(45,122,74,0.4); color: var(--green); }
+    .status-bar.warn { background: var(--amber-glow); border-color: rgba(200,131,42,0.35); color: #8a5a14; }
+    .status-bar.error { background: var(--red-glow); border-color: rgba(192,57,43,0.35); color: var(--red); }
+
+    /* Canvas action bar */
+    .canvas-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-ink { background: var(--ink); color: var(--paper); }
+    .btn-ink:hover { background: rgba(26,18,8,0.85); }
+    .btn-outline { background: transparent; color: var(--ink); border: 2px solid var(--line-dark); }
+    .btn-outline:hover { border-color: var(--amber); background: var(--amber-glow); }
+
+    /* Accuracy meter */
+    .accuracy-row { display: flex; gap: 10px; align-items: center; }
+    .acc-label { font-size: 12px; color: rgba(26,18,8,0.55); white-space: nowrap; }
+    .acc-bar { flex: 1; height: 8px; background: var(--paper3); border-radius: 999px; overflow: hidden; }
+    .acc-fill { height: 100%; background: var(--green); border-radius: 999px; transition: width 0.3s; width: 0%; }
+
+    @media (max-width: 800px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 2px solid var(--line-dark); }
+      .header-score { display: none; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
 </head>
 <body>
-  <div class="app">
-    <section class="hero">
-      <div class="card pad">
-        <div class="eyebrow">✍️ Cursive Quest</div>
-        <h1>Trace it with the script style you want.</h1>
-        <div class="sub">This version adds real script font choices so students can practice the same word in different cursive styles. The tracing layer is still separate from the guide so finger, stylus, and mouse input stay reliable.</div>
-      </div>
-      <div class="card pad">
-        <div class="mini">
-          <div class="mini-item"><strong>1. Pick a style</strong><span class="hint">Try different free script fonts that feel closer to the look you want.</span></div>
-          <div class="mini-item"><strong>2. Start on the green dot</strong><span class="hint">Each path begins with a visible pen location and order number.</span></div>
-          <div class="mini-item"><strong>3. Trace a real name</strong><span class="hint">Type a name and rebuild the guide in the chosen script.</span></div>
-        </div>
-      </div>
-    </section>
 
-    <section class="layout">
-      <aside class="card pad sidebar">
-        <div class="tabs">
-          <button class="tab active" data-mode="learn">Learn</button>
-          <button class="tab" data-mode="challenge">Challenge</button>
-          <button class="tab" data-mode="name">Write a Name</button>
-        </div>
-
-        <div class="font-box">
-          <div class="section-title" style="margin-top:0">Script style</div>
-          <select id="fontSelect"></select>
-          <div class="font-meta" id="fontLoadInfo">Loading font…</div>
-        </div>
-
-        <div class="lesson-box">
-          <div class="focus">
-            <div class="big" id="focusLetter">a</div>
-            <div class="tag" id="focusTag">Letter 1 of 26</div>
-          </div>
-          <div class="hint" id="lessonHint">Start on the green dot. Stay near the path. Finish each stroke in order.</div>
-          <div class="actions">
-            <button class="btn primary" id="prevBtn">Previous</button>
-            <button class="btn primary" id="nextBtn">Next</button>
-            <button class="btn ghost" id="clearBtn">Clear trace</button>
-            <button class="btn ghost" id="demoBtn">Show demo</button>
-          </div>
-        </div>
-
-        <div class="progress-meta">
-          <span id="progressText">0 of 26 letters mastered</span>
-          <span id="accuracyText">Accuracy 0%</span>
-        </div>
-        <div class="bar"><div id="progressFill"></div></div>
-
-        <div id="alphabetSection">
-          <div class="section-title">Alphabet</div>
-          <div class="alpha-grid" id="alphaGrid"></div>
-        </div>
-
-        <div id="nameSection" style="display:none">
-          <div class="section-title">Type a name</div>
-          <div class="name-box">
-            <input id="nameInput" maxlength="18" value="david" />
-            <button class="btn primary" id="buildNameBtn">Build word</button>
-          </div>
-        </div>
-
-        <div class="section-title">What changed</div>
-        <div class="info-box">
-          <div class="hint">I could not bundle the exact paid fonts from your screenshot. Instead I added a set of free script fonts in that same spirit so you can switch styles inside the app.</div>
-        </div>
-      </aside>
-
-      <main class="card pad">
-        <div class="preview-row">
-          <div>
-            <div class="font-preview" id="fontPreview">Sparkling Valentine</div>
-            <div class="tiny" id="previewCaption">Previewing the current script style.</div>
-          </div>
-          <div class="pill" id="fontPill">Style</div>
-        </div>
-
-        <div class="board-top">
-          <div>
-            <div class="board-title" id="boardTitle">Trace the letter a</div>
-            <div class="board-copy" id="boardCopy">Green means start. Yellow is the guide path. Purple is your live trace.</div>
-          </div>
-          <div class="score">
-            <div class="chip"><div class="k">Current Stroke</div><div class="v" id="strokeCounter">1 / 1</div></div>
-            <div class="chip"><div class="k">Score</div><div class="v" id="scoreValue">0</div></div>
-            <div class="chip"><div class="k">Mastered</div><div class="v" id="masteredValue">0</div></div>
-          </div>
-        </div>
-
-        <div class="canvas-frame">
-          <div class="toolbar">
-            <div class="legend">
-              <span><i class="sw" style="background:var(--good)"></i> Start point</span>
-              <span><i class="sw" style="background:var(--warn)"></i> Guide path</span>
-              <span><i class="sw" style="background:var(--accent2)"></i> Student trace</span>
-            </div>
-            <div>
-              <button class="btn ghost" id="toggleHelpersBtn">Hide helpers</button>
-            </div>
-          </div>
-
-          <div class="stage-wrap" id="stageWrap">
-            <svg class="guide-svg" id="guideSvg" viewBox="0 0 960 540" preserveAspectRatio="xMidYMid meet">
-              <defs>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
-                  <feMerge>
-                    <feMergeNode in="blur"></feMergeNode>
-                    <feMergeNode in="SourceGraphic"></feMergeNode>
-                  </feMerge>
-                </filter>
-                <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"></path>
-                </marker>
-              </defs>
-              <g id="guideLayer"></g>
-              <g id="helperLayer"></g>
-            </svg>
-            <canvas class="trace-canvas" id="traceCanvas" width="960" height="540"></canvas>
-          </div>
-
-          <div class="steps">
-            <div class="step"><div class="k">Step 1</div><div class="v" id="stepOne">Place the pen on the green dot.</div></div>
-            <div class="step"><div class="k">Step 2</div><div class="v" id="stepTwo">Move along the yellow path.</div></div>
-            <div class="step"><div class="k">Step 3</div><div class="v" id="stepThree">Finish every stroke to unlock the next letter.</div></div>
-          </div>
-
-          <div class="status warn" id="statusBox">Ready. Start on the green dot.</div>
-          <div class="tiny">Font based tracing needs internet the first time so the script files can load. If that fails, the app falls back to the built in tracing shapes.</div>
-        </div>
-      </main>
-    </section>
+<header class="header">
+  <div class="logo">✒️ Cursive <span>Quest</span></div>
+  <div class="header-score">
+    <div class="score-chip">
+      <div class="label">Score</div>
+      <div class="val" id="hScore">0</div>
+    </div>
+    <div class="score-chip">
+      <div class="label">Mastered</div>
+      <div class="val" id="hMastered">0/26</div>
+    </div>
+    <div class="score-chip">
+      <div class="label">Accuracy</div>
+      <div class="val" id="hAccuracy">—</div>
+    </div>
   </div>
+</header>
 
-  <script>
-    const FONT_OPTIONS = {
-      allura: {
-        label: 'Allura',
-        family: 'Allura Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/allura/Allura-Regular.ttf'
-      },
-      alexbrush: {
-        label: 'Alex Brush',
-        family: 'Alex Brush Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/alexbrush/AlexBrush-Regular.ttf'
-      },
-      sacramento: {
-        label: 'Sacramento',
-        family: 'Sacramento Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/sacramento/Sacramento-Regular.ttf'
-      },
-      greatvibes: {
-        label: 'Great Vibes',
-        family: 'Great Vibes Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/greatvibes/GreatVibes-Regular.ttf'
-      },
-      pinyon: {
-        label: 'Pinyon Script',
-        family: 'Pinyon Script Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/pinyonscript/PinyonScript-Regular.ttf'
-      },
-      yellowtail: {
-        label: 'Yellowtail',
-        family: 'Yellowtail Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/yellowtail/Yellowtail-Regular.ttf'
-      },
-      petitformal: {
-        label: 'Petit Formal Script',
-        family: 'Petit Formal Script Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/petitformalscript/PetitFormalScript-Regular.ttf'
-      },
-      italianno: {
-        label: 'Italianno',
-        family: 'Italianno Custom',
-        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/italianno/Italianno-Regular.ttf'
-      }
-    };
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
 
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
-    const guideLayer = document.getElementById('guideLayer');
-    const helperLayer = document.getElementById('helperLayer');
-    const traceCanvas = document.getElementById('traceCanvas');
-    const ctx = traceCanvas.getContext('2d');
+    <div>
+      <div class="section-label">Mode</div>
+      <div class="tabs">
+        <button class="tab active" data-mode="learn">Learn</button>
+        <button class="tab" data-mode="challenge">Challenge</button>
+        <button class="tab" data-mode="name">Name</button>
+      </div>
+    </div>
 
-    const state = {
-      mode: 'learn',
-      currentLetterIndex: 0,
-      currentLetter: 'a',
-      showHelpers: true,
-      scene: null,
-      pointerDown: false,
-      currentStrokeIndex: 0,
-      lastPoint: null,
-      totalSamples: 0,
-      goodSamples: 0,
-      score: 0,
-      mastered: new Set(),
-      demoPlaying: false,
-      selectedFontKey: 'allura',
-      fontsLoaded: {},
-      fontLoading: false,
-      usingFallback: false
-    };
+    <div>
+      <div class="section-label">Script Style</div>
+      <div class="font-select-wrap">
+        <select id="fontSelect"></select>
+      </div>
+      <div class="font-status" id="fontStatus">Loading font…</div>
+    </div>
 
-    const ui = {
-      focusLetter: document.getElementById('focusLetter'),
-      focusTag: document.getElementById('focusTag'),
-      lessonHint: document.getElementById('lessonHint'),
-      boardTitle: document.getElementById('boardTitle'),
-      boardCopy: document.getElementById('boardCopy'),
-      strokeCounter: document.getElementById('strokeCounter'),
-      progressText: document.getElementById('progressText'),
-      progressFill: document.getElementById('progressFill'),
-      accuracyText: document.getElementById('accuracyText'),
-      scoreValue: document.getElementById('scoreValue'),
-      masteredValue: document.getElementById('masteredValue'),
-      statusBox: document.getElementById('statusBox'),
-      alphaGrid: document.getElementById('alphaGrid'),
-      nameInput: document.getElementById('nameInput'),
-      nameSection: document.getElementById('nameSection'),
-      alphabetSection: document.getElementById('alphabetSection'),
-      toggleHelpersBtn: document.getElementById('toggleHelpersBtn'),
-      stepOne: document.getElementById('stepOne'),
-      stepTwo: document.getElementById('stepTwo'),
-      stepThree: document.getElementById('stepThree'),
-      fontSelect: document.getElementById('fontSelect'),
-      fontLoadInfo: document.getElementById('fontLoadInfo'),
-      fontPreview: document.getElementById('fontPreview'),
-      previewCaption: document.getElementById('previewCaption'),
-      fontPill: document.getElementById('fontPill')
-    };
+    <div class="letter-focus" id="letterFocus">
+      <div class="letter-display" id="letterDisplay">a</div>
+      <div class="letter-name" id="letterName">Lowercase A · Letter 1 of 26</div>
+      <div class="letter-nav">
+        <button class="btn btn-ghost" id="prevBtn">← Prev</button>
+        <button class="btn btn-ghost" id="nextBtn">Next →</button>
+        <button class="btn btn-amber btn-full" id="clearBtn">Clear & Retry</button>
+        <button class="btn btn-ghost btn-full" id="demoBtn">▶ Watch Demo</button>
+      </div>
+    </div>
 
-    function pt(x, y){ return {x, y}; }
+    <!-- HOW TO TRACE — always visible, updates by mode -->
+    <div class="instructions-panel">
+      <div class="section-label" style="margin-bottom:12px">How to Trace</div>
+      <div class="instr-step">
+        <div class="step-num green">1</div>
+        <div class="step-text">
+          <strong>Find the green dot</strong>
+          <span id="instr1">That's where your pen starts. Each stroke has its own numbered green dot.</span>
+        </div>
+      </div>
+      <div class="instr-step">
+        <div class="step-num amber">2</div>
+        <div class="step-text">
+          <strong>Follow the gold path</strong>
+          <span id="instr2">Keep your pen within the glowing yellow guide. Arrows show which direction to move.</span>
+        </div>
+      </div>
+      <div class="instr-step">
+        <div class="step-num purple">3</div>
+        <div class="step-text">
+          <strong>Lift after each stroke</strong>
+          <span id="instr3">When you reach the end of a stroke, lift your pen. The next green dot will unlock.</span>
+        </div>
+      </div>
+    </div>
 
-    function pathFromPoints(points){
-      if (!points || !points.length) return '';
-      if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
-      let d = `M ${points[0].x} ${points[0].y}`;
-      for (let i = 1; i < points.length - 1; i++){
-        const xc = (points[i].x + points[i + 1].x) / 2;
-        const yc = (points[i].y + points[i + 1].y) / 2;
-        d += ` Q ${points[i].x} ${points[i].y} ${xc} ${yc}`;
-      }
-      const last = points[points.length - 1];
-      const prev = points[points.length - 2];
-      d += ` Q ${prev.x} ${prev.y} ${last.x} ${last.y}`;
-      return d;
-    }
+    <!-- NAME MODE input (hidden normally) -->
+    <div id="nameSection" style="display:none">
+      <div class="section-label">Type a Name or Word</div>
+      <div class="name-input-wrap">
+        <input class="name-input" id="nameInput" maxlength="16" value="hello" placeholder="e.g. david" />
+        <button class="btn btn-amber" id="buildNameBtn">Build Tracing Guide →</button>
+      </div>
+    </div>
 
-    function scalePoints(points, ox, oy, scaleX = 1, scaleY = 1){
-      return points.map(p => pt(ox + p.x * scaleX, oy + p.y * scaleY));
-    }
+    <!-- ALPHABET (hidden in name mode) -->
+    <div id="alphaSection">
+      <div class="section-label">Alphabet</div>
+      <div class="alpha-grid" id="alphaGrid"></div>
+    </div>
 
-    function letterStrokeData(letter){
-      const map = {
-        a: {w:58, strokes:[[pt(0,80), pt(10,56), pt(24,48), pt(40,54), pt(44,78), pt(36,94), pt(18,92), pt(8,80), pt(16,64), pt(33,64), pt(46,80), pt(58,80)]]},
-        b: {w:60, strokes:[[pt(0,80), pt(4,58), pt(8,28), pt(18,16), pt(24,30), pt(18,54), pt(10,80), pt(20,66), pt(34,56), pt(48,60), pt(50,80), pt(38,94), pt(20,90), pt(8,80), pt(58,80)]]},
-        c: {w:52, strokes:[[pt(48,60), pt(38,50), pt(20,50), pt(8,64), pt(8,82), pt(20,94), pt(40,92), pt(50,82)]]},
-        d: {w:62, strokes:[[pt(0,80), pt(10,58), pt(24,50), pt(40,56), pt(42,78), pt(34,94), pt(16,92), pt(6,80), pt(16,66), pt(34,64), pt(46,80), pt(52,58), pt(50,26), pt(42,14), pt(34,24), pt(38,48), pt(54,80), pt(62,80)]]},
-        e: {w:48, strokes:[[pt(8,74), pt(18,58), pt(36,58), pt(42,70), pt(30,78), pt(16,78), pt(10,74), pt(16,88), pt(34,92), pt(46,82)]]},
-        f: {w:48, strokes:[[pt(34,12), pt(18,18), pt(12,44), pt(16,70), pt(28,94), pt(38,116)],[pt(2,50), pt(36,50)]]},
-        g: {w:58, strokes:[[pt(0,80), pt(10,58), pt(26,50), pt(42,58), pt(44,80), pt(34,96), pt(16,92), pt(6,80), pt(18,64), pt(34,64), pt(46,80), pt(44,104), pt(34,118), pt(18,116), pt(8,104)]]},
-        h: {w:60, strokes:[[pt(0,80), pt(4,58), pt(8,26), pt(18,16), pt(24,28), pt(18,52), pt(10,80), pt(16,66), pt(28,56), pt(42,60), pt(46,80), pt(58,80)]]},
-        i: {w:28, strokes:[[pt(0,80), pt(8,60), pt(14,58), pt(18,80), pt(28,80)],[pt(13,34), pt(13,34)]]},
-        j: {w:34, strokes:[[pt(14,58), pt(20,80), pt(18,104), pt(10,118), pt(0,108)],[pt(18,34), pt(18,34)]]},
-        k: {w:58, strokes:[[pt(0,80), pt(4,58), pt(8,24), pt(18,14), pt(24,28), pt(18,52), pt(10,80)],[pt(14,60), pt(26,58), pt(42,48)],[pt(20,62), pt(34,78), pt(54,80)]]},
-        l: {w:40, strokes:[[pt(10,80), pt(14,60), pt(16,26), pt(26,14), pt(34,30), pt(22,58), pt(12,80), pt(24,80), pt(40,80)]]},
-        m: {w:78, strokes:[[pt(0,80), pt(6,60), pt(16,58), pt(24,80), pt(30,62), pt(40,58), pt(50,80), pt(56,62), pt(66,58), pt(74,80), pt(78,80)]]},
-        n: {w:58, strokes:[[pt(0,80), pt(6,60), pt(16,58), pt(24,80), pt(30,62), pt(40,58), pt(52,80), pt(58,80)]]},
-        o: {w:54, strokes:[[pt(10,64), pt(22,50), pt(40,54), pt(46,76), pt(36,92), pt(18,92), pt(8,76), pt(16,62), pt(34,62), pt(48,80), pt(54,80)]]},
-        p: {w:58, strokes:[[pt(0,116), pt(4,92), pt(8,58), pt(18,50), pt(34,56), pt(42,76), pt(34,94), pt(16,90), pt(8,80), pt(16,66), pt(34,66), pt(48,80), pt(58,80)]]},
-        q: {w:60, strokes:[[pt(0,80), pt(10,58), pt(26,50), pt(42,58), pt(44,80), pt(34,96), pt(16,92), pt(6,80), pt(18,64), pt(34,64), pt(46,80), pt(50,100), pt(58,116)]]},
-        r: {w:42, strokes:[[pt(0,80), pt(6,60), pt(14,58), pt(20,80), pt(26,64), pt(34,58), pt(42,60)]]},
-        s: {w:46, strokes:[[pt(38,56), pt(24,50), pt(10,58), pt(18,70), pt(34,76), pt(40,88), pt(28,94), pt(10,88), pt(4,80), pt(18,78), pt(34,84), pt(46,80)]]},
-        t: {w:44, strokes:[[pt(20,16), pt(14,42), pt(16,70), pt(26,92), pt(40,80)],[pt(4,50), pt(32,50)]]},
-        u: {w:58, strokes:[[pt(0,58), pt(8,80), pt(16,92), pt(30,88), pt(36,58), pt(42,80), pt(50,92), pt(58,80)]]},
-        v: {w:56, strokes:[[pt(0,58), pt(12,92), pt(28,58), pt(44,92), pt(56,80)]]},
-        w: {w:78, strokes:[[pt(0,58), pt(10,92), pt(24,58), pt(38,92), pt(52,58), pt(66,92), pt(78,80)]]},
-        x: {w:52, strokes:[[pt(0,60), pt(18,92), pt(36,58), pt(52,80)],[pt(38,58), pt(18,82), pt(6,80)]]},
-        y: {w:58, strokes:[[pt(0,58), pt(12,92), pt(28,58), pt(38,82), pt(34,104), pt(24,118), pt(12,108)]]},
-        z: {w:50, strokes:[[pt(6,58), pt(42,58), pt(10,92), pt(46,92), pt(50,80)]]},
-        ' ': {w:34, strokes:[]}
-      };
-      return map[letter] || map.a;
-    }
+    <div>
+      <div class="progress-row">
+        <span id="progressText">0 of 26 letters mastered</span>
+        <span id="accText">Accuracy: 0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
 
-    function createSvg(tag, attrs = {}){
-      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-      Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
-      return el;
-    }
+  </aside>
 
-    function samplePath(pathEl, count = 160){
-      const len = pathEl.getTotalLength();
-      const out = [];
-      for (let i = 0; i <= count; i++){
-        const p = pathEl.getPointAtLength(len * (i / count));
-        out.push({x:p.x, y:p.y});
-      }
-      return out;
-    }
+  <!-- MAIN -->
+  <main class="main">
+    <div class="canvas-header">
+      <div>
+        <div class="canvas-title" id="canvasTitle">Trace the letter a</div>
+        <div class="canvas-subtitle" id="canvasSub">Follow the numbered strokes in order. Start each stroke on the green dot.</div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Start point</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Guide path</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Your trace</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Off-path</div>
+      </div>
+    </div>
 
-    function distance(a, b){
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      return Math.hypot(dx, dy);
-    }
+    <!-- Stroke order indicators -->
+    <div class="stroke-order-panel" id="strokeOrderPanel"></div>
 
-    function buildFallbackWordScene(text){
-      const cleaned = (text || 'a').toLowerCase().replace(/[^a-z ]/g, '') || 'a';
-      const scene = {label: cleaned, strokes: []};
-      let x = 80;
-      const y = 255;
-      const scale = 3.2;
-      cleaned.split('').forEach((ch, idx) => {
-        const data = letterStrokeData(ch);
-        if (ch === ' '){ x += data.w * scale; return; }
-        data.strokes.forEach((stroke, sIdx) => {
-          const points = scalePoints(stroke, x, y - 260, scale, scale);
-          scene.strokes.push({
-            id: `${ch}-${idx}-${sIdx}`,
-            letter: ch,
-            points,
-            d: pathFromPoints(points),
-            progress: 0,
-            done: false,
-            good: 0,
-            bad: 0,
-            sampled: []
-          });
-        });
-        x += (data.w - 10) * scale;
+    <!-- Accuracy bar -->
+    <div class="accuracy-row">
+      <div class="acc-label">Path accuracy</div>
+      <div class="acc-bar"><div class="acc-fill" id="accFill"></div></div>
+      <div class="acc-label" id="accPct">0%</div>
+    </div>
+
+    <div class="stage-wrapper" id="stageWrapper">
+      <svg class="guide-svg" id="guideSvg" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="softglow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="10" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,1 L9,5 L0,9 Z" fill="#c8832a" opacity="0.9"/>
+          </marker>
+        </defs>
+        <!-- Ruled guide lines -->
+        <line x1="30" y1="120" x2="930" y2="120" stroke="rgba(26,18,8,0.08)" stroke-width="1.5" stroke-dasharray="8 6"/>
+        <line x1="30" y1="240" x2="930" y2="240" stroke="rgba(26,18,8,0.06)" stroke-width="1" stroke-dasharray="6 8"/>
+        <line x1="30" y1="320" x2="930" y2="320" stroke="rgba(200,131,42,0.25)" stroke-width="1.5"/>
+        <line x1="30" y1="420" x2="930" y2="420" stroke="rgba(26,18,8,0.08)" stroke-width="1" stroke-dasharray="8 6"/>
+        <!-- Baseline label -->
+        <text x="34" y="316" font-size="9" fill="rgba(200,131,42,0.6)" font-family="DM Sans, sans-serif" font-weight="700" letter-spacing="0.1em">BASELINE</text>
+        <g id="guideLayer"></g>
+        <g id="helperLayer"></g>
+      </svg>
+      <canvas class="trace-canvas" id="traceCanvas" width="960" height="480"></canvas>
+    </div>
+
+    <div class="status-bar ready" id="statusBar">
+      ✏️ Ready — place your pen on the green dot numbered <strong>1</strong> to begin.
+    </div>
+
+    <div class="canvas-actions">
+      <button class="btn btn-ink" id="toggleHelpersBtn">Hide helpers</button>
+      <button class="btn btn-outline" id="hintBtn">Show hint</button>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+// FONT OPTIONS
+// ─────────────────────────────────────────────────────────────────
+const FONTS = {
+  allura: { label: 'Allura', family: 'AlluraQ', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/allura/Allura-Regular.ttf' },
+  alexbrush: { label: 'Alex Brush', family: 'AlexBrushQ', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/alexbrush/AlexBrush-Regular.ttf' },
+  sacramento: { label: 'Sacramento', family: 'SacramentoQ', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/sacramento/Sacramento-Regular.ttf' },
+  greatvibes: { label: 'Great Vibes', family: 'GreatVibesQ', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/greatvibes/GreatVibes-Regular.ttf' },
+  pinyon: { label: 'Pinyon Script', family: 'PinyonQ', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/pinyonscript/PinyonScript-Regular.ttf' },
+  yellowtail: { label: 'Yellowtail', family: 'YellowtailQ', url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/yellowtail/Yellowtail-Regular.ttf' },
+};
+
+// ─────────────────────────────────────────────────────────────────
+// FALLBACK STROKE DATA  (hand-crafted, baseline ≈ y=320)
+// ─────────────────────────────────────────────────────────────────
+function pt(x,y){ return {x,y}; }
+
+const LETTER_DATA = {
+  a:{w:110,strokes:[[pt(0,220),pt(20,180),pt(50,160),pt(80,170),pt(90,210),pt(80,260),pt(60,290),pt(30,310),pt(10,310),pt(0,290),pt(10,260),pt(40,250),pt(70,255),pt(95,280),pt(110,310)]]},
+  b:{w:110,strokes:[[pt(10,140),pt(5,200),pt(0,260),pt(5,310)],[pt(5,230),pt(30,210),pt(60,205),pt(85,215),pt(95,240),pt(90,265),pt(70,285),pt(40,290),pt(10,280)]],},
+  c:{w:100,strokes:[[pt(90,200),pt(70,175),pt(40,170),pt(15,185),pt(5,215),pt(5,255),pt(18,285),pt(45,300),pt(75,295),pt(95,280)]]},
+  d:{w:120,strokes:[[pt(20,220),pt(45,185),pt(75,175),pt(100,185),pt(110,215),pt(105,255),pt(90,285),pt(65,300),pt(35,295),pt(15,275),pt(10,250),pt(35,235),pt(65,240),pt(95,255),pt(110,275),pt(115,140),pt(110,155)]],},
+  e:{w:100,strokes:[[pt(10,250),pt(35,240),pt(65,238),pt(88,245),pt(90,265),pt(75,285),pt(50,298),pt(25,295),pt(8,275),pt(8,250),pt(25,225),pt(55,215),pt(80,220)]]},
+  f:{w:80,strokes:[[pt(65,150),pt(45,155),pt(25,170),pt(15,200),pt(15,260),pt(20,310)],[pt(0,230),pt(55,230)]]},
+  g:{w:110,strokes:[[pt(5,220),pt(25,190),pt(55,178),pt(82,188),pt(95,215),pt(90,252),pt(75,278),pt(50,290),pt(22,282),pt(8,260),pt(8,235),pt(30,220),pt(58,228),pt(85,250),pt(97,280),pt(100,330),pt(90,365),pt(68,375),pt(45,365)]]},
+  h:{w:110,strokes:[[pt(10,140),pt(5,200),pt(0,270),pt(5,310)],[pt(5,240),pt(28,218),pt(55,210),pt(78,218),pt(90,240),pt(90,280),pt(95,310)]]},
+  i:{w:55,strokes:[[pt(5,220),pt(20,245),pt(25,280),pt(30,310)],[pt(25,185),pt(28,185)]]},
+  j:{w:60,strokes:[[pt(30,220),pt(40,260),pt(42,300),pt(38,340),pt(25,360),pt(10,352)],[pt(35,185),pt(38,185)]]},
+  k:{w:110,strokes:[[pt(10,140),pt(5,210),pt(0,280),pt(5,310)],[pt(8,248),pt(30,235),pt(58,215),pt(80,200)],[pt(28,240),pt(50,262),pt(75,290),pt(100,310)]]},
+  l:{w:70,strokes:[[pt(20,140),pt(15,210),pt(10,280),pt(18,308),pt(38,315),pt(60,310)]]},
+  m:{w:160,strokes:[[pt(5,220),pt(8,265),pt(10,310)],[pt(8,235),pt(25,215),pt(48,210),pt(65,218),pt(68,250),pt(68,310)],[pt(68,235),pt(85,215),pt(108,210),pt(125,218),pt(130,250),pt(132,310)]]},
+  n:{w:110,strokes:[[pt(5,220),pt(8,265),pt(10,310)],[pt(8,235),pt(25,215),pt(50,210),pt(72,218),pt(80,248),pt(82,310)]]},
+  o:{w:110,strokes:[[pt(55,175),pt(80,178),pt(98,200),pt(100,238),pt(90,272),pt(68,295),pt(38,298),pt(15,278),pt(8,245),pt(12,210),pt(30,185),pt(55,178),pt(80,185),pt(100,210)]]},
+  p:{w:110,strokes:[[pt(8,220),pt(5,280),pt(0,340),pt(5,390)],[pt(5,240),pt(28,215),pt(58,208),pt(82,218),pt(94,244),pt(90,272),pt(70,290),pt(42,292),pt(15,275)]],},
+  q:{w:115,strokes:[[pt(5,225),pt(28,195),pt(58,183),pt(85,190),pt(100,218),pt(100,258),pt(88,285),pt(65,298),pt(35,294),pt(12,272),pt(8,242),pt(30,225),pt(60,228),pt(90,250),pt(102,278),pt(110,340),pt(115,385)]]},
+  r:{w:80,strokes:[[pt(5,220),pt(8,265),pt(10,310)],[pt(8,240),pt(22,220),pt(42,210),pt(62,210),pt(80,220)]]},
+  s:{w:95,strokes:[[pt(85,195),pt(62,178),pt(35,178),pt(15,196),pt(18,225),pt(38,240),pt(62,248),pt(80,268),pt(78,292),pt(58,308),pt(28,310),pt(8,296)]]},
+  t:{w:80,strokes:[[pt(38,145),pt(32,195),pt(28,255),pt(32,300),pt(50,312),pt(68,305)],[pt(5,228),pt(72,228)]]},
+  u:{w:110,strokes:[[pt(5,215),pt(5,265),pt(12,292),pt(30,308),pt(55,308),pt(72,290),pt(78,260),pt(80,215),pt(82,260),pt(90,295),pt(105,310)]]},
+  v:{w:110,strokes:[[pt(5,215),pt(18,268),pt(35,305),pt(55,315),pt(78,300),pt(100,260),pt(110,215)]]},
+  w:{w:155,strokes:[[pt(5,215),pt(15,268),pt(28,305),pt(45,310),pt(62,292),pt(78,265),pt(95,290),pt(110,308),pt(128,300),pt(145,262),pt(155,215)]]},
+  x:{w:100,strokes:[[pt(5,215),pt(28,248),pt(55,275),pt(80,308)],[pt(95,215),pt(72,248),pt(50,272),pt(28,298),pt(5,310)]]},
+  y:{w:110,strokes:[[pt(5,215),pt(22,262),pt(45,295),pt(65,305),pt(88,290),pt(105,252),pt(110,215)],[pt(55,308),pt(45,345),pt(30,368),pt(12,360)]]},
+  z:{w:100,strokes:[[pt(5,215),pt(45,215),pt(90,215),pt(12,305),pt(55,305),pt(100,305)]]},
+  ' ':{w:60,strokes:[]}
+};
+
+// ─────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────
+const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const state = {
+  mode: 'learn',
+  letterIdx: 0,
+  letter: 'a',
+  showHelpers: true,
+  scene: null,
+  strokeIdx: 0,
+  pointerDown: false,
+  tracing: false,
+  totalSamples: 0,
+  goodSamples: 0,
+  score: 0,
+  mastered: new Set(),
+  demoPlaying: false,
+  fontKey: 'allura',
+  fontsLoaded: {},
+  fontLoading: false,
+  usingFallback: false,
+  // Accuracy tracking per current lift
+  strokeGood: 0,
+  strokeBad: 0,
+};
+
+// ─────────────────────────────────────────────────────────────────
+// DOM REFS
+// ─────────────────────────────────────────────────────────────────
+const guideSvg = document.getElementById('guideSvg');
+const guideLayer = document.getElementById('guideLayer');
+const helperLayer = document.getElementById('helperLayer');
+const traceCanvas = document.getElementById('traceCanvas');
+const ctx = traceCanvas.getContext('2d');
+
+// ─────────────────────────────────────────────────────────────────
+// SVG HELPERS
+// ─────────────────────────────────────────────────────────────────
+function svgEl(tag, attrs={}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k,v] of Object.entries(attrs)) el.setAttribute(k,v);
+  return el;
+}
+
+function pointsToD(pts) {
+  if (!pts.length) return '';
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const cx = (pts[i].x + pts[i+1].x) / 2;
+    const cy = (pts[i].y + pts[i+1].y) / 2;
+    d += ` Q ${pts[i].x} ${pts[i].y} ${cx} ${cy}`;
+  }
+  if (pts.length > 1) {
+    const l = pts[pts.length-1];
+    const p = pts[pts.length-2];
+    d += ` Q ${p.x} ${p.y} ${l.x} ${l.y}`;
+  }
+  return d;
+}
+
+// Sample a rendered SVG path element into evenly-spaced points
+function sampleSvgPath(pathEl, count=200) {
+  const len = pathEl.getTotalLength();
+  const out = [];
+  for (let i = 0; i <= count; i++) {
+    const p = pathEl.getPointAtLength(len * (i/count));
+    out.push({x: p.x, y: p.y});
+  }
+  return out;
+}
+
+function dist(a,b) { return Math.hypot(a.x-b.x, a.y-b.y); }
+
+// ─────────────────────────────────────────────────────────────────
+// SCENE BUILDING — FALLBACK (uses hand-crafted data)
+// ─────────────────────────────────────────────────────────────────
+function buildFallbackScene(text) {
+  const clean = (text || 'a').toLowerCase().replace(/[^a-z ]/g,'') || 'a';
+  const scene = { label: clean, strokes: [] };
+  let x = 60;
+  const baseY = 0; // points already have absolute Y from LETTER_DATA
+  const scale = 2.8;
+
+  clean.split('').forEach((ch, ci) => {
+    const data = LETTER_DATA[ch] || LETTER_DATA['a'];
+    if (ch === ' ') { x += data.w * scale * 0.5; return; }
+    data.strokes.forEach((rawPts, si) => {
+      const pts = rawPts.map(p => ({ x: x + p.x * scale * 0.7, y: p.y * scale * 0.55 + 50 }));
+      scene.strokes.push({
+        id: `${ch}-${ci}-${si}`,
+        letter: ch,
+        d: pointsToD(pts),
+        sampled: [],
+        done: false,
+        progress: 0,
+        good: 0, bad: 0
       });
-      return scene;
-    }
-
-    function commandsToD(commands){
-      let d = '';
-      for (const c of commands){
-        if (c.type === 'M' || c.type === 'L') d += `${c.type} ${c.x} ${c.y} `;
-        else if (c.type === 'Q') d += `Q ${c.x1} ${c.y1} ${c.x} ${c.y} `;
-        else if (c.type === 'C') d += `C ${c.x1} ${c.y1} ${c.x2} ${c.y2} ${c.x} ${c.y} `;
-        else if (c.type === 'Z') d += 'Z ';
-      }
-      return d.trim();
-    }
-
-    function splitSubpaths(commands){
-      const out = [];
-      let current = [];
-      for (const cmd of commands){
-        if (cmd.type === 'M' && current.length){
-          out.push(current);
-          current = [cmd];
-        } else {
-          current.push(cmd);
-        }
-      }
-      if (current.length) out.push(current);
-      return out.filter(arr => arr.length > 1);
-    }
-
-    function transformCommand(cmd, scale, offsetX, offsetY){
-      const next = {type: cmd.type};
-      if ('x' in cmd) next.x = cmd.x * scale + offsetX;
-      if ('y' in cmd) next.y = cmd.y * scale + offsetY;
-      if ('x1' in cmd) next.x1 = cmd.x1 * scale + offsetX;
-      if ('y1' in cmd) next.y1 = cmd.y1 * scale + offsetY;
-      if ('x2' in cmd) next.x2 = cmd.x2 * scale + offsetX;
-      if ('y2' in cmd) next.y2 = cmd.y2 * scale + offsetY;
-      return next;
-    }
-
-    function buildFontScene(text){
-      const info = state.fontsLoaded[state.selectedFontKey];
-      if (!info || !info.font) return null;
-      const font = info.font;
-      const cleaned = (text || 'a').replace(/[^a-zA-Z ]/g, '') || 'a';
-      const fontSize = state.mode === 'name' ? 230 : 360;
-      const path = font.getPath(cleaned, 0, 0, fontSize);
-      const bbox = path.getBoundingBox();
-      const width = Math.max(1, bbox.x2 - bbox.x1);
-      const height = Math.max(1, bbox.y2 - bbox.y1);
-      const maxW = state.mode === 'name' ? 780 : 620;
-      const maxH = 300;
-      const scale = Math.min(maxW / width, maxH / height);
-      const offsetX = (960 - width * scale) / 2 - bbox.x1 * scale;
-      const offsetY = 265 - ((bbox.y1 + bbox.y2) / 2) * scale;
-      const subpaths = splitSubpaths(path.commands).map((commands, idx) => {
-        const transformed = commands.map(cmd => transformCommand(cmd, scale, offsetX, offsetY));
-        return {
-          id: `font-${idx}`,
-          letter: cleaned,
-          d: commandsToD(transformed),
-          progress: 0,
-          done: false,
-          good: 0,
-          bad: 0,
-          sampled: []
-        };
-      }).filter(stroke => stroke.d && /[CLQ]/.test(stroke.d));
-      return {label: cleaned, strokes: subpaths};
-    }
-
-    function getActiveSceneText(){
-      return state.mode === 'name' ? (ui.nameInput.value || 'david') : state.currentLetter;
-    }
-
-    function buildScene(){
-      const text = getActiveSceneText();
-      state.scene = buildFontScene(text);
-      state.usingFallback = !state.scene || !state.scene.strokes.length;
-      if (state.usingFallback) state.scene = buildFallbackWordScene(text.toLowerCase());
-      state.currentStrokeIndex = 0;
-      guideLayer.innerHTML = '';
-      helperLayer.innerHTML = '';
-      clearCanvas();
-
-      const lines = [120, 240, 365];
-      const colors = ['rgba(255,255,255,.06)', 'rgba(255,255,255,.08)', 'rgba(125,211,252,.18)'];
-      lines.forEach((y, i) => {
-        guideLayer.appendChild(createSvg('line', {
-          x1:40, y1:y, x2:920, y2:y,
-          stroke:colors[i], 'stroke-width':2, 'stroke-dasharray': i === 2 ? '10 8' : '8 10'
-        }));
-      });
-
-      state.scene.strokes.forEach((stroke, idx) => {
-        const outline = createSvg('path', {
-          d: stroke.d, fill:'none', stroke:'rgba(255,255,255,.18)', 'stroke-width':26, 'stroke-linecap':'round', 'stroke-linejoin':'round'
-        });
-        const guide = createSvg('path', {
-          d: stroke.d, fill:'none', stroke:'rgba(251,191,36,.92)', 'stroke-width':20, 'stroke-linecap':'round', 'stroke-linejoin':'round',
-          filter: state.showHelpers ? 'url(#glow)' : '', opacity: state.showHelpers ? 0.95 : 0.35
-        });
-        guideLayer.appendChild(outline);
-        guideLayer.appendChild(guide);
-        stroke.sampled = samplePath(guide, Math.max(120, Math.floor(guide.getTotalLength() / 6)));
-
-        if (state.showHelpers && stroke.sampled.length){
-          const start = stroke.sampled[0];
-          helperLayer.appendChild(createSvg('circle', {cx:start.x, cy:start.y, r:10, fill:'#34d399', stroke:'rgba(255,255,255,.6)', 'stroke-width':2}));
-          const num = createSvg('text', {x:start.x + 14, y:start.y - 14, fill:'#f6f7fb', 'font-size':20, 'font-weight':900});
-          num.textContent = idx + 1;
-          helperLayer.appendChild(num);
-          if (stroke.sampled.length > 20){
-            const a = stroke.sampled[Math.floor(stroke.sampled.length * .35)];
-            const b = stroke.sampled[Math.floor(stroke.sampled.length * .45)];
-            helperLayer.appendChild(createSvg('line', {
-              x1:a.x, y1:a.y, x2:b.x, y2:b.y, stroke:'#fbbf24', 'stroke-width':6, 'stroke-linecap':'round', 'marker-end':'url(#arrowHead)', opacity:.85
-            }));
-          }
-        }
-      });
-
-      updateUI();
-      setStatus(state.usingFallback ? 'Font guide unavailable, so the app is using the built in tracing shapes.' : 'Ready. Start on the green dot.', state.usingFallback ? 'warn' : 'warn');
-    }
-
-    function clearCanvas(){
-      ctx.clearRect(0, 0, traceCanvas.width, traceCanvas.height);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = '#a78bfa';
-      ctx.lineWidth = 14;
-    }
-
-    function currentStroke(){
-      return state.scene?.strokes[state.currentStrokeIndex] || null;
-    }
-
-    function pointFromEvent(evt){
-      const rect = traceCanvas.getBoundingClientRect();
-      return {
-        x: ((evt.clientX - rect.left) / rect.width) * traceCanvas.width,
-        y: ((evt.clientY - rect.top) / rect.height) * traceCanvas.height
-      };
-    }
-
-    function setStatus(msg, tone = 'warn'){
-      ui.statusBox.textContent = msg;
-      ui.statusBox.className = `status ${tone}`;
-    }
-
-    function updatePreview(){
-      const fontInfo = FONT_OPTIONS[state.selectedFontKey];
-      const previewText = state.mode === 'name' ? (ui.nameInput.value || 'Sparkling Valentine') : 'Sparkling Valentine';
-      ui.fontPreview.textContent = previewText;
-      ui.fontPreview.style.fontFamily = `"${fontInfo.family}", cursive`;
-      ui.fontPill.textContent = fontInfo.label;
-      ui.previewCaption.textContent = state.usingFallback
-        ? `${fontInfo.label} preview loaded. Tracing is using the fallback guide right now.`
-        : `${fontInfo.label} preview loaded. The tracing guide is being generated from this font.`;
-    }
-
-    function updateUI(){
-      const label = getActiveSceneText();
-      const fontInfo = FONT_OPTIONS[state.selectedFontKey];
-      ui.focusLetter.textContent = state.mode === 'name' ? label : state.currentLetter;
-      ui.focusTag.textContent = state.mode === 'name' ? `${label.length} characters` : `Letter ${state.currentLetterIndex + 1} of 26`;
-      ui.boardTitle.textContent = state.mode === 'name' ? `Trace the name ${label}` : `Trace the letter ${label}`;
-      ui.boardCopy.textContent = state.mode === 'challenge'
-        ? 'Challenge mode gives you fewer helpers. The stroke path still matters.'
-        : state.mode === 'name'
-          ? 'Type a name, pick a script style, then trace it left to right.'
-          : 'Green means start. Yellow is the guide path. Purple is your live trace.';
-      ui.lessonHint.textContent = state.mode === 'name'
-        ? 'This mode rebuilds the guide using your chosen script style.'
-        : state.mode === 'challenge'
-          ? 'Find the start and trust the shape.'
-          : 'Start on the green dot. Stay near the path. Finish each stroke in order.';
-      ui.strokeCounter.textContent = `${Math.min(state.currentStrokeIndex + 1, Math.max(state.scene?.strokes.length || 1, 1))} / ${state.scene?.strokes.length || 1}`;
-      ui.progressText.textContent = `${state.mastered.size} of 26 letters mastered`;
-      ui.progressFill.style.width = `${(state.mastered.size / 26) * 100}%`;
-      const acc = state.totalSamples ? Math.round((state.goodSamples / state.totalSamples) * 100) : 0;
-      ui.accuracyText.textContent = `Accuracy ${acc}%`;
-      ui.scoreValue.textContent = state.score;
-      ui.masteredValue.textContent = state.mastered.size;
-      ui.toggleHelpersBtn.textContent = state.showHelpers ? 'Hide helpers' : 'Show helpers';
-      ui.stepOne.textContent = state.mode === 'challenge' ? 'Find the start point.' : 'Place the pen on the green dot.';
-      ui.stepTwo.textContent = state.mode === 'name' ? 'Move left to right through the word.' : 'Move along the yellow path.';
-      ui.stepThree.textContent = state.mode === 'name' ? 'Complete the whole word cleanly.' : 'Finish each stroke to move on.';
-      ui.fontLoadInfo.innerHTML = state.fontLoading
-        ? `<span class="loading">Loading ${fontInfo.label}…</span>`
-        : state.usingFallback
-          ? `${fontInfo.label} could not build a live trace path here, so the app switched to the built in guide.`
-          : `<span class="success">${fontInfo.label} ready.</span>`;
-      [...ui.alphaGrid.querySelectorAll('.alpha-btn')].forEach((btn, i) => {
-        btn.classList.toggle('active', state.mode !== 'name' && i === state.currentLetterIndex);
-        btn.classList.toggle('done', state.mastered.has(alphabet[i]));
-      });
-      updatePreview();
-    }
-
-    function resetSceneProgress(){
-      state.currentStrokeIndex = 0;
-      state.pointerDown = false;
-      state.lastPoint = null;
-      state.scene?.strokes.forEach(s => {
-        s.progress = 0;
-        s.done = false;
-        s.good = 0;
-        s.bad = 0;
-      });
-      clearCanvas();
-      updateUI();
-    }
-
-    function beginTrace(evt){
-      if (state.demoPlaying) return;
-      const stroke = currentStroke();
-      if (!stroke || !stroke.sampled.length) return;
-      const p = pointFromEvent(evt);
-      const start = stroke.sampled[0];
-      const threshold = state.mode === 'challenge' ? 75 : 60;
-      if (distance(p, start) > threshold){
-        setStatus('Start closer to the green dot.', 'warn');
-        return;
-      }
-      state.pointerDown = true;
-      state.lastPoint = p;
-      if (traceCanvas.setPointerCapture) traceCanvas.setPointerCapture(evt.pointerId);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      setStatus(`Stroke ${state.currentStrokeIndex + 1} started. Keep going.`, 'good');
-      evt.preventDefault();
-    }
-
-    function moveTrace(evt){
-      if (!state.pointerDown || state.demoPlaying) return;
-      const stroke = currentStroke();
-      if (!stroke) return;
-      const p = pointFromEvent(evt);
-
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      state.lastPoint = p;
-
-      let bestIndex = stroke.progress;
-      let bestDistance = Infinity;
-      const start = Math.max(0, stroke.progress - 10);
-      const end = Math.min(stroke.sampled.length, stroke.progress + 55);
-      for (let i = start; i < end; i++){
-        const d = distance(p, stroke.sampled[i]);
-        if (d < bestDistance){
-          bestDistance = d;
-          bestIndex = i;
-        }
-      }
-
-      state.totalSamples += 1;
-      if (bestDistance < 25){
-        state.goodSamples += 1;
-        stroke.good += 1;
-      } else {
-        stroke.bad += 1;
-      }
-
-      if (bestDistance < 34 && bestIndex >= stroke.progress - 4){
-        stroke.progress = Math.max(stroke.progress, bestIndex);
-      }
-
-      if (stroke.progress >= stroke.sampled.length - 6){
-        finishStroke();
-      } else if (bestDistance > 44){
-        setStatus('You drifted off the path. Pull back toward the guide.', 'warn');
-      }
-      updateUI();
-      evt.preventDefault();
-    }
-
-    function endTrace(evt){
-      if (!state.pointerDown) return;
-      const stroke = currentStroke();
-      state.pointerDown = false;
-      state.lastPoint = null;
-      if (stroke && stroke.progress > stroke.sampled.length * 0.82){
-        finishStroke();
-      } else if (stroke && !stroke.done) {
-        setStatus('Almost. Start that stroke again and keep following the path.', 'warn');
-      }
-      try { if (traceCanvas.releasePointerCapture) traceCanvas.releasePointerCapture(evt.pointerId); } catch (e) {}
-      evt.preventDefault();
-    }
-
-    function finishStroke(){
-      const stroke = currentStroke();
-      if (!stroke || stroke.done) return;
-      stroke.done = true;
-      state.pointerDown = false;
-      state.score += Math.max(10, 24 - Math.floor(stroke.bad / 6));
-      state.currentStrokeIndex += 1;
-      if (state.currentStrokeIndex >= state.scene.strokes.length){
-        finishScene();
-      } else {
-        setStatus(`Nice. Stroke ${state.currentStrokeIndex} complete. Start the next green dot.`, 'good');
-      }
-      updateUI();
-    }
-
-    function finishScene(){
-      if (state.mode !== 'name') state.mastered.add(state.currentLetter);
-      state.score += 35;
-      setStatus(state.mode === 'name' ? 'Word complete. Nice connected writing.' : `Letter ${state.currentLetter} mastered.`, 'good');
-      renderAlphabetButtons();
-      updateUI();
-    }
-
-    function clearTrace(){
-      resetSceneProgress();
-      setStatus('Trace cleared. Start again on the green dot.', 'warn');
-    }
-
-    function nextLetter(){
-      state.currentLetterIndex = (state.currentLetterIndex + 1) % alphabet.length;
-      state.currentLetter = alphabet[state.currentLetterIndex];
-      buildScene();
-    }
-
-    function prevLetter(){
-      state.currentLetterIndex = (state.currentLetterIndex - 1 + alphabet.length) % alphabet.length;
-      state.currentLetter = alphabet[state.currentLetterIndex];
-      buildScene();
-    }
-
-    function setMode(mode){
-      state.mode = mode;
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.mode === mode));
-      ui.nameSection.style.display = mode === 'name' ? 'block' : 'none';
-      ui.alphabetSection.style.display = mode === 'name' ? 'none' : 'block';
-      if (mode === 'challenge') state.showHelpers = false;
-      if (mode === 'learn') state.showHelpers = true;
-      buildScene();
-    }
-
-    function renderAlphabetButtons(){
-      ui.alphaGrid.innerHTML = '';
-      alphabet.forEach((letter, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'alpha-btn';
-        btn.textContent = letter;
-        if (index === state.currentLetterIndex && state.mode !== 'name') btn.classList.add('active');
-        if (state.mastered.has(letter)) btn.classList.add('done');
-        btn.addEventListener('click', () => {
-          state.currentLetterIndex = index;
-          state.currentLetter = letter;
-          if (state.mode === 'name') setMode('learn');
-          else buildScene();
-        });
-        ui.alphaGrid.appendChild(btn);
-      });
-    }
-
-    async function playDemo(){
-      if (state.demoPlaying || !state.scene?.strokes?.length) return;
-      state.demoPlaying = true;
-      clearTrace();
-      clearCanvas();
-      ctx.strokeStyle = '#a78bfa';
-      ctx.lineWidth = 14;
-      for (let s = 0; s < state.scene.strokes.length; s++){
-        const stroke = state.scene.strokes[s];
-        const pts = stroke.sampled;
-        if (!pts.length) continue;
-        ctx.beginPath();
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (let i = 1; i < pts.length; i++){
-          ctx.lineTo(pts[i].x, pts[i].y);
-          if (i % 3 === 0) {
-            ctx.stroke();
-            await new Promise(r => setTimeout(r, 8));
-          }
-        }
-        ctx.stroke();
-      }
-      state.demoPlaying = false;
-      setStatus('Demo finished. Clear the board and try it yourself.', 'good');
-    }
-
-    async function loadSelectedFont(rebuild = true){
-      const key = state.selectedFontKey;
-      const info = FONT_OPTIONS[key];
-      if (state.fontsLoaded[key]){
-        updateUI();
-        if (rebuild) buildScene();
-        return;
-      }
-      state.fontLoading = true;
-      updateUI();
-      try{
-        const res = await fetch(info.url);
-        if (!res.ok) throw new Error('Font download failed');
-        const buffer = await res.arrayBuffer();
-        const parsed = opentype.parse(buffer);
-        const face = new FontFace(info.family, buffer);
-        await face.load();
-        document.fonts.add(face);
-        state.fontsLoaded[key] = {font: parsed, family: info.family};
-      }catch(err){
-        console.error(err);
-      }finally{
-        state.fontLoading = false;
-        updateUI();
-        if (rebuild) buildScene();
-      }
-    }
-
-    function populateFonts(){
-      Object.entries(FONT_OPTIONS).forEach(([key, info]) => {
-        const opt = document.createElement('option');
-        opt.value = key;
-        opt.textContent = info.label;
-        ui.fontSelect.appendChild(opt);
-      });
-      ui.fontSelect.value = state.selectedFontKey;
-    }
-
-    document.getElementById('nextBtn').addEventListener('click', nextLetter);
-    document.getElementById('prevBtn').addEventListener('click', prevLetter);
-    document.getElementById('clearBtn').addEventListener('click', clearTrace);
-    document.getElementById('demoBtn').addEventListener('click', playDemo);
-    document.getElementById('buildNameBtn').addEventListener('click', () => setMode('name'));
-    ui.nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') setMode('name'); });
-    ui.nameInput.addEventListener('input', updatePreview);
-    ui.toggleHelpersBtn.addEventListener('click', () => { state.showHelpers = !state.showHelpers; buildScene(); });
-    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setMode(tab.dataset.mode)));
-    ui.fontSelect.addEventListener('change', async () => {
-      state.selectedFontKey = ui.fontSelect.value;
-      await loadSelectedFont(true);
     });
+    x += data.w * scale * 0.68;
+  });
+  return scene;
+}
 
-    traceCanvas.addEventListener('pointerdown', beginTrace);
-    traceCanvas.addEventListener('pointermove', moveTrace);
-    traceCanvas.addEventListener('pointerup', endTrace);
-    traceCanvas.addEventListener('pointercancel', endTrace);
-    traceCanvas.addEventListener('pointerleave', endTrace);
+// ─────────────────────────────────────────────────────────────────
+// SCENE BUILDING — FONT-BASED
+// ─────────────────────────────────────────────────────────────────
+function cmdD(commands) {
+  let d = '';
+  for (const c of commands) {
+    if (c.type==='M'||c.type==='L') d += `${c.type} ${c.x.toFixed(2)} ${c.y.toFixed(2)} `;
+    else if (c.type==='Q') d += `Q ${c.x1.toFixed(2)} ${c.y1.toFixed(2)} ${c.x.toFixed(2)} ${c.y.toFixed(2)} `;
+    else if (c.type==='C') d += `C ${c.x1.toFixed(2)} ${c.y1.toFixed(2)} ${c.x2.toFixed(2)} ${c.y2.toFixed(2)} ${c.x.toFixed(2)} ${c.y.toFixed(2)} `;
+    else if (c.type==='Z') d += 'Z ';
+  }
+  return d.trim();
+}
 
-    populateFonts();
-    renderAlphabetButtons();
-    updatePreview();
-    buildScene();
-    loadSelectedFont(true);
-  </script>
+function splitSubpaths(cmds) {
+  const out=[]; let cur=[];
+  for (const c of cmds) {
+    if (c.type==='M' && cur.length) { out.push(cur); cur=[c]; }
+    else cur.push(c);
+  }
+  if (cur.length) out.push(cur);
+  return out.filter(arr => arr.length>1);
+}
+
+function transformCmd(cmd, sx, sy, ox, oy) {
+  const n = {type: cmd.type};
+  if ('x' in cmd) n.x = cmd.x*sx + ox;
+  if ('y' in cmd) n.y = cmd.y*sy + oy;
+  if ('x1' in cmd) { n.x1 = cmd.x1*sx + ox; n.y1 = cmd.y1*sy + oy; }
+  if ('x2' in cmd) { n.x2 = cmd.x2*sx + ox; n.y2 = cmd.y2*sy + oy; }
+  return n;
+}
+
+function buildFontScene(text) {
+  const info = state.fontsLoaded[state.fontKey];
+  if (!info) return null;
+  const font = info.font;
+  const clean = text.replace(/[^a-zA-Z ]/g,'') || 'a';
+  const isName = state.mode === 'name';
+  const fontSize = isName ? 220 : 340;
+  const path = font.getPath(clean, 0, 0, fontSize);
+  const bb = path.getBoundingBox();
+  const w = Math.max(1, bb.x2 - bb.x1);
+  const h = Math.max(1, bb.y2 - bb.y1);
+  const maxW = isName ? 840 : 680;
+  const maxH = 260;
+  const scale = Math.min(maxW/w, maxH/h);
+  const ox = (960 - w*scale)/2 - bb.x1*scale;
+  const oy = 310 - ((bb.y1+bb.y2)/2)*scale;
+  const subs = splitSubpaths(path.commands).map((cmds, idx) => {
+    const tr = cmds.map(c => transformCmd(c, scale, scale, ox, oy));
+    return {
+      id: `f-${idx}`,
+      letter: clean,
+      d: cmdD(tr),
+      sampled: [],
+      done: false,
+      progress: 0,
+      good: 0, bad: 0
+    };
+  }).filter(s => s.d && /[CLQq]/.test(s.d));
+  return subs.length ? { label: clean, strokes: subs } : null;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// BUILD SCENE — main entry point
+// ─────────────────────────────────────────────────────────────────
+function getText() {
+  return state.mode === 'name' ? (document.getElementById('nameInput').value || 'hello') : state.letter;
+}
+
+function buildScene() {
+  state.strokeIdx = 0;
+  state.pointerDown = false;
+  state.tracing = false;
+  state.strokeGood = 0;
+  state.strokeBad = 0;
+
+  const text = getText();
+  let scene = buildFontScene(text);
+  state.usingFallback = !scene;
+  if (!scene) scene = buildFallbackScene(text);
+  state.scene = scene;
+
+  guideLayer.innerHTML = '';
+  helperLayer.innerHTML = '';
+  clearCanvas();
+
+  // Draw each stroke guide
+  scene.strokes.forEach((stroke, idx) => {
+    // Wide soft backing
+    const backing = svgEl('path', {
+      d: stroke.d, fill:'none',
+      stroke:'rgba(200,131,42,0.12)',
+      'stroke-width': 36,
+      'stroke-linecap':'round', 'stroke-linejoin':'round'
+    });
+    guideLayer.appendChild(backing);
+
+    // Main guide path
+    const guide = svgEl('path', {
+      d: stroke.d, fill:'none',
+      stroke: state.showHelpers ? 'rgba(200,131,42,0.88)' : 'rgba(200,131,42,0.3)',
+      'stroke-width': state.showHelpers ? 22 : 18,
+      'stroke-linecap':'round', 'stroke-linejoin':'round',
+      filter: state.showHelpers ? 'url(#glow)' : ''
+    });
+    guideLayer.appendChild(guide);
+
+    // Sample the rendered guide path for hit testing
+    stroke.sampled = sampleSvgPath(guide, Math.max(180, Math.ceil(guide.getTotalLength()/4)));
+
+    if (state.showHelpers && stroke.sampled.length) {
+      const startPt = stroke.sampled[0];
+      const endPt = stroke.sampled[stroke.sampled.length-1];
+
+      // Start dot (green)
+      helperLayer.appendChild(svgEl('circle', {
+        cx: startPt.x, cy: startPt.y, r: 14,
+        fill: '#2d7a4a', filter:'url(#softglow)'
+      }));
+      helperLayer.appendChild(svgEl('circle', {
+        cx: startPt.x, cy: startPt.y, r: 7,
+        fill: '#7eedc0'
+      }));
+
+      // Stroke number label
+      const numBg = svgEl('circle', { cx: startPt.x+22, cy: startPt.y-22, r: 12, fill: '#1a1208' });
+      const numTx = svgEl('text', {
+        x: startPt.x+22, y: startPt.y-17,
+        fill: '#fdf8f0', 'font-size': 13, 'font-weight': 900,
+        'text-anchor': 'middle', 'font-family': 'DM Sans, sans-serif'
+      });
+      numTx.textContent = idx+1;
+      helperLayer.appendChild(numBg);
+      helperLayer.appendChild(numTx);
+
+      // End dot (small amber)
+      helperLayer.appendChild(svgEl('circle', { cx: endPt.x, cy: endPt.y, r: 6, fill: '#c8832a', opacity:'0.7' }));
+
+      // Direction arrows at 30%, 55%, 75% of path
+      [0.30, 0.55, 0.75].forEach(frac => {
+        const ai = Math.floor(frac * stroke.sampled.length);
+        const bi = Math.min(ai+4, stroke.sampled.length-1);
+        const a = stroke.sampled[ai], b = stroke.sampled[bi];
+        if (dist(a,b) > 8) {
+          helperLayer.appendChild(svgEl('line', {
+            x1:a.x, y1:a.y, x2:b.x, y2:b.y,
+            stroke:'#c8832a', 'stroke-width':5,
+            'stroke-linecap':'round',
+            'marker-end':'url(#arrow)', opacity:'0.85'
+          }));
+        }
+      });
+    }
+  });
+
+  updateStrokeOrderPanel();
+  updateUI();
+  setStatus('Place your pen on the green dot labelled <strong>1</strong> to begin.', 'ready');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// CANVAS DRAWING
+// ─────────────────────────────────────────────────────────────────
+function clearCanvas() {
+  ctx.clearRect(0, 0, traceCanvas.width, traceCanvas.height);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 16;
+}
+
+// Get position in SVG coordinate space (which matches our 960x480 viewBox)
+function getPos(evt) {
+  const rect = traceCanvas.getBoundingClientRect();
+  return {
+    x: ((evt.clientX - rect.left) / rect.width) * 960,
+    y: ((evt.clientY - rect.top) / rect.height) * 480
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TRACING LOGIC — fixed
+// ─────────────────────────────────────────────────────────────────
+function getStroke() { return state.scene?.strokes[state.strokeIdx] || null; }
+
+function onPointerDown(evt) {
+  if (state.demoPlaying) return;
+  const stroke = getStroke();
+  if (!stroke || stroke.done) return;
+  if (!stroke.sampled.length) return;
+
+  const p = getPos(evt);
+  const startPt = stroke.sampled[0];
+  const threshold = state.mode === 'challenge' ? 55 : 45;
+
+  if (dist(p, startPt) > threshold) {
+    setStatus(`Start closer to the <strong>green dot ${state.strokeIdx+1}</strong>. You're ${Math.round(dist(p,startPt))}px away.`, 'warn');
+    return;
+  }
+
+  state.pointerDown = true;
+  state.tracing = true;
+  state.strokeGood = 0;
+  state.strokeBad = 0;
+  stroke.progress = 0;
+
+  try { traceCanvas.setPointerCapture(evt.pointerId); } catch(e){}
+
+  // Start drawing the trace
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  ctx.strokeStyle = '#7c4d9e';
+  ctx.lineWidth = 16;
+
+  setStatus(`Stroke ${state.strokeIdx+1} started — keep following the gold path!`, 'good');
+  evt.preventDefault();
+}
+
+function onPointerMove(evt) {
+  if (!state.pointerDown || state.demoPlaying) return;
+  const stroke = getStroke();
+  if (!stroke) return;
+
+  const p = getPos(evt);
+
+  // Draw the student trace
+  ctx.lineTo(p.x, p.y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+
+  // ── IMPROVED hit detection ──
+  // Search a forward-biased window along the sampled path
+  const winStart = Math.max(0, stroke.progress - 5);
+  const winEnd = Math.min(stroke.sampled.length - 1, stroke.progress + 60);
+  let bestDist = Infinity;
+  let bestIdx = stroke.progress;
+
+  for (let i = winStart; i <= winEnd; i++) {
+    const d = dist(p, stroke.sampled[i]);
+    if (d < bestDist) { bestDist = d; bestIdx = i; }
+  }
+
+  // Count accuracy
+  state.totalSamples++;
+  const ON_PATH = 30; // px tolerance
+  const OFF_PATH = 55;
+
+  if (bestDist < ON_PATH) {
+    state.goodSamples++;
+    stroke.good++;
+    state.strokeGood++;
+    // Only advance progress forward
+    if (bestIdx > stroke.progress) stroke.progress = bestIdx;
+  } else {
+    stroke.bad++;
+    state.strokeBad++;
+  }
+
+  // Update color of trace based on accuracy
+  if (bestDist < ON_PATH) {
+    ctx.strokeStyle = '#7c4d9e';
+  } else if (bestDist < OFF_PATH) {
+    ctx.strokeStyle = '#c8832a';
+  } else {
+    ctx.strokeStyle = '#c0392b';
+    if (state.strokeBad % 20 === 0) {
+      setStatus('Drifting off path — pull back to the gold guide.', 'warn');
+    }
+  }
+
+  // Auto-complete when enough of the stroke is covered
+  const completion = stroke.progress / (stroke.sampled.length - 1);
+  if (completion >= 0.88) {
+    finishStroke(true);
+  }
+
+  updateAccuracyDisplay();
+  updateStrokeOrderPanel();
+  evt.preventDefault();
+}
+
+function onPointerUp(evt) {
+  if (!state.pointerDown) return;
+  state.pointerDown = false;
+  ctx.beginPath(); // reset path
+
+  const stroke = getStroke();
+  if (!stroke || stroke.done) return;
+
+  const completion = stroke.progress / Math.max(1, stroke.sampled.length - 1);
+
+  if (completion >= 0.75) {
+    finishStroke(false);
+  } else if (completion >= 0.35) {
+    setStatus(`You lifted too early — ${Math.round(completion*100)}% done. Keep going from where you left off.`, 'warn');
+  } else {
+    setStatus(`Good try! Start stroke ${state.strokeIdx+1} again on the green dot.`, 'warn');
+    // Don't reset progress — let them continue the same stroke
+  }
+
+  try { traceCanvas.releasePointerCapture(evt.pointerId); } catch(e){}
+  evt.preventDefault();
+}
+
+function finishStroke(auto) {
+  const stroke = getStroke();
+  if (!stroke || stroke.done) return;
+  stroke.done = true;
+  state.pointerDown = false;
+
+  const acc = stroke.good / Math.max(1, stroke.good + stroke.bad);
+  const pts = Math.round(10 + acc * 25);
+  state.score += pts;
+
+  const nextIdx = state.strokeIdx + 1;
+  if (nextIdx >= state.scene.strokes.length) {
+    finishScene();
+  } else {
+    state.strokeIdx = nextIdx;
+    setStatus(`✓ Stroke ${state.strokeIdx} done (+${pts} pts). Now find the green dot labelled <strong>${state.strokeIdx+1}</strong>.`, 'good');
+  }
+
+  updateStrokeOrderPanel();
+  updateUI();
+}
+
+function finishScene() {
+  const text = getText();
+  if (state.mode !== 'name') state.mastered.add(state.letter);
+  state.score += 50;
+  const msg = state.mode === 'name'
+    ? `🎉 "${text}" complete! Beautiful connected writing.`
+    : `🌟 Letter <strong>${state.letter}</strong> mastered! +50 bonus points.`;
+  setStatus(msg, 'good');
+  updateUI();
+  renderAlpha();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// DEMO
+// ─────────────────────────────────────────────────────────────────
+async function playDemo() {
+  if (state.demoPlaying || !state.scene?.strokes.length) return;
+  state.demoPlaying = true;
+  clearCanvas();
+
+  for (let s = 0; s < state.scene.strokes.length; s++) {
+    const stroke = state.scene.strokes[s];
+    const pts = stroke.sampled;
+    if (!pts.length) continue;
+    ctx.beginPath();
+    ctx.strokeStyle = '#7c4d9e';
+    ctx.lineWidth = 14;
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      ctx.lineTo(pts[i].x, pts[i].y);
+      if (i % 4 === 0) { ctx.stroke(); ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); await sleep(6); }
+    }
+    ctx.stroke();
+    await sleep(180); // pause between strokes
+  }
+  state.demoPlaying = false;
+  setStatus('Demo done. Clear the board and try it yourself!', 'ready');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─────────────────────────────────────────────────────────────────
+// UI UPDATES
+// ─────────────────────────────────────────────────────────────────
+function setStatus(html, type='ready') {
+  const el = document.getElementById('statusBar');
+  el.innerHTML = `${type==='good'?'✓ ':type==='warn'?'⚠ ':type==='error'?'✕ ':'✏️ '}${html}`;
+  el.className = `status-bar ${type}`;
+}
+
+function updateAccuracyDisplay() {
+  const pct = state.totalSamples ? Math.round((state.goodSamples/state.totalSamples)*100) : 0;
+  document.getElementById('accFill').style.width = pct+'%';
+  document.getElementById('accFill').style.background = pct>75?'var(--green)':pct>45?'var(--amber)':'var(--red)';
+  document.getElementById('accPct').textContent = pct+'%';
+}
+
+function updateStrokeOrderPanel() {
+  const panel = document.getElementById('strokeOrderPanel');
+  if (!state.scene) { panel.innerHTML=''; return; }
+  panel.innerHTML = state.scene.strokes.map((s,i) => {
+    let cls = 'stroke-badge';
+    if (s.done) cls += ' done';
+    if (i === state.strokeIdx && !s.done) cls += ' active';
+    return `<div class="${cls}"><div class="dot"></div>Stroke ${i+1}${s.done?' ✓':i===state.strokeIdx?' ←':''}</div>`;
+  }).join('');
+}
+
+function updateUI() {
+  const text = getText();
+  const fontInfo = FONTS[state.fontKey];
+  const mastered = state.mastered.size;
+  const acc = state.totalSamples ? Math.round((state.goodSamples/state.totalSamples)*100) : 0;
+
+  // Header scores
+  document.getElementById('hScore').textContent = state.score;
+  document.getElementById('hMastered').textContent = `${mastered}/26`;
+  document.getElementById('hAccuracy').textContent = state.totalSamples ? acc+'%' : '—';
+
+  // Sidebar
+  document.getElementById('letterDisplay').textContent = state.mode==='name' ? (document.getElementById('nameInput').value||'?')[0] : state.letter;
+  document.getElementById('letterName').textContent = state.mode==='name'
+    ? `"${text}" · ${text.length} chars`
+    : `Lowercase ${state.letter.toUpperCase()} · Letter ${state.letterIdx+1} of 26`;
+
+  // Canvas title
+  document.getElementById('canvasTitle').textContent = state.mode==='name'
+    ? `Trace the word "${text}"`
+    : `Trace the letter ${state.letter}`;
+  document.getElementById('canvasSub').textContent = state.mode==='challenge'
+    ? 'Challenge mode: fewer visual aids. Trust the guide path.'
+    : 'Follow numbered strokes in order. Start each stroke on the green dot.';
+
+  // Instructions panel (contextual)
+  document.getElementById('instr1').textContent = state.mode==='challenge'
+    ? 'Look carefully — the green start dot is still there but smaller.'
+    : 'That\'s where your pen starts. Each stroke has its own numbered green dot.';
+  document.getElementById('instr2').textContent = state.mode==='name'
+    ? 'Move left to right. The gold path connects letters in cursive style.'
+    : 'Keep your pen within the glowing gold guide. Arrows show the direction.';
+  document.getElementById('instr3').textContent = state.scene?.strokes.length > 1
+    ? `This letter has ${state.scene.strokes.length} strokes. Complete them all in order.`
+    : 'Complete the stroke to unlock the next letter. Finish at the amber dot.';
+
+  // Font status
+  document.getElementById('fontStatus').textContent = state.fontLoading
+    ? `Loading ${fontInfo.label}…`
+    : state.usingFallback
+      ? `${fontInfo.label} unavailable — using built-in guides`
+      : `${fontInfo.label} ready ✓`;
+  document.getElementById('fontStatus').style.color = state.usingFallback ? '#8a5a14' : 'var(--green)';
+
+  // Progress
+  document.getElementById('progressText').textContent = `${mastered} of 26 letters mastered`;
+  document.getElementById('accText').textContent = `Accuracy: ${state.totalSamples ? acc+'%' : '—'}`;
+  document.getElementById('progressFill').style.width = (mastered/26*100)+'%';
+
+  // Toggle helpers btn
+  document.getElementById('toggleHelpersBtn').textContent = state.showHelpers ? 'Hide helpers' : 'Show helpers';
+
+  // Alpha grid highlight
+  document.querySelectorAll('.alpha-btn').forEach((btn,i) => {
+    btn.classList.toggle('active', state.mode!=='name' && i===state.letterIdx);
+    btn.classList.toggle('mastered', state.mastered.has(alphabet[i]));
+  });
+
+  updateAccuracyDisplay();
+  updateStrokeOrderPanel();
+}
+
+function renderAlpha() {
+  const grid = document.getElementById('alphaGrid');
+  grid.innerHTML = '';
+  alphabet.forEach((letter, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'alpha-btn';
+    btn.textContent = letter;
+    if (i === state.letterIdx && state.mode !== 'name') btn.classList.add('active');
+    if (state.mastered.has(letter)) btn.classList.add('mastered');
+    btn.addEventListener('click', () => {
+      state.letterIdx = i;
+      state.letter = letter;
+      if (state.mode === 'name') setMode('learn');
+      else buildScene();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FONT LOADING
+// ─────────────────────────────────────────────────────────────────
+async function loadFont(key, rebuild=true) {
+  if (state.fontsLoaded[key]) { if (rebuild) buildScene(); updateUI(); return; }
+  state.fontLoading = true;
+  updateUI();
+  const info = FONTS[key];
+  try {
+    const res = await fetch(info.url);
+    if (!res.ok) throw new Error('fetch failed');
+    const buf = await res.arrayBuffer();
+    const parsed = opentype.parse(buf);
+    const face = new FontFace(info.family, buf);
+    await face.load();
+    document.fonts.add(face);
+    state.fontsLoaded[key] = { font: parsed };
+  } catch(e) {
+    console.warn('Font load failed:', key, e);
+  } finally {
+    state.fontLoading = false;
+    updateUI();
+    if (rebuild) buildScene();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MODE SWITCHING
+// ─────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode===mode));
+  document.getElementById('nameSection').style.display = mode==='name' ? '' : 'none';
+  document.getElementById('alphaSection').style.display = mode==='name' ? 'none' : '';
+  if (mode==='challenge') state.showHelpers = false;
+  if (mode==='learn') state.showHelpers = true;
+  buildScene();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// EVENT WIRING
+// ─────────────────────────────────────────────────────────────────
+// Tabs
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+
+// Letter nav
+document.getElementById('prevBtn').addEventListener('click', () => {
+  state.letterIdx = (state.letterIdx-1+26)%26;
+  state.letter = alphabet[state.letterIdx];
+  buildScene();
+});
+document.getElementById('nextBtn').addEventListener('click', () => {
+  state.letterIdx = (state.letterIdx+1)%26;
+  state.letter = alphabet[state.letterIdx];
+  buildScene();
+});
+
+// Clear
+document.getElementById('clearBtn').addEventListener('click', () => {
+  state.strokeIdx = 0;
+  state.strokeGood = 0;
+  state.strokeBad = 0;
+  state.scene?.strokes.forEach(s => { s.done=false; s.progress=0; s.good=0; s.bad=0; });
+  clearCanvas();
+  updateStrokeOrderPanel();
+  updateUI();
+  setStatus('Board cleared. Start on the green dot numbered <strong>1</strong>.', 'ready');
+});
+
+// Demo
+document.getElementById('demoBtn').addEventListener('click', playDemo);
+
+// Toggle helpers
+document.getElementById('toggleHelpersBtn').addEventListener('click', () => {
+  state.showHelpers = !state.showHelpers;
+  buildScene();
+});
+
+// Hint
+document.getElementById('hintBtn').addEventListener('click', () => {
+  const stroke = getStroke();
+  if (!stroke) return;
+  const pct = stroke.sampled.length ? Math.round(stroke.progress/stroke.sampled.length*100) : 0;
+  setStatus(`Stroke ${state.strokeIdx+1} of ${state.scene.strokes.length}. You're ${pct}% through this stroke. The gold arrows show which direction to go.`, 'ready');
+});
+
+// Font selector
+const fontSelect = document.getElementById('fontSelect');
+Object.entries(FONTS).forEach(([key,info]) => {
+  const opt = document.createElement('option');
+  opt.value = key; opt.textContent = info.label;
+  fontSelect.appendChild(opt);
+});
+fontSelect.value = state.fontKey;
+fontSelect.addEventListener('change', () => {
+  state.fontKey = fontSelect.value;
+  loadFont(state.fontKey, true);
+});
+
+// Name mode
+document.getElementById('buildNameBtn').addEventListener('click', () => setMode('name'));
+document.getElementById('nameInput').addEventListener('keydown', e => { if (e.key==='Enter') setMode('name'); });
+
+// Pointer events on canvas
+traceCanvas.addEventListener('pointerdown', onPointerDown);
+traceCanvas.addEventListener('pointermove', onPointerMove);
+traceCanvas.addEventListener('pointerup', onPointerUp);
+traceCanvas.addEventListener('pointercancel', onPointerUp);
+traceCanvas.addEventListener('pointerleave', onPointerUp);
+
+// ─────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────
+renderAlpha();
+updateUI();
+buildScene();
+loadFont(state.fontKey, true);
+</script>
 </body>
 </html>
