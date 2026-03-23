@@ -1,0 +1,913 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cursive Quest Font Picker</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a33;
+      --panel2:#172246;
+      --text:#f5f7fb;
+      --muted:#a8b2d4;
+      --line:#2e3f77;
+      --accent:#7dd3fc;
+      --accent2:#a78bfa;
+      --good:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(125,211,252,.12), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(167,139,250,.12), transparent 25%),
+        var(--bg);
+      color:var(--text);
+    }
+    .app{max-width:1320px;margin:0 auto;padding:20px;display:grid;gap:18px}
+    .hero,.layout{display:grid;gap:18px}
+    .hero{grid-template-columns:1.15fr .85fr}
+    .layout{grid-template-columns:360px minmax(0,1fr)}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:24px;
+      box-shadow:0 20px 50px rgba(0,0,0,.22);
+    }
+    .pad{padding:20px}
+    .eyebrow{display:inline-block;padding:8px 12px;border-radius:999px;background:rgba(125,211,252,.12);color:var(--accent);font-weight:800;font-size:13px;margin-bottom:12px}
+    h1{margin:0 0 10px;font-size:clamp(34px, 5vw, 60px);line-height:.95;letter-spacing:-.04em}
+    .sub{color:var(--muted);font-size:18px;line-height:1.45}
+    .mini{display:grid;gap:10px}
+    .mini-item{padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+    .mini-item strong{display:block;margin-bottom:6px}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+    button,input,select{font:inherit}
+    .tab,.btn,.alpha-btn{
+      border:none;border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--text);
+      background:#1a2445;font-weight:800;
+    }
+    .tab.active,.alpha-btn.active,.tab:hover{background:linear-gradient(180deg, rgba(125,211,252,.22), rgba(167,139,250,.16));outline:1px solid rgba(125,211,252,.2)}
+    .btn.primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#08111f}
+    .btn.ghost{background:#192445}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .sidebar .section-title{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 10px}
+    .lesson-box,.info-box,.font-box{background:#10182f;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px}
+    .focus{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:10px}
+    .focus .big{font-size:64px;font-weight:900;color:var(--accent);line-height:.8}
+    .focus .tag{font-size:13px;color:var(--muted);background:rgba(255,255,255,.05);border-radius:999px;padding:8px 10px}
+    .hint{color:var(--muted);font-size:14px;line-height:1.45}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .progress-meta{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:var(--muted);margin:14px 0 10px}
+    .bar{height:14px;border-radius:999px;background:#0f1730;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar > div{height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--accent),var(--accent2));transition:width .2s ease}
+    .alpha-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+    .alpha-btn.done{box-shadow:inset 0 0 0 1px rgba(52,211,153,.28);color:#b5f6de}
+    .name-box,.font-box{display:grid;gap:10px}
+    .name-box input,.font-box select{width:100%;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:#0d1730;color:var(--text)}
+    .board-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+    .board-title{font-size:28px;font-weight:900;letter-spacing:-.03em;margin:0 0 4px}
+    .board-copy{font-size:14px;color:var(--muted)}
+    .score{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{background:#121c38;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 12px;min-width:120px}
+    .chip .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+    .chip .v{font-size:24px;font-weight:900}
+    .canvas-frame{background:#0c1429;border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:18px}
+    .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+    .legend span{display:inline-flex;align-items:center;gap:8px}
+    .sw{width:14px;height:14px;border-radius:999px;display:inline-block}
+    .stage-wrap{
+      position:relative;
+      width:100%;
+      aspect-ratio:16/9;
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(125,211,252,.06), rgba(167,139,250,.05));
+      background-size:40px 40px,40px 40px,100% 100%;
+    }
+    .guide-svg,.trace-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .trace-canvas{touch-action:none;cursor:crosshair}
+    .preview-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end;margin-bottom:10px}
+    .font-preview{padding:14px 16px;border-radius:18px;background:#101831;border:1px solid rgba(255,255,255,.06);min-height:78px;display:flex;align-items:center;font-size:36px;color:#eef3ff;overflow:hidden;white-space:nowrap}
+    .font-meta{font-size:13px;color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-size:12px;color:var(--muted)}
+    .status{margin-top:12px;padding:14px 16px;border-radius:16px;background:#12213e;border:1px solid rgba(255,255,255,.06);font-weight:800}
+    .status.good{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.2);color:#b7f4dc}
+    .status.warn{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.2);color:#fde8ac}
+    .status.bad{background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.2);color:#ffd0da}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+    .step{background:#101831;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px}
+    .step .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+    .step .v{font-weight:800;line-height:1.35}
+    .tiny{color:var(--muted);font-size:13px;line-height:1.5;margin-top:12px}
+    .loading{color:#fde8ac}
+    .success{color:#b7f4dc}
+    @media (max-width:980px){.hero,.layout{grid-template-columns:1fr}}
+    @media (max-width:720px){
+      .app{padding:14px}
+      .tabs,.actions,.steps{grid-template-columns:1fr}
+      .alpha-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+      .preview-row{grid-template-columns:1fr}
+      .font-preview{font-size:28px;white-space:normal}
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="card pad">
+        <div class="eyebrow">✍️ Cursive Quest</div>
+        <h1>Trace it with the script style you want.</h1>
+        <div class="sub">This version adds real script font choices so students can practice the same word in different cursive styles. The tracing layer is still separate from the guide so finger, stylus, and mouse input stay reliable.</div>
+      </div>
+      <div class="card pad">
+        <div class="mini">
+          <div class="mini-item"><strong>1. Pick a style</strong><span class="hint">Try different free script fonts that feel closer to the look you want.</span></div>
+          <div class="mini-item"><strong>2. Start on the green dot</strong><span class="hint">Each path begins with a visible pen location and order number.</span></div>
+          <div class="mini-item"><strong>3. Trace a real name</strong><span class="hint">Type a name and rebuild the guide in the chosen script.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="card pad sidebar">
+        <div class="tabs">
+          <button class="tab active" data-mode="learn">Learn</button>
+          <button class="tab" data-mode="challenge">Challenge</button>
+          <button class="tab" data-mode="name">Write a Name</button>
+        </div>
+
+        <div class="font-box">
+          <div class="section-title" style="margin-top:0">Script style</div>
+          <select id="fontSelect"></select>
+          <div class="font-meta" id="fontLoadInfo">Loading font…</div>
+        </div>
+
+        <div class="lesson-box">
+          <div class="focus">
+            <div class="big" id="focusLetter">a</div>
+            <div class="tag" id="focusTag">Letter 1 of 26</div>
+          </div>
+          <div class="hint" id="lessonHint">Start on the green dot. Stay near the path. Finish each stroke in order.</div>
+          <div class="actions">
+            <button class="btn primary" id="prevBtn">Previous</button>
+            <button class="btn primary" id="nextBtn">Next</button>
+            <button class="btn ghost" id="clearBtn">Clear trace</button>
+            <button class="btn ghost" id="demoBtn">Show demo</button>
+          </div>
+        </div>
+
+        <div class="progress-meta">
+          <span id="progressText">0 of 26 letters mastered</span>
+          <span id="accuracyText">Accuracy 0%</span>
+        </div>
+        <div class="bar"><div id="progressFill"></div></div>
+
+        <div id="alphabetSection">
+          <div class="section-title">Alphabet</div>
+          <div class="alpha-grid" id="alphaGrid"></div>
+        </div>
+
+        <div id="nameSection" style="display:none">
+          <div class="section-title">Type a name</div>
+          <div class="name-box">
+            <input id="nameInput" maxlength="18" value="david" />
+            <button class="btn primary" id="buildNameBtn">Build word</button>
+          </div>
+        </div>
+
+        <div class="section-title">What changed</div>
+        <div class="info-box">
+          <div class="hint">I could not bundle the exact paid fonts from your screenshot. Instead I added a set of free script fonts in that same spirit so you can switch styles inside the app.</div>
+        </div>
+      </aside>
+
+      <main class="card pad">
+        <div class="preview-row">
+          <div>
+            <div class="font-preview" id="fontPreview">Sparkling Valentine</div>
+            <div class="tiny" id="previewCaption">Previewing the current script style.</div>
+          </div>
+          <div class="pill" id="fontPill">Style</div>
+        </div>
+
+        <div class="board-top">
+          <div>
+            <div class="board-title" id="boardTitle">Trace the letter a</div>
+            <div class="board-copy" id="boardCopy">Green means start. Yellow is the guide path. Purple is your live trace.</div>
+          </div>
+          <div class="score">
+            <div class="chip"><div class="k">Current Stroke</div><div class="v" id="strokeCounter">1 / 1</div></div>
+            <div class="chip"><div class="k">Score</div><div class="v" id="scoreValue">0</div></div>
+            <div class="chip"><div class="k">Mastered</div><div class="v" id="masteredValue">0</div></div>
+          </div>
+        </div>
+
+        <div class="canvas-frame">
+          <div class="toolbar">
+            <div class="legend">
+              <span><i class="sw" style="background:var(--good)"></i> Start point</span>
+              <span><i class="sw" style="background:var(--warn)"></i> Guide path</span>
+              <span><i class="sw" style="background:var(--accent2)"></i> Student trace</span>
+            </div>
+            <div>
+              <button class="btn ghost" id="toggleHelpersBtn">Hide helpers</button>
+            </div>
+          </div>
+
+          <div class="stage-wrap" id="stageWrap">
+            <svg class="guide-svg" id="guideSvg" viewBox="0 0 960 540" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
+                  <feMerge>
+                    <feMergeNode in="blur"></feMergeNode>
+                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                  </feMerge>
+                </filter>
+                <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"></path>
+                </marker>
+              </defs>
+              <g id="guideLayer"></g>
+              <g id="helperLayer"></g>
+            </svg>
+            <canvas class="trace-canvas" id="traceCanvas" width="960" height="540"></canvas>
+          </div>
+
+          <div class="steps">
+            <div class="step"><div class="k">Step 1</div><div class="v" id="stepOne">Place the pen on the green dot.</div></div>
+            <div class="step"><div class="k">Step 2</div><div class="v" id="stepTwo">Move along the yellow path.</div></div>
+            <div class="step"><div class="k">Step 3</div><div class="v" id="stepThree">Finish every stroke to unlock the next letter.</div></div>
+          </div>
+
+          <div class="status warn" id="statusBox">Ready. Start on the green dot.</div>
+          <div class="tiny">Font based tracing needs internet the first time so the script files can load. If that fails, the app falls back to the built in tracing shapes.</div>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const FONT_OPTIONS = {
+      allura: {
+        label: 'Allura',
+        family: 'Allura Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/allura/Allura-Regular.ttf'
+      },
+      alexbrush: {
+        label: 'Alex Brush',
+        family: 'Alex Brush Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/alexbrush/AlexBrush-Regular.ttf'
+      },
+      sacramento: {
+        label: 'Sacramento',
+        family: 'Sacramento Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/sacramento/Sacramento-Regular.ttf'
+      },
+      greatvibes: {
+        label: 'Great Vibes',
+        family: 'Great Vibes Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/greatvibes/GreatVibes-Regular.ttf'
+      },
+      pinyon: {
+        label: 'Pinyon Script',
+        family: 'Pinyon Script Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/pinyonscript/PinyonScript-Regular.ttf'
+      },
+      yellowtail: {
+        label: 'Yellowtail',
+        family: 'Yellowtail Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/yellowtail/Yellowtail-Regular.ttf'
+      },
+      petitformal: {
+        label: 'Petit Formal Script',
+        family: 'Petit Formal Script Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/petitformalscript/PetitFormalScript-Regular.ttf'
+      },
+      italianno: {
+        label: 'Italianno',
+        family: 'Italianno Custom',
+        url: 'https://raw.githubusercontent.com/google/fonts/main/ofl/italianno/Italianno-Regular.ttf'
+      }
+    };
+
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+    const guideLayer = document.getElementById('guideLayer');
+    const helperLayer = document.getElementById('helperLayer');
+    const traceCanvas = document.getElementById('traceCanvas');
+    const ctx = traceCanvas.getContext('2d');
+
+    const state = {
+      mode: 'learn',
+      currentLetterIndex: 0,
+      currentLetter: 'a',
+      showHelpers: true,
+      scene: null,
+      pointerDown: false,
+      currentStrokeIndex: 0,
+      lastPoint: null,
+      totalSamples: 0,
+      goodSamples: 0,
+      score: 0,
+      mastered: new Set(),
+      demoPlaying: false,
+      selectedFontKey: 'allura',
+      fontsLoaded: {},
+      fontLoading: false,
+      usingFallback: false
+    };
+
+    const ui = {
+      focusLetter: document.getElementById('focusLetter'),
+      focusTag: document.getElementById('focusTag'),
+      lessonHint: document.getElementById('lessonHint'),
+      boardTitle: document.getElementById('boardTitle'),
+      boardCopy: document.getElementById('boardCopy'),
+      strokeCounter: document.getElementById('strokeCounter'),
+      progressText: document.getElementById('progressText'),
+      progressFill: document.getElementById('progressFill'),
+      accuracyText: document.getElementById('accuracyText'),
+      scoreValue: document.getElementById('scoreValue'),
+      masteredValue: document.getElementById('masteredValue'),
+      statusBox: document.getElementById('statusBox'),
+      alphaGrid: document.getElementById('alphaGrid'),
+      nameInput: document.getElementById('nameInput'),
+      nameSection: document.getElementById('nameSection'),
+      alphabetSection: document.getElementById('alphabetSection'),
+      toggleHelpersBtn: document.getElementById('toggleHelpersBtn'),
+      stepOne: document.getElementById('stepOne'),
+      stepTwo: document.getElementById('stepTwo'),
+      stepThree: document.getElementById('stepThree'),
+      fontSelect: document.getElementById('fontSelect'),
+      fontLoadInfo: document.getElementById('fontLoadInfo'),
+      fontPreview: document.getElementById('fontPreview'),
+      previewCaption: document.getElementById('previewCaption'),
+      fontPill: document.getElementById('fontPill')
+    };
+
+    function pt(x, y){ return {x, y}; }
+
+    function pathFromPoints(points){
+      if (!points || !points.length) return '';
+      if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+      let d = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 1; i < points.length - 1; i++){
+        const xc = (points[i].x + points[i + 1].x) / 2;
+        const yc = (points[i].y + points[i + 1].y) / 2;
+        d += ` Q ${points[i].x} ${points[i].y} ${xc} ${yc}`;
+      }
+      const last = points[points.length - 1];
+      const prev = points[points.length - 2];
+      d += ` Q ${prev.x} ${prev.y} ${last.x} ${last.y}`;
+      return d;
+    }
+
+    function scalePoints(points, ox, oy, scaleX = 1, scaleY = 1){
+      return points.map(p => pt(ox + p.x * scaleX, oy + p.y * scaleY));
+    }
+
+    function letterStrokeData(letter){
+      const map = {
+        a: {w:58, strokes:[[pt(0,80), pt(10,56), pt(24,48), pt(40,54), pt(44,78), pt(36,94), pt(18,92), pt(8,80), pt(16,64), pt(33,64), pt(46,80), pt(58,80)]]},
+        b: {w:60, strokes:[[pt(0,80), pt(4,58), pt(8,28), pt(18,16), pt(24,30), pt(18,54), pt(10,80), pt(20,66), pt(34,56), pt(48,60), pt(50,80), pt(38,94), pt(20,90), pt(8,80), pt(58,80)]]},
+        c: {w:52, strokes:[[pt(48,60), pt(38,50), pt(20,50), pt(8,64), pt(8,82), pt(20,94), pt(40,92), pt(50,82)]]},
+        d: {w:62, strokes:[[pt(0,80), pt(10,58), pt(24,50), pt(40,56), pt(42,78), pt(34,94), pt(16,92), pt(6,80), pt(16,66), pt(34,64), pt(46,80), pt(52,58), pt(50,26), pt(42,14), pt(34,24), pt(38,48), pt(54,80), pt(62,80)]]},
+        e: {w:48, strokes:[[pt(8,74), pt(18,58), pt(36,58), pt(42,70), pt(30,78), pt(16,78), pt(10,74), pt(16,88), pt(34,92), pt(46,82)]]},
+        f: {w:48, strokes:[[pt(34,12), pt(18,18), pt(12,44), pt(16,70), pt(28,94), pt(38,116)],[pt(2,50), pt(36,50)]]},
+        g: {w:58, strokes:[[pt(0,80), pt(10,58), pt(26,50), pt(42,58), pt(44,80), pt(34,96), pt(16,92), pt(6,80), pt(18,64), pt(34,64), pt(46,80), pt(44,104), pt(34,118), pt(18,116), pt(8,104)]]},
+        h: {w:60, strokes:[[pt(0,80), pt(4,58), pt(8,26), pt(18,16), pt(24,28), pt(18,52), pt(10,80), pt(16,66), pt(28,56), pt(42,60), pt(46,80), pt(58,80)]]},
+        i: {w:28, strokes:[[pt(0,80), pt(8,60), pt(14,58), pt(18,80), pt(28,80)],[pt(13,34), pt(13,34)]]},
+        j: {w:34, strokes:[[pt(14,58), pt(20,80), pt(18,104), pt(10,118), pt(0,108)],[pt(18,34), pt(18,34)]]},
+        k: {w:58, strokes:[[pt(0,80), pt(4,58), pt(8,24), pt(18,14), pt(24,28), pt(18,52), pt(10,80)],[pt(14,60), pt(26,58), pt(42,48)],[pt(20,62), pt(34,78), pt(54,80)]]},
+        l: {w:40, strokes:[[pt(10,80), pt(14,60), pt(16,26), pt(26,14), pt(34,30), pt(22,58), pt(12,80), pt(24,80), pt(40,80)]]},
+        m: {w:78, strokes:[[pt(0,80), pt(6,60), pt(16,58), pt(24,80), pt(30,62), pt(40,58), pt(50,80), pt(56,62), pt(66,58), pt(74,80), pt(78,80)]]},
+        n: {w:58, strokes:[[pt(0,80), pt(6,60), pt(16,58), pt(24,80), pt(30,62), pt(40,58), pt(52,80), pt(58,80)]]},
+        o: {w:54, strokes:[[pt(10,64), pt(22,50), pt(40,54), pt(46,76), pt(36,92), pt(18,92), pt(8,76), pt(16,62), pt(34,62), pt(48,80), pt(54,80)]]},
+        p: {w:58, strokes:[[pt(0,116), pt(4,92), pt(8,58), pt(18,50), pt(34,56), pt(42,76), pt(34,94), pt(16,90), pt(8,80), pt(16,66), pt(34,66), pt(48,80), pt(58,80)]]},
+        q: {w:60, strokes:[[pt(0,80), pt(10,58), pt(26,50), pt(42,58), pt(44,80), pt(34,96), pt(16,92), pt(6,80), pt(18,64), pt(34,64), pt(46,80), pt(50,100), pt(58,116)]]},
+        r: {w:42, strokes:[[pt(0,80), pt(6,60), pt(14,58), pt(20,80), pt(26,64), pt(34,58), pt(42,60)]]},
+        s: {w:46, strokes:[[pt(38,56), pt(24,50), pt(10,58), pt(18,70), pt(34,76), pt(40,88), pt(28,94), pt(10,88), pt(4,80), pt(18,78), pt(34,84), pt(46,80)]]},
+        t: {w:44, strokes:[[pt(20,16), pt(14,42), pt(16,70), pt(26,92), pt(40,80)],[pt(4,50), pt(32,50)]]},
+        u: {w:58, strokes:[[pt(0,58), pt(8,80), pt(16,92), pt(30,88), pt(36,58), pt(42,80), pt(50,92), pt(58,80)]]},
+        v: {w:56, strokes:[[pt(0,58), pt(12,92), pt(28,58), pt(44,92), pt(56,80)]]},
+        w: {w:78, strokes:[[pt(0,58), pt(10,92), pt(24,58), pt(38,92), pt(52,58), pt(66,92), pt(78,80)]]},
+        x: {w:52, strokes:[[pt(0,60), pt(18,92), pt(36,58), pt(52,80)],[pt(38,58), pt(18,82), pt(6,80)]]},
+        y: {w:58, strokes:[[pt(0,58), pt(12,92), pt(28,58), pt(38,82), pt(34,104), pt(24,118), pt(12,108)]]},
+        z: {w:50, strokes:[[pt(6,58), pt(42,58), pt(10,92), pt(46,92), pt(50,80)]]},
+        ' ': {w:34, strokes:[]}
+      };
+      return map[letter] || map.a;
+    }
+
+    function createSvg(tag, attrs = {}){
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
+      return el;
+    }
+
+    function samplePath(pathEl, count = 160){
+      const len = pathEl.getTotalLength();
+      const out = [];
+      for (let i = 0; i <= count; i++){
+        const p = pathEl.getPointAtLength(len * (i / count));
+        out.push({x:p.x, y:p.y});
+      }
+      return out;
+    }
+
+    function distance(a, b){
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      return Math.hypot(dx, dy);
+    }
+
+    function buildFallbackWordScene(text){
+      const cleaned = (text || 'a').toLowerCase().replace(/[^a-z ]/g, '') || 'a';
+      const scene = {label: cleaned, strokes: []};
+      let x = 80;
+      const y = 255;
+      const scale = 3.2;
+      cleaned.split('').forEach((ch, idx) => {
+        const data = letterStrokeData(ch);
+        if (ch === ' '){ x += data.w * scale; return; }
+        data.strokes.forEach((stroke, sIdx) => {
+          const points = scalePoints(stroke, x, y - 260, scale, scale);
+          scene.strokes.push({
+            id: `${ch}-${idx}-${sIdx}`,
+            letter: ch,
+            points,
+            d: pathFromPoints(points),
+            progress: 0,
+            done: false,
+            good: 0,
+            bad: 0,
+            sampled: []
+          });
+        });
+        x += (data.w - 10) * scale;
+      });
+      return scene;
+    }
+
+    function commandsToD(commands){
+      let d = '';
+      for (const c of commands){
+        if (c.type === 'M' || c.type === 'L') d += `${c.type} ${c.x} ${c.y} `;
+        else if (c.type === 'Q') d += `Q ${c.x1} ${c.y1} ${c.x} ${c.y} `;
+        else if (c.type === 'C') d += `C ${c.x1} ${c.y1} ${c.x2} ${c.y2} ${c.x} ${c.y} `;
+        else if (c.type === 'Z') d += 'Z ';
+      }
+      return d.trim();
+    }
+
+    function splitSubpaths(commands){
+      const out = [];
+      let current = [];
+      for (const cmd of commands){
+        if (cmd.type === 'M' && current.length){
+          out.push(current);
+          current = [cmd];
+        } else {
+          current.push(cmd);
+        }
+      }
+      if (current.length) out.push(current);
+      return out.filter(arr => arr.length > 1);
+    }
+
+    function transformCommand(cmd, scale, offsetX, offsetY){
+      const next = {type: cmd.type};
+      if ('x' in cmd) next.x = cmd.x * scale + offsetX;
+      if ('y' in cmd) next.y = cmd.y * scale + offsetY;
+      if ('x1' in cmd) next.x1 = cmd.x1 * scale + offsetX;
+      if ('y1' in cmd) next.y1 = cmd.y1 * scale + offsetY;
+      if ('x2' in cmd) next.x2 = cmd.x2 * scale + offsetX;
+      if ('y2' in cmd) next.y2 = cmd.y2 * scale + offsetY;
+      return next;
+    }
+
+    function buildFontScene(text){
+      const info = state.fontsLoaded[state.selectedFontKey];
+      if (!info || !info.font) return null;
+      const font = info.font;
+      const cleaned = (text || 'a').replace(/[^a-zA-Z ]/g, '') || 'a';
+      const fontSize = state.mode === 'name' ? 230 : 360;
+      const path = font.getPath(cleaned, 0, 0, fontSize);
+      const bbox = path.getBoundingBox();
+      const width = Math.max(1, bbox.x2 - bbox.x1);
+      const height = Math.max(1, bbox.y2 - bbox.y1);
+      const maxW = state.mode === 'name' ? 780 : 620;
+      const maxH = 300;
+      const scale = Math.min(maxW / width, maxH / height);
+      const offsetX = (960 - width * scale) / 2 - bbox.x1 * scale;
+      const offsetY = 265 - ((bbox.y1 + bbox.y2) / 2) * scale;
+      const subpaths = splitSubpaths(path.commands).map((commands, idx) => {
+        const transformed = commands.map(cmd => transformCommand(cmd, scale, offsetX, offsetY));
+        return {
+          id: `font-${idx}`,
+          letter: cleaned,
+          d: commandsToD(transformed),
+          progress: 0,
+          done: false,
+          good: 0,
+          bad: 0,
+          sampled: []
+        };
+      }).filter(stroke => stroke.d && /[CLQ]/.test(stroke.d));
+      return {label: cleaned, strokes: subpaths};
+    }
+
+    function getActiveSceneText(){
+      return state.mode === 'name' ? (ui.nameInput.value || 'david') : state.currentLetter;
+    }
+
+    function buildScene(){
+      const text = getActiveSceneText();
+      state.scene = buildFontScene(text);
+      state.usingFallback = !state.scene || !state.scene.strokes.length;
+      if (state.usingFallback) state.scene = buildFallbackWordScene(text.toLowerCase());
+      state.currentStrokeIndex = 0;
+      guideLayer.innerHTML = '';
+      helperLayer.innerHTML = '';
+      clearCanvas();
+
+      const lines = [120, 240, 365];
+      const colors = ['rgba(255,255,255,.06)', 'rgba(255,255,255,.08)', 'rgba(125,211,252,.18)'];
+      lines.forEach((y, i) => {
+        guideLayer.appendChild(createSvg('line', {
+          x1:40, y1:y, x2:920, y2:y,
+          stroke:colors[i], 'stroke-width':2, 'stroke-dasharray': i === 2 ? '10 8' : '8 10'
+        }));
+      });
+
+      state.scene.strokes.forEach((stroke, idx) => {
+        const outline = createSvg('path', {
+          d: stroke.d, fill:'none', stroke:'rgba(255,255,255,.18)', 'stroke-width':26, 'stroke-linecap':'round', 'stroke-linejoin':'round'
+        });
+        const guide = createSvg('path', {
+          d: stroke.d, fill:'none', stroke:'rgba(251,191,36,.92)', 'stroke-width':20, 'stroke-linecap':'round', 'stroke-linejoin':'round',
+          filter: state.showHelpers ? 'url(#glow)' : '', opacity: state.showHelpers ? 0.95 : 0.35
+        });
+        guideLayer.appendChild(outline);
+        guideLayer.appendChild(guide);
+        stroke.sampled = samplePath(guide, Math.max(120, Math.floor(guide.getTotalLength() / 6)));
+
+        if (state.showHelpers && stroke.sampled.length){
+          const start = stroke.sampled[0];
+          helperLayer.appendChild(createSvg('circle', {cx:start.x, cy:start.y, r:10, fill:'#34d399', stroke:'rgba(255,255,255,.6)', 'stroke-width':2}));
+          const num = createSvg('text', {x:start.x + 14, y:start.y - 14, fill:'#f6f7fb', 'font-size':20, 'font-weight':900});
+          num.textContent = idx + 1;
+          helperLayer.appendChild(num);
+          if (stroke.sampled.length > 20){
+            const a = stroke.sampled[Math.floor(stroke.sampled.length * .35)];
+            const b = stroke.sampled[Math.floor(stroke.sampled.length * .45)];
+            helperLayer.appendChild(createSvg('line', {
+              x1:a.x, y1:a.y, x2:b.x, y2:b.y, stroke:'#fbbf24', 'stroke-width':6, 'stroke-linecap':'round', 'marker-end':'url(#arrowHead)', opacity:.85
+            }));
+          }
+        }
+      });
+
+      updateUI();
+      setStatus(state.usingFallback ? 'Font guide unavailable, so the app is using the built in tracing shapes.' : 'Ready. Start on the green dot.', state.usingFallback ? 'warn' : 'warn');
+    }
+
+    function clearCanvas(){
+      ctx.clearRect(0, 0, traceCanvas.width, traceCanvas.height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#a78bfa';
+      ctx.lineWidth = 14;
+    }
+
+    function currentStroke(){
+      return state.scene?.strokes[state.currentStrokeIndex] || null;
+    }
+
+    function pointFromEvent(evt){
+      const rect = traceCanvas.getBoundingClientRect();
+      return {
+        x: ((evt.clientX - rect.left) / rect.width) * traceCanvas.width,
+        y: ((evt.clientY - rect.top) / rect.height) * traceCanvas.height
+      };
+    }
+
+    function setStatus(msg, tone = 'warn'){
+      ui.statusBox.textContent = msg;
+      ui.statusBox.className = `status ${tone}`;
+    }
+
+    function updatePreview(){
+      const fontInfo = FONT_OPTIONS[state.selectedFontKey];
+      const previewText = state.mode === 'name' ? (ui.nameInput.value || 'Sparkling Valentine') : 'Sparkling Valentine';
+      ui.fontPreview.textContent = previewText;
+      ui.fontPreview.style.fontFamily = `"${fontInfo.family}", cursive`;
+      ui.fontPill.textContent = fontInfo.label;
+      ui.previewCaption.textContent = state.usingFallback
+        ? `${fontInfo.label} preview loaded. Tracing is using the fallback guide right now.`
+        : `${fontInfo.label} preview loaded. The tracing guide is being generated from this font.`;
+    }
+
+    function updateUI(){
+      const label = getActiveSceneText();
+      const fontInfo = FONT_OPTIONS[state.selectedFontKey];
+      ui.focusLetter.textContent = state.mode === 'name' ? label : state.currentLetter;
+      ui.focusTag.textContent = state.mode === 'name' ? `${label.length} characters` : `Letter ${state.currentLetterIndex + 1} of 26`;
+      ui.boardTitle.textContent = state.mode === 'name' ? `Trace the name ${label}` : `Trace the letter ${label}`;
+      ui.boardCopy.textContent = state.mode === 'challenge'
+        ? 'Challenge mode gives you fewer helpers. The stroke path still matters.'
+        : state.mode === 'name'
+          ? 'Type a name, pick a script style, then trace it left to right.'
+          : 'Green means start. Yellow is the guide path. Purple is your live trace.';
+      ui.lessonHint.textContent = state.mode === 'name'
+        ? 'This mode rebuilds the guide using your chosen script style.'
+        : state.mode === 'challenge'
+          ? 'Find the start and trust the shape.'
+          : 'Start on the green dot. Stay near the path. Finish each stroke in order.';
+      ui.strokeCounter.textContent = `${Math.min(state.currentStrokeIndex + 1, Math.max(state.scene?.strokes.length || 1, 1))} / ${state.scene?.strokes.length || 1}`;
+      ui.progressText.textContent = `${state.mastered.size} of 26 letters mastered`;
+      ui.progressFill.style.width = `${(state.mastered.size / 26) * 100}%`;
+      const acc = state.totalSamples ? Math.round((state.goodSamples / state.totalSamples) * 100) : 0;
+      ui.accuracyText.textContent = `Accuracy ${acc}%`;
+      ui.scoreValue.textContent = state.score;
+      ui.masteredValue.textContent = state.mastered.size;
+      ui.toggleHelpersBtn.textContent = state.showHelpers ? 'Hide helpers' : 'Show helpers';
+      ui.stepOne.textContent = state.mode === 'challenge' ? 'Find the start point.' : 'Place the pen on the green dot.';
+      ui.stepTwo.textContent = state.mode === 'name' ? 'Move left to right through the word.' : 'Move along the yellow path.';
+      ui.stepThree.textContent = state.mode === 'name' ? 'Complete the whole word cleanly.' : 'Finish each stroke to move on.';
+      ui.fontLoadInfo.innerHTML = state.fontLoading
+        ? `<span class="loading">Loading ${fontInfo.label}…</span>`
+        : state.usingFallback
+          ? `${fontInfo.label} could not build a live trace path here, so the app switched to the built in guide.`
+          : `<span class="success">${fontInfo.label} ready.</span>`;
+      [...ui.alphaGrid.querySelectorAll('.alpha-btn')].forEach((btn, i) => {
+        btn.classList.toggle('active', state.mode !== 'name' && i === state.currentLetterIndex);
+        btn.classList.toggle('done', state.mastered.has(alphabet[i]));
+      });
+      updatePreview();
+    }
+
+    function resetSceneProgress(){
+      state.currentStrokeIndex = 0;
+      state.pointerDown = false;
+      state.lastPoint = null;
+      state.scene?.strokes.forEach(s => {
+        s.progress = 0;
+        s.done = false;
+        s.good = 0;
+        s.bad = 0;
+      });
+      clearCanvas();
+      updateUI();
+    }
+
+    function beginTrace(evt){
+      if (state.demoPlaying) return;
+      const stroke = currentStroke();
+      if (!stroke || !stroke.sampled.length) return;
+      const p = pointFromEvent(evt);
+      const start = stroke.sampled[0];
+      const threshold = state.mode === 'challenge' ? 75 : 60;
+      if (distance(p, start) > threshold){
+        setStatus('Start closer to the green dot.', 'warn');
+        return;
+      }
+      state.pointerDown = true;
+      state.lastPoint = p;
+      if (traceCanvas.setPointerCapture) traceCanvas.setPointerCapture(evt.pointerId);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      setStatus(`Stroke ${state.currentStrokeIndex + 1} started. Keep going.`, 'good');
+      evt.preventDefault();
+    }
+
+    function moveTrace(evt){
+      if (!state.pointerDown || state.demoPlaying) return;
+      const stroke = currentStroke();
+      if (!stroke) return;
+      const p = pointFromEvent(evt);
+
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      state.lastPoint = p;
+
+      let bestIndex = stroke.progress;
+      let bestDistance = Infinity;
+      const start = Math.max(0, stroke.progress - 10);
+      const end = Math.min(stroke.sampled.length, stroke.progress + 55);
+      for (let i = start; i < end; i++){
+        const d = distance(p, stroke.sampled[i]);
+        if (d < bestDistance){
+          bestDistance = d;
+          bestIndex = i;
+        }
+      }
+
+      state.totalSamples += 1;
+      if (bestDistance < 25){
+        state.goodSamples += 1;
+        stroke.good += 1;
+      } else {
+        stroke.bad += 1;
+      }
+
+      if (bestDistance < 34 && bestIndex >= stroke.progress - 4){
+        stroke.progress = Math.max(stroke.progress, bestIndex);
+      }
+
+      if (stroke.progress >= stroke.sampled.length - 6){
+        finishStroke();
+      } else if (bestDistance > 44){
+        setStatus('You drifted off the path. Pull back toward the guide.', 'warn');
+      }
+      updateUI();
+      evt.preventDefault();
+    }
+
+    function endTrace(evt){
+      if (!state.pointerDown) return;
+      const stroke = currentStroke();
+      state.pointerDown = false;
+      state.lastPoint = null;
+      if (stroke && stroke.progress > stroke.sampled.length * 0.82){
+        finishStroke();
+      } else if (stroke && !stroke.done) {
+        setStatus('Almost. Start that stroke again and keep following the path.', 'warn');
+      }
+      try { if (traceCanvas.releasePointerCapture) traceCanvas.releasePointerCapture(evt.pointerId); } catch (e) {}
+      evt.preventDefault();
+    }
+
+    function finishStroke(){
+      const stroke = currentStroke();
+      if (!stroke || stroke.done) return;
+      stroke.done = true;
+      state.pointerDown = false;
+      state.score += Math.max(10, 24 - Math.floor(stroke.bad / 6));
+      state.currentStrokeIndex += 1;
+      if (state.currentStrokeIndex >= state.scene.strokes.length){
+        finishScene();
+      } else {
+        setStatus(`Nice. Stroke ${state.currentStrokeIndex} complete. Start the next green dot.`, 'good');
+      }
+      updateUI();
+    }
+
+    function finishScene(){
+      if (state.mode !== 'name') state.mastered.add(state.currentLetter);
+      state.score += 35;
+      setStatus(state.mode === 'name' ? 'Word complete. Nice connected writing.' : `Letter ${state.currentLetter} mastered.`, 'good');
+      renderAlphabetButtons();
+      updateUI();
+    }
+
+    function clearTrace(){
+      resetSceneProgress();
+      setStatus('Trace cleared. Start again on the green dot.', 'warn');
+    }
+
+    function nextLetter(){
+      state.currentLetterIndex = (state.currentLetterIndex + 1) % alphabet.length;
+      state.currentLetter = alphabet[state.currentLetterIndex];
+      buildScene();
+    }
+
+    function prevLetter(){
+      state.currentLetterIndex = (state.currentLetterIndex - 1 + alphabet.length) % alphabet.length;
+      state.currentLetter = alphabet[state.currentLetterIndex];
+      buildScene();
+    }
+
+    function setMode(mode){
+      state.mode = mode;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.mode === mode));
+      ui.nameSection.style.display = mode === 'name' ? 'block' : 'none';
+      ui.alphabetSection.style.display = mode === 'name' ? 'none' : 'block';
+      if (mode === 'challenge') state.showHelpers = false;
+      if (mode === 'learn') state.showHelpers = true;
+      buildScene();
+    }
+
+    function renderAlphabetButtons(){
+      ui.alphaGrid.innerHTML = '';
+      alphabet.forEach((letter, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'alpha-btn';
+        btn.textContent = letter;
+        if (index === state.currentLetterIndex && state.mode !== 'name') btn.classList.add('active');
+        if (state.mastered.has(letter)) btn.classList.add('done');
+        btn.addEventListener('click', () => {
+          state.currentLetterIndex = index;
+          state.currentLetter = letter;
+          if (state.mode === 'name') setMode('learn');
+          else buildScene();
+        });
+        ui.alphaGrid.appendChild(btn);
+      });
+    }
+
+    async function playDemo(){
+      if (state.demoPlaying || !state.scene?.strokes?.length) return;
+      state.demoPlaying = true;
+      clearTrace();
+      clearCanvas();
+      ctx.strokeStyle = '#a78bfa';
+      ctx.lineWidth = 14;
+      for (let s = 0; s < state.scene.strokes.length; s++){
+        const stroke = state.scene.strokes[s];
+        const pts = stroke.sampled;
+        if (!pts.length) continue;
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++){
+          ctx.lineTo(pts[i].x, pts[i].y);
+          if (i % 3 === 0) {
+            ctx.stroke();
+            await new Promise(r => setTimeout(r, 8));
+          }
+        }
+        ctx.stroke();
+      }
+      state.demoPlaying = false;
+      setStatus('Demo finished. Clear the board and try it yourself.', 'good');
+    }
+
+    async function loadSelectedFont(rebuild = true){
+      const key = state.selectedFontKey;
+      const info = FONT_OPTIONS[key];
+      if (state.fontsLoaded[key]){
+        updateUI();
+        if (rebuild) buildScene();
+        return;
+      }
+      state.fontLoading = true;
+      updateUI();
+      try{
+        const res = await fetch(info.url);
+        if (!res.ok) throw new Error('Font download failed');
+        const buffer = await res.arrayBuffer();
+        const parsed = opentype.parse(buffer);
+        const face = new FontFace(info.family, buffer);
+        await face.load();
+        document.fonts.add(face);
+        state.fontsLoaded[key] = {font: parsed, family: info.family};
+      }catch(err){
+        console.error(err);
+      }finally{
+        state.fontLoading = false;
+        updateUI();
+        if (rebuild) buildScene();
+      }
+    }
+
+    function populateFonts(){
+      Object.entries(FONT_OPTIONS).forEach(([key, info]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = info.label;
+        ui.fontSelect.appendChild(opt);
+      });
+      ui.fontSelect.value = state.selectedFontKey;
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', nextLetter);
+    document.getElementById('prevBtn').addEventListener('click', prevLetter);
+    document.getElementById('clearBtn').addEventListener('click', clearTrace);
+    document.getElementById('demoBtn').addEventListener('click', playDemo);
+    document.getElementById('buildNameBtn').addEventListener('click', () => setMode('name'));
+    ui.nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') setMode('name'); });
+    ui.nameInput.addEventListener('input', updatePreview);
+    ui.toggleHelpersBtn.addEventListener('click', () => { state.showHelpers = !state.showHelpers; buildScene(); });
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setMode(tab.dataset.mode)));
+    ui.fontSelect.addEventListener('change', async () => {
+      state.selectedFontKey = ui.fontSelect.value;
+      await loadSelectedFont(true);
+    });
+
+    traceCanvas.addEventListener('pointerdown', beginTrace);
+    traceCanvas.addEventListener('pointermove', moveTrace);
+    traceCanvas.addEventListener('pointerup', endTrace);
+    traceCanvas.addEventListener('pointercancel', endTrace);
+    traceCanvas.addEventListener('pointerleave', endTrace);
+
+    populateFonts();
+    renderAlphabetButtons();
+    updatePreview();
+    buildScene();
+    loadSelectedFont(true);
+  </script>
+</body>
+</html>
