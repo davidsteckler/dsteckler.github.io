@@ -1,0 +1,905 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Problem to Proof | Intro Entrepreneurship</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #555555;
+      --line: #d9d9d9;
+      --soft: #f6f6f6;
+      --accent: #0b57d0;
+      --good: #17663a;
+      --warn: #8a5a00;
+      --bad: #a22424;
+      --max: 780px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: var(--accent);
+      text-underline-offset: 0.16em;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+      padding: 10px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      font-size: 0.96rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.95rem;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 48px 0 28px;
+    }
+
+    .eyebrow {
+      font-family: Arial, Helvetica, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 8vw, 4.8rem);
+      line-height: 0.95;
+      margin: 0 0 18px;
+      max-width: 10ch;
+      font-weight: 700;
+    }
+
+    .lede {
+      font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+      max-width: 38rem;
+      color: var(--text);
+    }
+
+    .quiet {
+      color: var(--muted);
+    }
+
+    section {
+      padding: 30px 0;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 76px;
+    }
+
+    h2 {
+      font-size: clamp(1.7rem, 4vw, 2.3rem);
+      line-height: 1.05;
+      margin: 0 0 8px;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 0 0 8px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    p,
+    li {
+      font-size: 1.04rem;
+    }
+
+    .stack > * + * { margin-top: 16px; }
+    .tight > * + * { margin-top: 8px; }
+
+    .box {
+      border: 1px solid var(--line);
+      padding: 16px;
+      background: #fff;
+    }
+
+    .soft {
+      background: var(--soft);
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .flow {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .flow-step {
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      background: #fff;
+    }
+
+    .flow-step strong {
+      display: block;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .example-grid,
+    .lane-grid,
+    .proof-grid,
+    .verdict-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .lane-card button,
+    .quick-pick button,
+    .actions button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .lane-card button:hover,
+    .quick-pick button:hover,
+    .actions button:hover,
+    .lane-card button:focus-visible,
+    .quick-pick button:focus-visible,
+    .actions button:focus-visible {
+      border-color: var(--text);
+    }
+
+    .lane-card.selected,
+    .quick-pick button.active {
+      border-color: var(--text);
+      background: var(--soft);
+    }
+
+    .lane-card {
+      border: 1px solid var(--line);
+      padding: 14px;
+      background: #fff;
+    }
+
+    .lane-card p,
+    .example-grid p,
+    .verdict-grid p,
+    .box p {
+      margin: 0;
+    }
+
+    .example {
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+
+    .example .bad {
+      color: var(--bad);
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .example .better {
+      color: var(--good);
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      margin: 10px 0 6px;
+    }
+
+    label {
+      display: block;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.93rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      padding: 12px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 116px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: 2px solid rgba(11, 87, 208, 0.15);
+      border-color: var(--accent);
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.93rem;
+      margin-top: 4px;
+    }
+
+    .quick-pick {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .quick-pick button {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.92rem;
+      padding: 8px 12px;
+    }
+
+    .score {
+      font-size: 2.6rem;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .status-good { color: var(--good); }
+    .status-warn { color: var(--warn); }
+    .status-bad { color: var(--bad); }
+
+    .checklist {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .idea-card {
+      border: 1px solid var(--text);
+      padding: 18px;
+      background: #fff;
+    }
+
+    .idea-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .idea-card dl {
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .idea-card dt {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .idea-card dd {
+      margin: 2px 0 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .small {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 40px 0 60px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    @media (min-width: 720px) {
+      .grid.two,
+      .example-grid,
+      .lane-grid,
+      .proof-grid,
+      .verdict-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media print {
+      .topbar,
+      .actions,
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        font-size: 12pt;
+      }
+
+      .wrap {
+        width: 100%;
+        margin: 0;
+      }
+
+      section {
+        border-top: none;
+        padding: 12pt 0;
+      }
+
+      .idea-card {
+        border: 1px solid #000;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Problem to Proof</div>
+      <nav>
+        <a href="#start">Start</a>
+        <a href="#filter">Filter</a>
+        <a href="#lanes">Lanes</a>
+        <a href="#examples">Examples</a>
+        <a href="#builder">Builder</a>
+        <a href="#verdict">Verdict</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header id="start">
+      <div class="eyebrow">Intro Entrepreneurship · Highlands Middle School</div>
+      <h1>Good ideas start with real problems.</h1>
+      <p class="lede">Do not begin with a random invention. Begin with a person, a repeated frustration, and proof that the problem is real. Then test the smallest version you can test this week.</p>
+    </header>
+
+    <section>
+      <h2>Where to look</h2>
+      <div class="grid two">
+        <div class="stack box">
+          <h3>Start with your own life</h3>
+          <ul class="checklist">
+            <li>I keep forgetting...</li>
+            <li>I waste time when...</li>
+            <li>Students at our school always complain about...</li>
+            <li>Teachers always have to repeat...</li>
+            <li>Parents get confused about...</li>
+            <li>Coaches or club leaders struggle with...</li>
+          </ul>
+        </div>
+        <div class="stack box soft">
+          <h3>People you can listen to</h3>
+          <ul class="checklist">
+            <li>Students</li>
+            <li>Teachers</li>
+            <li>Parents</li>
+            <li>Coaches</li>
+            <li>Club leaders</li>
+            <li>Local businesses</li>
+          </ul>
+          <p class="small">A useful idea usually makes something faster, easier, cheaper, clearer, more organized, or more personal.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="filter">
+      <h2>Idea filter</h2>
+      <p class="quiet">Run every idea through this before you build anything.</p>
+      <div class="flow">
+        <div class="flow-step"><strong>1</strong> Can you name one specific person who has this problem?</div>
+        <div class="flow-step"><strong>2</strong> Does this problem happen often, not once in a while?</div>
+        <div class="flow-step"><strong>3</strong> What do people do now instead?</div>
+        <div class="flow-step"><strong>4</strong> Why is the current solution annoying, slow, expensive, or weak?</div>
+        <div class="flow-step"><strong>5</strong> Is your idea solving the problem, or just adding a gimmick?</div>
+        <div class="flow-step"><strong>6</strong> Could you test the first version in one week?</div>
+        <div class="flow-step"><strong>7</strong> If it is physical, do you know what it would cost to make?</div>
+        <div class="flow-step"><strong>8</strong> Have you heard real quotes from real people?</div>
+      </div>
+    </section>
+
+    <section id="lanes">
+      <h2>Choose the right lane</h2>
+      <p class="quiet">Not every idea should become a product. Start in the lane that matches reality.</p>
+      <div class="lane-grid">
+        <div class="lane-card" data-lane-card="service">
+          <h3>Service</h3>
+          <p>Fastest to test. Good for beginners. You help someone do something.</p>
+          <p class="small">Examples: tutoring, filming games, making study guides, organizing events.</p>
+        </div>
+        <div class="lane-card" data-lane-card="digital">
+          <h3>Digital</h3>
+          <p>Useful when the problem is information, reminders, planning, or access.</p>
+          <p class="small">Examples: website, planner, tool, dashboard, checklist, template.</p>
+        </div>
+        <div class="lane-card" data-lane-card="ai">
+          <h3>AI assisted</h3>
+          <p>Best when people already do something repetitive, slow, or confusing.</p>
+          <p class="small">Examples: study guide maker, summary tool, schedule helper, practice coach.</p>
+        </div>
+        <div class="lane-card" data-lane-card="physical">
+          <h3>Physical</h3>
+          <p>Hardest lane. Materials, price, durability, and manufacturing matter immediately.</p>
+          <p class="small">Do this only when the physical object itself is truly necessary.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="examples">
+      <h2>Weak idea → stronger direction</h2>
+      <div class="example-grid">
+        <div class="example">
+          <div class="bad">Weak idea</div>
+          <p>A basketball with a speaker inside it.</p>
+          <div class="better">Stronger direction</div>
+          <p>A shooting practice app that tracks makes, gives drills, and keeps progress for one player or a team.</p>
+        </div>
+        <div class="example">
+          <div class="bad">Weak idea</div>
+          <p>An app for everyone to do everything better.</p>
+          <div class="better">Stronger direction</div>
+          <p>A homework dashboard for one grade level that turns assignments into a clear after school plan.</p>
+        </div>
+        <div class="example">
+          <div class="bad">Weak idea</div>
+          <p>A smart water bottle with five new features.</p>
+          <div class="better">Stronger direction</div>
+          <p>A simple refill tracker for athletes who forget to drink during practice days.</p>
+        </div>
+        <div class="example">
+          <div class="bad">Weak idea</div>
+          <p>Sell a random product because people might buy it.</p>
+          <div class="better">Stronger direction</div>
+          <p>Talk to three teachers and build one small tool that saves them ten minutes every day.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="builder">
+      <h2>Build your idea</h2>
+      <p class="quiet">Be specific. Vague answers lead to weak ideas.</p>
+
+      <div class="box soft no-print" style="margin-bottom:16px;">
+        <h3>Quick problem picks</h3>
+        <div class="quick-pick">
+          <button type="button" data-problem="Students forget what they need for each class and then lose time getting organized.">Students forget materials</button>
+          <button type="button" data-problem="Teachers answer the same question over and over because directions are unclear or scattered.">Teachers repeat directions</button>
+          <button type="button" data-problem="Parents miss schedule changes, forms, or reminders because updates are spread across too many places.">Parents miss updates</button>
+          <button type="button" data-problem="Student athletes have no simple way to track practice, goals, and progress in one place.">Athletes track progress poorly</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="idea">Your idea in one sentence</label>
+        <textarea id="idea" placeholder="Example: A simple AI study guide tool for 7th grade science quizzes."></textarea>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="customer">Who exactly has this problem?</label>
+          <input id="customer" type="text" placeholder="Example: 7th grade students who miss class and do not know what work they missed." />
+        </div>
+        <div class="field">
+          <label for="lane">Which lane fits best?</label>
+          <select id="lane">
+            <option value="">Choose one</option>
+            <option value="service">Service</option>
+            <option value="digital">Digital</option>
+            <option value="ai">AI assisted</option>
+            <option value="physical">Physical</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="problem">What repeated problem are you solving?</label>
+        <textarea id="problem" placeholder="Describe what keeps happening, to whom, and why it matters."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="current">What do people do now instead?</label>
+        <textarea id="current" placeholder="Example: They ask friends, search Schoology, or email the teacher."></textarea>
+      </div>
+
+      <div class="grid two">
+        <div class="field">
+          <label for="win">Why is your version better?</label>
+          <textarea id="win" placeholder="Faster? cheaper? easier? more organized? more personal?"></textarea>
+        </div>
+        <div class="field">
+          <label for="cost">Cost or effort reality check</label>
+          <textarea id="cost" placeholder="If physical, what would materials cost? If digital, what is the simplest first version?"></textarea>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="test">What is the smallest test you can do this week?</label>
+        <textarea id="test" placeholder="Example: Show a mockup to 5 students. Make a landing page. Offer the service to 3 people. Build one tiny demo."></textarea>
+      </div>
+
+      <div class="proof-grid">
+        <div class="field">
+          <label for="quote1">Quote 1 from a real person</label>
+          <textarea id="quote1" placeholder="Example: I always forget what homework I missed when I'm absent."></textarea>
+        </div>
+        <div class="field">
+          <label for="quote2">Quote 2 from a real person</label>
+          <textarea id="quote2" placeholder="Example: I wish there was one place where I could see exactly what I need to do tonight."></textarea>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="quote3">Quote 3 from a real person</label>
+        <textarea id="quote3" placeholder="Optional, but strong ideas usually have more proof."></textarea>
+      </div>
+    </section>
+
+    <section id="verdict">
+      <h2>Verdict</h2>
+      <div class="verdict-grid">
+        <div class="box">
+          <div id="score" class="score">0</div>
+          <h3 id="status" class="status-bad">Not ready yet</h3>
+          <p id="summary">Fill in the idea builder. The score should come from proof, not optimism.</p>
+        </div>
+        <div class="box soft">
+          <h3>Bad idea detector</h3>
+          <div id="warnings" class="stack tight">
+            <p class="small">Warnings will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <h3>Next move</h3>
+        <div id="nextMove" class="stack tight">
+          <p>Talk to 3 real people before deciding your idea is good.</p>
+        </div>
+      </div>
+
+      <div class="idea-card" style="margin-top:24px;" id="ideaCard">
+        <h3>Idea card</h3>
+        <dl>
+          <div>
+            <dt>Customer</dt>
+            <dd id="cardCustomer">—</dd>
+          </div>
+          <div>
+            <dt>Problem</dt>
+            <dd id="cardProblem">—</dd>
+          </div>
+          <div>
+            <dt>Current solution</dt>
+            <dd id="cardCurrent">—</dd>
+          </div>
+          <div>
+            <dt>Idea</dt>
+            <dd id="cardIdea">—</dd>
+          </div>
+          <div>
+            <dt>Why it wins</dt>
+            <dd id="cardWin">—</dd>
+          </div>
+          <div>
+            <dt>Lane</dt>
+            <dd id="cardLane">—</dd>
+          </div>
+          <div>
+            <dt>First test this week</dt>
+            <dd id="cardTest">—</dd>
+          </div>
+          <div>
+            <dt>Proof</dt>
+            <dd id="cardProof">—</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="actions no-print">
+        <button type="button" id="printBtn">Print idea card</button>
+        <button type="button" id="resetBtn">Reset</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>This page is built to make weak ideas uncomfortable. A strong idea has a clear customer, a repeated problem, and proof from real people.</p>
+    </footer>
+  </div>
+
+  <script>
+    const fields = {
+      idea: document.getElementById('idea'),
+      customer: document.getElementById('customer'),
+      lane: document.getElementById('lane'),
+      problem: document.getElementById('problem'),
+      current: document.getElementById('current'),
+      win: document.getElementById('win'),
+      cost: document.getElementById('cost'),
+      test: document.getElementById('test'),
+      quote1: document.getElementById('quote1'),
+      quote2: document.getElementById('quote2'),
+      quote3: document.getElementById('quote3')
+    };
+
+    const scoreEl = document.getElementById('score');
+    const statusEl = document.getElementById('status');
+    const summaryEl = document.getElementById('summary');
+    const warningsEl = document.getElementById('warnings');
+    const nextMoveEl = document.getElementById('nextMove');
+
+    const cardMap = {
+      customer: document.getElementById('cardCustomer'),
+      problem: document.getElementById('cardProblem'),
+      current: document.getElementById('cardCurrent'),
+      idea: document.getElementById('cardIdea'),
+      win: document.getElementById('cardWin'),
+      lane: document.getElementById('cardLane'),
+      test: document.getElementById('cardTest'),
+      proof: document.getElementById('cardProof')
+    };
+
+    const storageKey = 'problemToProofSimple';
+
+    function getData() {
+      return Object.fromEntries(Object.entries(fields).map(([key, el]) => [key, el.value.trim()]));
+    }
+
+    function setSelectedLaneCard(value) {
+      document.querySelectorAll('[data-lane-card]').forEach(card => {
+        card.classList.toggle('selected', card.dataset.laneCard === value);
+      });
+    }
+
+    function addWarning(list, text) {
+      if (!list.includes(text)) list.push(text);
+    }
+
+    function quoteCount(data) {
+      return [data.quote1, data.quote2, data.quote3].filter(Boolean).length;
+    }
+
+    function analyze() {
+      const data = getData();
+      const warnings = [];
+      let score = 0;
+      const qCount = quoteCount(data);
+
+      if (data.customer.length > 18 && !/everyone|anyone|all students|all people|everybody/i.test(data.customer)) score += 15;
+      else addWarning(warnings, 'Your customer is too broad. Name a smaller group.');
+
+      if (data.problem.length > 35) score += 15;
+      else addWarning(warnings, 'Your problem is vague. Describe what keeps happening and why it matters.');
+
+      if (data.current.length > 20) score += 10;
+      else addWarning(warnings, 'You have not explained what people do now. If you do not know the current solution, you do not know why they would switch.');
+
+      if (data.idea.length > 18) score += 10;
+      else addWarning(warnings, 'Your idea sentence is too thin. Say clearly what it is.');
+
+      if (data.win.length > 18) score += 10;
+      else addWarning(warnings, 'You have not said why your version wins.');
+
+      if (data.lane) score += 10;
+      else addWarning(warnings, 'Pick a lane. Service, digital, AI assisted, or physical.');
+
+      if (data.test.length > 24) score += 15;
+      else addWarning(warnings, 'You do not have a real one week test yet.');
+
+      if (qCount >= 2) score += 15;
+      else addWarning(warnings, 'You need at least 2 real quotes from real people.');
+
+      if (data.lane === 'physical') {
+        if (data.cost.length > 18) score += 10;
+        else addWarning(warnings, 'Physical ideas need a cost reality check. Materials and price matter.');
+      } else if (data.cost.length > 10) {
+        score += 5;
+      }
+
+      if (/everyone|anyone|for all|for everybody/i.test(data.idea + ' ' + data.customer)) {
+        addWarning(warnings, 'If your idea is for everyone, it is probably for no one.');
+        score -= 5;
+      }
+
+      if (/smart|speaker|ai powered|ai-enhanced|blockchain|vr|ar/i.test(data.idea) && data.problem.length < 60) {
+        addWarning(warnings, 'This may be a gimmick. Fancy features do not replace a clear problem.');
+        score -= 5;
+      }
+
+      if (/app|website|platform|tool/i.test(data.idea) && data.problem.length < 35) {
+        addWarning(warnings, 'An app or website is not the reason. It is only the container.');
+      }
+
+      if (data.lane === 'physical' && !/material|cost|price|prototype|make|build/i.test(data.cost)) {
+        addWarning(warnings, 'Your physical idea still sounds like imagination more than production.');
+      }
+
+      if (qCount === 0) {
+        addWarning(warnings, 'Right now this is still an opinion. Go listen first.');
+      }
+
+      if (score < 0) score = 0;
+      if (score > 100) score = 100;
+
+      let status = 'Not ready yet';
+      let statusClass = 'status-bad';
+      let summary = 'This idea needs more reality and more proof.';
+      const next = [];
+
+      if (score >= 80) {
+        status = 'Strong enough to test';
+        statusClass = 'status-good';
+        summary = 'This is specific enough to run a real test this week.';
+        next.push('Build the smallest version now.');
+        next.push('Show it to the same people you interviewed.');
+        next.push('Measure whether they actually use it or ask for it.');
+      } else if (score >= 55) {
+        status = 'Promising, but not proven';
+        statusClass = 'status-warn';
+        summary = 'There is something here, but you still need sharper proof or a smaller first version.';
+        next.push('Narrow the customer further.');
+        next.push('Collect one more real quote.');
+        next.push('Make the one week test smaller and more concrete.');
+      } else {
+        next.push('Talk to 3 real people before building.');
+        next.push('Make the customer smaller.');
+        next.push('Replace features with one clear useful result.');
+      }
+
+      render(score, status, statusClass, summary, warnings, next, data, qCount);
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function render(score, status, statusClass, summary, warnings, next, data, qCount) {
+      scoreEl.textContent = score;
+      statusEl.textContent = status;
+      statusEl.className = statusClass;
+      summaryEl.textContent = summary;
+
+      warningsEl.innerHTML = warnings.length
+        ? warnings.map(w => `<p>• ${escapeHtml(w)}</p>`).join('')
+        : '<p>No major warning signs. Now test it in the real world.</p>';
+
+      nextMoveEl.innerHTML = next.map(n => `<p>• ${escapeHtml(n)}</p>`).join('');
+
+      cardMap.customer.textContent = data.customer || '—';
+      cardMap.problem.textContent = data.problem || '—';
+      cardMap.current.textContent = data.current || '—';
+      cardMap.idea.textContent = data.idea || '—';
+      cardMap.win.textContent = data.win || '—';
+      cardMap.lane.textContent = data.lane ? niceLane(data.lane) : '—';
+      cardMap.test.textContent = data.test || '—';
+      const proofText = [data.quote1, data.quote2, data.quote3].filter(Boolean).join(' | ');
+      cardMap.proof.textContent = qCount ? proofText : '—';
+      setSelectedLaneCard(data.lane);
+    }
+
+    function niceLane(value) {
+      const map = {
+        service: 'Service',
+        digital: 'Digital',
+        ai: 'AI assisted',
+        physical: 'Physical'
+      };
+      return map[value] || value;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    Object.values(fields).forEach(el => {
+      el.addEventListener('input', analyze);
+      el.addEventListener('change', analyze);
+    });
+
+    document.querySelectorAll('[data-lane-card]').forEach(card => {
+      card.addEventListener('click', () => {
+        fields.lane.value = card.dataset.laneCard;
+        analyze();
+      });
+    });
+
+    document.querySelectorAll('.quick-pick button').forEach(button => {
+      button.addEventListener('click', () => {
+        fields.problem.value = button.dataset.problem;
+        document.querySelectorAll('.quick-pick button').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        analyze();
+      });
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      localStorage.removeItem(storageKey);
+      Object.values(fields).forEach(el => el.value = '');
+      document.querySelectorAll('.quick-pick button').forEach(b => b.classList.remove('active'));
+      analyze();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      Object.entries(saved).forEach(([key, value]) => {
+        if (fields[key] && typeof value === 'string') fields[key].value = value;
+      });
+    } catch (e) {}
+
+    analyze();
+  </script>
+</body>
+</html>
