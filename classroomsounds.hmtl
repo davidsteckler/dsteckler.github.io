@@ -1,0 +1,811 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classroom Voice Soundboard</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(16, 24, 48, 0.9);
+      --panel-2: rgba(20, 30, 58, 0.92);
+      --border: rgba(255,255,255,0.1);
+      --text: #f5f7ff;
+      --muted: #aeb8d6;
+      --accent: #7dd3fc;
+      --accent-2: #c084fc;
+      --success: #34d399;
+      --gold: #fbbf24;
+      --danger: #fb7185;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,0.22), transparent 30%),
+        radial-gradient(circle at top right, rgba(192,132,252,0.18), transparent 28%),
+        linear-gradient(180deg, #08101f 0%, #111934 100%);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1450px, calc(100vw - 24px));
+      margin: 14px auto 28px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(22,31,62,0.92), rgba(14,22,44,0.96));
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 72ch;
+    }
+
+    .status-row {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .controls {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 22px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    select, input[type="range"], input[type="text"] {
+      width: 100%;
+    }
+
+    select, input[type="text"] {
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(10,17,36,0.9);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .toggle-row, .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      user-select: none;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .toggle input { transform: scale(1.15); }
+
+    .btn, button {
+      border: none;
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.18s ease, box-shadow 0.18s ease;
+      font: inherit;
+    }
+
+    .btn:active, .sound-btn:active {
+      transform: translateY(2px) scale(0.99);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .toolbar .btn {
+      padding: 12px 16px;
+      border-radius: 14px;
+      color: white;
+      background: linear-gradient(135deg, rgba(59,130,246,0.95), rgba(147,51,234,0.95));
+      box-shadow: 0 10px 22px rgba(59,130,246,0.22);
+    }
+
+    .toolbar .btn.alt {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      box-shadow: none;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .toolbar .btn.warn {
+      background: linear-gradient(135deg, rgba(251,113,133,0.95), rgba(244,114,182,0.95));
+      box-shadow: 0 10px 22px rgba(251,113,133,0.2);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(17,25,49,0.92), rgba(14,20,40,0.95));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 16px 18px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .sound-grid {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .sound-btn {
+      position: relative;
+      min-height: 102px;
+      border-radius: 20px;
+      padding: 14px;
+      text-align: left;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.09);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 28px rgba(0,0,0,0.18);
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(14,165,233,0.9), rgba(59,130,246,0.95));
+    }
+
+    .sound-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 45%, rgba(0,0,0,0.08));
+      pointer-events: none;
+    }
+
+    .sound-btn .title {
+      position: relative;
+      font-weight: 800;
+      font-size: 1.05rem;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .sound-btn .sub {
+      position: relative;
+      margin-top: 6px;
+      color: rgba(255,255,255,0.88);
+      font-size: 0.9rem;
+      line-height: 1.2;
+    }
+
+    .sound-btn .key {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 7px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.95);
+      z-index: 2;
+    }
+
+    .sound-btn.c1 { background: linear-gradient(135deg, #06b6d4, #2563eb); }
+    .sound-btn.c2 { background: linear-gradient(135deg, #10b981, #14b8a6); }
+    .sound-btn.c3 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .sound-btn.c4 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+    .sound-btn.c5 { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+    .sound-btn.c6 { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+    .custom-area {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .custom-row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.7fr 0.7fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .saved-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .saved-btn {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      min-height: 74px;
+      text-align: left;
+    }
+
+    .saved-btn small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+      padding: 0 8px;
+    }
+
+    @media (max-width: 1150px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      .sound-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .saved-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .wrap { width: min(100vw - 14px, 100%); }
+      .hero { padding: 14px; }
+      .controls { grid-template-columns: 1fr; }
+      .sound-grid { grid-template-columns: 1fr; }
+      .custom-row { grid-template-columns: 1fr; }
+      .saved-grid { grid-template-columns: 1fr; }
+      .toolbar .btn { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <h1>Classroom Voice Soundboard</h1>
+        <p>
+          Big buttons. Spoken praise. Quick classroom cues. Built for a teacher laptop on a projector.
+          Tap a button or use the keyboard hotkeys to fire a voice line with a matching sound effect.
+        </p>
+        <div class="status-row">
+          <div class="pill">Voice + sound stingers</div>
+          <div class="pill">Keyboard hotkeys</div>
+          <div class="pill">Custom phrase maker</div>
+          <div class="pill">Works from one file</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="field" style="grid-column: 1 / -1;">
+          <label for="voiceSelect">Voice</label>
+          <select id="voiceSelect"></select>
+        </div>
+
+        <div class="field">
+          <label for="rate">Voice Speed</label>
+          <input id="rate" type="range" min="0.7" max="1.35" step="0.01" value="1" />
+        </div>
+
+        <div class="field">
+          <label for="pitch">Voice Pitch</label>
+          <input id="pitch" type="range" min="0.8" max="1.35" step="0.01" value="1.05" />
+        </div>
+
+        <div class="field">
+          <label for="speechVolume">Voice Volume</label>
+          <input id="speechVolume" type="range" min="0.1" max="1" step="0.01" value="1" />
+        </div>
+
+        <div class="field">
+          <label for="fxVolume">Effect Volume</label>
+          <input id="fxVolume" type="range" min="0" max="1" step="0.01" value="0.55" />
+        </div>
+
+        <div class="toggle-row" style="grid-column: 1 / -1;">
+          <label class="toggle"><input id="voiceEnabled" type="checkbox" checked /> Voice on</label>
+          <label class="toggle"><input id="fxEnabled" type="checkbox" checked /> Effects on</label>
+          <label class="toggle"><input id="autoDuck" type="checkbox" checked /> Short effect before voice</label>
+        </div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <button class="btn" id="randomBtn">Random Hype</button>
+      <button class="btn alt" id="stopBtn">Stop Voice</button>
+      <button class="btn alt" id="fullscreenBtn">Fullscreen</button>
+      <button class="btn warn" id="testBtn">Test Sound + Voice</button>
+    </div>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Celebration</h2>
+          <span>Hotkeys 1 to 9</span>
+        </div>
+        <div class="sound-grid" id="celebrationGrid"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Encouragement + Transitions</h2>
+          <span>Hotkeys Q to O</span>
+        </div>
+        <div class="sound-grid" id="encourageGrid"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Focus + Reset</h2>
+          <span>Hotkeys A to J</span>
+        </div>
+        <div class="sound-grid" id="focusGrid"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Custom Phrase Maker</h2>
+          <span>Make your own voice buttons</span>
+        </div>
+        <div class="custom-area">
+          <div class="custom-row">
+            <div class="field">
+              <label for="customText">Phrase</label>
+              <input id="customText" type="text" placeholder="Example: Table 3 crushed that challenge" />
+            </div>
+            <div class="field">
+              <label for="customLabel">Button Label</label>
+              <input id="customLabel" type="text" placeholder="Table 3" />
+            </div>
+            <div class="field">
+              <label for="customEffect">Effect</label>
+              <select id="customEffect">
+                <option value="success">Success</option>
+                <option value="fanfare">Fanfare</option>
+                <option value="sparkle">Sparkle</option>
+                <option value="whoosh">Whoosh</option>
+                <option value="bell">Bell</option>
+                <option value="alert">Alert</option>
+                <option value="levelup">Level Up</option>
+              </select>
+            </div>
+            <button class="btn" id="saveCustomBtn">Save Button</button>
+          </div>
+
+          <div class="saved-grid" id="savedGrid"></div>
+        </div>
+      </article>
+    </section>
+
+    <p class="footer-note">
+      Tip: the first click lets the browser unlock audio. If you want a different feel, change the browser voice, speed, and pitch at the top.
+    </p>
+  </div>
+
+  <script>
+    const soundboards = {
+      celebration: [
+        { label: 'New Achievement', phrase: 'New achievement unlocked!', effect: 'levelup', key: '1', color: 'c1', sub: 'Big milestone energy' },
+        { label: 'Congrats', phrase: 'Congratulations! That was excellent!', effect: 'fanfare', key: '2', color: 'c2', sub: 'Formal celebration' },
+        { label: 'Good Job', phrase: 'Good job. Keep it going.', effect: 'success', key: '3', color: 'c3', sub: 'Clean and simple' },
+        { label: 'Outstanding', phrase: 'Outstanding work!', effect: 'sparkle', key: '4', color: 'c4', sub: 'Strong praise' },
+        { label: 'You Got It', phrase: 'You got it!', effect: 'whoosh', key: '5', color: 'c5', sub: 'Quick win cue' },
+        { label: 'Level Cleared', phrase: 'Level cleared!', effect: 'levelup', key: '6', color: 'c6', sub: 'Game style reward' },
+        { label: 'Huge Win', phrase: 'That is a huge win!', effect: 'fanfare', key: '7', color: 'c1', sub: 'Big class moment' },
+        { label: 'Nailed It', phrase: 'Nailed it.', effect: 'success', key: '8', color: 'c2', sub: 'Short punchy praise' },
+        { label: 'Mission Complete', phrase: 'Mission complete.', effect: 'bell', key: '9', color: 'c3', sub: 'Task complete' }
+      ],
+      encourage: [
+        { label: 'Nice Thinking', phrase: 'Nice thinking.', effect: 'sparkle', key: 'Q', color: 'c4', sub: 'Idea praise' },
+        { label: 'Strong Effort', phrase: 'Strong effort. Stay with it.', effect: 'success', key: 'W', color: 'c5', sub: 'Process praise' },
+        { label: 'Great Question', phrase: 'Great question.', effect: 'bell', key: 'E', color: 'c6', sub: 'For class discussion' },
+        { label: 'On Fire', phrase: 'You are on fire today.', effect: 'fanfare', key: 'R', color: 'c1', sub: 'High energy praise' },
+        { label: 'Let’s Go', phrase: 'Let’s go. Next round.', effect: 'whoosh', key: 'T', color: 'c2', sub: 'Move the class forward' },
+        { label: 'Locked In', phrase: 'Locked in. I see it.', effect: 'alert', key: 'Y', color: 'c3', sub: 'Focus recognition' },
+        { label: 'Brilliant', phrase: 'Brilliant move.', effect: 'sparkle', key: 'U', color: 'c4', sub: 'Sharp answer cue' },
+        { label: 'Keep Going', phrase: 'Keep going. You are close.', effect: 'success', key: 'I', color: 'c5', sub: 'Encourage persistence' },
+        { label: 'That’s It', phrase: 'That’s it. Right there.', effect: 'bell', key: 'O', color: 'c6', sub: 'Confirmation cue' }
+      ],
+      focus: [
+        { label: 'Eyes Up Here', phrase: 'Eyes up here in three, two, one.', effect: 'alert', key: 'A', color: 'c1', sub: 'Attention reset' },
+        { label: 'Freeze', phrase: 'Freeze and listen.', effect: 'alert', key: 'S', color: 'c2', sub: 'Hard stop cue' },
+        { label: 'Transition Time', phrase: 'Transition time. Move to the next step.', effect: 'whoosh', key: 'D', color: 'c3', sub: 'Smooth switch' },
+        { label: 'Partner Talk', phrase: 'Partner talk starts now.', effect: 'bell', key: 'F', color: 'c4', sub: 'Discussion cue' },
+        { label: 'Wrap It Up', phrase: 'Wrap it up in ten seconds.', effect: 'whoosh', key: 'G', color: 'c5', sub: 'Close the activity' },
+        { label: 'Reset', phrase: 'Quick reset. Deep breath and restart.', effect: 'bell', key: 'H', color: 'c6', sub: 'Tone reset' },
+        { label: 'Silent Mode', phrase: 'Silent mode. Go.', effect: 'alert', key: 'J', color: 'c1', sub: 'Instant quiet cue' }
+      ]
+    };
+
+    const voiceSelect = document.getElementById('voiceSelect');
+    const rateEl = document.getElementById('rate');
+    const pitchEl = document.getElementById('pitch');
+    const speechVolumeEl = document.getElementById('speechVolume');
+    const fxVolumeEl = document.getElementById('fxVolume');
+    const voiceEnabledEl = document.getElementById('voiceEnabled');
+    const fxEnabledEl = document.getElementById('fxEnabled');
+    const autoDuckEl = document.getElementById('autoDuck');
+
+    let voices = [];
+    let audioCtx = null;
+    let masterGain = null;
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = parseFloat(fxVolumeEl.value);
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    fxVolumeEl.addEventListener('input', () => {
+      if (masterGain) masterGain.gain.value = parseFloat(fxVolumeEl.value);
+    });
+
+    function loadVoices() {
+      voices = window.speechSynthesis.getVoices();
+      voiceSelect.innerHTML = '';
+
+      if (!voices.length) {
+        const option = document.createElement('option');
+        option.textContent = 'Default browser voice';
+        option.value = '-1';
+        voiceSelect.appendChild(option);
+        return;
+      }
+
+      const defaultIndex = voices.findIndex(v => /en-US|English/i.test(v.lang + ' ' + v.name));
+      voices.forEach((voice, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+      });
+      voiceSelect.value = defaultIndex >= 0 ? String(defaultIndex) : '0';
+    }
+
+    loadVoices();
+    if ('onvoiceschanged' in speechSynthesis) {
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function makeOsc(type, freq, start, duration, gainValue) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.connect(gain).connect(masterGain);
+      osc.start(start);
+      osc.stop(start + duration + 0.02);
+      return osc;
+    }
+
+    function noiseBurst(start, duration, gainValue, highpass = 700) {
+      const bufferSize = Math.max(1, Math.floor(audioCtx.sampleRate * duration));
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const source = audioCtx.createBufferSource();
+      source.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = highpass;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+      source.connect(filter).connect(gain).connect(masterGain);
+      source.start(start);
+      source.stop(start + duration + 0.02);
+    }
+
+    function playEffect(name) {
+      if (!fxEnabledEl.checked) return 0;
+      ensureAudio();
+      const t = audioCtx.currentTime + 0.01;
+      let duration = 0.42;
+
+      switch (name) {
+        case 'success':
+          makeOsc('triangle', 440, t, 0.12, 0.11);
+          makeOsc('triangle', 554.37, t + 0.11, 0.14, 0.1);
+          makeOsc('triangle', 659.25, t + 0.23, 0.2, 0.09);
+          duration = 0.45;
+          break;
+        case 'sparkle':
+          makeOsc('sine', 1318.5, t, 0.08, 0.08);
+          makeOsc('sine', 1760, t + 0.08, 0.08, 0.07);
+          makeOsc('sine', 2093, t + 0.16, 0.1, 0.06);
+          noiseBurst(t, 0.18, 0.03, 1600);
+          duration = 0.33;
+          break;
+        case 'fanfare':
+          makeOsc('sawtooth', 392, t, 0.12, 0.08);
+          makeOsc('sawtooth', 523.25, t + 0.13, 0.12, 0.08);
+          makeOsc('sawtooth', 659.25, t + 0.26, 0.16, 0.08);
+          makeOsc('sawtooth', 784, t + 0.42, 0.24, 0.08);
+          duration = 0.68;
+          break;
+        case 'whoosh':
+          noiseBurst(t, 0.32, 0.06, 300);
+          duration = 0.34;
+          break;
+        case 'bell':
+          makeOsc('sine', 1046.5, t, 0.35, 0.08);
+          makeOsc('sine', 1568, t, 0.27, 0.04);
+          duration = 0.38;
+          break;
+        case 'alert':
+          makeOsc('square', 740, t, 0.09, 0.05);
+          makeOsc('square', 740, t + 0.13, 0.09, 0.05);
+          duration = 0.26;
+          break;
+        case 'levelup':
+          makeOsc('triangle', 392, t, 0.08, 0.09);
+          makeOsc('triangle', 523.25, t + 0.08, 0.08, 0.09);
+          makeOsc('triangle', 659.25, t + 0.16, 0.08, 0.08);
+          makeOsc('triangle', 1046.5, t + 0.24, 0.22, 0.07);
+          duration = 0.5;
+          break;
+        default:
+          makeOsc('triangle', 523.25, t, 0.18, 0.08);
+          duration = 0.22;
+      }
+
+      return duration;
+    }
+
+    function speak(text, effect = 'success') {
+      if (!text) return;
+      const delay = playEffect(effect);
+
+      if (!voiceEnabledEl.checked) return;
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voiceIndex = parseInt(voiceSelect.value, 10);
+      if (!Number.isNaN(voiceIndex) && voices[voiceIndex]) utterance.voice = voices[voiceIndex];
+      utterance.rate = parseFloat(rateEl.value);
+      utterance.pitch = parseFloat(pitchEl.value);
+      utterance.volume = parseFloat(speechVolumeEl.value);
+
+      const speakNow = () => window.speechSynthesis.speak(utterance);
+      if (autoDuckEl.checked && fxEnabledEl.checked) {
+        setTimeout(speakNow, Math.max(0, delay * 1000));
+      } else {
+        speakNow();
+      }
+    }
+
+    function buildGrid(targetId, items) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = '';
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = `sound-btn ${item.color || 'c1'}`;
+        btn.dataset.phrase = item.phrase;
+        btn.dataset.effect = item.effect;
+        btn.dataset.key = item.key.toUpperCase();
+        btn.innerHTML = `
+          <span class="key">${item.key}</span>
+          <div class="title">${item.label}</div>
+          <div class="sub">${item.sub || item.phrase}</div>
+        `;
+        btn.addEventListener('click', () => speak(item.phrase, item.effect));
+        target.appendChild(btn);
+      });
+    }
+
+    buildGrid('celebrationGrid', soundboards.celebration);
+    buildGrid('encourageGrid', soundboards.encourage);
+    buildGrid('focusGrid', soundboards.focus);
+
+    const customText = document.getElementById('customText');
+    const customLabel = document.getElementById('customLabel');
+    const customEffect = document.getElementById('customEffect');
+    const saveCustomBtn = document.getElementById('saveCustomBtn');
+    const savedGrid = document.getElementById('savedGrid');
+
+    const STORAGE_KEY = 'classroomVoiceSoundboardCustomButtons_v1';
+
+    function getCustomButtons() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setCustomButtons(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, 8)));
+    }
+
+    function renderCustomButtons() {
+      const items = getCustomButtons();
+      savedGrid.innerHTML = '';
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'saved-btn';
+        empty.innerHTML = '<strong>No custom buttons yet</strong><small>Save phrases you use a lot.</small>';
+        savedGrid.appendChild(empty);
+        return;
+      }
+
+      items.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'saved-btn';
+        btn.innerHTML = `<strong>${item.label}</strong><small>${item.phrase}</small>`;
+        btn.addEventListener('click', () => speak(item.phrase, item.effect));
+        btn.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          const next = getCustomButtons();
+          next.splice(index, 1);
+          setCustomButtons(next);
+          renderCustomButtons();
+        });
+        savedGrid.appendChild(btn);
+      });
+    }
+
+    saveCustomBtn.addEventListener('click', () => {
+      const phrase = customText.value.trim();
+      if (!phrase) {
+        speak('Please type a phrase first.', 'alert');
+        return;
+      }
+      const label = customLabel.value.trim() || phrase.slice(0, 18);
+      const effect = customEffect.value;
+      const items = getCustomButtons();
+      items.unshift({ label, phrase, effect });
+      setCustomButtons(items);
+      renderCustomButtons();
+      customText.value = '';
+      customLabel.value = '';
+      speak('Custom button saved.', 'success');
+    });
+
+    renderCustomButtons();
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      window.speechSynthesis.cancel();
+      if (audioCtx) audioCtx.suspend();
+    });
+
+    document.getElementById('testBtn').addEventListener('click', () => {
+      speak('Soundboard is ready.', 'fanfare');
+    });
+
+    document.getElementById('randomBtn').addEventListener('click', () => {
+      const all = [...soundboards.celebration, ...soundboards.encourage, ...soundboards.focus];
+      const pick = all[Math.floor(Math.random() * all.length)];
+      speak(pick.phrase, pick.effect);
+    });
+
+    document.getElementById('fullscreenBtn').addEventListener('click', async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const active = document.activeElement;
+      const tag = active ? active.tagName : '';
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+      const key = e.key.toUpperCase();
+      if (key === ' ') {
+        e.preventDefault();
+        document.getElementById('randomBtn').click();
+        return;
+      }
+
+      const btn = document.querySelector(`.sound-btn[data-key="${key}"]`);
+      if (btn) {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+
+    document.body.addEventListener('click', ensureAudio, { once: true });
+  </script>
+</body>
+</html>
