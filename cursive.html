@@ -1,274 +1,136 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Real Script Trace</title>
+<title>Cursive Quest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Borel&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Caveat:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%;margin:0}
 :root{
-  --bg:#f7f4ee;
-  --paper:#fffdf9;
-  --ink:#171717;
+  --bg:#f5f0e8;
+  --paper:#fdfaf4;
+  --ink:#1a1612;
   --muted:#6e6558;
   --soft:#9b9183;
   --line:#e6ddcf;
-  --border:#d8d0c4;
+  --border:#d4c9b8;
   --gold:#b8892a;
   --green:#2a7a4a;
   --red:#c0392b;
-  --purple:#6b3fa0;
+  --purple:#5b35a0;
+  --purple-light:rgba(91,53,160,.12);
 }
 body{
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-family:'DM Sans',system-ui,sans-serif;
   background:var(--bg);
   color:var(--ink);
   overflow:hidden;
 }
 .topbar{
-  height:58px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
-  border-bottom:1px solid var(--border);
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;border-bottom:1.5px solid var(--border);
+  background:var(--paper);
 }
-.brand{
-  font-size:18px;
-  font-weight:800;
-  letter-spacing:.03em;
-}
-.brand span{color:var(--gold)}
-.stats{
-  display:flex;
-  gap:18px;
-  align-items:center;
-}
-.stat small{
-  display:block;
-  font-size:10px;
-  color:var(--soft);
-  text-transform:uppercase;
-  letter-spacing:.12em;
-}
-.stat strong{
-  display:block;
-  font-size:16px;
-}
-.app{
-  display:grid;
-  grid-template-columns:260px 1fr 230px;
-  height:calc(100% - 58px);
-}
-.panel{
-  padding:16px 14px;
-  overflow:auto;
-  border-right:1px solid var(--border);
-}
-.panel.right{
-  border-right:none;
-  border-left:1px solid var(--border);
-}
-.section{margin-bottom:18px}
-.label{
-  font-size:10px;
-  color:var(--soft);
-  text-transform:uppercase;
-  letter-spacing:.14em;
-  margin-bottom:8px;
-}
-.alpha-grid{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:5px;
-}
+.brand{font-size:19px;font-weight:700;font-family:'Dancing Script',cursive;letter-spacing:.02em;color:var(--purple)}
+.stats{display:flex;gap:20px;align-items:center}
+.stat small{display:block;font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.12em}
+.stat strong{display:block;font-size:15px;font-weight:700}
+.app{display:grid;grid-template-columns:252px 1fr 220px;height:calc(100% - 56px)}
+.panel{padding:14px 12px;overflow-y:auto;border-right:1.5px solid var(--border);background:var(--paper)}
+.panel.right{border-right:none;border-left:1.5px solid var(--border)}
+.section{margin-bottom:16px}
+.label{font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.14em;margin-bottom:7px}
+.alpha-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
 .alpha-btn{
-  min-height:38px;
-  border:1px solid var(--border);
-  background:var(--paper);
-  color:var(--ink);
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
+  min-height:36px;border:1.5px solid var(--border);background:var(--paper);
+  color:var(--ink);border-radius:8px;font-size:15px;cursor:pointer;font-family:'Caveat',cursive;
+  transition:background .12s,border-color .12s;
 }
-.alpha-btn.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
-.alpha-btn.done{background:rgba(42,122,74,.14);color:var(--green);border-color:var(--green)}
-.alpha-btn.done.sel{background:var(--green);color:#fff}
-.toggle{display:flex;gap:8px;flex-wrap:wrap}
+.alpha-btn:hover{background:var(--bg)}
+.alpha-btn.sel{background:var(--purple);color:#fff;border-color:var(--purple)}
+.alpha-btn.done{background:rgba(42,122,74,.12);color:var(--green);border-color:rgba(42,122,74,.4)}
+.alpha-btn.done.sel{background:var(--green);color:#fff;border-color:var(--green)}
+.toggle{display:flex;gap:6px}
 .toggle button,.btn{
-  border:1px solid var(--border);
-  background:var(--paper);
-  color:var(--ink);
-  border-radius:10px;
-  padding:11px 12px;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
+  border:1.5px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:background .12s;
 }
-.toggle button.on,.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
-.btnrow{display:flex;gap:8px}
+.toggle button:hover,.btn:hover{background:var(--bg)}
+.toggle button.on,.btn.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.btnrow{display:flex;gap:6px}
 .btnrow .btn{flex:1}
-.input{
-  width:100%;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--paper);
-  color:var(--ink);
-  padding:11px 12px;
-  font-size:14px;
-  outline:none;
+.input,.select{
+  width:100%;border:1.5px solid var(--border);border-radius:8px;background:var(--paper);
+  color:var(--ink);padding:9px 11px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;
 }
-.stage-wrap{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:14px;
-  padding:14px;
-  overflow:hidden;
-}
+.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mini{display:flex;flex-direction:column;gap:5px}
+.mini label{font-size:11px;color:var(--muted)}
+.range{width:100%;accent-color:var(--purple)}
+.color-row{display:flex;align-items:center;gap:8px}
+.color-picker{width:40px;height:34px;padding:0;border:1.5px solid var(--border);border-radius:8px;background:var(--paper);cursor:pointer}
+.help-list{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.help-item{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);line-height:1.5}
+.stage-wrap{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;overflow:hidden}
 .sheet{
-  width:min(1200px,100%);
-  height:min(76vh,780px);
-  min-height:360px;
-  background:var(--paper);
-  border:1px solid var(--border);
-  border-radius:12px;
-  overflow:hidden;
-  position:relative;
-  box-shadow:0 6px 24px rgba(0,0,0,.05);
+  width:min(1100px,100%);height:min(74vh,740px);min-height:340px;
+  background:var(--paper);border:1.5px solid var(--border);border-radius:14px;
+  overflow:hidden;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);
 }
-.viewport{
-  position:absolute;
-  inset:0;
-  overflow:auto;
-  -webkit-overflow-scrolling:touch;
-  touch-action:pan-x pan-y;
-}
-.stage{
-  position:relative;
-  background:var(--paper);
-}
-.bg-canvas,.guide-canvas,.trace-canvas,.tutorial-canvas{
-  position:absolute;
-  inset:0;
-}
-.trace-canvas{
-  touch-action:none;
-  user-select:none;
-  -webkit-user-select:none;
-  -webkit-touch-callout:none;
-}
+.viewport{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+.stage{position:relative;background:var(--paper)}
+.bg-canvas,.guide-canvas,.trace-canvas,.tutorial-canvas{position:absolute;inset:0}
+.bg-canvas,.guide-canvas,.tutorial-canvas{pointer-events:none}
+.trace-canvas{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
 .chip{
-  position:absolute;
-  right:14px;
-  bottom:12px;
-  padding:7px 12px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:rgba(255,253,249,.92);
-  font-size:11px;
-  color:var(--muted);
+  position:absolute;right:14px;bottom:12px;padding:6px 14px;
+  border:1.5px solid var(--border);border-radius:999px;
+  background:rgba(253,250,244,.9);font-size:12px;color:var(--muted);
+  font-family:'Caveat',cursive;font-size:15px;
 }
-.status-row,.acc-row{
-  width:min(1200px,100%);
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.dot{
-  width:8px;height:8px;border-radius:50%;background:#999;flex-shrink:0
-}
-.dot.ok{background:var(--green)}
-.dot.warn{background:var(--gold)}
-.dot.err{background:var(--red)}
-.status{
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.45;
-}
-.acc-tag,.acc-pct{
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  color:var(--soft);
-}
-.acc-track{
-  flex:1;
-  height:4px;
-  border-radius:999px;
-  background:var(--line);
-  overflow:hidden;
-}
-.acc-fill{
-  width:0%;
-  height:100%;
-  background:var(--green);
-}
+.status-row,.acc-row{width:min(1100px,100%);display:flex;align-items:center;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:#bbb;flex-shrink:0}
+.dot.ok{background:var(--green)}.dot.warn{background:var(--gold)}.dot.err{background:var(--red)}
+.status{font-size:13px;color:var(--muted);line-height:1.45}
+.acc-tag,.acc-pct{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft)}
+.acc-track{flex:1;height:5px;border-radius:999px;background:var(--line);overflow:hidden}
+.acc-fill{width:0%;height:100%;background:var(--green);transition:width .15s,background .3s}
 .stroke-list{display:flex;flex-direction:column;gap:6px}
-.metric{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 11px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--paper);
-  font-size:12px;
-  color:var(--muted);
-}
+.metric{display:flex;justify-content:space-between;gap:10px;padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;color:var(--muted)}
 .metric b{color:var(--ink)}
-.tip{
-  border:1px solid var(--border);
-  border-radius:11px;
-  background:var(--paper);
-  padding:12px;
-  font-size:12px;
-  line-height:1.58;
-  color:var(--muted);
+.tip{border:1.5px solid var(--border);border-radius:10px;background:var(--bg);padding:11px;font-size:12px;line-height:1.58;color:var(--muted)}
+.tip b{display:block;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.stroke-badge{
+  display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;
+  background:var(--purple-light);color:var(--purple);margin-left:6px;
 }
-.tip b{
-  display:block;
-  margin-bottom:4px;
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  color:var(--ink);
-}
-.mobile-controls{
-  display:none;
-  width:min(1200px,100%);
-  gap:8px;
-  flex-wrap:wrap;
-}
-.mobile-controls .btn{flex:1 1 130px}
-@media (max-width:980px){
+.mobile-controls{display:none;width:min(1100px,100%);gap:7px;flex-wrap:wrap}
+.mobile-controls .btn{flex:1 1 120px}
+.mobile-settings{display:none;width:min(1100px,100%);gap:7px;flex-wrap:wrap}
+.mobile-settings>*{flex:1 1 140px}
+@media(max-width:980px){
   .app{grid-template-columns:1fr}
   .panel{display:none}
-  .mobile-controls{display:flex}
-  .sheet{height:min(70vh,650px)}
+  .mobile-controls,.mobile-settings{display:flex}
+  .sheet{height:min(68vh,620px)}
 }
-@media (max-width:640px){
-  .topbar{height:54px;padding:0 12px}
-  .brand{font-size:17px}
-  .stats{gap:12px}
-  .stat strong{font-size:14px}
-  .stage-wrap{padding:10px}
-  .sheet{height:min(64vh,560px);min-height:320px}
-  .status-row,.acc-row,.mobile-controls{width:100%}
+@media(max-width:640px){
+  .topbar{height:52px;padding:0 12px}
+  .stage-wrap{padding:8px}
+  .sheet{height:min(62vh,520px);min-height:300px}
+  .status-row,.acc-row,.mobile-controls,.mobile-settings{width:100%}
 }
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="brand">Real <span>Script</span> Trace</div>
+  <div class="brand">Cursive Quest</div>
   <div class="stats">
     <div class="stat"><small>Score</small><strong id="scoreEl">0</strong></div>
     <div class="stat"><small>Accuracy</small><strong id="accuracyTopEl">—</strong></div>
@@ -285,43 +147,98 @@ body{
         <button id="wordModeBtn">Word</button>
       </div>
     </div>
-
     <div class="section" id="singleSection">
       <div class="label">Letter</div>
       <div class="alpha-grid" id="alphaGrid"></div>
     </div>
-
     <div class="section" id="wordSection" style="display:none">
       <div class="label">Word</div>
-      <input class="input" id="wordInput" maxlength="14" value="pixie" placeholder="type a lowercase word" />
-      <div class="btnrow" style="margin-top:8px">
+      <input class="input" id="wordInput" maxlength="12" value="pixie" placeholder="type a word" />
+      <div class="btnrow" style="margin-top:7px">
         <button class="btn primary" id="loadWordBtn">Load</button>
         <button class="btn" id="randomWordBtn">Random</button>
       </div>
     </div>
-
     <div class="section">
-      <div class="label">Actions</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn primary" id="tutorialBtn">Tutorial</button>
-        <button class="btn" id="clearBtn">Clear</button>
-        <button class="btn" id="fitBtn">Fit to Screen</button>
+      <div class="label">Practice Setup</div>
+      <div class="mini" style="margin-bottom:7px">
+        <label for="paperTypeSelect">Paper type</label>
+        <select class="select" id="paperTypeSelect">
+          <option value="script">Script paper</option>
+          <option value="lined">Wide ruled</option>
+          <option value="grid">Grid</option>
+          <option value="blank">Blank</option>
+        </select>
+      </div>
+      <div class="control-grid">
+        <div class="mini">
+          <label for="penSizeRange">Pen size</label>
+          <input class="range" id="penSizeRange" type="range" min="8" max="24" step="1" value="14"/>
+        </div>
+        <div class="mini">
+          <label for="tutorialSpeedSelect">Tutorial speed</label>
+          <select class="select" id="tutorialSpeedSelect">
+            <option value="slow">Slow</option>
+            <option value="normal" selected>Normal</option>
+            <option value="fast">Fast</option>
+          </select>
+        </div>
+      </div>
+      <div class="mini" style="margin-top:7px">
+        <label for="guideOpacityRange">Guide darkness</label>
+        <input class="range" id="guideOpacityRange" type="range" min="5" max="45" step="1" value="18"/>
+      </div>
+      <div class="mini" style="margin-top:7px">
+        <label>Pen color</label>
+        <div class="color-row">
+          <input class="color-picker" id="penColorPicker" type="color" value="#5b35a0"/>
+          <select class="select" id="penColorPreset">
+            <option value="#5b35a0" selected>Purple</option>
+            <option value="#1e3a8a">Blue</option>
+            <option value="#166534">Green</option>
+            <option value="#111827">Black</option>
+            <option value="#b91c1c">Red</option>
+          </select>
+        </div>
       </div>
     </div>
-
+    <div class="section">
+      <div class="label">Actions</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn primary" id="tutorialBtn">▶ Tutorial</button>
+        <button class="btn" id="undoBtn">↩ Undo Last Stroke</button>
+        <button class="btn" id="clearBtn">Clear All</button>
+        <button class="btn" id="doneBtn">✓ Done — Score It</button>
+      </div>
+    </div>
     <div class="tip">
-      <b>How this works now</b>
-      You can draw in one continuous stroke. The app no longer forces stroke breaks or requires a fragile starting overlap. Accuracy comes from two things: how much of your ink stays inside the script band, and how much of the script band you actually cover.
+      <b>Multi-stroke letters</b>
+      Lift your pen between strokes — each lift starts a new stroke and nothing disappears. Letters like <b>i</b>, <b>j</b>, <b>t</b>, <b>f</b>, and <b>x</b> need multiple strokes. Hit "Done" when you're finished.
     </div>
   </aside>
 
   <main class="stage-wrap">
     <div class="mobile-controls">
-      <button class="btn primary" id="tutorialBtnMobile">Tutorial</button>
-      <button class="btn" id="clearBtnMobile">Clear</button>
-      <button class="btn" id="fitBtnMobile">Fit</button>
+      <button class="btn primary" id="tutorialBtnM">▶ Tutorial</button>
+      <button class="btn" id="undoBtnM">↩ Undo</button>
+      <button class="btn" id="clearBtnM">Clear</button>
+      <button class="btn" id="doneBtnM">✓ Done</button>
     </div>
-
+    <div class="mobile-settings">
+      <select class="select" id="paperTypeSelectM">
+        <option value="script">Script paper</option>
+        <option value="lined">Wide ruled</option>
+        <option value="grid">Grid</option>
+        <option value="blank">Blank</option>
+      </select>
+      <select class="select" id="tutorialSpeedSelectM">
+        <option value="slow">Slow</option>
+        <option value="normal" selected>Normal</option>
+        <option value="fast">Fast</option>
+      </select>
+      <input class="color-picker" id="penColorPickerM" type="color" value="#5b35a0"/>
+      <input class="range" id="penSizeRangeM" type="range" min="8" max="24" step="1" value="14"/>
+    </div>
     <div class="sheet">
       <div class="viewport" id="viewport">
         <div class="stage" id="stage">
@@ -333,16 +250,14 @@ body{
         </div>
       </div>
     </div>
-
     <div class="acc-row">
       <div class="acc-tag">Accuracy</div>
       <div class="acc-track"><div class="acc-fill" id="accFill"></div></div>
       <div class="acc-pct" id="accPct">—</div>
     </div>
-
     <div class="status-row">
       <div class="dot" id="statusDot"></div>
-      <div class="status" id="statusEl">Open the tutorial, then trace the whole script in one clean motion.</div>
+      <div class="status" id="statusEl">Watch the tutorial, then trace the letter. Lift your pen freely between strokes.</div>
     </div>
   </main>
 
@@ -352,544 +267,748 @@ body{
       <div class="stroke-list">
         <div class="metric"><span>On path</span><b id="onPathEl">—</b></div>
         <div class="metric"><span>Coverage</span><b id="coverageEl">—</b></div>
-        <div class="metric"><span>Total score</span><b id="scoreSideEl">0</b></div>
+        <div class="metric"><span>Strokes</span><b id="strokesEl">0</b></div>
+        <div class="metric"><span>Score</span><b id="scoreSideEl">0</b></div>
       </div>
     </div>
-
-    <div class="tip">
-      <b>Font choice</b>
-      This version uses Borel from Google Fonts. It is described there as a cursive primer developed with primary school teachers and speech therapists, which makes it a much more believable starter script model than the custom fake letter shapes from the earlier versions.
+    <div class="section">
+      <div class="label">Learning Notes</div>
+      <div class="help-list">
+        <div class="help-item">Watch the tutorial to see the stroke order, then copy it.</div>
+        <div class="help-item">Lift your pen freely — dots, crossbars, and tails are all separate strokes.</div>
+        <div class="help-item">Hit "Done" when you've finished all strokes to get scored.</div>
+        <div class="help-item">Letters like <b>i j t f x</b> always need 2+ strokes.</div>
+      </div>
     </div>
-
     <div class="tip">
-      <b>Tutorial</b>
-      The tutorial now shows a moving guide sweep across the real script shape, then gets out of the way. Practice is uninterrupted.
+      <b>Undo last stroke</b>
+      If you mess up one stroke, undo just that one and redo it without clearing everything.
     </div>
   </aside>
 </div>
 
 <script>
-const alpha = 'abcdefghijklmnopqrstuvwxyz'.split('');
-const RANDOM_WORDS = ['pixie','david','leigh','cursive','trace','hello','green','river','quiet','story','magic','grace','smile','violet'];
-const FONT_FAMILY = '"Borel", cursive';
+// ─────────────────────────────────────────────────────────────────────────────
+// CURSIVE STROKE DEFINITIONS
+// Each letter has one or more strokes, each stroke is an array of [x,y] 
+// control points relative to a 200×200 bounding box.
+// x: 0=left, 200=right. y: 0=top, 200=bottom. Baseline at y≈145.
+// These are then scaled and positioned at render time.
+// ─────────────────────────────────────────────────────────────────────────────
 
-const S = {
-  mode:'single',
-  letter:'a',
-  letterIdx:0,
-  word:'pixie',
-  score:0,
-  mastered:new Set(),
-  stageWidth:1200,
-  stageHeight:620,
-  fontSize:260,
-  textX:120,
-  textY:330,
-  tutorialPlaying:false,
-  drawing:false,
-  activeInput:'none',
-  pointerId:null,
-  points:[],
-  segments:[],
-  lastPoint:null,
-  onPathPoints:0,
-  totalPoints:0,
-  coveredBins:new Set(),
-  totalTargetBins:1,
-  targetMask:null,
-  zoneMask:null,
-  resultLocked:false
+const LETTER_STROKES = {
+  a:[
+    [[145,65],[130,50],[100,48],[78,58],[62,80],[60,105],[70,130],[90,142],[110,142],[130,133],[145,115],[145,65],[145,145]]
+  ],
+  b:[
+    [[55,30],[55,145]],
+    [[55,90],[70,78],[90,72],[108,72],[124,80],[133,95],[130,112],[118,128],[100,135],[80,135],[62,128],[55,115]]
+  ],
+  c:[
+    [[138,75],[120,55],[98,48],[76,52],[60,68],[52,90],[54,115],[65,132],[82,143],[103,146],[124,141],[140,128]]
+  ],
+  d:[
+    [[100,48],[78,55],[60,75],[54,100],[60,125],[78,140],[100,145],[120,140],[135,122],[140,100],[138,75],[130,58],[115,48],[100,48]],
+    [[140,65],[140,145]]
+  ],
+  e:[
+    [[55,100],[80,92],[110,92],[138,100],[140,115],[130,133],[110,143],[88,143],[68,133],[56,115],[54,95],[62,75],[80,60],[100,55],[118,58]]
+  ],
+  f:[
+    [[130,48],[115,42],[100,45],[88,55],[80,70],[76,95],[74,145]],
+    [[58,88],[110,85]]
+  ],
+  g:[
+    [[138,70],[120,55],[98,50],[78,58],[62,76],[56,100],[60,124],[75,138],[96,142],[118,136],[133,120],[138,98],[138,70]],
+    [[138,100],[140,145],[138,160],[128,170],[112,172],[96,170],[82,162]]
+  ],
+  h:[
+    [[58,30],[58,145]],
+    [[58,88],[72,72],[90,62],[110,62],[126,72],[134,90],[134,145]]
+  ],
+  i:[
+    [[90,72],[88,145]],
+    [[88,52],[88,58]]
+  ],
+  j:[
+    [[105,72],[103,130],[100,148],[90,162],[75,170],[60,168],[50,158]],
+    [[103,52],[103,58]]
+  ],
+  k:[
+    [[58,30],[58,145]],
+    [[130,68],[80,110]],
+    [[88,102],[135,145]]
+  ],
+  l:[
+    [[88,32],[86,138],[90,148],[100,152],[112,150]]
+  ],
+  m:[
+    [[52,72],[52,145]],
+    [[52,80],[65,66],[82,60],[98,64],[106,76],[106,145]],
+    [[106,80],[118,66],[136,60],[150,64],[158,76],[158,145]]
+  ],
+  n:[
+    [[55,72],[55,145]],
+    [[55,80],[70,66],[88,60],[106,64],[115,78],[115,145]]
+  ],
+  o:[
+    [[145,80],[132,60],[112,50],[90,50],[70,60],[58,80],[55,105],[62,128],[80,142],[102,148],[122,142],[138,128],[146,106],[145,80]]
+  ],
+  p:[
+    [[62,72],[60,145],[62,165],[70,172],[82,170]],
+    [[62,80],[76,66],[94,60],[114,62],[128,76],[134,95],[128,114],[114,128],[94,132],[74,128],[62,115]]
+  ],
+  q:[
+    [[138,80],[124,62],[104,52],[82,54],[64,68],[56,90],[58,115],[70,133],[90,143],[112,143],[130,132],[140,112],[138,80]],
+    [[128,120],[148,160],[154,170]]
+  ],
+  r:[
+    [[58,72],[58,145]],
+    [[58,82],[70,68],[84,62],[98,64],[108,72]]
+  ],
+  s:[
+    [[136,72],[118,56],[96,52],[76,58],[62,74],[66,92],[84,104],[110,112],[126,124],[130,140],[118,152],[100,156],[78,152],[62,140]]
+  ],
+  t:[
+    [[95,38],[92,145]],
+    [[60,85],[130,82]]
+  ],
+  u:[
+    [[60,68],[60,122],[68,140],[84,148],[100,148],[116,138],[125,120],[125,68]],
+    [[125,112],[125,145]]
+  ],
+  v:[
+    [[60,68],[92,145],[125,68]]
+  ],
+  w:[
+    [[50,68],[72,145],[94,100],[115,145],[140,68]]
+  ],
+  x:[
+    [[60,70],[130,145]],
+    [[130,70],[60,145]]
+  ],
+  y:[
+    [[60,68],[92,130]],
+    [[130,68],[90,130],[75,155],[60,165],[46,162]]
+  ],
+  z:[
+    [[62,68],[132,68],[62,145],[134,145]]
+  ]
 };
 
-const viewport = document.getElementById('viewport');
-const stage = document.getElementById('stage');
-const bgCanvas = document.getElementById('bgCanvas');
-const guideCanvas = document.getElementById('guideCanvas');
-const traceCanvas = document.getElementById('traceCanvas');
-const tutorialCanvas = document.getElementById('tutorialCanvas');
-const bgCtx = bgCanvas.getContext('2d');
-const guideCtx = guideCanvas.getContext('2d');
-const traceCtx = traceCanvas.getContext('2d');
-const tutorialCtx = tutorialCanvas.getContext('2d');
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+const RANDOM_WORDS=['pixie','david','leigh','trace','hello','quiet','magic','grace','smile','river','story','green'];
+const FONT_FAMILY='"Dancing Script", cursive';
+const alpha='abcdefghijklmnopqrstuvwxyz'.split('');
 
-function normalizeWord(t){
-  return (t || '').toLowerCase().replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim().slice(0,14);
+const S={
+  mode:'single',letter:'a',letterIdx:0,word:'pixie',
+  score:0,mastered:new Set(),
+  stageW:1100,stageH:600,
+  fontSize:280,textX:80,textY:360,
+  tutorialPlaying:false,
+  drawing:false,activeInput:'none',pointerId:null,
+  points:[],segments:[],lastPoint:null,
+  onPathPoints:0,totalPoints:0,
+  coveredBins:new Set(),detachedBins:new Set(),
+  mainTargetBins:1,detachedTargetBins:0,
+  targetMask:null,zoneMask:null,detachedMask:null,
+  resultLocked:false,lastOverall:0,
+  penColor:'#5b35a0',penSize:14,
+  paperType:'script',guideOpacity:0.18,tutorialSpeed:'normal',
+  letterStrokePaths:[],// scaled stroke paths for current letter/word
+};
+
+const viewport=document.getElementById('viewport');
+const stage=document.getElementById('stage');
+const bgCanvas=document.getElementById('bgCanvas');
+const guideCanvas=document.getElementById('guideCanvas');
+const traceCanvas=document.getElementById('traceCanvas');
+const tutorialCanvas=document.getElementById('tutorialCanvas');
+const bgCtx=bgCanvas.getContext('2d');
+const guideCtx=guideCanvas.getContext('2d');
+const traceCtx=traceCanvas.getContext('2d');
+const tutCtx=tutorialCanvas.getContext('2d');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UTILITY
+// ─────────────────────────────────────────────────────────────────────────────
+function setStatus(msg,type='neutral'){
+  document.getElementById('statusEl').textContent=msg;
+  const d=document.getElementById('statusDot');
+  d.className='dot'+(type==='ok'?' ok':type==='warn'?' warn':type==='err'?' err':'');
 }
-function getPracticeText(){
-  return S.mode === 'single' ? S.letter : (normalizeWord(S.word) || 'a');
+function getPracticeText(){return S.mode==='single'?S.letter:(S.word||'a')}
+function normalizeWord(t){return(t||'').toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}
+function midpoint(a,b){return{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function idxFor(x,y){
+  const px=Math.max(0,Math.min(S.stageW-1,Math.round(x)));
+  const py=Math.max(0,Math.min(S.stageH-1,Math.round(y)));
+  return((py*S.stageW)+px)*4+3;
 }
-function setStatus(msg, type='neutral'){
-  document.getElementById('statusEl').textContent = msg;
-  const dot = document.getElementById('statusDot');
-  dot.className = 'dot' + (type==='ok' ? ' ok' : type==='warn' ? ' warn' : type==='err' ? ' err' : '');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CANVAS SETUP
+// ─────────────────────────────────────────────────────────────────────────────
+function setupCanvas(canvas,ctx){
+  const dpr=Math.max(1,window.devicePixelRatio||1);
+  canvas.width=Math.round(S.stageW*dpr);
+  canvas.height=Math.round(S.stageH*dpr);
+  canvas.style.width=S.stageW+'px';
+  canvas.style.height=S.stageH+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+}
+function setupAll(){
+  [[bgCanvas,bgCtx],[guideCanvas,guideCtx],[traceCanvas,traceCtx],[tutorialCanvas,tutCtx]].forEach(([c,x])=>setupCanvas(c,x));
+}
+function clear(ctx){ctx.clearRect(0,0,S.stageW,S.stageH)}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAPER BACKGROUND
+// ─────────────────────────────────────────────────────────────────────────────
+function drawPaper(){
+  clear(bgCtx);
+  if(S.paperType==='blank') return;
+  const baseline=S.stageH*0.65;
+  const mean=baseline-118;
+  const cap=baseline-240;
+  if(S.paperType==='grid'){
+    bgCtx.strokeStyle='#ede6db';bgCtx.lineWidth=1;
+    for(let x=0;x<=S.stageW;x+=36){bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,S.stageH);bgCtx.stroke()}
+    for(let y=0;y<=S.stageH;y+=36){bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(S.stageW,y);bgCtx.stroke()}
+    return;
+  }
+  if(S.paperType==='lined'){
+    bgCtx.strokeStyle='#e6ddcf';bgCtx.lineWidth=1.2;
+    for(let y=80;y<S.stageH;y+=58){bgCtx.beginPath();bgCtx.moveTo(30,y);bgCtx.lineTo(S.stageW-30,y);bgCtx.stroke()}
+    bgCtx.strokeStyle='#efdccf';bgCtx.beginPath();bgCtx.moveTo(72,0);bgCtx.lineTo(72,S.stageH);bgCtx.stroke();
+    return;
+  }
+  // script paper
+  bgCtx.strokeStyle='#e0d8cc';bgCtx.lineWidth=1;
+  bgCtx.setLineDash([6,6]);bgCtx.beginPath();bgCtx.moveTo(40,cap);bgCtx.lineTo(S.stageW-40,cap);bgCtx.stroke();
+  bgCtx.setLineDash([4,8]);bgCtx.beginPath();bgCtx.moveTo(40,mean);bgCtx.lineTo(S.stageW-40,mean);bgCtx.stroke();
+  bgCtx.setLineDash([]);bgCtx.strokeStyle='#c8beaf';bgCtx.lineWidth=1.6;
+  bgCtx.beginPath();bgCtx.moveTo(40,baseline);bgCtx.lineTo(S.stageW-40,baseline);bgCtx.stroke();
+  bgCtx.fillStyle='rgba(110,101,88,.5)';bgCtx.font='11px "DM Sans",sans-serif';
+  bgCtx.fillText('cap',44,cap-7);bgCtx.fillText('mid',44,mean-7);bgCtx.fillText('base',44,baseline-7);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEXT LAYOUT
+// ─────────────────────────────────────────────────────────────────────────────
+function measureText(text,fontSize){
+  const p=document.createElement('canvas').getContext('2d');
+  p.font=`${fontSize}px ${FONT_FAMILY}`;
+  return p.measureText(text).width;
+}
+function computeLayout(){
+  const text=getPracticeText();
+  let fontSize=S.mode==='single'?300:240;
+  const maxW=S.stageW-160;
+  while(measureText(text,fontSize)>maxW&&fontSize>100) fontSize-=6;
+  S.fontSize=fontSize;
+  const tw=measureText(text,fontSize);
+  S.textX=Math.max(60,(S.stageW-tw)/2-10);
+  S.textY=Math.floor(S.stageH*0.58);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GUIDE RENDER (ghost letter)
+// ─────────────────────────────────────────────────────────────────────────────
+function renderGuide(){
+  clear(guideCtx);
+  drawPaper();
+  const text=getPracticeText();
+  guideCtx.font=`${S.fontSize}px ${FONT_FAMILY}`;
+  guideCtx.textBaseline='alphabetic';
+  const alpha_val=S.guideOpacity;
+  guideCtx.fillStyle=`rgba(184,137,42,${alpha_val})`;
+  guideCtx.strokeStyle=`rgba(184,137,42,${Math.min(0.7,alpha_val+0.25)})`;
+  guideCtx.lineWidth=1.5;
+  guideCtx.fillText(text,S.textX,S.textY);
+  guideCtx.strokeText(text,S.textX,S.textY);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STROKE PATH GENERATION FROM DEFINITIONS
+// Converts normalized [0-200] coords to actual canvas coords for each character
+// ─────────────────────────────────────────────────────────────────────────────
+function getCharacterOffsets(){
+  // Returns array of {char, x, width} for each character in the practice text
+  const text=getPracticeText();
+  const probe=document.createElement('canvas').getContext('2d');
+  probe.font=`${S.fontSize}px ${FONT_FAMILY}`;
+  probe.textBaseline='alphabetic';
+  const offsets=[];
+  let cumX=S.textX;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    const w=probe.measureText(ch).width;
+    // Advance width for prefix to get accurate position
+    const prefixW=probe.measureText(text.slice(0,i)).width;
+    offsets.push({char:ch, x:S.textX+prefixW, width:w});
+  }
+  return offsets;
+}
+
+function buildLetterStrokePaths(){
+  // Build scaled stroke paths for the current letter/word
+  const text=getPracticeText();
+  const probe=document.createElement('canvas').getContext('2d');
+  probe.font=`${S.fontSize}px ${FONT_FAMILY}`;
+  probe.textBaseline='alphabetic';
+
+  S.letterStrokePaths=[];
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    const defs=LETTER_STROKES[ch];
+    if(!defs) continue;
+
+    const prefixW=probe.measureText(text.slice(0,i)).width;
+    const charW=probe.measureText(ch).width;
+    // Bounding box: x from textX+prefixW, width=charW, height based on fontSize
+    // The 200-unit box maps: x 0→200 maps to charX → charX+charW
+    // y 0→200 maps to (textY - fontSize*0.85) → (textY + fontSize*0.25)
+    const bx=S.textX+prefixW;
+    const bw=charW;
+    const by=S.textY-S.fontSize*0.85;
+    const bh=S.fontSize*1.1;
+
+    const charStrokes=defs.map(stroke=>
+      stroke.map(([nx,ny])=>({
+        x: bx + (nx/200)*bw,
+        y: by + (ny/200)*bh
+      }))
+    );
+    S.letterStrokePaths.push(...charStrokes);
+  }
+}
+
+// Catmull-Rom spline interpolation for smooth paths
+function catmullRomPoints(pts,segments=8){
+  if(pts.length<2) return pts.slice();
+  const result=[];
+  const ext=[pts[0],...pts,pts[pts.length-1]];
+  for(let i=1;i<ext.length-2;i++){
+    const p0=ext[i-1],p1=ext[i],p2=ext[i+1],p3=ext[i+2];
+    for(let t=0;t<segments;t++){
+      const u=t/segments;
+      const u2=u*u,u3=u2*u;
+      result.push({
+        x:0.5*((2*p1.x)+(-p0.x+p2.x)*u+(2*p0.x-5*p1.x+4*p2.x-p3.x)*u2+(-p0.x+3*p1.x-3*p2.x+p3.x)*u3),
+        y:0.5*((2*p1.y)+(-p0.y+p2.y)*u+(2*p0.y-5*p1.y+4*p2.y-p3.y)*u2+(-p0.y+3*p1.y-3*p2.y+p3.y)*u3)
+      });
+    }
+  }
+  result.push(pts[pts.length-1]);
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MASK BUILDING (for scoring)
+// ─────────────────────────────────────────────────────────────────────────────
+function buildMasks(){
+  const text=getPracticeText();
+
+  function makeOff(){
+    const c=document.createElement('canvas');
+    c.width=S.stageW;c.height=S.stageH;
+    return c;
+  }
+
+  // Target mask: the actual font pixels
+  const tOff=makeOff();const tCtx=tOff.getContext('2d');
+  tCtx.font=`${S.fontSize}px ${FONT_FAMILY}`;tCtx.textBaseline='alphabetic';
+  tCtx.fillStyle='#000';tCtx.fillText(text,S.textX,S.textY);
+  S.targetMask=tCtx.getImageData(0,0,S.stageW,S.stageH).data;
+
+  // Zone mask: fat stroked version (tolerance band)
+  const zOff=makeOff();const zCtx=zOff.getContext('2d');
+  zCtx.font=`${S.fontSize}px ${FONT_FAMILY}`;zCtx.textBaseline='alphabetic';
+  zCtx.lineCap='round';zCtx.lineJoin='round';
+  zCtx.strokeStyle='#000';zCtx.lineWidth=32;
+  zCtx.strokeText(text,S.textX,S.textY);
+  zCtx.fillStyle='#000';zCtx.fillText(text,S.textX,S.textY);
+  S.zoneMask=zCtx.getImageData(0,0,S.stageW,S.stageH).data;
+
+  // Count bins
+  const step=10;let tot=0;
+  for(let y=0;y<S.stageH;y+=step)for(let x=0;x<S.stageW;x+=step){
+    if(S.targetMask[((y*S.stageW)+x)*4+3]>10) tot++;
+  }
+  S.mainTargetBins=Math.max(1,tot);
+  S.detachedTargetBins=0;
+}
+
+function addCoveragePoint(x,y){
+  const step=10;
+  const bx=Math.floor(x/step),by=Math.floor(y/step);
+  const cx=bx*step+5,cy=by*step+5;
+  const idx=idxFor(cx,cy);
+  const key=bx+':'+by;
+  if(S.targetMask&&S.targetMask[idx]>10) S.coveredBins.add(key);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DRAWING
+// ─────────────────────────────────────────────────────────────────────────────
+function drawSmooth(ctx,pts,color,width){
+  if(!pts.length) return;
+  if(pts.length===1){
+    ctx.beginPath();ctx.arc(pts[0].x,pts[0].y,width/2,0,Math.PI*2);
+    ctx.fillStyle=color;ctx.fill();return;
+  }
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  if(pts.length===2){ctx.lineTo(pts[1].x,pts[1].y);}
+  else{
+    for(let i=1;i<pts.length-1;i++){
+      const mid=midpoint(pts[i],pts[i+1]);
+      ctx.quadraticCurveTo(pts[i].x,pts[i].y,mid.x,mid.y);
+    }
+    const l=pts[pts.length-1],p=pts[pts.length-2];
+    ctx.quadraticCurveTo(p.x,p.y,l.x,l.y);
+  }
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
+}
+
+function redrawTrace(){
+  clear(traceCtx);
+  S.segments.forEach(seg=>drawSmooth(traceCtx,seg.points,seg.color,seg.width));
+  if(S.points.length) drawSmooth(traceCtx,S.points,S.penColor,S.penSize);
+  document.getElementById('strokesEl').textContent=S.segments.length+(S.points.length?'+1':'');
+}
+
+function processPoint(p){
+  S.totalPoints++;
+  if(S.zoneMask&&S.zoneMask[idxFor(p.x,p.y)]>10) S.onPathPoints++;
+  addCoveragePoint(p.x,p.y);
+  updateMetrics();
+}
+function interpolateProcess(from,to){
+  const d=Math.max(1,Math.ceil(dist(from,to)/3));
+  for(let i=1;i<=d;i++){
+    const t=i/d;
+    processPoint({x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t});
+  }
+}
+
+function getEventPt(e){
+  const rect=traceCanvas.getBoundingClientRect();
+  let cx,cy;
+  if(e.touches&&e.touches.length){cx=e.touches[0].clientX;cy=e.touches[0].clientY;}
+  else if(e.changedTouches&&e.changedTouches.length){cx=e.changedTouches[0].clientX;cy=e.changedTouches[0].clientY;}
+  else{cx=e.clientX;cy=e.clientY;}
+  return{x:cx-rect.left,y:cy-rect.top};
+}
+
+function beginDraw(p){
+  if(S.tutorialPlaying) return;
+  if(S.resultLocked){S.resultLocked=false;setStatus('Continuing practice. Hit Done when finished.','neutral');}
+  S.drawing=true;
+  S.points=[p];S.lastPoint=p;
+  processPoint(p);redrawTrace();
+}
+function moveDraw(p){
+  if(!S.drawing||S.tutorialPlaying) return;
+  interpolateProcess(S.lastPoint,p);
+  S.points.push(p);S.lastPoint=p;redrawTrace();
+}
+function endDraw(){
+  if(!S.drawing) return;
+  S.drawing=false;
+  if(S.points.length){
+    S.segments.push({points:[...S.points],color:S.penColor,width:S.penSize});
+    S.points=[];redrawTrace();
+    setStatus('Stroke added. Keep going or hit Done to score.','neutral');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// METRICS & SCORING
+// ─────────────────────────────────────────────────────────────────────────────
+function updateMetrics(){
+  if(!S.totalPoints){
+    document.getElementById('onPathEl').textContent='—';
+    document.getElementById('coverageEl').textContent='—';
+    document.getElementById('accFill').style.width='0%';
+    document.getElementById('accPct').textContent='—';
+    document.getElementById('accuracyTopEl').textContent='—';
+    S.lastOverall=0;return;
+  }
+  const onP=Math.round((S.onPathPoints/S.totalPoints)*100);
+  const cov=Math.round((S.coveredBins.size/S.mainTargetBins)*100);
+  const overall=Math.round(onP*0.55+cov*0.45);
+  S.lastOverall=overall;
+  document.getElementById('onPathEl').textContent=onP+'%';
+  document.getElementById('coverageEl').textContent=cov+'%';
+  document.getElementById('accFill').style.width=overall+'%';
+  document.getElementById('accFill').style.background=overall>80?'var(--green)':overall>55?'var(--gold)':'var(--red)';
+  document.getElementById('accPct').textContent=overall+'%';
+  document.getElementById('accuracyTopEl').textContent=overall+'%';
+}
+
+function scoreResult(){
+  if(!S.totalPoints){setStatus('Draw something first, then hit Done.','warn');return;}
+  const overall=S.lastOverall;
+  S.resultLocked=true;
+  if(overall>=70){
+    S.score+=Math.round(40+overall*0.6);
+    if(S.mode==='single') S.mastered.add(S.letter);
+    updateHeader();renderAlpha();
+    setStatus(`Great! ${overall}% accuracy. Score +${Math.round(40+overall*0.6)} — letter mastered!`,'ok');
+  }else{
+    setStatus(`${overall}% accuracy. Try again — watch the tutorial and follow the stroke paths.`,'warn');
+  }
+  document.getElementById('scoreEl').textContent=S.score;
+  document.getElementById('scoreSideEl').textContent=S.score;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TUTORIAL — animates along the hand-authored stroke paths
+// ─────────────────────────────────────────────────────────────────────────────
+function getTutorialDelay(){
+  return S.tutorialSpeed==='slow'?32:S.tutorialSpeed==='fast'?10:18;
+}
+
+async function playTutorial(){
+  if(S.tutorialPlaying) return;
+  S.tutorialPlaying=true;
+  clear(tutCtx);
+  setStatus('Tutorial playing — watch the stroke order.','neutral');
+
+  const paths=S.letterStrokePaths;
+  if(!paths.length){S.tutorialPlaying=false;return;}
+
+  const delay=getTutorialDelay();
+
+  for(let si=0;si<paths.length;si++){
+    const rawPts=paths[si];
+    // Smooth via catmull-rom
+    const pts=catmullRomPoints(rawPts,10);
+    const shown=[];
+
+    for(let i=0;i<pts.length;i++){
+      shown.push(pts[i]);
+      // Draw every few frames
+      if(i%2===0||i===pts.length-1){
+        clear(tutCtx);
+
+        // Draw all completed strokes in full
+        for(let s=0;s<si;s++){
+          const completePts=catmullRomPoints(paths[s],10);
+          // Glow
+          tutCtx.save();
+          drawSmooth(tutCtx,completePts,'rgba(91,53,160,.15)',22);
+          // Solid
+          drawSmooth(tutCtx,completePts,'rgba(91,53,160,.75)',13);
+          tutCtx.restore();
+        }
+
+        // Draw current in-progress stroke
+        if(shown.length>1){
+          drawSmooth(tutCtx,shown,'rgba(91,53,160,.2)',24);
+          drawSmooth(tutCtx,shown,'rgba(91,53,160,.9)',13);
+        }
+
+        // Tip dot
+        const tip=shown[shown.length-1];
+        tutCtx.beginPath();tutCtx.arc(tip.x,tip.y,8,0,Math.PI*2);
+        tutCtx.fillStyle='rgba(42,122,74,.95)';tutCtx.fill();
+
+        // Stroke number badge
+        tutCtx.fillStyle='rgba(91,53,160,.9)';
+        tutCtx.font='bold 13px "DM Sans",sans-serif';
+        tutCtx.fillText(`stroke ${si+1}/${paths.length}`,tip.x+14,tip.y-8);
+
+        await new Promise(r=>setTimeout(r,delay));
+      }
+    }
+
+    // Pause between strokes
+    await new Promise(r=>setTimeout(r,320));
+
+    // Show lift-pen indicator if more strokes follow
+    if(si<paths.length-1){
+      const tip=pts[pts.length-1];
+      tutCtx.beginPath();tutCtx.arc(tip.x,tip.y,13,0,Math.PI*2);
+      tutCtx.strokeStyle='rgba(192,57,43,.8)';tutCtx.lineWidth=2.5;tutCtx.stroke();
+      tutCtx.fillStyle='rgba(192,57,43,.85)';
+      tutCtx.font='bold 12px "DM Sans",sans-serif';
+      tutCtx.fillText('↑ lift pen',tip.x+16,tip.y+4);
+      await new Promise(r=>setTimeout(r,420));
+    }
+  }
+
+  // Final: leave completed tutorial visible briefly then fade
+  await new Promise(r=>setTimeout(r,600));
+  clear(tutCtx);
+  S.tutorialPlaying=false;
+  setStatus(`Tutorial done. ${paths.length} stroke${paths.length>1?'s':''} — now trace it yourself!`,'ok');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESET / UNDO
+// ─────────────────────────────────────────────────────────────────────────────
+function resetPractice(msg=true){
+  S.points=[];S.segments=[];S.lastPoint=null;S.drawing=false;
+  S.pointerId=null;S.activeInput='none';
+  S.onPathPoints=0;S.totalPoints=0;
+  S.coveredBins=new Set();S.detachedBins=new Set();
+  S.lastOverall=0;S.resultLocked=false;
+  updateMetrics();redrawTrace();clear(tutCtx);
+  document.getElementById('strokesEl').textContent='0';
+  if(msg) setStatus('Cleared. Watch the tutorial, then trace each stroke.','neutral');
+}
+function undoStroke(){
+  if(S.segments.length===0){setStatus('Nothing to undo.','neutral');return;}
+  // Remove last segment and recount metrics from scratch
+  S.segments.pop();
+  // Recompute metrics from remaining segments
+  S.onPathPoints=0;S.totalPoints=0;S.coveredBins=new Set();S.detachedBins=new Set();
+  S.segments.forEach(seg=>{
+    for(let i=0;i<seg.points.length-1;i++) interpolateProcess(seg.points[i],seg.points[i+1]);
+  });
+  S.resultLocked=false;
+  redrawTrace();updateMetrics();
+  setStatus('Last stroke removed.','neutral');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCENE BUILD
+// ─────────────────────────────────────────────────────────────────────────────
+function fitToScreen(){
+  requestAnimationFrame(()=>{
+    const vr=viewport.getBoundingClientRect();
+    viewport.scrollLeft=Math.max(0,(S.stageW-vr.width)/2);
+    viewport.scrollTop=Math.max(0,(S.stageH-vr.height)/2-20);
+  });
+}
+function buildScene(){
+  stage.style.width=S.stageW+'px';stage.style.height=S.stageH+'px';
+  setupAll();computeLayout();renderGuide();buildMasks();buildLetterStrokePaths();
+  resetPractice(false);updateHeader();syncControls();fitToScreen();
+  const text=getPracticeText();
+  const strokeCount=S.letterStrokePaths.length;
+  setStatus(`Trace "${text}" — ${strokeCount} stroke${strokeCount!==1?'s':''} needed. Watch the tutorial first.`,'neutral');
+}
+function updateHeader(){
+  document.getElementById('scoreEl').textContent=S.score;
+  document.getElementById('scoreSideEl').textContent=S.score;
+  document.getElementById('masteredEl').textContent=`${S.mastered.size}/26`;
+  document.getElementById('chipEl').textContent=getPracticeText();
 }
 function renderAlpha(){
-  const grid = document.getElementById('alphaGrid');
-  grid.innerHTML = '';
-  alpha.forEach((ch,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'alpha-btn' + (i===S.letterIdx ? ' sel' : '') + (S.mastered.has(ch) ? ' done' : '');
-    btn.textContent = ch;
-    btn.addEventListener('click', () => {
-      S.mode = 'single';
-      S.letter = ch;
-      S.letterIdx = i;
-      syncModeUI();
-      buildScene();
+  const grid=document.getElementById('alphaGrid');
+  grid.innerHTML='';
+  alpha.forEach((ch,i)=>{
+    const btn=document.createElement('button');
+    btn.className='alpha-btn'+(i===S.letterIdx?' sel':'')+(S.mastered.has(ch)?' done':'');
+    btn.textContent=ch;
+    btn.addEventListener('click',()=>{
+      S.mode='single';S.letter=ch;S.letterIdx=i;
+      syncModeUI();buildScene();
     });
     grid.appendChild(btn);
   });
 }
-function updateHeader(){
-  document.getElementById('scoreEl').textContent = S.score;
-  document.getElementById('scoreSideEl').textContent = S.score;
-  document.getElementById('masteredEl').textContent = `${S.mastered.size}/26`;
-  document.getElementById('chipEl').textContent = getPracticeText();
-}
-function updateMetrics(){
-  const onPath = S.totalPoints ? Math.round((S.onPathPoints / S.totalPoints) * 100) : 0;
-  const coverage = S.totalTargetBins ? Math.round((S.coveredBins.size / S.totalTargetBins) * 100) : 0;
-  const overall = S.totalPoints ? Math.round(onPath * 0.55 + coverage * 0.45) : 0;
-  document.getElementById('onPathEl').textContent = S.totalPoints ? onPath + '%' : '—';
-  document.getElementById('coverageEl').textContent = S.totalPoints ? coverage + '%' : '—';
-  document.getElementById('accFill').style.width = overall + '%';
-  document.getElementById('accFill').style.background = overall > 82 ? 'var(--green)' : overall > 58 ? 'var(--gold)' : 'var(--red)';
-  document.getElementById('accPct').textContent = S.totalPoints ? overall + '%' : '—';
-  document.getElementById('accuracyTopEl').textContent = S.totalPoints ? overall + '%' : '—';
-}
-function fitToScreen(){
-  requestAnimationFrame(() => {
-    const vr = viewport.getBoundingClientRect();
-    viewport.scrollLeft = Math.max(0, (S.stageWidth - vr.width) / 2);
-    viewport.scrollTop = Math.max(0, (S.stageHeight - vr.height) / 2 - 20);
-  });
-}
-function setupCanvasSize(canvas, ctx){
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  canvas.width = Math.round(S.stageWidth * dpr);
-  canvas.height = Math.round(S.stageHeight * dpr);
-  canvas.style.width = S.stageWidth + 'px';
-  canvas.style.height = S.stageHeight + 'px';
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-function setupAllCanvases(){
-  [ [bgCanvas,bgCtx], [guideCanvas,guideCtx], [traceCanvas,traceCtx], [tutorialCanvas,tutorialCtx] ].forEach(([c,ctx]) => {
-    setupCanvasSize(c, ctx);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  });
-}
-function clearCanvas(ctx){
-  ctx.clearRect(0,0,S.stageWidth,S.stageHeight);
-}
-function drawPaper(){
-  clearCanvas(bgCtx);
-  const baseline = S.stageHeight * .68;
-  const mean = baseline - 126;
-  const cap = baseline - 255;
-  bgCtx.strokeStyle = '#e6ddcf';
-  bgCtx.lineWidth = 1;
-  bgCtx.setLineDash([6,6]);
-  bgCtx.beginPath();
-  bgCtx.moveTo(42, cap);
-  bgCtx.lineTo(S.stageWidth - 42, cap);
-  bgCtx.stroke();
-  bgCtx.setLineDash([4,8]);
-  bgCtx.beginPath();
-  bgCtx.moveTo(42, mean);
-  bgCtx.lineTo(S.stageWidth - 42, mean);
-  bgCtx.stroke();
-  bgCtx.setLineDash([]);
-  bgCtx.strokeStyle = '#d2c7b8';
-  bgCtx.lineWidth = 1.6;
-  bgCtx.beginPath();
-  bgCtx.moveTo(42, baseline);
-  bgCtx.lineTo(S.stageWidth - 42, baseline);
-  bgCtx.stroke();
-  bgCtx.strokeStyle = '#eee6d8';
-  bgCtx.lineWidth = 1;
-  bgCtx.setLineDash([4,8]);
-  bgCtx.beginPath();
-  bgCtx.moveTo(S.stageWidth/2, 12);
-  bgCtx.lineTo(S.stageWidth/2, S.stageHeight-12);
-  bgCtx.stroke();
-  bgCtx.setLineDash([]);
-}
-function computeTextLayout(){
-  const text = getPracticeText();
-  const probe = document.createElement('canvas');
-  probe.width = 10;
-  probe.height = 10;
-  const pctx = probe.getContext('2d');
-  let fontSize = S.mode === 'single' ? 290 : 250;
-  pctx.font = `${fontSize}px ${FONT_FAMILY}`;
-  let metrics = pctx.measureText(text);
-  const maxWidth = S.stageWidth - 220;
-  while(metrics.width > maxWidth && fontSize > 120){
-    fontSize -= 8;
-    pctx.font = `${fontSize}px ${FONT_FAMILY}`;
-    metrics = pctx.measureText(text);
-  }
-  S.fontSize = fontSize;
-  S.textX = Math.max(90, (S.stageWidth - metrics.width) / 2 - 30);
-  S.textY = S.stageHeight * 0.54;
-}
-function renderTarget(){
-  clearCanvas(guideCtx);
-  drawPaper();
-
-  guideCtx.font = `${S.fontSize}px ${FONT_FAMILY}`;
-  guideCtx.textBaseline = 'alphabetic';
-  guideCtx.fillStyle = 'rgba(184,137,42,.17)';
-  guideCtx.strokeStyle = 'rgba(184,137,42,.45)';
-  guideCtx.lineWidth = 2;
-  guideCtx.fillText(getPracticeText(), S.textX, S.textY);
-  guideCtx.strokeText(getPracticeText(), S.textX, S.textY);
-}
-function buildMasks(){
-  const off = document.createElement('canvas');
-  off.width = S.stageWidth;
-  off.height = S.stageHeight;
-  const octx = off.getContext('2d');
-  octx.font = `${S.fontSize}px ${FONT_FAMILY}`;
-  octx.textBaseline = 'alphabetic';
-  octx.fillStyle = '#000';
-  octx.fillText(getPracticeText(), S.textX, S.textY);
-
-  const mask = octx.getImageData(0,0,S.stageWidth,S.stageHeight);
-  S.targetMask = mask.data;
-
-  const zone = document.createElement('canvas');
-  zone.width = S.stageWidth;
-  zone.height = S.stageHeight;
-  const zctx = zone.getContext('2d');
-  zctx.font = `${S.fontSize}px ${FONT_FAMILY}`;
-  zctx.textBaseline = 'alphabetic';
-  zctx.lineCap = 'round';
-  zctx.lineJoin = 'round';
-  zctx.strokeStyle = '#000';
-  zctx.lineWidth = 26;
-  zctx.strokeText(getPracticeText(), S.textX, S.textY);
-  zctx.fillStyle = '#000';
-  zctx.fillText(getPracticeText(), S.textX, S.textY);
-
-  const zoneMask = zctx.getImageData(0,0,S.stageWidth,S.stageHeight);
-  S.zoneMask = zoneMask.data;
-
-  const step = 10;
-  let totalBins = 0;
-  for(let y=0;y<S.stageHeight;y+=step){
-    for(let x=0;x<S.stageWidth;x+=step){
-      const idx = ((y * S.stageWidth) + x) * 4 + 3;
-      if(S.targetMask[idx] > 10) totalBins++;
-    }
-  }
-  S.totalTargetBins = Math.max(1, totalBins);
-}
-function idxFor(x,y){
-  const px = Math.max(0, Math.min(S.stageWidth - 1, Math.round(x)));
-  const py = Math.max(0, Math.min(S.stageHeight - 1, Math.round(y)));
-  return ((py * S.stageWidth) + px) * 4 + 3;
-}
-function addCoveragePoint(x,y){
-  const binSize = 10;
-  const bx = Math.floor(x / binSize);
-  const by = Math.floor(y / binSize);
-  const centerX = bx * binSize + Math.floor(binSize / 2);
-  const centerY = by * binSize + Math.floor(binSize / 2);
-  const idx = idxFor(centerX, centerY);
-  if(S.targetMask[idx] > 10) S.coveredBins.add(bx + ':' + by);
-}
-function midpoint(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
-function drawSmoothStroke(ctx, points, color='rgba(107,63,160,.92)', width=14){
-  if(!points.length) return;
-  if(points.length === 1){
-    ctx.beginPath();
-    ctx.arc(points[0].x, points[0].y, width/2, 0, Math.PI*2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    return;
-  }
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  if(points.length === 2){
-    ctx.lineTo(points[1].x, points[1].y);
-  }else{
-    for(let i=1;i<points.length-1;i++){
-      const mid = midpoint(points[i], points[i+1]);
-      ctx.quadraticCurveTo(points[i].x, points[i].y, mid.x, mid.y);
-    }
-    const last = points[points.length-1];
-    const prev = points[points.length-2];
-    ctx.quadraticCurveTo(prev.x, prev.y, last.x, last.y);
-  }
-  ctx.strokeStyle = color;
-  ctx.lineWidth = width;
-  ctx.stroke();
-}
-function redrawTrace(){
-  clearCanvas(traceCtx);
-  S.segments.forEach(seg => drawSmoothStroke(traceCtx, seg.points, seg.color, seg.width));
-  if(S.points.length) drawSmoothStroke(traceCtx, S.points, 'rgba(107,63,160,.94)', 14);
-}
-function getEventPoint(e){
-  const rect = traceCanvas.getBoundingClientRect();
-  let clientX, clientY;
-  if(e.touches && e.touches.length){
-    clientX = e.touches[0].clientX;
-    clientY = e.touches[0].clientY;
-  }else if(e.changedTouches && e.changedTouches.length){
-    clientX = e.changedTouches[0].clientX;
-    clientY = e.changedTouches[0].clientY;
-  }else{
-    clientX = e.clientX;
-    clientY = e.clientY;
-  }
-  return {x:clientX - rect.left, y:clientY - rect.top};
-}
-function distance(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
-function processPoint(p){
-  S.totalPoints++;
-  const zoneIdx = idxFor(p.x, p.y);
-  if(S.zoneMask[zoneIdx] > 10) S.onPathPoints++;
-  addCoveragePoint(p.x, p.y);
-  updateMetrics();
-}
-function interpolateAndProcess(from,to){
-  const d = Math.max(1, Math.ceil(distance(from,to) / 3));
-  for(let i=1;i<=d;i++){
-    const t = i / d;
-    const p = {
-      x: from.x + (to.x - from.x) * t,
-      y: from.y + (to.y - from.y) * t
-    };
-    processPoint(p);
-  }
-}
-function beginDraw(p){
-  if(S.tutorialPlaying) return;
-  if(S.resultLocked) resetPractice(false);
-  S.drawing = true;
-  S.points = [p];
-  S.lastPoint = p;
-  processPoint(p);
-  redrawTrace();
-  setStatus('Tracing in one continuous pass.', 'ok');
-}
-function moveDraw(p){
-  if(!S.drawing || S.tutorialPlaying) return;
-  interpolateAndProcess(S.lastPoint, p);
-  S.points.push(p);
-  S.lastPoint = p;
-  redrawTrace();
-}
-function endDraw(){
-  if(!S.drawing) return;
-  S.drawing = false;
-  if(S.points.length){
-    S.segments.push({points:[...S.points], color:'rgba(107,63,160,.94)', width:14});
-    S.points = [];
-    redrawTrace();
-  }
-  evaluateResult();
-}
-function evaluateResult(){
-  const onPath = S.totalPoints ? (S.onPathPoints / S.totalPoints) : 0;
-  const coverage = S.totalTargetBins ? (S.coveredBins.size / S.totalTargetBins) : 0;
-  const overall = Math.round((onPath * 0.55 + coverage * 0.45) * 100);
-  if(overall >= 72){
-    S.score += Math.round(40 + overall * 0.6);
-    if(S.mode === 'single') S.mastered.add(S.letter);
-    updateHeader();
-    renderAlpha();
-    setStatus(`Nice. ${overall}% overall. ${Math.round(onPath*100)}% on path and ${Math.round(coverage*100)}% coverage.`, 'ok');
-  }else{
-    setStatus(`Keep going. ${overall}% overall. You want more coverage and more time inside the script band.`, 'warn');
-  }
-  S.resultLocked = true;
-}
-function resetPractice(resetStatus=true){
-  S.points = [];
-  S.segments = [];
-  S.lastPoint = null;
-  S.drawing = false;
-  S.pointerId = null;
-  S.activeInput = 'none';
-  S.onPathPoints = 0;
-  S.totalPoints = 0;
-  S.coveredBins = new Set();
-  S.resultLocked = false;
-  updateMetrics();
-  redrawTrace();
-  clearCanvas(tutorialCtx);
-  if(resetStatus) setStatus('Practice cleared. Open the tutorial, then trace the whole script in one pass.', 'neutral');
-}
-async function playTutorial(){
-  if(S.tutorialPlaying) return;
-  S.tutorialPlaying = true;
-  resetPractice(false);
-  setStatus('Tutorial playing.', 'neutral');
-  clearCanvas(tutorialCtx);
-
-  const text = getPracticeText();
-  const sweepWidth = Math.max(80, S.fontSize * 0.22);
-  const left = S.textX - 20;
-  const right = S.textX + measureTextWidth(text) + 40;
-  const yTop = S.textY - S.fontSize * 0.9;
-  const height = S.fontSize * 1.1;
-
-  for(let x = left; x < right; x += 6){
-    clearCanvas(tutorialCtx);
-
-    tutorialCtx.save();
-    tutorialCtx.font = `${S.fontSize}px ${FONT_FAMILY}`;
-    tutorialCtx.textBaseline = 'alphabetic';
-    tutorialCtx.fillStyle = 'rgba(107,63,160,.16)';
-    tutorialCtx.fillText(text, S.textX, S.textY);
-
-    tutorialCtx.beginPath();
-    tutorialCtx.rect(x, yTop, sweepWidth, height);
-    tutorialCtx.clip();
-
-    tutorialCtx.fillStyle = 'rgba(107,63,160,.85)';
-    tutorialCtx.fillText(text, S.textX, S.textY);
-    tutorialCtx.restore();
-
-    tutorialCtx.beginPath();
-    tutorialCtx.arc(x + sweepWidth * 0.35, S.textY - S.fontSize * 0.1, 10, 0, Math.PI * 2);
-    tutorialCtx.fillStyle = 'rgba(42,122,74,.9)';
-    tutorialCtx.fill();
-
-    await new Promise(r => setTimeout(r, 16));
-  }
-  clearCanvas(tutorialCtx);
-  S.tutorialPlaying = false;
-  setStatus('Tutorial done. Now trace it in one continuous motion.', 'ok');
-}
-function measureTextWidth(text){
-  const probe = document.createElement('canvas');
-  const pctx = probe.getContext('2d');
-  pctx.font = `${S.fontSize}px ${FONT_FAMILY}`;
-  return pctx.measureText(text).width;
-}
-function buildScene(){
-  stage.style.width = S.stageWidth + 'px';
-  stage.style.height = S.stageHeight + 'px';
-  setupAllCanvases();
-  computeTextLayout();
-  renderTarget();
-  buildMasks();
-  resetPractice(false);
-  updateHeader();
-  fitToScreen();
-  setStatus('Open the tutorial, then trace the whole script in one clean motion.', 'neutral');
-}
 function syncModeUI(){
-  const single = S.mode === 'single';
-  document.getElementById('singleModeBtn').classList.toggle('on', single);
-  document.getElementById('wordModeBtn').classList.toggle('on', !single);
-  document.getElementById('singleSection').style.display = single ? '' : 'none';
-  document.getElementById('wordSection').style.display = single ? 'none' : '';
+  const single=S.mode==='single';
+  document.getElementById('singleModeBtn').classList.toggle('on',single);
+  document.getElementById('wordModeBtn').classList.toggle('on',!single);
+  document.getElementById('singleSection').style.display=single?'':'none';
+  document.getElementById('wordSection').style.display=single?'none':'';
 }
-function pointerDown(e){
-  if(e.pointerType === 'touch') return;
-  e.preventDefault();
-  S.activeInput = 'pointer';
-  S.pointerId = e.pointerId;
-  try{ traceCanvas.setPointerCapture(e.pointerId); }catch(err){}
-  beginDraw(getEventPoint(e));
-}
-function pointerMove(e){
-  if(S.activeInput !== 'pointer') return;
-  if(S.pointerId !== null && e.pointerId !== S.pointerId) return;
-  e.preventDefault();
-  moveDraw(getEventPoint(e));
-}
-function pointerUp(e){
-  if(S.activeInput !== 'pointer') return;
-  if(S.pointerId !== null && e.pointerId !== S.pointerId) return;
-  e.preventDefault();
-  endDraw();
-  S.pointerId = null;
-  S.activeInput = 'none';
-}
-function touchStart(e){
-  e.preventDefault();
-  S.activeInput = 'touch';
-  beginDraw(getEventPoint(e));
-}
-function touchMove(e){
-  if(S.activeInput !== 'touch') return;
-  e.preventDefault();
-  moveDraw(getEventPoint(e));
-}
-function touchEnd(e){
-  if(S.activeInput !== 'touch') return;
-  e.preventDefault();
-  endDraw();
-  S.activeInput = 'none';
-}
-function wireButton(id, fn){
-  const el = document.getElementById(id);
-  if(el) el.addEventListener('click', fn);
+function syncControls(){
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v};
+  sv('paperTypeSelect',S.paperType);sv('paperTypeSelectM',S.paperType);
+  sv('penSizeRange',S.penSize);sv('penSizeRangeM',S.penSize);
+  sv('tutorialSpeedSelect',S.tutorialSpeed);sv('tutorialSpeedSelectM',S.tutorialSpeed);
+  sv('penColorPicker',S.penColor);sv('penColorPickerM',S.penColor);
+  sv('penColorPreset',S.penColor);
+  sv('guideOpacityRange',Math.round(S.guideOpacity*100));
 }
 
-document.getElementById('singleModeBtn').addEventListener('click', () => {
-  S.mode = 'single';
-  syncModeUI();
-  buildScene();
-});
-document.getElementById('wordModeBtn').addEventListener('click', () => {
-  S.mode = 'word';
-  S.word = normalizeWord(document.getElementById('wordInput').value) || 'pixie';
-  document.getElementById('wordInput').value = S.word;
-  syncModeUI();
-  buildScene();
-});
-document.getElementById('loadWordBtn').addEventListener('click', () => {
-  S.mode = 'word';
-  S.word = normalizeWord(document.getElementById('wordInput').value) || 'pixie';
-  document.getElementById('wordInput').value = S.word;
-  syncModeUI();
-  buildScene();
-});
-document.getElementById('randomWordBtn').addEventListener('click', () => {
-  const w = RANDOM_WORDS[Math.floor(Math.random() * RANDOM_WORDS.length)];
-  S.mode = 'word';
-  S.word = w;
-  document.getElementById('wordInput').value = w;
-  syncModeUI();
-  buildScene();
-});
-document.getElementById('wordInput').addEventListener('keydown', e => {
-  if(e.key === 'Enter') document.getElementById('loadWordBtn').click();
-});
+// ─────────────────────────────────────────────────────────────────────────────
+// POINTER / TOUCH EVENTS
+// ─────────────────────────────────────────────────────────────────────────────
+function pDown(e){
+  e.preventDefault();S.activeInput='pointer';S.pointerId=e.pointerId??null;
+  try{if(e.pointerId!=null)traceCanvas.setPointerCapture(e.pointerId);}catch(err){}
+  beginDraw(getEventPt(e));
+}
+function pMove(e){
+  if(S.activeInput!=='pointer') return;
+  if(S.pointerId!==null&&e.pointerId!=null&&e.pointerId!==S.pointerId) return;
+  e.preventDefault();moveDraw(getEventPt(e));
+}
+function pUp(e){
+  if(S.activeInput!=='pointer') return;
+  if(S.pointerId!==null&&e.pointerId!=null&&e.pointerId!==S.pointerId) return;
+  e.preventDefault();endDraw();S.pointerId=null;S.activeInput='none';
+}
+function tStart(e){if(window.PointerEvent)return;e.preventDefault();S.activeInput='touch';beginDraw(getEventPt(e));}
+function tMove(e){if(window.PointerEvent||S.activeInput!=='touch')return;e.preventDefault();moveDraw(getEventPt(e));}
+function tEnd(e){if(window.PointerEvent||S.activeInput!=='touch')return;e.preventDefault();endDraw();S.activeInput='none';}
 
-wireButton('tutorialBtn', playTutorial);
-wireButton('tutorialBtnMobile', playTutorial);
-wireButton('clearBtn', () => resetPractice(true));
-wireButton('clearBtnMobile', () => resetPractice(true));
-wireButton('fitBtn', fitToScreen);
-wireButton('fitBtnMobile', fitToScreen);
+traceCanvas.addEventListener('pointerdown',pDown,{passive:false});
+traceCanvas.addEventListener('pointermove',pMove,{passive:false});
+traceCanvas.addEventListener('pointerup',pUp,{passive:false});
+traceCanvas.addEventListener('pointercancel',pUp,{passive:false});
+traceCanvas.addEventListener('touchstart',tStart,{passive:false});
+traceCanvas.addEventListener('touchmove',tMove,{passive:false});
+traceCanvas.addEventListener('touchend',tEnd,{passive:false});
+traceCanvas.addEventListener('touchcancel',tEnd,{passive:false});
 
-traceCanvas.addEventListener('pointerdown', pointerDown, {passive:false});
-traceCanvas.addEventListener('pointermove', pointerMove, {passive:false});
-traceCanvas.addEventListener('pointerup', pointerUp, {passive:false});
-traceCanvas.addEventListener('pointercancel', pointerUp, {passive:false});
-traceCanvas.addEventListener('touchstart', touchStart, {passive:false});
-traceCanvas.addEventListener('touchmove', touchMove, {passive:false});
-traceCanvas.addEventListener('touchend', touchEnd, {passive:false});
-traceCanvas.addEventListener('touchcancel', touchEnd, {passive:false});
+// ─────────────────────────────────────────────────────────────────────────────
+// SETTINGS BINDING
+// ─────────────────────────────────────────────────────────────────────────────
+function bind(id,fn){const e=document.getElementById(id);if(e){e.addEventListener('input',fn);e.addEventListener('change',fn);}}
+bind('paperTypeSelect',e=>{S.paperType=e.target.value;renderGuide();syncControls();});
+bind('paperTypeSelectM',e=>{S.paperType=e.target.value;renderGuide();syncControls();});
+bind('penSizeRange',e=>{S.penSize=+e.target.value;syncControls();redrawTrace();});
+bind('penSizeRangeM',e=>{S.penSize=+e.target.value;syncControls();redrawTrace();});
+bind('tutorialSpeedSelect',e=>{S.tutorialSpeed=e.target.value;syncControls();});
+bind('tutorialSpeedSelectM',e=>{S.tutorialSpeed=e.target.value;syncControls();});
+bind('guideOpacityRange',e=>{S.guideOpacity=+e.target.value/100;renderGuide();syncControls();});
+bind('penColorPicker',e=>{S.penColor=e.target.value;syncControls();redrawTrace();});
+bind('penColorPickerM',e=>{S.penColor=e.target.value;syncControls();redrawTrace();});
+bind('penColorPreset',e=>{S.penColor=e.target.value;syncControls();redrawTrace();});
 
-window.addEventListener('resize', () => {
-  setupAllCanvases();
-  buildScene();
+// ─────────────────────────────────────────────────────────────────────────────
+// BUTTON WIRING
+// ─────────────────────────────────────────────────────────────────────────────
+function wb(id,fn){const e=document.getElementById(id);if(e)e.addEventListener('click',fn);}
+wb('singleModeBtn',()=>{S.mode='single';syncModeUI();buildScene();});
+wb('wordModeBtn',()=>{
+  S.mode='word';S.word=normalizeWord(document.getElementById('wordInput').value)||'pixie';
+  document.getElementById('wordInput').value=S.word;syncModeUI();buildScene();
 });
+wb('loadWordBtn',()=>{
+  S.mode='word';S.word=normalizeWord(document.getElementById('wordInput').value)||'pixie';
+  document.getElementById('wordInput').value=S.word;syncModeUI();buildScene();
+});
+wb('randomWordBtn',()=>{
+  const w=RANDOM_WORDS[Math.floor(Math.random()*RANDOM_WORDS.length)];
+  S.mode='word';S.word=w;document.getElementById('wordInput').value=w;syncModeUI();buildScene();
+});
+document.getElementById('wordInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loadWordBtn').click();});
+wb('tutorialBtn',playTutorial);wb('tutorialBtnM',playTutorial);
+wb('clearBtn',()=>resetPractice(true));wb('clearBtnM',()=>resetPractice(true));
+wb('undoBtn',undoStroke);wb('undoBtnM',undoStroke);
+wb('doneBtn',scoreResult);wb('doneBtnM',scoreResult);
 
-syncModeUI();
-renderAlpha();
-updateHeader();
-buildScene();
+window.addEventListener('resize',()=>{setupAll();buildScene();});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+syncModeUI();renderAlpha();updateHeader();buildScene();
 </script>
 </body>
 </html>
