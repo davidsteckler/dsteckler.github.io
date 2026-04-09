@@ -1,759 +1,1005 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Prompting — Best Practices Tier List</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,600;0,800;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg:     #0f0f0f;
-            --surface: #181818;
-            --border: #2a2a2a;
-            --mid:    #6e6e6e;
-            --light:  #b0b0b0;
-            --white:  #f0ede8;
-
-            --s:  #e8c547;
-            --a:  #e07b3f;
-            --b:  #6dba8e;
-            --c:  #5a9fd4;
-            --d:  #9b7ec8;
-
-            --s-bg: rgba(232,197,71,0.08);
-            --a-bg: rgba(224,123,63,0.08);
-            --b-bg: rgba(109,186,142,0.08);
-            --c-bg: rgba(90,159,212,0.08);
-            --d-bg: rgba(155,126,200,0.08);
-        }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Libre Baskerville', Georgia, serif;
-            background: var(--bg);
-            color: var(--white);
-            line-height: 1.65;
-            min-height: 100vh;
-        }
-
-        /* ── HERO ── */
-        .hero {
-            padding: 70px 24px 56px;
-            max-width: 900px;
-            margin: 0 auto;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .hero-eyebrow {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--mid);
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 800;
-            font-size: clamp(3.2rem, 9vw, 6.5rem);
-            line-height: 0.95;
-            letter-spacing: -0.01em;
-            text-transform: uppercase;
-            color: var(--white);
-            margin-bottom: 28px;
-        }
-
-        .hero h1 em {
-            font-style: italic;
-            font-weight: 600;
-            color: var(--s);
-        }
-
-        .hero-desc {
-            max-width: 540px;
-            font-size: 0.95rem;
-            color: var(--light);
-            line-height: 1.75;
-            font-style: italic;
-        }
-
-        /* ── LEGEND ── */
-        .legend {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 36px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.72rem;
-            color: var(--mid);
-        }
-
-        .legend-badge {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 800;
-            font-size: 0.95rem;
-            letter-spacing: 0.02em;
-            border-radius: 3px;
-            flex-shrink: 0;
-        }
-
-        /* ── TIERS LAYOUT ── */
-        .tiers {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 24px 80px;
-        }
-
-        .tier {
-            margin-top: 4px;
-        }
-
-        .tier-header {
-            display: flex;
-            align-items: stretch;
-            gap: 0;
-            margin-bottom: 3px;
-            margin-top: 36px;
-        }
-
-        .tier-badge {
-            width: 56px;
-            min-height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 800;
-            font-size: 1.9rem;
-            letter-spacing: 0.02em;
-            flex-shrink: 0;
-            border-radius: 4px 0 0 4px;
-        }
-
-        .tier-meta {
-            flex: 1;
-            padding: 12px 18px;
-            border-radius: 0 4px 4px 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .tier-name {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 600;
-            font-size: 1.05rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .tier-desc {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.7rem;
-            color: var(--mid);
-            margin-top: 2px;
-        }
-
-        /* ── CARDS ── */
-        .cards {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-left-width: 3px;
-            padding: 0;
-            border-radius: 3px;
-            overflow: hidden;
-            transition: border-color 0.2s;
-            cursor: pointer;
-        }
-
-        .card:hover { border-right-color: var(--border); }
-
-        .card-head {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            user-select: none;
-        }
-
-        .card-rank {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.65rem;
-            color: var(--mid);
-            min-width: 20px;
-            flex-shrink: 0;
-        }
-
-        .card-title {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-weight: 600;
-            font-size: 1.05rem;
-            letter-spacing: 0.02em;
-            color: var(--white);
-            flex: 1;
-            line-height: 1.25;
-        }
-
-        .card-new {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.6rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            padding: 2px 6px;
-            border-radius: 2px;
-            flex-shrink: 0;
-        }
-
-        .card-chevron {
-            font-size: 0.75rem;
-            color: var(--mid);
-            transition: transform 0.22s ease;
-            flex-shrink: 0;
-            font-style: normal;
-        }
-
-        .card.open .card-chevron { transform: rotate(180deg); }
-
-        .card-body {
-            display: none;
-            padding: 0 18px 18px 52px;
-            font-size: 0.88rem;
-            line-height: 1.75;
-            color: var(--light);
-        }
-
-        .card.open .card-body { display: block; }
-
-        .card-body p { margin-bottom: 12px; }
-        .card-body p:last-child { margin-bottom: 0; }
-
-        .card-body strong {
-            font-weight: 700;
-            color: var(--white);
-        }
-
-        .prompt-ex {
-            margin-top: 12px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.78rem;
-            background: #111;
-            border: 1px solid var(--border);
-            padding: 10px 14px;
-            color: var(--light);
-            border-radius: 3px;
-            line-height: 1.6;
-        }
-
-        .prompt-ex-label {
-            font-size: 0.62rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            opacity: 0.5;
-        }
-
-        /* tier-specific colors */
-        .tier-s .tier-badge      { background: var(--s);    color: #0f0f0f; }
-        .tier-s .tier-meta       { background: var(--s-bg); }
-        .tier-s .tier-name       { color: var(--s); }
-        .tier-s .card            { border-left-color: var(--s); }
-        .tier-s .card-rank       { color: var(--s); opacity: 0.6; }
-        .tier-s .legend-badge    { background: var(--s-bg); color: var(--s); border: 1px solid var(--s); }
-
-        .tier-a .tier-badge      { background: var(--a);    color: #0f0f0f; }
-        .tier-a .tier-meta       { background: var(--a-bg); }
-        .tier-a .tier-name       { color: var(--a); }
-        .tier-a .card            { border-left-color: var(--a); }
-        .tier-a .card-rank       { color: var(--a); opacity: 0.6; }
-        .tier-a .legend-badge    { background: var(--a-bg); color: var(--a); border: 1px solid var(--a); }
-
-        .tier-b .tier-badge      { background: var(--b);    color: #0f0f0f; }
-        .tier-b .tier-meta       { background: var(--b-bg); }
-        .tier-b .tier-name       { color: var(--b); }
-        .tier-b .card            { border-left-color: var(--b); }
-        .tier-b .card-rank       { color: var(--b); opacity: 0.6; }
-        .tier-b .legend-badge    { background: var(--b-bg); color: var(--b); border: 1px solid var(--b); }
-
-        .tier-c .tier-badge      { background: var(--c);    color: #0f0f0f; }
-        .tier-c .tier-meta       { background: var(--c-bg); }
-        .tier-c .tier-name       { color: var(--c); }
-        .tier-c .card            { border-left-color: var(--c); }
-        .tier-c .card-rank       { color: var(--c); opacity: 0.6; }
-        .tier-c .legend-badge    { background: var(--c-bg); color: var(--c); border: 1px solid var(--c); }
-
-        .tier-d .tier-badge      { background: var(--d);    color: #0f0f0f; }
-        .tier-d .tier-meta       { background: var(--d-bg); }
-        .tier-d .tier-name       { color: var(--d); }
-        .tier-d .card            { border-left-color: var(--d); }
-        .tier-d .card-rank       { color: var(--d); opacity: 0.6; }
-        .tier-d .legend-badge    { background: var(--d-bg); color: var(--d); border: 1px solid var(--d); }
-
-
-
-        /* ── FOOTNOTE ── */
-        .footnote {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 28px 24px 60px;
-            border-top: 1px solid var(--border);
-            font-size: 0.82rem;
-            color: var(--mid);
-            font-style: italic;
-        }
-
-        /* ── ANIMATIONS ── */
-        .tier { opacity: 0; transform: translateY(18px); animation: rise 0.45s ease forwards; }
-        .tier:nth-child(1) { animation-delay: 0.05s; }
-        .tier:nth-child(2) { animation-delay: 0.12s; }
-        .tier:nth-child(3) { animation-delay: 0.19s; }
-        .tier:nth-child(4) { animation-delay: 0.26s; }
-        .tier:nth-child(5) { animation-delay: 0.33s; }
-
-        @keyframes rise {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-body { animation: none; }
-        .card.open .card-body {
-            display: block;
-            animation: fadeBody 0.18s ease;
-        }
-        @keyframes fadeBody {
-            from { opacity: 0; transform: translateY(-4px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 600px) {
-            .hero h1 { font-size: clamp(2.6rem, 12vw, 4rem); }
-            .card-body { padding-left: 18px; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Cursive Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Caveat:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+:root{
+  --bg:#f5f0e8;
+  --paper:#fdfaf4;
+  --ink:#1a1612;
+  --muted:#6e6558;
+  --soft:#9b9183;
+  --line:#e6ddcf;
+  --border:#d4c9b8;
+  --gold:#b8892a;
+  --green:#2a7a4a;
+  --red:#c0392b;
+  --purple:#5b35a0;
+  --purple-light:rgba(91,53,160,.12);
+}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  overflow:hidden;
+}
+.topbar{
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;border-bottom:1.5px solid var(--border);
+  background:var(--paper);
+}
+.brand{font-size:19px;font-weight:700;font-family:'Dancing Script',cursive;letter-spacing:.02em;color:var(--purple)}
+.stats{display:flex;gap:20px;align-items:center}
+.stat small{display:block;font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.12em}
+.stat strong{display:block;font-size:15px;font-weight:700}
+.app{display:grid;grid-template-columns:252px 1fr 220px;height:calc(100% - 56px)}
+.panel{padding:14px 12px;overflow-y:auto;border-right:1.5px solid var(--border);background:var(--paper)}
+.panel.right{border-right:none;border-left:1.5px solid var(--border)}
+.section{margin-bottom:16px}
+.label{font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.14em;margin-bottom:7px}
+.alpha-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.alpha-btn{
+  min-height:36px;border:1.5px solid var(--border);background:var(--paper);
+  color:var(--ink);border-radius:8px;font-size:15px;cursor:pointer;font-family:'Caveat',cursive;
+  transition:background .12s,border-color .12s;
+}
+.alpha-btn:hover{background:var(--bg)}
+.alpha-btn.sel{background:var(--purple);color:#fff;border-color:var(--purple)}
+.alpha-btn.done{background:rgba(42,122,74,.12);color:var(--green);border-color:rgba(42,122,74,.4)}
+.alpha-btn.done.sel{background:var(--green);color:#fff;border-color:var(--green)}
+.toggle{display:flex;gap:6px}
+.toggle button,.btn{
+  border:1.5px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:background .12s;
+}
+.toggle button:hover,.btn:hover{background:var(--bg)}
+.toggle button.on,.btn.primary{background:var(--purple);color:#fff;border-color:var(--purple)}
+.btnrow{display:flex;gap:6px}
+.btnrow .btn{flex:1}
+.input,.select{
+  width:100%;border:1.5px solid var(--border);border-radius:8px;background:var(--paper);
+  color:var(--ink);padding:9px 11px;font-size:13px;outline:none;font-family:'DM Sans',sans-serif;
+}
+.control-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mini{display:flex;flex-direction:column;gap:5px}
+.mini label{font-size:11px;color:var(--muted)}
+.range{width:100%;accent-color:var(--purple)}
+.color-row{display:flex;align-items:center;gap:8px}
+.color-picker{width:40px;height:34px;padding:0;border:1.5px solid var(--border);border-radius:8px;background:var(--paper);cursor:pointer}
+.help-list{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.help-item{padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);line-height:1.5}
+.stage-wrap{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;overflow:hidden}
+.sheet{
+  width:min(1100px,100%);height:min(74vh,740px);min-height:340px;
+  background:var(--paper);border:1.5px solid var(--border);border-radius:14px;
+  overflow:hidden;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.06);
+}
+.viewport{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+.stage{position:relative;background:var(--paper)}
+.bg-canvas,.guide-canvas,.trace-canvas,.tutorial-canvas{position:absolute;inset:0}
+.bg-canvas,.guide-canvas,.tutorial-canvas{pointer-events:none}
+.trace-canvas{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.chip{
+  position:absolute;right:14px;bottom:12px;padding:6px 14px;
+  border:1.5px solid var(--border);border-radius:999px;
+  background:rgba(253,250,244,.9);font-size:12px;color:var(--muted);
+  font-family:'Caveat',cursive;font-size:15px;
+}
+.status-row,.acc-row{width:min(1100px,100%);display:flex;align-items:center;gap:10px}
+.dot{width:8px;height:8px;border-radius:50%;background:#bbb;flex-shrink:0}
+.dot.ok{background:var(--green)}.dot.warn{background:var(--gold)}.dot.err{background:var(--red)}
+.status{font-size:13px;color:var(--muted);line-height:1.45}
+.acc-tag,.acc-pct{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft)}
+.acc-track{flex:1;height:5px;border-radius:999px;background:var(--line);overflow:hidden}
+.acc-fill{width:0%;height:100%;background:var(--green);transition:width .15s,background .3s}
+.stroke-list{display:flex;flex-direction:column;gap:6px}
+.metric{display:flex;justify-content:space-between;gap:10px;padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);font-size:12px;color:var(--muted)}
+.metric b{color:var(--ink)}
+.tip{border:1.5px solid var(--border);border-radius:10px;background:var(--bg);padding:11px;font-size:12px;line-height:1.58;color:var(--muted)}
+.tip b{display:block;margin-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink)}
+.stroke-badge{
+  display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;
+  background:var(--purple-light);color:var(--purple);margin-left:6px;
+}
+.mobile-controls{display:none;width:min(1100px,100%);gap:7px;flex-wrap:wrap}
+.mobile-controls .btn{flex:1 1 120px}
+.mobile-settings{display:none;width:min(1100px,100%);gap:7px;flex-wrap:wrap}
+.mobile-settings>*{flex:1 1 140px}
+@media(max-width:980px){
+  .app{grid-template-columns:1fr}
+  .panel{display:none}
+  .mobile-controls,.mobile-settings{display:flex}
+  .sheet{height:min(68vh,620px)}
+}
+@media(max-width:640px){
+  .topbar{height:52px;padding:0 12px}
+  .stage-wrap{padding:8px}
+  .sheet{height:min(62vh,520px);min-height:300px}
+  .status-row,.acc-row,.mobile-controls,.mobile-settings{width:100%}
+}
+</style>
 </head>
 <body>
-
-<div class="hero">
-    <div class="hero-eyebrow">David Steckler &nbsp;/&nbsp; AI Best Practices</div>
-    <h1>Prompting<br><em>Tier List</em></h1>
-    <p class="hero-desc">Not all prompting habits are equal. These are ranked by how much they actually change the quality of your results — starting with the ones that matter most.</p>
+<div class="topbar">
+  <div class="brand">Cursive Quest</div>
+  <div class="stats">
+    <div class="stat"><small>Score</small><strong id="scoreEl">0</strong></div>
+    <div class="stat"><small>Accuracy</small><strong id="accuracyTopEl">—</strong></div>
+    <div class="stat"><small>Mastered</small><strong id="masteredEl">0/26</strong></div>
+  </div>
 </div>
 
-<div class="legend">
-    <div class="legend-item tier-s"><span class="legend-badge">S</span> Must-know. These alone will double your results.</div>
-    <div class="legend-item tier-a"><span class="legend-badge">A</span> High-impact habits worth building early.</div>
-    <div class="legend-item tier-b"><span class="legend-badge">B</span> Solid techniques once you have the basics.</div>
-    <div class="legend-item tier-c"><span class="legend-badge">C</span> Situational. Useful for specific use cases.</div>
-    <div class="legend-item tier-d"><span class="legend-badge">D</span> Nice to know, rarely changes the outcome.</div>
+<div class="app">
+  <aside class="panel">
+    <div class="section">
+      <div class="label">Mode</div>
+      <div class="toggle">
+        <button id="singleModeBtn" class="on">Single Letter</button>
+        <button id="wordModeBtn">Word</button>
+      </div>
+    </div>
+    <div class="section" id="singleSection">
+      <div class="label">Letter</div>
+      <div class="alpha-grid" id="alphaGrid"></div>
+    </div>
+    <div class="section" id="wordSection" style="display:none">
+      <div class="label">Word</div>
+      <input class="input" id="wordInput" maxlength="12" value="pixie" placeholder="type a word" />
+      <div class="btnrow" style="margin-top:7px">
+        <button class="btn primary" id="loadWordBtn">Load</button>
+        <button class="btn" id="randomWordBtn">Random</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="label">Practice Setup</div>
+      <div class="mini" style="margin-bottom:7px">
+        <label for="paperTypeSelect">Paper type</label>
+        <select class="select" id="paperTypeSelect">
+          <option value="script">Script paper</option>
+          <option value="lined">Wide ruled</option>
+          <option value="grid">Grid</option>
+          <option value="blank">Blank</option>
+        </select>
+      </div>
+      <div class="control-grid">
+        <div class="mini">
+          <label for="penSizeRange">Pen size</label>
+          <input class="range" id="penSizeRange" type="range" min="8" max="24" step="1" value="14"/>
+        </div>
+        <div class="mini">
+          <label for="tutorialSpeedSelect">Tutorial speed</label>
+          <select class="select" id="tutorialSpeedSelect">
+            <option value="slow">Slow</option>
+            <option value="normal" selected>Normal</option>
+            <option value="fast">Fast</option>
+          </select>
+        </div>
+      </div>
+      <div class="mini" style="margin-top:7px">
+        <label for="guideOpacityRange">Guide darkness</label>
+        <input class="range" id="guideOpacityRange" type="range" min="5" max="45" step="1" value="18"/>
+      </div>
+      <div class="mini" style="margin-top:7px">
+        <label>Pen color</label>
+        <div class="color-row">
+          <input class="color-picker" id="penColorPicker" type="color" value="#5b35a0"/>
+          <select class="select" id="penColorPreset">
+            <option value="#5b35a0" selected>Purple</option>
+            <option value="#1e3a8a">Blue</option>
+            <option value="#166534">Green</option>
+            <option value="#111827">Black</option>
+            <option value="#b91c1c">Red</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="label">Actions</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn primary" id="tutorialBtn">▶ Tutorial</button>
+        <button class="btn" id="undoBtn">↩ Undo Last Stroke</button>
+        <button class="btn" id="clearBtn">Clear All</button>
+        <button class="btn" id="doneBtn">✓ Done — Score It</button>
+      </div>
+    </div>
+    <div class="tip">
+      <b>Multi-stroke letters</b>
+      Lift your pen between strokes — each lift starts a new stroke and nothing disappears. Letters like <b>i</b>, <b>j</b>, <b>t</b>, <b>f</b>, and <b>x</b> need multiple strokes. Hit "Done" when you're finished.
+    </div>
+  </aside>
+
+  <main class="stage-wrap">
+    <div class="mobile-controls">
+      <button class="btn primary" id="tutorialBtnM">▶ Tutorial</button>
+      <button class="btn" id="undoBtnM">↩ Undo</button>
+      <button class="btn" id="clearBtnM">Clear</button>
+      <button class="btn" id="doneBtnM">✓ Done</button>
+    </div>
+    <div class="mobile-settings">
+      <select class="select" id="paperTypeSelectM">
+        <option value="script">Script paper</option>
+        <option value="lined">Wide ruled</option>
+        <option value="grid">Grid</option>
+        <option value="blank">Blank</option>
+      </select>
+      <select class="select" id="tutorialSpeedSelectM">
+        <option value="slow">Slow</option>
+        <option value="normal" selected>Normal</option>
+        <option value="fast">Fast</option>
+      </select>
+      <input class="color-picker" id="penColorPickerM" type="color" value="#5b35a0"/>
+      <input class="range" id="penSizeRangeM" type="range" min="8" max="24" step="1" value="14"/>
+    </div>
+    <div class="sheet">
+      <div class="viewport" id="viewport">
+        <div class="stage" id="stage">
+          <canvas class="bg-canvas" id="bgCanvas"></canvas>
+          <canvas class="guide-canvas" id="guideCanvas"></canvas>
+          <canvas class="trace-canvas" id="traceCanvas"></canvas>
+          <canvas class="tutorial-canvas" id="tutorialCanvas"></canvas>
+          <div class="chip" id="chipEl">a</div>
+        </div>
+      </div>
+    </div>
+    <div class="acc-row">
+      <div class="acc-tag">Accuracy</div>
+      <div class="acc-track"><div class="acc-fill" id="accFill"></div></div>
+      <div class="acc-pct" id="accPct">—</div>
+    </div>
+    <div class="status-row">
+      <div class="dot" id="statusDot"></div>
+      <div class="status" id="statusEl">Watch the tutorial, then trace the letter. Lift your pen freely between strokes.</div>
+    </div>
+  </main>
+
+  <aside class="panel right">
+    <div class="section">
+      <div class="label">Live Metrics</div>
+      <div class="stroke-list">
+        <div class="metric"><span>On path</span><b id="onPathEl">—</b></div>
+        <div class="metric"><span>Coverage</span><b id="coverageEl">—</b></div>
+        <div class="metric"><span>Strokes</span><b id="strokesEl">0</b></div>
+        <div class="metric"><span>Score</span><b id="scoreSideEl">0</b></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="label">Learning Notes</div>
+      <div class="help-list">
+        <div class="help-item">Watch the tutorial to see the stroke order, then copy it.</div>
+        <div class="help-item">Lift your pen freely — dots, crossbars, and tails are all separate strokes.</div>
+        <div class="help-item">Hit "Done" when you've finished all strokes to get scored.</div>
+        <div class="help-item">Letters like <b>i j t f x</b> always need 2+ strokes.</div>
+      </div>
+    </div>
+    <div class="tip">
+      <b>Undo last stroke</b>
+      If you mess up one stroke, undo just that one and redo it without clearing everything.
+    </div>
+  </aside>
 </div>
-
-<div class="tiers">
-
-    <!-- ═══════════ S TIER ═══════════ -->
-    <div class="tier tier-s">
-        <div class="tier-header">
-            <div class="tier-badge">S</div>
-            <div class="tier-meta">
-                <div class="tier-name">Essential</div>
-                <div class="tier-desc">The foundations. Ignore these and everything else is a waste of time.</div>
-            </div>
-        </div>
-        <div class="cards">
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">01</span>
-                    <span class="card-title">Be specific. Vague questions get vague answers.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>This is the single highest-leverage thing you can do. The model is trying to find the most likely useful response to your words — every ambiguous word is a guess it has to make on your behalf. Nail down who you are, what you want, and what format you expect, and almost everything else gets better automatically.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Instead of</div>
-                        "Tell me about marketing."
-                    </div>
-                    <div class="prompt-ex" style="margin-top:6px;">
-                        <div class="prompt-ex-label">Try</div>
-                        "I run a small online pottery shop. What are three low-cost marketing channels that work well for handmade goods, and why?"
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">02</span>
-                    <span class="card-title">Give it context about yourself and your goal.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>The AI has no idea who you are. It doesn't know if you're a student, a doctor, or a professional with twenty years of experience. Without that, it defaults to some imaginary average person — which is probably not you. A single sentence of background reorients the entire response.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Try opening with</div>
-                        "I'm a high school teacher with no coding background. I want to understand enough about APIs to explain them to students in plain English..."
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">03</span>
-                    <span class="card-title">Treat it like a conversation, not a search box.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Most people write one prompt, get one answer, and move on. That's the least effective way to use it. Follow up. Push back. Ask it to expand on one part and simplify another. The second and third responses are almost always better than the first — and the model remembers everything said earlier in the thread.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">After any response, try</div>
-                        "That third point is interesting — go deeper on that one specifically."
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">04</span>
-                    <span class="card-title">Push back when the answer is wrong or weak.</span>
-                    
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>AI models are inclined to be agreeable, which means they'll sometimes confidently give you a mediocre answer rather than admit uncertainty. If something feels off — say so, and explain why. <strong>Don't just say "try again."</strong> Tell it what was wrong. "That answer assumed I had a budget — I don't. Try again with that constraint." This is one of the fastest ways to dramatically improve output quality.</p>
-                    <p>One caveat: the model can also be too easily swayed in the other direction. If you push back and it caves completely without explanation, ask it to defend its original answer — that'll tell you whether it was wrong or just being agreeable.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">05</span>
-                    <span class="card-title">Ask for step-by-step reasoning on anything complex.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>When you ask the model to think through a problem step by step, it actually produces better answers — not just for your benefit. Forcing it to reason through steps reduces errors in math, logic, and analysis. This is called chain-of-thought prompting and there's real research behind it.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Add to any complex question</div>
-                        "...think through this step by step before giving me your answer."
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ═══════════ A TIER ═══════════ -->
-    <div class="tier tier-a">
-        <div class="tier-header">
-            <div class="tier-badge">A</div>
-            <div class="tier-meta">
-                <div class="tier-name">High Impact</div>
-                <div class="tier-desc">Worth building into your habits early. You'll notice the difference immediately.</div>
-            </div>
-        </div>
-        <div class="cards">
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">06</span>
-                    <span class="card-title">Give it a role to play — it changes the response quality.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Framing the AI as an expert in a specific domain shifts the tone, depth, and vocabulary of the response. It also helps the model decide which assumptions to make about your needs. "As a senior software engineer" produces different output than "As a computer science teacher for 7th graders" — even for the exact same question.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Example</div>
-                        "As a no-nonsense personal finance advisor, give me honest feedback on this budget: [paste budget]."
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">07</span>
-                    <span class="card-title">Break big tasks into smaller steps.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>One massive prompt asking for everything at once usually produces a bloated, shallow response. Decompose the problem — first ask what approach to take, then go deeper into each piece. You'll get more useful output for the same total effort, and it's easier to redirect when one part goes wrong.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">08</span>
-                    <span class="card-title">Ask it to critique your own work.</span>
-                    
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>One of the most underused prompts is simply: "What's wrong with this?" Paste in an email, a plan, a piece of code, an argument — and ask the AI to find the weaknesses, gaps, or errors. You'll often get feedback that's more useful than anything you'd get from a generic "improve this" request.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Try</div>
-                        "Read this email draft and tell me what's unclear, what might land badly, and what I've probably left out: [paste draft]"
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">09</span>
-                    <span class="card-title">State your constraints upfront.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Time, budget, skill level, tools available, audience — the more constraints you name, the more practical the output. Without them, the model tends to produce idealized solutions that assume unlimited resources. The real world has constraints; tell it what yours are.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Instead of</div>
-                        "How do I grow my newsletter?"
-                    </div>
-                    <div class="prompt-ex" style="margin-top:6px;">
-                        <div class="prompt-ex-label">Try</div>
-                        "I have 200 subscribers, post twice a month, and have no marketing budget. What are realistic ways to grow to 1,000?"
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">10</span>
-                    <span class="card-title">Start a new conversation when things go sideways.</span>
-                    
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>AI models carry the full context of a conversation forward — which is usually great, but becomes a liability when earlier exchanges were confused or went off the rails. If the model is stuck in a weird pattern, producing poor responses, or has been corrected so many times it seems disoriented, don't keep fighting it. Start fresh. Copy your best prompt and try again clean.</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ═══════════ B TIER ═══════════ -->
-    <div class="tier tier-b">
-        <div class="tier-header">
-            <div class="tier-badge">B</div>
-            <div class="tier-meta">
-                <div class="tier-name">Solid Technique</div>
-                <div class="tier-desc">Good habits once the fundamentals are down. Situationally very useful.</div>
-            </div>
-        </div>
-        <div class="cards">
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">11</span>
-                    <span class="card-title">Ask it to rephrase or simplify when confused.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>If an explanation isn't clicking, don't reread it hoping it'll click — ask for a different angle. "Explain that like I'm 12" or "Give me an analogy" or "Can you use a concrete example?" almost always helps more than rereading the same abstract explanation.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">12</span>
-                    <span class="card-title">Specify the output format you want.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Want a table? A numbered list? A short paragraph, not an essay? Say so. The default format is often longer and more padded than necessary. Specifying format also reduces the cleanup work after you get the answer.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Example</div>
-                        "Give me the answer as a two-column table: left column is the action, right column is why it matters. No intro text, just the table."
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">13</span>
-                    <span class="card-title">Use it as a brainstorming engine — ask for volume.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Generating a lot of ideas fast is genuinely one of AI's strongest suits. Ask for 20 or 30 ideas on any topic and you'll almost always find a handful that are worth keeping — ones you wouldn't have reached on your own. Don't filter while generating; ask for quantity first, then refine.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Example</div>
-                        "Give me 30 newsletter topic ideas for a freelance illustrator. Be creative, include some unusual angles, and don't repeat yourself."
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">14</span>
-                    <span class="card-title">Rephrase the question when the answer is off.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Sometimes the model just didn't understand what you actually meant. Rather than repeating yourself or typing the same prompt harder, try coming at it from a completely different angle. Change the framing, add a concrete example of what you're looking for, or strip it down to the core question.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">15</span>
-                    <span class="card-title">Ask for the opposing view, not just confirmation.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>The AI will naturally produce responses that feel balanced but often lean toward the popular or expected view. For anything important — decisions, arguments, analysis — explicitly ask it to steelman the opposite position. "Now argue against the advice you just gave me" is a surprisingly useful follow-up.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">16</span>
-                    <span class="card-title">Adjust the tone to fit where the output will be used.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>The default AI writing voice is often a bit too formal and polished to sound like a real person. If you're writing something that needs to sound human — a casual email, a social post, a Slack message — ask it to dial down the corporate sheen. Describe the audience and the context.</p>
-                    <div class="prompt-ex">
-                        <div class="prompt-ex-label">Example</div>
-                        "Rewrite this in a warmer, more direct tone. Cut the filler phrases. It should sound like it came from a real person, not a template."
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ═══════════ C TIER ═══════════ -->
-    <div class="tier tier-c">
-        <div class="tier-header">
-            <div class="tier-badge">C</div>
-            <div class="tier-meta">
-                <div class="tier-name">Situational</div>
-                <div class="tier-desc">Useful in specific contexts. Won't move the needle for everyday use.</div>
-            </div>
-        </div>
-        <div class="cards">
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">17</span>
-                    <span class="card-title">Use the mentor framing to get blunter advice.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Asking the AI to respond "as a mentor who won't sugarcoat things" tends to produce feedback that's more actionable and less hedged than default responses. Useful for evaluating ideas, getting career advice, or when you specifically want someone to tell you what's wrong with your plan.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">18</span>
-                    <span class="card-title">Ask for sources — but verify them yourself.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Requesting citations is a reasonable habit, but AI models sometimes fabricate references that sound credible. Treat any cited study or article as unconfirmed until you've checked it yourself. This isn't a reason to skip asking — it's just a reason to always double-check before you repeat something in your own work.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">19</span>
-                    <span class="card-title">Use it for things that are hard to Google.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Search engines are good at finding information that exists somewhere as a clean document. AI is better at synthesizing, reasoning through messy situations, and answering questions that are too specific or too contextual for search. The classic example: debugging code where the error depends on your specific logic, not a known bug.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">20</span>
-                    <span class="card-title">Know that its knowledge has a cutoff date.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>For anything time-sensitive — recent events, current prices, who currently holds a position — the AI may be working with outdated information and won't always flag this proactively. If recency matters, use a tool with web access (like Perplexity or Claude with web search enabled) or verify the answer elsewhere.</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ═══════════ D TIER ═══════════ -->
-    <div class="tier tier-d">
-        <div class="tier-header">
-            <div class="tier-badge">D</div>
-            <div class="tier-meta">
-                <div class="tier-name">Minor Gains</div>
-                <div class="tier-desc">Fine to know. Rarely changes the outcome in practice.</div>
-            </div>
-        </div>
-        <div class="cards">
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">21</span>
-                    <span class="card-title">Use examples to illustrate your request.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Showing the AI an example of what you want — a sample email, a formatting style, a tone of voice — is genuinely useful when the output needs to match something specific. In practice, for most everyday prompts, being specific (Tier S) achieves the same thing. This becomes more important for creative work or when you need output to match an existing style exactly.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">22</span>
-                    <span class="card-title">Ask for bold, bullets, or tables when it helps readability.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Formatting requests are useful for cleanup, but they don't change the substance of an answer. "Bold the key terms" or "put this in a table" is useful mainly when you're copying output directly into another document. In most conversational contexts, the information matters more than the formatting.</p>
-                </div>
-            </div>
-
-            <div class="card" onclick="toggle(this)">
-                <div class="card-head">
-                    <span class="card-rank">23</span>
-                    <span class="card-title">Be aware of potential bias in AI responses.</span>
-                    <span class="card-chevron">▼</span>
-                </div>
-                <div class="card-body">
-                    <p>Worth keeping in mind, but this is more of a general epistemic habit than a prompting technique. The practical version of this advice is already captured elsewhere: ask for both sides, ask for counterarguments, and verify anything important before relying on it. "Be aware of bias" on its own doesn't give you a concrete thing to do differently.</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-</div><!-- /tiers -->
-
-
 
 <script>
-    function toggle(card) {
-        card.classList.toggle('open');
+
+const RANDOM_WORDS=['pixie','david','leigh','trace','hello','quiet','magic','grace','smile','river','story','green'];
+const FONT_FAMILY='"Dancing Script", cursive';
+const alpha='abcdefghijklmnopqrstuvwxyz'.split('');
+
+const S={
+  mode:'single',letter:'a',letterIdx:0,word:'pixie',
+  score:0,mastered:new Set(),
+  stageW:1100,stageH:600,
+  fontSize:280,textX:80,textY:360,
+  tutorialPlaying:false,
+  drawing:false,activeInput:'none',pointerId:null,
+  points:[],segments:[],lastPoint:null,
+  onPathPoints:0,totalPoints:0,
+  coveredBins:new Set(),detachedBins:new Set(),
+  mainTargetBins:1,detachedTargetBins:0,
+  targetMask:null,zoneMask:null,detachedMask:null,
+  resultLocked:false,lastOverall:0,
+  penColor:'#5b35a0',penSize:14,
+  paperType:'script',guideOpacity:0.18,tutorialSpeed:'normal',
+  letterStrokePaths:[],
+};
+
+const viewport=document.getElementById('viewport');
+const stage=document.getElementById('stage');
+const bgCanvas=document.getElementById('bgCanvas');
+const guideCanvas=document.getElementById('guideCanvas');
+const traceCanvas=document.getElementById('traceCanvas');
+const tutorialCanvas=document.getElementById('tutorialCanvas');
+const bgCtx=bgCanvas.getContext('2d');
+const guideCtx=guideCanvas.getContext('2d');
+const traceCtx=traceCanvas.getContext('2d');
+const tutCtx=tutorialCanvas.getContext('2d');
+
+function setStatus(msg,type='neutral'){
+  document.getElementById('statusEl').textContent=msg;
+  const d=document.getElementById('statusDot');
+  d.className='dot'+(type==='ok'?' ok':type==='warn'?' warn':type==='err'?' err':'');
+}
+function getPracticeText(){return S.mode==='single'?S.letter:(S.word||'a')}
+function normalizeWord(t){return(t||'').toLowerCase().replace(/[^a-z]/g,'').slice(0,12)}
+function midpoint(a,b){return{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function idxFor(x,y){
+  const px=Math.max(0,Math.min(S.stageW-1,Math.round(x)));
+  const py=Math.max(0,Math.min(S.stageH-1,Math.round(y)));
+  return((py*S.stageW)+px)*4+3;
+}
+
+function setupCanvas(canvas,ctx){
+  const dpr=Math.max(1,window.devicePixelRatio||1);
+  canvas.width=Math.round(S.stageW*dpr);
+  canvas.height=Math.round(S.stageH*dpr);
+  canvas.style.width=S.stageW+'px';
+  canvas.style.height=S.stageH+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+}
+function setupAll(){
+  [[bgCanvas,bgCtx],[guideCanvas,guideCtx],[traceCanvas,traceCtx],[tutorialCanvas,tutCtx]].forEach(([c,x])=>setupCanvas(c,x));
+}
+function clear(ctx){ctx.clearRect(0,0,S.stageW,S.stageH)}
+
+function drawPaper(){
+  clear(bgCtx);
+  if(S.paperType==='blank') return;
+  const baseline=S.stageH*0.65;
+  const mean=baseline-118;
+  const cap=baseline-240;
+  if(S.paperType==='grid'){
+    bgCtx.strokeStyle='#ede6db';bgCtx.lineWidth=1;
+    for(let x=0;x<=S.stageW;x+=36){bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,S.stageH);bgCtx.stroke()}
+    for(let y=0;y<=S.stageH;y+=36){bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(S.stageW,y);bgCtx.stroke()}
+    return;
+  }
+  if(S.paperType==='lined'){
+    bgCtx.strokeStyle='#e6ddcf';bgCtx.lineWidth=1.2;
+    for(let y=80;y<S.stageH;y+=58){bgCtx.beginPath();bgCtx.moveTo(30,y);bgCtx.lineTo(S.stageW-30,y);bgCtx.stroke()}
+    bgCtx.strokeStyle='#efdccf';bgCtx.beginPath();bgCtx.moveTo(72,0);bgCtx.lineTo(72,S.stageH);bgCtx.stroke();
+    return;
+  }
+  bgCtx.strokeStyle='#e0d8cc';bgCtx.lineWidth=1;
+  bgCtx.setLineDash([6,6]);bgCtx.beginPath();bgCtx.moveTo(40,cap);bgCtx.lineTo(S.stageW-40,cap);bgCtx.stroke();
+  bgCtx.setLineDash([4,8]);bgCtx.beginPath();bgCtx.moveTo(40,mean);bgCtx.lineTo(S.stageW-40,mean);bgCtx.stroke();
+  bgCtx.setLineDash([]);bgCtx.strokeStyle='#c8beaf';bgCtx.lineWidth=1.6;
+  bgCtx.beginPath();bgCtx.moveTo(40,baseline);bgCtx.lineTo(S.stageW-40,baseline);bgCtx.stroke();
+  bgCtx.fillStyle='rgba(110,101,88,.5)';bgCtx.font='11px "DM Sans",sans-serif';
+  bgCtx.fillText('cap',44,cap-7);bgCtx.fillText('mid',44,mean-7);bgCtx.fillText('base',44,baseline-7);
+}
+
+function measureText(text,fontSize){
+  const p=document.createElement('canvas').getContext('2d');
+  p.font=`${fontSize}px ${FONT_FAMILY}`;
+  return p.measureText(text).width;
+}
+function computeLayout(){
+  const text=getPracticeText();
+  let fontSize=S.mode==='single'?300:240;
+  const maxW=S.stageW-160;
+  while(measureText(text,fontSize)>maxW&&fontSize>100) fontSize-=6;
+  S.fontSize=fontSize;
+  const tw=measureText(text,fontSize);
+  S.textX=Math.max(60,(S.stageW-tw)/2-10);
+  S.textY=Math.floor(S.stageH*0.58);
+}
+
+function renderGuide(){
+  clear(guideCtx);
+  drawPaper();
+  const text=getPracticeText();
+  guideCtx.font=`${S.fontSize}px ${FONT_FAMILY}`;
+  guideCtx.textBaseline='alphabetic';
+  const alpha_val=S.guideOpacity;
+  guideCtx.fillStyle=`rgba(184,137,42,${alpha_val})`;
+  guideCtx.strokeStyle=`rgba(184,137,42,${Math.min(0.7,alpha_val+0.25)})`;
+  guideCtx.lineWidth=1.5;
+  guideCtx.fillText(text,S.textX,S.textY);
+  guideCtx.strokeText(text,S.textX,S.textY);
+}
+
+// ─── Zhang-Suen thinning to extract skeleton from rendered font ───
+function zhangSuenThin(img,w,h){
+  function g(x,y){return(x<0||x>=w||y<0||y>=h)?0:img[y*w+x]}
+  let changed=true;
+  while(changed){
+    changed=false;
+    for(let pass=0;pass<2;pass++){
+      const rem=[];
+      for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+        if(!img[y*w+x])continue;
+        const p2=g(x,y-1),p3=g(x+1,y-1),p4=g(x+1,y),p5=g(x+1,y+1);
+        const p6=g(x,y+1),p7=g(x-1,y+1),p8=g(x-1,y),p9=g(x-1,y-1);
+        const B=p2+p3+p4+p5+p6+p7+p8+p9;
+        if(B<2||B>6)continue;
+        const n=[p2,p3,p4,p5,p6,p7,p8,p9,p2];
+        let A=0;for(let i=0;i<8;i++)if(n[i]===0&&n[i+1]===1)A++;
+        if(A!==1)continue;
+        if(pass===0){if(p2*p4*p6!==0)continue;if(p4*p6*p8!==0)continue;}
+        else{if(p2*p4*p8!==0)continue;if(p2*p6*p8!==0)continue;}
+        rem.push(y*w+x);
+      }
+      for(const idx of rem){img[idx]=0;changed=true;}
     }
+  }
+}
+
+function extractSkeletonComponents(bin,w,h){
+  const visited=new Uint8Array(w*h);
+  const comps=[];
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    if(!bin[y*w+x]||visited[y*w+x])continue;
+    const stack=[{x,y}],pixels=[];
+    visited[y*w+x]=1;
+    while(stack.length){
+      const p=stack.pop();pixels.push(p);
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        if(dx===0&&dy===0)continue;
+        const nx=p.x+dx,ny=p.y+dy;
+        if(nx<0||nx>=w||ny<0||ny>=h)continue;
+        if(bin[ny*w+nx]&&!visited[ny*w+nx]){visited[ny*w+nx]=1;stack.push({x:nx,y:ny})}
+      }
+    }
+    if(pixels.length>=3)comps.push(pixels);
+  }
+  comps.sort((a,b)=>b.length-a.length);
+  return comps;
+}
+
+function orderSkeletonPath(pixels,w){
+  const kf=(x,y)=>y*w+x;
+  const pSet=new Set(pixels.map(p=>kf(p.x,p.y)));
+  function nbrs(x,y){
+    const ns=[];
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      if(dx===0&&dy===0)continue;
+      if(pSet.has(kf(x+dx,y+dy)))ns.push({x:x+dx,y:y+dy});
+    }
+    return ns;
+  }
+  // Find endpoints (degree 1)
+  const endpoints=pixels.filter(p=>nbrs(p.x,p.y).length===1);
+  // Start from topmost endpoint (natural cursive start), tiebreak rightmost
+  let start;
+  if(endpoints.length>0){
+    endpoints.sort((a,b)=>a.y-b.y||(b.x-a.x));
+    start=endpoints[0];
+  }else{
+    // Pure loop — start from topmost
+    const sorted=[...pixels].sort((a,b)=>a.y-b.y||a.x-b.x);
+    start=sorted[0];
+  }
+  // Greedy walk preferring to continue in same direction
+  const visited=new Set();
+  const path=[start];
+  visited.add(kf(start.x,start.y));
+  let cur=start,dirX=0,dirY=1;
+  while(true){
+    const ns=nbrs(cur.x,cur.y).filter(n=>!visited.has(kf(n.x,n.y)));
+    if(!ns.length)break;
+    let best=ns[0],bestS=-Infinity;
+    for(const n of ns){
+      const dx=n.x-cur.x,dy=n.y-cur.y;
+      const len=Math.sqrt(dx*dx+dy*dy)||1;
+      const sc=(dx*dirX+dy*dirY)/len;
+      if(sc>bestS){bestS=sc;best=n;}
+    }
+    dirX=best.x-cur.x;dirY=best.y-cur.y;
+    const len=Math.sqrt(dirX*dirX+dirY*dirY)||1;
+    dirX/=len;dirY/=len;
+    visited.add(kf(best.x,best.y));
+    path.push(best);
+    cur=best;
+  }
+  // If we missed many pixels (junction branches), do a second pass
+  const remaining=pixels.filter(p=>!visited.has(kf(p.x,p.y)));
+  if(remaining.length>pixels.length*0.15){
+    // Find the closest unvisited pixel to the current end, bridge to it, and continue
+    let bridge=null,bridgeDist=Infinity;
+    for(const r of remaining){
+      const d=Math.hypot(r.x-cur.x,r.y-cur.y);
+      if(d<bridgeDist){bridgeDist=d;bridge=r;}
+    }
+    if(bridge&&bridgeDist<30){
+      visited.add(kf(bridge.x,bridge.y));
+      path.push(bridge);
+      cur=bridge;
+      dirX=0;dirY=1;
+      while(true){
+        const ns=nbrs(cur.x,cur.y).filter(n=>!visited.has(kf(n.x,n.y)));
+        if(!ns.length)break;
+        let best=ns[0],bestS=-Infinity;
+        for(const n of ns){
+          const dx=n.x-cur.x,dy=n.y-cur.y;
+          const len=Math.sqrt(dx*dx+dy*dy)||1;
+          const sc=(dx*dirX+dy*dirY)/len;
+          if(sc>bestS){bestS=sc;best=n;}
+        }
+        dirX=best.x-cur.x;dirY=best.y-cur.y;
+        const len=Math.sqrt(dirX*dirX+dirY*dirY)||1;
+        dirX/=len;dirY/=len;
+        visited.add(kf(best.x,best.y));
+        path.push(best);
+        cur=best;
+      }
+    }
+  }
+  return path;
+}
+
+function subsamplePath(pts,every){
+  if(pts.length<=every*2)return pts;
+  const r=[pts[0]];
+  for(let i=every;i<pts.length-1;i+=every)r.push(pts[i]);
+  r.push(pts[pts.length-1]);
+  return r;
+}
+
+function smoothPath(pts,iterations){
+  if(pts.length<3)return pts;
+  let cur=pts.map(p=>({x:p.x,y:p.y}));
+  for(let iter=0;iter<iterations;iter++){
+    const next=[cur[0]];
+    for(let i=1;i<cur.length-1;i++){
+      next.push({
+        x:cur[i-1].x*0.25+cur[i].x*0.5+cur[i+1].x*0.25,
+        y:cur[i-1].y*0.25+cur[i].y*0.5+cur[i+1].y*0.25
+      });
+    }
+    next.push(cur[cur.length-1]);
+    cur=next;
+  }
+  return cur;
+}
+
+// ─── Build stroke paths by skeletonizing the actual rendered font ───
+function buildLetterStrokePaths(){
+  const text=getPracticeText();
+  const SCALE=2;
+  const sw=Math.ceil(S.stageW/SCALE),sh=Math.ceil(S.stageH/SCALE);
+
+  const off=document.createElement('canvas');
+  off.width=sw;off.height=sh;
+  const oCtx=off.getContext('2d');
+  oCtx.font=`${S.fontSize/SCALE}px ${FONT_FAMILY}`;
+  oCtx.textBaseline='alphabetic';
+  oCtx.fillStyle='#000';
+  oCtx.fillText(text,S.textX/SCALE,S.textY/SCALE);
+
+  const idata=oCtx.getImageData(0,0,sw,sh);
+  const bin=new Uint8Array(sw*sh);
+  for(let i=0;i<sw*sh;i++) bin[i]=idata.data[i*4+3]>80?1:0;
+
+  zhangSuenThin(bin,sw,sh);
+
+  const comps=extractSkeletonComponents(bin,sw,sh);
+
+  S.letterStrokePaths=[];
+  for(const comp of comps){
+    const ordered=orderSkeletonPath(comp,sw);
+    // Scale back to full resolution
+    const scaled=ordered.map(p=>({x:p.x*SCALE,y:p.y*SCALE}));
+    // Subsample aggressively, then smooth to remove pixel jag
+    const sub=subsamplePath(scaled,4);
+    const smooth=smoothPath(sub,1);
+    if(smooth.length>=2) S.letterStrokePaths.push(smooth);
+  }
+
+  // Sort: main body (longest) first, then detached parts by x-position
+  if(S.letterStrokePaths.length>1){
+    const main=S.letterStrokePaths.reduce((a,b)=>a.length>b.length?a:b);
+    const rest=S.letterStrokePaths.filter(p=>p!==main);
+    rest.sort((a,b)=>a[0].x-b[0].x);
+    S.letterStrokePaths=[main,...rest];
+  }
+}
+
+function catmullRomPoints(pts,segments=8){
+  if(pts.length<2) return pts.slice();
+  const result=[];
+  const ext=[pts[0],...pts,pts[pts.length-1]];
+  for(let i=1;i<ext.length-2;i++){
+    const p0=ext[i-1],p1=ext[i],p2=ext[i+1],p3=ext[i+2];
+    for(let t=0;t<segments;t++){
+      const u=t/segments;
+      const u2=u*u,u3=u2*u;
+      result.push({
+        x:0.5*((2*p1.x)+(-p0.x+p2.x)*u+(2*p0.x-5*p1.x+4*p2.x-p3.x)*u2+(-p0.x+3*p1.x-3*p2.x+p3.x)*u3),
+        y:0.5*((2*p1.y)+(-p0.y+p2.y)*u+(2*p0.y-5*p1.y+4*p2.y-p3.y)*u2+(-p0.y+3*p1.y-3*p2.y+p3.y)*u3)
+      });
+    }
+  }
+  result.push(pts[pts.length-1]);
+  return result;
+}
+
+function buildMasks(){
+  const text=getPracticeText();
+  function makeOff(){
+    const c=document.createElement('canvas');
+    c.width=S.stageW;c.height=S.stageH;
+    return c;
+  }
+  const tOff=makeOff();const tCtx=tOff.getContext('2d');
+  tCtx.font=`${S.fontSize}px ${FONT_FAMILY}`;tCtx.textBaseline='alphabetic';
+  tCtx.fillStyle='#000';tCtx.fillText(text,S.textX,S.textY);
+  S.targetMask=tCtx.getImageData(0,0,S.stageW,S.stageH).data;
+
+  const zOff=makeOff();const zCtx=zOff.getContext('2d');
+  zCtx.font=`${S.fontSize}px ${FONT_FAMILY}`;zCtx.textBaseline='alphabetic';
+  zCtx.lineCap='round';zCtx.lineJoin='round';
+  zCtx.strokeStyle='#000';zCtx.lineWidth=32;
+  zCtx.strokeText(text,S.textX,S.textY);
+  zCtx.fillStyle='#000';zCtx.fillText(text,S.textX,S.textY);
+  S.zoneMask=zCtx.getImageData(0,0,S.stageW,S.stageH).data;
+
+  const step=10;let tot=0;
+  for(let y=0;y<S.stageH;y+=step)for(let x=0;x<S.stageW;x+=step){
+    if(S.targetMask[((y*S.stageW)+x)*4+3]>10) tot++;
+  }
+  S.mainTargetBins=Math.max(1,tot);
+  S.detachedTargetBins=0;
+}
+
+function addCoveragePoint(x,y){
+  const step=10;
+  const bx=Math.floor(x/step),by=Math.floor(y/step);
+  const cx=bx*step+5,cy=by*step+5;
+  const idx=idxFor(cx,cy);
+  const key=bx+':'+by;
+  if(S.targetMask&&S.targetMask[idx]>10) S.coveredBins.add(key);
+}
+
+function drawSmooth(ctx,pts,color,width){
+  if(!pts.length) return;
+  if(pts.length===1){
+    ctx.beginPath();ctx.arc(pts[0].x,pts[0].y,width/2,0,Math.PI*2);
+    ctx.fillStyle=color;ctx.fill();return;
+  }
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  if(pts.length===2){ctx.lineTo(pts[1].x,pts[1].y);}
+  else{
+    for(let i=1;i<pts.length-1;i++){
+      const mid=midpoint(pts[i],pts[i+1]);
+      ctx.quadraticCurveTo(pts[i].x,pts[i].y,mid.x,mid.y);
+    }
+    const l=pts[pts.length-1],p=pts[pts.length-2];
+    ctx.quadraticCurveTo(p.x,p.y,l.x,l.y);
+  }
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
+}
+
+function redrawTrace(){
+  clear(traceCtx);
+  S.segments.forEach(seg=>drawSmooth(traceCtx,seg.points,seg.color,seg.width));
+  if(S.points.length) drawSmooth(traceCtx,S.points,S.penColor,S.penSize);
+  document.getElementById('strokesEl').textContent=S.segments.length+(S.points.length?'+1':'');
+}
+
+function processPoint(p){
+  S.totalPoints++;
+  if(S.zoneMask&&S.zoneMask[idxFor(p.x,p.y)]>10) S.onPathPoints++;
+  addCoveragePoint(p.x,p.y);
+  updateMetrics();
+}
+function interpolateProcess(from,to){
+  const d=Math.max(1,Math.ceil(dist(from,to)/3));
+  for(let i=1;i<=d;i++){
+    const t=i/d;
+    processPoint({x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t});
+  }
+}
+
+function getEventPt(e){
+  const rect=traceCanvas.getBoundingClientRect();
+  let cx,cy;
+  if(e.touches&&e.touches.length){cx=e.touches[0].clientX;cy=e.touches[0].clientY;}
+  else if(e.changedTouches&&e.changedTouches.length){cx=e.changedTouches[0].clientX;cy=e.changedTouches[0].clientY;}
+  else{cx=e.clientX;cy=e.clientY;}
+  return{x:cx-rect.left,y:cy-rect.top};
+}
+
+function beginDraw(p){
+  if(S.tutorialPlaying) return;
+  if(S.resultLocked){S.resultLocked=false;setStatus('Continuing practice. Hit Done when finished.','neutral');}
+  S.drawing=true;
+  S.points=[p];S.lastPoint=p;
+  processPoint(p);redrawTrace();
+}
+function moveDraw(p){
+  if(!S.drawing||S.tutorialPlaying) return;
+  interpolateProcess(S.lastPoint,p);
+  S.points.push(p);S.lastPoint=p;redrawTrace();
+}
+function endDraw(){
+  if(!S.drawing) return;
+  S.drawing=false;
+  if(S.points.length){
+    S.segments.push({points:[...S.points],color:S.penColor,width:S.penSize});
+    S.points=[];redrawTrace();
+    setStatus('Stroke added. Keep going or hit Done to score.','neutral');
+  }
+}
+
+function updateMetrics(){
+  if(!S.totalPoints){
+    document.getElementById('onPathEl').textContent='—';
+    document.getElementById('coverageEl').textContent='—';
+    document.getElementById('accFill').style.width='0%';
+    document.getElementById('accPct').textContent='—';
+    document.getElementById('accuracyTopEl').textContent='—';
+    S.lastOverall=0;return;
+  }
+  const onP=Math.round((S.onPathPoints/S.totalPoints)*100);
+  const cov=Math.round((S.coveredBins.size/S.mainTargetBins)*100);
+  const overall=Math.round(onP*0.55+cov*0.45);
+  S.lastOverall=overall;
+  document.getElementById('onPathEl').textContent=onP+'%';
+  document.getElementById('coverageEl').textContent=cov+'%';
+  document.getElementById('accFill').style.width=overall+'%';
+  document.getElementById('accFill').style.background=overall>80?'var(--green)':overall>55?'var(--gold)':'var(--red)';
+  document.getElementById('accPct').textContent=overall+'%';
+  document.getElementById('accuracyTopEl').textContent=overall+'%';
+}
+
+function scoreResult(){
+  if(!S.totalPoints){setStatus('Draw something first, then hit Done.','warn');return;}
+  const overall=S.lastOverall;
+  S.resultLocked=true;
+  if(overall>=70){
+    S.score+=Math.round(40+overall*0.6);
+    if(S.mode==='single') S.mastered.add(S.letter);
+    updateHeader();renderAlpha();
+    setStatus(`Great! ${overall}% accuracy. Score +${Math.round(40+overall*0.6)} — letter mastered!`,'ok');
+  }else{
+    setStatus(`${overall}% accuracy. Try again — watch the tutorial and follow the stroke paths.`,'warn');
+  }
+  document.getElementById('scoreEl').textContent=S.score;
+  document.getElementById('scoreSideEl').textContent=S.score;
+}
+
+function getTutorialDelay(){
+  return S.tutorialSpeed==='slow'?32:S.tutorialSpeed==='fast'?10:18;
+}
+
+async function playTutorial(){
+  if(S.tutorialPlaying) return;
+  S.tutorialPlaying=true;
+  clear(tutCtx);
+  setStatus('Tutorial playing — watch the stroke order.','neutral');
+
+  const paths=S.letterStrokePaths;
+  if(!paths.length){S.tutorialPlaying=false;return;}
+
+  const delay=getTutorialDelay();
+
+  for(let si=0;si<paths.length;si++){
+    const rawPts=paths[si];
+    // Smooth via catmull-rom for nice animation
+    const pts=catmullRomPoints(rawPts,10);
+
+    // Show start point indicator before drawing
+    const startPt=pts[0];
+    clear(tutCtx);
+    // Redraw completed strokes
+    for(let s=0;s<si;s++){
+      const prev=catmullRomPoints(paths[s],10);
+      drawSmooth(tutCtx,prev,'rgba(91,53,160,.18)',20);
+      drawSmooth(tutCtx,prev,'rgba(91,53,160,.7)',12);
+    }
+    // Start point pulse
+    tutCtx.beginPath();tutCtx.arc(startPt.x,startPt.y,14,0,Math.PI*2);
+    tutCtx.strokeStyle='rgba(42,122,74,.6)';tutCtx.lineWidth=2.5;tutCtx.stroke();
+    tutCtx.beginPath();tutCtx.arc(startPt.x,startPt.y,6,0,Math.PI*2);
+    tutCtx.fillStyle='rgba(42,122,74,.95)';tutCtx.fill();
+    tutCtx.fillStyle='rgba(91,53,160,.9)';
+    tutCtx.font='bold 13px "DM Sans",sans-serif';
+    tutCtx.fillText(`stroke ${si+1}/${paths.length} — start here`,startPt.x+18,startPt.y-6);
+    await new Promise(r=>setTimeout(r,500));
+
+    // Animate drawing
+    const shown=[];
+    // Adaptive frame skip: longer paths animate faster
+    const frameSkip=Math.max(2,Math.min(8,Math.floor(pts.length/120)));
+    for(let i=0;i<pts.length;i++){
+      shown.push(pts[i]);
+      if(i%frameSkip===0||i===pts.length-1){
+        clear(tutCtx);
+
+        // Draw completed strokes
+        for(let s=0;s<si;s++){
+          const prev=catmullRomPoints(paths[s],10);
+          drawSmooth(tutCtx,prev,'rgba(91,53,160,.18)',20);
+          drawSmooth(tutCtx,prev,'rgba(91,53,160,.7)',12);
+        }
+
+        // Draw current in-progress stroke
+        if(shown.length>1){
+          drawSmooth(tutCtx,shown,'rgba(91,53,160,.18)',20);
+          drawSmooth(tutCtx,shown,'rgba(91,53,160,.9)',12);
+        }
+
+        // Pen tip
+        const tip=shown[shown.length-1];
+        tutCtx.beginPath();tutCtx.arc(tip.x,tip.y,8,0,Math.PI*2);
+        tutCtx.fillStyle='rgba(42,122,74,.95)';tutCtx.fill();
+
+        tutCtx.fillStyle='rgba(91,53,160,.9)';
+        tutCtx.font='bold 13px "DM Sans",sans-serif';
+        tutCtx.fillText(`stroke ${si+1}/${paths.length}`,tip.x+14,tip.y-8);
+
+        await new Promise(r=>setTimeout(r,delay));
+      }
+    }
+
+    // Pause between strokes
+    await new Promise(r=>setTimeout(r,320));
+
+    // Lift-pen indicator if more strokes follow
+    if(si<paths.length-1){
+      const tip=pts[pts.length-1];
+      tutCtx.beginPath();tutCtx.arc(tip.x,tip.y,13,0,Math.PI*2);
+      tutCtx.strokeStyle='rgba(192,57,43,.8)';tutCtx.lineWidth=2.5;tutCtx.stroke();
+      tutCtx.fillStyle='rgba(192,57,43,.85)';
+      tutCtx.font='bold 12px "DM Sans",sans-serif';
+      tutCtx.fillText('↑ lift pen',tip.x+16,tip.y+4);
+      await new Promise(r=>setTimeout(r,420));
+    }
+  }
+
+  await new Promise(r=>setTimeout(r,600));
+  clear(tutCtx);
+  S.tutorialPlaying=false;
+  setStatus(`Tutorial done. ${paths.length} stroke${paths.length>1?'s':''} — now trace it yourself!`,'ok');
+}
+
+function resetPractice(msg=true){
+  S.points=[];S.segments=[];S.lastPoint=null;S.drawing=false;
+  S.pointerId=null;S.activeInput='none';
+  S.onPathPoints=0;S.totalPoints=0;
+  S.coveredBins=new Set();S.detachedBins=new Set();
+  S.lastOverall=0;S.resultLocked=false;
+  updateMetrics();redrawTrace();clear(tutCtx);
+  document.getElementById('strokesEl').textContent='0';
+  if(msg) setStatus('Cleared. Watch the tutorial, then trace each stroke.','neutral');
+}
+function undoStroke(){
+  if(S.segments.length===0){setStatus('Nothing to undo.','neutral');return;}
+  S.segments.pop();
+  S.onPathPoints=0;S.totalPoints=0;S.coveredBins=new Set();S.detachedBins=new Set();
+  S.segments.forEach(seg=>{
+    for(let i=0;i<seg.points.length-1;i++) interpolateProcess(seg.points[i],seg.points[i+1]);
+  });
+  S.resultLocked=false;
+  redrawTrace();updateMetrics();
+  setStatus('Last stroke removed.','neutral');
+}
+
+function fitToScreen(){
+  requestAnimationFrame(()=>{
+    const vr=viewport.getBoundingClientRect();
+    viewport.scrollLeft=Math.max(0,(S.stageW-vr.width)/2);
+    viewport.scrollTop=Math.max(0,(S.stageH-vr.height)/2-20);
+  });
+}
+function buildScene(){
+  stage.style.width=S.stageW+'px';stage.style.height=S.stageH+'px';
+  setupAll();computeLayout();renderGuide();buildMasks();buildLetterStrokePaths();
+  resetPractice(false);updateHeader();syncControls();fitToScreen();
+  const text=getPracticeText();
+  const strokeCount=S.letterStrokePaths.length;
+  setStatus(`Trace "${text}" — ${strokeCount} stroke${strokeCount!==1?'s':''} needed. Watch the tutorial first.`,'neutral');
+}
+function updateHeader(){
+  document.getElementById('scoreEl').textContent=S.score;
+  document.getElementById('scoreSideEl').textContent=S.score;
+  document.getElementById('masteredEl').textContent=`${S.mastered.size}/26`;
+  document.getElementById('chipEl').textContent=getPracticeText();
+}
+function renderAlpha(){
+  const grid=document.getElementById('alphaGrid');
+  grid.innerHTML='';
+  alpha.forEach((ch,i)=>{
+    const btn=document.createElement('button');
+    btn.className='alpha-btn'+(i===S.letterIdx?' sel':'')+(S.mastered.has(ch)?' done':'');
+    btn.textContent=ch;
+    btn.addEventListener('click',()=>{
+      S.mode='single';S.letter=ch;S.letterIdx=i;
+      syncModeUI();buildScene();
+    });
+    grid.appendChild(btn);
+  });
+}
+function syncModeUI(){
+  const single=S.mode==='single';
+  document.getElementById('singleModeBtn').classList.toggle('on',single);
+  document.getElementById('wordModeBtn').classList.toggle('on',!single);
+  document.getElementById('singleSection').style.display=single?'':'none';
+  document.getElementById('wordSection').style.display=single?'none':'';
+}
+function syncControls(){
+  const sv=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v};
+  sv('paperTypeSelect',S.paperType);sv('paperTypeSelectM',S.paperType);
+  sv('penSizeRange',S.penSize);sv('penSizeRangeM',S.penSize);
+  sv('tutorialSpeedSelect',S.tutorialSpeed);sv('tutorialSpeedSelectM',S.tutorialSpeed);
+  sv('penColorPicker',S.penColor);sv('penColorPickerM',S.penColor);
+  sv('penColorPreset',S.penColor);
+  sv('guideOpacityRange',Math.round(S.guideOpacity*100));
+}
+
+function pDown(e){
+  e.preventDefault();S.activeInput='pointer';S.pointerId=e.pointerId??null;
+  try{if(e.pointerId!=null)traceCanvas.setPointerCapture(e.pointerId);}catch(err){}
+  beginDraw(getEventPt(e));
+}
+function pMove(e){
+  if(S.activeInput!=='pointer') return;
+  if(S.pointerId!==null&&e.pointerId!=null&&e.pointerId!==S.pointerId) return;
+  e.preventDefault();moveDraw(getEventPt(e));
+}
+function pUp(e){
+  if(S.activeInput!=='pointer') return;
+  if(S.pointerId!==null&&e.pointerId!=null&&e.pointerId!==S.pointerId) return;
+  e.preventDefault();endDraw();S.pointerId=null;S.activeInput='none';
+}
+function tStart(e){if(window.PointerEvent)return;e.preventDefault();S.activeInput='touch';beginDraw(getEventPt(e));}
+function tMove(e){if(window.PointerEvent||S.activeInput!=='touch')return;e.preventDefault();moveDraw(getEventPt(e));}
+function tEnd(e){if(window.PointerEvent||S.activeInput!=='touch')return;e.preventDefault();endDraw();S.activeInput='none';}
+
+traceCanvas.addEventListener('pointerdown',pDown,{passive:false});
+traceCanvas.addEventListener('pointermove',pMove,{passive:false});
+traceCanvas.addEventListener('pointerup',pUp,{passive:false});
+traceCanvas.addEventListener('pointercancel',pUp,{passive:false});
+traceCanvas.addEventListener('touchstart',tStart,{passive:false});
+traceCanvas.addEventListener('touchmove',tMove,{passive:false});
+traceCanvas.addEventListener('touchend',tEnd,{passive:false});
+traceCanvas.addEventListener('touchcancel',tEnd,{passive:false});
+
+function bind(id,fn){const e=document.getElementById(id);if(e){e.addEventListener('input',fn);e.addEventListener('change',fn);}}
+bind('paperTypeSelect',e=>{S.paperType=e.target.value;renderGuide();syncControls();});
+bind('paperTypeSelectM',e=>{S.paperType=e.target.value;renderGuide();syncControls();});
+bind('penSizeRange',e=>{S.penSize=+e.target.value;syncControls();redrawTrace();});
+bind('penSizeRangeM',e=>{S.penSize=+e.target.value;syncControls();redrawTrace();});
+bind('tutorialSpeedSelect',e=>{S.tutorialSpeed=e.target.value;syncControls();});
+bind('tutorialSpeedSelectM',e=>{S.tutorialSpeed=e.target.value;syncControls();});
+bind('guideOpacityRange',e=>{S.guideOpacity=+e.target.value/100;renderGuide();syncControls();});
+bind('penColorPicker',e=>{S.penColor=e.target.value;syncControls();redrawTrace();});
+bind('penColorPickerM',e=>{S.penColor=e.target.value;syncControls();redrawTrace();});
+bind('penColorPreset',e=>{S.penColor=e.target.value;syncControls();redrawTrace();});
+
+function wb(id,fn){const e=document.getElementById(id);if(e)e.addEventListener('click',fn);}
+wb('singleModeBtn',()=>{S.mode='single';syncModeUI();buildScene();});
+wb('wordModeBtn',()=>{
+  S.mode='word';S.word=normalizeWord(document.getElementById('wordInput').value)||'pixie';
+  document.getElementById('wordInput').value=S.word;syncModeUI();buildScene();
+});
+wb('loadWordBtn',()=>{
+  S.mode='word';S.word=normalizeWord(document.getElementById('wordInput').value)||'pixie';
+  document.getElementById('wordInput').value=S.word;syncModeUI();buildScene();
+});
+wb('randomWordBtn',()=>{
+  const w=RANDOM_WORDS[Math.floor(Math.random()*RANDOM_WORDS.length)];
+  S.mode='word';S.word=w;document.getElementById('wordInput').value=w;syncModeUI();buildScene();
+});
+document.getElementById('wordInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loadWordBtn').click();});
+wb('tutorialBtn',playTutorial);wb('tutorialBtnM',playTutorial);
+wb('clearBtn',()=>resetPractice(true));wb('clearBtnM',()=>resetPractice(true));
+wb('undoBtn',undoStroke);wb('undoBtnM',undoStroke);
+wb('doneBtn',scoreResult);wb('doneBtnM',scoreResult);
+
+window.addEventListener('resize',()=>{setupAll();buildScene();});
+
+syncModeUI();renderAlpha();updateHeader();buildScene();
 </script>
 </body>
 </html>
