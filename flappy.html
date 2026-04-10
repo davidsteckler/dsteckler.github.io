@@ -142,7 +142,7 @@
 
     .stats{
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       justify-content: flex-end;
       flex-wrap: wrap;
@@ -157,7 +157,7 @@
       background: rgba(0,0,0,0.18);
       box-shadow: 0 8px 18px rgba(0,0,0,0.18);
       display: inline-flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
       white-space: nowrap;
     }
@@ -167,6 +167,7 @@
     .pill .dot.good{ background: rgba(136,255,182,0.75); }
     .pill .dot.bad{ background: rgba(255,107,107,0.75); }
     .pill .dot.warn{ background: rgba(255,211,107,0.75); }
+    .pill .dot.combo{ background: rgba(255,107,214,0.75); }
 
     .footer{
       opacity: 0.8;
@@ -181,14 +182,16 @@
       right: 14px;
       bottom: 14px;
       width: min(380px, calc(100vw - 28px));
+      max-height: calc(100vh - 28px);
       border-radius: 16px;
       border: 2px solid rgba(200,247,255,0.18);
-      background: rgba(2,16,27,0.72);
+      background: rgba(2,16,27,0.88);
       box-shadow: 0 18px 36px rgba(0,0,0,0.28);
       padding: 12px;
       box-sizing: border-box;
       display: none;
       z-index: 10;
+      backdrop-filter: blur(8px);
     }
 
     .panel.show{ display: block; }
@@ -213,8 +216,30 @@
       font-size: 11px;
     }
 
+    .lifetime-stats{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(200,247,255,0.04);
+      border: 1px solid rgba(200,247,255,0.08);
+    }
+
+    .lifetime-stats .ls{
+      text-align: center;
+      font-size: 11px;
+      color: rgba(200,247,255,0.7);
+    }
+    .lifetime-stats .ls b{
+      display: block;
+      font-size: 16px;
+      color: var(--warn);
+    }
+
     .ach-list{
-      max-height: 260px;
+      max-height: 220px;
       overflow: auto;
       padding-right: 6px;
     }
@@ -228,7 +253,8 @@
       border-radius: 12px;
       border: 2px solid rgba(200,247,255,0.10);
       background: rgba(255,255,255,0.03);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      transition: border-color 0.3s;
     }
 
     .ach .badge{
@@ -273,16 +299,23 @@
       padding: 10px 12px;
       border-radius: 14px;
       border: 2px solid rgba(200,247,255,0.18);
-      background: rgba(2,16,27,0.78);
+      background: rgba(2,16,27,0.85);
       box-shadow: 0 18px 36px rgba(0,0,0,0.28);
       font-size: 12px;
       color: rgba(200,247,255,0.95);
       display: none;
       z-index: 11;
       max-width: min(420px, calc(100vw - 28px));
+      backdrop-filter: blur(6px);
     }
-    .toast.show{ display: block; }
+    .toast.show{ display: block; animation: toastIn 0.25s ease-out; }
     .toast b{ color: var(--good); }
+    .toast .combo-toast{ color: #ff6bd6; }
+
+    @keyframes toastIn{
+      from{ opacity: 0; transform: translateY(12px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
 
     @media (max-width: 520px){
       .title h1{ font-size: 16px; }
@@ -315,21 +348,21 @@
 
           <div class="hud">
             <div class="hint">
-              Space or click or tap to swim. Avoid the coral gates. Grab powerups and bonus bubbles.
+              Space / click / tap to swim. Avoid coral gates. Hug gates close for near-miss bonus!
               <br />R restarts. M toggles sound.
             </div>
             <div class="stats">
-              <div class="pill"><span class="dot warn"></span>Score: <b id="score">0</b></div>
-              <div class="pill"><span class="dot good"></span>Best: <b id="best">0</b></div>
-              <div class="pill"><span class="dot"></span>Mode: <b id="mode">Ready</b></div>
-              <div class="pill"><span class="dot good"></span>Shield: <b id="shield">0</b></div>
-              <div class="pill"><span class="dot"></span>Buffs: <b id="buffs">—</b></div>
+              <div class="pill"><span class="dot warn"></span>Score <b id="score">0</b></div>
+              <div class="pill"><span class="dot good"></span>Best <b id="best">0</b></div>
+              <div class="pill"><span class="dot combo"></span>Combo <b id="combo">—</b></div>
+              <div class="pill"><span class="dot"></span><b id="mode">Ready</b></div>
+              <div class="pill"><span class="dot good"></span>Shield <b id="shield">0</b></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="footer">Save as flappy-fish.html and open it. Achievements persist in your browser.</div>
+      <div class="footer">Tap fast, combo hard, beat your best. Achievements persist.</div>
     </div>
   </div>
 
@@ -338,6 +371,7 @@
       <span>ACHIEVEMENTS</span>
       <span class="close" id="panelClose">Close</span>
     </h3>
+    <div class="lifetime-stats" id="lifetimeStats"></div>
     <div class="ach-list" id="achList"></div>
   </div>
 
@@ -352,7 +386,7 @@
       const bestEl = document.getElementById("best");
       const modeEl = document.getElementById("mode");
       const shieldEl = document.getElementById("shield");
-      const buffsEl = document.getElementById("buffs");
+      const comboEl = document.getElementById("combo");
 
       const btnStart = document.getElementById("btnStart");
       const btnRestart = document.getElementById("btnRestart");
@@ -362,6 +396,7 @@
       const panel = document.getElementById("panel");
       const panelClose = document.getElementById("panelClose");
       const achListEl = document.getElementById("achList");
+      const lifetimeEl = document.getElementById("lifetimeStats");
 
       const toast = document.getElementById("toast");
 
@@ -376,14 +411,17 @@
       const SWIM_V = -520;
 
       const PIPE_W = 72;
-      const PIPE_GAP_MIN = 150;
-      const PIPE_GAP_MAX = 190;
+      const PIPE_GAP_MIN = 148;
+      const PIPE_GAP_MAX = 195;
       const PIPE_SPACING = 250;
       const PIPE_SPEED_START = 260;
-      const SPEED_RAMP = 0.018;
+      const SPEED_RAMP = 0.016;
 
-      const POWERUP_SPAWN_CHANCE = 0.22; // per pipe spawn
+      const POWERUP_SPAWN_CHANCE = 0.24;
       const POWERUP_SIZE = 14;
+
+      // Near miss threshold — how close to pipe edge to trigger bonus
+      const NEAR_MISS_PX = 22;
 
       const FISH = {
         x: 190,
@@ -393,6 +431,108 @@
       };
 
       const RNG = (min, max) => min + Math.random() * (max - min);
+      const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+      // ===== SCREEN JUICE =====
+      let screenShake = 0;
+      let screenFlashAlpha = 0;
+      let screenFlashColor = "rgba(255,255,255,";
+      let freezeTimer = 0; // hit-freeze effect
+
+      function shake(amount) { screenShake = Math.max(screenShake, amount); }
+      function flash(color, alpha) { screenFlashColor = color; screenFlashAlpha = alpha; }
+
+      // ===== FLOATING TEXT PARTICLES =====
+      let floatingTexts = [];
+      function spawnFloatingText(x, y, text, color = "#ffd36b", size = 18) {
+        floatingTexts.push({ x, y, text, color, size, life: 1.2, maxLife: 1.2, vy: -90 });
+      }
+
+      // ===== COMBO SYSTEM =====
+      let comboCount = 0;
+      let comboTimer = 0;
+      const COMBO_WINDOW = 2.8; // seconds to keep combo alive
+      const COMBO_NAMES = ["", "", "DOUBLE", "TRIPLE", "QUAD", "PENTA", "HEXA", "ULTRA", "MEGA", "INSANE", "GODLIKE"];
+
+      function addCombo() {
+        comboCount++;
+        comboTimer = COMBO_WINDOW;
+        if (comboCount >= 3) {
+          const name = COMBO_NAMES[Math.min(comboCount, COMBO_NAMES.length - 1)];
+          spawnFloatingText(FISH.x + 30, FISH.y - 40, name + "!", "#ff6bd6", 22);
+          beep(440 + comboCount * 80, 0.06, "square", 0.025);
+          shake(3 + comboCount);
+        }
+        comboEl.textContent = comboCount >= 2 ? `x${comboCount}` : "—";
+      }
+
+      function getComboMultiplier() {
+        if (comboCount < 2) return 1;
+        if (comboCount < 4) return 1.5;
+        if (comboCount < 6) return 2;
+        if (comboCount < 8) return 2.5;
+        return 3;
+      }
+
+      function breakCombo() {
+        if (comboCount >= 3) {
+          spawnFloatingText(FISH.x, FISH.y - 30, "combo broke", "rgba(255,107,107,0.8)", 13);
+        }
+        comboCount = 0;
+        comboEl.textContent = "—";
+      }
+
+      // ===== NEAR-MISS SYSTEM =====
+      function checkNearMiss(pipe) {
+        const cx = FISH.x;
+        const cy = FISH.y;
+        const gapTop = pipe.topH;
+        const gapBottom = pipe.topH + pipe.gap;
+
+        const distToTop = Math.abs(cy - gapTop);
+        const distToBottom = Math.abs(cy - gapBottom);
+        const closest = Math.min(distToTop, distToBottom);
+
+        if (closest < NEAR_MISS_PX && cx > pipe.x && cx < pipe.x + PIPE_W + 20) {
+          return true;
+        }
+        return false;
+      }
+
+      // ===== DEATH MESSAGES =====
+      const DEATH_MSGS = [
+        "So close!", "Almost!", "One more try!", "You got this!",
+        "The fish believes in you!", "That gate was unfair tbh",
+        "Warming up!", "Next run is THE run", "Shake it off!",
+        "The coral was scared of you", "Learning the ocean!",
+        "That was a practice run", "Your fish misses you already",
+        "The gates are trembling", "Just getting started!"
+      ];
+
+      const MILESTONE_MSGS = {
+        5: "Getting the hang of it!",
+        10: "Double digits! Nice!",
+        15: "The ocean respects you now",
+        20: "Officially a fish pilot",
+        25: "Quarter century of gates!",
+        30: "The coral fears your name",
+        40: "Legendary swimmer!",
+        50: "TRENCH LEGEND STATUS"
+      };
+
+      // ===== FISH EVOLUTION =====
+      // Fish changes appearance based on score
+      function getFishColors(s) {
+        if (s >= 40) return { body: "#ff6bff", fin: "#ff6b6b", tail: "#ffd36b", eye: "#fff", glow: "rgba(255,107,255,0.15)" };
+        if (s >= 25) return { body: "#6bffea", fin: "#ff6bd6", tail: "#b84cff", eye: "#fff", glow: "rgba(107,255,234,0.12)" };
+        if (s >= 15) return { body: "#88ffb6", fin: "#ffd36b", tail: "#ff9a6b", eye: "#0b1a2a", glow: "rgba(136,255,182,0.10)" };
+        if (s >= 8) return { body: "#ffe6a3", fin: "#ff9a6b", tail: "#ff6b6b", eye: "#0b1a2a", glow: "rgba(255,230,163,0.06)" };
+        return { body: "#ffd36b", fin: "#ff9a6b", tail: "#ff6b6b", eye: "#0b1a2a", glow: null };
+      }
+
+      // ===== GOLDEN GATE EVENT =====
+      // Randomly a pipe becomes golden = worth 5x points
+      const GOLDEN_CHANCE = 0.08;
 
       // Audio
       let audioOn = true;
@@ -416,6 +556,13 @@
         } catch (e) {}
       }
 
+      function playComboBeep(combo) {
+        const base = 600;
+        for (let i = 0; i < Math.min(combo, 5); i++) {
+          setTimeout(() => beep(base + i * 120, 0.04, "square", 0.02), i * 40);
+        }
+      }
+
       const STATE = {
         ready: "Ready",
         playing: "Playing",
@@ -427,12 +574,24 @@
       let pipes = [];
       let bubbles = [];
       let powerups = [];
+      let particles = []; // generic particle system
 
       let t = 0;
       let last = performance.now();
 
       let score = 0;
       let best = 0;
+
+      // Persistent lifetime stats
+      let lifetime = { runs: 0, totalScore: 0, totalGates: 0, bestCombo: 0, nearMisses: 0, deaths: 0 };
+      try {
+        const saved = JSON.parse(localStorage.getItem("flappyFishLifetime") || "{}");
+        if (saved.runs !== undefined) lifetime = saved;
+      } catch (e) {}
+
+      function saveLifetime() {
+        try { localStorage.setItem("flappyFishLifetime", JSON.stringify(lifetime)); } catch(e) {}
+      }
 
       // Run tracking for achievements
       let run = {
@@ -441,15 +600,18 @@
         usedPowerups: 0,
         lastSwimTime: 0,
         gatesSinceSwim: 0,
-        shieldSavedYou: false
+        shieldSavedYou: false,
+        nearMisses: 0,
+        maxCombo: 0,
+        goldenGates: 0
       };
 
       // Buffs and inventory
       const buffs = {
         shieldCharges: 0,
-        slowTime: 0,   // seconds remaining
-        magnet: 0,     // seconds remaining
-        x2: 0          // seconds remaining
+        slowTime: 0,
+        magnet: 0,
+        x2: 0
       };
 
       function activeBuffList() {
@@ -460,7 +622,7 @@
         return a.length ? a.join(", ") : "—";
       }
 
-      // Achievements (persist)
+      // ===== ACHIEVEMENTS =====
       const ACH = [
         { id:"first_swim", name:"First Swim", desc:"Swim for the first time.", check: () => run.swims >= 1 },
         { id:"first_bubble", name:"Bubble Popper", desc:"Collect your first bonus bubble.", check: () => run.bonusBubbles >= 1 },
@@ -470,7 +632,16 @@
         { id:"survivor_5", name:"No Panic", desc:"Pass 5 gates without swimming.", check: () => run.gatesSinceSwim >= 5 },
         { id:"clean_15", name:"Clean Run", desc:"Score 15 without using any powerups.", check: () => score >= 15 && run.usedPowerups === 0 },
         { id:"bubble_10", name:"Bubble Hunter", desc:"Collect 10 bonus bubbles in one run.", check: () => run.bonusBubbles >= 10 },
-        { id:"shield_save", name:"Unbreakable", desc:"Let a shield save you from a crash.", check: () => run.shieldSavedYou }
+        { id:"shield_save", name:"Unbreakable", desc:"Let a shield save you from a crash.", check: () => run.shieldSavedYou },
+        { id:"near_3", name:"Daredevil", desc:"Get 3 near-misses in one run.", check: () => run.nearMisses >= 3 },
+        { id:"near_10", name:"Thread the Needle", desc:"Get 10 near-misses in one run.", check: () => run.nearMisses >= 10 },
+        { id:"combo_5", name:"Combo King", desc:"Reach a 5x combo.", check: () => comboCount >= 5 },
+        { id:"combo_8", name:"Unstoppable", desc:"Reach an 8x combo.", check: () => comboCount >= 8 },
+        { id:"golden", name:"Golden Gate", desc:"Pass through a golden gate.", check: () => run.goldenGates >= 1 },
+        { id:"evolve", name:"Evolution", desc:"Score 15+ and see your fish transform.", check: () => score >= 15 },
+        { id:"runs_10", name:"Dedicated", desc:"Play 10 total runs.", check: () => lifetime.runs >= 10 },
+        { id:"runs_50", name:"Obsessed", desc:"Play 50 total runs.", check: () => lifetime.runs >= 50 },
+        { id:"lifetime_500", name:"500 Club", desc:"Earn 500 total lifetime points.", check: () => lifetime.totalScore >= 500 },
       ];
 
       let unlocked = {};
@@ -492,22 +663,36 @@
       }
 
       function unlockIfNeeded() {
-        let any = false;
         for (const a of ACH) {
           if (unlocked[a.id]) continue;
           if (a.check()) {
             unlocked[a.id] = { at: Date.now() };
             saveAchievements();
-            any = true;
             beep(1200, 0.06, "square", 0.02);
-            beep(1600, 0.05, "square", 0.015);
-            showToast(`Achievement unlocked: <b>${a.name}</b>`);
+            setTimeout(() => beep(1600, 0.05, "square", 0.015), 60);
+            showToast(`Achievement: <b>${a.name}</b>`);
+            // celebration particles
+            for (let i = 0; i < 20; i++) {
+              particles.push({
+                x: FISH.x + RNG(-20, 20), y: FISH.y + RNG(-20, 20),
+                vx: RNG(-180, 180), vy: RNG(-200, 50),
+                life: RNG(0.5, 1.2), maxLife: 1.2,
+                size: RNG(3, 7),
+                color: pick(["#ffd36b", "#88ffb6", "#ff6bd6", "#7ee7ff", "#ff6b6b"])
+              });
+            }
           }
         }
-        if (any) renderAchievementsList();
       }
 
       function renderAchievementsList() {
+        // Lifetime stats
+        lifetimeEl.innerHTML = `
+          <div class="ls"><b>${lifetime.runs}</b>runs</div>
+          <div class="ls"><b>${lifetime.totalScore}</b>points</div>
+          <div class="ls"><b>${lifetime.bestCombo}x</b>best combo</div>
+        `;
+
         achListEl.innerHTML = "";
         for (const a of ACH) {
           const isOn = !!unlocked[a.id];
@@ -545,9 +730,17 @@
         pipes = [];
         bubbles = [];
         powerups = [];
+        particles = [];
+        floatingTexts = [];
 
         t = 0;
         score = 0;
+        comboCount = 0;
+        comboTimer = 0;
+        comboEl.textContent = "—";
+        screenShake = 0;
+        screenFlashAlpha = 0;
+        freezeTimer = 0;
 
         run = {
           swims: 0,
@@ -555,7 +748,10 @@
           usedPowerups: 0,
           lastSwimTime: 0,
           gatesSinceSwim: 0,
-          shieldSavedYou: false
+          shieldSavedYou: false,
+          nearMisses: 0,
+          maxCombo: 0,
+          goldenGates: 0
         };
 
         buffs.shieldCharges = 0;
@@ -565,7 +761,6 @@
 
         scoreEl.textContent = "0";
         shieldEl.textContent = "0";
-        buffsEl.textContent = "—";
 
         const firstX = W + 120;
         for (let i = 0; i < 5; i++) spawnPipe(firstX + i * PIPE_SPACING);
@@ -579,8 +774,9 @@
         const topMin = 60;
         const topMax = GROUND_Y - 70 - gap;
         const topH = Math.floor(RNG(topMin, Math.max(topMin + 1, topMax)));
+        const golden = Math.random() < GOLDEN_CHANCE;
 
-        pipes.push({ x, topH, gap, passed: false });
+        pipes.push({ x, topH, gap, passed: false, nearMissed: false, golden });
 
         // Bonus bubble near the gap center sometimes
         if (Math.random() < 0.55) {
@@ -607,42 +803,38 @@
       }
 
       function makePowerup(x, y, kind) {
-        return {
-          x, y,
-          r: POWERUP_SIZE,
-          kind,
-          spin: RNG(0, Math.PI * 2),
-          wob: RNG(0, 10),
-          alive: true
-        };
+        return { x, y, r: POWERUP_SIZE, kind, spin: RNG(0, Math.PI * 2), wob: RNG(0, 10), alive: true };
       }
 
       function applyPowerup(kind) {
         run.usedPowerups += 1;
 
+        const msgs = {
+          shield: ["Shield +1!", "Protected!", "Armor up!"],
+          slow: ["Slow time!", "Time warp!", "Easy mode!"],
+          magnet: ["Magnet!", "Come to me!", "Bubble vacuum!"],
+          x2: ["x2 Score!", "Double up!", "Big points!"]
+        };
+
         if (kind === "shield") {
           buffs.shieldCharges += 1;
           beep(740, 0.06, "square", 0.02);
-          showToast(`Powerup: <b>Shield</b> (+1)`);
         }
-
         if (kind === "slow") {
           buffs.slowTime = Math.max(buffs.slowTime, 6.5);
           beep(520, 0.06, "square", 0.02);
-          showToast(`Powerup: <b>Slow Time</b>`);
         }
-
         if (kind === "magnet") {
           buffs.magnet = Math.max(buffs.magnet, 7.0);
           beep(900, 0.05, "square", 0.02);
-          showToast(`Powerup: <b>Magnet</b>`);
         }
-
         if (kind === "x2") {
           buffs.x2 = Math.max(buffs.x2, 7.0);
           beep(1200, 0.05, "square", 0.02);
-          showToast(`Powerup: <b>x2 Score</b>`);
         }
+
+        spawnFloatingText(FISH.x + 30, FISH.y - 25, pick(msgs[kind]), "#7ee7ff", 14);
+        flash("rgba(200,247,255,", 0.12);
       }
 
       function makeBubble(x, y, size, bonus=false) {
@@ -665,6 +857,23 @@
             RNG(5, 12),
             false
           ));
+        }
+      }
+
+      // Explosion particles for death and events
+      function spawnExplosion(x, y, count, colors) {
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + RNG(-0.3, 0.3);
+          const speed = RNG(80, 280);
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: RNG(0.4, 1.0),
+            maxLife: 1.0,
+            size: RNG(3, 8),
+            color: pick(colors)
+          });
         }
       }
 
@@ -723,6 +932,15 @@
         ctx.font = `${size}px ui-monospace, Menlo, Consolas, monospace`;
         ctx.textBaseline = "top";
         ctx.fillText(txt, Math.round(x), Math.round(y));
+      }
+
+      function pxTextCenter(txt, x, y, c, size = 14) {
+        ctx.fillStyle = c;
+        ctx.font = `${size}px ui-monospace, Menlo, Consolas, monospace`;
+        ctx.textBaseline = "top";
+        ctx.textAlign = "center";
+        ctx.fillText(txt, Math.round(x), Math.round(y));
+        ctx.textAlign = "left";
       }
 
       function drawTinyFish(x, y, s, c) {
@@ -838,10 +1056,18 @@
         const y = Math.round(FISH.y);
 
         const tilt = clamp(FISH.vy / 700, -0.7, 0.7);
+        const fc = getFishColors(score);
+
+        // Glow for evolved fish
+        if (fc.glow) {
+          ctx.globalAlpha = 0.5;
+          pxRect(x - 32, y - 32, 64, 64, fc.glow);
+          ctx.globalAlpha = 1;
+        }
 
         // Shield ring
         if (buffs.shieldCharges > 0) {
-          ctx.globalAlpha = 0.18;
+          ctx.globalAlpha = 0.18 + 0.08 * Math.sin(t * 6);
           pxRect(x - 28, y - 28, 56, 56, "rgba(136,255,182,1)");
           ctx.globalAlpha = 1;
         }
@@ -850,24 +1076,47 @@
         ctx.translate(x, y);
         ctx.rotate(tilt);
 
+        // Shadow
         ctx.globalAlpha = 0.25;
         pxRect(-16, 18, 32, 6, "rgba(0,0,0,1)");
         ctx.globalAlpha = 1;
 
-        pxRect(-18, -10, 30, 20, "#ffd36b");
+        // Body
+        pxRect(-18, -10, 30, 20, fc.body);
         pxRect(-14, -14, 18, 6, "#ffe6a3");
-        pxRect(-10, 8, 18, 6, "#f7b23b");
+        pxRect(-10, 8, 18, 6, fc.fin);
 
-        pxRect(12, -6, 10, 12, "#ff9a6b");
-        pxRect(22, -10, 6, 20, "#ff6b6b");
-        pxRect(28, -6, 4, 12, "#ff9a6b");
+        // Tail
+        pxRect(12, -6, 10, 12, fc.fin);
+        pxRect(22, -10, 6, 20, fc.tail);
+        pxRect(28, -6, 4, 12, fc.fin);
 
-        pxRect(-2, 2, 10, 8, "#ff9a6b");
-        pxRect(4, 8, 6, 4, "#ff6b6b");
+        // Bottom fin
+        pxRect(-2, 2, 10, 8, fc.fin);
+        pxRect(4, 8, 6, 4, fc.tail);
 
-        pxRect(-8, -4, 6, 6, "#0b1a2a");
+        // Eye
+        pxRect(-8, -4, 6, 6, fc.eye);
         pxRect(-6, -2, 2, 2, "#c8f7ff");
 
+        // Evolved crown for 25+
+        if (score >= 25) {
+          pxRect(-12, -18, 4, 6, "#ffd36b");
+          pxRect(-4, -20, 4, 8, "#ffd36b");
+          pxRect(4, -18, 4, 6, "#ffd36b");
+          pxRect(-14, -14, 22, 4, "#ffd36b");
+        }
+
+        // Evolved stars for 40+
+        if (score >= 40) {
+          const sparkle = Math.sin(t * 12) > 0.3;
+          if (sparkle) {
+            pxRect(-22, -6, 3, 3, "#fff");
+            pxRect(14, -16, 3, 3, "#fff");
+          }
+        }
+
+        // Swim particles
         if (state === STATE.playing && Math.random() < 0.25) {
           bubbles.push(makeBubble(
             FISH.x - 14,
@@ -885,10 +1134,22 @@
         const topH = Math.round(p.topH);
         const gap = Math.round(p.gap);
 
-        const c0 = "#ff6bd6";
-        const c1 = "#b84cff";
-        const c2 = "#6bffea";
-        const c3 = "#2dd6ff";
+        let c0, c1, c2, c3;
+
+        if (p.golden) {
+          c0 = "#ffd36b";
+          c1 = "#ffb627";
+          c2 = "#fff5d6";
+          c3 = "#ffe082";
+          // golden shimmer
+          const shimmer = 0.7 + 0.3 * Math.sin(t * 8 + p.x * 0.01);
+          ctx.globalAlpha = shimmer;
+        } else {
+          c0 = "#ff6bd6";
+          c1 = "#b84cff";
+          c2 = "#6bffea";
+          c3 = "#2dd6ff";
+        }
 
         pxRect(x, 0, PIPE_W, topH, "rgba(0,0,0,0.25)");
         pxRect(x + 4, 4, PIPE_W - 8, topH - 8, c1);
@@ -910,8 +1171,8 @@
         }
 
         ctx.globalAlpha = 0.25;
-        pxRect(x - 2, topH - 2, PIPE_W + 4, 4, "#c8f7ff");
-        pxRect(x - 2, by - 2, PIPE_W + 4, 4, "#c8f7ff");
+        pxRect(x - 2, topH - 2, PIPE_W + 4, 4, p.golden ? "#fff5d6" : "#c8f7ff");
+        pxRect(x - 2, by - 2, PIPE_W + 4, 4, p.golden ? "#fff5d6" : "#c8f7ff");
         ctx.globalAlpha = 1;
       }
 
@@ -924,8 +1185,8 @@
           pxRect(b.x - Math.floor(b.r/2), b.y - Math.floor(b.r/2), Math.max(2, Math.floor(b.r/2)), Math.max(2, Math.floor(b.r/2)), "rgba(200,247,255,0.55)");
 
           if (b.bonus) {
-            ctx.globalAlpha = 0.55;
-            pxRect(b.x - b.r + 2, b.y - b.r + 2, b.r * 2 - 4, b.r * 2 - 4, "rgba(255,211,107,0.35)");
+            ctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 6);
+            pxRect(b.x - b.r + 2, b.y - b.r + 2, b.r * 2 - 4, b.r * 2 - 4, "rgba(255,211,107,0.45)");
           }
           ctx.globalAlpha = 1;
         }
@@ -964,45 +1225,128 @@
         }
       }
 
+      function drawParticles() {
+        for (const p of particles) {
+          const alpha = p.life / p.maxLife;
+          ctx.globalAlpha = alpha;
+          pxRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size, p.color);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawFloatingTexts() {
+        for (const ft of floatingTexts) {
+          const alpha = ft.life / ft.maxLife;
+          ctx.globalAlpha = alpha;
+          pxTextCenter(ft.text, ft.x, ft.y, ft.color, ft.size);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // Combo bar visualization
+      function drawComboBar() {
+        if (comboCount < 2) return;
+        const barW = 120;
+        const barH = 6;
+        const bx = FISH.x - barW/2;
+        const by = FISH.y - 38;
+        const fill = comboTimer / COMBO_WINDOW;
+
+        ctx.globalAlpha = 0.5;
+        pxRect(bx, by, barW, barH, "rgba(0,0,0,0.5)");
+        const comboColor = comboCount >= 8 ? "#ff6bff" : comboCount >= 5 ? "#ff6bd6" : "#ffd36b";
+        pxRect(bx, by, barW * fill, barH, comboColor);
+        ctx.globalAlpha = 1;
+
+        pxTextCenter(`x${comboCount}`, FISH.x, by - 16, comboColor, 14);
+      }
+
       function drawOverlay() {
         if (state === STATE.playing) return;
 
         ctx.globalAlpha = 0.92;
-        pxRect(0, 0, W, H, "rgba(0,0,0,0.18)");
+        pxRect(0, 0, W, H, "rgba(0,0,0,0.22)");
         ctx.globalAlpha = 1;
 
         const bx = 70;
-        const by = 84;
+        const by = 60;
         const bw = W - 140;
-        const bh = 205;
+        const bh = state === STATE.over ? 320 : 240;
 
         pxRect(bx, by, bw, bh, "rgba(0,0,0,0.32)");
-        pxRect(bx + 6, by + 6, bw - 12, bh - 12, "rgba(6,38,58,0.70)");
+        pxRect(bx + 6, by + 6, bw - 12, bh - 12, "rgba(6,38,58,0.75)");
         pxRect(bx + 6, by + 6, bw - 12, 4, "rgba(200,247,255,0.25)");
         pxRect(bx + 6, by + bh - 10, bw - 12, 4, "rgba(200,247,255,0.12)");
 
-        const headline = state === STATE.over ? "GAME OVER" : "FLAPPY FISH";
-        const sub = state === STATE.over ? "Press R to restart" : "Space or tap to swim";
-
-        pxText(headline, bx + 36, by + 30, "#c8f7ff", 34);
-        pxText(sub, bx + 36, by + 82, "rgba(200,247,255,0.90)", 16);
-
-        pxText("Powerups: S shield, T slow time, M magnet, 2 x2 score", bx + 36, by + 118, "rgba(200,247,255,0.78)", 13);
-        pxText("Press Achievements to see your unlocks", bx + 36, by + 142, "rgba(200,247,255,0.78)", 13);
-
         if (state === STATE.over) {
-          const sx = bx + bw - 240;
-          const sy = by + 40;
-          pxRect(sx, sy, 200, 120, "rgba(0,0,0,0.30)");
-          pxRect(sx + 6, sy + 6, 188, 108, "rgba(2,16,27,0.35)");
-          pxText("Score", sx + 18, sy + 18, "rgba(200,247,255,0.85)", 14);
-          pxText(String(score), sx + 18, sy + 42, "#ffd36b", 26);
-          pxText("Best", sx + 18, sy + 78, "rgba(200,247,255,0.85)", 14);
-          pxText(String(best), sx + 76, sy + 78, "#7ee7ff", 14);
+          const deathMsg = pick(DEATH_MSGS);
+          const milestoneMsg = Object.entries(MILESTONE_MSGS)
+            .filter(([k]) => score >= Number(k))
+            .pop();
+
+          pxText("GAME OVER", bx + 36, by + 26, "#c8f7ff", 34);
+
+          // Score display
+          const sx = bx + 36;
+          pxText("Score", sx, by + 74, "rgba(200,247,255,0.85)", 14);
+          pxText(String(score), sx, by + 94, "#ffd36b", 30);
+
+          // Was it a new best?
+          if (score >= best && score > 0) {
+            pxText("NEW BEST!", sx + 120, by + 98, "#88ffb6", 18);
+          } else {
+            pxText(`Best: ${best}`, sx + 120, by + 100, "#7ee7ff", 14);
+            // "Almost" nudge
+            if (best > 0 && score >= best - 3 && score < best) {
+              pxText(`Only ${best - score} away from your best!`, sx + 120, by + 120, "#ffd36b", 13);
+            }
+          }
+
+          // Run stats
+          const statsY = by + 142;
+          pxText(`Combo: ${run.maxCombo}x`, sx, statsY, "rgba(200,247,255,0.75)", 13);
+          pxText(`Near-misses: ${run.nearMisses}`, sx + 160, statsY, "rgba(200,247,255,0.75)", 13);
+          pxText(`Bubbles: ${run.bonusBubbles}`, sx + 340, statsY, "rgba(200,247,255,0.75)", 13);
+
+          // Death message
+          pxText(milestoneMsg ? milestoneMsg[1] : deathMsg, sx, statsY + 28, "rgba(200,247,255,0.90)", 15);
+
+          // Streak / lifetime
+          pxText(`Total runs: ${lifetime.runs}  |  Lifetime points: ${lifetime.totalScore}`, sx, statsY + 56, "rgba(200,247,255,0.55)", 12);
+
+          // Retry prompt
+          const blink = Math.sin(t * 5) > 0;
+          if (blink) {
+            pxText("Space or tap to try again!", sx, statsY + 84, "#c8f7ff", 16);
+          }
+
+        } else {
+          // Ready state
+          pxText("FLAPPY FISH", bx + 36, by + 26, "#c8f7ff", 34);
+          pxText("Space or tap to swim", bx + 36, by + 78, "rgba(200,247,255,0.90)", 16);
+
+          pxText("Powerups: S shield, T slow, M magnet, 2 double", bx + 36, by + 116, "rgba(200,247,255,0.72)", 13);
+          pxText("Hug gates close for NEAR-MISS bonus points!", bx + 36, by + 138, "#ff6bd6", 13);
+          pxText("Chain gates fast for COMBO multiplier!", bx + 36, by + 158, "#ffd36b", 13);
+          pxText("Your fish evolves as you score higher!", bx + 36, by + 178, "#88ffb6", 13);
+
+          if (lifetime.runs > 0) {
+            pxText(`${lifetime.runs} runs played  |  Best: ${best}`, bx + 36, by + 204, "rgba(200,247,255,0.55)", 12);
+          }
         }
       }
 
       function swim() {
+        if (state === STATE.over) {
+          // Quick restart from game over
+          setState(STATE.ready);
+          reset();
+          setState(STATE.playing);
+          FISH.vy = SWIM_V;
+          run.swims = 1;
+          beep(740, 0.05, "square", 0.03);
+          return;
+        }
         if (state === STATE.ready) {
           setState(STATE.playing);
           reset();
@@ -1055,7 +1399,28 @@
 
       // Update loop
       function update(dt) {
+        // Hit-freeze effect
+        if (freezeTimer > 0) {
+          freezeTimer -= dt;
+          return;
+        }
+
         t += dt;
+
+        // Screen shake decay
+        screenShake *= Math.max(0, 1 - dt * 12);
+        if (screenShake < 0.3) screenShake = 0;
+
+        // Screen flash decay
+        screenFlashAlpha *= Math.max(0, 1 - dt * 6);
+
+        // Combo timer
+        if (comboTimer > 0) {
+          comboTimer -= dt;
+          if (comboTimer <= 0) {
+            breakCombo();
+          }
+        }
 
         // Buff countdowns
         buffs.slowTime = Math.max(0, buffs.slowTime - dt);
@@ -1063,13 +1428,29 @@
         buffs.x2 = Math.max(0, buffs.x2 - dt);
 
         shieldEl.textContent = String(buffs.shieldCharges);
-        buffsEl.textContent = activeBuffList();
+
+        // Floating texts
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+          const ft = floatingTexts[i];
+          ft.y += ft.vy * dt;
+          ft.life -= dt;
+          if (ft.life <= 0) floatingTexts.splice(i, 1);
+        }
+
+        // Particles
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 200 * dt; // gravity on particles
+          p.life -= dt;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
 
         // Bubbles drift always
         for (let i = bubbles.length - 1; i >= 0; i--) {
           const b = bubbles[i];
 
-          // Magnet effect toward fish for bonus bubbles
           if (state === STATE.playing && buffs.magnet > 0 && b.bonus) {
             const dx = FISH.x - b.x;
             const dy = FISH.y - b.y;
@@ -1081,7 +1462,6 @@
           b.x += b.vx * dt;
           b.y += b.vy * dt;
           b.life -= dt;
-
           b.vy -= 18 * dt;
 
           if (b.life <= 0 || b.y < -30) bubbles.splice(i, 1);
@@ -1096,7 +1476,7 @@
         FISH.vy += GRAVITY * dt;
         FISH.y += FISH.vy * dt;
 
-        // Powerups move with the world
+        // Powerups
         for (const p of powerups) {
           if (!p.alive) continue;
           p.x -= speed * dt;
@@ -1118,31 +1498,83 @@
           if (!p.passed && p.x + PIPE_W < FISH.x) {
             p.passed = true;
 
-            // Achievement tracker: gates without swim
             run.gatesSinceSwim += 1;
 
-            // Scoring with x2
-            const add = buffs.x2 > 0 ? 2 : 1;
+            // Check near-miss
+            let nearMiss = checkNearMiss(p);
+            if (nearMiss && !p.nearMissed) {
+              p.nearMissed = true;
+              run.nearMisses++;
+              lifetime.nearMisses++;
+              spawnFloatingText(FISH.x + 40, FISH.y - 20, "CLOSE!", "#ff6bd6", 16);
+              spawnExplosion(FISH.x, FISH.y, 6, ["#ff6bd6", "#ffd36b", "#7ee7ff"]);
+              beep(1400, 0.03, "square", 0.02);
+            }
+
+            // Base score
+            let add = 1;
+            // Golden gate bonus
+            if (p.golden) {
+              add = 5;
+              run.goldenGates++;
+              spawnFloatingText(FISH.x + 40, FISH.y, "GOLDEN +5!", "#ffd36b", 20);
+              flash("rgba(255,211,107,", 0.15);
+              shake(4);
+              beep(880, 0.08, "square", 0.025);
+              setTimeout(() => beep(1100, 0.06, "square", 0.02), 60);
+            }
+            // Near miss bonus
+            if (nearMiss) add += 1;
+            // x2 buff
+            if (buffs.x2 > 0) add *= 2;
+            // Combo multiplier
+            addCombo();
+            add = Math.floor(add * getComboMultiplier());
+
+            run.maxCombo = Math.max(run.maxCombo, comboCount);
+            lifetime.bestCombo = Math.max(lifetime.bestCombo, comboCount);
+
             score += add;
             scoreEl.textContent = String(score);
-            beep(980, 0.04, "square", 0.02);
+
+            if (add > 1) {
+              spawnFloatingText(FISH.x + 50, FISH.y + 10, `+${add}`, "#ffd36b", add >= 5 ? 22 : 16);
+            }
+
+            // Pitch rises with combo
+            beep(880 + comboCount * 40, 0.04, "square", 0.02);
+
+            // Milestone check
+            if (MILESTONE_MSGS[score]) {
+              showToast(`<b>${MILESTONE_MSGS[score]}</b>`, 2500);
+              spawnExplosion(FISH.x, FISH.y, 15, ["#88ffb6", "#ffd36b", "#7ee7ff"]);
+            }
+
+            // "Approaching best" nudge
+            if (best > 5 && score === best - 1) {
+              showToast(`<b class="combo-toast">1 away from your best!</b>`, 1800);
+            }
 
             unlockIfNeeded();
           }
 
-          // Collision check, but allow shield
+          // Collision
           if (fishCollidesPipe(p)) {
             if (buffs.shieldCharges > 0) {
               buffs.shieldCharges -= 1;
               run.shieldSavedYou = true;
 
-              // push fish into safe-ish zone
               FISH.vy = SWIM_V * 0.55;
               FISH.y = clamp(FISH.y, 40, GROUND_Y - 40);
 
               spawnBubbleBurst(FISH.x, true);
+              spawnExplosion(FISH.x, FISH.y, 12, ["#88ffb6", "#7ee7ff"]);
+              shake(6);
+              flash("rgba(136,255,182,", 0.15);
+              freezeTimer = 0.06;
               beep(220, 0.08, "square", 0.03);
               beep(520, 0.06, "square", 0.02);
+              spawnFloatingText(FISH.x, FISH.y - 30, "SHIELD!", "#88ffb6", 18);
 
               unlockIfNeeded();
             } else {
@@ -1167,9 +1599,12 @@
 
             run.bonusBubbles += 1;
 
-            const add = buffs.x2 > 0 ? 4 : 2;
+            let add = buffs.x2 > 0 ? 4 : 2;
+            add = Math.floor(add * getComboMultiplier());
             score += add;
             scoreEl.textContent = String(score);
+
+            spawnFloatingText(b.x, b.y - 10, `+${add}`, "#7ee7ff", 14);
 
             beep(1200, 0.05, "square", 0.02);
             beep(1500, 0.04, "square", 0.015);
@@ -1188,13 +1623,14 @@
           ));
         }
 
-        // Keep within bounds
+        // Bounds check
         if (FISH.y + FISH.r > GROUND_Y || FISH.y - FISH.r < 0) {
           if (buffs.shieldCharges > 0) {
             buffs.shieldCharges -= 1;
             run.shieldSavedYou = true;
             FISH.vy = SWIM_V * 0.55;
             FISH.y = clamp(FISH.y, 40, GROUND_Y - 40);
+            shake(5);
             beep(220, 0.08, "square", 0.03);
             unlockIfNeeded();
           } else {
@@ -1205,15 +1641,33 @@
 
       function endGame() {
         setState(STATE.over);
+
+        // Epic death effects
+        spawnExplosion(FISH.x, FISH.y, 30, ["#ff6b6b", "#ffd36b", "#ff6bd6", "#c8f7ff"]);
         spawnBubbleBurst(FISH.x, false);
+        shake(12);
+        flash("rgba(255,107,107,", 0.25);
+        freezeTimer = 0.12; // dramatic pause
+
         beep(140, 0.12, "square", 0.03);
-        beep(90, 0.16, "square", 0.03);
+        setTimeout(() => beep(90, 0.16, "square", 0.03), 80);
+
+        // Lifetime tracking
+        lifetime.runs++;
+        lifetime.totalScore += score;
+        lifetime.totalGates += score;
+        lifetime.deaths++;
+        saveLifetime();
 
         // Best score
         if (score > best) {
           best = score;
           bestEl.textContent = String(best);
           try { localStorage.setItem("flappyFishBest", String(best)); } catch (e) {}
+          if (score > 0) {
+            showToast(`<b>NEW BEST: ${score}!</b>`, 3000);
+            spawnExplosion(FISH.x, FISH.y, 40, ["#88ffb6", "#ffd36b", "#fff"]);
+          }
         }
 
         // Final unlock pass
@@ -1221,7 +1675,16 @@
       }
 
       function render(dt) {
-        ctx.clearRect(0, 0, W, H);
+        ctx.save();
+
+        // Screen shake
+        if (screenShake > 0.5) {
+          const sx = (Math.random() - 0.5) * screenShake * 2;
+          const sy = (Math.random() - 0.5) * screenShake * 2;
+          ctx.translate(sx, sy);
+        }
+
+        ctx.clearRect(-10, -10, W + 20, H + 20);
 
         const baseSpeed = PIPE_SPEED_START + (t * (PIPE_SPEED_START * SPEED_RAMP));
         const speed = buffs.slowTime > 0 ? baseSpeed * 0.62 : baseSpeed;
@@ -1231,8 +1694,12 @@
         for (const p of pipes) drawPipe(p);
         drawPowerups();
         drawBubbles();
+        drawParticles();
         drawFish();
+        drawFloatingTexts();
+        drawComboBar();
 
+        // Sparkle particles
         if (Math.random() < 0.09) {
           const x = RNG(0, W);
           const y = RNG(0, GROUND_Y - 30);
@@ -1241,10 +1708,40 @@
           ctx.globalAlpha = 1;
         }
 
-        pxText("Space or tap to swim", 14, 12, "rgba(200,247,255,0.55)", 12);
-        pxText("R restart   M sound   A achievements", 14, 28, "rgba(200,247,255,0.45)", 12);
+        // Speed lines when going fast
+        if (state === STATE.playing && baseSpeed > 400) {
+          const intensity = Math.min(0.15, (baseSpeed - 400) * 0.0003);
+          ctx.globalAlpha = intensity;
+          for (let i = 0; i < 4; i++) {
+            const y = RNG(20, GROUND_Y - 20);
+            pxRect(RNG(0, W * 0.7), y, RNG(30, 80), 2, "rgba(200,247,255,1)");
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        // Screen flash
+        if (screenFlashAlpha > 0.01) {
+          ctx.globalAlpha = screenFlashAlpha;
+          pxRect(0, 0, W, H, screenFlashColor + "1)");
+          ctx.globalAlpha = 1;
+        }
+
+        // HUD on canvas
+        pxText("Space/tap to swim", 14, 12, "rgba(200,247,255,0.50)", 12);
+
+        // Active buff indicators on screen
+        if (state === STATE.playing) {
+          let bx = 14;
+          const by = 30;
+          if (buffs.slowTime > 0) { pxText(`SLOW ${buffs.slowTime.toFixed(1)}s`, bx, by, "#7ee7ff", 12); bx += 100; }
+          if (buffs.magnet > 0) { pxText(`MAGNET ${buffs.magnet.toFixed(1)}s`, bx, by, "#ffd36b", 12); bx += 110; }
+          if (buffs.x2 > 0) { pxText(`x2 ${buffs.x2.toFixed(1)}s`, bx, by, "#ff6b6b", 12); bx += 80; }
+          if (buffs.shieldCharges > 0) { pxText(`SHIELD x${buffs.shieldCharges}`, bx, by, "#88ffb6", 12); }
+        }
 
         drawOverlay();
+
+        ctx.restore();
       }
 
       function loop(now) {
