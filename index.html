@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About | David Steckler</title>
-  <meta name="description" content="About David Steckler, 7th grade computer science teacher focused on building thinkers, not just coders." />
+  <title>Home | David Steckler</title>
+  <meta name="description" content="Home base for David Steckler, 7th grade computer science teacher focused on building thinkers, not just coders." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -120,6 +120,32 @@
     nav a:hover, nav a.active {
       color: var(--ink);
       background: rgba(28,27,24,0.06);
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 12px;
+      top: -48px;
+      z-index: 100;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--ink);
+      color: var(--surface);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: top 0.15s ease;
+    }
+
+    .skip-link:focus-visible {
+      top: 12px;
+      outline-color: var(--terracotta);
     }
 
     main { padding: 44px 0 64px; }
@@ -582,19 +608,30 @@
 
       .closing { padding: 24px 20px; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal,
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header>
     <div class="wrap topbar">
       <a href="index.html">
         <div class="brand-title">David Steckler</div>
         <div class="brand-sub">// cs · robotics · thinking for yourself</div>
       </a>
-      <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
-      <nav id="site-nav">
-        <a href="index.html">Home</a>
-        <a href="about.html" class="active">About</a>
+      <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="site-nav" aria-haspopup="true">☰</button>
+      <nav id="site-nav" aria-hidden="false">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About</a>
         <a href="course.html">Course</a>
         <a href="blog.html">Blog</a>
         <a href="contact.html">Contact</a>
@@ -604,7 +641,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
     <div class="wrap">
 
       <section class="hero">
@@ -897,12 +934,44 @@
   <script>
     const toggle = document.querySelector('.menu-toggle');
     const nav = document.querySelector('nav');
+    const mobileMedia = window.matchMedia('(max-width: 600px)');
 
     if (toggle && nav) {
+      const syncNavA11y = () => {
+        const isMobile = mobileMedia.matches;
+        const isOpen = nav.classList.contains('open');
+        nav.setAttribute('aria-hidden', String(isMobile ? !isOpen : false));
+      };
+
+      syncNavA11y();
+
       toggle.addEventListener('click', () => {
         const open = nav.classList.toggle('open');
         toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+        syncNavA11y();
       });
+
+      nav.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+          nav.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Open navigation');
+          syncNavA11y();
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && nav.classList.contains('open')) {
+          nav.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Open navigation');
+          syncNavA11y();
+          toggle.focus();
+        }
+      });
+
+      mobileMedia.addEventListener('change', syncNavA11y);
     }
 
     const obs = new IntersectionObserver((entries) => {
