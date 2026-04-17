@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2047,7 +2048,9 @@ function initGame(){
       weapon:null,armor:null,ring:null,amulet:null,
       inventory:[],potions:{hp:0,mp:0},
       spells:[],shieldBuff:0,poisoned:0,kills:0,steps:0,
-      swingAnim:0, bobPhase:0, queuedAction:null, skillCooldowns:{bash:0,kick:0}},
+      swingAnim:0, bobPhase:0, queuedAction:null, skillCooldowns:{bash:0,kick:0},
+      guardTurns:0,relics:[],
+      relicStats:{crit:0,dodge:0,steal:0,spellPower:0,thorns:0,damageTaken:1,potionBoost:0,healTax:0,cooldownPlus:0,mpDrain:0,selfHit:0,goldMult:1}},
     turnCount:0,gameOver:false,paused:false,
     camera:{x:0,y:0},screenShake:0,
     hover:{active:false,screenX:0,screenY:0,tileX:-1,tileY:-1,path:[]},
@@ -2055,6 +2058,7 @@ function initGame(){
     logLines:[],lastLoot:null,
     autoMove:false,autoPath:[],
     inventoryOpen:false, floorBiome:'ruins',
+    relicChoiceOpen:false,relicQueue:[],
   };
   generateFloor(1);
 }
@@ -3608,6 +3612,178 @@ startBtn.addEventListener('keydown',e=>{
 drawStatIcons();drawPotionIcon();
 try{updateCombatButtons();}catch(e){}
 resize();
+
+
+// ===== V12 PATCH: harder floors, readable UI, relic choices, guard, better music =====
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+  #char-panel{width:clamp(190px,20vw,280px)!important;min-width:190px!important}
+  #inv-panel{width:clamp(210px,22vw,300px)!important;min-width:210px!important}
+  #stats-area,.stat-num-row,#story-panel,#inspect-panel,#msg-area,#floor-info,.equip-slot .item-stat,.equip-slot .slot-type,.inv-char-meta,.inv-consumable-info,.inventory-card .desc,.inventory-card .stats,.inventory-card .compare,.inventory-help,.inventory-topline .bag-meta{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important}
+  #stats-area{font-size:9px!important}
+  .stat-label{color:#aeb8dd!important;width:38px!important;font-weight:700!important}
+  .stat-val{font-size:9px!important;color:#f4f7ff!important;width:72px!important;font-weight:800!important}
+  .stat-num-row{font-size:10px!important}
+  .equip-slot .item-name{font-size:9px!important;color:#f3f6ff!important;font-weight:800!important}
+  .equip-slot .item-stat{font-size:8px!important;color:#c7d0ee!important}
+  .equip-slot .slot-type{font-size:6px!important;color:#9aa5cc!important;font-weight:700!important}
+  #gear-summary .gs-power{font-size:14px!important;font-weight:900!important}
+  #gear-summary .gs-sub{font-size:9px!important;color:#d9e1f7!important;line-height:1.5!important}
+  #floor-info .fi-sub{font-size:9px!important;color:#c2cae8!important}
+  #story-panel .sp-label{font-size:8px!important;color:#b4bedf!important;font-weight:800!important}
+  #story-panel .sp-title{font-size:13px!important;font-weight:900!important}
+  #story-panel .sp-text{font-size:9px!important;color:#dbe2f7!important;line-height:1.5!important}
+  #story-panel .sp-objective{font-size:9px!important;line-height:1.45!important}
+  #msg-area{font-size:9px!important;line-height:1.5!important;color:#d9e1f7!important;max-height:160px!important}
+  #inspect-panel .ip-name{font-size:13px!important;font-weight:900!important;color:#f5f8ff!important}
+  #inspect-panel .ip-type{font-size:8px!important;color:#bcc5e4!important}
+  #inspect-panel .ip-desc{font-size:9px!important;line-height:1.5!important;color:#dbe2f7!important}
+  #inspect-panel .ip-stats,#inspect-panel .ip-empty{font-size:9px!important;line-height:1.5!important}
+  .mini-action-btn{height:40px!important;font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:11px!important;font-weight:800!important}
+  .mini-action-btn.combat strong{font-size:11px!important}
+  .mini-action-btn.combat em{font-size:10px!important;color:#c7cfea!important}
+  #relic-panel{padding:10px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#151625,#10111b)}
+  #relic-panel .rp-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+  #relic-panel .rp-title{font-size:8px;color:#b4bedf;text-transform:uppercase;letter-spacing:1px;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-weight:900}
+  #relic-panel .rp-count{font-size:10px;color:#ffd866;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-weight:900}
+  #relic-panel .rp-help{font-size:8px;color:#d1d8f1;line-height:1.45;margin-bottom:8px;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+  #relic-list{display:flex;flex-wrap:wrap;gap:6px}
+  .relic-chip{padding:4px 7px;border:1px solid var(--border);border-radius:999px;background:#0f1320;color:#edf2ff;font-size:8px;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-weight:800;white-space:nowrap}
+  .relic-chip small{display:block;font-size:7px;color:#b9c3e5;font-weight:700}
+  #relic-choice-modal .modal-panel{max-width:980px}
+  .relic-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px}
+  .relic-choice-card{background:linear-gradient(180deg,#171a2a,#10131f);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;min-height:240px}
+  .relic-choice-card:hover{transform:translateY(-2px);border-color:#7fffd4;box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 0 1px rgba(127,255,212,.18)}
+  .relic-choice-name{font-size:18px;color:#f3f7ff;margin-bottom:6px;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-weight:900}
+  .relic-choice-type{font-size:11px;color:#aab2d6;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+  .relic-choice-blessing,.relic-choice-curse{border-radius:10px;padding:10px 12px;margin-bottom:10px;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+  .relic-choice-blessing{background:rgba(127,255,212,.08);border:1px solid rgba(127,255,212,.18)}
+  .relic-choice-curse{background:rgba(255,80,112,.08);border:1px solid rgba(255,80,112,.18)}
+  .relic-choice-blessing strong{display:block;color:#9fffe4;font-size:11px;margin-bottom:4px}
+  .relic-choice-curse strong{display:block;color:#ff9fb0;font-size:11px;margin-bottom:4px}
+  .relic-choice-blessing div,.relic-choice-curse div{font-size:14px;color:#f2f6ff;line-height:1.4}
+  .relic-choice-footer{font-size:12px;color:#d8def5;line-height:1.45;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+  @media (max-width: 900px){.relic-choice-grid{grid-template-columns:1fr}}
+  `;
+  document.head.appendChild(style);
+
+  function ensureUI(){
+    const kick=document.getElementById('kick-btn');
+    if(kick && !document.getElementById('guard-btn')){
+      const b=document.createElement('button'); b.id='guard-btn'; b.type='button'; b.className='mini-action-btn combat'; b.innerHTML='<strong>G</strong><em>Guard</em>'; kick.after(b); b.onclick=()=>useGuard();
+    }
+    const gear=document.getElementById('gear-summary');
+    if(gear && !document.getElementById('relic-panel')){
+      const div=document.createElement('div'); div.id='relic-panel'; div.innerHTML='<div class="rp-top"><div class="rp-title">Relics</div><div class="rp-count" id="relic-count">0 / 100</div></div><div class="rp-help">Elite and boss relics are double edged. Pick one of two and build around the drawback.</div><div id="relic-list"></div>'; gear.after(div);
+    }
+    const invCons=document.querySelector('.inv-consumables');
+    if(invCons && !document.getElementById('inventory-relics')){
+      const title=document.createElement('div'); title.className='inv-section-title'; title.textContent='Active Relics';
+      const box=document.createElement('div'); box.id='inventory-relics'; box.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px';
+      invCons.prepend(box); invCons.prepend(title);
+    }
+    if(!document.getElementById('relic-choice-modal')){
+      const modal=document.createElement('div'); modal.id='relic-choice-modal'; modal.className='modal-backdrop hidden';
+      modal.innerHTML='<div class="modal-panel"><div class="modal-head"><div><div class="modal-title">RELIC CHOICE</div><div class="modal-sub" id="relic-choice-sub">Choose one blessing and accept its cost.</div></div></div><div class="relic-choice-grid" id="relic-choice-grid"></div></div>';
+      document.body.appendChild(modal);
+    }
+  }
+  function ensureRelicState(){
+    if(!G || !G.player) return;
+    const p=G.player;
+    if(!Array.isArray(p.relics)) p.relics=[];
+    if(typeof p.guardTurns!=='number') p.guardTurns=0;
+    if(!p.relicStats) p.relicStats={};
+    const defaults={crit:0,dodge:0,steal:0,spellPower:0,thorns:0,damageTaken:1,potionBoost:0,healTax:0,cooldownPlus:0,mpDrain:0,selfHit:0,goldMult:1};
+    for(const k in defaults){
+      if(typeof p.relicStats[k] !== 'number') p.relicStats[k]=defaults[k];
+    }
+  }
+  ensureUI();
+  ensureRelicState();
+
+  SFX.tracks={
+    themeSong:{stepDur:0.142,roots:[220,247,196,165],lead:[0,4,7,11,7,4,7,11,12,11,9,7,4,7,9,11,7,9,11,14,11,9,7,4,5,7,9,12,9,7,5,4,0,4,7,11,7,4,7,11,12,14,16,14,12,11,9,7,7,9,11,14,16,14,11,9,5,7,9,12,11,9,7,4],harmony:[7,null,11,null,11,null,12,null,16,null,14,null,12,null,11,null,12,null,14,null,16,null,14,null,9,null,12,null,12,null,11,null,7,null,11,null,11,null,12,null,16,null,19,null,16,null,14,null,14,null,16,null,19,null,16,null,11,null,14,null,16,null,14,null],bass:[0,null,0,null,5,null,5,null,7,null,7,null,4,null,4,null,5,null,5,null,9,null,9,null,4,null,4,null,2,null,2,null],drum:'uplift',leadType:'triangle',bassType:'square'},
+    themeBridge:{stepDur:0.142,roots:[247,220,196,220],lead:[7,9,11,14,11,9,7,4,9,11,14,16,14,11,9,7,11,12,14,16,14,12,11,9,7,9,11,12,11,9,7,5],harmony:[11,null,14,null,16,null,14,null,12,null,16,null,19,null,16,null,14,null,16,null,19,null,16,null,11,null,14,null,16,null,14,null],bass:[0,null,0,null,7,null,7,null,5,null,5,null,4,null,4,null],drum:'uplift',leadType:'triangle',bassType:'square'},
+    battleSong:{stepDur:0.118,roots:[196,220,247,220],lead:[12,14,15,19,15,14,12,10,12,14,15,19,17,15,14,12,10,12,14,17,14,12,10,8,10,12,14,17,19,17,15,14],harmony:[7,null,10,null,12,null,10,null,7,null,10,null,14,null,12,null,5,null,8,null,10,null,8,null,7,null,10,null,12,null,10,null],bass:[0,0,0,0,7,7,7,7,5,5,5,5,3,3,3,3],drum:'drive',leadType:'square',bassType:'triangle'},
+    battleBridge:{stepDur:0.112,roots:[220,247,262,247],lead:[14,15,17,21,17,15,14,12,14,15,17,21,19,17,15,14,12,14,15,19,17,15,14,12,10,12,14,17,19,17,15,14],harmony:[8,null,12,null,14,null,12,null,8,null,12,null,15,null,14,null,7,null,10,null,12,null,10,null,8,null,12,null,14,null,12,null],bass:[0,0,null,0,7,7,null,7,5,5,null,5,3,3,null,3],drum:'drive',leadType:'square',bassType:'triangle'}
+  };
+  SFX.scheduleMusic=function(){
+    if(!this.ctx || this.muted){ this.musicTimer=null; return; }
+    const mood=this.musicMood || {depth:1,danger:0};
+    const trackKey=this.musicTrackKey || this.chooseTrack(mood.depth,mood.danger);
+    const track=this.tracks[trackKey];
+    const now=this.ctx.currentTime+0.06;
+    const stepDur=track.stepDur;
+    const root=track.roots[(Math.max(1,mood.depth)-1)%track.roots.length];
+    const stepsToSchedule=8;
+    const leadGain = trackKey.startsWith('battle') ? 0.036 : 0.03;
+    const harmGain = trackKey.startsWith('battle') ? 0.02 : 0.016;
+    const bassGain = trackKey.startsWith('battle') ? 0.026 : 0.021;
+    for(let i=0;i<stepsToSchedule;i++){
+      const step=(this.musicStep+i)%track.lead.length; const t=now+i*stepDur;
+      const leadNote=track.lead[step], harmNote=track.harmony[step % track.harmony.length], bassNote=track.bass[step % track.bass.length];
+      if(leadNote!==null&&leadNote!==undefined) this.playNote(root*Math.pow(2,leadNote/12),t,stepDur*0.86,track.leadType,leadGain);
+      if(harmNote!==null&&harmNote!==undefined) this.playNote(root*Math.pow(2,harmNote/12),t,stepDur*0.78,'square',harmGain);
+      if(bassNote!==null&&bassNote!==undefined) this.playNote((root/2)*Math.pow(2,bassNote/12),t,stepDur*0.92,track.bassType,bassGain);
+      if(track.drum==='uplift'){
+        if(step%4===0) this.playNoise(t,0.05,0.0062,'kick');
+        if(step%8===4) this.playNoise(t,0.036,0.0054,'snare');
+        if(step%2===1) this.playNoise(t+stepDur*0.52,0.018,0.0028,'hat');
+        if(step%8===6 && leadNote!==null && leadNote!==undefined) this.playNote(root*Math.pow(2,(leadNote+7)/12), t+stepDur*0.18, stepDur*0.16, 'triangle', 0.010);
+      } else {
+        if(step%4===0 || step%4===2) this.playNoise(t,0.052,0.0068,'kick');
+        if(step%8===4) this.playNoise(t,0.04,0.0056,'snare');
+        if(step%2===1) this.playNoise(t+stepDur*0.48,0.018,0.0031,'hat');
+        if(step%8===7 && leadNote!==null && leadNote!==undefined) this.playNote(root*Math.pow(2,(leadNote+12)/12), t+stepDur*0.2, stepDur*0.16, 'triangle', 0.012);
+      }
+    }
+    this.musicStep=(this.musicStep+stepsToSchedule)%track.lead.length;
+    this.musicTimer=setTimeout(()=>{ this.musicTimer=null; this.scheduleMusic(); }, stepDur*stepsToSchedule*1000);
+  };
+
+  const RELIC_BOONS=[
+    {label:'Fury Core',desc:'+3 ATK',apply:p=>{p.atk+=3;}}, {label:'Bastion Core',desc:'+2 DEF',apply:p=>{p.def+=2;}},
+    {label:'Vital Core',desc:'+12 max HP',apply:p=>{p.maxHp+=12;p.hp=Math.min(p.maxHp,p.hp+12);}}, {label:'Mana Core',desc:'+8 max MP',apply:p=>{p.maxMp+=8;p.mp=Math.min(p.maxMp,p.mp+8);}},
+    {label:'Razor Core',desc:'+14% crit chance',apply:p=>{p.relicStats.crit+=0.14;}}, {label:'Mist Core',desc:'+12% dodge',apply:p=>{p.relicStats.dodge+=0.12;}},
+    {label:'Leech Core',desc:'+12% lifesteal',apply:p=>{p.relicStats.steal+=0.12;}}, {label:'Volt Core',desc:'+30% spell damage',apply:p=>{p.relicStats.spellPower+=0.30;}},
+    {label:'Flask Core',desc:'+35% potion power',apply:p=>{p.relicStats.potionBoost+=0.35;}}, {label:'Thorn Core',desc:'+2 thorn damage',apply:p=>{p.relicStats.thorns+=2;}}
+  ];
+  const RELIC_CURSES=[
+    {label:'of Frailty',desc:'-1 DEF',apply:p=>{p.def=Math.max(0,p.def-1);}}, {label:'of Ash',desc:'-2 ATK',apply:p=>{p.atk=Math.max(1,p.atk-2);}},
+    {label:'of Withering',desc:'-10 max HP',apply:p=>{p.maxHp=Math.max(8,p.maxHp-10);p.hp=Math.min(p.hp,p.maxHp);}}, {label:'of Silence',desc:'-6 max MP',apply:p=>{p.maxMp=Math.max(4,p.maxMp-6);p.mp=Math.min(p.mp,p.maxMp);}},
+    {label:'of Glass',desc:'take 25% more damage',apply:p=>{p.relicStats.damageTaken+=0.25;}}, {label:'of Thirst',desc:'potions heal 35% less',apply:p=>{p.relicStats.healTax+=0.35;}},
+    {label:'of Rust',desc:'combat skills recover 1 turn slower',apply:p=>{p.relicStats.cooldownPlus+=1;}}, {label:'of Leakage',desc:'lose 1 MP every 4 turns',apply:p=>{p.relicStats.mpDrain+=1;}},
+    {label:'of Blood Price',desc:'lose 1 HP after each melee hit',apply:p=>{p.relicStats.selfHit+=1;}}, {label:'of Tribute',desc:'gold gain reduced by 25%',apply:p=>{p.relicStats.goldMult*=0.75;}}
+  ];
+  const RELIC_PREFIXES=['Solar','Neon','Aether','Prism','Storm','Lumen','Echo','Velvet','Nova','Pulse'];
+  const RELIC_SUFFIX_BASE=['Chain','Sigil','Engine','Heart','Lens','Idol','Bloom','Circuit','Talisman','Shard'];
+  const RELICS=[]; for(let i=0;i<10;i++) for(let j=0;j<10;j++) RELICS.push({id:`relic_${i}_${j}`,name:`${RELIC_PREFIXES[i]} ${RELIC_SUFFIX_BASE[j]} ${RELIC_CURSES[j].label}`,boon:RELIC_BOONS[i],curse:RELIC_CURSES[j],color:['#7fffd4','#5bdfff','#c89bff','#ffd866','#ff9b5b'][i%5],desc:`${RELIC_BOONS[i].desc}, but ${RELIC_CURSES[j].desc}.`});
+  function relicsRemaining(){ return RELICS.filter(r=>!(G.player?.relics||[]).some(o=>o.id===r.id)); }
+  function requestRelicChoice(source='elite'){ ensureRelicState(); if(relicsRemaining().length<2) return; G.relicQueue=G.relicQueue||[]; G.relicQueue.push(source); }
+  function showNextRelicChoice(){ ensureRelicState(); ensureUI(); if(G.gameOver||G.relicChoiceOpen||!(G.relicQueue||[]).length) return; const pool=relicsRemaining().slice(); if(pool.length<2) return; G.relicChoiceOpen=true; G.paused=true; const source=G.relicQueue.shift(); const choices=[]; while(choices.length<2&&pool.length){ const idx=rng.int(0,pool.length-1); choices.push(pool.splice(idx,1)[0]); } const grid=document.getElementById('relic-choice-grid'); const sub=document.getElementById('relic-choice-sub'); if(sub) sub.textContent=(source==='boss'?'A boss relic rises from the ruin. ':'An elite relic hums with power. ')+'Choose one blessing and accept its cost.'; grid.innerHTML=choices.map((r,idx)=>`<button class="relic-choice-card" data-idx="${idx}" type="button"><div class="relic-choice-name" style="color:${r.color}">${r.name}</div><div class="relic-choice-type">Relic ${G.player.relics.length+1} of 100</div><div class="relic-choice-blessing"><strong>Upside</strong><div>${r.boon.desc}</div></div><div class="relic-choice-curse"><strong>Cost</strong><div>${r.curse.desc}</div></div><div class="relic-choice-footer">${r.desc}</div></button>`).join(''); Array.from(grid.querySelectorAll('.relic-choice-card')).forEach((el,i)=>el.onclick=()=>takeRelic(choices[i])); document.getElementById('relic-choice-modal').classList.remove('hidden'); }
+  function takeRelic(relic){ ensureRelicState(); if(!relic||G.player.relics.some(r=>r.id===relic.id)) return; relic.boon.apply(G.player); relic.curse.apply(G.player); G.player.relics.push(relic); G.player.hp=Math.min(G.player.hp,G.player.maxHp); G.player.mp=Math.min(G.player.mp,G.player.maxMp); addLog(`Relic claimed: ${relic.name}`,'item'); document.getElementById('relic-choice-modal').classList.add('hidden'); G.relicChoiceOpen=false; G.paused=false; updateEquipUI(); renderInventoryModal(); updateRelicUI(); if((G.relicQueue||[]).length) setTimeout(showNextRelicChoice,120); }
+  function updateRelicUI(){ ensureRelicState(); ensureUI(); const count=document.getElementById('relic-count'); if(count&&G.player) count.textContent=`${G.player.relics.length} / 100`; const list=document.getElementById('relic-list'); if(list&&G.player){ list.innerHTML=!G.player.relics.length?'<div class="relic-chip"><small>No relics yet</small>Beat elites and bosses</div>':G.player.relics.slice(-6).reverse().map(r=>`<div class="relic-chip" title="${r.desc.replace(/"/g,'&quot;')}">${r.name}<small>${r.boon.desc} • ${r.curse.desc}</small></div>`).join(''); } const inv=document.getElementById('inventory-relics'); if(inv&&G.player){ inv.innerHTML=G.player.relics.length?G.player.relics.map(r=>`<div class="relic-chip" title="${r.desc.replace(/"/g,'&quot;')}">${r.name}<small>${r.boon.desc} • ${r.curse.desc}</small></div>`).join(''):'<div class="inventory-empty" style="padding:0;margin:0">No relics claimed yet.</div>'; } }
+
+  const oldUpdateEquipUI=updateEquipUI; updateEquipUI=function(){ oldUpdateEquipUI(); updateRelicUI(); };
+  const oldRenderInventoryModal=renderInventoryModal; renderInventoryModal=function(){ oldRenderInventoryModal(); updateRelicUI(); };
+  getStats=function(){ ensureRelicState(); const p=G.player; let atk=p.atk,def=p.def,crit=p.relicStats?.crit||0,dodge=p.relicStats?.dodge||0,steal=p.relicStats?.steal||0; if(p.weapon){atk+=p.weapon.atk;if(p.weapon.crit)crit+=p.weapon.crit;if(p.weapon.lifesteal)steal+=p.weapon.lifesteal;} if(p.armor){def+=p.armor.def;if(p.armor.dodge)dodge+=p.armor.dodge;} if(p.ring){if(p.ring.crit)crit+=p.ring.crit;if(p.ring.lifesteal)steal+=p.ring.lifesteal;} if(p.amulet&&p.amulet.mdef)def+=Math.floor(p.amulet.mdef*.5); return {atk,def,crit,dodge,steal,spellPower:p.relicStats?.spellPower||0,thorns:(p.amulet?.thorns||0)+(p.relicStats?.thorns||0),damageTaken:p.relicStats?.damageTaken||1}; };
+  predictEnemyIntent=function(e){ if(!e||e.hp<=0) return null; if(e.stunned>0) return {icon:'✦',label:'Stunned',color:'#ffd866'}; if(e.intentCharge) return {icon:'⚠',label:e.intentCharge.kind==='blast'?'Charged blast':'Heavy slam',color:'#ff9b5b'}; const dist=Math.abs(e.x-G.player.x)+Math.abs(e.y-G.player.y); const canSeePlayer=G.visible[e.y]&&G.visible[e.y][e.x]; if(dist===1) return {icon:'⚔',label:`Attack ${Math.max(1,e.atk-getStats().def-1)}-${Math.max(1,e.atk-getStats().def+1)}`,color:'#ff5070'}; if((e.boss||e.elite||e.miniBoss)&&dist<=4&&dist>1) return {icon:'⚠',label:'Threatening zone',color:'#ff9b5b'}; if(e.range&&dist<=e.range&&canSeePlayer) return {icon:'✦',label:`Cast ${Math.max(1,e.atk-getStats().def-1)}-${Math.max(1,e.atk-getStats().def+1)}`,color:'#c89bff'}; if(e.alert) return {icon:'➜',label:'Advance',color:'#7fffd4'}; return {icon:'…',label:'Wander',color:'#6a6a8a'}; };
+  useGuard=function(){ ensureRelicState(); if(G.gameOver||G.paused) return; G.player.guardTurns=1; clearQueuedAction(); spawnSpellFx({kind:'shield',x:G.player.x,y:G.player.y,color:'#ffd866',life:22,maxLife:22}); addLog('Guard raised. Next enemy phase damage is reduced.','info'); endTurn(); };
+  updateCombatButtons=function(){ ensureRelicState(); ensureUI(); const map=[['slash','slash-btn'],['bash','bash-btn'],['kick','kick-btn'],['guard','guard-btn']]; for(const [action,id] of map){ const btn=document.getElementById(id); if(!btn) continue; btn.classList.toggle('active', G.player?.queuedAction===action || (action==='guard'&&G.player?.guardTurns>0)); const cd=(G.player?.skillCooldowns?.[action]||0); btn.classList.toggle('cooldown', cd>0); if(action==='slash') btn.innerHTML=`<strong>Q</strong><em>${G.player?.queuedAction==='slash'?'Ready':'Slash'}</em>`; if(action==='bash') btn.innerHTML=`<strong>E</strong><em>${cd>0?'Bash '+cd+'t':'Bash'}</em>`; if(action==='kick') btn.innerHTML=`<strong>F</strong><em>${cd>0?'Kick '+cd+'t':'Kick'}</em>`; if(action==='guard') btn.innerHTML=`<strong>G</strong><em>${G.player?.guardTurns>0?'Guard Up':'Guard'}</em>`; } };
+  attack=function(attacker,defender,isPlayer){ ensureRelicState(); const st=getStats(); let dmg; if(isPlayer){ dmg=Math.max(1,st.atk-defender.def+rng.int(-1,1)); const w=G.player.weapon; if(w&&w.hits===2)dmg=Math.floor(dmg*1.6); if(w&&w.fire)dmg+=rng.int(1,3); if(w&&w.stun&&rng.chance(w.stun))defender.stunned=2; G.player.swingAnim=1; if(G.player.relicStats?.selfHit){ G.player.hp=Math.max(1,G.player.hp-G.player.relicStats.selfHit); spawnDamageText(G.player.x,G.player.y,`-${G.player.relicStats.selfHit}`,'#ff9ba8'); } playerDealDamage(defender,dmg,{label:'Hit',color:'#ff9b5b',sound:'hit',critScale:1,critMult:2,shake:3}); } else { dmg=Math.max(1,attacker.atk-st.def+rng.int(-1,1)); if(G.player.guardTurns>0) dmg=Math.max(1,Math.floor(dmg*0.4)); dmg=Math.max(1,Math.floor(dmg*(st.damageTaken||1))); if(st.dodge>0&&rng.chance(st.dodge)){addLog(`Dodged ${attacker.name}!`,'info');SFX.play('step');spawnP(G.player.x,G.player.y,'#7fffd4',3);spawnDamageText(G.player.x,G.player.y,'MISS','#7fffd4');return;} if(G.player.shieldBuff>0)dmg=Math.max(1,dmg-G.player.shieldBuff); if(G.player.armor&&G.player.armor.absorb)dmg=Math.floor(dmg*(1-G.player.armor.absorb)); if(attacker.venom&&rng.chance(attacker.venom)){G.player.poisoned=Math.max(G.player.poisoned||0,3);addLog('Poisoned!','combat');} if((st.thorns||0)>0){ attacker.hp-=st.thorns; spawnDamageText(attacker.x,attacker.y,`${st.thorns}`,'#ffd866'); if(attacker.hp<=0){ killEnemy(attacker); return; } } defender.hp-=dmg; shakeScreen(4); G.player.hitFlash=1; addLog(`${attacker.name} hits you for ${dmg}`,'combat'); SFX.play('hurt'); spawnP(G.player.x,G.player.y,'#ff4040',5); spawnDamageText(G.player.x,G.player.y,`${dmg}`,'#ff5070'); if(G.player.hp<=0)doGameOver(); } };
+  const oldCastSpell=castSpell; castSpell=function(idx){ ensureRelicState(); if(idx>=G.player.spells.length||G.gameOver||G.paused) return; const sp=G.player.spells[idx]; if(G.player.mp<sp.cost){addLog('Not enough MP!','info');return;} if(['heal','shield','blink'].includes(sp.type)) return oldCastSpell(idx); G.player.mp-=sp.cost; const targets=G.enemies.filter(e=>{const d=Math.abs(e.x-G.player.x)+Math.abs(e.y-G.player.y); return d<=(sp.range||5)&&G.visible[e.y]&&G.visible[e.y][e.x]&&e.hp>0;}).sort((a,b)=>(Math.abs(a.x-G.player.x)+Math.abs(a.y-G.player.y))-(Math.abs(b.x-G.player.x)+Math.abs(b.y-G.player.y))); if(!targets.length){addLog('No targets!','info'); G.player.mp+=sp.cost; return;} const main=targets[0]; const dmg=Math.max(1,Math.floor((sp.dmg||0)*(1+(G.player.relicStats?.spellPower||0)))); const hit=[main]; if(sp.aoe) for(const e of G.enemies) if(e!==main&&e.hp>0&&Math.abs(e.x-main.x)+Math.abs(e.y-main.y)<=sp.aoe) hit.push(e); if(sp.chain){ let last=main; for(let c=0;c<sp.chain;c++){ const nx=G.enemies.find(e=>e!==last&&!hit.includes(e)&&e.hp>0&&Math.abs(e.x-last.x)+Math.abs(e.y-last.y)<=3); if(nx){ hit.push(nx); last=nx; } } } const col={fire:'#ff6b3a',ice:'#5bdfff',lightning:'#ffd866',poison:'#40ff40',earth:'#c8a050'}[sp.type]||'#c89bff'; if(sp.type==='lightning') spawnSpellFx({kind:'chain',points:[{x:G.player.x,y:G.player.y},...hit.map(h=>({x:h.x,y:h.y}))],color:col,life:14,maxLife:14}); else if(sp.type==='poison') spawnSpellFx({kind:'cloud',x:main.x,y:main.y,color:col,life:24,maxLife:24}); else { spawnSpellFx({kind:'projectile',from:{x:G.player.x,y:G.player.y},to:{x:main.x,y:main.y},color:col,life:16,maxLife:16}); spawnSpellFx({kind:'burst',x:main.x,y:main.y,color:col,life:18,maxLife:18}); } for(const e of hit){ e.hp-=dmg; e.hitFlash=1; if(sp.slow)e.slowed=true; if(sp.dot)e.poisoned=sp.dot; spawnP(e.x,e.y,col,7); spawnDamageText(e.x,e.y,`${dmg}`,col,sp.type==='lightning'); if(e.hp<=0)killEnemy(e);} shakeScreen(Math.min(6,2+hit.length)); addLog(`${sp.name} hits ${hit.length} for ${dmg}!`,'spell'); SFX.play('spell'); endTurn(); };
+  usePotion=function(kind='hp'){ ensureRelicState(); if(G.gameOver||G.paused)return; if(kind==='mp'){ if((G.player.potions.mp||0)<=0){ addLog('No Mana Potions stored.','info'); return; } G.player.potions.mp--; const amount=Math.max(3,Math.floor((8+G.player.floor*2)*(1+(G.player.relicStats?.potionBoost||0)-(G.player.relicStats?.healTax||0)))); G.player.mp=Math.min(G.player.maxMp,G.player.mp+amount); addLog(`Mana Potion +${amount} MP`,'item'); SFX.play('pickup'); spawnSpellFx({kind:'burst',x:G.player.x,y:G.player.y,color:'#5b8bff',life:18,maxLife:18}); } else { if((G.player.potions.hp||0)<=0){ addLog('No Health Potions stored.','info'); return; } G.player.potions.hp--; const amount=Math.max(4,Math.floor((12+G.player.level*2)*(1+(G.player.relicStats?.potionBoost||0)-(G.player.relicStats?.healTax||0)))); G.player.hp=Math.min(G.player.maxHp,G.player.hp+amount); addLog(`Health Potion +${amount} HP`,'item'); SFX.play('heal'); spawnSpellFx({kind:'burst',x:G.player.x,y:G.player.y,color:'#5bff7f',life:18,maxLife:18}); } updatePotionUI(); renderInventoryModal(); endTurn(); };
+  const oldKillEnemy=killEnemy; killEnemy=function(e){ const wasBoss=e.boss, wasElite=e.elite||e.miniBoss; oldKillEnemy(e); if(wasBoss) requestRelicChoice('boss'); else if(wasElite && (e.miniBoss || rng.chance(0.55))) requestRelicChoice('elite'); };
+  const oldOpenChest=openChest; openChest=function(){ if(rng.chance(0.12)){ requestRelicChoice('elite'); addLog('The chest reveals a relic altar.','item'); } oldOpenChest(); };
+  enemyTurn=function(){ ensureRelicState(); for(const e of G.enemies){ if(e.hp<=0)continue; if(e.stunned>0){e.stunned--;continue;} if(e.slowed&&rng.chance(.5))continue; if(e.poisoned>0){e.hp-=1;e.poisoned--;spawnP(e.x,e.y,'#40ff40',2);if(e.hp<=0){killEnemy(e);continue;}} const actions=e.eliteHaste&&rng.chance(e.eliteHaste)?2:1; for(let step=0;step<actions;step++){ if(e.hp<=0||G.gameOver)break; const dist=Math.abs(e.x-G.player.x)+Math.abs(e.y-G.player.y); const canSee=G.visible[e.y]&&G.visible[e.y][e.x]; if(canSee&&dist<=10)e.alert=true; if(!e.alert){ if(rng.chance(.3)){ const [dx,dy]=rng.pick([[0,-1],[0,1],[-1,0],[1,0]]); const nx=e.x+dx, ny=e.y+dy; if(nx>=0&&nx<MAP_W&&ny>=0&&ny<MAP_H&&G.map[ny][nx]!==T.WALL&&!G.enemies.some(o=>o!==e&&o.x===nx&&o.y===ny)){ e.x=nx;e.y=ny; } } break; } if(e.intentCharge){ const tx=e.intentCharge.x, ty=e.intentCharge.y; for(let ay=ty-1; ay<=ty+1; ay++) for(let ax=tx-1; ax<=tx+1; ax++){ if(ax<0||ax>=MAP_W||ay<0||ay>=MAP_H) continue; if(G.player.x===ax&&G.player.y===ay){ const st=getStats(); let dmg=Math.max(2,e.atk + (e.boss?3:1) - st.def + rng.int(0,2)); if(G.player.guardTurns>0) dmg=Math.max(1,Math.floor(dmg*0.4)); dmg=Math.max(1,Math.floor(dmg*(st.damageTaken||1))); G.player.hp-=dmg; G.player.hitFlash=1; spawnDamageText(G.player.x,G.player.y,`${dmg}`,'#ff7040'); } } spawnSpellFx({kind:'burst',x:tx,y:ty,color:e.boss?'#ff7040':'#ffb35b',life:24,maxLife:24}); addLog(`${e.name} unleashes ${e.intentCharge.kind==='blast'?'a blast':'a slam'}!`,'combat'); e.intentCharge=null; if(G.player.hp<=0)doGameOver(); break; } if((e.boss||e.elite||e.miniBoss) && dist>1 && dist<=4 && rng.chance(e.boss?0.45:0.20)){ e.intentCharge={kind:(e.range?'blast':'slam'),x:G.player.x,y:G.player.y}; addLog(`${e.name} lines up a ${e.intentCharge.kind}!`,'combat'); break; } if(dist===1){ attack(e,G.player,false); break; } if(e.range&&dist<=e.range&&canSee){ const st=getStats(); let dmg=Math.max(1,e.atk-st.def+rng.int(-1,1)); if(G.player.guardTurns>0) dmg=Math.max(1,Math.floor(dmg*0.4)); dmg=Math.max(1,Math.floor(dmg*(st.damageTaken||1))); G.player.hp-=dmg; addLog(`${e.name} casts for ${dmg}!`,'combat'); SFX.play('spell'); spawnSpellFx({kind:'projectile',from:{x:e.x,y:e.y},to:{x:G.player.x,y:G.player.y},color:'#c89bff',life:14,maxLife:14}); spawnP(G.player.x,G.player.y,'#c89bff',4); if(G.player.hp<=0)doGameOver(); break; } let moved=false; if(e.ai==='erratic'&&rng.chance(.6)){ const [dx,dy]=rng.pick([[0,-1],[0,1],[-1,0],[1,0]]); const nx=e.x+dx, ny=e.y+dy; if(G.map[ny]&&G.map[ny][nx]!==T.WALL&&!(nx===G.player.x&&ny===G.player.y)){ e.x=nx; e.y=ny; moved=true; } } if(e.ai==='phase'){ const dx=Math.sign(G.player.x-e.x),dy=Math.sign(G.player.y-e.y); if(rng.chance(.5)){ const nx=e.x+dx; if(nx>=0&&nx<MAP_W){ e.x=nx; moved=true; } } else { const ny=e.y+dy; if(ny>=0&&ny<MAP_H){ e.y=ny; moved=true; } } } if(!moved&&(e.ai==='chase'||e.ai==='smart'||e.ai==='boss'||e.ai==='ranged')){ const path=findPath(e.x,e.y,G.player.x,G.player.y,12,false); if(path.length>0){ const next=path[0]; if(!(next.x===G.player.x&&next.y===G.player.y)&&!G.enemies.some(o=>o!==e&&o.x===next.x&&o.y===next.y)){ e.x=next.x;e.y=next.y; } } } if(G.map[e.y]&&G.map[e.y][e.x]===T.TRAP) triggerTrapAt(e.x,e.y,e.name,e); } } };
+  endTurn=function(){ ensureRelicState(); G.turnCount++; if(G.player.ring&&G.player.ring.regen)G.player.hp=Math.min(G.player.maxHp,G.player.hp+G.player.ring.regen); if(G.player.shieldBuff>0)G.player.shieldBuff--; if(G.player.skillCooldowns.bash>0)G.player.skillCooldowns.bash--; if(G.player.skillCooldowns.kick>0)G.player.skillCooldowns.kick--; updateCombatButtons(); if(G.player.poisoned>0){G.player.hp-=1;G.player.poisoned--;} if((G.player.relicStats?.mpDrain||0)>0 && G.turnCount%4===0){ G.player.mp=Math.max(0,G.player.mp-G.player.relicStats.mpDrain); } enemyTurn(); if(G.player.guardTurns>0) G.player.guardTurns--; computeFOV(); updateCamera(); updateHoverPath(); SFX.setAmbience(G.player.floor, G.enemies.filter(e=>(e.boss||e.miniBoss)&&G.visible[e.y]&&G.visible[e.y][e.x]).length*5 + G.enemies.filter(e=>G.visible[e.y]&&G.visible[e.y][e.x]).length*0.22); if(G.player.hp<=0&&!G.gameOver)doGameOver(); if(!G.gameOver && !G.inventoryOpen && document.getElementById('level-up').classList.contains('hidden')) showNextRelicChoice(); };
+  const oldRender=render; render=function(){ oldRender(); const t=performance.now()/1000, cx_=G.camera.x, cy_=G.camera.y; for(const e of G.enemies){ if(!e.intentCharge||!G.visible[e.y]||!G.visible[e.y][e.x]) continue; for(let ty=e.intentCharge.y-1; ty<=e.intentCharge.y+1; ty++) for(let tx=e.intentCharge.x-1; tx<=e.intentCharge.x+1; tx++){ const sx=(tx-cx_)*TILE, sy=(ty-cy_)*TILE; if(sx<-TILE||sx>canvas.width||sy<-TILE||sy>canvas.height) continue; ctx.globalAlpha=.16+Math.sin(t*6)*.08; ctx.fillStyle=e.boss?'#ff7040':'#ffb35b'; ctx.fillRect(sx+2,sy+2,TILE-4,TILE-4); ctx.globalAlpha=.7; ctx.strokeStyle=e.boss?'#ff9b5b':'#ffd866'; ctx.lineWidth=2; ctx.strokeRect(sx+2,sy+2,TILE-4,TILE-4); } } ctx.globalAlpha=1; };
+  generateFloor=function(depth){ ensureRelicState(); ensureUI(); const useW=52, useH=40; const map=Array.from({length:MAP_H},()=>Array(MAP_W).fill(T.WALL)); const rooms=[]; const floorBiome=getBiomeForDepth(depth); G.floorBiome=floorBiome; const numRooms=4+Math.min(depth,4); for(let i=0;i<numRooms*7;i++){ if(rooms.length>=numRooms) break; const w=rng.int(5,8), h=rng.int(4,6), x=rng.int(2,useW-w-3), y=rng.int(2,useH-h-3); let ok=true; for(const r of rooms){ if(x<r.x+r.w+2&&x+w+2>r.x&&y<r.y+r.h+2&&y+h+2>r.y){ ok=false; break; } } if(!ok) continue; const room={x,y,w,h,cx:Math.floor(x+w/2),cy:Math.floor(y+h/2),theme:chooseRoomTheme(floorBiome)}; rooms.push(room); for(let ry=y;ry<y+h;ry++)for(let rx=x;rx<x+w;rx++)map[ry][rx]=T.FLOOR; } for(let i=1;i<rooms.length;i++){ const a=rooms[i-1],b=rooms[i]; let cx=a.cx,cy=a.cy; carveBrush(map,cx,cy,0); while(cx!==b.cx){cx+=cx<b.cx?1:-1; carveBrush(map,cx,cy,0);} while(cy!==b.cy){cy+=cy<b.cy?1:-1; carveBrush(map,cx,cy,0);} } for(let y=1;y<MAP_H-1;y++)for(let x=1;x<MAP_W-1;x++){ if(map[y][x]!==T.FLOOR)continue; const floorN=map[y-1][x]!==T.WALL,floorS=map[y+1][x]!==T.WALL,floorW=map[y][x-1]!==T.WALL,floorE=map[y][x+1]!==T.WALL; const isDoor=(floorN&&floorS&&!floorW&&!floorE)||(!floorN&&!floorS&&floorW&&floorE); if(isDoor&&rng.chance(.1))map[y][x]=T.DOOR; } for(let y=0;y<MAP_H;y++)for(let x=0;x<MAP_W;x++) if(map[y][x]===T.FLOOR&&rng.chance(.008+depth*.003)) map[y][x]=T.TRAP; const startRoom=rooms[0], endRoom=rooms[rooms.length-1]; if(startRoom)startRoom.theme='plain'; if(endRoom)endRoom.theme=depth>=7?'lava':'plain'; map[endRoom.cy][endRoom.cx]=T.STAIR_DOWN; if(depth>1)map[startRoom.cy][startRoom.cx]=T.STAIR_UP; G.map=map; G.rooms=rooms; G.explored=Array.from({length:MAP_H},()=>Array(MAP_W).fill(false)); G.visible=Array.from({length:MAP_H},()=>Array(MAP_W).fill(false)); G.trapSeen=Array.from({length:MAP_H},()=>Array(MAP_W).fill(false)); G.player.x=startRoom.cx; G.player.y=startRoom.cy; G.enemies=[]; for(let i=1;i<rooms.length;i++){ const room=rooms[i]; const num=rng.int(2,3+Math.floor(depth/2)); for(let j=0;j<num;j++){ const ex=rng.int(room.x+1,room.x+room.w-2), ey=rng.int(room.y+1,room.y+room.h-2); if(map[ey][ex]!==T.FLOOR&&map[ey][ex]!==T.TRAP)continue; const roster=ENEMIES.filter(e=>!e.boss); const tier=Math.min(Math.floor(depth/2),roster.length-1); const type={...roster[rng.int(Math.max(0,tier-1),Math.min(roster.length-1,tier+1))]}; const s=1+(depth-1)*.18; type.hp=Math.floor(type.hp*s); type.atk=Math.floor(type.atk*s); type.def=Math.floor(type.def*s); type.xp=Math.floor(type.xp*s); type.gold=Math.floor(type.gold*s); const ft=maybePromoteElite(type,depth+1); G.enemies.push({...ft,x:ex,y:ey,maxHp:ft.hp,id:Math.random(),alert:false,poisoned:0,stunned:0,slowed:false,hitFlash:0,bobOffset:Math.random()*10}); } } if(depth>=2 && rooms.length>2){ const arena=rooms[Math.max(1,rooms.length-2)]; let apex; if(depth%3===0){ apex={...rng.pick(ENEMIES.filter(e=>e.boss))}; } else { const roster=ENEMIES.filter(e=>!e.boss); const idx=Math.min(roster.length-1, Math.max(3, Math.floor(depth/2)+2)); apex=maybePromoteElite({...roster[idx]}, depth+2); apex.miniBoss=true; } const s=1.1+(depth-1)*.22; apex.hp=Math.floor(apex.hp*s); apex.atk=Math.floor(apex.atk*s); apex.def=Math.floor(apex.def*s); apex.xp=Math.floor(apex.xp*s); apex.gold=Math.floor(apex.gold*s); apex.maxHp=apex.hp; G.enemies.push({...apex,x:arena.cx,y:arena.cy,id:Math.random(),alert:true,poisoned:0,stunned:0,slowed:false,hitFlash:0,bobOffset:Math.random()*10}); } G.items=[]; for(const room of rooms){ if(rng.chance(.5)){ const ix=rng.int(room.x+1,room.x+room.w-2), iy=rng.int(room.y+1,room.y+room.h-2); if(map[iy][ix]===T.FLOOR){ const type=rng.pick(['potion_hp','potion_mp','gold','chest','crystal','shrine']); G.items.push({x:ix,y:iy,type,id:Math.random()}); } } } for(const room of rooms.slice(1)){ const hv=room.theme==='treasure'||room.theme==='crystal'||room.theme==='shrine'; if(!hv||!rng.chance(room.theme==='treasure'?0.9:0.45)) continue; const ix=rng.int(room.x+1,room.x+room.w-2), iy=rng.int(room.y+1,room.y+room.h-2); if(map[iy][ix]!==T.FLOOR||G.items.some(it=>it.x===ix&&it.y===iy)) continue; const pref=room.theme==='treasure'?rng.pick(['weapon','armor']):room.theme==='crystal'?rng.pick(['ring','amulet']):null; G.items.push(createEquipmentPickup(ix,iy,depth,pref,room.theme==='treasure'?2:1,'pedestal')); } if(depth>=2&&rooms.length>2&&rng.chance(.7)){ const room=rng.pick(rooms.slice(1)); const ix=rng.int(room.x+1,room.x+room.w-2), iy=rng.int(room.y+1,room.y+room.h-2); if(map[iy][ix]===T.FLOOR&&!G.items.some(it=>it.x===ix&&it.y===iy)) G.items.push(createEquipmentPickup(ix,iy,depth,null,1,'cache')); } G.particles=[]; computeFOV(); updateCamera(); updateEquipUI(); updateSpellUI(); updatePotionUI(); document.getElementById('fi-floor').textContent=`Floor ${depth}`; const biomeLabel=(G.floorBiome||'ruins').replace(/^./,m=>m.toUpperCase()); document.getElementById('fi-sub').textContent=`${FLOOR_NAMES[Math.min(depth-1,FLOOR_NAMES.length-1)]} • ${biomeLabel} Biome`; updateStoryPanel(); updateRelicUI(); };
+  document.addEventListener('keydown',e=>{ if((e.key||'').toLowerCase()==='g' && !e.repeat){ e.preventDefault(); useGuard(); }});
+  ensureUI(); updateRelicUI();
+})();
 
 </script>
 </body>
