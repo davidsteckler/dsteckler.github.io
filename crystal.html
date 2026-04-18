@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Crystal Caverns — Roguelike</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap');
 :root {
   --bg:#0b0b14;--panel:#10111c;--panel2:#161828;--border:#2a2c44;--border-hi:#4a4c6a;
-  --text:#c8c8d8;--text-dim:#6a6a8a;--text-hi:#eaeaf4;
+  --text:#dfe6ff;--text-dim:#aeb8dc;--text-hi:#f8fbff;--ui-font:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--display-font:'Cinzel',serif;
   --accent:#7fffd4;--accent2:#5bdfff;--gold:#ffd866;--red:#ff5070;--blue:#5b8bff;
   --purple:#c89bff;--green:#5bff7f;--orange:#ff9b5b;
   --glow-cyan:0 0 12px #7fffd480;--glow-gold:0 0 12px #ffd86680;
@@ -17,7 +17,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%}
-body{background:var(--bg);color:var(--text);font-family:'Press Start 2P',monospace;overflow:hidden;display:flex;justify-content:center;align-items:center;user-select:none}
+body{background:var(--bg);color:var(--text);font-family:var(--ui-font);overflow:hidden;display:flex;justify-content:center;align-items:center;user-select:none;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 
 #app{display:flex;gap:0;height:100vh;max-height:100vh;width:100vw;max-width:100vw;min-width:0;min-height:0}
 
@@ -322,6 +322,59 @@ canvas#game{image-rendering:pixelated;image-rendering:crisp-edges;display:block;
 /* Mute button */
 #mute-btn{position:fixed;top:10px;right:10px;z-index:45;background:var(--panel);border:1px solid var(--border);color:var(--text-dim);font-family:'Press Start 2P',monospace;font-size:8px;padding:6px 10px;cursor:pointer;border-radius:3px}
 #mute-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+
+/* readability pass */
+body, #app, #char-panel, #inv-panel, #stats-area, #bottom-bar, #msg-area, #story-panel, #inspect-panel, #tooltip, .modal-panel, .inventory-card, .inventory-empty, .inventory-help, .lu-option, .mini-action-btn, .mobile-btn, #mute-btn, .modal-close, .inv-action-btn {
+  font-family:var(--ui-font)!important;
+  letter-spacing:.01em;
+}
+.panel-header, .modal-title, #overlay h1, #overlay .subtitle, #char-title, #char-name, #floor-info .fi-floor, #gear-summary .gs-power {
+  font-family:var(--display-font)!important;
+}
+#overlay p{font-size:14px;line-height:1.8;color:#d6ddfb;max-width:760px}
+#overlay .controls-grid{font-size:13px;color:#d9e1ff;max-width:620px;gap:8px 34px}
+#overlay .controls-grid .ck{font-weight:700;color:#97ffe2}
+.btn{font-size:19px;padding:16px 44px}
+#stats-area{font-size:12px}
+.stat-label,.stat-val{font-size:12px}
+.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:12px}
+#gear-summary .gs-label{font-size:11px;color:#cbd6ff}
+#gear-summary .gs-sub{font-size:12px;color:#d6defb;line-height:1.55}
+#gear-summary .gs-tag{font-size:11px}
+.equip-slot{min-height:74px;padding:6px}
+.equip-slot .slot-type{font-size:10px;color:#c3cef0}
+.equip-slot .item-name{font-size:13px;color:#f5f8ff}
+.equip-slot .item-stat{font-size:11px;color:#d2daf6;line-height:1.35}
+#floor-info .fi-floor{font-size:16px}
+#floor-info .fi-sub{font-size:12px;color:#d3dbf8}
+#story-panel .sp-label,#inspect-panel .ip-label{font-size:11px;color:#c8d2f5}
+#story-panel .sp-title{font-size:17px;color:#ffe28b;line-height:1.2}
+#story-panel .sp-text,#story-panel .sp-objective{font-size:13px;color:#e0e6ff;line-height:1.55}
+#inspect-panel .ip-name{font-size:16px;color:#f7fbff}
+#inspect-panel .ip-type{font-size:11px;color:#bfc9eb}
+#inspect-panel .ip-desc,#inspect-panel .ip-stats,#inspect-panel .ip-empty,#inspect-panel .ip-compare,#inspect-panel .ip-tip{font-size:13px;color:#e0e6ff;line-height:1.55}
+#msg-area{font-size:12px;line-height:1.55;max-height:180px;color:#e0e6ff}
+#action-log{font-size:12px;color:#dde5ff}
+#tooltip{max-width:320px;padding:12px 14px;color:#eef3ff}
+#tooltip .tt-name{font-size:15px}
+#tooltip .tt-type{font-size:11px;color:#c1cdef}
+#tooltip .tt-desc,#tooltip .tt-stats,#tooltip .tt-compare,#tooltip .tt-intent{font-size:12px;line-height:1.5;color:#e4ebff}
+.inventory-topline .bag-title{font-size:15px}
+.inventory-topline .bag-meta,.inventory-help,.inventory-empty,.inv-mini,.inv-consumable-info,.inv-character-card,.inv-char-meta,.inventory-card .slot,.inventory-card .desc,.inventory-card .stats,.inventory-card .compare,.modal-sub{font-size:12px;color:#d9e1ff}
+.inv-char-name{font-size:18px}
+.inv-equip-slot .label{font-size:10px;color:#c1ccef}
+.inv-equip-slot .name{font-size:13px}
+.inv-equip-slot .meta{font-size:12px}
+.inv-section-title{font-size:13px}
+.inventory-card .name{font-size:14px}
+.inv-action-btn,.modal-close,.mini-action-btn,#mobile-topbar .mobile-top-btn{font-size:12px}
+@media (max-width:900px){
+  #overlay p{font-size:13px}
+  #overlay .controls-grid{font-size:12px;max-width:520px}
+  #story-panel .sp-text,#story-panel .sp-objective,#inspect-panel .ip-desc,#inspect-panel .ip-stats,#inspect-panel .ip-empty,#msg-area,.stat-label,.stat-val,.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:12px}
+}
+
 </style>
 </head>
 <body>
@@ -330,8 +383,8 @@ canvas#game{image-rendering:pixelated;image-rendering:crisp-edges;display:block;
 <div id="overlay">
   <h1>CRYSTAL CAVERNS</h1>
   <div class="subtitle">The Heart Below</div>
-  <p>The Warden who kept the mountain sealed is dead. Her last message named only one hope: descend into Crystal Caverns, recover the Heart Lens, and stop the Hollow Court from waking beneath the tenth floor.</p>
-  <p>Every relic you find belonged to someone who failed before you. Learn what it does. Build around it. Bring the seal back intact.</p>
+  <p>The mountain was not sealed to keep death out. It was sealed to keep certainty in. Deep below, the Heart Lens can show one flawless future and make every other future disappear.</p>
+  <p>You are descending because the Hollow Court has started to wake: the people who chose one perfect outcome and became trapped inside it. Every relic below is a bargain someone once called reasonable.</p>
   <div class="controls-grid">
     <span><span class="ck">WASD/Arrows</span> Move/Attack</span>
     <span><span class="ck">1-4</span> Cast Spells</span>
@@ -426,9 +479,9 @@ canvas#game{image-rendering:pixelated;image-rendering:crisp-edges;display:block;
       </div>
       <div id="story-panel">
         <div class="sp-label">Story</div>
-        <div class="sp-title" id="story-title">The Broken Seal</div>
-        <div class="sp-text" id="story-text">The Warden is gone. The Heart Lens lies somewhere below, and the dead have started moving again.</div>
-        <div class="sp-objective" id="story-objective"><strong>Objective:</strong> reach Floor 10 and recover the Heart Lens.</div>
+        <div class="sp-title" id="story-title">The First Lie</div>
+        <div class="sp-text" id="story-text">The seal was built to bury a machine that can promise one perfect future. Something below has started offering that promise again.</div>
+        <div class="sp-objective" id="story-objective"><strong>Objective:</strong> reach Floor 10 and decide whether the Lens should survive you.</div>
       </div>
       <div id="minimap-wrap"><canvas id="minimap" width="90" height="66"></canvas></div>
       <div id="inspect-panel"><div class="ip-label">Inspect</div><div class="ip-empty">Hover enemies, loot, traps, doors, or stairs to read what matters before you commit. Click relics to pin their full description. Q Slash, E Bash, and F Kick give you more than a simple bump attack.</div></div>
@@ -2016,20 +2069,26 @@ function chooseRoomTheme(biome){
 
 const STORY={
   beats:{
-    1:{title:'The Broken Seal',text:'The ward above the cavern has failed. The Heart Lens was carried below when the Warden fell, and now the dead answer something deeper than hunger.'},
-    2:{title:'Footprints in Dust',text:'You start finding signs of older expeditions: cracked flasks, snapped blades, and relics left behind by people who also thought they were the last chance.'},
-    3:{title:'The Crystal Memory',text:"The caverns remember violence. Every glowing seam hums with fragments of the Warden's final stand."},
-    4:{title:'Bargains in the Dark',text:'Goblin scavengers strip the dead and sell what they fear to wear. That means the Heart Lens is valuable enough that someone is keeping it.'},
-    5:{title:'The Bone Archive',text:'Below the upper tunnels the dead are no longer wandering. They are waiting. Something is organizing them.'},
-    6:{title:'The Shadow Choir',text:'Whispers move through the walls at nightfall. The Hollow Court is not awake yet, but it is listening.'},
-    7:{title:'Ash Gate',text:"You reach the old defense line where the Warden's keepers made their final stand. The stones are scorched from the inside."},
-    8:{title:'The Court Stirs',text:'Every relic you recover feels less like treasure and more like evidence. The mountain was never hiding gold. It was hiding a prison.'},
-    9:{title:'The Heart Chamber',text:'The air grows warm and thin. Somewhere below, the Heart Lens is still pulsing, barely holding the seal together.'},
-    10:{title:'The Last Descent',text:'There is no deeper warning after this. If the seal breaks here, the Hollow Court walks back into the world.'}
+    1:{title:'The First Lie',text:'The seal was never built to keep monsters out. It was built to bury the Heart Lens, a machine that can show one perfect future and make every other future feel disposable.'},
+    2:{title:'The Useful Dead',text:'The bodies below were not all victims. Some came here willingly, certain they could use the Lens for peace, victory, or love, and called that certainty wisdom.'},
+    3:{title:'Crystal Arithmetic',text:'The crystal seams are not ore. They are memory glass. They hold the futures people were willing to trade away to keep only one path alive.'},
+    4:{title:'The Borrowed Crown',text:'Goblin traders hoard relics because relics are choices made solid. Every item here helped someone win a moment by quietly losing a piece of the life around it.'},
+    5:{title:'The Museum of Almost',text:'The Bone Archive is full of near victories: sealed letters, emergency plans, wedding bands, maps home. The Court is built from people who wanted certainty more than wholeness.'},
+    6:{title:'The Hollow Court',text:'You finally understand the enemy. They are not undead. They are people hollowed out by perfect outcomes. Their bodies stayed. Their freedom did not.'},
+    7:{title:'The Keepers\' Mistake',text:'The Warden\'s order tried to use the Lens once to end a war forever. They got their answer, but the answer kept spreading, turning compromise into weakness and doubt into sin.'},
+    8:{title:'The Cost of Relief',text:'The deeper you go, the more the caverns tempt you with the same argument: suffering ends faster when one choice is forced. That is what makes the Lens dangerous. It sounds merciful.'},
+    9:{title:'The Heart Below',text:'The mountain is not collapsing from age. It is bending toward a decision. The Lens has been choosing for everything around it, and the Court wants one final owner.'},
+    10:{title:'The Last Honest Choice',text:'At the bottom there is no treasure test, only a human one. Keep the Lens and become the next person certain enough to rule with it, or break the one thing that can promise a painless future.'}
   }
 };
-function getStoryBeat(floor){return STORY.beats[Math.min(floor,10)]||{title:'The Deeper Dark',text:'The caverns keep falling away beneath you. Recover the Heart Lens before the mountain opens fully.'};}
-function getStoryObjective(){if(!G.player) return 'Recover the Heart Lens.'; if(G.player.floor<10) return 'Objective: reach Floor 10 and recover the Heart Lens.'; return 'Objective: survive the Heart Chamber and reclaim the seal.';}
+function getStoryBeat(floor){return STORY.beats[Math.min(floor,10)]||{title:'Deeper Than Certainty',text:'The caverns keep asking the same question in harder forms: what are you willing to erase to be sure?'};}
+function getStoryObjective(){
+  if(!G.player) return 'Learn what the Heart Lens really is.';
+  if(G.player.floor<4) return 'Objective: follow the relic trail and learn what the Heart Lens really is.';
+  if(G.player.floor<8) return 'Objective: reach the deep wards before the Hollow Court fully wakes.';
+  if(G.player.floor<10) return 'Objective: reach Floor 10 before the Lens chooses the world for you.';
+  return 'Objective: choose whether certainty deserves to survive.';
+}
 
 // ══════════════════════════════════════════════════════════════
 //  GAME STATE
@@ -4084,63 +4143,163 @@ resize();
     }
   };
 
+  
   function stopMusicTimer(){ if(SFX.musicTimer){ clearTimeout(SFX.musicTimer); SFX.musicTimer=null; } }
-  SFX.playSynthNote=function(freq, when, dur, wave='triangle', gain=0.02, detune=0){
+  SFX.midiToFreq=function(n){ return 440*Math.pow(2,(n-69)/12); };
+  SFX.ensureNoise=function(){
+    if(this.noiseBuffer||!this.ctx) return;
+    const len=this.ctx.sampleRate;
+    const buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<len;i++) data[i]=Math.random()*2-1;
+    this.noiseBuffer=buf;
+  };
+  SFX.playTone=function(freq, when, dur, opts={}){
     if(this.muted||!this.ctx||!this.masterGain) return;
+    const wave=opts.wave||'triangle';
+    const gain=opts.gain ?? 0.016;
+    const attack=opts.attack ?? 0.012;
+    const release=opts.release ?? 0.08;
     const osc=this.ctx.createOscillator();
     const g=this.ctx.createGain();
-    osc.type=wave; osc.frequency.setValueAtTime(freq,when); if(detune) osc.detune.value=detune;
-    g.gain.setValueAtTime(0.0001,when);
-    g.gain.linearRampToValueAtTime(gain,when+0.012);
-    g.gain.setTargetAtTime(0.0001,when+Math.max(0.03,dur*0.55),Math.max(0.02,dur*0.22));
+    osc.type=wave;
+    osc.frequency.setValueAtTime(freq, when);
+    if(opts.detune) osc.detune.setValueAtTime(opts.detune, when);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when+attack);
+    g.gain.setTargetAtTime(0.0001, when+Math.max(attack+0.01, dur-release), Math.max(0.02, release*0.35));
     osc.connect(g); g.connect(this.musicGain||this.masterGain);
-    osc.start(when); osc.stop(when+dur+0.12);
+    osc.start(when); osc.stop(when+dur+release+0.05);
   };
-  SFX.playKick=function(when){
+  SFX.playDualTone=function(freq, when, dur, opts={}){
+    this.playTone(freq, when, dur, opts);
+    this.playTone(freq*2, when, dur*0.86, {...opts, gain:(opts.gain??0.016)*0.42, wave:opts.overWave||'triangle', detune:(opts.detune||0)+(opts.overDetune||3)});
+  };
+  SFX.playKick=function(when, gain=0.055){
     if(this.muted||!this.ctx) return;
     const osc=this.ctx.createOscillator(); const g=this.ctx.createGain();
-    osc.type='sine'; osc.frequency.setValueAtTime(110,when); osc.frequency.exponentialRampToValueAtTime(42,when+0.16);
-    g.gain.setValueAtTime(0.0001,when); g.gain.linearRampToValueAtTime(0.03,when+0.005); g.gain.exponentialRampToValueAtTime(0.0001,when+0.18);
-    osc.connect(g); g.connect(this.musicGain||this.masterGain); osc.start(when); osc.stop(when+0.2);
+    osc.type='sine';
+    osc.frequency.setValueAtTime(128, when);
+    osc.frequency.exponentialRampToValueAtTime(46, when+0.18);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, when+0.22);
+    osc.connect(g); g.connect(this.musicGain||this.masterGain);
+    osc.start(when); osc.stop(when+0.24);
+  };
+  SFX.playSnare=function(when, gain=0.03){
+    if(this.muted||!this.ctx) return;
+    this.ensureNoise();
+    const src=this.ctx.createBufferSource(); src.buffer=this.noiseBuffer;
+    const hp=this.ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.setValueAtTime(1200, when);
+    const bp=this.ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.setValueAtTime(1900, when); bp.Q.value=0.9;
+    const g=this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when+0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, when+0.13);
+    src.connect(hp); hp.connect(bp); bp.connect(g); g.connect(this.musicGain||this.masterGain);
+    src.start(when); src.stop(when+0.14);
+    const tone=this.ctx.createOscillator(); const tg=this.ctx.createGain();
+    tone.type='triangle'; tone.frequency.setValueAtTime(220, when); tone.frequency.exponentialRampToValueAtTime(140, when+0.08);
+    tg.gain.setValueAtTime(0.0001, when); tg.gain.linearRampToValueAtTime(gain*0.28, when+0.003); tg.gain.exponentialRampToValueAtTime(0.0001, when+0.1);
+    tone.connect(tg); tg.connect(this.musicGain||this.masterGain); tone.start(when); tone.stop(when+0.11);
+  };
+  SFX.playHat=function(when, gain=0.012, open=false){
+    if(this.muted||!this.ctx) return;
+    this.ensureNoise();
+    const src=this.ctx.createBufferSource(); src.buffer=this.noiseBuffer;
+    const hp=this.ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.setValueAtTime(open?5500:7500, when);
+    const g=this.ctx.createGain();
+    const dur=open?0.12:0.045;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when+0.0025);
+    g.gain.exponentialRampToValueAtTime(0.0001, when+dur);
+    src.connect(hp); hp.connect(g); g.connect(this.musicGain||this.masterGain);
+    src.start(when); src.stop(when+dur+0.02);
   };
   SFX.initMusic=function(){
     if(!this.ctx) return;
-    if(!this.musicGain){ this.musicGain=this.ctx.createGain(); this.musicGain.gain.value=0.22; this.musicGain.connect(this.masterGain); }
+    if(!this.musicGain){ this.musicGain=this.ctx.createGain(); this.musicGain.gain.value=0.18; this.musicGain.connect(this.masterGain); }
     if(this.ambientGain) this.ambientGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
-    this.musicMode='theme'; this.musicStep=0; stopMusicTimer.call(this); this.scheduleMusic();
+    this.musicMode='theme';
+    this.musicStep=0;
+    stopMusicTimer.call(this);
+    this.scheduleMusic();
   };
   SFX.scheduleMusic=function(){
     if(this.muted||!this.ctx){ stopMusicTimer.call(this); return; }
-    const theme={bpm:134, root:220, bass:[0,null,7,null,5,null,7,null,9,null,7,null,5,null,4,null], lead:[0,4,7,11,7,4,0,4,2,5,9,12,9,7,5,4], harmony:[7,null,11,null,9,null,11,null,12,null,11,null,9,null,7,null]};
-    const battle={bpm:156, root:196, bass:[0,0,7,7,5,5,7,7,9,9,7,7,5,5,4,4], lead:[12,11,9,7,9,11,12,14,12,11,9,7,9,7,5,4], harmony:[7,null,7,null,9,null,11,null,12,null,12,null,9,null,7,null]};
+    const stepCount=32;
+    const theme={
+      bpm:128,
+      bars:[
+        {root:40,chord:[0,3,7,10], bass:[0,null,0,7,10,null,7,12], hook:[14,15,17,19,17,15,14,12]},
+        {root:36,chord:[0,4,7,11], bass:[0,null,0,7,11,null,7,12], hook:[12,14,15,19,15,14,12,10]},
+        {root:43,chord:[0,4,7,9], bass:[0,null,0,7,9,null,7,12], hook:[11,12,14,17,16,14,12,11]},
+        {root:38,chord:[0,5,7,10], bass:[0,null,0,7,10,null,12,7], hook:[10,12,14,17,14,12,10,9]}
+      ]
+    };
+    const battle={
+      bpm:136,
+      bars:[
+        {root:40,chord:[0,3,7,10], bass:[0,0,7,0,10,7,12,7], hook:[19,17,15,14,15,17,19,22]},
+        {root:43,chord:[0,4,7,9], bass:[0,0,7,0,9,7,12,7], hook:[17,16,14,12,14,16,17,19]},
+        {root:45,chord:[0,3,7,10], bass:[0,0,7,0,10,7,12,7], hook:[20,19,17,15,17,19,20,22]},
+        {root:38,chord:[0,5,7,10], bass:[0,0,7,0,10,7,12,10], hook:[17,15,14,12,14,15,17,19]}
+      ]
+    };
     const tr=this.musicMode==='battle'?battle:theme;
     const stepDur=60/tr.bpm/2;
-    const now=this.ctx.currentTime+0.02;
-    const steps=16;
-    const major=[0,2,4,5,7,9,11,12,14];
-    for(let i=0;i<steps;i++){
-      const step=(this.musicStep+i)%tr.lead.length;
+    const now=this.ctx.currentTime+0.04;
+    for(let i=0;i<stepCount;i++){
+      const globalStep=(this.musicStep+i)%stepCount;
+      const bar=Math.floor(globalStep/8);
+      const stepInBar=globalStep%8;
       const t=now+i*stepDur;
-      const bass=tr.bass[step], lead=tr.lead[step], harm=tr.harmony[step];
-      if(bass!==null){ const f=tr.root*Math.pow(2,bass/12); this.playSynthNote(f,t,stepDur*0.92,'square',this.musicMode==='battle'?0.024:0.018); this.playSynthNote(f*0.5,t,stepDur*0.85,'triangle',0.016); }
-      if(lead!==null){ const lf=tr.root*2*Math.pow(2,lead/12); this.playSynthNote(lf,t+stepDur*0.02,stepDur*0.6,'triangle',this.musicMode==='battle'?0.022:0.018, (step%2?2:-2)); }
-      if(harm!==null){ const hf=tr.root*Math.pow(2,harm/12); this.playSynthNote(hf,t+stepDur*0.18,stepDur*0.48,'sine',0.010); }
-      if(step%4===0) this.playKick(t);
-      if(this.musicMode==='battle' && step%4===2) this.playKick(t+stepDur*0.5);
+      const section=tr.bars[bar];
+      const base=section.root;
+      const bass=section.bass[stepInBar];
+      const chordTones=section.chord;
+      const hook=section.hook[stepInBar];
+      if(globalStep%2===0) this.playKick(t, this.musicMode==='battle'?0.06:0.052);
+      if(globalStep%8===2||globalStep%8===6) this.playSnare(t+stepDur*0.01, this.musicMode==='battle'?0.035:0.03);
+      this.playHat(t+stepDur*0.52, this.musicMode==='battle'?0.012:0.01, globalStep%8===7);
+      if(bass!==null){
+        const bf=this.midiToFreq(base+bass-12);
+        this.playDualTone(bf, t, stepDur*0.92, {wave:'square', overWave:'triangle', gain:this.musicMode==='battle'?0.024:0.02, attack:0.008, release:0.06, overDetune:1});
+      }
+      const chordMidi=[base+chordTones[0], base+chordTones[1], base+chordTones[2], base+chordTones[3]];
+      if(globalStep%2===0){
+        this.playTone(this.midiToFreq(chordMidi[1]+12), t+stepDur*0.04, stepDur*1.7, {wave:'sine', gain:this.musicMode==='battle'?0.0085:0.0105, attack:0.025, release:0.22});
+        this.playTone(this.midiToFreq(chordMidi[3]+12), t+stepDur*0.1, stepDur*1.6, {wave:'triangle', gain:this.musicMode==='battle'?0.006:0.0075, attack:0.03, release:0.24, detune:-2});
+      }
+      const arpTone=chordMidi[(stepInBar + (bar%2)) % chordMidi.length] + 12 + (stepInBar>=4?12:0);
+      this.playTone(this.midiToFreq(arpTone), t+stepDur*0.02, stepDur*0.75, {wave:'square', gain:this.musicMode==='battle'?0.014:0.012, attack:0.006, release:0.05, detune:(stepInBar%2?2:-2)});
+      if(hook!==null && (stepInBar===1||stepInBar===3||stepInBar===5||stepInBar===7)){
+        this.playDualTone(this.midiToFreq(base+hook), t+stepDur*0.05, stepDur*1.25, {wave:'triangle', overWave:'sine', gain:this.musicMode==='battle'?0.016:0.014, attack:0.012, release:0.1, overDetune:4});
+      }
     }
-    this.musicStep=(this.musicStep+steps)%tr.lead.length;
-    this.musicTimer=setTimeout(()=>{ this.musicTimer=null; this.scheduleMusic(); }, stepDur*steps*1000*0.92);
+    this.musicStep=(this.musicStep+stepCount)%stepCount;
+    this.musicTimer=setTimeout(()=>{ this.musicTimer=null; this.scheduleMusic(); }, stepDur*stepCount*1000*0.97);
   };
   const oldInit=SFX.init.bind(SFX);
   SFX.init=function(){ oldInit(); this.initMusic(); };
   SFX.setAmbience=function(depth,danger=0){
-    if(this.ambientGain&&this.ctx) this.ambientGain.gain.setTargetAtTime(0,this.ctx.currentTime,0.05);
-    const next=danger>1.2?'battle':'theme';
-    if(this.musicMode!==next){ this.musicMode=next; this.musicStep=0; stopMusicTimer.call(this); if(this.ctx&&!this.muted) this.scheduleMusic(); }
-    if(this.musicGain&&this.ctx){ const target=next==='battle'?0.24:0.20; this.musicGain.gain.setTargetAtTime(this.muted?0:target, this.ctx.currentTime, 0.2); }
+    if(this.ambientGain&&this.ctx) this.ambientGain.gain.setTargetAtTime(0,this.ctx.currentTime,0.08);
+    const next=danger>1.15?'battle':'theme';
+    if(this.musicMode!==next){
+      this.musicMode=next;
+      this.musicStep=0;
+      stopMusicTimer.call(this);
+      if(this.ctx&&!this.muted) this.scheduleMusic();
+    }
+    if(this.musicGain&&this.ctx){
+      const target=next==='battle'?0.19:0.16;
+      this.musicGain.gain.setTargetAtTime(this.muted?0:target, this.ctx.currentTime, 0.18);
+    }
   };
   const oldToggleMute=SFX.toggleMute.bind(SFX);
-  SFX.toggleMute=function(){ oldToggleMute(); if(this.musicGain&&this.ctx) this.musicGain.gain.setTargetAtTime(this.muted?0:(this.musicMode==='battle'?0.24:0.20), this.ctx.currentTime, 0.05); if(!this.muted&&!this.musicTimer) this.scheduleMusic(); };
+  SFX.toggleMute=function(){ oldToggleMute(); if(this.musicGain&&this.ctx) this.musicGain.gain.setTargetAtTime(this.muted?0:(this.musicMode==='battle'?0.19:0.16), this.ctx.currentTime, 0.05); if(!this.muted&&!this.musicTimer) this.scheduleMusic(); };
+
 
   const oldRender2=render;
   render=function(){
