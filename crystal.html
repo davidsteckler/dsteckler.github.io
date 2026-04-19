@@ -6429,11 +6429,930 @@ resize();
     SFX.toggleMute=function(){ oldToggle(); if(!this.muted) this.startMusic(true); else this.stopMusic(); };
   });
 
+
+  // ===== V20 PATCH: enemy factions, readable combat info, smarter doors, richer interactions, smoother music =====
+  (function(){
+    const style=document.createElement('style');
+    style.textContent=`
+      #ability-help{max-width:520px!important;padding:8px 12px!important;background:linear-gradient(180deg,#16203b,#0c1221)!important;border-color:rgba(160,210,255,.25)!important}
+      #ability-help .ah-name{font-size:12px!important;color:#ffffff!important}
+      #ability-help .ah-desc{font-size:9px!important;line-height:1.6!important;color:#edf4ff!important}
+      #ability-help .ah-tag{font-size:8px!important;color:#94ffd9!important}
+      #inspect-panel .ip-name{font-size:12px!important;color:#ffffff!important;text-shadow:0 1px 0 #000!important}
+      #inspect-panel .ip-type{font-size:8px!important;color:#d8e6ff!important}
+      #inspect-panel .ip-desc,#inspect-panel .ip-stats,#inspect-panel .ip-empty,#inspect-panel .ip-compare,#inspect-panel .ip-tip{font-size:8px!important;line-height:1.8!important;color:#f3f7ff!important}
+      #tooltip{border-color:#6c8aca!important;box-shadow:0 10px 28px rgba(0,0,0,.55)!important}
+      #tooltip .tt-name{font-size:10px!important;color:#fff!important}
+      #tooltip .tt-type{font-size:7px!important;color:#d7e2ff!important}
+      #tooltip .tt-desc,#tooltip .tt-stats,#tooltip .tt-compare{font-size:7px!important;line-height:1.7!important;color:#f1f5ff!important}
+      #enemy-modal .v19-modal-card{max-width:min(860px,94vw)!important;background:linear-gradient(180deg,#121a31,#0b1020)!important;border:1px solid rgba(170,200,255,.2)!important}
+      #enemy-modal .v19-modal-top{margin-bottom:8px!important}
+      #enemy-modal .v19-main h4,#enemy-modal .v19-side h4{font-size:12px!important;color:#fff!important;margin-bottom:8px}
+      #enemy-modal .v19-main p,#enemy-modal .v19-side p{font-size:12px!important;line-height:1.6!important;color:#edf4ff!important}
+      #enemy-modal .v19-pill{font-size:11px!important;background:#182543!important;color:#fff!important;border-color:rgba(255,255,255,.12)!important}
+      #enemy-modal .v20-gear-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px}
+      #enemy-modal .v20-gear-chip{display:flex;gap:8px;align-items:center;padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.04)}
+      #enemy-modal .v20-gear-chip canvas{width:24px;height:24px;image-rendering:pixelated;flex:0 0 auto}
+      #enemy-modal .v20-gear-chip div{font-size:11px;line-height:1.35;color:#eff5ff}
+    `;
+    document.head.appendChild(style);
+
+    abilityMeta.slash={tag:'Q',name:'Slash',desc:'Arc attack. Hits the target tile and the two flanking tiles. Great when melee foes stack in a doorway.'};
+    abilityMeta.bash={tag:'E',name:'Bash',desc:'Heavy shove. Strong single hit that pushes 1 tile. Best for walls, traps, and breaking shield lines.'};
+    abilityMeta.kick={tag:'F',name:'Kick',desc:'Fast interrupt. Low damage, but it staggers and can stop archers, mages, and chargers from getting a clean turn.'};
+    abilityMeta.guard={tag:'G',name:'Guard',desc:'Brace this turn. You take less damage next enemy phase and buy time to read the room.'};
+    abilityMeta.basic={tag:'Click',name:'Basic Strike',desc:'Adjacent attack. Every build can punch and kick, but weapons make those trades much stronger.'};
+    abilityMeta.ranged={tag:'Click',name:'Ranged Shot',desc:'Bow, crossbow, or wand attack. Fire from safety if line of sight and range are good.'};
+
+    const FACTION_DATA={
+      beast:{label:'Pack Beast',role:'Harrier',desc:'Fast opener that tries to force messy trades.',badge:'#ffbf7a'},
+      ooze:{label:'Caustic Ooze',role:'Anchor',desc:'Sticky body that is easy to hit but punishes weak weapons.',badge:'#9cff9a'},
+      flying:{label:'Nightwing',role:'Diver',desc:'Jumps angles and pressures fragile backlines.',badge:'#d8c7ff'},
+      bone:{label:'Bone Legion',role:'Bulwark',desc:'Holds lanes with spears and shields. Wants a straight fight.',badge:'#d9ddd5'},
+      raider:{label:'Goblin Company',role:'Skirmisher',desc:'Plays wide and makes bad trades feel tempting.',badge:'#ffd18a'},
+      spirit:{label:'Veilborn',role:'Assassin',desc:'Phases and punishes overcommitment.',badge:'#cfcfff'},
+      demon:{label:'Ash Host',role:'Breaker',desc:'Charges hard and crushes choke points.',badge:'#ff9c7a'},
+      mage:{label:'Hex Circle',role:'Summoner',desc:'Uses distance, bolts, and disposable bodies to win space.',badge:'#d9a8ff'},
+      dragon:{label:'Wyrm Court',role:'Apex',desc:'Turns the room into its own weapon.',badge:'#ffd782'},
+      'undead mage':{label:'Hollow Court',role:'Archon',desc:'Curses from range and hides behind the dead.',badge:'#d8e5ff'}
+    };
+
+    const oldEnsureEnemyMetaV20=ensureEnemyMeta;
+    ensureEnemyMeta=function(enemy){
+      enemy=oldEnsureEnemyMetaV20(enemy);
+      if(!enemy) return enemy;
+      const fac=FACTION_DATA[enemy.unitType]||FACTION_DATA[(enemy.unitType||'').toLowerCase()]||null;
+      if(fac){
+        enemy.faction=enemy.faction||fac.label;
+        enemy.role=enemy.role||fac.role;
+        enemy.desc=((enemy.desc||'')+' '+fac.desc).trim();
+        enemy.badgeColor=enemy.badgeColor||fac.badge;
+      } else {
+        enemy.role=enemy.role||'Foe';
+        enemy.badgeColor=enemy.badgeColor||'#d8e6ff';
+      }
+      if(enemy.ai==='ranged' && !enemy.skills.includes('Keeps distance')) enemy.skills.push('Keeps distance');
+      if(enemy.phase && !enemy.skills.includes('Ignores walls')) enemy.skills.push('Ignores walls');
+      if(enemy.elite && !enemy.skills.includes('Elite pressure')) enemy.skills.push('Elite pressure');
+      if(enemy.boss && !enemy.skills.includes('Boss pattern')) enemy.skills.push('Boss pattern');
+      return enemy;
+    };
+    if(window.ENEMIES) ENEMIES.forEach(ensureEnemyMeta);
+
+    const summonMinion=function(caster){
+      const opts=[[1,0],[-1,0],[0,1],[0,-1]];
+      for(const [dx,dy] of opts){
+        const x=caster.x+dx,y=caster.y+dy;
+        if(x<0||y<0||x>=MAP_W||y>=MAP_H) continue;
+        if(G.map[y][x]===T.WALL||G.map[y][x]===T.DOOR) continue;
+        if((G.player.x===x&&G.player.y===y)||G.enemies.some(e=>e.hp>0&&e.x===x&&e.y===y)) continue;
+        const add={...ENEMIES.find(e=>e.name==='Skeleton')};
+        add.hp=Math.max(4,Math.floor((caster.hp||6)*0.35)); add.maxHp=add.hp; add.atk=Math.max(1,Math.floor((caster.atk||2)*0.55)); add.def=1; add.xp=2; add.gold=0; add.name='Bound Skeleton'; add.sprite='skeleton'; add.ai='chase'; add.summoned=true;
+        ensureEnemyMeta(add);
+        G.enemies.push({...add,x,y,id:Math.random(),alert:true,poisoned:0,stunned:0,slowed:false,hitFlash:0,bobOffset:Math.random()*10});
+        spawnSpellFx({kind:'burst',x,y,color:'#c89bff',life:18,maxLife:18});
+        addLog((caster.bossName||caster.name)+' calls up a skeleton.','combat');
+        return true;
+      }
+      return false;
+    };
+
+    const oldEnemyTurnV20=enemyTurn;
+    enemyTurn=function(){
+      if(!G||!G.enemies) return oldEnemyTurnV20();
+      for(const e of G.enemies) ensureEnemyMeta(e);
+      for(const e of G.enemies){
+        if(e.hp<=0) continue;
+        if(!e._v20init){ e._v20init=true; e.hasSummoned=false; e.chargeCooldown=0; }
+      }
+      for(const e of G.enemies){
+        if(e.hp<=0) continue;
+        if(e.stunned>0){e.stunned--;continue;}
+        if(e.slowed&&rng.chance(.5)) continue;
+        if(e.poisoned>0){e.hp-=1;e.poisoned--;spawnP(e.x,e.y,'#40ff40',2);if(e.hp<=0){killEnemy(e);continue;}}
+        const actions=e.eliteHaste&&rng.chance(e.eliteHaste)?2:1;
+        for(let step=0;step<actions;step++){
+          if(e.hp<=0||G.gameOver) break;
+          const dist=Math.abs(e.x-G.player.x)+Math.abs(e.y-G.player.y);
+          const canSee=G.visible[e.y]&&G.visible[e.y][e.x];
+          if(canSee&&dist<=11)e.alert=true;
+          if(e.chargeCooldown>0) e.chargeCooldown--;
+
+          if(e.intentCharge){
+            const tx=e.intentCharge.x, ty=e.intentCharge.y;
+            for(let ay=ty-1; ay<=ty+1; ay++) for(let ax=tx-1; ax<=tx+1; ax++){
+              if(ax<0||ax>=MAP_W||ay<0||ay>=MAP_H) continue;
+              if(G.player.x===ax&&G.player.y===ay){
+                const st=getStats(); let dmg=Math.max(2,e.atk + (e.boss?3:1) - st.def + rng.int(0,2));
+                if(G.player.guardTurns>0) dmg=Math.max(1,Math.floor(dmg*0.4));
+                dmg=Math.max(1,Math.floor(dmg*(st.damageTaken||1))); G.player.hp-=dmg; G.player.hitFlash=1; spawnDamageText(G.player.x,G.player.y,`${dmg}`,'#ff7040');
+              }
+            }
+            spawnSpellFx({kind:'burst',x:tx,y:ty,color:e.boss?'#ff7040':'#ffb35b',life:24,maxLife:24});
+            addLog(`${e.name} unleashes ${e.intentCharge.kind==='blast'?'a blast':'a slam'}!`,'combat'); e.intentCharge=null; if(G.player.hp<=0)doGameOver(); break;
+          }
+
+          if(e.role==='Summoner' && !e.hasSummoned && dist<=6 && rng.chance(0.28)){ if(summonMinion(e)){ e.hasSummoned=true; break; } }
+          if((e.role==='Breaker'||e.unitType==='demon') && dist>1 && dist<=4 && (!e.chargeCooldown) && rng.chance(0.28)){ e.intentCharge={kind:'slam',x:G.player.x,y:G.player.y}; e.chargeCooldown=3; addLog(`${e.name} lowers its shoulder for a rush!`,'combat'); break; }
+          if((e.boss||e.elite||e.miniBoss) && dist>1 && dist<=4 && rng.chance(e.boss?0.45:0.20)){ e.intentCharge={kind:(e.range?'blast':'slam'),x:G.player.x,y:G.player.y}; addLog(`${e.name} lines up a ${e.intentCharge.kind}!`,'combat'); break; }
+          if(dist===1){ attack(e,G.player,false); break; }
+          if(e.range&&dist<=e.range&&canSee){
+            const st=getStats(); let dmg=Math.max(1,e.atk-st.def+rng.int(-1,1)); if(G.player.guardTurns>0) dmg=Math.max(1,Math.floor(dmg*0.4)); dmg=Math.max(1,Math.floor(dmg*(st.damageTaken||1)));
+            G.player.hp-=dmg; addLog(`${e.name} ${e.role==='Summoner'?'hexes':'fires at'} you for ${dmg}!`,'combat'); SFX.play('spell'); spawnSpellFx({kind:'projectile',from:{x:e.x,y:e.y},to:{x:G.player.x,y:G.player.y},color:e.weaponColor||'#c89bff',life:14,maxLife:14}); spawnP(G.player.x,G.player.y,e.weaponColor||'#c89bff',4); if(G.player.hp<=0)doGameOver(); break;
+          }
+          if(!e.alert){ if(rng.chance(.25)){ const [dx,dy]=rng.pick([[0,-1],[0,1],[-1,0],[1,0]]); const nx=e.x+dx, ny=e.y+dy; if(nx>=0&&nx<MAP_W&&ny>=0&&ny<MAP_H&&G.map[ny][nx]!==T.WALL&&!G.enemies.some(o=>o!==e&&o.hp>0&&o.x===nx&&o.y===ny)){ e.x=nx;e.y=ny; } } break; }
+          let moved=false;
+          if(e.ai==='erratic'&&rng.chance(.55)){ const [dx,dy]=rng.pick([[0,-1],[0,1],[-1,0],[1,0]]); const nx=e.x+dx, ny=e.y+dy; if(G.map[ny]&&G.map[ny][nx]!==T.WALL&&!(nx===G.player.x&&ny===G.player.y)){ e.x=nx; e.y=ny; moved=true; } }
+          if(e.ai==='phase' && !moved){ const dx=Math.sign(G.player.x-e.x),dy=Math.sign(G.player.y-e.y); if(rng.chance(.5)){ const nx=e.x+dx; if(nx>=0&&nx<MAP_W){ e.x=nx; moved=true; } } else { const ny=e.y+dy; if(ny>=0&&ny<MAP_H){ e.y=ny; moved=true; } } }
+          if(!moved&&(e.ai==='chase'||e.ai==='smart'||e.ai==='boss'||e.ai==='ranged')){
+            const path=findPath(e.x,e.y,G.player.x,G.player.y,12,false); if(path.length>0){ const next=path[0]; if(!(next.x===G.player.x&&next.y===G.player.y)&&!G.enemies.some(o=>o!==e&&o.hp>0&&o.x===next.x&&o.y===next.y)){ e.x=next.x; e.y=next.y; } }
+          }
+          if(G.map[e.y]&&G.map[e.y][e.x]===T.TRAP) triggerTrapAt(e.x,e.y,e.name,e);
+        }
+      }
+    };
+
+    function coordKey(x,y){ return x+','+y; }
+    function floorish(v){ return v===T.FLOOR || v===T.DOOR || v===T.TRAP || v===T.STAIR_DOWN || v===T.STAIR_UP; }
+    function roomFor(x,y){ return G.rooms.find(r=>x>=r.x && x<r.x+r.w && y>=r.y && y<r.y+r.h); }
+    function roomInterior(r,x,y){ return x>r.x && x<r.x+r.w-1 && y>r.y && y<r.y+r.h-1; }
+    function chooseDoorKind(room){
+      if(!room) return 'normal';
+      if(room.theme==='treasure') return rng.pick(['cache','cache','iron']);
+      if(room.theme==='crystal' || room.theme==='shrine') return rng.pick(['warded','warded','iron']);
+      if(room.theme==='shadow' || room.theme==='bones') return rng.pick(['iron','normal']);
+      return rng.pick(['normal','normal','iron']);
+    }
+    function cleanAndTagDoors(){
+      G.doorMeta={};
+      for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++) if(G.map[y][x]===T.DOOR) G.map[y][x]=T.FLOOR;
+      const chosen=[];
+      for(const room of G.rooms||[]){
+        if(!room || room===G.rooms[0] || room===G.rooms[G.rooms.length-1]) continue;
+        const cands=[];
+        for(let x=room.x+1;x<room.x+room.w-1;x++){
+          let y=room.y; if(floorish(G.map[y]?.[x]) && roomInterior(room,x,y+1) && floorish(G.map[y-1]?.[x]) && !roomFor(x,y-1)) cands.push({x,y,room});
+          y=room.y+room.h-1; if(floorish(G.map[y]?.[x]) && roomInterior(room,x,y-1) && floorish(G.map[y+1]?.[x]) && !roomFor(x,y+1)) cands.push({x,y,room});
+        }
+        for(let y=room.y+1;y<room.y+room.h-1;y++){
+          let x=room.x; if(floorish(G.map[y]?.[x]) && roomInterior(room,x+1,y) && floorish(G.map[y]?.[x-1]) && !roomFor(x-1,y)) cands.push({x,y,room});
+          x=room.x+room.w-1; if(floorish(G.map[y]?.[x]) && roomInterior(room,x-1,y) && floorish(G.map[y]?.[x+1]) && !roomFor(x+1,y)) cands.push({x,y,room});
+        }
+        const picks=[]; const limit=(room.theme==='treasure'||room.theme==='shrine')?1:1;
+        while(cands.length && picks.length<limit){
+          const idx=rng.int(0,cands.length-1); const c=cands.splice(idx,1)[0];
+          if(chosen.some(o=>Math.abs(o.x-c.x)+Math.abs(o.y-c.y)<=1)) continue;
+          picks.push(c); chosen.push(c);
+        }
+        for(const c of picks){ G.map[c.y][c.x]=T.DOOR; G.doorMeta[coordKey(c.x,c.y)]={kind:chooseDoorKind(room), roomTheme:room.theme}; }
+      }
+    }
+    function populateInteractives(){
+      G.interactives=[];
+      const typesByTheme={
+        crystal:['crystalNode','crystalNode','fountain'],
+        shrine:['fountain','brazier'],
+        bones:['tomb','tomb','brazier'],
+        shadow:['brazier','lever'],
+        treasure:['anvil','lever','tomb'],
+        moss:['fountain','brazier'],
+        lava:['brazier','anvil'],
+        plain:['lever','brazier']
+      };
+      for(const room of (G.rooms||[]).slice(1,-1)){
+        if(!room || !rng.chance(room.theme==='plain'?0.18:0.4)) continue;
+        const candidates=[];
+        for(let y=room.y+1;y<room.y+room.h-1;y++) for(let x=room.x+1;x<room.x+room.w-1;x++){
+          if(G.map[y][x]!==T.FLOOR) continue;
+          if(G.items.some(it=>it.x===x&&it.y===y)) continue;
+          if(G.enemies.some(e=>e.hp>0&&e.x===x&&e.y===y)) continue;
+          candidates.push({x,y});
+        }
+        if(!candidates.length) continue;
+        const pos=candidates[rng.int(0,candidates.length-1)];
+        const type=rng.pick(typesByTheme[room.theme]||typesByTheme.plain);
+        G.interactives.push({x:pos.x,y:pos.y,type,used:false,roomTheme:room.theme,id:Math.random()});
+      }
+    }
+    function revealAround(x,y,r=4){
+      for(let yy=Math.max(0,y-r);yy<=Math.min(MAP_H-1,y+r);yy++) for(let xx=Math.max(0,x-r);xx<=Math.min(MAP_W-1,x+r);xx++){
+        if(Math.abs(xx-x)+Math.abs(yy-y)<=r+1){ G.explored[yy][xx]=true; G.visible[yy][xx]=true; }
+      }
+    }
+    function interactiveInfo(obj){
+      const map={
+        brazier:{name:'Signal Brazier',desc:'Light it to reveal the room and scorch nearby shadows.',stats:['Interact beside it to reveal nearby tiles and burn adjacent enemies.'],color:'#ffb35b'},
+        fountain:{name:'Clear Spring',desc:'A cold basin that restores some health and mana once.',stats:['Interact beside it to recover 35% HP and 35% MP.'],color:'#8ad9ff'},
+        tomb:{name:'Old Tomb',desc:'Break the seal for a reward, but the dead do not always stay quiet.',stats:['Interact beside it for gold or a possible undead ambush.'],color:'#d8ddd5'},
+        lever:{name:'Wall Lever',desc:'A rusted mechanism tied to the room. Good for trap play and access.',stats:['Interact beside it to reveal and disarm nearby traps.'],color:'#ffd866'},
+        anvil:{name:'Travel Anvil',desc:'A field forge used by people who expected another fight.',stats:['Interact beside it to sharpen your weapon for this floor.'],color:'#c9d8e8'},
+        crystalNode:{name:'Crystal Node',desc:'A living shard humming with unstable thought.',stats:['Interact beside it to gain MP and charge your next spell.'],color:'#c89bff'}
+      };
+      return map[obj.type];
+    }
+    function activateInteractive(obj){
+      if(!obj || obj.used) return;
+      obj.used=true;
+      const info=interactiveInfo(obj);
+      if(info) addLog(info.name+' activated.','info');
+      if(obj.type==='brazier'){
+        revealAround(obj.x,obj.y,5); spawnP(obj.x,obj.y,'#ffb35b',10); SFX.play('shrine');
+        for(const e of G.enemies){ if(e.hp>0 && Math.abs(e.x-obj.x)+Math.abs(e.y-obj.y)<=1){ e.hp-=2; spawnDamageText(e.x,e.y,'2','#ffb35b'); if(e.hp<=0) killEnemy(e); }}
+      } else if(obj.type==='fountain'){
+        const hp=Math.max(3,Math.floor(G.player.maxHp*0.35)), mp=Math.max(2,Math.floor(G.player.maxMp*0.35)); G.player.hp=Math.min(G.player.maxHp,G.player.hp+hp); G.player.mp=Math.min(G.player.maxMp,G.player.mp+mp); spawnP(obj.x,obj.y,'#8ad9ff',10); SFX.play('heal');
+      } else if(obj.type==='tomb'){
+        if(rng.chance(0.45)){ const add={...ENEMIES.find(e=>e.name==='Skeleton')}; add.hp=8+G.player.floor; add.maxHp=add.hp; add.atk=3+Math.floor(G.player.floor/2); add.def=1; add.gold=0; add.xp=4; add.name='Awakened Guardian'; ensureEnemyMeta(add); G.enemies.push({...add,x:obj.x,y:obj.y,id:Math.random(),alert:true,poisoned:0,stunned:0,slowed:false,hitFlash:0,bobOffset:Math.random()*10}); addLog('The tomb opens and something wakes.','combat'); }
+        else { const g=rng.int(6,14)+G.player.floor; G.player.gold+=g; addLog('The tomb holds '+g+' gold.','item'); spawnP(obj.x,obj.y,'#ffd866',8); }
+      } else if(obj.type==='lever'){
+        let traps=0; for(let yy=Math.max(0,obj.y-5);yy<=Math.min(MAP_H-1,obj.y+5);yy++) for(let xx=Math.max(0,obj.x-5);xx<=Math.min(MAP_W-1,obj.x+5);xx++){ if(G.map[yy][xx]===T.TRAP){ G.map[yy][xx]=T.FLOOR; traps++; }}
+        addLog(traps?`Lever disarms ${traps} trap${traps===1?'':'s'}.`:'The lever grinds, but nothing nearby was armed.','info'); SFX.play('door');
+      } else if(obj.type==='anvil'){
+        if(G.player.weapon){ G.player.weapon.atk=(G.player.weapon.atk||1)+1; G.player.weapon.power=(G.player.weapon.power||calcItemPower(G.player.weapon,'weapon'))+1; addLog((G.player.weapon.name||'Weapon')+' is honed for this descent.','item'); updateEquipUI(); }
+      } else if(obj.type==='crystalNode'){
+        G.player.mp=Math.min(G.player.maxMp,G.player.mp+3); G.player.nextSpellAmp=1.25; addLog('Crystal charge: your next spell hits harder.','spell'); spawnP(obj.x,obj.y,'#c89bff',12); SFX.play('pickup');
+      }
+      renderInspectPanel();
+    }
+
+    const oldGenerateFloorV20=generateFloor;
+    generateFloor=function(depth){
+      oldGenerateFloorV20(depth);
+      cleanAndTagDoors();
+      populateInteractives();
+      computeFOV(); updateCamera();
+    };
+
+    function doorEffectText(kind){
+      return ({normal:'Simple choke point. Quiet to open.', iron:'Heavy door. Opening it braces you for the next exchange.', warded:'Arcane seal. Opening it reveals ground and restores a little MP.', cache:'Supply door. Opening it can drop gold or a potion.'})[kind]||'Door.';
+    }
+    function openDoorAt(x,y){
+      const meta=G.doorMeta?.[coordKey(x,y)]||{kind:'normal'};
+      G.map[y][x]=T.FLOOR; if(G.doorMeta) delete G.doorMeta[coordKey(x,y)];
+      if(meta.kind==='iron'){ G.player.guardTurns=Math.max(G.player.guardTurns||0,1); addLog('You shoulder open an iron door and brace for impact.','info'); }
+      else if(meta.kind==='warded'){ G.player.mp=Math.min(G.player.maxMp,G.player.mp+2); revealAround(x,y,4); addLog('The ward breaks. The room lights up and mana returns.','info'); }
+      else if(meta.kind==='cache'){ if(rng.chance(0.55)){ G.player.potions.hp++; addLog('A cache door hides a health potion.','item'); updatePotionUI(); } else { const g=rng.int(5,12)+G.player.floor; G.player.gold+=g; addLog('A cache door spills '+g+' gold.','item'); } }
+      else addLog('Opened a door.','info');
+      SFX.play('door');
+    }
+
+    movePlayer=function(dx,dy,viaAuto=false){
+      if(!viaAuto) clearAutoMove();
+      if(G.gameOver||G.paused) return;
+      if(dx<0) G.player.facing='left'; else if(dx>0) G.player.facing='right'; else if(dy<0) G.player.facing='up'; else if(dy>0) G.player.facing='down';
+      const nx=G.player.x+dx, ny=G.player.y+dy;
+      if(nx<0||nx>=MAP_W||ny<0||ny>=MAP_H) return;
+      if(G.map[ny][nx]===T.WALL) return;
+      const enemy=G.enemies.find(e=>e.x===nx&&e.y===ny&&e.hp>0);
+      if(enemy){ if(G.player.queuedAction){ if(tryCombatAction(G.player.queuedAction,dx,dy)) return; clearQueuedAction(); } attack(G.player,enemy,true); endTurn(); return; }
+      if(G.map[ny][nx]===T.DOOR) openDoorAt(nx,ny);
+      G.player.x=nx; G.player.y=ny; G.player.steps++; SFX.play('step');
+      if(G.map[ny][nx]===T.TRAP){ triggerTrapAt(nx,ny,'player'); if(G.player.hp<=0){doGameOver(); return;} }
+      if(G.map[ny][nx]===T.STAIR_DOWN){ G.player.floor++; addLog(`Descending to floor ${G.player.floor}...`,'info'); SFX.play('stairs'); generateFloor(G.player.floor); return; }
+      const item=G.items.find(it=>it.x===nx&&it.y===ny); if(item) pickupItem(item);
+      endTurn();
+    };
+
+    const oldGetWorldHoverInfoV20=getWorldHoverInfo;
+    getWorldHoverInfo=function(x,y){
+      const i=(G.interactives||[]).find(o=>o.x===x&&o.y===y&&!o.used);
+      if(i){ const inf=interactiveInfo(i); return {name:inf.name,type:'interactive',color:inf.color,desc:inf.desc,stats:inf.stats}; }
+      const info=oldGetWorldHoverInfoV20(x,y);
+      if(G.map[y]?.[x]===T.DOOR){ const meta=G.doorMeta?.[coordKey(x,y)]||{kind:'normal'}; return {name:(meta.kind[0].toUpperCase()+meta.kind.slice(1))+' Door',type:'door',color:meta.kind==='warded'?'#c89bff':meta.kind==='cache'?'#ffd866':meta.kind==='iron'?'#c9d8e8':'#ffcf8b',desc:doorEffectText(meta.kind),stats:['Open by walking into it.','Inspect first if you want to plan the room.']}; }
+      if(info){
+        const enemy=G.enemies.find(e=>e.hp>0&&e.x===x&&e.y===y&&G.visible[y]&&G.visible[y][x]);
+        if(enemy){ ensureEnemyMeta(enemy); info.name=(enemy.bossName||enemy.name); info.desc=enemy.desc; const prev=playerDamagePreview(enemy); const intent=typeof predictEnemyIntent==='function'?predictEnemyIntent(enemy):null; info.stats=[`Role ${enemy.role||'Foe'} • ${enemy.faction||'Unknown'}`,`Weapon ${enemy.weaponLabel||enemy.weaponClass||'—'}`,`Gear ${enemy.gearSummary||'Natural weapons'}`,`Your hit ${prev.low}-${prev.high} • Matchup ${prev.matchup.label}`,`Skills ${(enemy.skills||[]).join(', ')||'None listed'}`,`Weak ${((enemy.weak||[]).map(k=>WEAPON_CLASS_INFO[k]?.label||k).join(', ')||'—')}`,`Resist ${((enemy.resist||[]).map(k=>WEAPON_CLASS_INFO[k]?.label||k).join(', ')||'—')}`]; if(intent) info.intent=intent; info.color=enemy.badgeColor||info.color; }
+      }
+      return info;
+    };
+
+    const oldOpenEnemyModalV20=openEnemyModal;
+    function gearIconKey(label){
+      const s=String(label||'').toLowerCase();
+      if(s.includes('bow')) return 'shortbow';
+      if(s.includes('crossbow')) return 'crossbow';
+      if(s.includes('staff')) return 'arc_wand';
+      if(s.includes('spear')||s.includes('lance')) return 'dragon_fang';
+      if(s.includes('shield')||s.includes('buckler')||s.includes('pavis')||s.includes('mail')||s.includes('plate')||s.includes('mantle')||s.includes('wrap')) return 'chain_mail';
+      if(s.includes('claw')||s.includes('fang')||s.includes('talon')) return 'shadow_dagger';
+      if(s.includes('cleaver')||s.includes('hatchet')) return 'flame_axe';
+      return 'iron_sword';
+    }
+    openEnemyModal=function(enemy){
+      if(!enemy||enemy.hp<=0) return;
+      ensureEnemyMeta(enemy);
+      const modal=byId('enemy-modal'); if(!modal) return;
+      const intent=typeof predictEnemyIntent==='function' ? predictEnemyIntent(enemy) : null;
+      const preview=typeof playerDamagePreview==='function' ? playerDamagePreview(enemy) : null;
+      const matchup=preview?.matchup;
+      const main=modal.querySelector('.v19-main'); const side=modal.querySelector('.v19-side');
+      modal.querySelector('.v19-modal-title').textContent=(enemy.bossName||enemy.name);
+      main.innerHTML='<h4>What this enemy is trying to do</h4>'+
+        `<p>${enemy.desc||'A dangerous opponent.'}</p>`+
+        '<div class="v19-statline">'+
+        `<span class="v19-pill">${enemy.role||'Foe'}</span>`+
+        `<span class="v19-pill">${enemy.faction||'Unknown faction'}</span>`+
+        `<span class="v19-pill">HP ${enemy.hp}/${enemy.maxHp}</span>`+
+        `<span class="v19-pill">ATK ${enemy.atk}</span>`+
+        `<span class="v19-pill">DEF ${enemy.def}</span>`+
+        (enemy.range?`<span class="v19-pill">Range ${enemy.range}</span>`:'')+
+        (intent?`<span class="v19-pill" style="color:${intent.color||'#fff'}">${intent.icon} ${intent.label}</span>`:'')+
+        (matchup?`<span class="v19-pill" style="color:${matchup.mult>=1?'#96ffe5':'#ffbf8a'}">Matchup ${matchup.label}</span>`:'')+
+        '</div>'+
+        `<p style="margin-top:10px"><strong>Skills:</strong> ${((enemy.skills||[]).join(', '))||'No special skills listed.'}</p>`+
+        `<p><strong>How to think about it:</strong> ${matchup?.mult>=1.18?'Take the trade if the room is clean.':matchup?.mult<=0.9?'Respect it. Reposition, guard, or spend a spell first.':'Fight it, but read the next turn before you commit two actions.'}</p>`;
+      side.innerHTML='<h4>Gear and weaknesses</h4>'+
+        `<p><strong>Weapon:</strong> ${enemy.weaponLabel||enemy.weaponClass||'Natural weapons'}</p>`+
+        `<p><strong>Weak:</strong> ${((enemy.weak||[]).map(k=>WEAPON_CLASS_INFO[k]?.label||k).join(', ')||'—')}</p>`+
+        `<p><strong>Resist:</strong> ${((enemy.resist||[]).map(k=>WEAPON_CLASS_INFO[k]?.label||k).join(', ')||'—')}</p>`+
+        `<p><strong>Your hit:</strong> ${preview?preview.low+'-'+preview.high:'?'}</p>`+
+        `<div class="v20-gear-grid">${(enemy.gear||['Natural weapons']).map(g=>`<div class="v20-gear-chip"><canvas width="28" height="28" data-gear="${gearIconKey(g)}"></canvas><div><strong>${g}</strong><br>${/shield|buckler|mail|plate|wrap|mantle|pavis/i.test(g)?'Defensive gear':'Offensive gear'}</div></div>`).join('')}</div>`;
+      side.querySelectorAll('canvas[data-gear]').forEach(c=>{ const icon=ITEM_ICONS[c.dataset.gear]; if(icon) drawIconToCanvas(c,icon.px,icon.w,icon.h,icon.colors); });
+      const actions=modal.querySelector('.v19-actions'); actions.innerHTML='';
+      const close=document.createElement('button'); close.className='v19-btn'; close.textContent='Close'; close.onclick=()=>modal.classList.remove('show');
+      const pin=document.createElement('button'); pin.className='v19-btn'; pin.textContent='Pin Inspect'; pin.onclick=()=>{ pinInspect({kind:'world',x:enemy.x,y:enemy.y}); renderInspectPanel(); };
+      const act=document.createElement('button'); act.className='v19-btn primary'; act.textContent=(canRangedAttack(enemy)?'Shoot':'Attack'); act.onclick=()=>{ modal.classList.remove('show'); if(canRangedAttack(enemy)){ attack(G.player, enemy, true); endTurn(); return; } const dist=Math.abs(enemy.x-G.player.x)+Math.abs(enemy.y-G.player.y); if(dist===1){ attack(G.player, enemy, true); endTurn(); } else startAutoMoveTo(enemy.x,enemy.y); };
+      actions.append(act,pin,close);
+      modal.classList.add('show');
+    };
+
+    handleCanvasPoint=function(clientX, clientY){
+      if(G.gameOver||G.paused) return;
+      const rect=canvas.getBoundingClientRect();
+      const sx=(clientX-rect.left)*(canvas.width/rect.width); const sy=(clientY-rect.top)*(canvas.height/rect.height);
+      const tx=Math.floor(sx/TILE)+G.camera.x; const ty=Math.floor(sy/TILE)+G.camera.y;
+      const info=getWorldHoverInfo(tx,ty);
+      const samePinned=G.selectedInspect&&G.selectedInspect.kind==='world'&&G.selectedInspect.x===tx&&G.selectedInspect.y===ty;
+      const dist=Math.abs(tx-G.player.x)+Math.abs(ty-G.player.y);
+      const enemy=G.enemies.find(en=>en.x===tx&&en.y===ty&&en.hp>0);
+      const interactive=(G.interactives||[]).find(o=>o.x===tx&&o.y===ty&&!o.used);
+      if(enemy){ if(!samePinned){ pinInspect({kind:'world',x:tx,y:ty}); return; } openEnemyModal(enemy); return; }
+      if(interactive){ if(!samePinned){ pinInspect({kind:'world',x:tx,y:ty}); return; } if(dist<=1){ activateInteractive(interactive); endTurn(); } else startAutoMoveTo(tx,ty); return; }
+      if(info && !samePinned){ pinInspect({kind:'world',x:tx,y:ty}); return; }
+      if(samePinned) clearPinnedInspect();
+      if(dist===0){ waitTurn(); return; }
+      startAutoMoveTo(tx,ty);
+    };
+
+    const oldRenderV20=render;
+    function drawEnemyBadges(){
+      if(!G||!G.enemies) return;
+      ctx.save(); ctx.font='8px "Press Start 2P", monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      for(const e of G.enemies){
+        if(e.hp<=0||!G.visible[e.y]?.[e.x]) continue;
+        const sx=(e.x-G.camera.x)*TILE+TILE/2, sy=(e.y-G.camera.y)*TILE-8;
+        if(sx<0||sx>canvas.width||sy<0||sy>canvas.height) continue;
+        const label=(e.role||e.eliteMod||'Foe').slice(0,10);
+        const w=Math.max(34, ctx.measureText(label).width+10);
+        ctx.fillStyle='rgba(7,10,18,.86)'; ctx.fillRect(sx-w/2, sy-6, w, 12);
+        ctx.strokeStyle=e.badgeColor||'#d8e6ff'; ctx.strokeRect(sx-w/2+0.5, sy-5.5, w-1, 11);
+        ctx.fillStyle='#ffffff'; ctx.fillText(label, sx, sy);
+      }
+      ctx.restore();
+    }
+    function drawInteractives(){
+      if(!G||!G.interactives) return;
+      for(const obj of G.interactives){
+        if(obj.used) continue;
+        const px=(obj.x-G.camera.x)*TILE, py=(obj.y-G.camera.y)*TILE;
+        if(px<-TILE||py<-TILE||px>canvas.width||py>canvas.height) continue;
+        ctx.save();
+        if(obj.type==='brazier'){ ctx.fillStyle='#5a2a10'; ctx.fillRect(px+9,py+10,4,8); ctx.fillStyle='#ffb35b'; ctx.fillRect(px+7,py+5,8,6); }
+        else if(obj.type==='fountain'){ ctx.strokeStyle='#8ad9ff'; ctx.lineWidth=2; ctx.strokeRect(px+6,py+7,10,8); ctx.fillStyle='rgba(138,217,255,.35)'; ctx.fillRect(px+7,py+8,8,6); }
+        else if(obj.type==='tomb'){ ctx.fillStyle='#cfd4dc'; ctx.fillRect(px+6,py+6,10,12); ctx.fillStyle='#7a808a'; ctx.fillRect(px+9,py+9,4,2); }
+        else if(obj.type==='lever'){ ctx.fillStyle='#8a6a3a'; ctx.fillRect(px+10,py+6,2,10); ctx.fillStyle='#ffd866'; ctx.fillRect(px+8,py+5,6,2); }
+        else if(obj.type==='anvil'){ ctx.fillStyle='#9aa6b9'; ctx.fillRect(px+6,py+11,10,5); ctx.fillStyle='#c9d8e8'; ctx.fillRect(px+8,py+8,8,4); }
+        else if(obj.type==='crystalNode'){ ctx.fillStyle='#c89bff'; ctx.fillRect(px+9,py+4,4,12); ctx.fillRect(px+7,py+8,8,4); }
+        ctx.restore();
+      }
+    }
+    render=function(){ oldRenderV20(); drawInteractives(); drawEnemyBadges(); };
+
+    const oldRenderInspectPanelV20=renderInspectPanel;
+    renderInspectPanel=function(){ oldRenderInspectPanelV20(); const panel=byId('inspect-panel'); if(!panel) return; const pinned=getPinnedInspectInfo&&getPinnedInspectInfo(); if(pinned && G.selectedInspect?.kind==='world'){ panel.insertAdjacentHTML('beforeend','<div class="ip-tip">Tap once to pin, tap again to open full enemy brief or use an object.</div>'); } };
+
+    // smoother, brighter original electronic music with softer envelopes to avoid clicks
+    SFX.ensureMusicBus=function(){ if(!this.ctx) return; if(!this.musicGain){ this.musicGain=this.ctx.createGain(); this.musicGain.gain.value=this.muted?0:0.14; this.musicGain.connect(this.masterGain); } };
+    SFX.stopMusic=function(){ if(this.musicTimer){ clearTimeout(this.musicTimer); this.musicTimer=null; } };
+    SFX.voxTone=function(freq, when, dur, wave='sawtooth', gain=0.014, detune=0, lp=1800){ if(this.muted||!this.ctx) return; this.ensureMusicBus(); const osc=this.ctx.createOscillator(); const filter=this.ctx.createBiquadFilter(); const g=this.ctx.createGain(); osc.type=wave; osc.frequency.setValueAtTime(freq,when); if(detune) osc.detune.setValueAtTime(detune,when); filter.type='lowpass'; filter.frequency.setValueAtTime(lp,when); filter.Q.value=0.18; g.gain.setValueAtTime(0.0001,when); g.gain.linearRampToValueAtTime(gain,when+0.03); g.gain.setTargetAtTime(0.0001,when+Math.max(0.08,dur-0.12),0.09); osc.connect(filter); filter.connect(g); g.connect(this.musicGain); osc.start(when); osc.stop(when+dur+0.18); };
+    SFX.houseKick=function(when,gain=0.028){ if(this.muted||!this.ctx) return; this.ensureMusicBus(); const osc=this.ctx.createOscillator(); const g=this.ctx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(92,when); osc.frequency.exponentialRampToValueAtTime(46,when+0.28); g.gain.setValueAtTime(0.0001,when); g.gain.linearRampToValueAtTime(gain,when+0.02); g.gain.exponentialRampToValueAtTime(0.0001,when+0.26); osc.connect(g); g.connect(this.musicGain); osc.start(when); osc.stop(when+0.32); };
+    SFX.tracks={
+      explore:{tempo:126,prog:[[57,64,69],[53,60,65],[60,67,72],[55,62,67]],bass:[57,null,57,null,57,null,57,null,53,null,53,null,53,null,53,null,60,null,60,null,60,null,60,null,55,null,55,null,55,null,55,null],hook:[69,null,72,74,76,null,74,null,72,null,69,null,72,74,76,null,79,null,76,74,72,null,74,null,76,null,74,72,69,null,67,null]},
+      exploreB:{tempo:128,prog:[[57,64,69],[60,67,72],[62,69,74],[55,62,67]],bass:[57,null,57,null,60,null,60,null,62,null,62,null,55,null,55,null,57,null,57,null,60,null,60,null,62,null,62,null,55,null,55,null],hook:[76,null,79,81,79,null,76,null,74,null,76,79,81,null,79,null,84,null,81,79,76,null,79,null,81,null,79,76,74,null,72,null]},
+      battle:{tempo:132,prog:[[57,64,69],[57,64,69],[60,67,72],[62,69,74]],bass:[57,null,57,57,57,null,57,57,57,null,57,57,60,null,60,60,60,null,60,60,62,null,62,62,62,null,62,62,60,null,60,60],hook:[81,null,79,81,84,null,81,79,76,null,79,81,84,null,86,84,81,null,79,81,84,null,86,88,84,null,81,79,76,null,79,null]},
+      battleB:{tempo:134,prog:[[57,64,69],[53,60,65],[60,67,72],[55,62,67]],bass:[57,null,57,57,53,null,53,53,60,null,60,60,55,null,55,55,57,null,57,57,53,null,53,53,60,null,60,60,55,null,55,55],hook:[84,null,81,79,81,null,84,86,88,null,86,84,81,null,79,null,84,null,86,88,91,null,88,86,84,null,81,79,76,null,79,null]}
+    };
+    SFX.chooseTrack=function(depth,danger){ return danger>=4 ? (depth%2?'battle':'battleB') : (depth%2?'explore':'exploreB'); };
+    SFX.setAmbience=function(depth,danger){ this.musicMood={depth:depth||1,danger:danger||0}; this.ensureMusicBus(); const next=this.chooseTrack(depth,danger); if(this.musicTrackKey!==next){ this.musicTrackKey=next; this.musicStep=0; this.stopMusic(); this.startMusic(true); } else if(this.musicGain&&this.ctx){ this.musicGain.gain.setTargetAtTime(this.muted?0:(danger>=4?0.17:0.145), this.ctx.currentTime, 0.3); } };
+    SFX.startMusic=function(force){ if(!this.ctx||this.muted) return; this.ensureMusicBus(); if(force) this.stopMusic(); if(this.musicTimer) return; this.scheduleMusic(); };
+    SFX.scheduleMusic=function(){ if(!this.ctx||this.muted){ this.musicTimer=null; return; } this.ensureMusicBus(); const mood=this.musicMood||{depth:1,danger:0}; const key=this.musicTrackKey||this.chooseTrack(mood.depth,mood.danger); const track=this.tracks[key]; if(!track) return; const now=this.ctx.currentTime+0.05; const stepDur=60/track.tempo/8; const steps=32; for(let i=0;i<steps;i++){ const step=(this.musicStep+i)%32; const t=now+i*stepDur; const bass=track.bass[step]; const hook=track.hook[step]; const chord=track.prog[Math.floor(step/8)%track.prog.length]; if(step%8===0||step%8===4) this.houseKick(t, mood.danger>=4?0.032:0.028); if(step%4===2) this.voxTone(this.midiToFreq(chord[1]+12),t,stepDur*2.6,'triangle',mood.danger>=4?0.007:0.008,0,1400); if(step%8===0){ this.voxTone(this.midiToFreq(chord[0]),t,stepDur*5,'sawtooth',mood.danger>=4?0.0105:0.0095,-3,1600); this.voxTone(this.midiToFreq(chord[2]),t+0.02,stepDur*4.8,'triangle',mood.danger>=4?0.0065:0.006,3,1500); } if(bass!=null) this.voxTone(this.midiToFreq(bass-12),t,stepDur*1.8,'square',mood.danger>=4?0.022:0.018,0,700); if(hook!=null){ this.voxTone(this.midiToFreq(hook),t+0.01,stepDur*1.7,'sawtooth',mood.danger>=4?0.015:0.013,0,2200); this.voxTone(this.midiToFreq(hook+12),t+0.03,stepDur*1.3,'triangle',mood.danger>=4?0.0055:0.0045,5,2500); } } this.musicStep=(this.musicStep+steps)%32; this.musicTimer=setTimeout(()=>{ this.musicTimer=null; this.scheduleMusic(); }, stepDur*steps*1000); };
+    const oldToggleMuteV20=SFX.toggleMute.bind(SFX);
+    SFX.toggleMute=function(){ oldToggleMuteV20(); if(!this.muted) this.startMusic(true); else this.stopMusic(); };
+
+    const oldAttackV20=attack;
+    attack=function(attacker,defender,isPlayer){ const res=oldAttackV20(attacker,defender,isPlayer); if(isPlayer&&G.player&&G.player.nextSpellAmp&&attacker===G.player&&G.player.weapon?.weaponClass==='arcane'){ G.player.nextSpellAmp=1; } return res; };
+    if(window.G && G.rooms && G.rooms.length){ try{ cleanAndTagDoors(); populateInteractives(); }catch(e){} }
+
+    const oldCastSpellV20=castSpell;
+    if(typeof oldCastSpellV20==='function'){
+      castSpell=function(index){ const amp=G.player?.nextSpellAmp||1; const preAtk=G.player?.atk||0; if(amp>1 && G.player) G.player.atk=Math.floor(preAtk*amp); const result=oldCastSpellV20(index); if(G.player){ G.player.atk=preAtk; G.player.nextSpellAmp=1; } return result; };
+    }
+  })();
+
   function bootV19(){
     ensurePatchUI(); wireAbilityHints(); setAbilityHelp('basic'); refreshIdentity();
     if(window.G && G.enemies) G.enemies.forEach(assignEnemyGear);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bootV19); else bootV19();
+})();
+</script>
+
+
+<script>
+(() => {
+  // ===== V21 PATCH: smarter room doors + brighter click-free dance music =====
+  function v21CoordKey(x,y){ return x+','+y; }
+  function v21Floorish(v){ return v===T.FLOOR || v===T.TRAP || v===T.STAIR_DOWN || v===T.STAIR_UP || v===T.DOOR; }
+  function v21RoomAt(x,y){ return (G.rooms||[]).find(r=>x>=r.x && x<r.x+r.w && y>=r.y && y<r.y+r.h); }
+  function v21IsSpecialTheme(theme){ return ['treasure','crystal','shrine','shadow','bones','lava'].includes(theme); }
+  function v21DoorKind(theme){
+    if(theme==='treasure') return rng.pick(['cache','cache','iron']);
+    if(theme==='crystal' || theme==='shrine') return rng.pick(['warded','warded','iron']);
+    if(theme==='shadow' || theme==='bones') return rng.pick(['iron','normal']);
+    if(theme==='lava') return rng.pick(['iron','warded']);
+    return 'normal';
+  }
+  function v21CorridorDepth(x,y,dx,dy){
+    let depth=0;
+    for(let i=0;i<4;i++){
+      const tx=x+dx*i, ty=y+dy*i;
+      if(!v21Floorish(G.map?.[ty]?.[tx])) break;
+      if(i>0 && v21RoomAt(tx,ty)) break;
+      depth++;
+    }
+    return depth;
+  }
+  function v21DoorCandidate(room,x,y,insideX,insideY,outX,outY,dx,dy){
+    if(!v21Floorish(G.map?.[y]?.[x])) return null;
+    if(!v21Floorish(G.map?.[insideY]?.[insideX])) return null;
+    if(!v21Floorish(G.map?.[outY]?.[outX])) return null;
+    if(v21RoomAt(outX,outY)) return null;
+    const depth=v21CorridorDepth(outX,outY,dx,dy);
+    if(depth < 2) return null;
+    const centered = Math.abs(x-room.cx) + Math.abs(y-room.cy);
+    return {x,y,room,depth,centered};
+  }
+  function v21RebuildDoors(){
+    if(!G || !G.map || !G.rooms || !G.rooms.length) return;
+    G.doorMeta = {};
+    for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++) if(G.map[y][x]===T.DOOR) G.map[y][x]=T.FLOOR;
+    const chosen=[];
+    const startRoom=G.rooms[0], endRoom=G.rooms[G.rooms.length-1];
+    for(const room of G.rooms){
+      if(!room || room===startRoom || room===endRoom) continue;
+      if(!v21IsSpecialTheme(room.theme)) continue;
+      if(room.w < 6 || room.h < 5) continue;
+      const cands=[];
+      for(let x=room.x+2;x<room.x+room.w-2;x++){
+        let c=v21DoorCandidate(room,x,room.y,x,room.y+1,x,room.y-1,0,-1); if(c) cands.push(c);
+        c=v21DoorCandidate(room,x,room.y+room.h-1,x,room.y+room.h-2,x,room.y+room.h,0,1); if(c) cands.push(c);
+      }
+      for(let y=room.y+2;y<room.y+room.h-2;y++){
+        let c=v21DoorCandidate(room,room.x,y,room.x+1,y,room.x-1,y,-1,0); if(c) cands.push(c);
+        c=v21DoorCandidate(room,room.x+room.w-1,y,room.x+room.w-2,y,room.x+room.w,y,1,0); if(c) cands.push(c);
+      }
+      cands.sort((a,b)=> (b.depth-a.depth) || (a.centered-b.centered));
+      const pick=cands.find(c=>!chosen.some(o=>Math.abs(o.x-c.x)+Math.abs(o.y-c.y)<4));
+      if(!pick) continue;
+      chosen.push(pick);
+      G.map[pick.y][pick.x]=T.DOOR;
+      G.doorMeta[v21CoordKey(pick.x,pick.y)]={kind:v21DoorKind(room.theme), roomTheme:room.theme};
+    }
+  }
+
+  if(typeof generateFloor==='function'){
+    const v21OldGenerateFloor = generateFloor;
+    generateFloor = function(depth){
+      v21OldGenerateFloor(depth);
+      try{ v21RebuildDoors(); computeFOV(); updateCamera(); }catch(err){ console.warn('Door rebuild failed', err); }
+    };
+  }
+  try{ if(typeof G!=='undefined' && G.rooms && G.rooms.length) v21RebuildDoors(); }catch(err){}
+
+  // brighter, smoother original electronic music inspired by upbeat new-wave / dance energy
+  SFX.stopMusic = function(){ if(this.musicTimer){ clearTimeout(this.musicTimer); this.musicTimer=null; } };
+  SFX.ensureMusicBus = function(){
+    if(!this.ctx) return;
+    if(!this.musicCompressor){
+      this.musicCompressor = this.ctx.createDynamicsCompressor();
+      this.musicCompressor.threshold.value = -26;
+      this.musicCompressor.knee.value = 20;
+      this.musicCompressor.ratio.value = 3;
+      this.musicCompressor.attack.value = 0.02;
+      this.musicCompressor.release.value = 0.26;
+      this.musicCompressor.connect(this.masterGain);
+    }
+    if(!this.musicGain){
+      this.musicGain = this.ctx.createGain();
+      this.musicGain.gain.value = this.muted ? 0 : 0.12;
+    }
+    try{ this.musicGain.disconnect(); }catch(err){}
+    this.musicGain.connect(this.musicCompressor);
+  };
+  SFX.smoothTone = function(freq, when, dur, opts={}){
+    if(this.muted || !this.ctx || !freq) return;
+    this.ensureMusicBus();
+    const wave = opts.wave || 'triangle';
+    const gain = opts.gain ?? 0.01;
+    const lp = opts.lp ?? 1800;
+    const detune = opts.detune ?? 0;
+    const attack = opts.attack ?? 0.018;
+    const release = opts.release ?? 0.14;
+    const peak2 = opts.peak2 ?? (gain*0.72);
+    const oscA = this.ctx.createOscillator();
+    const oscB = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
+    const g = this.ctx.createGain();
+    oscA.type = wave;
+    oscB.type = opts.wave2 || wave;
+    oscA.frequency.setValueAtTime(freq, when);
+    oscB.frequency.setValueAtTime(freq, when);
+    oscA.detune.setValueAtTime(detune-4, when);
+    oscB.detune.setValueAtTime(detune+4, when);
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(lp, when);
+    filter.Q.value = 0.16;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when + attack);
+    g.gain.linearRampToValueAtTime(peak2, when + Math.max(attack+0.02, dur*0.55));
+    g.gain.setTargetAtTime(0.0001, when + Math.max(0.06, dur - release), release*0.6);
+    oscA.connect(filter); oscB.connect(filter); filter.connect(g); g.connect(this.musicGain);
+    oscA.start(when); oscB.start(when);
+    oscA.stop(when + dur + release + 0.12); oscB.stop(when + dur + release + 0.12);
+  };
+  SFX.softKick = function(when, gain=0.022){
+    if(this.muted || !this.ctx) return;
+    this.ensureMusicBus();
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(96, when);
+    osc.frequency.exponentialRampToValueAtTime(44, when + 0.22);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.22);
+    osc.connect(g); g.connect(this.musicGain);
+    osc.start(when); osc.stop(when + 0.28);
+  };
+  SFX.clicklessPluck = function(freq, when, gain=0.006){
+    if(this.muted || !this.ctx || !freq) return;
+    this.ensureMusicBus();
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    const filter = this.ctx.createBiquadFilter();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, when);
+    filter.type='lowpass'; filter.frequency.setValueAtTime(1500, when); filter.Q.value=0.1;
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(gain, when + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.13);
+    osc.connect(filter); filter.connect(g); g.connect(this.musicGain);
+    osc.start(when); osc.stop(when + 0.18);
+  };
+  SFX.tracks = {
+    explore:{
+      tempo:128,
+      chords:[[62,65,69],[58,62,65],[65,69,72],[60,64,67]],
+      bass:[38,null,38,38,38,null,38,38,34,null,34,34,41,null,41,41,36,null,36,36,38,null,38,38,34,null,34,34,41,null,41,41],
+      hook:[74,null,74,77,81,null,77,null,74,null,74,77,82,null,79,null,81,null,79,77,74,null,77,null,79,null,77,74,72,null,74,null],
+      stab:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]
+    },
+    exploreB:{
+      tempo:130,
+      chords:[[62,65,69],[65,69,72],[69,72,76],[60,64,67]],
+      bass:[38,null,38,38,41,null,41,41,45,null,45,45,36,null,36,36,38,null,38,38,41,null,41,41,45,null,45,45,36,null,36,36],
+      hook:[81,null,79,77,79,null,81,84,86,null,84,81,79,null,77,null,81,null,84,86,88,null,86,84,81,null,79,77,74,null,77,null],
+      stab:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]
+    },
+    battle:{
+      tempo:132,
+      chords:[[62,65,69],[60,64,67],[65,69,72],[67,71,74]],
+      bass:[38,38,null,38,36,36,null,36,41,41,null,41,43,43,null,43,38,38,null,38,36,36,null,36,41,41,null,41,43,43,null,43],
+      hook:[86,null,84,81,84,null,86,88,89,null,88,86,84,null,81,null,86,null,88,89,91,null,89,88,86,null,84,81,79,null,81,null],
+      stab:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]
+    },
+    battleB:{
+      tempo:134,
+      chords:[[62,65,69],[58,62,65],[65,69,72],[67,71,74]],
+      bass:[38,38,null,38,34,34,null,34,41,41,null,41,43,43,null,43,38,38,null,38,34,34,null,34,41,41,null,41,43,43,null,43],
+      hook:[84,null,81,79,81,null,84,86,88,null,86,84,81,null,79,null,84,null,86,88,91,null,88,86,84,null,81,79,76,null,79,null],
+      stab:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]
+    }
+  };
+  SFX.chooseTrack = function(depth,danger){ return danger>=4 ? (depth%2 ? 'battle' : 'battleB') : (depth%2 ? 'explore' : 'exploreB'); };
+  SFX.setAmbience = function(depth,danger){
+    this.musicMood={depth:depth||1,danger:danger||0};
+    this.ensureMusicBus();
+    const next=this.chooseTrack(depth,danger);
+    if(this.musicTrackKey!==next){
+      this.musicTrackKey=next; this.musicStep=0; this.stopMusic(); this.startMusic(true);
+    } else if(this.musicGain && this.ctx){
+      this.musicGain.gain.setTargetAtTime(this.muted?0:(danger>=4?0.14:0.118), this.ctx.currentTime, 0.3);
+    }
+  };
+  SFX.startMusic = function(force){ if(!this.ctx || this.muted) return; this.ensureMusicBus(); if(force){ this.stopMusic(); this.musicStep=0; } if(this.musicTimer) return; this.scheduleMusic(); };
+  SFX.scheduleMusic = function(){
+    if(!this.ctx || this.muted){ this.musicTimer=null; return; }
+    this.ensureMusicBus();
+    const mood=this.musicMood||{depth:1,danger:0};
+    const key=this.musicTrackKey||this.chooseTrack(mood.depth,mood.danger);
+    const track=this.tracks[key]; if(!track) return;
+    const now=this.ctx.currentTime+0.06;
+    const stepDur=60/track.tempo/4;
+    const steps=32;
+    const battle = key.startsWith('battle');
+    for(let i=0;i<steps;i++){
+      const step=(this.musicStep+i)%32;
+      const t=now+i*stepDur;
+      const chord=track.chords[Math.floor(step/8)%track.chords.length];
+      const bass=track.bass[step];
+      const hook=track.hook[step];
+      if(step%4===0) this.softKick(t, battle?0.024:0.021);
+      if(track.stab[step]){
+        this.smoothTone(this.midiToFreq(chord[0]), t, stepDur*1.8, {wave:'sawtooth', wave2:'triangle', gain:battle?0.0088:0.008, lp:battle?1600:1800, detune:-2, attack:0.018, release:0.11});
+        this.smoothTone(this.midiToFreq(chord[1]), t+0.004, stepDur*1.7, {wave:'triangle', gain:battle?0.0068:0.0062, lp:1700, detune:2, attack:0.02, release:0.11});
+        this.smoothTone(this.midiToFreq(chord[2]), t+0.008, stepDur*1.65, {wave:'triangle', gain:battle?0.0062:0.0056, lp:1900, detune:5, attack:0.02, release:0.11});
+      }
+      if(bass!=null){
+        this.smoothTone(this.midiToFreq(bass), t, stepDur*1.3, {wave:'triangle', wave2:'triangle', gain:battle?0.013:0.011, lp:820, attack:0.016, release:0.09});
+      }
+      if(hook!=null){
+        this.smoothTone(this.midiToFreq(hook), t+0.01, stepDur*1.45, {wave:'sawtooth', wave2:'triangle', gain:battle?0.0105:0.0092, lp:battle?2400:2600, detune:3, attack:0.022, release:0.12});
+        if(step%8===6) this.clicklessPluck(this.midiToFreq(hook+12), t+0.04, battle?0.0048:0.0042);
+      }
+    }
+    this.musicStep=(this.musicStep+steps)%32;
+    this.musicTimer=setTimeout(()=>{ this.musicTimer=null; this.scheduleMusic(); }, stepDur*steps*1000);
+  };
+  const v21OldToggleMute = SFX.toggleMute.bind(SFX);
+  SFX.toggleMute = function(){ v21OldToggleMute(); if(!this.muted) this.startMusic(true); else this.stopMusic(); };
+})();
+</script>
+
+
+<style>
+.v22-inspect-sections,.v22-tooltip-sections{display:grid;gap:8px;margin-top:8px}
+.v22-inspect-section,.v22-tooltip-section{border:1px solid rgba(155,175,255,.12);background:linear-gradient(180deg,rgba(16,20,38,.9),rgba(9,12,24,.92));border-radius:8px;padding:8px 10px}
+.v22-inspect-section .sec-label,.v22-tooltip-section .sec-label{font-size:10px;color:#8fdcff;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.v22-inspect-section .sec-body,.v22-tooltip-section .sec-body{font-size:12px;color:#eef3ff;line-height:1.55}
+.v22-enemy-desc{font-size:13px;line-height:1.6;color:#dbe6ff;margin-bottom:8px}
+.v22-gear-list{display:grid;gap:8px;margin-top:8px}
+.v22-gear-row{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;padding:6px 8px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.03)}
+.v22-gear-row canvas{width:30px;height:30px;image-rendering:pixelated;background:#090d1a;border:1px solid rgba(255,255,255,.08);border-radius:6px}
+.v22-gear-row .gear-name{font-size:12px;color:#f5f8ff;line-height:1.35}
+.v22-gear-row .gear-meta{font-size:11px;color:#c9d7f8;line-height:1.45}
+.v22-modal-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:14px}
+@media (max-width:900px){.v22-modal-grid{grid-template-columns:1fr}}
+.inv-slot-icon, .inventory-card-icon{display:flex;align-items:center;justify-content:center;background:#090d1a;border:1px solid rgba(255,255,255,.08);border-radius:8px;overflow:hidden;flex-shrink:0}
+.inv-slot-icon{width:34px;height:34px;margin-bottom:6px}
+.inv-slot-icon canvas,.inventory-card-icon canvas{width:28px;height:28px;image-rendering:pixelated}
+.inv-equip-slot .row{display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:start}
+.inventory-card .top{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:start}
+.inventory-card-icon{width:40px;height:40px}
+.inventory-card .name{line-height:1.35}
+.inventory-card .desc{min-height:0}
+.inventory-card .stats,.inventory-card .compare{padding-left:54px}
+.v22-attack-note{margin-top:8px;font-size:11px;color:#8fdcff;line-height:1.5}
+</style>
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function safe(fn){ try{ return fn(); } catch(e){ console.error(e); } }
+  function titleCase(s){ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); }
+  function enemyAt(x,y){ return (window.G&&G.enemies||[]).find(e=>e.hp>0&&e.x===x&&e.y===y); }
+  function gearIconKey(label){
+    const s=String(label||'').toLowerCase();
+    if(s.includes('bow')) return 'shortbow';
+    if(s.includes('crossbow')) return 'crossbow';
+    if(s.includes('staff')||s.includes('wand')||s.includes('hex')) return 'arc_wand';
+    if(s.includes('spear')||s.includes('lance')) return 'dragon_fang';
+    if(s.includes('shield')||s.includes('buckler')||s.includes('pavis')||s.includes('mail')||s.includes('plate')||s.includes('mantle')||s.includes('wrap')) return 'chain_mail';
+    if(s.includes('claw')||s.includes('fang')||s.includes('talon')||s.includes('core')) return 'shadow_dagger';
+    if(s.includes('cleaver')||s.includes('hatchet')||s.includes('axe')) return 'flame_axe';
+    return 'iron_sword';
+  }
+  function drawIconByKey(canvas, key){
+    if(!canvas || typeof ITEM_ICONS==='undefined') return;
+    const icon=ITEM_ICONS[key];
+    if(icon) drawIconToCanvas(canvas,icon.px,icon.w,icon.h,icon.colors);
+    else {
+      const cx=canvas.getContext('2d'); cx.clearRect(0,0,canvas.width,canvas.height);
+    }
+  }
+  function formatClass(k){ return (window.WEAPON_CLASS_INFO&&WEAPON_CLASS_INFO[k]?.label) || titleCase(k||'Unknown'); }
+  function classColor(k){ return (window.WEAPON_CLASS_INFO&&WEAPON_CLASS_INFO[k]?.color) || '#8fdcff'; }
+  function activeAbilityLabel(){
+    if(!window.G||!G.player) return 'Basic Attack';
+    const q=G.player.queuedAction;
+    if(q==='slash') return 'Slash';
+    if(q==='bash') return 'Bash';
+    if(q==='kick') return 'Kick';
+    if(q==='guard') return 'Guard';
+    const w=G.player.weapon;
+    if(w?.ranged) return 'Ranged Shot';
+    return 'Basic Attack';
+  }
+  function describeEnemyBehavior(enemy){
+    const role=(enemy.role||'Foe').toLowerCase();
+    const intent=(typeof predictEnemyIntent==='function' ? predictEnemyIntent(enemy) : null);
+    if(role.includes('assassin')) return 'Bursts in fast, punishes open lanes, and wants soft targets before you can stabilize.';
+    if(role.includes('bulwark')) return 'Soaks pressure, forces awkward trades, and protects space better than it kills.';
+    if(role.includes('summoner')) return 'Buys time and creates extra bodies. Kill it early or the room gets worse every turn.';
+    if(role.includes('skirmisher')) return 'Kites and pokes. It wants a clean line and room to disengage.';
+    if(role.includes('breaker')) return 'Pushes tempo with heavy hits and tries to crack your guard or trap you against terrain.';
+    if(enemy.range>=4) return 'Favors range and line of sight. Break angles, use cover, or punish when it has to reposition.';
+    if((enemy.weaponClass||'')==='crush') return 'Excels in direct trades and likes forcing you into short range exchanges.';
+    if((enemy.weaponClass||'')==='pierce') return 'Threatens from cleaner angles and punishes you if you walk into its preferred spacing.';
+    return intent?.label ? `Right now it wants to ${intent.label.toLowerCase()}.` : 'A direct threat. Study the matchup before stepping into its tile.';
+  }
+  function buildEnemySections(enemy){
+    safe(()=>typeof ensureEnemyMeta==='function' && ensureEnemyMeta(enemy));
+    const preview=typeof playerDamagePreview==='function' ? playerDamagePreview(enemy) : null;
+    const intent=typeof predictEnemyIntent==='function' ? predictEnemyIntent(enemy) : null;
+    const skills=(enemy.skills&&enemy.skills.length)?enemy.skills.join(', '):'No special skills listed.';
+    const weak=(enemy.weak||[]).map(formatClass).join(', ') || 'No obvious weakness';
+    const resist=(enemy.resist||[]).map(formatClass).join(', ') || 'No notable resistance';
+    const sections=[
+      {label:'Role', body:`${enemy.role||'Foe'} • ${enemy.faction||'Unknown faction'} • ${String(enemy.unitType||'foe').toUpperCase()}`},
+      {label:'Plan', body:describeEnemyBehavior(enemy)},
+      {label:'Threat', body:`Weapon ${enemy.weaponLabel||formatClass(enemy.weaponClass)}${enemy.range?` • Range ${enemy.range}`:''}${intent?` • Next ${intent.label}`:''}`},
+      {label:'Skills', body:skills},
+      {label:'Matchup', body:preview?`You deal ${preview.low}-${preview.high} • ${preview.matchup.label} trade with ${formatClass(preview.attClass)}.`:'No preview yet.'},
+      {label:'Exploit', body:`Weak to ${weak}. Resists ${resist}.`}
+    ];
+    return {preview,intent,sections};
+  }
+  function renderSections(sections, cls){
+    return `<div class="${cls}">`+sections.map(sec=>`<div class="${cls==='v22-inspect-sections'?'v22-inspect-section':'v22-tooltip-section'}"><div class="sec-label">${sec.label}</div><div class="sec-body">${sec.body}</div></div>`).join('')+`</div>`;
+  }
+
+  const baseGetWorldHoverInfo = getWorldHoverInfo;
+  getWorldHoverInfo = function(x,y){
+    const info=baseGetWorldHoverInfo(x,y);
+    const enemy=enemyAt(x,y);
+    if(enemy && G?.visible?.[y]?.[x]){
+      const meta=buildEnemySections(enemy);
+      return {
+        name: enemy.bossName||enemy.name,
+        type: `${enemy.role||'Enemy'} • ${String(enemy.unitType||'foe').toUpperCase()}`,
+        color: enemy.badgeColor||classColor(enemy.weaponClass),
+        desc: enemy.desc||'A dangerous opponent.',
+        stats:[`HP ${enemy.hp}/${enemy.maxHp} • ATK ${enemy.atk} • DEF ${enemy.def}`],
+        intent: meta.intent,
+        sections: meta.sections,
+        compare: `Click an adjacent foe to use ${activeAbilityLabel()}. Click a distant foe twice for the full brief.`
+      };
+    }
+    return info;
+  };
+
+  renderInspectPanel = function(){
+    const panel=byId('inspect-panel'); if(!panel) return;
+    const pinned=(typeof getPinnedInspectInfo==='function') ? getPinnedInspectInfo() : null;
+    const info = pinned || (G?.hover?.active ? getWorldHoverInfo(G.hover.tileX,G.hover.tileY) : null);
+    const label = pinned ? 'Pinned' : 'Inspect';
+    if(!info){
+      panel.innerHTML='<div class="ip-label">Inspect</div><div class="ip-empty">Hover enemies, loot, doors, or interactives. Click a nearby enemy to attack with your current action.</div>';
+      return;
+    }
+    const stats=(info.stats||[]).map(s=>'<span>'+s+'</span>').join('');
+    const sections=info.sections?renderSections(info.sections,'v22-inspect-sections'):'';
+    panel.innerHTML=`<div class="ip-label">${label}</div><div class="ip-name" style="color:${info.color||'#c8c8d8'}">${info.name}</div><div class="ip-type">${info.type||'world'}</div><div class="v22-enemy-desc">${info.desc||''}</div><div class="ip-stats">${stats}</div>${sections}${info.intent?`<div class="ip-intent" style="border-color:${info.intent.color}80;color:${info.intent.color}">${info.intent.icon} ${info.intent.label}</div>`:''}${info.compare?`<div class="ip-compare"><span class="good">${info.compare}</span></div>`:''}<div class="ip-tip">Click a different tile to change focus.</div>`;
+  };
+
+  renderWorldTooltip = function(){
+    if(!G?.hover?.active){ hideTooltip(); return; }
+    const info=getWorldHoverInfo(G.hover.tileX,G.hover.tileY);
+    if(!info){ hideTooltip(); return; }
+    const stats=(info.stats||[]).map(s=>'<span>'+s+'</span>').join('');
+    const sections=info.sections?renderSections(info.sections,'v22-tooltip-sections'):'';
+    showTooltipHTML(`<div class="tt-name" style="color:${info.color||'#c8c8d8'}">${info.name}</div><div class="tt-type">${info.type||'world'}</div><div class="tt-desc">${info.desc||''}</div><div class="tt-stats">${stats}</div>${sections}${info.intent?`<div class="tt-intent" style="border-color:${info.intent.color}80;color:${info.intent.color}">${info.intent.icon} ${info.intent.label}</div>`:''}${info.compare?`<div class="tt-compare"><span class="tt-compare-good">${info.compare}</span></div>`:''}`,G.hover.screenX,G.hover.screenY);
+  };
+
+  const baseOpenEnemyModal = openEnemyModal;
+  openEnemyModal = function(enemy){
+    if(!enemy||enemy.hp<=0) return;
+    safe(()=>typeof ensureEnemyMeta==='function' && ensureEnemyMeta(enemy));
+    const modal=byId('enemy-modal'); if(!modal) return baseOpenEnemyModal(enemy);
+    const meta=buildEnemySections(enemy);
+    const preview=meta.preview;
+    modal.querySelector('.v19-modal-title').textContent=(enemy.bossName||enemy.name);
+    const main=modal.querySelector('.v19-main');
+    const side=modal.querySelector('.v19-side');
+    main.innerHTML=`<div class="v22-modal-grid"><div><h4>Read the enemy</h4><div class="v22-enemy-desc">${enemy.desc||'A dangerous opponent.'}</div><div class="v19-statline"><span class="v19-pill">HP ${enemy.hp}/${enemy.maxHp}</span><span class="v19-pill">ATK ${enemy.atk}</span><span class="v19-pill">DEF ${enemy.def}</span>${enemy.range?`<span class="v19-pill">Range ${enemy.range}</span>`:''}<span class="v19-pill" style="color:${classColor(enemy.weaponClass)}">${formatClass(enemy.weaponClass)}</span></div>${renderSections(meta.sections.slice(0,4),'v22-inspect-sections')}<div class="v22-attack-note">Current action: <strong>${activeAbilityLabel()}</strong></div></div><div><h4>Gear and openings</h4>${renderSections(meta.sections.slice(4),'v22-inspect-sections')}<div class="v22-gear-list">${(enemy.gear||['Natural weapons']).map(g=>`<div class="v22-gear-row"><canvas width="28" height="28" data-gear="${gearIconKey(g)}"></canvas><div><div class="gear-name">${g}</div><div class="gear-meta">${/shield|buckler|mail|plate|wrap|mantle|pavis/i.test(g)?'Defensive gear that makes direct trades worse.':'Offensive gear that shapes how this enemy pressures you.'}</div></div></div>`).join('')}</div></div></div>`;
+    main.querySelectorAll('canvas[data-gear]').forEach(c=>drawIconByKey(c,c.dataset.gear));
+    side.innerHTML=`<h4>Quick read</h4><p><strong>Best attack:</strong> ${preview?`${formatClass(preview.attClass)} for ${preview.low}-${preview.high}`:'Read the room first.'}</p><p><strong>Commit?</strong> ${preview?.matchup?.mult>=1.12?'Yes, if you are not pulling extra pressure.' : preview?.matchup?.mult<=0.92?'Not yet. Reposition or spend a tool first.' : 'Maybe. Check the next enemy before you lock in.'}</p><p><strong>Use on click:</strong> Clicking this enemy in melee now uses your current action immediately.</p>`;
+    const actions=modal.querySelector('.v19-actions'); actions.innerHTML='';
+    const close=document.createElement('button'); close.className='v19-btn'; close.textContent='Close'; close.onclick=()=>modal.classList.remove('show');
+    const pin=document.createElement('button'); pin.className='v19-btn'; pin.textContent='Pin Inspect'; pin.onclick=()=>{ pinInspect({kind:'world',x:enemy.x,y:enemy.y}); renderInspectPanel(); };
+    const act=document.createElement('button'); act.className='v19-btn primary'; act.textContent=(canRangedAttack(enemy)?'Use Current Attack':'Approach / Attack'); act.onclick=()=>{ modal.classList.remove('show'); const dist=Math.abs(enemy.x-G.player.x)+Math.abs(enemy.y-G.player.y); if(canRangedAttack(enemy)){ attack(G.player,enemy,true); endTurn(); return; } if(dist===1){ if(G.player.queuedAction && typeof tryCombatAction==='function' && tryCombatAction(G.player.queuedAction,Math.sign(enemy.x-G.player.x),Math.sign(enemy.y-G.player.y))) return; attack(G.player,enemy,true); endTurn(); return; } startAutoMoveTo(enemy.x,enemy.y); };
+    actions.append(act,pin,close);
+    modal.classList.add('show');
+  };
+
+  handleCanvasPoint = function(clientX, clientY){
+    if(!window.G||G.gameOver||G.paused) return;
+    const rect=canvas.getBoundingClientRect();
+    const sx=(clientX-rect.left)*(canvas.width/rect.width); const sy=(clientY-rect.top)*(canvas.height/rect.height);
+    const tx=Math.floor(sx/TILE)+G.camera.x; const ty=Math.floor(sy/TILE)+G.camera.y;
+    const enemy=enemyAt(tx,ty);
+    const samePinned=G.selectedInspect&&G.selectedInspect.kind==='world'&&G.selectedInspect.x===tx&&G.selectedInspect.y===ty;
+    const dist=Math.abs(tx-G.player.x)+Math.abs(ty-G.player.y);
+    const interactive=(G.interactives||[]).find(o=>o.x===tx&&o.y===ty&&!o.used);
+    const info=getWorldHoverInfo(tx,ty);
+    if(enemy){
+      pinInspect({kind:'world',x:tx,y:ty});
+      if(canRangedAttack(enemy)) { attack(G.player,enemy,true); endTurn(); return; }
+      if(dist===1){ if(G.player.queuedAction && typeof tryCombatAction==='function' && tryCombatAction(G.player.queuedAction,Math.sign(tx-G.player.x),Math.sign(ty-G.player.y))) return; attack(G.player,enemy,true); endTurn(); return; }
+      if(samePinned) { openEnemyModal(enemy); return; }
+      return;
+    }
+    if(interactive){ if(!samePinned){ pinInspect({kind:'world',x:tx,y:ty}); return; } if(dist<=1){ activateInteractive(interactive); endTurn(); } else startAutoMoveTo(tx,ty); return; }
+    if(info && !samePinned){ pinInspect({kind:'world',x:tx,y:ty}); return; }
+    if(samePinned) clearPinnedInspect();
+    if(dist===0){ waitTurn(); return; }
+    startAutoMoveTo(tx,ty);
+  };
+
+  const prevDrawPlayerBody = drawPlayerBody;
+  drawPlayerBody = function(target,px,py,t,scale){
+    prevDrawPlayerBody(target,px,py,t,scale);
+    if(!window.G||!G.player) return;
+    const bob=Math.sin(t*3)*0.8*scale;
+    const left=(G.player.facing==='left');
+    const armor=G.player.armor, ring=G.player.ring, amulet=G.player.amulet, weapon=G.player.weapon;
+    if(armor){
+      const base=armor.glowColor||armor.trimColor||rarityColor(armor.rarity)||'#7fb3ff';
+      target.save();
+      target.globalAlpha=.95;
+      target.fillStyle=base;
+      target.fillRect(px+6*scale,py+9*scale+bob,10*scale,8*scale);
+      target.fillStyle='#0f1730';
+      target.fillRect(px+8*scale,py+11*scale+bob,6*scale,4*scale);
+      target.fillStyle=base;
+      target.fillRect(px+4*scale,py+9*scale+bob,2*scale,6*scale);
+      target.fillRect(px+16*scale,py+9*scale+bob,2*scale,6*scale);
+      target.restore();
+    }
+    if(amulet){
+      target.save();
+      target.fillStyle=amulet.glowColor||rarityColor(amulet.rarity)||'#ffd866';
+      target.fillRect(px+10*scale,py+8*scale+bob,4*scale,1*scale);
+      target.fillRect(px+11*scale,py+9*scale+bob,2*scale,2*scale);
+      target.restore();
+    }
+    if(ring){
+      target.save();
+      target.fillStyle=ring.glowColor||rarityColor(ring.rarity)||'#7fffd4';
+      const rx=left?px+5*scale:px+17*scale;
+      target.fillRect(rx,py+14*scale+bob,2*scale,2*scale);
+      target.restore();
+    }
+    if(weapon && ITEM_ICONS[weapon.icon]){
+      const icon=ITEM_ICONS[weapon.icon];
+      const wx=left?px-6*scale:px+13*scale;
+      const wy=py+7*scale+bob;
+      target.save();
+      if(weapon.glowColor){ target.shadowColor=weapon.glowColor; target.shadowBlur=Math.max(2,6*scale); }
+      if(left){ target.translate(wx+12*scale,wy); target.scale(-1,1); drawPixels(target,0,0,icon.px,icon.w,icon.h,icon.colors,scale*(10/28)); }
+      else drawPixels(target,wx,wy,icon.px,icon.w,icon.h,icon.colors,scale*(10/28));
+      target.restore();
+    }
+  };
+
+  renderInventoryModal = function(){
+    const list=byId('inventory-list'); if(!list||!G?.player) return;
+    byId('inv-char-level').textContent=`Level ${G.player.level}`;
+    byId('inv-char-floor').textContent=`Floor ${G.player.floor}`;
+    const slots=[['weapon',G.player.weapon],['armor',G.player.armor],['ring',G.player.ring],['amulet',G.player.amulet]];
+    const power=slots.reduce((s,[slot,it])=>s+(it?calcItemPower(it,slot):0),0);
+    byId('inv-char-power').textContent=`Build Power ${power}`;
+    byId('inventory-count').textContent=`${G.player.inventory.length} stored relic${G.player.inventory.length===1?'':'s'}`;
+    byId('inv-hp-count').textContent=`${G.player.potions.hp} in pack`;
+    byId('inv-mp-count').textContent=`${G.player.potions.mp} in pack`;
+    const grid=byId('inventory-equip-grid');
+    grid.innerHTML=slots.map(([slot,item])=>`<div class="inv-equip-slot rarity-${item?.rarity||'common'}" data-slot="${slot}"><div class="label">${itemSlotLabel(slot)}</div><div class="row"><div class="inv-slot-icon"><canvas width="28" height="28" data-item-icon="${item?.icon||''}" data-fallback="${slot==='weapon'?'iron_sword':slot==='armor'?'chain_mail':slot==='ring'?'ring_mp':'ring_gold'}"></canvas></div><div><div class="name" style="color:${item?rarityColor(item.rarity):'#9a9ab0'}">${item?item.name:'Empty'}</div><div class="meta">${item?(itemStatLines(item,slot,true).slice(0,3).join(' • ')):'Click to keep this slot empty.'}</div></div></div></div>`).join('');
+    [...grid.querySelectorAll('.inv-equip-slot')].forEach(el=>el.onclick=()=>unequipSlot(el.dataset.slot));
+    grid.querySelectorAll('canvas[data-item-icon]').forEach(c=>drawIconByKey(c,c.dataset.itemIcon||c.dataset.fallback));
+    if(!G.player.inventory.length) list.innerHTML='<div class="inventory-empty">Your pack is empty.<br><br>Recover relics in the dungeon, then choose what deserves a slot on your character.</div>';
+    else {
+      list.innerHTML=G.player.inventory.map((entry,idx)=>{ const loot=entry.loot, slot=entry.slot; return `<div class="inventory-card rarity-${loot.rarity||'common'}" data-index="${idx}"><div class="top"><div class="inventory-card-icon"><canvas width="28" height="28" data-item-icon="${loot.icon||''}" data-fallback="${slot==='weapon'?'iron_sword':slot==='armor'?'chain_mail':slot==='ring'?'ring_mp':'ring_gold'}"></canvas></div><div><div class="name" style="color:${rarityColor(loot.rarity)}">${loot.name}</div><div class="desc">${loot.desc||'Recovered gear.'}</div></div><div class="slot">${slot}</div></div><div class="stats">${itemStatLines(loot,slot,false).slice(0,4).join(' • ')}</div><div class="compare">${compareItemText(loot,slot)||'No direct comparison.'}</div></div>`; }).join('');
+      [...list.querySelectorAll('.inventory-card')].forEach(el=>el.onclick=()=>equipInventoryItem(Number(el.dataset.index)));
+      list.querySelectorAll('canvas[data-item-icon]').forEach(c=>drawIconByKey(c,c.dataset.itemIcon||c.dataset.fallback));
+    }
+    const invPortrait=byId('inventory-portrait'); if(invPortrait){ const c=invPortrait.getContext('2d'); c.clearRect(0,0,invPortrait.width,invPortrait.height); c.save(); c.scale(4,4); drawPlayerBody(c,4,2,performance.now()/1000,1); c.restore(); }
+    if(typeof updateRelicUI==='function') updateRelicUI();
+  };
+
 })();
 </script>
 
