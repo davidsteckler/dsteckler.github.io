@@ -1901,36 +1901,204 @@
         campaign.shopOffers.next = shuffle(nextLevelItems).slice(0, 2).map(item => item.key);
       }
 
+      function getScenePalette() {
+        if (!currentStage) {
+          return {
+            bands: ["#2a94b6", "#2281a4", "#17647e", "#114a63", "#0c3448", "#082634"],
+            haze: "rgba(164,246,255,0.08)",
+            current: "rgba(164,246,255,0.26)",
+            route: "rgba(255,209,115,0.24)",
+            floor: "rgba(7,17,24,0.90)",
+            floor2: "rgba(14,60,70,0.34)",
+            coral: "#ff9270",
+            kelp: "#61d59a",
+            panel: "rgba(8,34,51,0.82)",
+            panelEdge: "rgba(148,242,255,0.20)",
+            accent: "#93f1ff"
+          };
+        }
+
+        if (currentStage.kind === "boss") {
+          const color = currentStage.bossProfile?.color || "#ff8f8f";
+          return {
+            bands: ["#4f1f34", "#3f1a2f", "#30162a", "#241328", "#16102a", "#0c0a15"],
+            haze: "rgba(255,122,134,0.08)",
+            current: "rgba(255,122,134,0.28)",
+            route: "rgba(255,255,255,0.14)",
+            floor: "rgba(10,8,18,0.92)",
+            floor2: "rgba(62,19,35,0.38)",
+            coral: color,
+            kelp: "#7ee7ff",
+            panel: "rgba(28,11,20,0.82)",
+            panelEdge: "rgba(255,143,218,0.22)",
+            accent: color
+          };
+        }
+
+        if (currentStage.shortBiome === "Kelp") {
+          return {
+            bands: ["#2c8d82", "#21786d", "#1a6258", "#124943", "#0d3431", "#082421"],
+            haze: "rgba(98,213,154,0.08)",
+            current: "rgba(98,213,154,0.26)",
+            route: "rgba(98,213,154,0.24)",
+            floor: "rgba(7,22,18,0.90)",
+            floor2: "rgba(20,83,58,0.34)",
+            coral: "#7ee29f",
+            kelp: "#5dcc86",
+            panel: "rgba(7,36,31,0.82)",
+            panelEdge: "rgba(126,255,188,0.18)",
+            accent: "#aefad0"
+          };
+        }
+
+        if (currentStage.shortBiome === "Ruins") {
+          return {
+            bands: ["#6a705f", "#555f55", "#485048", "#343c3d", "#232e36", "#17222b"],
+            haze: "rgba(239,176,72,0.07)",
+            current: "rgba(255,209,115,0.25)",
+            route: "rgba(255,209,115,0.24)",
+            floor: "rgba(19,16,13,0.92)",
+            floor2: "rgba(96,66,32,0.32)",
+            coral: "#efb048",
+            kelp: "#8fc08a",
+            panel: "rgba(40,29,18,0.82)",
+            panelEdge: "rgba(255,209,115,0.18)",
+            accent: "#ffd173"
+          };
+        }
+
+        if (currentStage.shortBiome === "Trench") {
+          return {
+            bands: ["#26356f", "#1f2d61", "#18234e", "#131d3e", "#10192d", "#0a1120"],
+            haze: "rgba(141,149,255,0.08)",
+            current: "rgba(141,149,255,0.26)",
+            route: "rgba(141,149,255,0.24)",
+            floor: "rgba(5,8,24,0.94)",
+            floor2: "rgba(45,52,100,0.32)",
+            coral: "#8f95ff",
+            kelp: "#6d82ff",
+            panel: "rgba(10,18,44,0.82)",
+            panelEdge: "rgba(163,176,255,0.20)",
+            accent: "#ccd1ff"
+          };
+        }
+
+        return {
+          bands: ["#2899b9", "#1d83a6", "#14687f", "#0d5067", "#0a394d", "#072a38"],
+          haze: "rgba(147,241,255,0.08)",
+          current: "rgba(147,241,255,0.26)",
+          route: "rgba(255,140,109,0.22)",
+          floor: "rgba(6,18,25,0.90)",
+          floor2: "rgba(14,64,72,0.34)",
+          coral: "#ff8c6d",
+          kelp: "#62d59a",
+          panel: "rgba(7,33,48,0.82)",
+          panelEdge: "rgba(147,241,255,0.20)",
+          accent: "#93f1ff"
+        };
+      }
+
+      function estimateTextWidth(text, size = 12) {
+        return Math.ceil(String(text).length * (size * 0.62));
+      }
+
+      function drawInfoPill(x, y, text, color, fill = "rgba(8,32,48,0.84)") {
+        const w = estimateTextWidth(text, 12) + 18;
+        pxRect(x, y, w, 16, "rgba(0,0,0,0.38)");
+        pxRect(x + 2, y + 2, w - 4, 12, fill);
+        pxRect(x + 4, y + 4, 4, 8, color);
+        pxText(text, x + 12, y + 2, color, 12);
+        return w;
+      }
+
+      function drawStageHudRibbon() {
+        if (state !== STATE.playing || !currentStage) return;
+        const scene = getScenePalette();
+        const routeTheme = getRouteTheme();
+        const topY = 12;
+        let x = 14;
+        const badges = [
+          { text: SETTINGS.mode === "campaign" ? `L${campaign.level}` : "ENDLESS", color: "#ffd173" },
+          { text: currentStage.shortBiome.toUpperCase(), color: currentStage.kind === "boss" ? (currentStage.bossProfile?.color || "#ff8f8f") : scene.accent }
+        ];
+        if (currentStage.routeName) badges.push({ text: currentStage.routeName.toUpperCase(), color: routeTheme ? routeTheme.color : "#93f1ff" });
+        if (buffs.slowTime > 0) badges.push({ text: `SLOW ${buffs.slowTime.toFixed(1)}s`, color: "#7ee7ff" });
+        if (buffs.magnet > 0) badges.push({ text: `MAGNET ${buffs.magnet.toFixed(1)}s`, color: "#ffd173" });
+        if (buffs.x2 > 0) badges.push({ text: `x2 ${buffs.x2.toFixed(1)}s`, color: "#ff7a86" });
+        if (buffs.shieldCharges > 0) badges.push({ text: `SHIELD ${buffs.shieldCharges}`, color: "#88ffb6" });
+        if (run.freeRevive > 0) badges.push({ text: `REVIVE ${run.freeRevive}`, color: "#88ffb6" });
+
+        for (const badge of badges) {
+          const nextW = estimateTextWidth(badge.text, 12) + 24;
+          if (x + nextW > W - 290) break;
+          x += drawInfoPill(x, topY, badge.text, badge.color, scene.panel) + 6;
+        }
+
+        if (currentMission && currentStage.goal != null) {
+          const mission = getMissionProgress();
+          const boxX = 14;
+          const boxY = H - 70;
+          const boxW = Math.min(330, W - 28);
+          const boxH = 44;
+          pxRect(boxX, boxY, boxW, boxH, "rgba(0,0,0,0.34)");
+          pxRect(boxX + 3, boxY + 3, boxW - 6, boxH - 6, scene.panel);
+          pxRect(boxX + 3, boxY + 3, boxW - 6, 3, scene.panelEdge);
+          pxText("MISSION", boxX + 10, boxY + 8, mission.done ? "#88ffb6" : "#ffd173", 12);
+          pxText(currentMission.text, boxX + 10, boxY + 22, "rgba(236,254,255,0.88)", 12);
+          const progressW = boxW - 20;
+          pxRect(boxX + 10, boxY + 34, progressW, 5, "rgba(255,255,255,0.14)");
+          const fill = clamp(currentStage.goal ? run.gatesPassed / currentStage.goal : 0, 0, 1);
+          pxRect(boxX + 10, boxY + 34, progressW * fill, 5, mission.done ? "#88ffb6" : "#93f1ff");
+          pxText(mission.label, boxX + boxW - estimateTextWidth(mission.label, 12) - 10, boxY + 8, mission.done ? "#88ffb6" : "rgba(236,254,255,0.72)", 12);
+        }
+      }
+
       function drawRunProgress() {
         if (!currentStage || state !== STATE.playing || currentStage.goal == null) return;
-        const boxW = currentStage.kind === "boss" ? 248 : 176;
-        const boxH = currentStage.kind === "boss" ? 14 : 12;
-        const x = W - boxW - 18;
-        const y = 16;
+        const boss = currentStage.kind === "boss";
+        const scene = getScenePalette();
+        const label = boss ? (currentStage.bossProfile?.glyph || "BOSS") : "CLEAR";
+        const color = boss ? (currentStage.bossProfile?.color || "#ff8f8f") : "#88ffb6";
+        const boxW = boss ? 268 : 204;
+        const boxH = 28;
+        const x = W - boxW - 16;
+        const y = 14;
         const fill = clamp(run.gatesPassed / currentStage.goal, 0, 1);
-        const bossColor = currentStage.bossProfile?.color || "#ff8f8f";
-        pxRect(x, y, boxW, boxH, "rgba(0,0,0,0.45)");
-        pxRect(x + 2, y + 2, (boxW - 4) * fill, boxH - 4, currentStage.kind === "boss" ? bossColor : "#88ffb6");
-        if (currentStage.kind === "boss") {
-          pxText(`${currentStage.bossProfile?.glyph || "BOSS"} ${run.gatesPassed}/${currentStage.goal}`, x + 8, y - 14, bossColor, 12);
-        } else {
-          pxText(`${run.gatesPassed}/${currentStage.goal}`, x + 58, y - 12, "rgba(200,247,255,0.86)", 12);
+
+        pxRect(x, y, boxW, boxH, "rgba(0,0,0,0.40)");
+        pxRect(x + 3, y + 3, boxW - 6, boxH - 6, scene.panel);
+        pxRect(x + 3, y + 3, boxW - 6, 3, scene.panelEdge);
+        pxText(label, x + 10, y + 7, color, 12);
+        const countLabel = `${run.gatesPassed}/${currentStage.goal}`;
+        pxText(countLabel, x + boxW - estimateTextWidth(countLabel, 12) - 10, y + 7, "rgba(236,254,255,0.92)", 12);
+
+        const barX = x + 10;
+        const barY = y + 16;
+        const barW = boxW - 20;
+        pxRect(barX, barY, barW, 8, "rgba(255,255,255,0.14)");
+        pxRect(barX + 1, barY + 1, Math.max(0, (barW - 2) * fill), 6, color);
+        if (fill > 0.08) {
+          ctx.globalAlpha = 0.25;
+          pxRect(barX + 2, barY + 2, Math.max(0, (barW - 8) * fill), 2, "rgba(255,255,255,0.85)");
+          ctx.globalAlpha = 1;
         }
       }
 
       function drawEventBanner() {
         if (!eventBanner.text || eventBanner.time <= 0 || state === STATE.map || state === STATE.store) return;
+        const scene = getScenePalette();
         const progress = eventBanner.max ? eventBanner.time / eventBanner.max : 0;
         const alpha = Math.min(1, progress * 1.8);
-        const boxW = Math.min(W - 120, 420);
-        const boxH = 40;
+        const boxW = Math.min(W - 120, 440);
+        const boxH = 44;
         const x = W / 2 - boxW / 2;
-        const y = 54;
-        ctx.globalAlpha = 0.82 * alpha;
-        pxRect(x, y, boxW, boxH, "rgba(0,0,0,0.55)");
+        const y = 52;
+        ctx.globalAlpha = 0.88 * alpha;
+        pxRect(x, y, boxW, boxH, "rgba(0,0,0,0.42)");
         ctx.globalAlpha = 1;
-        pxRect(x + 4, y + 4, boxW - 8, boxH - 8, "rgba(6,38,58,0.82)");
-        pxTextCenter(eventBanner.text, W / 2, y + 9, eventBanner.color, eventBanner.size);
+        pxRect(x + 4, y + 4, boxW - 8, boxH - 8, scene.panel);
+        pxRect(x + 4, y + 4, boxW - 8, 4, scene.panelEdge);
+        pxTextCenter(eventBanner.text, W / 2, y + 10, eventBanner.color, eventBanner.size);
       }
 
       function updateHUD() {
@@ -2639,13 +2807,11 @@
       }
 
       function drawBackground(dt, speed) {
+        const scene = getScenePalette();
         for (let i = 0; i < 18; i++) {
           const y = i * (H / 18);
-          const k = i / 18;
-          const r = Math.floor(5 + 20 * (1 - k));
-          const g = Math.floor(25 + 80 * (1 - k));
-          const b = Math.floor(46 + 100 * (1 - k));
-          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          const color = scene.bands[Math.min(scene.bands.length - 1, Math.floor(i / 3))];
+          ctx.fillStyle = color;
           ctx.fillRect(0, Math.round(y), W, Math.ceil(H / 18));
         }
 
@@ -2654,36 +2820,46 @@
           ctx.fillRect(0, 0, W, H);
         }
 
-        ctx.globalAlpha = SETTINGS.motion === "off" ? 0.05 : 0.10;
+        ctx.globalAlpha = SETTINGS.motion === "off" ? 0.04 : 0.10;
         for (let i = 0; i < 7; i++) {
-          const x = (i * 160 + (t * 30) % 160) - 120;
-          ctx.fillStyle = "rgba(200,247,255,1)";
+          const x = (i * 160 + (t * 28) % 160) - 120;
+          ctx.fillStyle = scene.haze;
           ctx.beginPath();
           ctx.moveTo(x, 0);
           ctx.lineTo(x + 70, 0);
-          ctx.lineTo(x + 190, H);
-          ctx.lineTo(x + 120, H);
+          ctx.lineTo(x + 180, H);
+          ctx.lineTo(x + 110, H);
           ctx.closePath();
           ctx.fill();
         }
         ctx.globalAlpha = 1;
 
+        ctx.globalAlpha = 0.16;
+        for (let i = 0; i < 6; i++) {
+          const waveY = 42 + i * 28;
+          for (let x = -20; x < W + 30; x += 20) {
+            const lift = Math.sin((x * 0.03) + t * 1.2 + i * 0.8) * 2;
+            pxRect(x, waveY + lift, 12, 2, "rgba(255,255,255,0.32)");
+          }
+        }
+        ctx.globalAlpha = 1;
+
         bg.farX -= dt * (speed * 0.10);
         if (bg.farX < -W) bg.farX += W;
-        drawSilhouetteLayer(Math.round(bg.farX), 0.18);
-        drawSilhouetteLayer(Math.round(bg.farX + W), 0.18);
+        drawSilhouetteLayer(Math.round(bg.farX), 0.16);
+        drawSilhouetteLayer(Math.round(bg.farX + W), 0.16);
 
         bg.midX -= dt * (speed * 0.22);
         if (bg.midX < -W) bg.midX += W;
-        drawSeaweedLayer(Math.round(bg.midX), 0.25);
-        drawSeaweedLayer(Math.round(bg.midX + W), 0.25);
+        drawSeaweedLayer(Math.round(bg.midX), 0.28);
+        drawSeaweedLayer(Math.round(bg.midX + W), 0.28);
 
         bg.nearX -= dt * (speed * 0.36);
         if (bg.nearX < -W) bg.nearX += W;
         drawRockLayer(Math.round(bg.nearX));
         drawRockLayer(Math.round(bg.nearX + W));
 
-        ctx.globalAlpha = 0.35;
+        ctx.globalAlpha = 0.24;
         for (const s of bg.sprites) {
           s.x -= dt * s.v;
           if (s.x < -20) {
@@ -2692,7 +2868,7 @@
             s.s = RNG(0.8, 1.8);
             s.v = RNG(8, 24);
           }
-          drawTinyFish(s.x, s.y, s.s, "rgba(0,0,0,0.85)");
+          drawTinyFish(s.x, s.y, s.s, "rgba(0,0,0,0.75)");
         }
         ctx.globalAlpha = 1;
 
@@ -2702,7 +2878,7 @@
         }
 
         if (currentStage && currentStage.routeTier === "safe") {
-          ctx.globalAlpha = 0.16;
+          ctx.globalAlpha = 0.14;
           for (let y = 64; y < GROUND_Y - 30; y += 86) pxRect(40, y, W - 80, 2, "rgba(136,255,182,1)");
           ctx.globalAlpha = 1;
         } else if (currentStage && currentStage.routeTier === "treasure") {
@@ -2715,11 +2891,25 @@
           ctx.globalAlpha = 1;
         }
 
-        pxRect(0, GROUND_Y, W, H - GROUND_Y, "rgba(2,12,18,0.85)");
+        pxRect(0, GROUND_Y, W, H - GROUND_Y, scene.floor);
         for (let i = 0; i < W; i += 18) {
           const h = 6 + Math.floor(6 * Math.sin((i + t * 40) * 0.02));
-          pxRect(i, GROUND_Y + 2, 10, Math.max(2, h), "rgba(20,90,92,0.30)");
+          pxRect(i, GROUND_Y + 2, 10, Math.max(2, h), scene.floor2);
         }
+
+        for (let i = 0; i < W; i += 54) {
+          const stemH = 12 + ((i / 54) % 3) * 7;
+          pxRect(i, GROUND_Y - stemH, 4, stemH, scene.kelp);
+          if ((i / 54) % 2 === 0) {
+            pxRect(i + 4, GROUND_Y - stemH + 4, 6, 4, scene.coral);
+            pxRect(i - 4, GROUND_Y - stemH + 8, 5, 4, scene.coral);
+          }
+        }
+
+        ctx.globalAlpha = 0.12;
+        pxRect(0, 0, 10, GROUND_Y, "rgba(0,0,0,1)");
+        pxRect(W - 10, 0, 10, GROUND_Y, "rgba(0,0,0,1)");
+        ctx.globalAlpha = 1;
       }
 
       function getFishColors(s) {
@@ -2806,6 +2996,9 @@
         const x = Math.round(p.x);
         const topH = Math.round(p.topH);
         const gap = Math.round(p.gap);
+        const by = topH + gap;
+        const bh = GROUND_Y - by;
+        const biome = currentStage?.kind === "boss" ? "Boss" : (currentStage?.shortBiome || "Reef");
 
         const palette = currentStage ? currentStage.pipePalette : ["#ff6bd6", "#b84cff", "#6bffea", "#2dd6ff"];
         let c0 = palette[0], c1 = palette[1], c2 = palette[2], c3 = palette[3];
@@ -2823,32 +3016,54 @@
           c1 = "#ffb627";
           c2 = "#fff5d6";
           c3 = "#ffe082";
-          const shimmer = SETTINGS.motion === "off" ? 0.8 : 0.75 + 0.2 * Math.sin(t * 6 + p.x * 0.01);
+          const shimmer = SETTINGS.motion === "off" ? 0.84 : 0.72 + 0.20 * Math.sin(t * 6 + p.x * 0.01);
           ctx.globalAlpha = shimmer;
         }
 
-        pxRect(x, 0, PIPE_W, topH, "rgba(0,0,0,0.25)");
-        pxRect(x + 4, 4, PIPE_W - 8, topH - 8, c1);
+        function drawColumn(colX, colY, colW, colH, main, shadow, shine, capY, topColumn) {
+          pxRect(colX, colY, colW, colH, "rgba(0,0,0,0.28)");
+          pxRect(colX + 4, colY + 4, colW - 8, colH - 8, shadow);
+          pxRect(colX + 10, colY + 8, 8, colH - 16, main);
+          pxRect(colX + colW - 18, colY + 8, 8, colH - 16, main);
+          pxRect(colX + 24, colY + 8, colW - 48, colH - 16, shine);
 
-        for (let i = 0; i < PIPE_W; i += 12) {
-          pxRect(x + i + 2, topH - 12, 10, 10, c0);
-          if (i % 24 === 0) pxRect(x + i + 4, topH - 22, 8, 8, c2);
+          if (biome === "Reef") {
+            for (let yy = colY + 12; yy < colY + colH - 12; yy += 18) {
+              pxRect(colX + 2, yy, 6, 6, c0);
+              pxRect(colX + colW - 8, yy + 6, 6, 6, c2);
+            }
+          } else if (biome === "Kelp") {
+            for (let yy = colY + 18; yy < colY + colH - 18; yy += 26) {
+              pxRect(colX - 6, yy, 6, 12, c0);
+              pxRect(colX + colW, yy + 4, 6, 12, c2);
+            }
+          } else if (biome === "Ruins") {
+            for (let yy = colY + 18; yy < colY + colH - 12; yy += 28) {
+              pxRect(colX + 8, yy, colW - 16, 3, "rgba(0,0,0,0.18)");
+              pxRect(colX + 18, yy + 8, 3, 8, c1);
+              pxRect(colX + colW - 22, yy + 10, 3, 10, c1);
+            }
+          } else {
+            for (let yy = colY + 14; yy < colY + colH - 12; yy += 20) {
+              pxRect(colX + 14, yy, colW - 28, 2, c2);
+            }
+          }
+
+          const lipH = 14;
+          const lipY = topColumn ? capY - lipH : capY;
+          pxRect(colX - 5, lipY, colW + 10, lipH, main);
+          pxRect(colX - 1, lipY + 4, colW + 2, lipH - 6, shine);
+          if (p.golden) {
+            pxRect(colX + Math.floor(colW / 2) - 5, lipY + 3, 10, 8, "#fff5d6");
+          }
         }
 
-        const by = topH + gap;
-        const bh = GROUND_Y - by;
+        drawColumn(x, 0, PIPE_W, topH, c0, c1, c2, topH - 4, true);
+        drawColumn(x, by, PIPE_W, bh, c2, c3, c0, by - 10, false);
 
-        pxRect(x, by, PIPE_W, bh, "rgba(0,0,0,0.25)");
-        pxRect(x + 4, by + 4, PIPE_W - 8, bh - 8, c3);
-
-        for (let i = 0; i < PIPE_W; i += 12) {
-          pxRect(x + i + 2, by + 2, 10, 10, c2);
-          if (i % 24 === 0) pxRect(x + i + 4, by + 14, 8, 8, c0);
-        }
-
-        ctx.globalAlpha = 0.25;
-        pxRect(x - 2, topH - 2, PIPE_W + 4, 4, p.golden ? "#fff5d6" : "#c8f7ff");
-        pxRect(x - 2, by - 2, PIPE_W + 4, 4, p.golden ? "#fff5d6" : "#c8f7ff");
+        ctx.globalAlpha = 0.18;
+        pxRect(x + 6, 0, 6, topH, "rgba(255,255,255,0.9)");
+        pxRect(x + 6, by, 6, bh, "rgba(255,255,255,0.9)");
         ctx.globalAlpha = 1;
       }
 
@@ -2989,80 +3204,81 @@
       function drawOverlay() {
         if (state === STATE.playing || state === STATE.store || state === STATE.map) return;
 
+        const scene = getScenePalette();
         ctx.globalAlpha = 0.92;
-        pxRect(0, 0, W, H, "rgba(0,0,0,0.22)");
+        pxRect(0, 0, W, H, "rgba(0,0,0,0.24)");
         ctx.globalAlpha = 1;
 
         const bx = 70;
         const by = 60;
         const bw = W - 140;
-        const bh = 312;
+        const bh = 320;
 
-        pxRect(bx, by, bw, bh, "rgba(0,0,0,0.32)");
-        pxRect(bx + 6, by + 6, bw - 12, bh - 12, "rgba(6,38,58,0.75)");
-        pxRect(bx + 6, by + 6, bw - 12, 4, "rgba(200,247,255,0.25)");
-        pxRect(bx + 6, by + bh - 10, bw - 12, 4, "rgba(200,247,255,0.12)");
+        pxRect(bx, by, bw, bh, "rgba(0,0,0,0.34)");
+        pxRect(bx + 6, by + 6, bw - 12, bh - 12, scene.panel);
+        pxRect(bx + 6, by + 6, bw - 12, 4, scene.panelEdge);
+        pxRect(bx + 6, by + bh - 10, bw - 12, 4, "rgba(255,255,255,0.10)");
+        pxRect(bx + 24, by + 18, 94, 18, "rgba(0,0,0,0.20)");
+        pxText(state === STATE.over ? "DIVE REPORT" : "READY ROOM", bx + 32, by + 22, "#ffd173", 12);
 
         if (state === STATE.over) {
-          pxText("GAME OVER", bx + 36, by + 26, "#c8f7ff", 34);
-          pxText("Score", bx + 36, by + 78, "rgba(200,247,255,0.85)", 14);
-          pxText(String(score), bx + 36, by + 98, "#ffd36b", 30);
+          pxText("GAME OVER", bx + 36, by + 52, "#c8f7ff", 34);
+          pxText("Score", bx + 36, by + 96, "rgba(200,247,255,0.76)", 14);
+          pxText(String(score), bx + 36, by + 116, "#ffd36b", 30);
 
           if (score >= best && score > 0) {
-            pxText("NEW BEST", bx + 140, by + 102, "#88ffb6", 18);
+            pxText("NEW BEST", bx + 156, by + 118, "#88ffb6", 18);
           } else {
-            pxText(`Best: ${best}`, bx + 140, by + 104, "#7ee7ff", 14);
+            pxText(`Best: ${best}`, bx + 156, by + 118, "#7ee7ff", 14);
           }
 
+          if (crashReason) pxText(`Cause: ${crashReason}`, bx + 36, by + 146, "#ff8f8f", 13);
           const deathLine = deathMessageDisplay || "The ocean is deciding";
-          pxText(deathLine, bx + 36, by + 148, deathMessageLocked ? "rgba(200,247,255,0.92)" : "rgba(200,247,255,0.78)", 15);
-          if (crashReason) pxText(`Cause: ${crashReason}`, bx + 36, by + 126, "#ff8f8f", 13);
-          if (!deathMessageLocked) {
-            pxText("locking final line...", bx + 36, by + 166, "rgba(200,247,255,0.46)", 11);
-          }
+          pxText(deathLine, bx + 36, by + 168, deathMessageLocked ? "rgba(200,247,255,0.92)" : "rgba(200,247,255,0.78)", 15);
+          if (!deathMessageLocked) pxText("locking final line...", bx + 36, by + 186, "rgba(200,247,255,0.46)", 11);
 
           if (SETTINGS.mode === "campaign") {
-            pxText(`Campaign ended on level ${campaign.level}`, bx + 36, by + 180, "rgba(200,247,255,0.74)", 14);
-            pxText(`Pearls banked: ${campaign.pearls}   Total gates this run: ${campaign.totalGates + run.gatesPassed}`, bx + 36, by + 204, "rgba(200,247,255,0.58)", 12);
-            if (currentStage && currentStage.goal != null) pxText(`You were ${Math.max(0, currentStage.goal - run.gatesPassed)} gates from clear`, bx + 36, by + 220, "#ffd36b", 12);
+            pxText(`Campaign ended on level ${campaign.level}`, bx + 36, by + 216, "rgba(200,247,255,0.74)", 14);
+            pxText(`Pearls banked: ${campaign.pearls}   Total gates this run: ${campaign.totalGates + run.gatesPassed}`, bx + 36, by + 236, "rgba(200,247,255,0.58)", 12);
+            if (currentStage && currentStage.goal != null) pxText(`You were ${Math.max(0, currentStage.goal - run.gatesPassed)} gates from clear`, bx + 36, by + 254, "#ffd36b", 12);
             if (currentStage) {
-              pxText(`Current biome: ${currentStage.displayName}`, bx + 36, by + 226, "#ffd36b", 14);
+              pxText(`Current biome: ${currentStage.displayName}`, bx + 36, by + 274, "#ffd36b", 14);
               const temptation = currentStage.kind === "boss"
                 ? `Tip: ${currentStage.bossProfile?.line || "Boss pressure comes in phases."}`
                 : currentStage.routeName ? `Run it back and lean into ${currentStage.routeName.toLowerCase()}.` : "Run it back with a sharper line.";
-              pxText(temptation, bx + 36, by + 246, "rgba(200,247,255,0.66)", 12);
+              pxText(temptation, bx + 36, by + 292, "rgba(200,247,255,0.66)", 12);
             }
           } else {
-            pxText("Infinite mode never stops until you do", bx + 36, by + 180, "rgba(200,247,255,0.74)", 14);
-            pxText(`Gates passed: ${run.gatesPassed}   Near misses: ${run.nearMisses}`, bx + 36, by + 204, "rgba(200,247,255,0.58)", 12);
+            pxText("Infinite mode never stops until you do", bx + 36, by + 216, "rgba(200,247,255,0.74)", 14);
+            pxText(`Gates passed: ${run.gatesPassed}   Near misses: ${run.nearMisses}`, bx + 36, by + 236, "rgba(200,247,255,0.58)", 12);
           }
 
-          pxText("Space or tap to run it back", bx + 36, by + 250, "#c8f7ff", 16);
+          pxText("Space or tap to run it back", bx + 36, by + 306, "#c8f7ff", 16);
         } else {
-          pxText("FLAPPY FISH", bx + 36, by + 26, "#c8f7ff", 34);
-          pxText(SETTINGS.mode === "campaign" ? "Campaign mode selected" : "Infinite mode selected", bx + 36, by + 78, "rgba(200,247,255,0.90)", 16);
+          pxText("FLAPPY FISH", bx + 36, by + 52, "#c8f7ff", 34);
+          pxText(SETTINGS.mode === "campaign" ? "Campaign mode selected" : "Infinite mode selected", bx + 36, by + 92, "rgba(200,247,255,0.90)", 16);
 
           if (SETTINGS.mode === "campaign" && currentStage && currentMission) {
-            pxText(`${currentStage.displayName} • Level ${campaign.level}`, bx + 36, by + 118, "#ffd36b", 15);
+            pxText(`${currentStage.displayName} • Level ${campaign.level}`, bx + 36, by + 130, "#ffd36b", 15);
             if (currentStage.kind === "boss" && currentStage.bossProfile) {
-              pxText(`${currentStage.bossProfile.subtitle} • ${currentStage.bossProfile.line}`, bx + 36, by + 142, currentStage.bossProfile.color, 14);
+              pxText(`${currentStage.bossProfile.subtitle} • ${currentStage.bossProfile.line}`, bx + 36, by + 154, currentStage.bossProfile.color, 14);
             } else {
-              pxText(currentStage.description, bx + 36, by + 142, "rgba(200,247,255,0.74)", 14);
+              pxText(currentStage.description, bx + 36, by + 154, "rgba(200,247,255,0.74)", 14);
             }
-            pxText(`Mission: ${currentMission.text}`, bx + 36, by + 168, "rgba(200,247,255,0.74)", 14);
+            pxText(`Mission: ${currentMission.text}`, bx + 36, by + 178, "rgba(200,247,255,0.74)", 14);
             const nextStages = [campaign.level, campaign.level + 1, campaign.level + 2].map(level => {
               const s = createStage(level, "campaign");
               return `L${level} ${s.kind === "boss" ? "Boss" : s.shortBiome}`;
             }).join("  •  ");
-            pxText(nextStages, bx + 36, by + 198, "rgba(200,247,255,0.55)", 12);
+            pxText(nextStages, bx + 36, by + 204, "rgba(200,247,255,0.55)", 12);
           } else {
-            pxText("No store. No level breaks. Just survive.", bx + 36, by + 118, "rgba(200,247,255,0.74)", 14);
-            pxText("Speed ramps and the best run wins.", bx + 36, by + 142, "rgba(200,247,255,0.74)", 14);
-            pxText("This is the pure arcade lane.", bx + 36, by + 166, "#ffd36b", 14);
+            pxText("No store. No level breaks. Just survive.", bx + 36, by + 130, "rgba(200,247,255,0.74)", 14);
+            pxText("Speed ramps and the best run wins.", bx + 36, by + 154, "rgba(200,247,255,0.74)", 14);
+            pxText("This is the pure arcade lane.", bx + 36, by + 178, "#ffd36b", 14);
           }
 
-          pxText("Space or tap to start", bx + 36, by + 232, "#c8f7ff", 16);
-          pxText("Press 1 for campaign or 2 for infinite", bx + 36, by + 256, "rgba(200,247,255,0.60)", 12);
+          pxText("Space or tap to start", bx + 36, by + 286, "#c8f7ff", 16);
+          pxText("Press 1 for campaign or 2 for infinite", bx + 36, by + 306, "rgba(200,247,255,0.60)", 12);
         }
       }
 
@@ -3387,24 +3603,7 @@
           ctx.globalAlpha = 1;
         }
 
-        if (state === STATE.playing && currentStage) {
-          let bx = 14;
-          const by = 12;
-          pxText(SETTINGS.mode === "campaign" ? `LEVEL ${campaign.level}` : "INFINITE", bx, by, "rgba(200,247,255,0.55)", 12);
-          bx += SETTINGS.mode === "campaign" ? 80 : 72;
-          pxText(currentStage.shortBiome.toUpperCase(), bx, by, currentStage.kind === "boss" ? "#ff8f8f" : "#ffd36b", 12);
-          bx += 92;
-          if (currentStage.routeName) { pxText(currentStage.routeName.toUpperCase(), bx, by, getRouteTheme() ? getRouteTheme().color : "#7ee7ff", 12); bx += 138; }
-          if (buffs.slowTime > 0) { pxText(`SLOW ${buffs.slowTime.toFixed(1)}s`, bx, by, "#7ee7ff", 12); bx += 100; }
-          if (buffs.magnet > 0) { pxText(`MAGNET ${buffs.magnet.toFixed(1)}s`, bx, by, "#ffd36b", 12); bx += 110; }
-          if (buffs.x2 > 0) { pxText(`x2 ${buffs.x2.toFixed(1)}s`, bx, by, "#ff6b6b", 12); bx += 80; }
-          if (buffs.shieldCharges > 0) { pxText(`SHIELD x${buffs.shieldCharges}`, bx, by, "#88ffb6", 12); bx += 100; }
-          if (run.freeRevive > 0) { pxText(`REVIVE x${run.freeRevive}`, bx, by, "#88ffb6", 12); }
-          if (currentMission && currentStage.goal != null) {
-            const mission = getMissionProgress();
-            pxText(`MISSION ${mission.label}`, 14, H - 74, mission.done ? "#88ffb6" : "rgba(200,247,255,0.76)", 12);
-          }
-        }
+        drawStageHudRibbon();
 
         drawOverlay();
         ctx.restore();
