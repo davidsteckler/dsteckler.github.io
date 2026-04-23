@@ -1,0 +1,3499 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Flappy Fish Campaign Evolution</title>
+  <style>
+
+    :root{
+      --bg0:#030c16;
+      --bg1:#082235;
+      --bg2:#0d4968;
+      --bg3:#17a2bb;
+      --trench:#0f1632;
+      --ui:#ecfeff;
+      --ui-soft:rgba(236,254,255,0.78);
+      --ui2:#93f1ff;
+      --warn:#ffd173;
+      --good:#88ffb6;
+      --bad:#ff7a86;
+      --pink:#ff7de4;
+      --gold:#efb048;
+      --coral:#ff8c6d;
+      --kelp:#62d59a;
+      --glass:rgba(5,20,32,0.68);
+      --glass2:rgba(8,44,63,0.56);
+      --bubble:rgba(255,255,255,0.08);
+      --edge:rgba(147,241,255,0.22);
+      --shadow: rgba(0,0,0,0.42);
+    }
+
+    *{ box-sizing:border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      color: var(--ui);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      image-rendering: pixelated;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(28,178,208,0.28), transparent 24%),
+        radial-gradient(circle at 15% 10%, rgba(255,141,109,0.13), transparent 22%),
+        radial-gradient(circle at 82% 6%, rgba(255,209,115,0.10), transparent 18%),
+        linear-gradient(180deg, #11496a 0%, #0a2338 42%, #050d17 100%);
+    }
+
+    body{
+      position: relative;
+    }
+
+    body::before,
+    body::after{
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before{
+      opacity: 0.52;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.09) 0 2px, transparent 3px),
+        radial-gradient(circle at 80% 28%, rgba(255,255,255,0.09) 0 2px, transparent 3px),
+        radial-gradient(circle at 68% 66%, rgba(255,255,255,0.08) 0 3px, transparent 4px),
+        radial-gradient(circle at 12% 74%, rgba(255,255,255,0.08) 0 2px, transparent 3px),
+        linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.06) 45%, transparent 55%),
+        linear-gradient(300deg, transparent 0%, rgba(255,255,255,0.05) 45%, transparent 55%);
+      background-size: 260px 260px, 300px 300px, 380px 380px, 340px 340px, 520px 520px, 600px 600px;
+      animation: tideDrift 26s linear infinite;
+    }
+
+    body::after{
+      opacity: 0.34;
+      background:
+        radial-gradient(circle at 50% 120%, rgba(255,122,134,0.28), transparent 28%),
+        radial-gradient(circle at 5% 100%, rgba(98,213,154,0.18), transparent 22%),
+        radial-gradient(circle at 95% 105%, rgba(239,176,72,0.24), transparent 18%);
+      filter: blur(34px);
+    }
+
+    .wrap,
+    .overlay-panel,
+    .toast{
+      position: relative;
+      z-index: 1;
+    }
+
+    .wrap{
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .frame{
+      width: min(1100px, 96vw);
+      display: grid;
+      gap: 14px;
+      position: relative;
+    }
+
+    .frame::before,
+    .frame::after{
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      width: 150px;
+      height: 62px;
+      pointer-events: none;
+      opacity: 0.6;
+      filter: blur(1px);
+    }
+
+    .frame::before{
+      left: 10px;
+      background:
+        radial-gradient(circle at 18% 85%, rgba(98,213,154,0.35) 0 12px, transparent 13px),
+        radial-gradient(circle at 32% 78%, rgba(98,213,154,0.26) 0 16px, transparent 17px),
+        radial-gradient(circle at 56% 88%, rgba(255,140,109,0.26) 0 15px, transparent 16px),
+        radial-gradient(circle at 75% 78%, rgba(255,209,115,0.28) 0 14px, transparent 15px);
+    }
+
+    .frame::after{
+      right: 14px;
+      background:
+        radial-gradient(circle at 80% 82%, rgba(98,213,154,0.34) 0 14px, transparent 15px),
+        radial-gradient(circle at 60% 76%, rgba(98,213,154,0.24) 0 16px, transparent 17px),
+        radial-gradient(circle at 34% 88%, rgba(255,140,109,0.24) 0 15px, transparent 16px),
+        radial-gradient(circle at 12% 78%, rgba(255,209,115,0.24) 0 12px, transparent 13px);
+    }
+
+    .topbar{
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 15px 18px;
+      border-radius: 24px;
+      border: 1px solid var(--edge);
+      background:
+        linear-gradient(180deg, rgba(14,76,106,0.58), rgba(5,19,30,0.72)),
+        radial-gradient(circle at 14% 18%, rgba(255,255,255,0.07), transparent 28%);
+      box-shadow:
+        0 24px 48px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        inset 0 -1px 0 rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+    }
+
+    .title{
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .title h1{
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 3px;
+      font-weight: 900;
+      line-height: 1;
+      color: transparent;
+      background: linear-gradient(180deg, #ffffff 0%, #bffaff 40%, #ffd173 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 4px 14px rgba(0,0,0,0.32));
+    }
+
+    .title .tag{
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(147,241,255,0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--ui2);
+      opacity: 1;
+      white-space: nowrap;
+    }
+
+    .buttons{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button{
+      appearance: none;
+      border: 1px solid rgba(147,241,255,0.24);
+      background: linear-gradient(180deg, rgba(14,86,118,0.78), rgba(6,29,43,0.92));
+      color: var(--ui);
+      padding: 9px 12px;
+      border-radius: 14px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow:
+        0 10px 20px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.10);
+      transition: transform 0.05s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      user-select: none;
+    }
+
+    button:hover{
+      border-color: rgba(147,241,255,0.46);
+      background: linear-gradient(180deg, rgba(18,104,139,0.88), rgba(7,39,56,0.95));
+      box-shadow:
+        0 14px 24px rgba(0,0,0,0.28),
+        0 0 0 1px rgba(147,241,255,0.08) inset;
+    }
+
+    button:active{ transform: translateY(1px); }
+    button:disabled{
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #btnStart{ border-color: rgba(136,255,182,0.38); background: linear-gradient(180deg, rgba(30,111,78,0.92), rgba(13,54,39,0.92)); }
+    #btnRestart{ border-color: rgba(255,140,109,0.34); background: linear-gradient(180deg, rgba(112,54,38,0.88), rgba(56,26,19,0.92)); }
+    #btnMode{ border-color: rgba(147,241,255,0.34); }
+    #btnMute{ border-color: rgba(255,209,115,0.34); background: linear-gradient(180deg, rgba(102,79,25,0.88), rgba(58,43,15,0.92)); }
+    #btnMotion{ border-color: rgba(255,125,228,0.34); background: linear-gradient(180deg, rgba(86,42,83,0.88), rgba(46,22,44,0.92)); }
+
+    .card{
+      width: 100%;
+      border-radius: 28px;
+      border: 1px solid var(--edge);
+      background:
+        linear-gradient(180deg, rgba(10,59,84,0.56), rgba(4,16,26,0.82)),
+        radial-gradient(circle at 18% 12%, rgba(255,255,255,0.08), transparent 28%),
+        radial-gradient(circle at 88% 0%, rgba(255,209,115,0.05), transparent 16%);
+      box-shadow:
+        0 26px 52px rgba(0,0,0,0.28),
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        inset 0 -1px 0 rgba(0,0,0,0.30);
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.05) 25%, transparent 45%),
+        radial-gradient(circle at 8% 22%, rgba(147,241,255,0.10) 0 4px, transparent 5px),
+        radial-gradient(circle at 92% 14%, rgba(255,255,255,0.08) 0 3px, transparent 4px);
+      pointer-events: none;
+      opacity: 0.65;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: start;
+      justify-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    canvas{
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      max-height: 70vh;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(8,25,40,0.22), rgba(3,10,16,0.34));
+      border: 1px solid rgba(147,241,255,0.26);
+      box-shadow:
+        inset 0 0 0 2px rgba(5,14,22,0.40),
+        inset 0 0 35px rgba(12,152,178,0.12),
+        0 28px 46px rgba(0,0,0,0.24),
+        0 0 0 6px rgba(255,255,255,0.02);
+      touch-action: none;
+    }
+
+    .hud{
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      margin-top: 2px;
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--ui-soft);
+      line-height: 1.55;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(147,241,255,0.12);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)),
+        rgba(0,0,0,0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .hint b,
+    .subtle b,
+    .shop-header h3,
+    .shop-section h4{
+      color: var(--warn);
+    }
+
+    .stats{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: rgba(236,254,255,0.92);
+    }
+
+    .pill{
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(147,241,255,0.16);
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+      box-shadow:
+        0 8px 16px rgba(0,0,0,0.14),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      white-space: nowrap;
+      backdrop-filter: blur(5px);
+    }
+
+    .pill b{
+      color: var(--warn);
+      text-shadow: 0 0 12px rgba(255,209,115,0.20);
+    }
+
+    .pill .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(236,254,255,0.45);
+      display: inline-block;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .pill .dot.good{ background: rgba(136,255,182,0.85); color: rgba(136,255,182,0.85); }
+    .pill .dot.bad{ background: rgba(255,122,134,0.85); color: rgba(255,122,134,0.85); }
+    .pill .dot.warn{ background: rgba(255,209,115,0.85); color: rgba(255,209,115,0.85); }
+    .pill .dot.combo{ background: rgba(255,125,228,0.85); color: rgba(255,125,228,0.85); }
+
+    .subtle{
+      opacity: 0.88;
+      font-size: 11px;
+      text-align: center;
+      margin-top: 0;
+      line-height: 1.5;
+      color: rgba(236,254,255,0.66);
+      letter-spacing: 0.4px;
+      padding: 0 12px;
+    }
+
+    .overlay-panel{
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(2,10,17,0.62);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      padding: 16px;
+    }
+
+    .overlay-panel.show{
+      display: grid;
+    }
+
+    .overlay-panel::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(147,241,255,0.08), transparent 18%),
+        radial-gradient(circle at 84% 10%, rgba(255,209,115,0.06), transparent 14%),
+        radial-gradient(circle at 50% 100%, rgba(255,122,134,0.12), transparent 22%);
+      pointer-events: none;
+    }
+
+    .shop-card,
+    .map-card{
+      width: min(980px, 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(147,241,255,0.20);
+      background:
+        linear-gradient(180deg, rgba(12,63,89,0.94), rgba(4,16,26,0.95)),
+        radial-gradient(circle at 88% 0%, rgba(255,209,115,0.06), transparent 18%);
+      box-shadow:
+        0 24px 54px rgba(0,0,0,0.34),
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        inset 0 -1px 0 rgba(0,0,0,0.30);
+      padding: 18px;
+      max-height: min(90vh, 900px);
+      overflow: auto;
+      position: relative;
+    }
+
+    .shop-card::before,
+    .map-card::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.05) 22%, transparent 44%),
+        radial-gradient(circle at 10% 20%, rgba(147,241,255,0.10) 0 3px, transparent 4px),
+        radial-gradient(circle at 90% 12%, rgba(255,255,255,0.08) 0 3px, transparent 4px);
+      opacity: 0.65;
+      pointer-events: none;
+    }
+
+    .shop-header,
+    .shop-meta,
+    .route-strip,
+    .mission-card,
+    .shop-sections,
+    .panel-actions,
+    .map-grid,
+    #pathGrid{
+      position: relative;
+      z-index: 1;
+    }
+
+    .shop-header{
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .shop-header h3{
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .shop-header p{
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: rgba(236,254,255,0.74);
+    }
+
+    .shop-meta{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .route-strip{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .route-node{
+      min-width: 100px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(147,241,255,0.10);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      font-size: 11px;
+      line-height: 1.4;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .route-node b{
+      display: block;
+      font-size: 12px;
+      margin-bottom: 2px;
+      color: var(--ui);
+    }
+
+    .route-node.current{
+      border-color: rgba(136,255,182,0.30);
+      background: linear-gradient(180deg, rgba(136,255,182,0.14), rgba(136,255,182,0.06));
+    }
+
+    .route-node.next{
+      border-color: rgba(255,209,115,0.30);
+      background: linear-gradient(180deg, rgba(255,209,115,0.12), rgba(255,209,115,0.05));
+    }
+
+    .route-node.boss{
+      border-color: rgba(255,122,134,0.30);
+      background: linear-gradient(180deg, rgba(255,122,134,0.12), rgba(255,122,134,0.05));
+    }
+
+    .map-grid{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .path-choice{
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid rgba(147,241,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      min-height: 240px;
+      align-content: start;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+
+    .path-choice::before{
+      content: "";
+      position: absolute;
+      top: 26px;
+      left: -20px;
+      width: 20px;
+      height: 2px;
+      background: rgba(147,241,255,0.16);
+    }
+
+    .path-choice::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 42%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .path-choice:first-child::before{
+      display: none;
+    }
+
+    .path-choice h4{
+      margin: 0;
+      font-size: 15px;
+      color: var(--ui);
+    }
+
+    .path-choice .path-tag{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(147,241,255,0.16);
+      background: rgba(0,0,0,0.18);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(236,254,255,0.86);
+    }
+
+    .path-choice p{
+      margin: 0;
+      font-size: 11px;
+      line-height: 1.5;
+      color: rgba(236,254,255,0.72);
+    }
+
+    .path-choice .path-stats{
+      display: grid;
+      gap: 7px;
+      font-size: 11px;
+      color: rgba(236,254,255,0.82);
+    }
+
+    .path-choice .path-stats span{
+      padding: 7px 9px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(147,241,255,0.08);
+    }
+
+    .path-choice.safe{
+      border-color: rgba(136,255,182,0.28);
+      background: linear-gradient(180deg, rgba(136,255,182,0.11), rgba(136,255,182,0.04));
+    }
+
+    .path-choice.treasure{
+      border-color: rgba(255,209,115,0.28);
+      background: linear-gradient(180deg, rgba(255,209,115,0.11), rgba(255,209,115,0.04));
+    }
+
+    .path-choice.wild{
+      border-color: rgba(255,125,228,0.28);
+      background: linear-gradient(180deg, rgba(255,125,228,0.10), rgba(255,125,228,0.04));
+    }
+
+    .mission-card{
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(147,241,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      font-size: 12px;
+      line-height: 1.55;
+      color: rgba(236,254,255,0.82);
+    }
+
+    .mission-card b{
+      color: var(--warn);
+    }
+
+    .shop-sections{
+      display: grid;
+      gap: 14px;
+    }
+
+    .shop-section h4{
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .shop-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .shop-item{
+      border-radius: 16px;
+      border: 1px solid rgba(147,241,255,0.10);
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      padding: 13px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shop-item::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 45%);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .shop-item > *{
+      position: relative;
+      z-index: 1;
+    }
+
+    .shop-item h5{
+      margin: 0;
+      font-size: 14px;
+      color: var(--ui);
+    }
+
+    .shop-item p{
+      margin: 0;
+      min-height: 34px;
+      line-height: 1.45;
+      font-size: 11px;
+      color: rgba(236,254,255,0.68);
+    }
+
+    .shop-item .meta{
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: rgba(236,254,255,0.76);
+    }
+
+    .panel-actions{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .panel-actions .left,
+    .panel-actions .right{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .primary{ border-color: rgba(136,255,182,0.35); background: linear-gradient(180deg, rgba(26,112,78,0.94), rgba(13,53,39,0.96)); }
+    .accent{ border-color: rgba(255,209,115,0.38); background: linear-gradient(180deg, rgba(123,86,23,0.90), rgba(67,47,15,0.96)); }
+    .danger{ border-color: rgba(255,122,134,0.38); background: linear-gradient(180deg, rgba(116,39,50,0.90), rgba(60,19,25,0.96)); }
+
+    .toast{
+      position: fixed;
+      left: 14px;
+      bottom: 14px;
+      padding: 11px 13px;
+      border-radius: 16px;
+      border: 1px solid rgba(147,241,255,0.18);
+      background: linear-gradient(180deg, rgba(10,58,82,0.92), rgba(4,16,26,0.94));
+      box-shadow: 0 18px 36px rgba(0,0,0,0.28);
+      font-size: 12px;
+      color: rgba(236,254,255,0.95);
+      display: none;
+      z-index: 21;
+      max-width: min(420px, calc(100vw - 28px));
+      backdrop-filter: blur(10px);
+    }
+
+    .toast.show{ display: block; animation: toastIn 0.25s ease-out; }
+    .toast b{ color: var(--good); }
+
+    @keyframes toastIn{
+      from{ opacity: 0; transform: translateY(12px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tideDrift{
+      0%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(-2.5%, 1.4%, 0) scale(1.04); }
+      100%{ transform: translate3d(0,0,0) scale(1); }
+    }
+
+    @media (max-width: 900px){
+      .topbar{
+        grid-template-columns: 1fr;
+      }
+
+      .buttons{
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 760px){
+      .shop-grid{ grid-template-columns: 1fr; }
+      .map-grid{ grid-template-columns: 1fr; }
+      .path-choice::before{ display: none; }
+      .title .tag{ white-space: normal; }
+      .title h1{ font-size: 21px; }
+    }
+
+    @media (max-width: 520px){
+      .wrap{ padding: 12px; }
+      .topbar{ padding: 14px; border-radius: 20px; }
+      button{ font-size: 11px; padding: 8px 10px; }
+      .hud{ grid-template-columns: 1fr; }
+      .stats{ justify-content: flex-start; }
+      .route-node{ min-width: calc(50% - 8px); }
+      .card{ border-radius: 22px; padding: 10px; }
+      canvas{ border-radius: 16px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="frame">
+      <div class="topbar">
+        <div class="title">
+          <h1>FLAPPY FISH</h1>
+          <div class="tag">reef run • treasure routes • bosses • relics</div>
+        </div>
+        <div class="buttons">
+          <button id="btnStart">Start</button>
+          <button id="btnRestart">Restart</button>
+          <button id="btnMode">Mode: Campaign</button>
+          <button id="btnMute">Sound: On</button>
+          <button id="btnMotion">Motion: Reduced</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <canvas id="game" width="960" height="540" aria-label="Flappy Fish game"></canvas>
+
+          <div class="hud">
+            <div class="hint" id="hintText">
+              Campaign now has biomes, missions, boss levels, and a stronger store.
+              <br />Space / click / tap to swim. R restarts. 1 switches to campaign. 2 switches to infinite.
+            </div>
+            <div class="stats">
+              <div class="pill"><span class="dot warn"></span>Score <b id="score">0</b></div>
+              <div class="pill"><span class="dot warn"></span>Goal <b id="goalLabel">0/0</b></div>
+              <div class="pill"><span class="dot good"></span>Shield <b id="shieldLabel">0</b></div>
+              <div class="pill"><span class="dot combo"></span>Combo <b id="combo">—</b></div>
+              <div class="pill"><span class="dot good"></span>Pearls <b id="pearlsLabel">0</b></div>
+              <div class="pill"><span class="dot"></span>Best <b id="best">0</b></div>
+              <div class="pill" style="display:none"><span class="dot"></span>State <b id="modeLabel">Ready</b></div>
+              <div class="pill" style="display:none"><span class="dot warn"></span>Biome <b id="biomeLabel">Reef</b></div>
+              <div class="pill" style="display:none"><span class="dot"></span>Level <b id="levelLabel">1</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subtle" id="subtleText">
+        Reduced motion stays on by default. Campaign now changes by biome instead of just numbers.
+      </div>
+    </div>
+  </div>
+
+
+  <div id="mapPanel" class="overlay-panel" aria-hidden="true">
+    <div class="map-card">
+      <div class="shop-header">
+        <h3 id="mapTitle">CHOOSE A ROUTE</h3>
+        <p id="mapSub">Pick a path before the level starts. Each route changes the run.</p>
+      </div>
+
+      <div class="shop-meta" id="mapMeta"></div>
+      <div class="route-strip" id="mapRouteStrip"></div>
+      <div class="map-grid" id="pathGrid"></div>
+
+      <div class="panel-actions">
+        <div class="left">
+          <button id="btnMapResetCampaign" class="danger">Reset Campaign</button>
+        </div>
+        <div class="right">
+          <button id="btnMapCancel">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="shopPanel" class="overlay-panel" aria-hidden="true">
+    <div class="shop-card">
+      <div class="shop-header">
+        <h3 id="shopTitle">LEVEL CLEAR</h3>
+        <p id="shopSub">Spend pearls now, then keep the campaign moving.</p>
+      </div>
+
+      <div class="shop-meta" id="shopMeta"></div>
+      <div class="route-strip" id="routeStrip"></div>
+      <div class="mission-card" id="shopMission"></div>
+
+      <div class="shop-sections">
+        <div class="shop-section">
+          <h4>Permanent run upgrades</h4>
+          <div class="shop-grid" id="permGrid"></div>
+        </div>
+
+        <div class="shop-section">
+          <h4>Relics</h4>
+          <div class="shop-grid" id="relicGrid"></div>
+        </div>
+
+        <div class="shop-section">
+          <h4>Next level buys</h4>
+          <div class="shop-grid" id="consumableGrid"></div>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <div class="left">
+          <button id="btnCashOut" class="accent">Cash Out</button>
+          <button id="btnRerollShop">Reroll Shop</button>
+          <button id="btnResetCampaign" class="danger">Reset Campaign</button>
+        </div>
+        <div class="right">
+          <button id="btnNextLevel" class="primary">Next Level</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+
+      const scoreEl = document.getElementById("score");
+      const bestEl = document.getElementById("best");
+      const comboEl = document.getElementById("combo");
+      const modeEl = document.getElementById("modeLabel");
+      const biomeEl = document.getElementById("biomeLabel");
+      const levelEl = document.getElementById("levelLabel");
+      const pearlsEl = document.getElementById("pearlsLabel");
+      const goalEl = document.getElementById("goalLabel");
+      const shieldEl = document.getElementById("shieldLabel");
+      const hintText = document.getElementById("hintText");
+      const subtleText = document.getElementById("subtleText");
+
+      const btnStart = document.getElementById("btnStart");
+      const btnRestart = document.getElementById("btnRestart");
+      const btnMode = document.getElementById("btnMode");
+      const btnMute = document.getElementById("btnMute");
+      const btnMotion = document.getElementById("btnMotion");
+
+      const mapPanel = document.getElementById("mapPanel");
+      const mapTitle = document.getElementById("mapTitle");
+      const mapSub = document.getElementById("mapSub");
+      const mapMeta = document.getElementById("mapMeta");
+      const mapRouteStrip = document.getElementById("mapRouteStrip");
+      const pathGrid = document.getElementById("pathGrid");
+      const btnMapResetCampaign = document.getElementById("btnMapResetCampaign");
+      const btnMapCancel = document.getElementById("btnMapCancel");
+
+      const shopPanel = document.getElementById("shopPanel");
+      const shopTitle = document.getElementById("shopTitle");
+      const shopSub = document.getElementById("shopSub");
+      const shopMeta = document.getElementById("shopMeta");
+      const shopMission = document.getElementById("shopMission");
+      const routeStrip = document.getElementById("routeStrip");
+      const permGrid = document.getElementById("permGrid");
+      const relicGrid = document.getElementById("relicGrid");
+      const consumableGrid = document.getElementById("consumableGrid");
+      const btnCashOut = document.getElementById("btnCashOut");
+      const btnRerollShop = document.getElementById("btnRerollShop");
+      const btnResetCampaign = document.getElementById("btnResetCampaign");
+      const btnNextLevel = document.getElementById("btnNextLevel");
+      const toast = document.getElementById("toast");
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const GROUND_Y = H - 54;
+      const PIPE_W = 72;
+      const PIPE_SPACING = 250;
+      const POWERUP_SIZE = 14;
+      const SWIM_V_BASE = -520;
+      const GRAVITY = 1800;
+      const NEAR_MISS_PX = 22;
+
+      const RNG = (min, max) => min + Math.random() * (max - min);
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+      const STATE = {
+        ready: "Ready",
+        playing: "Playing",
+        over: "Game Over",
+        store: "Store",
+        map: "Route Map"
+      };
+
+      const SETTINGS = {
+        mode: "campaign",
+        motion: "reduced"
+      };
+
+      const BIOMES = [
+        {
+          id: "reef",
+          name: "Coral Reef",
+          short: "Reef",
+          desc: "Wide forgiving lanes and extra bubbles.",
+          tint: "rgba(62, 178, 193, 0.14)",
+          fog: "rgba(0,0,0,0)",
+          gap: 10,
+          speed: -16,
+          gold: 0.00,
+          power: 0.04,
+          bubble: 0.08,
+          current: 0,
+          pipe: ["#ff79dc", "#b84cff", "#6bffea", "#2dd6ff"]
+        },
+        {
+          id: "kelp",
+          name: "Kelp Forest",
+          short: "Kelp",
+          desc: "Gentler speed, more powerups, green haze.",
+          tint: "rgba(52, 152, 119, 0.16)",
+          fog: "rgba(13, 64, 41, 0.10)",
+          gap: 2,
+          speed: -8,
+          gold: 0.00,
+          power: 0.10,
+          bubble: 0.02,
+          current: 34,
+          pipe: ["#9cff80", "#4eb86b", "#c6ff9a", "#73d88e"]
+        },
+        {
+          id: "ruins",
+          name: "Sunken Ruins",
+          short: "Ruins",
+          desc: "Tighter gates and richer golden routes.",
+          tint: "rgba(202, 145, 71, 0.15)",
+          fog: "rgba(74, 47, 12, 0.06)",
+          gap: -8,
+          speed: 6,
+          gold: 0.08,
+          power: -0.03,
+          bubble: -0.02,
+          current: 0,
+          pipe: ["#ffd36b", "#c08a2a", "#fff0aa", "#e3b95f"]
+        },
+        {
+          id: "trench",
+          name: "Deep Trench",
+          short: "Trench",
+          desc: "Dark water, faster ramp, sparse powerups.",
+          tint: "rgba(82, 65, 165, 0.16)",
+          fog: "rgba(6, 9, 36, 0.16)",
+          gap: -12,
+          speed: 18,
+          gold: 0.03,
+          power: -0.10,
+          bubble: -0.04,
+          current: -24,
+          pipe: ["#8f95ff", "#5760e5", "#ccd1ff", "#6d82ff"]
+        }
+      ];
+
+      const BOSS_NAMES = [
+        "Jelly Crown",
+        "Tidal Rift",
+        "Abyss Heart",
+        "Storm Spine"
+      ];
+
+      const BOSS_PROFILES = {
+        "Jelly Crown": {
+          subtitle: "Pressure Queen",
+          color: "#ff8fda",
+          glyph: "JELLY",
+          sequence: ["current", "current", "walls"],
+          currentMult: 1.3,
+          moveMult: 0.75,
+          speedBonus: -6,
+          gapBonus: 6,
+          line: "Strong current pulses with softer wall drift."
+        },
+        "Tidal Rift": {
+          subtitle: "Fracture Maw",
+          color: "#7ee7ff",
+          glyph: "RIFT",
+          sequence: ["walls", "walls", "current"],
+          currentMult: 0.7,
+          moveMult: 1.45,
+          speedBonus: 6,
+          gapBonus: -4,
+          line: "The arena shifts more than the water does."
+        },
+        "Abyss Heart": {
+          subtitle: "Pulse Engine",
+          color: "#ff6b6b",
+          glyph: "HEART",
+          sequence: ["current", "walls", "current", "walls"],
+          currentMult: 1.0,
+          moveMult: 1.0,
+          speedBonus: 10,
+          gapBonus: -8,
+          line: "Balanced pressure with a meaner lane."
+        },
+        "Storm Spine": {
+          subtitle: "Breaker Coil",
+          color: "#ffd36b",
+          glyph: "STORM",
+          sequence: ["walls", "current", "walls", "current"],
+          currentMult: 1.15,
+          moveMult: 1.2,
+          speedBonus: 18,
+          gapBonus: -10,
+          line: "Fastest boss. Everything hits harder."
+        }
+      };
+
+      const deathMessages = [
+        "One ugly gate away from glory",
+        "The coral got lucky",
+        "Good line. Wrong inch",
+        "That was almost the clean run",
+        "The fish wants another shot"
+      ];
+
+      let deathMessageDisplay = "";
+      let deathMessageFinal = "";
+      let deathMessageSpinTime = 0;
+      let deathMessageNextSwap = 0;
+      let deathMessageLocked = false;
+      const deathMessageSpinDuration = 1.2;
+
+      function resetDeathMessageRoll() {
+        deathMessageDisplay = "";
+        deathMessageFinal = "";
+        deathMessageSpinTime = 0;
+        deathMessageNextSwap = 0;
+        deathMessageLocked = false;
+      }
+
+      function startDeathMessageRoll() {
+        deathMessageFinal = pick(deathMessages);
+        deathMessageDisplay = pick(deathMessages);
+        deathMessageSpinTime = 0;
+        deathMessageNextSwap = 0;
+        deathMessageLocked = false;
+      }
+
+      function updateDeathMessageRoll(dt) {
+        if (state !== STATE.over || deathMessageLocked) return;
+
+        deathMessageSpinTime += dt;
+        const progress = Math.min(1, deathMessageSpinTime / deathMessageSpinDuration);
+
+        if (deathMessageSpinTime >= deathMessageNextSwap) {
+          if (progress > 0.82) {
+            deathMessageDisplay = deathMessageFinal;
+          } else {
+            const pool = deathMessages.filter(msg => msg !== deathMessageDisplay);
+            deathMessageDisplay = pick(pool.length ? pool : deathMessages);
+          }
+
+          deathMessageNextSwap = deathMessageSpinTime + (0.04 + progress * 0.18);
+        }
+
+        if (progress >= 1) {
+          deathMessageDisplay = deathMessageFinal;
+          deathMessageLocked = true;
+        }
+      }
+
+      const FISH = {
+        x: 190,
+        y: H * 0.5,
+        r: 14,
+        vy: 0
+      };
+
+      let state = STATE.ready;
+      let score = 0;
+      let best = Number(localStorage.getItem("flappyFishCampaignEvolutionBest") || "0");
+      bestEl.textContent = String(best);
+
+      let audioOn = true;
+      let audioCtx = null;
+
+      let pipes = [];
+      let bubbles = [];
+      let powerups = [];
+      let particles = [];
+      let floatingTexts = [];
+      let fishTrail = [];
+
+      let comboCount = 0;
+      let comboTimer = 0;
+      const COMBO_WINDOW = 2.8;
+
+      let screenShake = 0;
+      let screenFlashAlpha = 0;
+      let screenFlashColor = "rgba(255,255,255,";
+      let freezeTimer = 0;
+
+      let t = 0;
+      let last = performance.now();
+
+      let currentStage = null;
+      let currentMission = null;
+      let crashReason = "";
+
+      const eventBanner = {
+        text: "",
+        color: "#ffd36b",
+        time: 0,
+        max: 0,
+        size: 20
+      };
+
+      const bossCycle = {
+        timer: 0,
+        wave: 0,
+        type: "current",
+        phase: "recover",
+        direction: 1,
+        label: "",
+        strength: 0,
+        moveScale: 0.08,
+        cuePlayed: false
+      };
+
+      const campaign = {
+        level: 1,
+        pearls: 0,
+        totalScore: 0,
+        totalGates: 0,
+        pathChoices: [],
+        selectedRoute: null,
+        routeEchoes: [],
+        upgrades: {
+          gap: 0,
+          swim: 0,
+          shield: 0,
+          pearl: 0
+        },
+        relics: {
+          goldenBonus: false,
+          firstNearMissShield: false,
+          bubbleCombo: false,
+          routePearl: false
+        },
+        nextLevel: {
+          revive: 0,
+          freezeStart: false,
+          goldRush: false
+        },
+        shopOffers: {
+          permanents: [],
+          relics: [],
+          next: [],
+          rerollCost: 3
+        }
+      };
+
+      const run = {
+        swims: 0,
+        bonusBubbles: 0,
+        usedPowerups: 0,
+        shieldsUsed: 0,
+        gatesSinceSwim: 0,
+        nearMisses: 0,
+        maxCombo: 0,
+        goldenGates: 0,
+        gatesPassed: 0,
+        pearlsEarnedThisLevel: 0,
+        firstNearMissShieldTriggered: false,
+        missionAnnounced: false,
+        freeRevive: 0
+      };
+
+      const buffs = {
+        shieldCharges: 0,
+        slowTime: 0,
+        magnet: 0,
+        x2: 0
+      };
+
+      const bg = {
+        farX: 0,
+        midX: 0,
+        nearX: 0,
+        sprites: Array.from({ length: 14 }, () => ({
+          x: RNG(0, W),
+          y: RNG(40, GROUND_Y - 120),
+          s: RNG(0.8, 1.8),
+          v: RNG(8, 24)
+        }))
+      };
+
+      const permanentItems = [
+        {
+          key: "gap",
+          name: "Wider Gates",
+          desc: "+10 pixels to every future gate gap.",
+          baseCost: 8,
+          growth: 6,
+          button: "Buy Width"
+        },
+        {
+          key: "swim",
+          name: "Stronger Swim",
+          desc: "Each tap recovers harder on future levels.",
+          baseCost: 8,
+          growth: 6,
+          button: "Buy Swim"
+        },
+        {
+          key: "shield",
+          name: "Starting Shield",
+          desc: "+1 shield at the start of each future level.",
+          baseCost: 10,
+          growth: 8,
+          button: "Buy Shield"
+        },
+        {
+          key: "pearl",
+          name: "Pearl Boost",
+          desc: "+1 extra pearl from rewards for the rest of the run.",
+          baseCost: 12,
+          growth: 8,
+          button: "Buy Boost"
+        }
+      ];
+
+      const relicItems = [
+        {
+          key: "goldenBonus",
+          name: "Golden Appetite",
+          desc: "Golden gates give +2 extra score and +2 extra pearls.",
+          cost: 15
+        },
+        {
+          key: "firstNearMissShield",
+          name: "Needle Armor",
+          desc: "Your first near miss each level grants a free shield.",
+          cost: 13
+        },
+        {
+          key: "bubbleCombo",
+          name: "Bubble Rhythm",
+          desc: "Bonus bubbles refill part of the combo timer.",
+          cost: 12
+        },
+        {
+          key: "routePearl",
+          name: "Pearl Route",
+          desc: "Every 5 gates passed gives +1 pearl.",
+          cost: 14
+        }
+      ];
+
+      const nextLevelItems = [
+        {
+          key: "revive",
+          name: "Pocket Revive",
+          desc: "One crash next level turns into a rescue burst instead of death.",
+          cost: 10,
+          max: 2,
+          amount: 1
+        },
+        {
+          key: "freezeStart",
+          name: "Slow Start",
+          desc: "Next level begins with slow time already active.",
+          cost: 9,
+          max: 1
+        },
+        {
+          key: "goldRush",
+          name: "Gold Rush",
+          desc: "Next level has far more golden gates.",
+          cost: 11,
+          max: 1
+        }
+      ];
+
+      function saveSettings() {
+        try {
+          localStorage.setItem("flappyFishCampaignEvolutionSettings", JSON.stringify({
+            mode: SETTINGS.mode,
+            motion: SETTINGS.motion,
+            sound: audioOn
+          }));
+        } catch (e) {}
+      }
+
+      try {
+        const saved = JSON.parse(localStorage.getItem("flappyFishCampaignEvolutionSettings") || "{}");
+        if (saved.mode === "campaign" || saved.mode === "infinite") SETTINGS.mode = saved.mode;
+        if (saved.motion === "full" || saved.motion === "reduced" || saved.motion === "off") SETTINGS.motion = saved.motion;
+        if (typeof saved.sound === "boolean") audioOn = saved.sound;
+      } catch (e) {}
+
+      function updateModeButton() {
+        btnMode.textContent = `Mode: ${SETTINGS.mode === "campaign" ? "Campaign" : "Infinite"}`;
+      }
+
+      function updateMotionButton() {
+        const label = SETTINGS.motion[0].toUpperCase() + SETTINGS.motion.slice(1);
+        btnMotion.textContent = `Motion: ${label}`;
+      }
+
+      function motionScale() {
+        if (SETTINGS.motion === "off") return 0;
+        if (SETTINGS.motion === "reduced") return 0.35;
+        return 1;
+      }
+
+      function flashScale() {
+        if (SETTINGS.motion === "off") return 0;
+        if (SETTINGS.motion === "reduced") return 0.45;
+        return 1;
+      }
+
+      function freezeScale() {
+        if (SETTINGS.motion === "off") return 0;
+        if (SETTINGS.motion === "reduced") return 0.45;
+        return 1;
+      }
+
+      function cycleMotion() {
+        SETTINGS.motion = SETTINGS.motion === "full" ? "reduced" : SETTINGS.motion === "reduced" ? "off" : "full";
+        updateMotionButton();
+        saveSettings();
+      }
+
+      function toggleMode(nextMode = null) {
+        SETTINGS.mode = nextMode || (SETTINGS.mode === "campaign" ? "infinite" : "campaign");
+        updateModeButton();
+        saveSettings();
+        hideShop();
+        hideMap();
+
+        if (SETTINGS.mode === "campaign") {
+          resetCampaignProgress();
+          prepareCampaignPreview();
+          openMap();
+        } else {
+          prepareLevel(false);
+          setState(STATE.ready);
+        }
+
+        updateHUD();
+      }
+
+      function shake(amount) {
+        const scaled = amount * motionScale();
+        if (!scaled) return;
+        screenShake = Math.max(screenShake, scaled);
+      }
+
+      function flash(color, alpha) {
+        const scaled = alpha * flashScale();
+        if (!scaled) return;
+        screenFlashColor = color;
+        screenFlashAlpha = scaled;
+      }
+
+      function hitFreeze(seconds) {
+        const scaled = seconds * freezeScale();
+        if (!scaled) return;
+        freezeTimer = Math.max(freezeTimer, scaled);
+      }
+
+      function beep(freq = 440, duration = 0.06, type = "square", gain = 0.03) {
+        if (!audioOn) return;
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const now = audioCtx.currentTime;
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = type;
+          o.frequency.setValueAtTime(freq, now);
+          g.gain.setValueAtTime(gain, now);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.start(now);
+          o.stop(now + duration);
+        } catch (e) {}
+      }
+
+      function setState(next) {
+        state = next;
+        modeEl.textContent = next;
+      }
+
+      function addCombo() {
+        comboCount++;
+        comboTimer = COMBO_WINDOW;
+        run.maxCombo = Math.max(run.maxCombo, comboCount);
+
+        if (comboCount >= 3) {
+          const names = ["", "", "DOUBLE", "TRIPLE", "QUAD", "PENTA", "HEXA", "ULTRA", "MEGA"];
+          spawnFloatingText(FISH.x + 30, FISH.y - 40, `${names[Math.min(comboCount, names.length - 1)]}!`, "#ff6bd6", 20);
+          beep(440 + comboCount * 85, 0.05, "square", 0.022);
+        }
+      }
+
+      function breakCombo() {
+        comboCount = 0;
+        comboTimer = 0;
+      }
+
+      function getComboMultiplier() {
+        if (comboCount < 2) return 1;
+        if (comboCount < 4) return 1.5;
+        if (comboCount < 6) return 2;
+        if (comboCount < 8) return 2.5;
+        return 3;
+      }
+
+      function getBiomeForLevel(level) {
+        const nonBossIndex = (level - 1) - Math.floor((level - 1) / 5);
+        return BIOMES[nonBossIndex % BIOMES.length];
+      }
+
+      function createStage(level, mode) {
+        if (mode === "infinite") {
+          return {
+            kind: "infinite",
+            level,
+            label: "∞",
+            displayName: "Infinite Run",
+            shortBiome: "Infinite",
+            description: "Pure endless arcade pressure.",
+            tint: "rgba(0,0,0,0)",
+            fog: "rgba(0,0,0,0)",
+            goal: null,
+            baseSpeed: 260,
+            speedRamp: 0.016,
+            gapMin: 148,
+            gapMax: 195,
+            goldenChance: 0.08,
+            powerChance: 0.24,
+            bubbleChanceBonus: 0,
+            swimVelocity: SWIM_V_BASE,
+            pearlBoost: 0,
+            levelBonus: 0,
+            currentStrength: 0,
+            movingGates: false,
+            pipePalette: ["#ff6bd6", "#b84cff", "#6bffea", "#2dd6ff"]
+          };
+        }
+
+        const isBoss = level % 5 === 0;
+        if (isBoss) {
+          const bossIndex = Math.floor(level / 5) - 1;
+          const bossName = BOSS_NAMES[bossIndex % BOSS_NAMES.length];
+          const bossBiome = getBiomeForLevel(level - 1);
+          const bossProfile = BOSS_PROFILES[bossName] || BOSS_PROFILES["Jelly Crown"];
+          return {
+            kind: "boss",
+            level,
+            label: String(level),
+            displayName: `${bossName} Boss`,
+            shortBiome: "Boss",
+            description: bossProfile.line,
+            tint: "rgba(255, 90, 90, 0.14)",
+            fog: "rgba(37, 0, 0, 0.10)",
+            goal: 9 + Math.floor(level / 5) * 2,
+            baseSpeed: 248 + level * 8 + bossProfile.speedBonus,
+            speedRamp: 0.007,
+            gapMin: Math.max(122, 152 + campaign.upgrades.gap * 10 - Math.floor(level / 2) + bossProfile.gapBonus),
+            gapMax: Math.max(132, 170 + campaign.upgrades.gap * 10 - Math.floor(level / 2) + bossProfile.gapBonus),
+            goldenChance: 0.16 + (campaign.nextLevel.goldRush ? 0.16 : 0),
+            powerChance: 0.08,
+            bubbleChanceBonus: -0.06,
+            swimVelocity: SWIM_V_BASE - campaign.upgrades.swim * 24,
+            pearlBoost: campaign.upgrades.pearl,
+            levelBonus: 12 + level,
+            currentStrength: 180 * bossProfile.currentMult,
+            movingGates: true,
+            bossProfile,
+            pipePalette: [bossProfile.color, "#ff5858", bossBiome.pipe[2], bossBiome.pipe[3]]
+          };
+        }
+
+        const biome = getBiomeForLevel(level);
+        return {
+          kind: "campaign",
+          level,
+          label: String(level),
+          displayName: biome.name,
+          shortBiome: biome.short,
+          description: biome.desc,
+          tint: biome.tint,
+          fog: biome.fog,
+          goal: 7 + (level - 1) * 2,
+          baseSpeed: 222 + (level - 1) * 18 + biome.speed,
+          speedRamp: 0.004 + (biome.id === "trench" ? 0.0015 : 0),
+          gapMin: Math.max(126, 170 - (level - 1) * 4 + campaign.upgrades.gap * 10 + biome.gap),
+          gapMax: Math.max(140, 205 - (level - 1) * 3 + campaign.upgrades.gap * 10 + biome.gap),
+          goldenChance: Math.min(0.24, 0.05 + level * 0.01 + biome.gold + (campaign.nextLevel.goldRush ? 0.16 : 0)),
+          powerChance: clamp(0.16 + biome.power, 0.05, 0.34),
+          bubbleChanceBonus: biome.bubble,
+          swimVelocity: SWIM_V_BASE - campaign.upgrades.swim * 24,
+          pearlBoost: campaign.upgrades.pearl,
+          levelBonus: 6 + level * 2,
+          currentStrength: biome.current,
+          movingGates: false,
+          pipePalette: biome.pipe
+        };
+      }
+
+
+      function makeRouteEcho(route, level, strength, sourceLevel) {
+        return {
+          level,
+          sourceLevel,
+          source: route.name,
+          tier: route.tier,
+          tag: route.tag,
+          strength,
+          gap: Math.round(route.gap * strength),
+          speed: route.speed * strength,
+          gold: route.gold * strength,
+          power: route.power * strength,
+          bubble: route.bubble * strength,
+          current: route.current * strength,
+          levelBonus: Math.round(route.levelBonus * Math.max(0.35, strength))
+        };
+      }
+
+      function pruneRouteEchoes() {
+        campaign.routeEchoes = campaign.routeEchoes.filter(e => e.level >= campaign.level);
+      }
+
+      function queueRouteEchoes(route, sourceLevel) {
+        campaign.routeEchoes = campaign.routeEchoes.filter(e => e.sourceLevel !== sourceLevel);
+        campaign.routeEchoes.push(
+          makeRouteEcho(route, sourceLevel + 1, 0.65, sourceLevel),
+          makeRouteEcho(route, sourceLevel + 2, 0.35, sourceLevel)
+        );
+        pruneRouteEchoes();
+      }
+
+      function getRouteEchoesForLevel(level) {
+        return campaign.routeEchoes.filter(e => e.level === level);
+      }
+
+      function applyRouteEchoesToStage(stage) {
+        if (!stage || stage.kind === "infinite") return stage;
+        const echoes = getRouteEchoesForLevel(stage.level);
+        if (!echoes.length) return { ...stage, echoTags: [], echoSummary: "" };
+
+        const echoTags = [...new Set(echoes.map(e => e.tag))];
+        const out = { ...stage, echoTags, echoSummary: echoes.map(e => `${e.source} echo`).join(" • ") };
+
+        for (const echo of echoes) {
+          out.gapMin = Math.max(110, out.gapMin + echo.gap);
+          out.gapMax = Math.max(122, out.gapMax + echo.gap);
+          out.baseSpeed += echo.speed;
+          out.goldenChance = clamp(out.goldenChance + echo.gold, 0.01, 0.45);
+          out.powerChance = clamp(out.powerChance + echo.power, 0.03, 0.45);
+          out.bubbleChanceBonus = clamp(out.bubbleChanceBonus + echo.bubble, -0.10, 0.20);
+          out.currentStrength += echo.current;
+          out.levelBonus = Math.max(0, out.levelBonus + echo.levelBonus);
+        }
+
+        return out;
+      }
+
+      function createRouteChoices(level) {
+        const stage = applyRouteEchoesToStage(createStage(level, "campaign"));
+
+        if (stage.kind === "boss") {
+          return [
+            {
+              key: "boss-safe",
+              tier: "safe",
+              name: "Anchored Entry",
+              tag: "safer",
+              desc: "A steadier line into the boss room with less current and a wider opening.",
+              gap: 12,
+              speed: -10,
+              gold: -0.02,
+              power: 0.02,
+              bubble: 0,
+              current: -50,
+              levelBonus: -2
+            },
+            {
+              key: "boss-crown",
+              tier: "treasure",
+              name: "Crown Route",
+              tag: "richer",
+              desc: "A sharper line through the center. More gold if you hold the nerve.",
+              gap: 0,
+              speed: 4,
+              gold: 0.08,
+              power: -0.02,
+              bubble: 0,
+              current: 10,
+              levelBonus: 4
+            },
+            {
+              key: "boss-surge",
+              tier: "wild",
+              name: "Surge Channel",
+              tag: "harder",
+              desc: "The riskiest entrance. Tighter space, stronger current, more reward.",
+              gap: -10,
+              speed: 14,
+              gold: 0.04,
+              power: 0.04,
+              bubble: 0.02,
+              current: 60,
+              levelBonus: 6
+            }
+          ];
+        }
+
+        return [
+          {
+            key: `safe-${level}`,
+            tier: "safe",
+            name: "Calm Current",
+            tag: "safer",
+            desc: "A cleaner line with wider gates and a little less speed.",
+            gap: 14,
+            speed: -12,
+            gold: -0.02,
+            power: 0.02,
+            bubble: 0,
+            current: Math.sign(stage.currentStrength || 0) * -18,
+            levelBonus: -2
+          },
+          {
+            key: `treasure-${level}`,
+            tier: "treasure",
+            name: "Treasure Route",
+            tag: "richer",
+            desc: "Normal control but more golden gates and a better clear bonus.",
+            gap: 0,
+            speed: 4,
+            gold: 0.10,
+            power: -0.02,
+            bubble: 0,
+            current: 0,
+            levelBonus: 4
+          },
+          {
+            key: `wild-${level}`,
+            tier: "wild",
+            name: "Wild Current",
+            tag: "spicier",
+            desc: "Tighter space with more bubbles and powerups if you can hold the line.",
+            gap: -10,
+            speed: 12,
+            gold: 0.03,
+            power: 0.08,
+            bubble: 0.06,
+            current: 22,
+            levelBonus: 3
+          }
+        ];
+      }
+
+      function applyRouteToStage(stage, route) {
+        if (!route) return { ...stage, routeName: "Direct Route", routeDesc: "No route selected." };
+
+        return {
+          ...stage,
+          routeName: route.name,
+          routeTier: route.tier,
+          routeTag: route.tag,
+          routeDesc: route.desc,
+          goal: stage.goal,
+          gapMin: Math.max(110, stage.gapMin + route.gap),
+          gapMax: Math.max(122, stage.gapMax + route.gap),
+          baseSpeed: stage.baseSpeed + route.speed,
+          goldenChance: clamp(stage.goldenChance + route.gold, 0.01, 0.45),
+          powerChance: clamp(stage.powerChance + route.power, 0.03, 0.45),
+          bubbleChanceBonus: clamp(stage.bubbleChanceBonus + route.bubble, -0.10, 0.20),
+          currentStrength: stage.currentStrength + route.current,
+          levelBonus: Math.max(0, stage.levelBonus + route.levelBonus)
+        };
+      }
+
+      function createMission(stage) {
+        if (SETTINGS.mode === "infinite") return null;
+
+        if (stage.kind === "boss") {
+          return { type: "bossClear", text: "Survive the boss stage.", reward: 6, target: stage.goal };
+        }
+
+        const selector = (stage.level + Math.floor(stage.baseSpeed)) % 5;
+        if (selector === 0) return { type: "bubbles", text: `Collect ${3 + Math.floor(stage.level / 3)} bonus bubbles.`, reward: 4 + Math.floor(stage.level / 2), target: 3 + Math.floor(stage.level / 3) };
+        if (selector === 1) return { type: "near", text: "Get 2 near misses.", reward: 4 + Math.floor(stage.level / 2), target: 2 };
+        if (selector === 2) return { type: "combo", text: `Reach a x${4 + Math.floor(stage.level / 5)} combo.`, reward: 4 + Math.floor(stage.level / 2), target: 4 + Math.floor(stage.level / 5) };
+        if (selector === 3) return { type: "cleanShield", text: "Finish the level without using a shield.", reward: 5 + Math.floor(stage.level / 2), target: 1 };
+        return { type: "golden", text: `Pass ${1 + (stage.level >= 7 ? 1 : 0)} golden gates.`, reward: 4 + Math.floor(stage.level / 2), target: 1 + (stage.level >= 7 ? 1 : 0) };
+      }
+
+      function getMissionProgress() {
+        if (!currentMission) return { done: false, label: "—" };
+
+        if (currentMission.type === "bubbles") {
+          return { done: run.bonusBubbles >= currentMission.target, label: `${run.bonusBubbles}/${currentMission.target}` };
+        }
+        if (currentMission.type === "near") {
+          return { done: run.nearMisses >= currentMission.target, label: `${run.nearMisses}/${currentMission.target}` };
+        }
+        if (currentMission.type === "combo") {
+          return { done: run.maxCombo >= currentMission.target, label: `${run.maxCombo}/${currentMission.target}` };
+        }
+        if (currentMission.type === "golden") {
+          return { done: run.goldenGates >= currentMission.target, label: `${run.goldenGates}/${currentMission.target}` };
+        }
+        if (currentMission.type === "cleanShield") {
+          return { done: run.shieldsUsed === 0, label: run.shieldsUsed === 0 ? "clean" : "failed" };
+        }
+        if (currentMission.type === "bossClear") {
+          return { done: run.gatesPassed >= currentMission.target, label: `${run.gatesPassed}/${currentMission.target}` };
+        }
+        return { done: false, label: "—" };
+      }
+
+      function resetRunStats() {
+        run.swims = 0;
+        run.bonusBubbles = 0;
+        run.usedPowerups = 0;
+        run.shieldsUsed = 0;
+        run.gatesSinceSwim = 0;
+        run.nearMisses = 0;
+        run.maxCombo = 0;
+        run.goldenGates = 0;
+        run.gatesPassed = 0;
+        run.pearlsEarnedThisLevel = 0;
+        run.firstNearMissShieldTriggered = false;
+        run.missionAnnounced = false;
+        run.freeRevive = campaign.nextLevel.revive;
+        resetDeathMessageRoll();
+      }
+
+      function resetBossCycle() {
+        bossCycle.timer = 0;
+        bossCycle.wave = 0;
+        bossCycle.type = "current";
+        bossCycle.phase = "telegraph";
+        bossCycle.direction = 1;
+        bossCycle.label = "";
+        bossCycle.strength = 0;
+        bossCycle.moveScale = 0.08;
+        bossCycle.cuePlayed = false;
+      }
+
+      function updateBossCycle(dt) {
+        if (!currentStage || currentStage.kind !== "boss" || state !== STATE.playing) {
+          bossCycle.phase = "recover";
+          bossCycle.label = "";
+          bossCycle.strength = 0;
+          bossCycle.moveScale = 0.08;
+          return;
+        }
+
+        const telegraph = 0.95;
+        const active = 1.10;
+        const rest = 1.35;
+        const cycle = telegraph + active + rest;
+
+        bossCycle.timer += dt;
+        while (bossCycle.timer >= cycle) {
+          bossCycle.timer -= cycle;
+          bossCycle.wave += 1;
+          const seq = currentStage.bossProfile?.sequence || ["current", "walls"];
+          bossCycle.type = seq[bossCycle.wave % seq.length];
+          bossCycle.direction = bossCycle.wave % 4 < 2 ? 1 : -1;
+          bossCycle.cuePlayed = false;
+        }
+
+        if (bossCycle.timer < telegraph) {
+          bossCycle.phase = "telegraph";
+          bossCycle.strength = 0;
+          bossCycle.moveScale = bossCycle.type === "walls" ? 0.04 : 0.08;
+          bossCycle.label = bossCycle.type === "current"
+            ? (bossCycle.direction > 0 ? "DOWN CURRENT" : "UP CURRENT")
+            : "CORAL SHIFT";
+
+          if (!bossCycle.cuePlayed) {
+            bossCycle.cuePlayed = true;
+            beep(bossCycle.type === "current" ? 310 : 380, 0.07, "square", 0.018);
+          }
+        } else if (bossCycle.timer < telegraph + active) {
+          const p = (bossCycle.timer - telegraph) / active;
+          const ramp = Math.sin(p * Math.PI);
+          bossCycle.phase = "active";
+          bossCycle.strength = bossCycle.type === "current" ? ramp : 0;
+          bossCycle.moveScale = bossCycle.type === "walls" ? (0.18 + 0.82 * ramp) : 0.10;
+          bossCycle.label = bossCycle.type === "current"
+            ? (bossCycle.direction > 0 ? "DOWN CURRENT LIVE" : "UP CURRENT LIVE")
+            : "SHIFT LIVE";
+        } else {
+          bossCycle.phase = "recover";
+          bossCycle.strength = 0;
+          bossCycle.moveScale = 0.10;
+          bossCycle.label = "";
+        }
+      }
+
+      function announce(text, color = "#ffd36b", duration = 1.4, size = 20) {
+        eventBanner.text = text;
+        eventBanner.color = color;
+        eventBanner.time = duration;
+        eventBanner.max = duration;
+        eventBanner.size = size;
+      }
+
+      function shuffle(arr) {
+        const out = [...arr];
+        for (let i = out.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [out[i], out[j]] = [out[j], out[i]];
+        }
+        return out;
+      }
+
+      function getRouteTheme() {
+        if (!currentStage || !currentStage.routeTier) return null;
+        if (currentStage.routeTier === "safe") return { color: "#88ffb6", label: "CALM CURRENT" };
+        if (currentStage.routeTier === "treasure") return { color: "#ffd36b", label: "TREASURE ROUTE" };
+        return { color: "#ff6bd6", label: "WILD CURRENT" };
+      }
+
+      function rollShopOffers(force = false) {
+        if (!force && campaign.shopOffers.permanents.length && campaign.shopOffers.relics.length && campaign.shopOffers.next.length) return;
+        campaign.shopOffers.permanents = shuffle(permanentItems).slice(0, 2).map(item => item.key);
+        campaign.shopOffers.relics = shuffle(relicItems.filter(item => !campaign.relics[item.key])).slice(0, 2).map(item => item.key);
+        campaign.shopOffers.next = shuffle(nextLevelItems).slice(0, 2).map(item => item.key);
+      }
+
+      function drawRunProgress() {
+        if (!currentStage || state !== STATE.playing || currentStage.goal == null) return;
+        const boxW = currentStage.kind === "boss" ? 248 : 176;
+        const boxH = currentStage.kind === "boss" ? 14 : 12;
+        const x = W - boxW - 18;
+        const y = 16;
+        const fill = clamp(run.gatesPassed / currentStage.goal, 0, 1);
+        const bossColor = currentStage.bossProfile?.color || "#ff8f8f";
+        pxRect(x, y, boxW, boxH, "rgba(0,0,0,0.45)");
+        pxRect(x + 2, y + 2, (boxW - 4) * fill, boxH - 4, currentStage.kind === "boss" ? bossColor : "#88ffb6");
+        if (currentStage.kind === "boss") {
+          pxText(`${currentStage.bossProfile?.glyph || "BOSS"} ${run.gatesPassed}/${currentStage.goal}`, x + 8, y - 14, bossColor, 12);
+        } else {
+          pxText(`${run.gatesPassed}/${currentStage.goal}`, x + 58, y - 12, "rgba(200,247,255,0.86)", 12);
+        }
+      }
+
+      function drawEventBanner() {
+        if (!eventBanner.text || eventBanner.time <= 0 || state === STATE.map || state === STATE.store) return;
+        const progress = eventBanner.max ? eventBanner.time / eventBanner.max : 0;
+        const alpha = Math.min(1, progress * 1.8);
+        const boxW = Math.min(W - 120, 420);
+        const boxH = 40;
+        const x = W / 2 - boxW / 2;
+        const y = 54;
+        ctx.globalAlpha = 0.82 * alpha;
+        pxRect(x, y, boxW, boxH, "rgba(0,0,0,0.55)");
+        ctx.globalAlpha = 1;
+        pxRect(x + 4, y + 4, boxW - 8, boxH - 8, "rgba(6,38,58,0.82)");
+        pxTextCenter(eventBanner.text, W / 2, y + 9, eventBanner.color, eventBanner.size);
+      }
+
+      function updateHUD() {
+        scoreEl.textContent = String(score);
+        shieldEl.textContent = String(buffs.shieldCharges);
+        comboEl.textContent = comboCount >= 2 ? `x${comboCount}` : "—";
+        bestEl.textContent = String(best);
+
+        if (currentStage) {
+          biomeEl.textContent = currentStage.shortBiome;
+          levelEl.textContent = currentStage.label;
+          goalEl.textContent = currentStage.goal == null ? "∞" : `${run.gatesPassed}/${currentStage.goal}`;
+        } else {
+          biomeEl.textContent = "—";
+          levelEl.textContent = "—";
+          goalEl.textContent = "—";
+        }
+
+        pearlsEl.textContent = SETTINGS.mode === "campaign" ? String(campaign.pearls) : "—";
+
+        if (SETTINGS.mode === "campaign" && currentStage && currentMission) {
+          const progress = getMissionProgress();
+          const nextEffects = [];
+          const routeTheme = getRouteTheme();
+          if (campaign.nextLevel.revive > 0) nextEffects.push(`revive x${campaign.nextLevel.revive}`);
+          if (campaign.nextLevel.freezeStart) nextEffects.push("slow start");
+          if (campaign.nextLevel.goldRush) nextEffects.push("gold rush");
+
+          hintText.innerHTML =
+            `<b>${currentStage.displayName}</b>${routeTheme ? ` • <span style="color:${routeTheme.color}">${routeTheme.label}</span>` : ""}` +
+            (state === STATE.map
+              ? `<br />Pick your line before you enter the water.`
+              : `<br />Mission: ${currentMission.text} <span style="color:${progress.done ? '#88ffb6' : '#ffd36b'}">(${progress.label})</span>`) +
+            (currentStage.echoSummary ? `<br />Echoes active: ${currentStage.echoSummary}` : "") +
+            (nextEffects.length ? `<br />Queued: ${nextEffects.join(", ")}` : "");
+
+          subtleText.textContent = state === STATE.map
+            ? "Each route now pushes the run toward safer, richer, or sharper pressure."
+            : currentStage.kind === "boss"
+              ? "Boss pressure is clearer now. Telegraph first, punish second."
+              : routeTheme
+                ? `${routeTheme.label} is shaping this stage.`
+                : "The route you picked should feel different, not just read different.";
+        } else {
+          hintText.innerHTML =
+            "Infinite mode strips it back to the pure arcade lane." +
+            "<br />No shop. No breaks. Just survive.";
+          subtleText.textContent = "Campaign is where the route choices and build decisions live.";
+        }
+      }
+
+      function showToast(html, ms = 1800) {
+        toast.innerHTML = html;
+        toast.classList.add("show");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove("show"), ms);
+      }
+
+      function spawnFloatingText(x, y, text, color = "#ffd36b", size = 18) {
+        floatingTexts.push({ x, y, text, color, size, life: 1.0, maxLife: 1.0, vy: -75 });
+      }
+
+      function spawnExplosion(x, y, count, colors) {
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + RNG(-0.3, 0.3);
+          const speed = RNG(80, 220);
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: RNG(0.35, 0.8),
+            maxLife: 0.8,
+            size: RNG(2, 6),
+            color: pick(colors)
+          });
+        }
+      }
+
+      function makeBubble(x, y, size, bonus = false) {
+        return {
+          x, y,
+          r: size,
+          vx: RNG(-10, 18),
+          vy: RNG(-40, -110),
+          life: RNG(2.0, 4.0),
+          bonus
+        };
+      }
+
+      function spawnBubbleBurst(x, gentle = false) {
+        const n = gentle ? 5 : 9;
+        for (let i = 0; i < n; i++) {
+          bubbles.push(makeBubble(
+            x + RNG(-40, 40),
+            RNG(GROUND_Y - 120, GROUND_Y - 40),
+            RNG(5, 12),
+            false
+          ));
+        }
+      }
+
+      function pickPowerupKind() {
+        const roll = Math.random();
+        if (roll < 0.32) return "shield";
+        if (roll < 0.56) return "slow";
+        if (roll < 0.80) return "magnet";
+        return "x2";
+      }
+
+      function makePowerup(x, y, kind) {
+        return { x, y, r: POWERUP_SIZE, kind, wob: RNG(0, 10), alive: true };
+      }
+
+      function applyPowerup(kind) {
+        run.usedPowerups += 1;
+        const msgs = {
+          shield: "Shield +1",
+          slow: "Slow time",
+          magnet: "Magnet",
+          x2: "Double score"
+        };
+
+        if (kind === "shield") {
+          buffs.shieldCharges += 1;
+          beep(740, 0.06, "square", 0.02);
+        }
+        if (kind === "slow") {
+          buffs.slowTime = Math.max(buffs.slowTime, 6.5);
+          beep(520, 0.06, "square", 0.02);
+        }
+        if (kind === "magnet") {
+          buffs.magnet = Math.max(buffs.magnet, 7.0);
+          beep(900, 0.05, "square", 0.02);
+        }
+        if (kind === "x2") {
+          buffs.x2 = Math.max(buffs.x2, 7.0);
+          beep(1200, 0.05, "square", 0.02);
+        }
+
+        spawnFloatingText(FISH.x + 30, FISH.y - 25, msgs[kind], "#7ee7ff", 14);
+        flash("rgba(200,247,255,", 0.08);
+        updateHUD();
+      }
+
+      function circleRectCollide(cx, cy, cr, rx, ry, rw, rh) {
+        const nx = clamp(cx, rx, rx + rw);
+        const ny = clamp(cy, ry, ry + rh);
+        const dx = cx - nx;
+        const dy = cy - ny;
+        return (dx * dx + dy * dy) <= cr * cr;
+      }
+
+      function fishCollectsCircle(x, y, r) {
+        const dx = FISH.x - x;
+        const dy = FISH.y - y;
+        const rr = (FISH.r + r) * (FISH.r + r);
+        return dx * dx + dy * dy <= rr;
+      }
+
+      function fishCollidesPipe(p) {
+        const cx = FISH.x;
+        const cy = FISH.y;
+        const cr = FISH.r;
+        const topRect = { x: p.x, y: 0, w: PIPE_W, h: p.topH };
+        const bottomY = p.topH + p.gap;
+        const bottomRect = { x: p.x, y: bottomY, w: PIPE_W, h: (GROUND_Y - bottomY) };
+
+        if (circleRectCollide(cx, cy, cr, topRect.x, topRect.y, topRect.w, topRect.h)) return true;
+        if (circleRectCollide(cx, cy, cr, bottomRect.x, bottomRect.y, bottomRect.w, bottomRect.h)) return true;
+        if (cy + cr > GROUND_Y) return true;
+        if (cy - cr < 0) return true;
+        return false;
+      }
+
+      function checkNearMiss(pipe) {
+        const cy = FISH.y;
+        const gapTop = pipe.topH;
+        const gapBottom = pipe.topH + pipe.gap;
+        const closest = Math.min(Math.abs(cy - gapTop), Math.abs(cy - gapBottom));
+        return closest < NEAR_MISS_PX && FISH.x > pipe.x && FISH.x < pipe.x + PIPE_W + 20;
+      }
+
+      function rewardPearls(amount, label = null) {
+        if (SETTINGS.mode !== "campaign") return;
+        const total = amount + campaign.upgrades.pearl;
+        campaign.pearls += total;
+        run.pearlsEarnedThisLevel += total;
+        if (label) spawnFloatingText(FISH.x + 46, FISH.y + 8, `+${total} ${label}`, "#88ffb6", 14);
+        updateHUD();
+      }
+
+      function spawnPipe(x) {
+        const gap = RNG(currentStage.gapMin, currentStage.gapMax);
+        const topMin = 60;
+        const topMax = GROUND_Y - 70 - gap;
+        const topH = Math.floor(RNG(topMin, Math.max(topMin + 1, topMax)));
+        const golden = Math.random() < currentStage.goldenChance;
+
+        pipes.push({
+          x,
+          topH,
+          baseTopH: topH,
+          gap,
+          passed: false,
+          nearMissed: false,
+          golden,
+          phase: RNG(0, Math.PI * 2),
+          driftAmp: currentStage.kind === "boss" ? RNG(18, 44) : 0,
+          driftSpeed: currentStage.kind === "boss" ? RNG(1.0, 1.8) : 0
+        });
+
+        if (Math.random() < 0.55 + currentStage.bubbleChanceBonus) {
+          const bx = x + PIPE_W * 0.5 + RNG(-18, 18);
+          const by = topH + gap * 0.5 + RNG(-28, 28);
+          bubbles.push(makeBubble(bx, by, 10, true));
+        }
+
+        if (Math.random() < currentStage.powerChance) {
+          const px = x + PIPE_W * 0.5;
+          const py = topH + gap * 0.5 + RNG(-38, 38);
+          powerups.push(makePowerup(px, py, pickPowerupKind()));
+        }
+      }
+
+      function prepareLevel(startPlaying = false) {
+        pruneRouteEchoes();
+        const selectedRoute = SETTINGS.mode === "campaign" ? campaign.selectedRoute : null;
+        currentStage = applyRouteToStage(applyRouteEchoesToStage(createStage(campaign.level, SETTINGS.mode)), selectedRoute);
+        currentMission = createMission(currentStage);
+
+        FISH.y = H * 0.5;
+        FISH.vy = 0;
+        pipes = [];
+        bubbles = [];
+        powerups = [];
+        particles = [];
+        floatingTexts = [];
+        fishTrail = [];
+        t = 0;
+        score = 0;
+        comboCount = 0;
+        comboTimer = 0;
+        fishTrail = [];
+        screenShake = 0;
+        screenFlashAlpha = 0;
+        freezeTimer = 0;
+        bg.farX = 0;
+        bg.midX = 0;
+        bg.nearX = 0;
+
+        resetRunStats();
+        crashReason = "";
+        eventBanner.text = "";
+        eventBanner.time = 0;
+
+        buffs.shieldCharges = SETTINGS.mode === "campaign" ? campaign.upgrades.shield : 0;
+        buffs.slowTime = campaign.nextLevel.freezeStart ? 6.0 : 0;
+        buffs.magnet = 0;
+        buffs.x2 = 0;
+
+        campaign.nextLevel.freezeStart = false;
+        campaign.nextLevel.goldRush = false;
+        campaign.nextLevel.revive = 0;
+        campaign.selectedRoute = null;
+        resetBossCycle();
+
+        const firstX = W + 120;
+        for (let i = 0; i < 5; i++) spawnPipe(firstX + i * PIPE_SPACING);
+        spawnBubbleBurst(W + 200, true);
+
+        setState(startPlaying ? STATE.playing : STATE.ready);
+        if (startPlaying && currentStage) {
+          if (currentStage.kind === "boss") announce(currentStage.displayName.toUpperCase(), "#ff8f8f", 1.6, 22);
+          else if (currentStage.routeName) announce(currentStage.routeName.toUpperCase(), getRouteTheme() ? getRouteTheme().color : "#ffd36b", 1.2, 18);
+        }
+        updateHUD();
+      }
+
+
+      function prepareCampaignPreview() {
+        pruneRouteEchoes();
+        currentStage = applyRouteEchoesToStage(createStage(campaign.level, "campaign"));
+        currentMission = createMission(currentStage);
+        score = 0;
+        comboCount = 0;
+        comboTimer = 0;
+        screenShake = 0;
+        screenFlashAlpha = 0;
+        freezeTimer = 0;
+        resetRunStats();
+        updateHUD();
+      }
+
+      function renderMap() {
+        const previewStage = applyRouteEchoesToStage(createStage(campaign.level, "campaign"));
+        campaign.pathChoices = createRouteChoices(campaign.level);
+
+        mapTitle.textContent = previewStage.kind === "boss" ? `BOSS ROUTE • LEVEL ${campaign.level}` : `CHOOSE A ROUTE • LEVEL ${campaign.level}`;
+        mapSub.textContent = `${previewStage.displayName} • ${previewStage.description} Click a path to start the level.`;
+
+        mapMeta.innerHTML = `
+          <div class="pill"><span class="dot warn"></span>Level <b>${campaign.level}</b></div>
+          <div class="pill"><span class="dot"></span>Biome <b>${previewStage.shortBiome}</b></div>
+          <div class="pill"><span class="dot good"></span>Pearls <b>${campaign.pearls}</b></div>
+          <div class="pill"><span class="dot combo"></span>Goal <b>${previewStage.goal}</b></div>
+          ${previewStage.echoSummary ? `<div class="pill"><span class="dot"></span>Incoming <b>${previewStage.echoSummary}</b></div>` : ""}
+        `;
+
+        mapRouteStrip.innerHTML = [campaign.level, campaign.level + 1, campaign.level + 2, campaign.level + 3]
+          .map(l => routeNodeHTML(l, campaign.level))
+          .join("");
+
+        pathGrid.innerHTML = "";
+        for (const route of campaign.pathChoices) {
+          const stage = applyRouteToStage(previewStage, route);
+          const card = document.createElement("div");
+          card.className = `path-choice ${route.tier}`;
+          card.innerHTML = `
+            <div class="path-tag">${route.tag}</div>
+            <h4>${route.name}</h4>
+            <p>${route.desc}</p>
+            <div class="path-stats">
+              <span>Goal reward: +${stage.levelBonus} pearls on clear</span>
+              <span>Gap: ${route.gap >= 0 ? "+" : ""}${route.gap}px • Speed: ${route.speed >= 0 ? "+" : ""}${route.speed}</span>
+              <span>Gold: ${Math.round(stage.goldenChance * 100)}% • Power: ${Math.round(stage.powerChance * 100)}%</span>
+              <span>Echoes into L${campaign.level + 1} and L${campaign.level + 2}</span>
+            </div>
+          `;
+          const btn = document.createElement("button");
+          btn.className = route.tier === "safe" ? "primary" : route.tier === "treasure" ? "accent" : "";
+          btn.textContent = "Take This Path";
+          btn.addEventListener("click", () => {
+            campaign.selectedRoute = route;
+            queueRouteEchoes(route, campaign.level);
+            hideMap();
+            prepareLevel(true);
+            announce(route.tier === "safe" ? "CALM LINE" : route.tier === "treasure" ? "TREASURE LINE" : "WILD LINE", route.tier === "safe" ? "#88ffb6" : route.tier === "treasure" ? "#ffd36b" : "#ff6bd6", 1.35, 20);
+            showToast(`<b>${route.name}</b> selected`, 1400);
+            if (currentStage.kind === "boss") {
+              showToast(`<b>${currentStage.displayName}</b>`, 1700);
+            }
+          });
+          card.appendChild(btn);
+          pathGrid.appendChild(card);
+        }
+      }
+
+      function openMap() {
+        if (SETTINGS.mode !== "campaign") return;
+        pruneRouteEchoes();
+        prepareCampaignPreview();
+        setState(STATE.map);
+        renderMap();
+        mapPanel.classList.add("show");
+        mapPanel.setAttribute("aria-hidden", "false");
+      }
+
+      function hideMap() {
+        mapPanel.classList.remove("show");
+        mapPanel.setAttribute("aria-hidden", "true");
+      }
+
+      function resetCampaignProgress() {
+        campaign.level = 1;
+        campaign.pearls = 0;
+        campaign.totalScore = 0;
+        campaign.totalGates = 0;
+        campaign.pathChoices = [];
+        campaign.selectedRoute = null;
+        campaign.routeEchoes = [];
+        campaign.upgrades.gap = 0;
+        campaign.upgrades.swim = 0;
+        campaign.upgrades.shield = 0;
+        campaign.upgrades.pearl = 0;
+        campaign.relics.goldenBonus = false;
+        campaign.relics.firstNearMissShield = false;
+        campaign.relics.bubbleCombo = false;
+        campaign.relics.routePearl = false;
+        campaign.nextLevel.revive = 0;
+        campaign.nextLevel.freezeStart = false;
+        campaign.nextLevel.goldRush = false;
+        campaign.shopOffers.permanents = [];
+        campaign.shopOffers.relics = [];
+        campaign.shopOffers.next = [];
+      }
+
+      function startSelectedMode() {
+        if (SETTINGS.mode === "campaign") {
+          openMap();
+          showToast(`<b>Choose a route</b>`, 1200);
+          return;
+        }
+
+        prepareLevel(true);
+        showToast(`<b>Infinite</b> begins`, 1400);
+      }
+
+      function startNextCampaignLevel() {
+        hideShop();
+        campaign.level += 1;
+        openMap();
+      }
+
+      function restart(silent = false) {
+        hideShop();
+        hideMap();
+
+        if (SETTINGS.mode === "campaign") {
+          resetCampaignProgress();
+          prepareCampaignPreview();
+          openMap();
+        } else {
+          prepareLevel(false);
+          setState(STATE.ready);
+        }
+
+        if (!silent) {
+          showToast(`<b>${SETTINGS.mode === "campaign" ? "Campaign" : "Infinite"}</b> reset`, 1200);
+        }
+      }
+
+      function toggleSound() {
+        audioOn = !audioOn;
+        btnMute.textContent = audioOn ? "Sound: On" : "Sound: Off";
+        saveSettings();
+        if (audioOn) beep(880, 0.05, "square", 0.03);
+      }
+
+      function routeNodeHTML(level, currentLevel) {
+        const stage = applyRouteEchoesToStage(createStage(level, "campaign"));
+        const classes = [
+          "route-node",
+          level === currentLevel ? "current" : "",
+          level === currentLevel + 1 ? "next" : "",
+          stage.kind === "boss" ? "boss" : ""
+        ].filter(Boolean).join(" ");
+        const echoLine = stage.echoSummary ? `<span style="color:#7ee7ff">Echo: ${stage.echoTags.join(" + ")}</span><br />` : "";
+        return `<div class="${classes}"><b>L${level}</b>${stage.displayName}<br />${echoLine}${stage.kind === "boss" ? "Boss stage" : stage.description}</div>`;
+      }
+
+      function createShopCard(item, canAfford, buttonText, onClick, extraMeta = "") {
+        const card = document.createElement("div");
+        card.className = "shop-item";
+        card.innerHTML = `<h5>${item.name}</h5><p>${item.desc}</p><div class="meta">${extraMeta}<span>Cost ${item.cost}</span></div>`;
+        const btn = document.createElement("button");
+        btn.textContent = buttonText;
+        btn.disabled = !canAfford;
+        btn.addEventListener("click", onClick);
+        card.appendChild(btn);
+        return card;
+      }
+
+      function renderShop() {
+        const nextLevel = campaign.level + 1;
+        const nextStage = createStage(nextLevel, "campaign");
+        const missionProgress = getMissionProgress();
+        rollShopOffers();
+
+        shopTitle.textContent = `LEVEL ${campaign.level} CLEAR`;
+        shopSub.textContent = `Biome cleared: ${currentStage.displayName}. Mission ${missionProgress.done ? "complete" : "missed"} this level.`;
+
+        shopMeta.innerHTML = `
+          <div class="pill"><span class="dot warn"></span>Pearls <b>${campaign.pearls}</b></div>
+          <div class="pill"><span class="dot good"></span>Next Level <b>${nextLevel}</b></div>
+          <div class="pill"><span class="dot"></span>Next Biome <b>${nextStage.shortBiome}</b></div>
+          <div class="pill"><span class="dot combo"></span>Total Gates <b>${campaign.totalGates}</b></div>
+          <div class="pill"><span class="dot"></span>Reroll <b>${campaign.shopOffers.rerollCost}</b></div>
+        `;
+
+        routeStrip.innerHTML = [campaign.level, campaign.level + 1, campaign.level + 2, campaign.level + 3].map(l => routeNodeHTML(l, campaign.level)).join("");
+
+        shopMission.innerHTML = `<b>Level mission</b><br />${currentMission ? currentMission.text : "—"}<br />Result: <span style="color:${missionProgress.done ? '#88ffb6' : '#ff6b6b'}">${missionProgress.done ? `complete for +${currentMission.reward} pearls` : "not completed"}</span>`;
+
+        permGrid.innerHTML = "";
+        relicGrid.innerHTML = "";
+        consumableGrid.innerHTML = "";
+
+        const offeredPermanents = permanentItems.filter(item => campaign.shopOffers.permanents.includes(item.key));
+        const offeredRelics = relicItems.filter(item => campaign.shopOffers.relics.includes(item.key) && !campaign.relics[item.key]);
+        const offeredNext = nextLevelItems.filter(item => campaign.shopOffers.next.includes(item.key));
+
+        for (const item of offeredPermanents) {
+          const level = campaign.upgrades[item.key];
+          const cost = item.baseCost + level * item.growth;
+          item.cost = cost;
+          const canAfford = campaign.pearls >= cost;
+          const card = createShopCard(
+            item,
+            canAfford,
+            item.button,
+            () => {
+              if (campaign.pearls < cost) return;
+              campaign.pearls -= cost;
+              campaign.upgrades[item.key] += 1;
+              beep(980, 0.05, "square", 0.022);
+              showToast(`<b>${item.name}</b> upgraded`, 1200);
+              updateHUD();
+              renderShop();
+            },
+            `<span>Level ${level}</span>`
+          );
+          permGrid.appendChild(card);
+        }
+
+        if (!offeredRelics.length) {
+          const empty = document.createElement("div");
+          empty.className = "shop-item";
+          empty.innerHTML = `<h5>Relic rack empty</h5><p>You already own the relics the shop tried to offer.</p><div class="meta"><span>Try the reroll</span><span>Cost ${campaign.shopOffers.rerollCost}</span></div>`;
+          relicGrid.appendChild(empty);
+        }
+
+        for (const item of offeredRelics) {
+          const owned = campaign.relics[item.key];
+          const canAfford = campaign.pearls >= item.cost && !owned;
+          const card = createShopCard(
+            item,
+            canAfford,
+            owned ? "Owned" : "Buy Relic",
+            () => {
+              if (campaign.pearls < item.cost || campaign.relics[item.key]) return;
+              campaign.pearls -= item.cost;
+              campaign.relics[item.key] = true;
+              beep(1120, 0.05, "square", 0.024);
+              showToast(`<b>${item.name}</b> claimed`, 1200);
+              updateHUD();
+              renderShop();
+            },
+            `<span>${owned ? "Unlocked" : "Locked"}</span>`
+          );
+          relicGrid.appendChild(card);
+        }
+
+        for (const item of offeredNext) {
+          let owned;
+          if (item.key === "revive") owned = campaign.nextLevel.revive;
+          else owned = campaign.nextLevel[item.key] ? 1 : 0;
+          const canAfford = campaign.pearls >= item.cost && owned < item.max;
+          const card = createShopCard(
+            item,
+            canAfford,
+            owned >= item.max ? "Maxed" : "Buy Next Level",
+            () => {
+              if (campaign.pearls < item.cost) return;
+              if (item.key === "revive") {
+                if (campaign.nextLevel.revive >= item.max) return;
+                campaign.nextLevel.revive += item.amount;
+              } else {
+                if (campaign.nextLevel[item.key]) return;
+                campaign.nextLevel[item.key] = true;
+              }
+              campaign.pearls -= item.cost;
+              beep(900, 0.05, "square", 0.02);
+              showToast(`<b>${item.name}</b> queued`, 1200);
+              updateHUD();
+              renderShop();
+            },
+            `<span>Owned ${owned}/${item.max}</span>`
+          );
+          consumableGrid.appendChild(card);
+        }
+      }
+
+      function showShop(levelBonus, missionBonus) {
+        hideMap();
+        rollShopOffers(true);
+        setState(STATE.store);
+        shopPanel.classList.add("show");
+        shopPanel.setAttribute("aria-hidden", "false");
+        renderShop();
+        const pieces = [`<b>Level clear</b> +${levelBonus} pearls`];
+        if (missionBonus > 0) pieces.push(`mission +${missionBonus}`);
+        showToast(pieces.join(" • "), 2200);
+      }
+
+      function hideShop() {
+        shopPanel.classList.remove("show");
+        shopPanel.setAttribute("aria-hidden", "true");
+      }
+
+      function finishCampaignLevel() {
+        const mission = getMissionProgress();
+        const levelBonus = currentStage.levelBonus;
+        const missionBonus = mission.done && currentMission ? currentMission.reward : 0;
+
+        campaign.totalScore += score;
+        campaign.totalGates += run.gatesPassed;
+        campaign.pearls += levelBonus + missionBonus;
+
+        spawnExplosion(FISH.x, FISH.y, 18, ["#88ffb6", "#ffd36b", "#7ee7ff"]);
+        flash("rgba(136,255,182,", 0.12);
+        shake(4.5);
+
+        announce(currentStage.kind === "boss" ? `${currentStage.displayName.toUpperCase()} DOWN` : "LEVEL CLEARED", currentStage.kind === "boss" ? (currentStage.bossProfile?.color || "#88ffb6") : "#88ffb6", 1.8, 22);
+        showShop(levelBonus, missionBonus);
+        updateHUD();
+      }
+
+      function useRescue(saveText = "RESCUE") {
+        FISH.vy = currentStage.swimVelocity * 0.55;
+        FISH.y = clamp(FISH.y, 40, GROUND_Y - 40);
+        spawnBubbleBurst(FISH.x, true);
+        spawnExplosion(FISH.x, FISH.y, 12, ["#88ffb6", "#7ee7ff"]);
+        shake(4);
+        flash("rgba(136,255,182,", 0.10);
+        hitFreeze(0.04);
+        beep(220, 0.08, "square", 0.03);
+        beep(520, 0.06, "square", 0.02);
+        spawnFloatingText(FISH.x, FISH.y - 30, saveText, "#88ffb6", 18);
+        updateHUD();
+      }
+
+      function swim() {
+        if (state === STATE.store || state === STATE.map) return;
+
+        if (state === STATE.over) {
+          if (SETTINGS.mode === "campaign") {
+            resetCampaignProgress();
+          }
+          prepareLevel(true);
+          FISH.vy = currentStage.swimVelocity;
+          run.swims = 1;
+          beep(740, 0.05, "square", 0.03);
+          return;
+        }
+
+        if (state === STATE.ready) {
+          startSelectedMode();
+        }
+
+        if (state === STATE.playing) {
+          FISH.vy = currentStage.swimVelocity;
+          run.swims += 1;
+          run.gatesSinceSwim = 0;
+          beep(620, 0.04, "square", 0.025);
+        }
+      }
+
+      function pxRect(x, y, w, h, c) {
+        ctx.fillStyle = c;
+        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      }
+
+      function pxText(txt, x, y, c, size = 14) {
+        ctx.fillStyle = c;
+        ctx.font = `${size}px ui-monospace, Menlo, Consolas, monospace`;
+        ctx.textBaseline = "top";
+        ctx.fillText(txt, Math.round(x), Math.round(y));
+      }
+
+      function pxTextCenter(txt, x, y, c, size = 14) {
+        ctx.fillStyle = c;
+        ctx.font = `${size}px ui-monospace, Menlo, Consolas, monospace`;
+        ctx.textBaseline = "top";
+        ctx.textAlign = "center";
+        ctx.fillText(txt, Math.round(x), Math.round(y));
+        ctx.textAlign = "left";
+      }
+
+      function drawTinyFish(x, y, s, c) {
+        const w = Math.round(12 * s);
+        const h = Math.round(6 * s);
+        pxRect(x, y, w, h, c);
+        pxRect(x + w, y + Math.floor(h / 2) - 1, 4, 3, c);
+        pxRect(x - 4, y + 1, 4, 4, c);
+      }
+
+      function drawSilhouetteLayer(offsetX, alpha) {
+        ctx.globalAlpha = alpha;
+        for (let i = 0; i < 9; i++) {
+          const x = offsetX + i * 120;
+          const y = 90 + Math.floor((i % 3) * 18);
+          const w = Math.floor(110 * (1.2 - (i % 3) * 0.1));
+          const h = Math.floor(60 * (1.0 - (i % 2) * 0.1));
+          pxRect(x, y, w, h, "rgba(0,0,0,1)");
+          for (let k = 0; k < w; k += 10) pxRect(x + k, y - 8, 8, 8, "rgba(0,0,0,1)");
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawSeaweedLayer(offsetX, alpha) {
+        ctx.globalAlpha = alpha;
+        const greenShift = currentStage && currentStage.shortBiome === "Kelp";
+        for (let i = 0; i < 14; i++) {
+          const x = offsetX + i * 76 + (i % 2) * 12;
+          const base = GROUND_Y - 4;
+          const height = 50 + (i % 5) * 22;
+          const sway = Math.floor(6 * Math.sin(t * 2 + i));
+          for (let y = 0; y < height; y += 8) {
+            pxRect(x + Math.floor(sway * (y / height)), base - y, 8, 8, greenShift ? "rgba(58,188,102,1)" : "rgba(35,160,140,1)");
+            if (i % 3 === 0) pxRect(x + 8 + Math.floor(sway * (y / height)), base - y + 4, 6, 6, greenShift ? "rgba(36,120,74,1)" : "rgba(22,110,96,1)");
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawRockLayer(offsetX) {
+        for (let i = 0; i < 8; i++) {
+          const x = offsetX + i * 130;
+          const y = GROUND_Y - 22;
+          const w = 90 + (i % 3) * 26;
+          const h = 28 + (i % 2) * 14;
+          pxRect(x, y, w, h, "rgba(0,0,0,0.35)");
+          pxRect(x + 6, y + 6, w - 12, h - 10, currentStage && currentStage.shortBiome === "Ruins" ? "rgba(75,53,26,0.70)" : "rgba(10,40,58,0.65)");
+          pxRect(x + 12, y + 12, Math.max(10, w - 34), 8, "rgba(200,247,255,0.08)");
+        }
+      }
+
+      function drawBackground(dt, speed) {
+        for (let i = 0; i < 18; i++) {
+          const y = i * (H / 18);
+          const k = i / 18;
+          const r = Math.floor(5 + 20 * (1 - k));
+          const g = Math.floor(25 + 80 * (1 - k));
+          const b = Math.floor(46 + 100 * (1 - k));
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+          ctx.fillRect(0, Math.round(y), W, Math.ceil(H / 18));
+        }
+
+        if (currentStage && currentStage.tint !== "rgba(0,0,0,0)") {
+          ctx.fillStyle = currentStage.tint;
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        ctx.globalAlpha = SETTINGS.motion === "off" ? 0.05 : 0.10;
+        for (let i = 0; i < 7; i++) {
+          const x = (i * 160 + (t * 30) % 160) - 120;
+          ctx.fillStyle = "rgba(200,247,255,1)";
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x + 70, 0);
+          ctx.lineTo(x + 190, H);
+          ctx.lineTo(x + 120, H);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        bg.farX -= dt * (speed * 0.10);
+        if (bg.farX < -W) bg.farX += W;
+        drawSilhouetteLayer(Math.round(bg.farX), 0.18);
+        drawSilhouetteLayer(Math.round(bg.farX + W), 0.18);
+
+        bg.midX -= dt * (speed * 0.22);
+        if (bg.midX < -W) bg.midX += W;
+        drawSeaweedLayer(Math.round(bg.midX), 0.25);
+        drawSeaweedLayer(Math.round(bg.midX + W), 0.25);
+
+        bg.nearX -= dt * (speed * 0.36);
+        if (bg.nearX < -W) bg.nearX += W;
+        drawRockLayer(Math.round(bg.nearX));
+        drawRockLayer(Math.round(bg.nearX + W));
+
+        ctx.globalAlpha = 0.35;
+        for (const s of bg.sprites) {
+          s.x -= dt * s.v;
+          if (s.x < -20) {
+            s.x = W + RNG(0, 120);
+            s.y = RNG(40, GROUND_Y - 120);
+            s.s = RNG(0.8, 1.8);
+            s.v = RNG(8, 24);
+          }
+          drawTinyFish(s.x, s.y, s.s, "rgba(0,0,0,0.85)");
+        }
+        ctx.globalAlpha = 1;
+
+        if (currentStage && currentStage.fog !== "rgba(0,0,0,0)") {
+          ctx.fillStyle = currentStage.fog;
+          ctx.fillRect(0, 0, W, GROUND_Y);
+        }
+
+        if (currentStage && currentStage.routeTier === "safe") {
+          ctx.globalAlpha = 0.16;
+          for (let y = 64; y < GROUND_Y - 30; y += 86) pxRect(40, y, W - 80, 2, "rgba(136,255,182,1)");
+          ctx.globalAlpha = 1;
+        } else if (currentStage && currentStage.routeTier === "treasure") {
+          ctx.globalAlpha = SETTINGS.motion === "off" ? 0.12 : 0.10 + 0.06 * Math.sin(t * 4);
+          for (let i = 0; i < 6; i++) pxRect(90 + i * 130, 80 + ((i % 2) * 90), 6, GROUND_Y - 180, "rgba(255,211,107,1)");
+          ctx.globalAlpha = 1;
+        } else if (currentStage && currentStage.routeTier === "wild") {
+          ctx.globalAlpha = SETTINGS.motion === "off" ? 0.10 : 0.12 + 0.08 * Math.sin(t * 7);
+          for (let i = 0; i < 10; i++) pxRect(i * 96, 0, 4, GROUND_Y, "rgba(255,107,214,1)");
+          ctx.globalAlpha = 1;
+        }
+
+        pxRect(0, GROUND_Y, W, H - GROUND_Y, "rgba(2,12,18,0.85)");
+        for (let i = 0; i < W; i += 18) {
+          const h = 6 + Math.floor(6 * Math.sin((i + t * 40) * 0.02));
+          pxRect(i, GROUND_Y + 2, 10, Math.max(2, h), "rgba(20,90,92,0.30)");
+        }
+      }
+
+      function getFishColors(s) {
+        if (s >= 40) return { body: "#ff6bff", fin: "#ff6b6b", tail: "#ffd36b", eye: "#fff", glow: "rgba(255,107,255,0.15)" };
+        if (s >= 25) return { body: "#6bffea", fin: "#ff6bd6", tail: "#b84cff", eye: "#fff", glow: "rgba(107,255,234,0.12)" };
+        if (s >= 15) return { body: "#88ffb6", fin: "#ffd36b", tail: "#ff9a6b", eye: "#0b1a2a", glow: "rgba(136,255,182,0.10)" };
+        if (s >= 8) return { body: "#ffe6a3", fin: "#ff9a6b", tail: "#ff6b6b", eye: "#0b1a2a", glow: "rgba(255,230,163,0.06)" };
+        return { body: "#ffd36b", fin: "#ff9a6b", tail: "#ff6b6b", eye: "#0b1a2a", glow: null };
+      }
+
+      function drawFishTrail() {
+        for (let i = 0; i < fishTrail.length; i++) {
+          const node = fishTrail[i];
+          const alpha = (node.life / node.maxLife) * (0.28 + 0.22 * (1 - i / Math.max(1, fishTrail.length)));
+          ctx.globalAlpha = alpha;
+          pxRect(node.x - node.w / 2, node.y - node.h / 2, node.w, node.h, node.color);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawFish() {
+        const x = Math.round(FISH.x);
+        const y = Math.round(FISH.y);
+        const tilt = clamp(FISH.vy / 700, -0.7, 0.7);
+        const fc = getFishColors(score);
+        const finKick = SETTINGS.motion === "off" ? 0 : Math.sin(t * 14) * 2;
+        const tailKick = SETTINGS.motion === "off" ? 0 : Math.sin(t * 18) * 3;
+        const bodyBob = SETTINGS.motion === "off" ? 0 : Math.sin(t * 7) * 1.5;
+
+        if (fc.glow) {
+          ctx.globalAlpha = 0.5;
+          pxRect(x - 32, y - 32, 64, 64, fc.glow);
+          ctx.globalAlpha = 1;
+        }
+
+        if (buffs.shieldCharges > 0) {
+          ctx.globalAlpha = 0.18 + (SETTINGS.motion === "off" ? 0 : 0.08 * Math.sin(t * 6));
+          pxRect(x - 28, y - 28, 56, 56, "rgba(136,255,182,1)");
+          ctx.globalAlpha = 1;
+        }
+
+        ctx.save();
+        ctx.translate(x, y + bodyBob);
+        ctx.rotate(tilt);
+
+        ctx.globalAlpha = 0.25;
+        pxRect(-16, 18, 32, 6, "rgba(0,0,0,1)");
+        ctx.globalAlpha = 1;
+
+        pxRect(-18, -10, 30, 20, fc.body);
+        pxRect(-14, -14, 18, 6, "#ffe6a3");
+        pxRect(-10, 8 + finKick, 18, 6, fc.fin);
+        pxRect(12, -6 + finKick, 10, 12, fc.fin);
+        pxRect(22 + tailKick, -10, 6, 20, fc.tail);
+        pxRect(28 + tailKick, -6, 4, 12, fc.fin);
+        pxRect(-2, 2, 10, 8, fc.fin);
+        pxRect(4 + tailKick, 8, 6, 4, fc.tail);
+        pxRect(-8, -4, 6, 6, fc.eye);
+        pxRect(-6, -2, 2, 2, "#c8f7ff");
+
+        if (score >= 25) {
+          pxRect(-12, -18, 4, 6, "#ffd36b");
+          pxRect(-4, -20, 4, 8, "#ffd36b");
+          pxRect(4, -18, 4, 6, "#ffd36b");
+          pxRect(-14, -14, 22, 4, "#ffd36b");
+        }
+
+        if (score >= 40 && SETTINGS.motion !== "off") {
+          const sparkle = Math.sin(t * 12) > 0.3;
+          if (sparkle) {
+            pxRect(-22, -6, 3, 3, "#fff");
+            pxRect(14, -16, 3, 3, "#fff");
+          }
+        }
+
+        if (state === STATE.playing && Math.random() < 0.25) {
+          bubbles.push(makeBubble(FISH.x - 14, FISH.y + RNG(-8, 10), RNG(4, 8), false));
+        }
+
+        ctx.restore();
+      }
+
+      function drawPipe(p) {
+        const x = Math.round(p.x);
+        const topH = Math.round(p.topH);
+        const gap = Math.round(p.gap);
+
+        const palette = currentStage ? currentStage.pipePalette : ["#ff6bd6", "#b84cff", "#6bffea", "#2dd6ff"];
+        let c0 = palette[0], c1 = palette[1], c2 = palette[2], c3 = palette[3];
+
+        if (!p.golden && currentStage && currentStage.routeTier === "safe") {
+          c0 = "#88ffb6"; c1 = "#2b8f66"; c2 = "#d9ffe8"; c3 = "#67d9a6";
+        } else if (!p.golden && currentStage && currentStage.routeTier === "treasure") {
+          c0 = "#ffd36b"; c1 = "#c08a2a"; c2 = "#fff0aa"; c3 = "#e3b95f";
+        } else if (!p.golden && currentStage && currentStage.routeTier === "wild") {
+          c0 = "#ff6bd6"; c1 = "#8c2f95"; c2 = "#ffb9ef"; c3 = "#c65bf0";
+        }
+
+        if (p.golden) {
+          c0 = "#ffd36b";
+          c1 = "#ffb627";
+          c2 = "#fff5d6";
+          c3 = "#ffe082";
+          const shimmer = SETTINGS.motion === "off" ? 0.8 : 0.75 + 0.2 * Math.sin(t * 6 + p.x * 0.01);
+          ctx.globalAlpha = shimmer;
+        }
+
+        pxRect(x, 0, PIPE_W, topH, "rgba(0,0,0,0.25)");
+        pxRect(x + 4, 4, PIPE_W - 8, topH - 8, c1);
+
+        for (let i = 0; i < PIPE_W; i += 12) {
+          pxRect(x + i + 2, topH - 12, 10, 10, c0);
+          if (i % 24 === 0) pxRect(x + i + 4, topH - 22, 8, 8, c2);
+        }
+
+        const by = topH + gap;
+        const bh = GROUND_Y - by;
+
+        pxRect(x, by, PIPE_W, bh, "rgba(0,0,0,0.25)");
+        pxRect(x + 4, by + 4, PIPE_W - 8, bh - 8, c3);
+
+        for (let i = 0; i < PIPE_W; i += 12) {
+          pxRect(x + i + 2, by + 2, 10, 10, c2);
+          if (i % 24 === 0) pxRect(x + i + 4, by + 14, 8, 8, c0);
+        }
+
+        ctx.globalAlpha = 0.25;
+        pxRect(x - 2, topH - 2, PIPE_W + 4, 4, p.golden ? "#fff5d6" : "#c8f7ff");
+        pxRect(x - 2, by - 2, PIPE_W + 4, 4, p.golden ? "#fff5d6" : "#c8f7ff");
+        ctx.globalAlpha = 1;
+      }
+
+      function drawBubbles() {
+        for (const b of bubbles) {
+          ctx.globalAlpha = 0.85;
+          pxRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2, "rgba(200,247,255,0.18)");
+          ctx.globalAlpha = 0.9;
+          pxRect(b.x - Math.floor(b.r / 2), b.y - Math.floor(b.r / 2), Math.max(2, Math.floor(b.r / 2)), Math.max(2, Math.floor(b.r / 2)), "rgba(200,247,255,0.55)");
+          if (b.bonus) {
+            ctx.globalAlpha = SETTINGS.motion === "off" ? 0.42 : 0.48 + 0.12 * Math.sin(t * 5);
+            pxRect(b.x - b.r + 2, b.y - b.r + 2, b.r * 2 - 4, b.r * 2 - 4, "rgba(255,211,107,0.45)");
+          }
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function drawPowerups() {
+        for (const p of powerups) {
+          if (!p.alive) continue;
+          const x = Math.round(p.x);
+          const y = Math.round(p.y);
+          const pulse = SETTINGS.motion === "off" ? 0.85 : 0.7 + 0.2 * Math.sin(t * 4 + p.wob);
+
+          let base = "rgba(200,247,255,0.18)";
+          let core = "rgba(200,247,255,0.55)";
+          let tint = "rgba(200,247,255,0.20)";
+          let label = "?";
+
+          if (p.kind === "shield") { tint = "rgba(136,255,182,0.25)"; label = "S"; }
+          if (p.kind === "slow") { tint = "rgba(126,231,255,0.25)"; label = "T"; }
+          if (p.kind === "magnet") { tint = "rgba(255,211,107,0.22)"; label = "M"; }
+          if (p.kind === "x2") { tint = "rgba(255,107,107,0.20)"; label = "2"; }
+
+          ctx.globalAlpha = 0.9;
+          pxRect(x - p.r, y - p.r, p.r * 2, p.r * 2, base);
+          ctx.globalAlpha = 0.85 * pulse;
+          pxRect(x - p.r + 2, y - p.r + 2, p.r * 2 - 4, p.r * 2 - 4, tint);
+          ctx.globalAlpha = 0.95;
+          pxRect(x - 5, y - 6, 10, 12, core);
+          ctx.globalAlpha = 1;
+          pxText(label, x - 4, y - 8, "rgba(2,16,27,0.85)", 16);
+        }
+      }
+
+      function drawParticles() {
+        for (const p of particles) {
+          const alpha = p.life / p.maxLife;
+          ctx.globalAlpha = alpha;
+          pxRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size, p.color);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawFloatingTexts() {
+        for (const ft of floatingTexts) {
+          const alpha = ft.life / ft.maxLife;
+          ctx.globalAlpha = alpha;
+          pxTextCenter(ft.text, ft.x, ft.y, ft.color, ft.size);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      function drawComboBar() {
+        if (comboCount < 2) return;
+        const barW = 120;
+        const barH = 6;
+        const bx = FISH.x - barW / 2;
+        const by = FISH.y - 38;
+        const fill = comboTimer / COMBO_WINDOW;
+
+        ctx.globalAlpha = 0.5;
+        pxRect(bx, by, barW, barH, "rgba(0,0,0,0.5)");
+        const comboColor = comboCount >= 8 ? "#ff6bff" : comboCount >= 5 ? "#ff6bd6" : "#ffd36b";
+        pxRect(bx, by, barW * fill, barH, comboColor);
+        ctx.globalAlpha = 1;
+
+        pxTextCenter(`x${comboCount}`, FISH.x, by - 16, comboColor, 14);
+      }
+
+      function drawBossSigil() {
+        if (!currentStage || currentStage.kind !== "boss" || state !== STATE.playing) return;
+        const profile = currentStage.bossProfile || BOSS_PROFILES["Jelly Crown"];
+        const x = W - 88;
+        const y = 54;
+        ctx.globalAlpha = 0.18 + (SETTINGS.motion === "off" ? 0 : 0.08 * Math.sin(t * 5));
+        pxRect(x - 26, y - 26, 52, 52, profile.color);
+        ctx.globalAlpha = 1;
+        pxRect(x - 18, y - 18, 36, 36, "rgba(6,38,58,0.78)");
+        pxTextCenter(profile.glyph[0], x, y - 10, profile.color, 26);
+        pxTextCenter(profile.subtitle.toUpperCase(), x, y + 20, "rgba(200,247,255,0.74)", 10);
+      }
+
+      function drawBossWarning() {
+        if (!currentStage || currentStage.kind !== "boss" || state !== STATE.playing) return;
+        if (bossCycle.phase === "recover") return;
+
+        const telegraph = 0.95;
+        const profile = currentStage.bossProfile || BOSS_PROFILES["Jelly Crown"];
+        const color = profile.color || (bossCycle.type === "current" ? "#ffd36b" : "#ff8f8f");
+        const label = bossCycle.type === "current"
+          ? (bossCycle.direction > 0 ? "DOWN CURRENT" : "UP CURRENT")
+          : "CORAL SHIFT";
+        const activeLabel = bossCycle.type === "current"
+          ? `${profile.glyph} CURRENT`
+          : `${profile.glyph} SHIFT`;
+        const boxW = 248;
+        const boxH = 34;
+        const boxX = W / 2 - boxW / 2;
+        const boxY = 18;
+
+        ctx.globalAlpha = bossCycle.phase === "telegraph" ? 0.44 + 0.16 * Math.sin(t * 10) : 0.82;
+        pxRect(boxX, boxY, boxW, boxH, "rgba(0,0,0,0.55)");
+        ctx.globalAlpha = 1;
+        pxRect(boxX + 4, boxY + 4, boxW - 8, boxH - 8, "rgba(6,38,58,0.78)");
+        pxTextCenter(bossCycle.phase === "telegraph" ? label : activeLabel, W / 2, boxY + 8, color, 14);
+
+        if (bossCycle.phase === "telegraph") {
+          const fill = clamp(bossCycle.timer / telegraph, 0, 1);
+          ctx.globalAlpha = 0.35;
+          pxRect(boxX + 14, boxY + 24, boxW - 28, 4, "rgba(255,255,255,0.20)");
+          ctx.globalAlpha = 1;
+          pxRect(boxX + 14, boxY + 24, (boxW - 28) * fill, 4, color);
+        } else if (bossCycle.type === "current") {
+          pxTextCenter(bossCycle.direction > 0 ? "vvvvvvvv" : "^^^^^^^^", W / 2, boxY + 23, color, 12);
+        } else {
+          pxTextCenter("<   >", W / 2, boxY + 23, color, 12);
+        }
+
+        if (bossCycle.type === "walls" && bossCycle.phase === "telegraph") {
+          ctx.globalAlpha = 0.22 + 0.10 * Math.sin(t * 12);
+          pxRect(0, 0, 10, H, color);
+          pxRect(W - 10, 0, 10, H, color);
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function drawOverlay() {
+        if (state === STATE.playing || state === STATE.store || state === STATE.map) return;
+
+        ctx.globalAlpha = 0.92;
+        pxRect(0, 0, W, H, "rgba(0,0,0,0.22)");
+        ctx.globalAlpha = 1;
+
+        const bx = 70;
+        const by = 60;
+        const bw = W - 140;
+        const bh = 312;
+
+        pxRect(bx, by, bw, bh, "rgba(0,0,0,0.32)");
+        pxRect(bx + 6, by + 6, bw - 12, bh - 12, "rgba(6,38,58,0.75)");
+        pxRect(bx + 6, by + 6, bw - 12, 4, "rgba(200,247,255,0.25)");
+        pxRect(bx + 6, by + bh - 10, bw - 12, 4, "rgba(200,247,255,0.12)");
+
+        if (state === STATE.over) {
+          pxText("GAME OVER", bx + 36, by + 26, "#c8f7ff", 34);
+          pxText("Score", bx + 36, by + 78, "rgba(200,247,255,0.85)", 14);
+          pxText(String(score), bx + 36, by + 98, "#ffd36b", 30);
+
+          if (score >= best && score > 0) {
+            pxText("NEW BEST", bx + 140, by + 102, "#88ffb6", 18);
+          } else {
+            pxText(`Best: ${best}`, bx + 140, by + 104, "#7ee7ff", 14);
+          }
+
+          const deathLine = deathMessageDisplay || "The ocean is deciding";
+          pxText(deathLine, bx + 36, by + 148, deathMessageLocked ? "rgba(200,247,255,0.92)" : "rgba(200,247,255,0.78)", 15);
+          if (crashReason) pxText(`Cause: ${crashReason}`, bx + 36, by + 126, "#ff8f8f", 13);
+          if (!deathMessageLocked) {
+            pxText("locking final line...", bx + 36, by + 166, "rgba(200,247,255,0.46)", 11);
+          }
+
+          if (SETTINGS.mode === "campaign") {
+            pxText(`Campaign ended on level ${campaign.level}`, bx + 36, by + 180, "rgba(200,247,255,0.74)", 14);
+            pxText(`Pearls banked: ${campaign.pearls}   Total gates this run: ${campaign.totalGates + run.gatesPassed}`, bx + 36, by + 204, "rgba(200,247,255,0.58)", 12);
+            if (currentStage && currentStage.goal != null) pxText(`You were ${Math.max(0, currentStage.goal - run.gatesPassed)} gates from clear`, bx + 36, by + 220, "#ffd36b", 12);
+            if (currentStage) {
+              pxText(`Current biome: ${currentStage.displayName}`, bx + 36, by + 226, "#ffd36b", 14);
+              const temptation = currentStage.kind === "boss"
+                ? `Tip: ${currentStage.bossProfile?.line || "Boss pressure comes in phases."}`
+                : currentStage.routeName ? `Run it back and lean into ${currentStage.routeName.toLowerCase()}.` : "Run it back with a sharper line.";
+              pxText(temptation, bx + 36, by + 246, "rgba(200,247,255,0.66)", 12);
+            }
+          } else {
+            pxText("Infinite mode never stops until you do", bx + 36, by + 180, "rgba(200,247,255,0.74)", 14);
+            pxText(`Gates passed: ${run.gatesPassed}   Near misses: ${run.nearMisses}`, bx + 36, by + 204, "rgba(200,247,255,0.58)", 12);
+          }
+
+          pxText("Space or tap to run it back", bx + 36, by + 250, "#c8f7ff", 16);
+        } else {
+          pxText("FLAPPY FISH", bx + 36, by + 26, "#c8f7ff", 34);
+          pxText(SETTINGS.mode === "campaign" ? "Campaign mode selected" : "Infinite mode selected", bx + 36, by + 78, "rgba(200,247,255,0.90)", 16);
+
+          if (SETTINGS.mode === "campaign" && currentStage && currentMission) {
+            pxText(`${currentStage.displayName} • Level ${campaign.level}`, bx + 36, by + 118, "#ffd36b", 15);
+            if (currentStage.kind === "boss" && currentStage.bossProfile) {
+              pxText(`${currentStage.bossProfile.subtitle} • ${currentStage.bossProfile.line}`, bx + 36, by + 142, currentStage.bossProfile.color, 14);
+            } else {
+              pxText(currentStage.description, bx + 36, by + 142, "rgba(200,247,255,0.74)", 14);
+            }
+            pxText(`Mission: ${currentMission.text}`, bx + 36, by + 168, "rgba(200,247,255,0.74)", 14);
+            const nextStages = [campaign.level, campaign.level + 1, campaign.level + 2].map(level => {
+              const s = createStage(level, "campaign");
+              return `L${level} ${s.kind === "boss" ? "Boss" : s.shortBiome}`;
+            }).join("  •  ");
+            pxText(nextStages, bx + 36, by + 198, "rgba(200,247,255,0.55)", 12);
+          } else {
+            pxText("No store. No level breaks. Just survive.", bx + 36, by + 118, "rgba(200,247,255,0.74)", 14);
+            pxText("Speed ramps and the best run wins.", bx + 36, by + 142, "rgba(200,247,255,0.74)", 14);
+            pxText("This is the pure arcade lane.", bx + 36, by + 166, "#ffd36b", 14);
+          }
+
+          pxText("Space or tap to start", bx + 36, by + 232, "#c8f7ff", 16);
+          pxText("Press 1 for campaign or 2 for infinite", bx + 36, by + 256, "rgba(200,247,255,0.60)", 12);
+        }
+      }
+
+      function endGame() {
+        setState(STATE.over);
+        startDeathMessageRoll();
+
+        spawnExplosion(FISH.x, FISH.y, 30, ["#ff6b6b", "#ffd36b", "#ff6bd6", "#c8f7ff"]);
+        spawnBubbleBurst(FISH.x, false);
+        shake(6);
+        flash("rgba(255,107,107,", 0.12);
+        hitFreeze(0.06);
+
+        beep(140, 0.12, "square", 0.03);
+        setTimeout(() => beep(90, 0.16, "square", 0.03), 80);
+
+        if (score > best) {
+          best = score;
+          bestEl.textContent = String(best);
+          try { localStorage.setItem("flappyFishCampaignEvolutionBest", String(best)); } catch (e) {}
+          if (score > 0) {
+            showToast(`<b>NEW BEST: ${score}</b>`, 2800);
+          }
+        }
+
+        updateHUD();
+      }
+
+      function update(dt) {
+        if (freezeTimer > 0) {
+          freezeTimer -= dt;
+          return;
+        }
+
+        t += dt;
+        screenShake *= Math.max(0, 1 - dt * 12);
+        if (screenShake < 0.3) screenShake = 0;
+        screenFlashAlpha *= Math.max(0, 1 - dt * 6);
+
+        if (comboTimer > 0) {
+          comboTimer -= dt;
+          if (comboTimer <= 0) breakCombo();
+        }
+
+        buffs.slowTime = Math.max(0, buffs.slowTime - dt);
+        buffs.magnet = Math.max(0, buffs.magnet - dt);
+        buffs.x2 = Math.max(0, buffs.x2 - dt);
+
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+          const ft = floatingTexts[i];
+          ft.y += ft.vy * dt;
+          ft.life -= dt;
+          if (ft.life <= 0) floatingTexts.splice(i, 1);
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 200 * dt;
+          p.life -= dt;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+          if (state === STATE.playing && buffs.magnet > 0 && b.bonus) {
+            const dx = FISH.x - b.x;
+            const dy = FISH.y - b.y;
+            const d = Math.max(40, Math.hypot(dx, dy));
+            b.vx += (dx / d) * 55 * dt;
+            b.vy += (dy / d) * 55 * dt;
+          }
+
+          b.x += b.vx * dt;
+          b.y += b.vy * dt;
+          b.life -= dt;
+          b.vy -= 18 * dt;
+
+          if (b.life <= 0 || b.y < -30) bubbles.splice(i, 1);
+        }
+
+        updateDeathMessageRoll(dt);
+        updateBossCycle(dt);
+        if (eventBanner.time > 0) eventBanner.time = Math.max(0, eventBanner.time - dt);
+
+        if (state !== STATE.playing) return;
+
+        const baseSpeed = currentStage.baseSpeed + (t * (currentStage.baseSpeed * currentStage.speedRamp));
+        const speed = buffs.slowTime > 0 ? baseSpeed * 0.62 : baseSpeed;
+
+        FISH.vy += GRAVITY * dt;
+        if (currentStage.currentStrength) {
+          if (currentStage.kind === "boss") {
+            if (bossCycle.type === "current" && bossCycle.phase !== "recover") {
+              const currentScale = bossCycle.phase === "telegraph" ? 0.14 : bossCycle.strength;
+              FISH.vy += bossCycle.direction * currentStage.currentStrength * currentScale * dt;
+            }
+          } else {
+            FISH.vy += Math.sin(t * 1.7) * currentStage.currentStrength * dt;
+          }
+        }
+        FISH.y += FISH.vy * dt;
+
+        for (const p of powerups) {
+          if (!p.alive) continue;
+          p.x -= speed * dt;
+          if (p.x < -60) p.alive = false;
+          if (fishCollectsCircle(p.x, p.y, p.r)) {
+            p.alive = false;
+            applyPowerup(p.kind);
+          }
+        }
+
+        for (const p of pipes) {
+          p.x -= speed * dt;
+
+          if (currentStage.kind === "boss") {
+            const topMin = 54;
+            const topMax = GROUND_Y - 70 - p.gap;
+            const moveScale = bossCycle.type === "walls" ? bossCycle.moveScale : 0.08;
+            p.topH = clamp(p.baseTopH + Math.sin(t * p.driftSpeed + p.phase) * p.driftAmp * moveScale, topMin, topMax);
+          }
+
+          if (!p.passed && p.x + PIPE_W < FISH.x) {
+            p.passed = true;
+            run.gatesSinceSwim += 1;
+            run.gatesPassed += 1;
+
+            let nearMiss = checkNearMiss(p);
+            if (nearMiss && !p.nearMissed) {
+              p.nearMissed = true;
+              run.nearMisses++;
+              spawnFloatingText(FISH.x + 40, FISH.y - 20, "CLOSE!", "#ff6bd6", 16);
+              announce("NEAR MISS", "#ff6bd6", 0.7, 18);
+              spawnExplosion(FISH.x, FISH.y, 6, ["#ff6bd6", "#ffd36b", "#7ee7ff"]);
+              beep(1400, 0.03, "square", 0.02);
+              rewardPearls(1, "pearl");
+
+              if (SETTINGS.mode === "campaign" && campaign.relics.firstNearMissShield && !run.firstNearMissShieldTriggered) {
+                run.firstNearMissShieldTriggered = true;
+                buffs.shieldCharges += 1;
+                spawnFloatingText(FISH.x + 34, FISH.y - 44, "NEEDLE ARMOR", "#88ffb6", 13);
+              }
+            }
+
+            let add = 1;
+            let pearlLabel = "pearl";
+            if (p.golden) {
+              add = 5 + (SETTINGS.mode === "campaign" && campaign.relics.goldenBonus ? 2 : 0);
+              run.goldenGates++;
+              spawnFloatingText(FISH.x + 40, FISH.y, `GOLDEN +${add}`, "#ffd36b", 20);
+              announce("GOLDEN GATE", "#ffd36b", 0.9, 20);
+              flash("rgba(255,211,107,", 0.10);
+              shake(currentStage.kind === "boss" ? 4 : 3);
+              beep(880, 0.08, "square", 0.025);
+              setTimeout(() => beep(1100, 0.06, "square", 0.02), 60);
+              rewardPearls(2 + (SETTINGS.mode === "campaign" && campaign.relics.goldenBonus ? 2 : 0), "pearls");
+            } else {
+              rewardPearls(1, pearlLabel);
+            }
+
+            if (nearMiss) add += 1;
+            if (buffs.x2 > 0) add *= 2;
+
+            addCombo();
+            add = Math.floor(add * getComboMultiplier());
+
+            score += add;
+            if (add > 1) {
+              spawnFloatingText(FISH.x + 50, FISH.y + 10, `+${add}`, "#ffd36b", add >= 5 ? 22 : 16);
+            }
+
+            if (SETTINGS.mode === "campaign" && campaign.relics.routePearl && run.gatesPassed % 5 === 0) {
+              rewardPearls(1, "route");
+            }
+
+            if (!run.missionAnnounced && currentMission && getMissionProgress().done) {
+              run.missionAnnounced = true;
+              announce("MISSION READY", "#88ffb6", 1.0, 18);
+              showToast(`<b>Mission ready</b>`, 1100);
+            }
+
+            beep(880 + comboCount * 40, 0.04, "square", 0.02);
+
+            if ([10, 20, 30, 40, 50].includes(score)) {
+              showToast(`<b>${score}</b> points`, 1500);
+            }
+
+            updateHUD();
+
+            if (SETTINGS.mode === "campaign" && run.gatesPassed >= currentStage.goal) {
+              finishCampaignLevel();
+              return;
+            }
+          }
+
+          if (fishCollidesPipe(p)) {
+            if (buffs.shieldCharges > 0) {
+              buffs.shieldCharges -= 1;
+              run.shieldsUsed += 1;
+              useRescue("SHIELD");
+            } else if (run.freeRevive > 0) {
+              run.freeRevive -= 1;
+              useRescue("REVIVE");
+            } else {
+              crashReason = p.golden ? "clipped a golden gate" : "clipped coral";
+              endGame();
+              return;
+            }
+          }
+        }
+
+        while (pipes.length && pipes[0].x < -PIPE_W - 10) {
+          pipes.shift();
+          const lastX = pipes.length ? pipes[pipes.length - 1].x : W;
+          spawnPipe(Math.max(lastX + PIPE_SPACING, W + 220));
+        }
+
+        for (let i = bubbles.length - 1; i >= 0; i--) {
+          const b = bubbles[i];
+          if (b.bonus && fishCollectsCircle(b.x, b.y, b.r)) {
+            bubbles.splice(i, 1);
+
+            run.bonusBubbles += 1;
+
+            let add = buffs.x2 > 0 ? 4 : 2;
+            add = Math.floor(add * getComboMultiplier());
+            score += add;
+
+            if (SETTINGS.mode === "campaign" && campaign.relics.bubbleCombo) {
+              comboTimer = Math.min(COMBO_WINDOW, comboTimer + 0.55);
+            }
+
+            spawnFloatingText(b.x, b.y - 10, `+${add}`, "#7ee7ff", 14);
+            rewardPearls(1, "pearl");
+
+            beep(1200, 0.05, "square", 0.02);
+            beep(1500, 0.04, "square", 0.015);
+
+            if (!run.missionAnnounced && currentMission && getMissionProgress().done) {
+              run.missionAnnounced = true;
+              announce("MISSION READY", "#88ffb6", 1.0, 18);
+              showToast(`<b>Mission ready</b>`, 1100);
+            }
+
+            updateHUD();
+          }
+        }
+
+        if (Math.random() < 0.06) {
+          bubbles.push(makeBubble(
+            W + 18,
+            RNG(GROUND_Y - 120, GROUND_Y - 30),
+            RNG(4, 10),
+            false
+          ));
+        }
+
+        if (FISH.y + FISH.r > GROUND_Y || FISH.y - FISH.r < 0) {
+          if (buffs.shieldCharges > 0) {
+            buffs.shieldCharges -= 1;
+            run.shieldsUsed += 1;
+            useRescue("SHIELD");
+          } else if (run.freeRevive > 0) {
+            run.freeRevive -= 1;
+            useRescue("REVIVE");
+          } else {
+            crashReason = FISH.y + FISH.r > GROUND_Y ? "hit the seafloor" : "hit the surface";
+            endGame();
+          }
+        }
+      }
+
+      function render(dt) {
+        ctx.save();
+
+        if (screenShake > 0.5) {
+          const sx = (Math.random() - 0.5) * screenShake * 2;
+          const sy = (Math.random() - 0.5) * screenShake * 2;
+          ctx.translate(sx, sy);
+        }
+
+        ctx.clearRect(-10, -10, W + 20, H + 20);
+
+        const baseSpeed = currentStage ? currentStage.baseSpeed + (t * (currentStage.baseSpeed * currentStage.speedRamp)) : 260;
+        const speed = buffs.slowTime > 0 ? baseSpeed * 0.62 : baseSpeed;
+
+        drawBackground(dt, speed);
+        for (const p of pipes) drawPipe(p);
+        drawPowerups();
+        drawBubbles();
+        drawParticles();
+        drawFishTrail();
+        drawFish();
+        drawFloatingTexts();
+        drawComboBar();
+        drawBossSigil();
+        drawBossWarning();
+        drawRunProgress();
+        drawEventBanner();
+
+        if (SETTINGS.motion === "full" && Math.random() < 0.06) {
+          ctx.globalAlpha = 0.18;
+          pxRect(RNG(0, W), RNG(0, GROUND_Y), 2, 2, "rgba(200,247,255,1)");
+          ctx.globalAlpha = 1;
+        }
+
+        if (state === STATE.playing && baseSpeed > 400 && SETTINGS.motion === "full") {
+          const intensity = Math.min(0.14, (baseSpeed - 400) * 0.00025);
+          ctx.globalAlpha = intensity;
+          for (let i = 0; i < 4; i++) {
+            const y = RNG(20, GROUND_Y - 20);
+            pxRect(RNG(0, W * 0.7), y, RNG(30, 80), 2, "rgba(200,247,255,1)");
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        if (screenFlashAlpha > 0.01) {
+          ctx.globalAlpha = screenFlashAlpha;
+          pxRect(0, 0, W, H, screenFlashColor + "1)");
+          ctx.globalAlpha = 1;
+        }
+
+        if (state === STATE.playing && currentStage) {
+          let bx = 14;
+          const by = 12;
+          pxText(SETTINGS.mode === "campaign" ? `LEVEL ${campaign.level}` : "INFINITE", bx, by, "rgba(200,247,255,0.55)", 12);
+          bx += SETTINGS.mode === "campaign" ? 80 : 72;
+          pxText(currentStage.shortBiome.toUpperCase(), bx, by, currentStage.kind === "boss" ? "#ff8f8f" : "#ffd36b", 12);
+          bx += 92;
+          if (currentStage.routeName) { pxText(currentStage.routeName.toUpperCase(), bx, by, getRouteTheme() ? getRouteTheme().color : "#7ee7ff", 12); bx += 138; }
+          if (buffs.slowTime > 0) { pxText(`SLOW ${buffs.slowTime.toFixed(1)}s`, bx, by, "#7ee7ff", 12); bx += 100; }
+          if (buffs.magnet > 0) { pxText(`MAGNET ${buffs.magnet.toFixed(1)}s`, bx, by, "#ffd36b", 12); bx += 110; }
+          if (buffs.x2 > 0) { pxText(`x2 ${buffs.x2.toFixed(1)}s`, bx, by, "#ff6b6b", 12); bx += 80; }
+          if (buffs.shieldCharges > 0) { pxText(`SHIELD x${buffs.shieldCharges}`, bx, by, "#88ffb6", 12); bx += 100; }
+          if (run.freeRevive > 0) { pxText(`REVIVE x${run.freeRevive}`, bx, by, "#88ffb6", 12); }
+          if (currentMission && currentStage.goal != null) {
+            const mission = getMissionProgress();
+            pxText(`MISSION ${mission.label}`, 14, H - 74, mission.done ? "#88ffb6" : "rgba(200,247,255,0.76)", 12);
+          }
+        }
+
+        drawOverlay();
+        ctx.restore();
+      }
+
+      function loop(now) {
+        const dt = Math.min(0.032, (now - last) / 1000);
+        last = now;
+        update(dt);
+        render(dt);
+        requestAnimationFrame(loop);
+      }
+
+      btnStart.addEventListener("click", () => {
+        if (state === STATE.store) return;
+        swim();
+      });
+
+      btnRestart.addEventListener("click", () => restart());
+      btnMode.addEventListener("click", () => toggleMode());
+      btnMute.addEventListener("click", () => toggleSound());
+      btnMotion.addEventListener("click", () => cycleMotion());
+
+      btnMapResetCampaign.addEventListener("click", () => {
+        resetCampaignProgress();
+        hideMap();
+        openMap();
+      });
+
+      btnMapCancel.addEventListener("click", () => {
+        hideMap();
+        setState(STATE.ready);
+        updateHUD();
+      });
+
+      btnCashOut.addEventListener("click", () => {
+        hideShop();
+        resetCampaignProgress();
+        prepareLevel(false);
+        showToast(`<b>Campaign banked</b>`, 1400);
+      });
+
+      btnRerollShop.addEventListener("click", () => {
+        const cost = campaign.shopOffers.rerollCost;
+        if (campaign.pearls < cost) {
+          showToast(`<b>Need ${cost} pearls</b>`, 1000);
+          return;
+        }
+        campaign.pearls -= cost;
+        campaign.shopOffers.rerollCost += 1;
+        rollShopOffers(true);
+        announce("SHOP REROLLED", "#7ee7ff", 0.9, 18);
+        beep(760, 0.05, "square", 0.02);
+        updateHUD();
+        renderShop();
+      });
+
+      btnResetCampaign.addEventListener("click", () => {
+        hideShop();
+        resetCampaignProgress();
+        prepareLevel(false);
+      });
+
+      btnNextLevel.addEventListener("click", () => startNextCampaignLevel());
+
+      window.addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if (k === " " || k === "arrowup" || k === "w") { e.preventDefault(); swim(); }
+        if (k === "r") restart();
+        if (k === "m") toggleSound();
+        if (k === "1") toggleMode("campaign");
+        if (k === "2") toggleMode("infinite");
+      }, { passive: false });
+
+      canvas.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        swim();
+      }, { passive: false });
+
+      updateModeButton();
+      updateMotionButton();
+      btnMute.textContent = audioOn ? "Sound: On" : "Sound: Off";
+
+      if (SETTINGS.mode === "campaign") {
+        resetCampaignProgress();
+      }
+      prepareLevel(false);
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
