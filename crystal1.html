@@ -7356,5 +7356,502 @@ resize();
 })();
 </script>
 
+
+<!-- OPENING DRAFT PATCH: Slay-the-Spire style run choices -->
+<style id="opening-draft-tactical-style-final">
+#starter-modal .v19-modal-card{width:min(980px,94vw);border-radius:22px;border:1px solid rgba(127,255,212,.24);background:radial-gradient(circle at top left,rgba(127,255,212,.12),transparent 34%),radial-gradient(circle at bottom right,rgba(200,155,255,.10),transparent 36%),linear-gradient(180deg,#11182d,#070b15)}
+#starter-modal .v19-modal-title{font-family:var(--display-font,'Cinzel',serif);font-size:26px;letter-spacing:2px;color:#f8fbff;line-height:1.25}
+#starter-modal .v19-modal-kicker{color:#7fffd4;letter-spacing:2px}.opening-draft-copy{font-size:12px;line-height:1.75;color:#e6efff;margin:0 0 14px}
+#starter-modal .starter-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#starter-modal .starter-choice{min-height:270px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:linear-gradient(180deg,rgba(24,34,58,.98),rgba(10,15,28,.98));padding:16px;cursor:pointer;text-align:left;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
+#starter-modal .starter-choice:hover{transform:translateY(-3px);border-color:rgba(127,255,212,.48);box-shadow:0 18px 32px rgba(0,0,0,.35),0 0 18px rgba(127,255,212,.14)}
+#starter-modal .starter-choice .sc-title{font-size:15px;line-height:1.45;color:#fff;margin-bottom:8px}#starter-modal .starter-choice .sc-sub{font-size:9px;color:#7fffd4;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px}
+#starter-modal .starter-choice .sc-desc{font-size:11px;line-height:1.7;color:#dfeaff;margin-bottom:12px}#starter-modal .starter-choice .sc-rule{margin-top:10px;padding:10px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);font-size:10px;line-height:1.7;color:#f4f8ff}
+#starter-modal .starter-choice .sc-rule strong{color:#ffd866;font-weight:normal}#starter-modal .starter-choice .sc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}#starter-modal .starter-choice .sc-tag{font-size:8px;color:#eaf2ff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:999px;padding:5px 8px}
+#run-mod-panel{padding:10px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#171b30,#0d1120)}#run-mod-panel .rmp-label{font-size:7px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}#run-mod-panel .rmp-title{font-size:11px;color:var(--gold);line-height:1.5;margin-bottom:5px}#run-mod-panel .rmp-text{font-size:7px;color:#e1e9ff;line-height:1.8}#run-mod-panel .rmp-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}#run-mod-panel .rmp-tag{font-size:6px;color:#f4fbff;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:2px 6px;background:rgba(255,255,255,.05)}
+@media(max-width:960px){#starter-modal .starter-choices{grid-template-columns:1fr}#starter-modal .starter-choice{min-height:0}}
+</style>
+<script id="opening-draft-tactical-patch-final">
+(function(){'use strict';
+const byId=id=>document.getElementById(id);const safe=fn=>{try{return fn()}catch(e){console.warn('[Opening Draft]',e)}};const clone=o=>o?JSON.parse(JSON.stringify(o)):o;
+function pickUnique(a,c){const b=a.slice(),o=[];while(b.length&&o.length<c)o.push(b.splice(Math.floor(Math.random()*b.length),1)[0]);return o}
+function freshRunMods(choice){G.runMods={chosen:{key:choice.key,title:choice.title,sub:choice.sub,desc:choice.desc,rule:choice.rule,tags:choice.tags},enemyCountMult:1,goldMult:1,xpMult:1,shopPriceMult:1,potionTax:0,waitMana:0,extraReveal:0,earlyEliteChance:0,rangedPressure:0,enemyAwareness:0,enemyHasteAfterHit:0}}
+function ensureRunMods(){if(!window.G)return null;G.runMods=G.runMods||{};['enemyCountMult','goldMult','xpMult','shopPriceMult'].forEach(k=>{if(G.runMods[k]==null)G.runMods[k]=1});['potionTax','waitMana','extraReveal','earlyEliteChance','rangedPressure','enemyAwareness','enemyHasteAfterHit'].forEach(k=>{if(G.runMods[k]==null)G.runMods[k]=0});return G.runMods}
+function findWeapon(n){return safe(()=>ITEMS.weapons.find(w=>w.name===n))||safe(()=>ITEMS.weapons[0])}function findArmor(n){return safe(()=>ITEMS.armor.find(a=>a.name===n))||safe(()=>ITEMS.armor[0])}function findSpell(n){return safe(()=>ITEMS.spells.find(s=>s.name===n))}
+function giveWeapon(n){const w=findWeapon(n);if(w)G.player.weapon=clone(w)}function giveArmor(n){const a=findArmor(n);if(a)G.player.armor=clone(a)}function giveSpell(n){const s=findSpell(n);if(!s)return;G.player.spells=G.player.spells||[];if(G.player.spells.length<4&&!G.player.spells.some(x=>x.name===s.name))G.player.spells.push(clone(s))}
+function equipRelic(slot,t){G.player[slot]={name:t.name,rarity:t.rarity||'rare',icon:t.icon||'ring_mp',desc:t.desc||'A run-shaping relic.',hp:t.hp||0,mp:t.mp||0,atk:t.atk||0,def:t.def||0,crit:t.crit||0,dodge:t.dodge||0,lifesteal:t.lifesteal||0,regen:t.regen||0,thorns:t.thorns||0,goldMult:t.goldMult,xpMult:t.xpMult,speed:t.speed||0,mdef:t.mdef||0}}
+const OPENING_CHOICES=[
+{key:'duelist_map',title:"The Duelist's Map",sub:'Cleaner fights, earlier danger',desc:'You begin with a real blade and fewer early bodies. The cave answers by sending elites sooner.',rule:'Start with +1 attack, an Iron Sword, and fewer enemies on Floor 1. Elite pressure begins earlier.',tags:['Blade','Tempo','Elite Risk'],apply(){G.player.atk+=1;giveWeapon('Iron Sword');G.player.potions.hp+=1;G.runMods.enemyCountMult=.78;G.runMods.earlyEliteChance=.18}},
+{key:'glass_scholar',title:'The Glass Scholar',sub:'Spells now, blood later',desc:'You enter with answers in your hands and less room to be wrong.',rule:'Start with extra mana, a wand, Blink, and Ice Shard. Lose 5 max HP.',tags:['Magic','Fragile','Burst'],apply(){G.player.maxHp=Math.max(10,G.player.maxHp-5);G.player.hp=Math.min(G.player.hp,G.player.maxHp);G.player.maxMp+=6;G.player.mp=G.player.maxMp;giveWeapon('Arc Wand');giveSpell('Blink');giveSpell('Ice Shard');G.player.potions.mp+=2}},
+{key:'relic_debt',title:'The Relic Debt',sub:'Power borrowed loudly',desc:'The mountain gives you a rare relic immediately. Nothing given this early is free.',rule:'Start with a rare ring. Shops cost more for the whole run.',tags:['Relic','Greed','Shop Tax'],apply(){equipRelic('ring',{name:'Borrowed Star Ring',rarity:'rare',icon:'ring_crit',desc:'A bright ring with a price still looking for you. +15% crit and +5 max MP.',crit:.15,mp:5});G.player.maxMp+=5;G.player.mp+=5;G.runMods.shopPriceMult=1.35}},
+{key:'patient_warden',title:'The Patient Warden',sub:'Waiting becomes a weapon',desc:'You can recover mana by giving up tempo, but enemies become more willing to press you.',rule:'Waiting restores 1 MP. Enemies notice you from slightly farther away.',tags:['Control','Mana','Pressure'],apply(){G.runMods.waitMana=1;G.runMods.enemyAwareness=2;G.player.def+=1}},
+{key:'blood_price',title:'The Blood Price',sub:'Kills pay better',desc:'Every enemy carries more gold. Every potion becomes a little less forgiving.',rule:'Gain 35% more gold from kills and loose gold pickups. Potions restore less.',tags:['Gold','Risk','Economy'],apply(){G.runMods.goldMult=1.35;G.runMods.potionTax=.25;G.player.gold+=20;G.player.relicStats.healTax=(G.player.relicStats.healTax||0)+.25}},
+{key:'scouts_instinct',title:"The Scout's Instinct",sub:'See first, suffer later',desc:'You read more of the floor immediately, but the dungeon leans into ranged threats.',rule:'Reveal more terrain at the start of each floor. Ranged enemies become more common.',tags:['Vision','Route','Ranged Risk'],apply(){G.runMods.extraReveal=5;G.runMods.rangedPressure=.22;equipRelic('amulet',{name:'Scout Lens',rarity:'uncommon',icon:'amulet_ward',desc:'A lens that catches movement before danger fully arrives. +10% dodge.',dodge:.10})}},
+{key:'heavy_oath',title:'The Heavy Oath',sub:'Safe trades, slower turns',desc:'You enter armored enough to survive mistakes, but every fight asks you to commit.',rule:'Start with armor and +2 defense. After attacking, enemies may press through your slower tempo.',tags:['Armor','Defense','Commitment'],apply(){G.player.def+=2;giveArmor('Chain Mail');G.runMods.enemyHasteAfterHit=.12}},
+{key:'knife_math',title:'Knife Math',sub:'Critical thinking, literally',desc:'You are weaker in a flat trade, but better when the first hit matters.',rule:'Start with +15% crit and a blade. Lose 3 max HP.',tags:['Crit','Aggro','Low HP'],apply(){G.player.maxHp=Math.max(10,G.player.maxHp-3);G.player.hp=Math.min(G.player.hp,G.player.maxHp);giveWeapon('Iron Sword');equipRelic('ring',{name:'Knife Math Ring',rarity:'uncommon',icon:'ring_crit',desc:'Every first mistake becomes arithmetic. +15% crit.',crit:.15})}},
+{key:'lantern_pact',title:'The Lantern Pact',sub:'Safer floors, weaker scaling',desc:'The first rooms become easier to survive. The reward curve gets stingier.',rule:'Start with more potions and safer early floors. Gain slightly less XP.',tags:['Survival','Route','XP Tax'],apply(){G.player.potions.hp+=2;G.player.potions.mp+=1;G.runMods.enemyCountMult=.86;G.runMods.xpMult=.88}}
+];
+function ensureOpeningModal(){let m=byId('starter-modal');if(!m){m=document.createElement('div');m.id='starter-modal';document.body.appendChild(m)}m.innerHTML='<div class="v19-modal-card"><div class="v19-modal-top"><div><div class="v19-modal-kicker">Choose Your Opening</div><div class="v19-modal-title">One decision bends the whole run.</div></div></div><p class="opening-draft-copy">Pick the kind of problem you want this run to become. The dungeon engine stays the same. The pressure changes.</p><div class="starter-choices"></div></div>';return m}
+function renderChoice(c){return '<button class="starter-choice" type="button" data-opening-key="'+c.key+'"><div><div class="sc-title">'+c.title+'</div><div class="sc-sub">'+c.sub+'</div><div class="sc-desc">'+c.desc+'</div><div class="sc-rule"><strong>Run rule:</strong> '+c.rule+'</div></div><div class="sc-tags">'+c.tags.map(t=>'<span class="sc-tag">'+t+'</span>').join('')+'</div></button>'}
+function showOpeningDraft(){if(!window.G||!G.player)return;const m=ensureOpeningModal(),choices=pickUnique(OPENING_CHOICES,3),wrap=m.querySelector('.starter-choices');wrap.innerHTML=choices.map(renderChoice).join('');wrap.querySelectorAll('[data-opening-key]').forEach(btn=>btn.addEventListener('click',()=>applyOpeningChoice(OPENING_CHOICES.find(c=>c.key===btn.dataset.openingKey))));G.paused=true;G.player.loadoutChosen=false;m.classList.add('show')}
+function resetLoadout(){G.player.inventory=[];G.player.spells=[];G.player.potions={hp:0,mp:0};G.player.weapon=null;G.player.armor=null;G.player.ring=null;G.player.amulet=null}
+function applyOpeningChoice(c){if(!c||!window.G||!G.player)return;resetLoadout();freshRunMods(c);c.apply();G.player.loadoutChosen=true;G.paused=false;const m=byId('starter-modal');if(m)m.classList.remove('show');applyCurrentFloorMods();updateAllUI();if(typeof addLog==='function')addLog('Opening chosen: '+c.title,'info')}
+function updateAllUI(){safe(()=>updateStatsUI());safe(()=>updateEquipUI());safe(()=>updateSpellUI());safe(()=>updatePotionUI());safe(()=>updateStoryPanel());safe(()=>updateMobileHUD());safe(()=>renderInventoryModal());safe(()=>updateRunModifierPanel());safe(()=>render())}
+function updateRunModifierPanel(){if(!window.G||!G.player)return;const sp=byId('story-panel');if(!sp)return;let p=byId('run-mod-panel');if(!p){p=document.createElement('div');p.id='run-mod-panel';sp.parentNode.insertBefore(p,sp.nextSibling)}const c=G.runMods&&G.runMods.chosen;if(!c){p.innerHTML='<div class="rmp-label">Opening</div><div class="rmp-title">No opening chosen yet</div><div class="rmp-text">Your first decision will shape the run.</div>';return}p.innerHTML='<div class="rmp-label">Opening</div><div class="rmp-title">'+c.title+'</div><div class="rmp-text">'+c.rule+'</div><div class="rmp-tags">'+c.tags.map(t=>'<span class="rmp-tag">'+t+'</span>').join('')+'</div>'}
+function revealOpeningVision(){if(!window.G||!G.player||!G.visible||!G.explored)return;const n=G.runMods&&G.runMods.extraReveal;if(!n)return;const px=G.player.x,py=G.player.y;for(let y=py-n;y<=py+n;y++)for(let x=px-n;x<=px+n;x++){if(y<0||x<0||y>=G.visible.length||x>=G.visible[0].length)continue;if(Math.abs(x-px)+Math.abs(y-py)<=n){G.visible[y][x]=true;G.explored[y][x]=true}}}
+function applyCurrentFloorMods(){if(!window.G||!G.player||!G.runMods)return;if(Array.isArray(G.enemies)){if(G.runMods.enemyCountMult<1&&!G.__openingEnemiesTrimmed){const target=Math.max(1,Math.floor(G.enemies.length*G.runMods.enemyCountMult));while(G.enemies.length>target){const i=G.enemies.findIndex(e=>!e.boss&&!e.elite&&!e.miniBoss);if(i<0)break;G.enemies.splice(i,1)}G.__openingEnemiesTrimmed=true}if(G.runMods.earlyEliteChance&&G.player.floor<=3&&!G.__openingEliteRolled){const e=G.enemies.find(x=>!x.boss&&!x.elite&&!x.miniBoss);if(e&&Math.random()<G.runMods.earlyEliteChance){e.elite=true;e.name='Elite '+e.name;e.maxHp=Math.ceil(e.maxHp*1.35);e.hp=e.maxHp;e.atk+=1;e.def+=1;e.gold=Math.ceil((e.gold||0)*1.5+5);e.xp=Math.ceil((e.xp||1)*1.4)}G.__openingEliteRolled=true}if(G.runMods.rangedPressure&&!G.__openingRangedRolled){G.enemies.forEach(e=>{if(!e.boss&&Math.random()<G.runMods.rangedPressure){e.range=Math.max(e.range||1,4);e.ai='ranged';e.weaponClass=e.weaponClass||'ranged';if(!/Ranged|Archer/i.test(e.name))e.name='Ranged '+e.name}});G.__openingRangedRolled=true}}revealOpeningVision()}
+function patchStart(){const old=window.startGame;if(typeof old!=='function'||old.__openingDraftFinal)return;const w=function(ev){const out=old.call(this,ev);if(window.G&&G.player)G.player.loadoutChosen=true;setTimeout(()=>{if(!window.G||!G.player)return;const m=byId('starter-modal');if(m)m.classList.remove('show');G.player.loadoutChosen=false;showOpeningDraft();updateRunModifierPanel()},180);return out};w.__openingDraftFinal=true;window.startGame=w;safe(()=>{startGame=w})}
+function patchGenerate(){if(typeof generateFloor!=='function'||generateFloor.__openingDraftFinal)return;const old=generateFloor;const w=function(depth){const out=old.call(this,depth);if(window.G){G.__openingEnemiesTrimmed=false;G.__openingEliteRolled=false;G.__openingRangedRolled=false;ensureRunMods();if(G.runMods&&G.runMods.chosen)applyCurrentFloorMods()}return out};w.__openingDraftFinal=true;generateFloor=w;window.generateFloor=w}
+function patchKill(){if(typeof killEnemy!=='function'||killEnemy.__openingDraftFinal)return;const old=killEnemy;const w=function(e){if(window.G&&G.runMods&&e&&!e.__openingRewardAdjusted){if(G.runMods.goldMult!==1)e.gold=Math.max(0,Math.floor((e.gold||0)*G.runMods.goldMult));if(G.runMods.xpMult!==1)e.xp=Math.max(1,Math.floor((e.xp||1)*G.runMods.xpMult));e.__openingRewardAdjusted=true}return old.call(this,e)};w.__openingDraftFinal=true;killEnemy=w;window.killEnemy=w}
+function patchPickup(){if(typeof pickupItem!=='function'||pickupItem.__openingDraftFinal)return;const old=pickupItem;const w=function(item){const before=window.G&&G.player?G.player.gold:0,was=item&&item.type==='gold';const out=old.call(this,item);if(was&&window.G&&G.player&&G.runMods&&G.runMods.goldMult!==1){const gained=G.player.gold-before,extra=Math.max(0,Math.floor(gained*(G.runMods.goldMult-1)));if(extra>0){G.player.gold+=extra;if(typeof addLog==='function')addLog('Blood Price bonus: +'+extra+'G','item')}}return out};w.__openingDraftFinal=true;pickupItem=w;window.pickupItem=w}
+function patchWait(){if(typeof waitTurn!=='function'||waitTurn.__openingDraftFinal)return;const old=waitTurn;const w=function(){const out=old.call(this);if(window.G&&G.player&&G.runMods&&G.runMods.waitMana&&G.player.mp<G.player.maxMp){G.player.mp=Math.min(G.player.maxMp,G.player.mp+G.runMods.waitMana);if(typeof addLog==='function')addLog('Patience restores '+G.runMods.waitMana+' MP.','spell');safe(()=>updateStatsUI());safe(()=>updateMobileHUD())}return out};w.__openingDraftFinal=true;waitTurn=w;window.waitTurn=w}
+function patchAttack(){if(typeof attack!=='function'||attack.__openingDraftFinal)return;const old=attack;const w=function(a,d,isP){const out=old.call(this,a,d,isP);if(isP&&window.G&&G.runMods&&G.runMods.enemyHasteAfterHit&&d&&d.hp>0&&Math.random()<G.runMods.enemyHasteAfterHit){d.alert=true;if(typeof addLog==='function')addLog(d.name+' presses through your heavy oath.','combat')}return out};w.__openingDraftFinal=true;attack=w;window.attack=w}
+function boot(){patchGenerate();patchKill();patchPickup();patchWait();patchAttack();window.getRunShopPrice=base=>Math.ceil(base*((window.G&&G.runMods&&G.runMods.shopPriceMult)||1));patchStart();setTimeout(()=>safe(()=>updateRunModifierPanel()),300)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();window.getOpeningDraftChoices=()=>pickUnique(OPENING_CHOICES,3);window.showOpeningDraft=showOpeningDraft;window.applyOpeningChoice=applyOpeningChoice;window.updateRunModifierPanel=updateRunModifierPanel;
+})();
+</script>
+
+
+<!-- ===== FINAL PATCH: tactical relics, weapon spacing, click attack, XP clarity ===== -->
+<style id="final-tactical-style">
+  #stats-area{font-size:12px!important;line-height:1.55!important;padding:12px!important}
+  .stat-label{font-size:10px!important;width:44px!important}.stat-val{font-size:10px!important;width:78px!important}.stat-num-row{font-size:12px!important;padding:5px 4px!important}.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:12px!important}
+  #gear-summary .gs-label,#story-panel .sp-label,#inspect-panel .ip-label,#floor-info .fi-sub{font-size:10px!important}
+  #gear-summary .gs-sub,#story-panel .sp-text,#story-panel .sp-objective,#inspect-panel .ip-desc,#inspect-panel .ip-stats,#inspect-panel .ip-empty,#msg-area{font-size:11px!important;line-height:1.65!important}
+  #story-panel .sp-title,#inspect-panel .ip-name{font-size:15px!important;line-height:1.35!important}#msg-area{max-height:190px!important}#action-log{font-size:10px!important;line-height:1.6!important}
+  #ability-help{min-width:270px!important;max-width:520px!important}#ability-help .ah-name{font-size:12px!important}#ability-help .ah-desc{font-size:10px!important;line-height:1.6!important}#ability-help .ah-tag{font-size:8px!important}
+  .mini-action-btn.combat em{font-size:9px!important;line-height:1.25!important}
+  .xp-pulse{animation:xpPulse 900ms ease-out 1;box-shadow:0 0 0 1px rgba(200,155,255,.55),0 0 18px rgba(200,155,255,.35)!important}@keyframes xpPulse{0%{filter:brightness(1.7)}100%{filter:brightness(1)}}
+  .relic-choice-card.skip-relic{border:1px dashed rgba(255,255,255,.24)!important;background:linear-gradient(180deg,#121624,#0a0e18)!important}.relic-choice-card.skip-relic .relic-choice-name{color:#dbe5ff!important}
+  .tactical-note{display:inline-block;margin-top:7px;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:10px;color:#eaf2ff}
+</style>
+<script id="final-tactical-patch">
+(function(){
+  if(window.__finalTacticalPatch) return; window.__finalTacticalPatch=true;
+  const $=id=>document.getElementById(id), safe=fn=>{try{return fn()}catch(e){console.warn('final tactical patch',e)}};
+  const dist=(a,b,c,d)=>Math.abs(a-c)+Math.abs(b-d);
+  function enemyAt(x,y){return (window.G&&G.enemies||[]).find(e=>e.hp>0&&e.x===x&&e.y===y)}
+  function weapon(){return window.G&&G.player?G.player.weapon:null}
+  function kind(w=weapon()){const s=((w&&((w.weaponType||'')+' '+(w.name||'')+' '+(w.weaponClass||'')))||'').toLowerCase();if(/crossbow/.test(s))return'crossbow';if(/bow/.test(s))return'bow';if(/wand|arcane/.test(s))return'wand';if(/hammer|maul|mace|axe|crush/.test(s))return'crush';if(/spear|lance|pierce/.test(s))return'pierce';if(/sword|blade|dagger|edge/.test(s))return'blade';return w?'melee':'unarmed'}
+  function isRanged(w=weapon()){return !!(w&&(w.ranged||w.range>1||/bow|crossbow|wand/i.test((w.name||'')+' '+(w.weaponType||''))))}
+  function range(w=weapon()){const k=kind(w);return k==='crossbow'?Math.max(5,w?.range||5):k==='bow'?Math.max(4,w?.range||4):k==='wand'?Math.max(5,w?.range||5):1}
+  function lineClear(x0,y0,x1,y1){if(!window.G||!G.map)return false;let dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx-dy,x=x0,y=y0;while(!(x===x1&&y===y1)){let e2=2*err;if(e2>-dy){err-=dy;x+=sx}if(e2<dx){err+=dx;y+=sy}if(x===x1&&y===y1)break;if(!G.map[y]||G.map[y][x]===T.WALL||G.map[y][x]===T.DOOR)return false}return true}
+  function canShoot(e){if(!window.G||!G.player||!e||!isRanged())return false;const d=dist(G.player.x,G.player.y,e.x,e.y);return d>1&&d<=range()&&G.visible?.[e.y]?.[e.x]&&lineClear(G.player.x,G.player.y,e.x,e.y)}
+  window.canRangedAttack=canShoot;
+  function push(e,dx,dy,tiles,label){let moved=false;for(let i=0;i<tiles;i++){const nx=e.x+dx,ny=e.y+dy;if(typeof canPushTo==='function'&&canPushTo(nx,ny)){e.x=nx;e.y=ny;moved=true;if(G.map?.[ny]?.[nx]===T.TRAP&&typeof triggerTrapAt==='function')triggerTrapAt(nx,ny,e.name,e)}else{if(typeof spawnDamageText==='function')spawnDamageText(e.x,e.y,'WALL','#5bdfff');break}}if(moved&&typeof addLog==='function')addLog(`${e.name} is ${label}.`,'info');return moved}
+  function rangedShot(e){const w=weapon(),k=kind(w);if(!w||!e)return false;const d=dist(G.player.x,G.player.y,e.x,e.y);if(d<=1){addLog(`${w.weaponType||w.name||'Ranged weapon'} needs space. Kick them back or swap to melee.`,'info');return true}if(!canShoot(e)){addLog('No clean shot. Move for line of sight or range.','info');return true}const st=typeof getStats==='function'?getStats():{atk:G.player.atk,crit:0};let dmg=Math.max(1,st.atk+(w.atk||0)-e.def+rng.int(0,2));let label='Shot',color=w.projectileColor||'#d8e9ff';if(k==='crossbow'){dmg=Math.floor(dmg*1.22)+1;label='Crossbow bolt'}if(k==='bow'){dmg=Math.max(1,Math.floor(dmg*.95));label='Bow shot'}if(k==='wand'){dmg=Math.max(1,Math.floor(dmg*.80+(G.player.maxMp||0)/6));label='Arc bolt';color='#d7a8ff'}if(typeof spawnSpellFx==='function')spawnSpellFx({kind:'projectile',from:{x:G.player.x,y:G.player.y},to:{x:e.x,y:e.y},color,life:16,maxLife:16});if(typeof playerDealDamage==='function')playerDealDamage(e,dmg,{label,color,sound:k==='wand'?'spell':'hit',critScale:k==='bow'?1.25:1,critMult:k==='crossbow'?2.05:1.75,shake:3});if(e.hp>0){const dx=Math.sign(e.x-G.player.x),dy=Math.sign(e.y-G.player.y);if(k==='crossbow'&&rng.chance(.55))push(e,dx,dy,1,'knocked back by the bolt');if(k==='bow'&&rng.chance(.35)){e.slowed=true;addLog(`${e.name} is slowed by the arrow.`,'info')}if(k==='wand'&&rng.chance(.35)){e.stunned=Math.max(e.stunned||0,1);addLog(`${e.name} flickers and loses a beat.`,'spell')}}addLog(`${label}: ${k==='crossbow'?'heavy damage and knockback chance':k==='bow'?'safe damage and slow chance':'arcane damage and stun chance'}.`,'combat');if(typeof endTurn==='function')endTurn();return true}
+  function patchAttack(){if(typeof attack!=='function'||attack.__finalPatch)return;const old=attack;attack=function(a,d,isP){if(isP&&window.G&&a===G.player&&isRanged()&&d)return rangedShot(d);return old.apply(this,arguments)};attack.__finalPatch=true;window.attack=attack}
+  function patchActions(){if(typeof tryCombatAction!=='function'||tryCombatAction.__finalPatch)return;const old=tryCombatAction;tryCombatAction=function(action,dx,dy){if(!action||!window.G||G.gameOver||G.paused)return false;const e=enemyAt(G.player.x+dx,G.player.y+dy),w=weapon(),k=kind(w),st=typeof getStats==='function'?getStats():{atk:G.player.atk};if(action==='slash'){if(isRanged()){addLog('Slash needs a melee weapon. Ranged weapons shoot from distance.','info');return false}if(k==='blade'&&e){const hits=getSlashTiles(dx,dy).map(p=>enemyAt(p.x,p.y)).filter(Boolean);G.player.swingAnim=1;spawnSpellFx({kind:'slash',x:G.player.x,y:G.player.y,dx,dy,color:w?.glowColor||'#7fffd4',life:12,maxLife:12});hits.forEach((x,i)=>playerDealDamage(x,Math.max(1,Math.floor(st.atk*(i?0.70:1.08))-x.def+rng.int(0,1)),{label:i?'Cleave':'Sword slash',color:'#7fffd4',critScale:.9,shake:i?2:4}));addLog('Slash is best when enemies are grouped beside your target.','info');clearQueuedAction();endTurn();return true}}
+    if(action==='bash'&&e){G.player.swingAnim=1;spawnSpellFx({kind:'bash',x:e.x,y:e.y,dx,dy,color:'#5bdfff',life:14,maxLife:14});playerDealDamage(e,Math.max(1,Math.floor(st.atk*(k==='crush'?1.15:.82))-e.def+rng.int(0,1)),{label:k==='crush'?'Crushing bash':'Bash',color:'#5bdfff',allowCrit:false,stun:1,shake:5});if(e.hp>0){const moved=push(e,dx,dy,k==='crush'?2:1,'shoved back');if(!moved){e.hp-=k==='crush'?3:2;spawnDamageText(e.x,e.y,k==='crush'?'3':'2','#5bdfff');if(e.hp<=0)killEnemy(e);else addLog('Bash is strongest when a wall or trap is behind the target.','info')}}G.player.skillCooldowns.bash=2+(G.player.relicStats?.cooldownPlus||0);clearQueuedAction();endTurn();return true}
+    if(action==='kick'&&e){spawnSpellFx({kind:'kick',x:e.x,y:e.y,dx,dy,color:'#ffb35b',life:14,maxLife:14});const danger=!!(e.range||e.intentCharge||e.elite||e.boss||e.miniBoss);playerDealDamage(e,Math.max(1,Math.floor(st.atk*.55)+1-e.def+rng.int(0,1)),{label:danger?'Interrupt kick':'Kick',color:'#ffb35b',allowCrit:false,stun:danger?2:1,shake:4,noSteal:true});if(e.hp>0)push(e,dx,dy,1,'kicked out of position');if(danger)addLog('Kick is best as an interrupt against ranged, elite, boss, or charging enemies.','info');G.player.skillCooldowns.kick=2+(G.player.relicStats?.cooldownPlus||0);clearQueuedAction();endTurn();return true}
+    return old.apply(this,arguments)};tryCombatAction.__finalPatch=true;window.tryCombatAction=tryCombatAction}
+  function patchClick(){if(typeof handleCanvasPoint!=='function'||handleCanvasPoint.__finalPatch)return;handleCanvasPoint=function(clientX,clientY){if(!window.G||G.gameOver||G.paused)return;const rect=canvas.getBoundingClientRect(),sx=(clientX-rect.left)*(canvas.width/rect.width),sy=(clientY-rect.top)*(canvas.height/rect.height),tx=Math.floor(sx/TILE)+G.camera.x,ty=Math.floor(sy/TILE)+G.camera.y,e=enemyAt(tx,ty),d=dist(G.player.x,G.player.y,tx,ty),same=G.selectedInspect&&G.selectedInspect.kind==='world'&&G.selectedInspect.x===tx&&G.selectedInspect.y===ty;if(e){if(typeof pinInspect==='function')pinInspect({kind:'world',x:tx,y:ty});if(canShoot(e))return rangedShot(e);if(d===1){if(isRanged()){addLog('Too close to shoot. Kick them back, move away, or switch to melee.','info');return}if(G.player.queuedAction&&typeof tryCombatAction==='function'&&tryCombatAction(G.player.queuedAction,Math.sign(tx-G.player.x),Math.sign(ty-G.player.y)))return;attack(G.player,e,true);endTurn();return}if(same&&typeof openEnemyModal==='function'){openEnemyModal(e);return}return}const interactive=(G.interactives||[]).find(o=>o.x===tx&&o.y===ty&&!o.used),info=typeof getWorldHoverInfo==='function'?getWorldHoverInfo(tx,ty):null;if(interactive){if(!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x:tx,y:ty});return}if(d<=1){activateInteractive(interactive);endTurn()}else startAutoMoveTo(tx,ty);return}if(info&&!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x:tx,y:ty});return}if(same&&typeof clearPinnedInspect==='function')clearPinnedInspect();if(d===0){waitTurn();return}startAutoMoveTo(tx,ty)};handleCanvasPoint.__finalPatch=true;window.handleCanvasPoint=handleCanvasPoint}
+  function patchAbilityHelp(){const refresh=()=>{const help=$('ability-help');if(!help||!window.G||!G.player)return;const w=weapon(),k=kind(w);let msg='Click an adjacent enemy to attack. Q Slash hits an arc, E Bash shoves, F Kick interrupts.';if(k==='crossbow')msg='Crossbow: click a visible enemy 2 to 5 tiles away. Heavy shot, high crit, can knock back. Cannot fire in melee.';else if(k==='bow')msg='Bow: click a visible enemy 2 to 4 tiles away. Safer poke, can slow. Cannot fire in melee.';else if(k==='wand')msg='Wand: click a visible enemy 2 to 5 tiles away. Lower weapon damage, can stun, fits spell builds.';else if(k==='blade')msg='Sword/blade: best in melee. Q Slash can hit the front target plus side tiles.';else if(k==='crush')msg='Crush weapon: E Bash hits harder and shoves farther into walls or traps.';else if(k==='pierce')msg='Pierce weapon: strong direct melee trades. Use Kick or positioning before you get surrounded.';help.innerHTML='<div class="ah-tag">Current weapon</div><div class="ah-name">'+(w?w.name:'Unarmed')+'</div><div class="ah-desc">'+msg+'</div>'};['slash-btn','bash-btn','kick-btn','guard-btn'].forEach(id=>{const b=$(id);if(b&&!b.__finalHint){b.__finalHint=true;b.addEventListener('mouseenter',refresh);b.addEventListener('click',()=>setTimeout(refresh,30))}});setInterval(refresh,2000);setTimeout(refresh,600)}
+  function relics(){return[{id:'anchor',name:'Anchor Bell',color:'#5bdfff',boon:'Bash deals +2 damage and pushes 1 extra tile.',cost:'Kick cooldown is +1 turn.',note:'Great when you use walls, corners, and traps.',apply(){G.player.relicStats.bashBonus=(G.player.relicStats.bashBonus||0)+2;G.player.relicStats.kickTax=(G.player.relicStats.kickTax||0)+1}},{id:'string',name:"Hunter's String",color:'#8af0ff',boon:'Ranged attacks deal +1 damage and slow more often.',cost:'You lose 1 defense while holding a ranged weapon.',note:'A real ranged build relic. Strong, but spacing matters.',apply(){G.player.relicStats.rangedBonus=(G.player.relicStats.rangedBonus||0)+1;G.player.relicStats.rangedDefTax=(G.player.relicStats.rangedDefTax||0)+1}},{id:'crown',name:'Splinter Crown',color:'#ffd866',boon:'+8% crit forever.',cost:'Potions restore 10% less.',note:'Reliable upside with a small recovery cost.',apply(){G.player.relicStats.crit=(G.player.relicStats.crit||0)+.08;G.player.relicStats.healTax=(G.player.relicStats.healTax||0)+.10}},{id:'shield',name:'Pocket Shield',color:'#7fffd4',boon:'Kick gives 1 Guard turn when used on dangerous enemies.',cost:'-1 max MP.',note:'For players who time interrupts.',apply(){G.player.maxMp=Math.max(4,G.player.maxMp-1);G.player.mp=Math.min(G.player.mp,G.player.maxMp);G.player.relicStats.kickGuard=1}},{id:'lantern',name:'Greedy Lantern',color:'#ffb35b',boon:'Gold rewards are 25% larger.',cost:'Elites are slightly more alert.',note:'Economy upside with a small pressure cost.',apply(){G.player.relicStats.goldMult=(G.player.relicStats.goldMult||1)*1.25;G.player.relicStats.eliteNoise=(G.player.relicStats.eliteNoise||0)+.10}},{id:'grip',name:'Second Grip',color:'#c89bff',boon:'Slash and basic melee attacks deal +1 damage.',cost:'Ranged shots deal -1 damage.',note:'Clean melee identity.',apply(){G.player.relicStats.meleeBonus=(G.player.relicStats.meleeBonus||0)+1;G.player.relicStats.rangedPenalty=(G.player.relicStats.rangedPenalty||0)+1}}]}
+  function closeRelic(){const m=$('relic-choice-modal');if(m)m.classList.add('hidden');if(window.G){G.relicChoiceOpen=false;G.paused=false}}
+  function drawRelics(){if(!window.G||!G.player)return;const list=$('relic-list');if(list){const rs=G.player.relics||[];list.innerHTML=rs.length?rs.slice(-8).map(r=>`<span class="relic-chip" style="border-color:${r.color||'#7fffd4'}66">${r.name}<small>${r.boon?.desc||''}</small></span>`).join(''):'<span class="relic-chip">No relics yet<small>Skip is allowed.</small></span>'}const c=$('relic-count');if(c)c.textContent=(G.player.relics||[]).length+' relics'}
+  function takeRelic(r){G.player.relicStats=G.player.relicStats||{};G.player.relics=G.player.relics||[];G.player.vFinalRelics=G.player.vFinalRelics||[];if(G.player.vFinalRelics.includes(r.id))return;r.apply();const stored={id:'final_'+r.id,name:r.name,color:r.color,boon:{desc:r.boon},curse:{desc:r.cost},desc:r.note};G.player.vFinalRelics.push(r.id);G.player.relics.push(stored);addLog('Relic claimed: '+r.name,'item');closeRelic();drawRelics();safe(()=>updateStatsUI());safe(()=>updateEquipUI());safe(()=>renderInventoryModal())}
+  function replaceRelicDraft(){const modal=$('relic-choice-modal'),grid=$('relic-choice-grid');if(!modal||!grid||modal.classList.contains('hidden')||grid.__finalReplacing)return;grid.__finalReplacing=true;const pool=relics().filter(r=>!(G.player?.vFinalRelics||[]).includes(r.id));const choices=[];while(pool.length&&choices.length<2)choices.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);const sub=$('relic-choice-sub');if(sub)sub.textContent='Pick one tactical relic or skip. Upsides matter more than costs, but the cost should shape your plan.';grid.innerHTML=choices.map((r,i)=>`<button class="relic-choice-card" type="button" data-final-relic="${i}"><div class="relic-choice-name" style="color:${r.color}">${r.name}</div><div class="relic-choice-type">Tactical relic</div><div class="relic-choice-blessing"><strong>Upside</strong><div>${r.boon}</div></div><div class="relic-choice-curse"><strong>Small cost</strong><div>${r.cost}</div></div><div class="relic-choice-footer">${r.note}<br><span class="tactical-note">Build-around choice</span></div></button>`).join('')+`<button class="relic-choice-card skip-relic" type="button" id="skip-relic-final"><div class="relic-choice-name">Skip Relic</div><div class="relic-choice-type">Safe choice</div><div class="relic-choice-blessing"><strong>Upside</strong><div>Gain 12 gold and avoid the downside.</div></div><div class="relic-choice-curse"><strong>Cost</strong><div>No relic power this time.</div></div><div class="relic-choice-footer">Use this when neither relic fits your build.</div></button>`;grid.querySelectorAll('[data-final-relic]').forEach(btn=>btn.onclick=()=>takeRelic(choices[Number(btn.dataset.finalRelic)]));const skip=$('skip-relic-final');if(skip)skip.onclick=()=>{G.player.gold+=12;addLog('Skipped relic. +12 gold instead.','item');closeRelic();drawRelics();safe(()=>updateStatsUI())};setTimeout(()=>grid.__finalReplacing=false,500)}
+  function patchRelicModal(){const obs=new MutationObserver(()=>setTimeout(replaceRelicDraft,25));obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});setInterval(()=>{replaceRelicDraft();drawRelics()},1200)}
+  function patchStats(){if(typeof getStats!=='function'||getStats.__finalStats)return;const old=getStats;getStats=function(){const st=old.apply(this,arguments),rs=G.player?.relicStats||{},k=kind();if(isRanged()&&rs.rangedDefTax)st.def=Math.max(0,(st.def||0)-rs.rangedDefTax);if(k==='blade'||k==='crush'||k==='pierce'||k==='unarmed')st.atk=(st.atk||0)+(rs.meleeBonus||0);if(isRanged())st.atk=(st.atk||0)+(rs.rangedBonus||0)-(rs.rangedPenalty||0);return st};getStats.__finalStats=true;window.getStats=getStats}
+  function patchXP(){if(typeof killEnemy!=='function'||killEnemy.__finalXP)return;const old=killEnemy;killEnemy=function(e){const out=old.apply(this,arguments),bar=$('bar-xp');if(bar){bar.classList.add('xp-pulse');setTimeout(()=>bar.classList.remove('xp-pulse'),900)}if(typeof addLog==='function')addLog(`EXP bar updated: ${G.player.xp}/${G.player.xpNext} XP toward next level.`,'level');safe(()=>updateStatsUI());return out};killEnemy.__finalXP=true;window.killEnemy=killEnemy}
+  function patchInspect(){if(typeof getWorldHoverInfo==='function'&&!getWorldHoverInfo.__finalInspect){const old=getWorldHoverInfo;getWorldHoverInfo=function(x,y){const info=old.apply(this,arguments),e=enemyAt(x,y);if(info&&e&&window.G){const d=dist(G.player.x,G.player.y,e.x,e.y),w=weapon();const read=isRanged(w)?(d<=1?'Too close to shoot. Kick or move.':d<=range(w)&&lineClear(G.player.x,G.player.y,e.x,e.y)?'Clean ranged shot available.':'Move for line of sight or range.'):(d===1?'Click to melee attack.':'Click once to inspect, again to approach.');info.stats=(info.stats||[]).concat([`YOUR WEAPON: ${w?w.name:'Unarmed'}`,`TACTICAL READ: ${read}`]);info.compare=read}return info};getWorldHoverInfo.__finalInspect=true;window.getWorldHoverInfo=getWorldHoverInfo}}
+  function boot(){patchStats();patchAttack();patchActions();patchClick();patchAbilityHelp();patchRelicModal();patchXP();patchInspect();drawRelics();safe(()=>updateStatsUI());safe(()=>updateEquipUI())}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
+
+<!-- V24 TARGETED CONTROLS PATCH: no bump attacks, ability-first targeting -->
+<style id="cc-v24-targeted-controls-style">
+  #attack-btn.target-ready,
+  #slash-btn.target-ready,
+  #bash-btn.target-ready,
+  #kick-btn.target-ready,
+  #guard-btn.target-ready {
+    border-color: rgba(127,255,212,.75) !important;
+    box-shadow: 0 0 14px rgba(127,255,212,.28), inset 0 0 0 1px rgba(127,255,212,.18) !important;
+    color: #9dffe4 !important;
+  }
+  #target-help-chip {
+    min-width: 230px;
+    max-width: 460px;
+    padding: 8px 10px;
+    border: 1px solid rgba(127,255,212,.16);
+    border-radius: 10px;
+    background: linear-gradient(180deg,#121a30,#0b1020);
+    font-size: 8px;
+    line-height: 1.55;
+    color: #dfeaff;
+  }
+  #target-help-chip strong {
+    color: #7fffd4;
+    font-weight: normal;
+  }
+  @media (max-width: 900px) {
+    #target-help-chip { display:none; }
+  }
+</style>
+
+<script id="cc-v24-targeted-controls-patch">
+(function(){
+  "use strict";
+
+  const byId = id => document.getElementById(id);
+  const safe = fn => { try { return fn(); } catch(e) { console.warn('[V24 target controls]', e); } };
+
+  function enemyAt(x,y){
+    return window.G && Array.isArray(G.enemies) ? G.enemies.find(e => e.hp > 0 && e.x === x && e.y === y) : null;
+  }
+
+  function manhattan(ax,ay,bx,by){ return Math.abs(ax-bx) + Math.abs(ay-by); }
+
+  function currentWeapon(){ return window.G && G.player ? G.player.weapon : null; }
+
+  function weaponKind(w=currentWeapon()){
+    const raw = String((w && (w.kind || w.type || w.weaponClass || w.name)) || '').toLowerCase();
+    if(raw.includes('crossbow')) return 'crossbow';
+    if(raw.includes('bow')) return 'bow';
+    if(raw.includes('wand') || raw.includes('staff') || raw.includes('arc')) return 'wand';
+    if(raw.includes('hammer') || raw.includes('mace') || raw.includes('club') || raw.includes('axe') || raw.includes('crush')) return 'crush';
+    if(raw.includes('spear') || raw.includes('dagger') || raw.includes('pierce') || raw.includes('rapier')) return 'pierce';
+    if(raw.includes('sword') || raw.includes('blade') || raw.includes('edge')) return 'blade';
+    return 'blade';
+  }
+
+  function isRangedWeapon(w=currentWeapon()){
+    const k = weaponKind(w);
+    return k === 'crossbow' || k === 'bow' || k === 'wand';
+  }
+
+  function weaponRange(w=currentWeapon()){
+    const k = weaponKind(w);
+    if(k === 'crossbow') return 5;
+    if(k === 'wand') return 5;
+    if(k === 'bow') return 4;
+    return 1;
+  }
+
+  function lineClear(x1,y1,x2,y2){
+    if(!window.G || !G.map) return false;
+    const dx = Math.sign(x2-x1), dy = Math.sign(y2-y1);
+    if(dx !== 0 && dy !== 0) return false;
+    let x = x1 + dx, y = y1 + dy;
+    while(x !== x2 || y !== y2){
+      if(!G.map[y] || G.map[y][x] === T.WALL) return false;
+      if(enemyAt(x,y)) return false;
+      x += dx; y += dy;
+    }
+    return true;
+  }
+
+  function faceToward(tx,ty){
+    if(!window.G || !G.player) return;
+    const dx = Math.sign(tx - G.player.x);
+    const dy = Math.sign(ty - G.player.y);
+    if(Math.abs(tx-G.player.x) >= Math.abs(ty-G.player.y)) {
+      if(dx < 0) G.player.facing = 'left';
+      else if(dx > 0) G.player.facing = 'right';
+    } else {
+      if(dy < 0) G.player.facing = 'up';
+      else if(dy > 0) G.player.facing = 'down';
+    }
+  }
+
+  function log(msg,type='info'){
+    if(typeof addLog === 'function') addLog(msg,type);
+  }
+
+  function setQueuedTargetAction(action){
+    if(!window.G || !G.player || G.gameOver || G.paused) return;
+    G.player.queuedAction = (G.player.queuedAction === action) ? null : action;
+    updateTargetButtons();
+
+    if(!G.player.queuedAction){
+      log('Targeting cancelled.','info');
+      return;
+    }
+
+    const labels = {
+      weapon: isRangedWeapon() ? 'Aim primed. Click a visible enemy in a straight line.' : 'Attack primed. Click an adjacent enemy.',
+      slash: 'Slash primed. Click an adjacent enemy to swing through the front arc.',
+      bash: 'Bash primed. Click an adjacent enemy to shove it into walls, traps, or space.',
+      kick: 'Kick primed. Click an adjacent enemy to interrupt, stun, or make room.',
+      guard: 'Guard does not need a target. It protects your next exchange.'
+    };
+    log(labels[action] || 'Ability primed. Click a target.','info');
+  }
+
+  function updateTargetButtons(){
+    if(!window.G || !G.player) return;
+    const map = [
+      ['weapon','attack-btn'],
+      ['slash','slash-btn'],
+      ['bash','bash-btn'],
+      ['kick','kick-btn'],
+      ['guard','guard-btn']
+    ];
+    for(const [action,id] of map){
+      const btn = byId(id);
+      if(!btn) continue;
+      const active = G.player.queuedAction === action;
+      btn.classList.toggle('active', active);
+      btn.classList.toggle('target-ready', active);
+      const cd = (G.player.skillCooldowns && G.player.skillCooldowns[action]) || 0;
+      if(id === 'attack-btn') {
+        const ranged = isRangedWeapon();
+        btn.innerHTML = `<strong>A</strong><em>${active ? 'Target' : (ranged ? 'Aim' : 'Attack')}</em>`;
+        btn.title = ranged ? 'Select, then click a visible enemy 2 or more tiles away.' : 'Select, then click an adjacent enemy.';
+      }
+      if(action === 'slash') btn.innerHTML = `<strong>Q</strong><em>${active ? 'Target' : 'Slash'}</em>`;
+      if(action === 'bash') btn.innerHTML = `<strong>E</strong><em>${cd > 0 ? 'Bash '+cd+'t' : (active ? 'Target' : 'Bash')}</em>`;
+      if(action === 'kick') btn.innerHTML = `<strong>F</strong><em>${cd > 0 ? 'Kick '+cd+'t' : (active ? 'Target' : 'Kick')}</em>`;
+    }
+    updateTargetHelp();
+  }
+
+  function ensureAttackButton(){
+    const slash = byId('slash-btn');
+    if(!slash || byId('attack-btn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'attack-btn';
+    btn.className = 'mini-action-btn combat';
+    btn.type = 'button';
+    btn.innerHTML = '<strong>A</strong><em>Attack</em>';
+    btn.onclick = () => setQueuedTargetAction('weapon');
+    slash.before(btn);
+  }
+
+  function ensureTargetHelp(){
+    const bar = byId('bottom-bar');
+    if(!bar || byId('target-help-chip')) return;
+    const chip = document.createElement('div');
+    chip.id = 'target-help-chip';
+    chip.innerHTML = '<strong>Targeting:</strong> choose Attack, Slash, Bash, or Kick, then click an enemy.';
+    const actionLog = byId('action-log');
+    if(actionLog) bar.insertBefore(chip, actionLog);
+    else bar.appendChild(chip);
+  }
+
+  function updateTargetHelp(){
+    const chip = byId('target-help-chip');
+    if(!chip || !window.G || !G.player) return;
+    const q = G.player.queuedAction;
+    const w = currentWeapon();
+    const wName = w && w.name ? w.name : 'weapon';
+    if(q === 'weapon') {
+      chip.innerHTML = isRangedWeapon()
+        ? `<strong>Aim ready:</strong> click a visible enemy 2-${weaponRange()} tiles away. ${wName} cannot fire in melee.`
+        : `<strong>Attack ready:</strong> click an adjacent enemy. Walking into enemies no longer attacks.`;
+    } else if(q === 'slash') {
+      chip.innerHTML = '<strong>Slash ready:</strong> click an adjacent enemy. Best when enemies are grouped beside the target.';
+    } else if(q === 'bash') {
+      chip.innerHTML = '<strong>Bash ready:</strong> click an adjacent enemy. Best near walls, traps, doors, or ledges of space.';
+    } else if(q === 'kick') {
+      chip.innerHTML = '<strong>Kick ready:</strong> click an adjacent enemy. Best against ranged enemies, elites, bosses, or anything charging.';
+    } else {
+      chip.innerHTML = '<strong>Targeting:</strong> choose Attack/Aim, Slash, Bash, or Kick, then click an enemy. Movement only moves.';
+    }
+  }
+
+  function clearQueued(){
+    if(window.G && G.player) G.player.queuedAction = null;
+    updateTargetButtons();
+  }
+
+  function weaponTarget(enemy){
+    if(!window.G || !G.player || !enemy) return false;
+    const d = manhattan(G.player.x,G.player.y,enemy.x,enemy.y);
+    faceToward(enemy.x,enemy.y);
+
+    if(isRangedWeapon()){
+      const r = weaponRange();
+      if(d <= 1){ log('Too close to shoot. Kick them back, move away, or switch to a melee weapon.','info'); return false; }
+      if(d > r){ log(`Target is too far. This weapon reaches ${r} tiles.`, 'info'); return false; }
+      if(!lineClear(G.player.x,G.player.y,enemy.x,enemy.y)){ log('No clean line of sight. Move into a straight lane first.','info'); return false; }
+      if(typeof rangedShot === 'function') { rangedShot(enemy); clearQueued(); return true; }
+      if(typeof attack === 'function') { attack(G.player, enemy, true); if(typeof endTurn === 'function') endTurn(); clearQueued(); return true; }
+      return false;
+    }
+
+    if(d !== 1){ log('Melee attacks need an adjacent target. Move closer, then attack.','info'); return false; }
+    if(typeof attack === 'function') {
+      attack(G.player,enemy,true);
+      if(typeof endTurn === 'function') endTurn();
+      clearQueued();
+      return true;
+    }
+    return false;
+  }
+
+  function targetedAbility(enemy){
+    if(!window.G || !G.player || !enemy) return false;
+    const action = G.player.queuedAction;
+    if(!action) return false;
+    const dx = Math.sign(enemy.x - G.player.x);
+    const dy = Math.sign(enemy.y - G.player.y);
+    const d = manhattan(G.player.x,G.player.y,enemy.x,enemy.y);
+    faceToward(enemy.x,enemy.y);
+
+    if(action === 'weapon') return weaponTarget(enemy);
+
+    if(action === 'slash' || action === 'bash' || action === 'kick'){
+      if(d !== 1){ log(`${action[0].toUpperCase()+action.slice(1)} needs an adjacent target.`, 'info'); return false; }
+      if(typeof tryCombatAction === 'function') {
+        const used = tryCombatAction(action, dx, dy);
+        if(used) { clearQueued(); return true; }
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  function patchAbilityButtons(){
+    ensureAttackButton();
+    ensureTargetHelp();
+
+    const binds = [
+      ['slash-btn','slash'],
+      ['bash-btn','bash'],
+      ['kick-btn','kick']
+    ];
+    for(const [id,action] of binds){
+      const btn = byId(id);
+      if(!btn || btn.__v24Targeted) continue;
+      btn.__v24Targeted = true;
+      btn.onclick = () => setQueuedTargetAction(action);
+    }
+
+    const atk = byId('attack-btn');
+    if(atk && !atk.__v24Targeted){
+      atk.__v24Targeted = true;
+      atk.onclick = () => setQueuedTargetAction('weapon');
+    }
+
+    document.addEventListener('keydown', e => {
+      if(!window.G || G.gameOver || G.paused) return;
+      const tag = String(document.activeElement && document.activeElement.tagName || '').toLowerCase();
+      if(tag === 'input' || tag === 'textarea') return;
+      if(e.key === 'a' || e.key === 'A') { e.preventDefault(); setQueuedTargetAction('weapon'); }
+      if(e.key === 'q' || e.key === 'Q') { e.preventDefault(); setQueuedTargetAction('slash'); }
+      if(e.key === 'e' || e.key === 'E') { e.preventDefault(); setQueuedTargetAction('bash'); }
+      if(e.key === 'f' || e.key === 'F') { e.preventDefault(); setQueuedTargetAction('kick'); }
+      if(e.key === 'Escape') { clearQueued(); }
+    }, true);
+
+    setInterval(updateTargetButtons, 750);
+    updateTargetButtons();
+  }
+
+  function patchClickTargeting(){
+    const newHandle = function(clientX, clientY){
+      if(!window.G || G.gameOver || G.paused) return;
+      const rect = canvas.getBoundingClientRect();
+      const sx = (clientX - rect.left) * (canvas.width / rect.width);
+      const sy = (clientY - rect.top) * (canvas.height / rect.height);
+      const tx = Math.floor(sx / TILE) + G.camera.x;
+      const ty = Math.floor(sy / TILE) + G.camera.y;
+      const enemy = enemyAt(tx,ty);
+      const d = manhattan(G.player.x,G.player.y,tx,ty);
+      const samePinned = G.selectedInspect && G.selectedInspect.kind === 'world' && G.selectedInspect.x === tx && G.selectedInspect.y === ty;
+
+      if(enemy){
+        if(typeof clearAutoMove === 'function') clearAutoMove();
+        if(typeof pinInspect === 'function') pinInspect({kind:'world',x:tx,y:ty});
+
+        if(G.player.queuedAction){
+          targetedAbility(enemy);
+          return;
+        }
+
+        if(samePinned && typeof openEnemyModal === 'function') openEnemyModal(enemy);
+        log('Enemy selected. Choose Attack/Aim, Slash, Bash, or Kick, then click the enemy again.', 'info');
+        return;
+      }
+
+      const interactive = (G.interactives || []).find(o => o.x === tx && o.y === ty && !o.used);
+      const info = typeof getWorldHoverInfo === 'function' ? getWorldHoverInfo(tx,ty) : null;
+
+      if(interactive){
+        if(!samePinned && typeof pinInspect === 'function'){ pinInspect({kind:'world',x:tx,y:ty}); return; }
+        if(d <= 1 && typeof activateInteractive === 'function') { activateInteractive(interactive); if(typeof endTurn === 'function') endTurn(); }
+        else if(typeof startAutoMoveTo === 'function') startAutoMoveTo(tx,ty);
+        return;
+      }
+
+      if(info && !samePinned && typeof pinInspect === 'function') { pinInspect({kind:'world',x:tx,y:ty}); return; }
+      if(samePinned && typeof clearPinnedInspect === 'function') clearPinnedInspect();
+      if(d === 0){ if(typeof waitTurn === 'function') waitTurn(); return; }
+      if(typeof startAutoMoveTo === 'function') startAutoMoveTo(tx,ty);
+    };
+
+    window.handleCanvasPoint = newHandle;
+    try { handleCanvasPoint = newHandle; } catch(e) {}
+  }
+
+  function patchNoBumpAttack(){
+    if(typeof movePlayer !== 'function') return;
+    const oldMove = movePlayer;
+    const newMove = function(dx,dy,viaAuto=false){
+      if(!window.G || !G.player) return oldMove.apply(this, arguments);
+      if(!viaAuto && typeof clearAutoMove === 'function') clearAutoMove();
+      if(G.gameOver || G.paused) return;
+
+      if(dx < 0) G.player.facing = 'left';
+      else if(dx > 0) G.player.facing = 'right';
+      else if(dy < 0) G.player.facing = 'up';
+      else if(dy > 0) G.player.facing = 'down';
+
+      const nx = G.player.x + dx;
+      const ny = G.player.y + dy;
+      if(nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) return;
+      if(G.map[ny][nx] === T.WALL) return;
+
+      const enemy = enemyAt(nx,ny);
+      if(enemy){
+        if(typeof clearAutoMove === 'function') clearAutoMove();
+        if(typeof pinInspect === 'function') pinInspect({kind:'world',x:nx,y:ny});
+        log('Enemy blocks the tile. Movement no longer attacks. Choose an ability, then click the enemy.', 'info');
+        return;
+      }
+
+      return oldMove.call(this, dx, dy, viaAuto);
+    };
+
+    window.movePlayer = newMove;
+    try { movePlayer = newMove; } catch(e) {}
+  }
+
+  function patchHoverPathStopsAtEnemies(){
+    if(typeof updateHoverPath !== 'function') return;
+    const newHover = function(){
+      if(!window.G || !G.hover) return;
+      if(!G.hover.active){ G.hover.path = []; return; }
+      const {tileX,tileY} = G.hover;
+      if(enemyAt(tileX,tileY)){ G.hover.path = []; return; }
+      if(typeof canPathTo === 'function' && !canPathTo(tileX,tileY)){ G.hover.path = []; return; }
+      if(typeof findPath === 'function'){
+        const path = findPath(G.player.x,G.player.y,tileX,tileY,120,true);
+        G.hover.path = path && path.length ? path : [];
+      }
+    };
+    window.updateHoverPath = newHover;
+    try { updateHoverPath = newHover; } catch(e) {}
+  }
+
+  function boot(){
+    patchAbilityButtons();
+    patchClickTargeting();
+    patchNoBumpAttack();
+    patchHoverPathStopsAtEnemies();
+    updateTargetButtons();
+    log('Controls updated: movement only moves. Choose an ability, then click a target.', 'info');
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
 </body>
 </html>
