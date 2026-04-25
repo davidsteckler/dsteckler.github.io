@@ -9245,7 +9245,7 @@ resize();
   function safe(fn,fallback){try{return fn()}catch(err){console.warn('[cc-class-path]',err);return fallback}}
   function clone(o){return o?JSON.parse(JSON.stringify(o)):o}
   function ensurePath(){
-    if(!window.G || !G.player) return null;
+    if(typeof G === 'undefined' || !G || !G.player) return null;
     var p=G.player;
     p.classPath=p.classPath||{xp:{melee:0,ranged:0,magic:0,defense:0,sustain:0,potion:0,relic:0,explore:0,crit:0,curse:0},evolutions:[],tier:0,lastFloor:G.player.floor||1,offered:{},name:p.classSeed||'Wanderer'};
     var keys=['melee','ranged','magic','defense','sustain','potion','relic','explore','crit','curse'];
@@ -9422,7 +9422,7 @@ resize();
     }
     if(typeof generateFloor==='function' && !generateFloor.__ccClassPathPatched){
       var oldFloor=generateFloor;
-      generateFloor=function(depth){ var out=oldFloor.apply(this,arguments); if(G&&G.player){ensurePath().lastFloor=depth; addXP('explore',2,null); updatePathPanel();} return out; };
+      generateFloor=function(depth){ var out=oldFloor.apply(this,arguments); if(typeof G!=='undefined'&&G&&G.player){var __path=ensurePath(); if(__path){__path.lastFloor=depth; addXP('explore',2,null); updatePathPanel();}} return out; };
       generateFloor.__ccClassPathPatched=true;
     }
   }
@@ -11196,6 +11196,32 @@ resize();
   }
   function boot(){ensurePanel(); if(hasGame()&&!G.mystery) generateMystery(); updatePanel(); var canvas=byId('game'); if(canvas&&!canvas.__ccMysteryClick){canvas.__ccMysteryClick=true; canvas.addEventListener('click',tryClickedMarker,{capture:true}); canvas.addEventListener('pointerdown',tryClickedMarker,{capture:true,passive:false});}}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+
+
+<script id="cc-global-g-bridge-fix">
+(function(){
+  "use strict";
+  try {
+    Object.defineProperty(window, "G", {
+      configurable: true,
+      get: function(){
+        try { return G; } catch(e) { return undefined; }
+      },
+      set: function(v){
+        try { G = v; } catch(e) {}
+      }
+    });
+  } catch(e) {
+    try {
+      if (typeof G !== "undefined") window.G = G;
+    } catch(_) {}
+  }
+
+  window.CC_GET_GAME = function(){
+    try { return G; } catch(e) { return window.G || null; }
+  };
 })();
 </script>
 
