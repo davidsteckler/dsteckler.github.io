@@ -7357,467 +7357,159 @@ resize();
 </script>
 
 
-<!-- OPENING DRAFT PATCH: Slay-the-Spire style run choices -->
-<style id="opening-draft-tactical-style-final">
-#starter-modal .v19-modal-card{width:min(980px,94vw);border-radius:22px;border:1px solid rgba(127,255,212,.24);background:radial-gradient(circle at top left,rgba(127,255,212,.12),transparent 34%),radial-gradient(circle at bottom right,rgba(200,155,255,.10),transparent 36%),linear-gradient(180deg,#11182d,#070b15)}
-#starter-modal .v19-modal-title{font-family:var(--display-font,'Cinzel',serif);font-size:26px;letter-spacing:2px;color:#f8fbff;line-height:1.25}
-#starter-modal .v19-modal-kicker{color:#7fffd4;letter-spacing:2px}.opening-draft-copy{font-size:12px;line-height:1.75;color:#e6efff;margin:0 0 14px}
-#starter-modal .starter-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-#starter-modal .starter-choice{min-height:270px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:linear-gradient(180deg,rgba(24,34,58,.98),rgba(10,15,28,.98));padding:16px;cursor:pointer;text-align:left;box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
-#starter-modal .starter-choice:hover{transform:translateY(-3px);border-color:rgba(127,255,212,.48);box-shadow:0 18px 32px rgba(0,0,0,.35),0 0 18px rgba(127,255,212,.14)}
-#starter-modal .starter-choice .sc-title{font-size:15px;line-height:1.45;color:#fff;margin-bottom:8px}#starter-modal .starter-choice .sc-sub{font-size:9px;color:#7fffd4;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px}
-#starter-modal .starter-choice .sc-desc{font-size:11px;line-height:1.7;color:#dfeaff;margin-bottom:12px}#starter-modal .starter-choice .sc-rule{margin-top:10px;padding:10px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);font-size:10px;line-height:1.7;color:#f4f8ff}
-#starter-modal .starter-choice .sc-rule strong{color:#ffd866;font-weight:normal}#starter-modal .starter-choice .sc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}#starter-modal .starter-choice .sc-tag{font-size:8px;color:#eaf2ff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:999px;padding:5px 8px}
-#run-mod-panel{padding:10px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#171b30,#0d1120)}#run-mod-panel .rmp-label{font-size:7px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}#run-mod-panel .rmp-title{font-size:11px;color:var(--gold);line-height:1.5;margin-bottom:5px}#run-mod-panel .rmp-text{font-size:7px;color:#e1e9ff;line-height:1.8}#run-mod-panel .rmp-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}#run-mod-panel .rmp-tag{font-size:6px;color:#f4fbff;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:2px 6px;background:rgba(255,255,255,.05)}
-@media(max-width:960px){#starter-modal .starter-choices{grid-template-columns:1fr}#starter-modal .starter-choice{min-height:0}}
+<!-- ===== STABLE START + SLAY-STYLE OPENING PATCH ===== -->
+<style id="cc-stable-opening-style">
+  #starter-modal.cc-opening-modal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;z-index:95;background:rgba(3,5,12,.86);backdrop-filter:blur(7px);padding:18px}
+  #starter-modal.cc-opening-modal.show{display:flex!important}
+  #starter-modal.cc-opening-modal .v19-modal-card{width:min(1060px,96vw);max-height:92vh;overflow:auto;border:2px solid rgba(127,255,212,.32);border-radius:24px;background:radial-gradient(circle at 20% 0%,rgba(127,255,212,.12),transparent 34%),radial-gradient(circle at 90% 100%,rgba(200,155,255,.13),transparent 34%),linear-gradient(180deg,#121a31,#070b15);box-shadow:0 28px 90px rgba(0,0,0,.62);padding:22px}
+  #starter-modal.cc-opening-modal .v19-modal-kicker{font-size:12px;color:#7fffd4;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+  #starter-modal.cc-opening-modal .v19-modal-title{font-family:var(--display-font,'Cinzel',serif);font-size:30px;line-height:1.2;color:#fff;letter-spacing:2px;margin-bottom:8px}
+  #starter-modal.cc-opening-modal .cc-open-copy{font-size:13px;line-height:1.75;color:#e6efff;margin:0 0 16px;max-width:860px}
+  #starter-modal.cc-opening-modal .starter-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  #starter-modal.cc-opening-modal .starter-choice{min-height:320px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:linear-gradient(180deg,rgba(24,34,58,.98),rgba(10,15,28,.98));padding:16px;cursor:pointer;text-align:left;color:#f6fbff;transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease;font-family:var(--ui-font,'Press Start 2P',monospace)}
+  #starter-modal.cc-opening-modal .starter-choice:hover{transform:translateY(-3px);border-color:rgba(127,255,212,.55);box-shadow:0 18px 38px rgba(0,0,0,.36),0 0 20px rgba(127,255,212,.13)}
+  #starter-modal.cc-opening-modal .sc-title{font-size:15px;line-height:1.5;color:#fff;margin-bottom:8px}
+  #starter-modal.cc-opening-modal .sc-sub{font-size:9px;color:#7fffd4;text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px}
+  #starter-modal.cc-opening-modal .sc-desc{font-size:11px;line-height:1.75;color:#dfeaff;margin-bottom:12px}
+  #starter-modal.cc-opening-modal .sc-rule{font-size:10px;line-height:1.7;color:#f5f8ff;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;margin-top:10px}
+  #starter-modal.cc-opening-modal .sc-rule strong{color:#ffd866;font-weight:normal}
+  #starter-modal.cc-opening-modal .sc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  #starter-modal.cc-opening-modal .sc-tag{font-size:8px;color:#eaf2ff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);border-radius:999px;padding:5px 8px}
+  #starter-modal.cc-opening-modal .cc-start-warning{margin-top:14px;border:1px solid rgba(255,216,102,.24);border-radius:16px;padding:12px;color:#ffe7a0;background:rgba(255,216,102,.06);font-size:11px;line-height:1.7}
+  @media(max-width:960px){#starter-modal.cc-opening-modal .starter-choices{grid-template-columns:1fr}#starter-modal.cc-opening-modal .starter-choice{min-height:0}}
 </style>
-<script id="opening-draft-tactical-patch-final">
-(function(){'use strict';
-const byId=id=>document.getElementById(id);const safe=fn=>{try{return fn()}catch(e){console.warn('[Opening Draft]',e)}};const clone=o=>o?JSON.parse(JSON.stringify(o)):o;
-function pickUnique(a,c){const b=a.slice(),o=[];while(b.length&&o.length<c)o.push(b.splice(Math.floor(Math.random()*b.length),1)[0]);return o}
-function freshRunMods(choice){G.runMods={chosen:{key:choice.key,title:choice.title,sub:choice.sub,desc:choice.desc,rule:choice.rule,tags:choice.tags},enemyCountMult:1,goldMult:1,xpMult:1,shopPriceMult:1,potionTax:0,waitMana:0,extraReveal:0,earlyEliteChance:0,rangedPressure:0,enemyAwareness:0,enemyHasteAfterHit:0}}
-function ensureRunMods(){if(!window.G)return null;G.runMods=G.runMods||{};['enemyCountMult','goldMult','xpMult','shopPriceMult'].forEach(k=>{if(G.runMods[k]==null)G.runMods[k]=1});['potionTax','waitMana','extraReveal','earlyEliteChance','rangedPressure','enemyAwareness','enemyHasteAfterHit'].forEach(k=>{if(G.runMods[k]==null)G.runMods[k]=0});return G.runMods}
-function findWeapon(n){return safe(()=>ITEMS.weapons.find(w=>w.name===n))||safe(()=>ITEMS.weapons[0])}function findArmor(n){return safe(()=>ITEMS.armor.find(a=>a.name===n))||safe(()=>ITEMS.armor[0])}function findSpell(n){return safe(()=>ITEMS.spells.find(s=>s.name===n))}
-function giveWeapon(n){const w=findWeapon(n);if(w)G.player.weapon=clone(w)}function giveArmor(n){const a=findArmor(n);if(a)G.player.armor=clone(a)}function giveSpell(n){const s=findSpell(n);if(!s)return;G.player.spells=G.player.spells||[];if(G.player.spells.length<4&&!G.player.spells.some(x=>x.name===s.name))G.player.spells.push(clone(s))}
-function equipRelic(slot,t){G.player[slot]={name:t.name,rarity:t.rarity||'rare',icon:t.icon||'ring_mp',desc:t.desc||'A run-shaping relic.',hp:t.hp||0,mp:t.mp||0,atk:t.atk||0,def:t.def||0,crit:t.crit||0,dodge:t.dodge||0,lifesteal:t.lifesteal||0,regen:t.regen||0,thorns:t.thorns||0,goldMult:t.goldMult,xpMult:t.xpMult,speed:t.speed||0,mdef:t.mdef||0}}
-const OPENING_CHOICES=[
-{key:'duelist_map',title:"The Duelist's Map",sub:'Cleaner fights, earlier danger',desc:'You begin with a real blade and fewer early bodies. The cave answers by sending elites sooner.',rule:'Start with +1 attack, an Iron Sword, and fewer enemies on Floor 1. Elite pressure begins earlier.',tags:['Blade','Tempo','Elite Risk'],apply(){G.player.atk+=1;giveWeapon('Iron Sword');G.player.potions.hp+=1;G.runMods.enemyCountMult=.78;G.runMods.earlyEliteChance=.18}},
-{key:'glass_scholar',title:'The Glass Scholar',sub:'Spells now, blood later',desc:'You enter with answers in your hands and less room to be wrong.',rule:'Start with extra mana, a wand, Blink, and Ice Shard. Lose 5 max HP.',tags:['Magic','Fragile','Burst'],apply(){G.player.maxHp=Math.max(10,G.player.maxHp-5);G.player.hp=Math.min(G.player.hp,G.player.maxHp);G.player.maxMp+=6;G.player.mp=G.player.maxMp;giveWeapon('Arc Wand');giveSpell('Blink');giveSpell('Ice Shard');G.player.potions.mp+=2}},
-{key:'relic_debt',title:'The Relic Debt',sub:'Power borrowed loudly',desc:'The mountain gives you a rare relic immediately. Nothing given this early is free.',rule:'Start with a rare ring. Shops cost more for the whole run.',tags:['Relic','Greed','Shop Tax'],apply(){equipRelic('ring',{name:'Borrowed Star Ring',rarity:'rare',icon:'ring_crit',desc:'A bright ring with a price still looking for you. +15% crit and +5 max MP.',crit:.15,mp:5});G.player.maxMp+=5;G.player.mp+=5;G.runMods.shopPriceMult=1.35}},
-{key:'patient_warden',title:'The Patient Warden',sub:'Waiting becomes a weapon',desc:'You can recover mana by giving up tempo, but enemies become more willing to press you.',rule:'Waiting restores 1 MP. Enemies notice you from slightly farther away.',tags:['Control','Mana','Pressure'],apply(){G.runMods.waitMana=1;G.runMods.enemyAwareness=2;G.player.def+=1}},
-{key:'blood_price',title:'The Blood Price',sub:'Kills pay better',desc:'Every enemy carries more gold. Every potion becomes a little less forgiving.',rule:'Gain 35% more gold from kills and loose gold pickups. Potions restore less.',tags:['Gold','Risk','Economy'],apply(){G.runMods.goldMult=1.35;G.runMods.potionTax=.25;G.player.gold+=20;G.player.relicStats.healTax=(G.player.relicStats.healTax||0)+.25}},
-{key:'scouts_instinct',title:"The Scout's Instinct",sub:'See first, suffer later',desc:'You read more of the floor immediately, but the dungeon leans into ranged threats.',rule:'Reveal more terrain at the start of each floor. Ranged enemies become more common.',tags:['Vision','Route','Ranged Risk'],apply(){G.runMods.extraReveal=5;G.runMods.rangedPressure=.22;equipRelic('amulet',{name:'Scout Lens',rarity:'uncommon',icon:'amulet_ward',desc:'A lens that catches movement before danger fully arrives. +10% dodge.',dodge:.10})}},
-{key:'heavy_oath',title:'The Heavy Oath',sub:'Safe trades, slower turns',desc:'You enter armored enough to survive mistakes, but every fight asks you to commit.',rule:'Start with armor and +2 defense. After attacking, enemies may press through your slower tempo.',tags:['Armor','Defense','Commitment'],apply(){G.player.def+=2;giveArmor('Chain Mail');G.runMods.enemyHasteAfterHit=.12}},
-{key:'knife_math',title:'Knife Math',sub:'Critical thinking, literally',desc:'You are weaker in a flat trade, but better when the first hit matters.',rule:'Start with +15% crit and a blade. Lose 3 max HP.',tags:['Crit','Aggro','Low HP'],apply(){G.player.maxHp=Math.max(10,G.player.maxHp-3);G.player.hp=Math.min(G.player.hp,G.player.maxHp);giveWeapon('Iron Sword');equipRelic('ring',{name:'Knife Math Ring',rarity:'uncommon',icon:'ring_crit',desc:'Every first mistake becomes arithmetic. +15% crit.',crit:.15})}},
-{key:'lantern_pact',title:'The Lantern Pact',sub:'Safer floors, weaker scaling',desc:'The first rooms become easier to survive. The reward curve gets stingier.',rule:'Start with more potions and safer early floors. Gain slightly less XP.',tags:['Survival','Route','XP Tax'],apply(){G.player.potions.hp+=2;G.player.potions.mp+=1;G.runMods.enemyCountMult=.86;G.runMods.xpMult=.88}}
-];
-function ensureOpeningModal(){let m=byId('starter-modal');if(!m){m=document.createElement('div');m.id='starter-modal';document.body.appendChild(m)}m.innerHTML='<div class="v19-modal-card"><div class="v19-modal-top"><div><div class="v19-modal-kicker">Choose Your Opening</div><div class="v19-modal-title">One decision bends the whole run.</div></div></div><p class="opening-draft-copy">Pick the kind of problem you want this run to become. The dungeon engine stays the same. The pressure changes.</p><div class="starter-choices"></div></div>';return m}
-function renderChoice(c){return '<button class="starter-choice" type="button" data-opening-key="'+c.key+'"><div><div class="sc-title">'+c.title+'</div><div class="sc-sub">'+c.sub+'</div><div class="sc-desc">'+c.desc+'</div><div class="sc-rule"><strong>Run rule:</strong> '+c.rule+'</div></div><div class="sc-tags">'+c.tags.map(t=>'<span class="sc-tag">'+t+'</span>').join('')+'</div></button>'}
-function showOpeningDraft(){if(!window.G||!G.player)return;const m=ensureOpeningModal(),choices=pickUnique(OPENING_CHOICES,3),wrap=m.querySelector('.starter-choices');wrap.innerHTML=choices.map(renderChoice).join('');wrap.querySelectorAll('[data-opening-key]').forEach(btn=>btn.addEventListener('click',()=>applyOpeningChoice(OPENING_CHOICES.find(c=>c.key===btn.dataset.openingKey))));G.paused=true;G.player.loadoutChosen=false;m.classList.add('show')}
-function resetLoadout(){G.player.inventory=[];G.player.spells=[];G.player.potions={hp:0,mp:0};G.player.weapon=null;G.player.armor=null;G.player.ring=null;G.player.amulet=null}
-function applyOpeningChoice(c){if(!c||!window.G||!G.player)return;resetLoadout();freshRunMods(c);c.apply();G.player.loadoutChosen=true;G.paused=false;const m=byId('starter-modal');if(m)m.classList.remove('show');applyCurrentFloorMods();updateAllUI();if(typeof addLog==='function')addLog('Opening chosen: '+c.title,'info')}
-function updateAllUI(){safe(()=>updateStatsUI());safe(()=>updateEquipUI());safe(()=>updateSpellUI());safe(()=>updatePotionUI());safe(()=>updateStoryPanel());safe(()=>updateMobileHUD());safe(()=>renderInventoryModal());safe(()=>updateRunModifierPanel());safe(()=>render())}
-function updateRunModifierPanel(){if(!window.G||!G.player)return;const sp=byId('story-panel');if(!sp)return;let p=byId('run-mod-panel');if(!p){p=document.createElement('div');p.id='run-mod-panel';sp.parentNode.insertBefore(p,sp.nextSibling)}const c=G.runMods&&G.runMods.chosen;if(!c){p.innerHTML='<div class="rmp-label">Opening</div><div class="rmp-title">No opening chosen yet</div><div class="rmp-text">Your first decision will shape the run.</div>';return}p.innerHTML='<div class="rmp-label">Opening</div><div class="rmp-title">'+c.title+'</div><div class="rmp-text">'+c.rule+'</div><div class="rmp-tags">'+c.tags.map(t=>'<span class="rmp-tag">'+t+'</span>').join('')+'</div>'}
-function revealOpeningVision(){if(!window.G||!G.player||!G.visible||!G.explored)return;const n=G.runMods&&G.runMods.extraReveal;if(!n)return;const px=G.player.x,py=G.player.y;for(let y=py-n;y<=py+n;y++)for(let x=px-n;x<=px+n;x++){if(y<0||x<0||y>=G.visible.length||x>=G.visible[0].length)continue;if(Math.abs(x-px)+Math.abs(y-py)<=n){G.visible[y][x]=true;G.explored[y][x]=true}}}
-function applyCurrentFloorMods(){if(!window.G||!G.player||!G.runMods)return;if(Array.isArray(G.enemies)){if(G.runMods.enemyCountMult<1&&!G.__openingEnemiesTrimmed){const target=Math.max(1,Math.floor(G.enemies.length*G.runMods.enemyCountMult));while(G.enemies.length>target){const i=G.enemies.findIndex(e=>!e.boss&&!e.elite&&!e.miniBoss);if(i<0)break;G.enemies.splice(i,1)}G.__openingEnemiesTrimmed=true}if(G.runMods.earlyEliteChance&&G.player.floor<=3&&!G.__openingEliteRolled){const e=G.enemies.find(x=>!x.boss&&!x.elite&&!x.miniBoss);if(e&&Math.random()<G.runMods.earlyEliteChance){e.elite=true;e.name='Elite '+e.name;e.maxHp=Math.ceil(e.maxHp*1.35);e.hp=e.maxHp;e.atk+=1;e.def+=1;e.gold=Math.ceil((e.gold||0)*1.5+5);e.xp=Math.ceil((e.xp||1)*1.4)}G.__openingEliteRolled=true}if(G.runMods.rangedPressure&&!G.__openingRangedRolled){G.enemies.forEach(e=>{if(!e.boss&&Math.random()<G.runMods.rangedPressure){e.range=Math.max(e.range||1,4);e.ai='ranged';e.weaponClass=e.weaponClass||'ranged';if(!/Ranged|Archer/i.test(e.name))e.name='Ranged '+e.name}});G.__openingRangedRolled=true}}revealOpeningVision()}
-function patchStart(){const old=window.startGame;if(typeof old!=='function'||old.__openingDraftFinal)return;const w=function(ev){const out=old.call(this,ev);if(window.G&&G.player)G.player.loadoutChosen=true;setTimeout(()=>{if(!window.G||!G.player)return;const m=byId('starter-modal');if(m)m.classList.remove('show');G.player.loadoutChosen=false;showOpeningDraft();updateRunModifierPanel()},180);return out};w.__openingDraftFinal=true;window.startGame=w;safe(()=>{startGame=w})}
-function patchGenerate(){if(typeof generateFloor!=='function'||generateFloor.__openingDraftFinal)return;const old=generateFloor;const w=function(depth){const out=old.call(this,depth);if(window.G){G.__openingEnemiesTrimmed=false;G.__openingEliteRolled=false;G.__openingRangedRolled=false;ensureRunMods();if(G.runMods&&G.runMods.chosen)applyCurrentFloorMods()}return out};w.__openingDraftFinal=true;generateFloor=w;window.generateFloor=w}
-function patchKill(){if(typeof killEnemy!=='function'||killEnemy.__openingDraftFinal)return;const old=killEnemy;const w=function(e){if(window.G&&G.runMods&&e&&!e.__openingRewardAdjusted){if(G.runMods.goldMult!==1)e.gold=Math.max(0,Math.floor((e.gold||0)*G.runMods.goldMult));if(G.runMods.xpMult!==1)e.xp=Math.max(1,Math.floor((e.xp||1)*G.runMods.xpMult));e.__openingRewardAdjusted=true}return old.call(this,e)};w.__openingDraftFinal=true;killEnemy=w;window.killEnemy=w}
-function patchPickup(){if(typeof pickupItem!=='function'||pickupItem.__openingDraftFinal)return;const old=pickupItem;const w=function(item){const before=window.G&&G.player?G.player.gold:0,was=item&&item.type==='gold';const out=old.call(this,item);if(was&&window.G&&G.player&&G.runMods&&G.runMods.goldMult!==1){const gained=G.player.gold-before,extra=Math.max(0,Math.floor(gained*(G.runMods.goldMult-1)));if(extra>0){G.player.gold+=extra;if(typeof addLog==='function')addLog('Blood Price bonus: +'+extra+'G','item')}}return out};w.__openingDraftFinal=true;pickupItem=w;window.pickupItem=w}
-function patchWait(){if(typeof waitTurn!=='function'||waitTurn.__openingDraftFinal)return;const old=waitTurn;const w=function(){const out=old.call(this);if(window.G&&G.player&&G.runMods&&G.runMods.waitMana&&G.player.mp<G.player.maxMp){G.player.mp=Math.min(G.player.maxMp,G.player.mp+G.runMods.waitMana);if(typeof addLog==='function')addLog('Patience restores '+G.runMods.waitMana+' MP.','spell');safe(()=>updateStatsUI());safe(()=>updateMobileHUD())}return out};w.__openingDraftFinal=true;waitTurn=w;window.waitTurn=w}
-function patchAttack(){if(typeof attack!=='function'||attack.__openingDraftFinal)return;const old=attack;const w=function(a,d,isP){const out=old.call(this,a,d,isP);if(isP&&window.G&&G.runMods&&G.runMods.enemyHasteAfterHit&&d&&d.hp>0&&Math.random()<G.runMods.enemyHasteAfterHit){d.alert=true;if(typeof addLog==='function')addLog(d.name+' presses through your heavy oath.','combat')}return out};w.__openingDraftFinal=true;attack=w;window.attack=w}
-function boot(){patchGenerate();patchKill();patchPickup();patchWait();patchAttack();window.getRunShopPrice=base=>Math.ceil(base*((window.G&&G.runMods&&G.runMods.shopPriceMult)||1));patchStart();setTimeout(()=>safe(()=>updateRunModifierPanel()),300)}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();window.getOpeningDraftChoices=()=>pickUnique(OPENING_CHOICES,3);window.showOpeningDraft=showOpeningDraft;window.applyOpeningChoice=applyOpeningChoice;window.updateRunModifierPanel=updateRunModifierPanel;
-})();
-</script>
-
-
-<!-- ===== FINAL PATCH: tactical relics, weapon spacing, click attack, XP clarity ===== -->
-<style id="cc-clean-class-combat-style">
-  /* Clean, readable bottom bar. Early game is now click to attack, not button soup. */
-  #slash-btn,#bash-btn,#kick-btn,#guard-btn,#attack-btn,#ability-help,#mobile-tactical-bar{display:none!important}
-  #bottom-bar{height:76px;min-height:76px;padding:8px 12px;gap:10px;overflow:visible;background:linear-gradient(180deg,#111629,#090d18);border-top:1px solid rgba(127,255,212,.16)}
-  #bottom-bar .bar-sep{display:none}
-  #action-log{display:none!important}
-  .inv-mini{font-size:9px;color:#dbe6ff;margin-left:4px;white-space:nowrap}
-  .spell-slot,#potion-btn,#mana-btn,.mini-action-btn{width:62px!important;height:56px!important;min-width:62px!important;border-radius:12px!important;font-size:9px!important}
-  .spell-slot .spell-key,#potion-btn .spell-key,#mana-btn .spell-key{font-size:8px!important;color:#9fb4e8!important}
-  .spell-slot .spell-cost,.potion-count,.potion-label{font-size:8px!important}
-  #inv-open-btn,#wait-btn{font-size:10px!important;min-width:78px!important;color:#f4fbff!important}
-  .spell-slot.clean-selected{border-color:#ffd866!important;box-shadow:0 0 0 1px rgba(255,216,102,.35) inset,0 0 16px rgba(255,216,102,.20)!important}
-  .spell-slot .spell-name-tip{font-size:9px!important;line-height:1.65!important;min-width:270px!important;max-width:340px!important;padding:10px 12px!important;border-radius:12px!important}
-  .clean-tip-title{display:block;color:#fff;margin-bottom:4px}.clean-tip-line{display:block;color:#dce7ff}.clean-tip-target{display:block;color:#ffd866;margin-top:6px}
-
-  /* Bigger left-side stats. */
-  #stats-area{font-size:11px!important;padding:14px!important}
-  .stat-row{gap:10px!important;margin:9px 0!important}
-  .stat-label{font-size:10px!important;width:42px!important}.stat-val{font-size:10px!important;width:72px!important}
-  .stat-num-row{padding:6px 4px!important}.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:11px!important}
-  #char-title{font-size:11px!important;color:#d8e8ff!important}#char-name{font-size:10px!important;color:#8dffe0!important}
-  #class-build-panel{margin:10px 0 4px;padding:10px;border:1px solid rgba(127,255,212,.14);border-radius:12px;background:linear-gradient(180deg,rgba(18,28,48,.94),rgba(9,13,25,.94))}
-  #class-build-panel .cb-label{font-size:8px;color:#9fb4e8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-  #class-build-panel .cb-name{font-size:12px;color:#ffd866;line-height:1.4;margin-bottom:5px}
-  #class-build-panel .cb-text{font-size:9px;color:#e1eaff;line-height:1.55}
-  #class-build-panel .cb-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.cb-tag{font-size:7px;color:#f7fbff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);padding:3px 6px;border-radius:999px}
-
-  /* Forecast panel: simple Fire Emblem style preview. */
-  #clean-forecast{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:14;width:min(720px,calc(100% - 26px));display:none;pointer-events:none;border:1px solid rgba(127,255,212,.28);border-radius:18px;background:linear-gradient(180deg,rgba(9,14,28,.97),rgba(5,8,16,.94));box-shadow:0 20px 42px rgba(0,0,0,.42),0 0 0 1px rgba(127,255,212,.08) inset;padding:12px 14px;color:#eef5ff;font-family:var(--ui-font,'Press Start 2P',monospace)}
-  #clean-forecast .cf-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px}.cf-action{font-size:12px;color:#fff;line-height:1.4}.cf-target{font-size:11px;color:#ffd866;line-height:1.4;text-align:right}
-  #clean-forecast .cf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cf-box{border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.045);padding:8px;min-height:48px}.cf-label{font-size:7px;color:#9fb0dd;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.cf-val{font-size:12px;color:#f7fbff;line-height:1.35}.cf-note{font-size:9px;line-height:1.55;color:#dbe6ff;margin-top:10px}.cf-good{color:#7fffd4}.cf-warn{color:#ffcc7a}.cf-bad{color:#ff7b96}.cf-mana{color:#8eb0ff}
-  #target-help-chip{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:13;width:min(640px,calc(100% - 28px));border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(10,15,29,.88);padding:9px 12px;color:#eaf2ff;font-size:9px;line-height:1.5;text-align:center;pointer-events:none}
-  #target-help-chip strong{color:#7fffd4;font-weight:normal}
-
-  @media (max-width:900px){
-    #bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:50;height:auto;min-height:84px;justify-content:center;gap:7px;padding:8px 8px calc(10px + env(safe-area-inset-bottom));flex-wrap:wrap}
-    .spell-slot,#potion-btn,#mana-btn,.mini-action-btn{width:54px!important;height:50px!important;min-width:54px!important}
-    #inv-open-btn,#wait-btn{min-width:62px!important;font-size:8px!important}.inv-mini{display:none!important}
-    #clean-forecast{bottom:108px;width:calc(100% - 18px);padding:10px}.cf-action,.cf-target{font-size:9px!important}.cf-val{font-size:10px!important}#clean-forecast .cf-grid{grid-template-columns:repeat(2,1fr)}.cf-note{font-size:8px!important}
-    #target-help-chip{bottom:92px;width:calc(100% - 18px);font-size:8px}
-    #mobile-controls{bottom:calc(92px + env(safe-area-inset-bottom))!important}
-  }
-</style>
-<script id="cc-clean-class-combat-patch">
+<script id="cc-stable-opening-and-death-fix">
 (function(){
   'use strict';
-  const $=id=>document.getElementById(id);
-  const log=(m,t='info')=>{try{addLog(m,t)}catch(e){console.log(m)}};
-  const safe=fn=>{try{return fn()}catch(e){console.warn('[clean-combat]',e)}};
-  const player=()=>window.G&&G.player?G.player:null;
-  const man=(a,b,c,d)=>Math.abs(a-c)+Math.abs(b-d);
-  function enemyAt(x,y){return (window.G&&G.enemies||[]).find(e=>e.hp>0&&e.x===x&&e.y===y)}
-  function visible(x,y){return !!(window.G&&G.visible&&G.visible[y]&&G.visible[y][x])}
-  function sight(x1,y1,x2,y2){try{return typeof lineClear==='function'?lineClear(x1,y1,x2,y2):true}catch(e){return true}}
-  function stats(){try{return getStats()}catch(e){const p=player();return {atk:p?.atk||1,def:p?.def||0,crit:p?.crit||0,dodge:p?.dodge||0}}}
-  function weapon(){const p=player();return p&&p.weapon?p.weapon:{name:'Bare Hands',atk:0,kind:'fist',weaponClass:'edge',desc:'Basic melee attack.'}}
-  function wClass(w=weapon()){if(typeof weaponClassOf==='function')return weaponClassOf(w);return w.weaponClass||w.kind||'edge'}
-  function isRanged(w=weapon()){const c=wClass(w);return !!(w.ranged||w.range>1||c==='ranged'||c==='arcane'||/bow|crossbow|wand|staff/i.test((w.name||'')+' '+(w.weaponType||'')+' '+(w.kind||'')))}
-  function wRange(w=weapon()){return isRanged(w)?(w.range||(/crossbow/i.test(w.name||'')?5:/bow/i.test(w.name||'')?4:5)):1}
-  function selectedSpell(){const p=player();return p&&Number.isInteger(p.selectedSpellIndex)?p.spells[p.selectedSpellIndex]:null}
-  function clearSpell(){const p=player();if(p)p.selectedSpellIndex=null; updateSpellSlots(); updateHelp();}
-  function spellIsSelf(sp){return sp&&['heal','shield','blink'].includes(sp.type)}
-  function spellColor(sp){return {fire:'#ff6b3a',ice:'#5bdfff',lightning:'#ffd866',poison:'#40ff40',earth:'#c8a050',heal:'#7fffd4',shield:'#7ac8ff',blink:'#c89bff'}[sp?.type]||'#c89bff'}
-  function spellDetails(sp){if(!sp)return''; if(sp.type==='heal')return `Self • ${sp.cost} MP • Heal ${sp.heal||0} HP`; if(sp.type==='shield')return `Self • ${sp.cost} MP • Shield +${sp.shield||0}`; if(sp.type==='blink')return `Self • ${sp.cost} MP • Blink up to ${sp.range||5}`; return `Target • ${sp.cost} MP • Range ${sp.range||5} • Damage ${sp.dmg||0}${sp.aoe?' • AoE '+sp.aoe:''}${sp.chain?' • Chain '+sp.chain:''}${sp.slow?' • Slow':''}${sp.dot?' • Poison':''}`}
-
-  function ensureUI(){
-    const wrap=$('canvas-wrap');
-    if(wrap&&!$('clean-forecast')){const f=document.createElement('div');f.id='clean-forecast';wrap.appendChild(f)}
-    if(wrap&&!$('target-help-chip')){const h=document.createElement('div');h.id='target-help-chip';h.innerHTML='<strong>Click an enemy</strong> to attack or shoot. Click empty tiles to move.';wrap.appendChild(h)}
-    const statsArea=$('stats-area');
-    if(statsArea&&!$('class-build-panel')){const panel=document.createElement('div');panel.id='class-build-panel';statsArea.appendChild(panel)}
-  }
-  function updateHelp(){
-    const chip=$('target-help-chip'); if(!chip||!player())return;
-    const sp=selectedSpell(), w=weapon();
-    if(sp) chip.innerHTML=`<strong>${sp.name} selected:</strong> tap an enemy to cast. ${spellDetails(sp)}`;
-    else if(isRanged(w)) chip.innerHTML=`<strong>${w.name}:</strong> tap an enemy ${2}-${wRange(w)} tiles away to shoot. Too close means step back first.`;
-    else chip.innerHTML=`<strong>${w.name}:</strong> tap an adjacent enemy to attack. Movement into enemies only blocks.`;
-  }
-
-  function forecast(enemy, sp=selectedSpell()){
-    if(!player()||!enemy)return null; const p=player(), st=stats(), d=man(p.x,p.y,enemy.x,enemy.y), w=weapon();
-    if(sp){
-      const range=sp.range||5, valid=!spellIsSelf(sp)&&p.mp>=sp.cost&&d<=range&&visible(enemy.x,enemy.y)&&sight(p.x,p.y,enemy.x,enemy.y);
-      const dmg=sp.dmg||0, hit=valid?0.94:0; return {kind:'spell',name:sp.name,target:enemy.name,valid,why:!valid?(p.mp<sp.cost?'Not enough mana':d>range?'Out of range':!visible(enemy.x,enemy.y)?'Not visible':'No line'):'Click to cast',low:dmg,high:dmg,hit,range,cost:sp.cost,effect:spellDetails(sp),afterLow:Math.max(0,enemy.hp-dmg),afterHigh:Math.max(0,enemy.hp-dmg)};
-    }
-    const ranged=isRanged(w), range=wRange(w), inRange=ranged?(d>=2&&d<=range):(d===1), line=!ranged||sight(p.x,p.y,enemy.x,enemy.y), valid=inRange&&visible(enemy.x,enemy.y)&&line;
-    const base=Math.max(1,(st.atk||1)-((enemy.def||0)));
-    const low=Math.max(1,base-1), high=Math.max(low,base+1+(w.hits===2?1:0)+(/crossbow/i.test(w.name||'')?1:0));
-    let hit=ranged?0.82:0.90; if(ranged)hit-=Math.max(0,d-3)*0.05; hit=Math.max(.55,Math.min(.96,hit+(st.crit||0)*0.15));
-    let effect=ranged?'Projectile. Can miss. ': 'Melee strike. Can miss. ';
-    if(/crossbow/i.test(w.name||'')) effect+='Crossbow may knock back.'; else if(/bow/i.test(w.name||'')) effect+='Bow may slow.'; else if(/wand|staff/i.test((w.name||'')+' '+(w.weaponType||''))) effect+='Wand may stagger.'; else effect+='Class grows from this weapon.';
-    let why='Click to attack'; if(!valid){why=ranged?(d<=1?'Too close':d>range?'Out of range':!line?'No line of sight':'Not visible'):(d!==1?'Too far':'Not visible')}
-    return {kind:ranged?'ranged':'melee',name:ranged?`${w.name} Shot`:`${w.name} Attack`,target:enemy.name,valid,why,low,high,hit:valid?hit:0,range:ranged?`2-${range}`:'1',cost:0,effect,afterLow:Math.max(0,enemy.hp-high),afterHigh:Math.max(0,enemy.hp-low)};
-  }
-  function showForecast(enemy){ensureUI();const f=forecast(enemy);const el=$('clean-forecast'); if(!el||!f){return} el.style.display='block';
-    el.innerHTML=`<div class="cf-top"><div class="cf-action">${f.name}</div><div class="cf-target">${f.target}</div></div><div class="cf-grid"><div class="cf-box"><div class="cf-label">Damage</div><div class="cf-val ${f.valid?'cf-good':'cf-bad'}">${f.low}-${f.high}</div></div><div class="cf-box"><div class="cf-label">Hit</div><div class="cf-val">${Math.round(f.hit*100)}%</div></div><div class="cf-box"><div class="cf-label">Range</div><div class="cf-val">${f.range}</div></div><div class="cf-box"><div class="cf-label">After Hit</div><div class="cf-val">${f.afterLow}-${f.afterHigh} HP</div></div></div><div class="cf-note ${f.valid?'':'cf-warn'}">${f.why}. ${f.cost?`Cost: ${f.cost} MP. `:''}${f.effect}</div>`;
-  }
-  function hideForecast(){const el=$('clean-forecast'); if(el)el.style.display='none'}
-  function rollHit(chance){return Math.random()<chance}
-  function dealToEnemy(enemy,dmg,label,color){enemy.hp-=dmg;enemy.hitFlash=1;spawnP(enemy.x,enemy.y,color||'#ff9b5b',7);spawnDamageText(enemy.x,enemy.y,String(dmg),color||'#ff9b5b');if(enemy.hp<=0)killEnemy(enemy)}
-  function weaponAttack(enemy){
-    if(!player()||!enemy)return false; const p=player(), w=weapon(), f=forecast(enemy,null); showForecast(enemy); if(!f.valid){log(f.why,'info');return false}
-    if(typeof clearAutoMove==='function')clearAutoMove();
-    const col=w.projectileColor||w.glowColor||(isRanged(w)?'#d8e9ff':'#ff9b5b');
-    if(isRanged(w))spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color:col,life:16,maxLife:16}); else {p.swingAnim=1;spawnSpellFx({kind:'slash',x:p.x,y:p.y,dx:Math.sign(enemy.x-p.x),dy:Math.sign(enemy.y-p.y),color:col,life:10,maxLife:10})}
-    if(!rollHit(f.hit)){spawnDamageText(enemy.x,enemy.y,'MISS','#dbe6ff');log(`${f.name} misses ${enemy.name}.`,'combat');SFX.play('step');clearSpell();endTurn();return true}
-    const dmg=Math.floor(f.low+Math.random()*(f.high-f.low+1)); dealToEnemy(enemy,dmg,f.name,col); log(`${f.name} hits ${enemy.name} for ${dmg}.`,'combat');
-    if(enemy.hp>0&&isRanged(w)){
-      if(/crossbow/i.test(w.name||'')&&Math.random()<.35)pushEnemy(enemy,Math.sign(enemy.x-p.x),Math.sign(enemy.y-p.y),1,'Crossbow knockback');
-      else if(/bow/i.test(w.name||'')&&Math.random()<.40){enemy.slowed=true;log(`${enemy.name} is slowed.`,'info')}
-      else if(/wand|staff/i.test((w.name||'')+' '+(w.weaponType||''))&&Math.random()<.25){enemy.stunned=Math.max(enemy.stunned||0,1);log(`${enemy.name} staggers.`,'spell')}
-    }
-    clearSpell();endTurn();return true;
-  }
-  function pushEnemy(enemy,dx,dy,tiles,label){for(let i=0;i<tiles;i++){const nx=enemy.x+dx,ny=enemy.y+dy;if(typeof canPushTo==='function'&&canPushTo(nx,ny)){enemy.x=nx;enemy.y=ny;if(G.map[ny][nx]===T.TRAP&&typeof triggerTrapAt==='function')triggerTrapAt(nx,ny,enemy.name,enemy)}else break}log(label||'Knockback','info')}
-  function castTarget(enemy){
-    const sp=selectedSpell(); if(!sp)return weaponAttack(enemy); const p=player(), f=forecast(enemy,sp); showForecast(enemy); if(!f.valid){log(f.why,'info');return false}
-    p.mp-=sp.cost; const col=spellColor(sp); let hit=[enemy];
-    if(sp.aoe)for(const e of G.enemies)if(e!==enemy&&e.hp>0&&man(e.x,e.y,enemy.x,enemy.y)<=sp.aoe)hit.push(e);
-    if(sp.chain){let last=enemy;for(let c=0;c<sp.chain;c++){const nx=G.enemies.find(e=>e.hp>0&&!hit.includes(e)&&man(e.x,e.y,last.x,last.y)<=3);if(nx){hit.push(nx);last=nx}}}
-    if(sp.type==='lightning')spawnSpellFx({kind:'chain',points:[{x:p.x,y:p.y},...hit.map(h=>({x:h.x,y:h.y}))],color:col,life:14,maxLife:14});else if(sp.type==='poison')spawnSpellFx({kind:'cloud',x:enemy.x,y:enemy.y,color:col,life:24,maxLife:24});else{spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color:col,life:16,maxLife:16});spawnSpellFx({kind:'burst',x:enemy.x,y:enemy.y,color:col,life:18,maxLife:18})}
-    for(const e of hit){dealToEnemy(e,sp.dmg||0,sp.name,col);if(e.hp>0){if(sp.slow)e.slowed=true;if(sp.dot)e.poisoned=sp.dot}}
-    log(`${sp.name} hits ${hit.length} target${hit.length===1?'':'s'}.`,'spell');SFX.play('spell');clearSpell();endTurn();return true;
-  }
-  function screenToTile(clientX,clientY){const rect=canvas.getBoundingClientRect();const sx=(clientX-rect.left)*(canvas.width/rect.width);const sy=(clientY-rect.top)*(canvas.height/rect.height);return {x:Math.floor(sx/TILE)+G.camera.x,y:Math.floor(sy/TILE)+G.camera.y}}
-  function cleanHandle(clientX,clientY){
-    if(!player()||G.gameOver||G.paused)return; const {x,y}=screenToTile(clientX,clientY), enemy=enemyAt(x,y);
-    if(enemy){try{pinInspect({kind:'world',x,y})}catch(e){}; if(selectedSpell())return castTarget(enemy); return weaponAttack(enemy)}
-    hideForecast(); if(selectedSpell()){log('Choose an enemy target for '+selectedSpell().name+'.','info');return}
-    const d=man(G.player.x,G.player.y,x,y), same=G.selectedInspect&&G.selectedInspect.kind==='world'&&G.selectedInspect.x===x&&G.selectedInspect.y===y;
-    const interactive=(G.interactives||[]).find(o=>o.x===x&&o.y===y&&!o.used), info=typeof getWorldHoverInfo==='function'?getWorldHoverInfo(x,y):null;
-    if(interactive){if(!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x,y});return} if(d<=1&&typeof activateInteractive==='function'){activateInteractive(interactive);endTurn()}else if(typeof startAutoMoveTo==='function')startAutoMoveTo(x,y);return}
-    if(info&&!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x,y});return}
-    if(d===0){waitTurn();return} if(typeof clearPinnedInspect==='function')clearPinnedInspect(); if(typeof startAutoMoveTo==='function')startAutoMoveTo(x,y)
-  }
-  function patchMove(){if(typeof movePlayer!=='function'||movePlayer.__cleanClassCombat)return;const old=movePlayer;const wrapped=function(dx,dy,viaAuto=false){if(!player())return old.apply(this,arguments);const nx=G.player.x+dx,ny=G.player.y+dy;if(!G.gameOver&&!G.paused&&G.map?.[ny]?.[nx]!==T.WALL&&enemyAt(nx,ny)){if(typeof clearAutoMove==='function')clearAutoMove();showForecast(enemyAt(nx,ny));log('Enemy blocks that tile. Click the enemy to attack. Movement never bump-attacks.','info');return}return old.apply(this,arguments)};wrapped.__cleanClassCombat=true;window.movePlayer=wrapped;try{movePlayer=wrapped}catch(e){}}
-  function patchCastSpell(){if(typeof castSpell!=='function'||castSpell.__cleanClassCombat)return;const original=castSpell;const wrapped=function(idx){if(!player()||G.gameOver||G.paused)return;const sp=G.player.spells[idx];if(!sp)return;if(G.player.mp<sp.cost){log('Not enough MP.','info');return}if(spellIsSelf(sp)){clearSpell();return original.call(this,idx)}G.player.selectedSpellIndex=G.player.selectedSpellIndex===idx?null:idx;updateSpellSlots();updateHelp();if(G.player.selectedSpellIndex===idx)log(`${sp.name} selected. Click an enemy target. ${spellDetails(sp)}`,'spell')};wrapped.__cleanClassCombat=true;window.castSpell=wrapped;try{castSpell=wrapped}catch(e){}}
-  function updateSpellSlots(){if(!player())return;for(let i=0;i<4;i++){const el=$('spell'+i);if(el)el.classList.toggle('clean-selected',G.player.selectedSpellIndex===i)}}
-  function patchSpellUI(){if(typeof updateSpellUI!=='function'||updateSpellUI.__cleanClassCombat)return;const old=updateSpellUI;const wrapped=function(){old.apply(this,arguments);if(!player())return;for(let i=0;i<4;i++){const el=$('spell'+i),sp=G.player.spells[i];if(!el||!sp)continue;el.onclick=(ev)=>{if(ev){ev.preventDefault();ev.stopPropagation()}castSpell(i)};el.onpointerup=(ev)=>{ev.preventDefault();ev.stopPropagation();castSpell(i)};const tip=el.querySelector('.spell-name-tip');if(tip)tip.innerHTML=`<span class="clean-tip-title">${sp.name}</span><span class="clean-tip-line">${sp.desc||''}</span><span class="clean-tip-target">${spellDetails(sp)}</span>`}updateSpellSlots()};wrapped.__cleanClassCombat=true;window.updateSpellUI=wrapped;try{updateSpellUI=wrapped}catch(e){}}
-  function patchKillXP(){if(typeof killEnemy!=='function'||killEnemy.__cleanXP)return;const old=killEnemy;const wrapped=function(e){const before=player()?G.player.xp:0;const r=old.apply(this,arguments);setTimeout(()=>{if(!player())return;const gained=Math.max(0,G.player.xp-before);const bar=$('bar-xp');if(bar){bar.style.transition='width .25s, filter .25s';bar.style.filter='brightness(1.8)';setTimeout(()=>bar.style.filter='',220)}log(`EXP gained. XP bar is now ${G.player.xp}/${G.player.xpNext}.`,'level');updateClassPanel()},40);return r};wrapped.__cleanXP=true;window.killEnemy=wrapped;try{killEnemy=wrapped}catch(e){}}
-  function classInfo(){const p=player();if(!p)return {name:'Wanderer',text:'No build yet.',tags:[]};let melee=0,ranged=0,magic=0,def=0,trick=0;const w=weapon();if(isRanged(w))ranged+=3;else melee+=2;if(wClass(w)==='arcane')magic+=2;if(wClass(w)==='crush')def+=1;if(wClass(w)==='pierce')trick+=1;(p.spells||[]).forEach(s=>{if(spellIsSelf(s))def+=1;else magic+=1});[p.armor,p.ring,p.amulet].forEach(it=>{if(!it)return;if(it.def||it.hp||it.absorb||it.thorns)def+=2;if(it.crit||it.dodge||it.speed)trick+=2;if(it.mp||it.mdef||it.spellPower)magic+=2;if(it.atk)melee+=1});let name='Wanderer',text='Your class forms from the gear and spells you keep.';if(magic>=5&&ranged>=3){name='Spellshot';text='Ranged weapons and spells are shaping you into a backline controller.'}else if(magic>=5){name='Spellweaver';text='Your spell choices are becoming the center of the run.'}else if(ranged>=4){name='Sharpshooter';text='Your build wants space, line of sight, and clean first shots.'}else if(melee>=4&&def>=3){name='Iron Duelist';text='You are becoming a close-range fighter who can stay in bad trades.'}else if(melee>=4){name='Blademaster';text='Your build is leaning into direct melee pressure.'}else if(def>=5){name='Guardian';text='Armor, sustain, and safe trades define this run.'}else if(trick>=4){name='Skirmisher';text='Crit, speed, and awkward angles are becoming your identity.'}return {name,text,tags:[`Melee ${melee}`,`Ranged ${ranged}`,`Magic ${magic}`,`Defense ${def}`]}}
-  function updateClassPanel(){ensureUI();const info=classInfo();const panel=$('class-build-panel');if(panel)panel.innerHTML=`<div class="cb-label">Class forming</div><div class="cb-name">${info.name}</div><div class="cb-text">${info.text}</div><div class="cb-tags">${info.tags.map(t=>`<span class="cb-tag">${t}</span>`).join('')}</div>`;const title=$('char-title');if(title)title.textContent=info.name;updateHelp()}
-  function patchEvents(){
-    window.handleCanvasPoint=cleanHandle;try{handleCanvasPoint=cleanHandle}catch(e){}
-    if(window.canvas&&!canvas.__cleanClassPointer){canvas.__cleanClassPointer=true;let last=0;const run=e=>{if(!player())return;const now=performance.now();if(now-last<90)return;last=now;e.preventDefault();e.stopImmediatePropagation();const p=e.changedTouches?e.changedTouches[0]:e;cleanHandle(p.clientX,p.clientY)};canvas.addEventListener('pointerup',run,true);canvas.addEventListener('touchend',run,{capture:true,passive:false});canvas.addEventListener('click',run,true);canvas.addEventListener('mousemove',e=>{if(!player())return;const {x,y}=screenToTile(e.clientX,e.clientY);const en=enemyAt(x,y);if(en)showForecast(en);else hideForecast()},true)}
-  }
-  function hideOldButtons(){['slash-btn','bash-btn','kick-btn','guard-btn','attack-btn'].forEach(id=>{const b=$(id);if(b)b.onclick=null})}
-  function boot(){ensureUI();hideOldButtons();patchMove();patchCastSpell();patchSpellUI();patchKillXP();patchEvents();safe(()=>updateSpellUI());updateClassPanel();updateHelp();setInterval(()=>{if(player())updateClassPanel()},1800);log('Clean controls: click enemies to attack or shoot. Spells select first, then click a target. Movement never attacks.','info')}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-})();
-</script>
-
-<!-- FINAL FIX PATCH: direct click combat, easier first floor, meaningful relic text -->
-<style id="cc-final-fix-style">
-  /* stop the bottom bar from becoming a tiny unreadable cockpit */
-  #slash-btn,#bash-btn,#kick-btn,#guard-btn,#attack-btn{display:none!important}
-  #bottom-bar{min-height:72px!important;height:auto!important;gap:8px!important;align-items:center!important;justify-content:center!important;overflow:visible!important;padding:8px 12px!important}
-  .spell-slot,#potion-btn,#mana-btn,#inv-open-btn,#wait-btn{width:62px!important;min-width:62px!important;height:54px!important;font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:11px!important;font-weight:800!important}
-  #action-log{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:13px!important;line-height:1.35!important;max-height:54px!important;text-align:left!important;min-width:260px!important}
-  #target-help-chip{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:13px!important;line-height:1.35!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(760px,94%)!important;background:rgba(7,10,18,.92)!important;border:1px solid rgba(127,255,212,.25)!important;border-radius:14px!important;padding:10px 14px!important;z-index:8!important;pointer-events:none!important}
-  #clean-forecast{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:13px!important;line-height:1.35!important;z-index:9!important;pointer-events:none!important;max-width:min(520px,92%)!important}
-  #clean-forecast .cf-action{font-size:15px!important}.cf-val{font-size:15px!important}.cf-note{font-size:12px!important}
-  #stats-area,.stat-row,.stat-num-row{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:14px!important;line-height:1.35!important}
-  .stat-label,.stat-val,.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:14px!important;font-weight:800!important}
-  .stat-label{width:42px!important}.stat-val{width:80px!important}
-  #gear-summary .gs-sub,#relic-panel .rp-help,#inspect-panel .ip-desc,#inspect-panel .ip-stats,#msg-area{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:12px!important;line-height:1.45!important}
-  #cc-click-shield{position:fixed;inset:0;pointer-events:none;z-index:99999}
-  .cc-relic-skip{border:1px dashed rgba(255,216,102,.45)!important;background:linear-gradient(180deg,#1c1722,#0f1018)!important}
-  @media(max-width:900px){
-    #bottom-bar{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:60!important;min-height:88px!important;padding:8px 8px calc(10px + env(safe-area-inset-bottom))!important;flex-wrap:wrap!important}
-    #center{padding-bottom:92px!important}
-    #target-help-chip{bottom:98px!important;font-size:12px!important}
-    #clean-forecast{bottom:132px!important;width:calc(100% - 18px)!important}
-    .spell-slot,#potion-btn,#mana-btn,#inv-open-btn,#wait-btn{width:58px!important;min-width:58px!important;height:54px!important}
-    #mobile-controls{display:none!important}
-  }
-</style>
-<script id="cc-final-fix-direct-combat">
-(function(){
-  'use strict';
-  const TILE_SIZE = 22;
-  const byId = id => document.getElementById(id);
-  const log = (m,t='info') => { try{ addLog(m,t); } catch(e){ console.log(m); } };
-  const safe = fn => { try { return fn(); } catch(e){ console.warn('[final-fix]', e); return undefined; } };
-  const man = (a,b,c,d)=>Math.abs(a-c)+Math.abs(b-d);
-  const player = () => window.G && G.player ? G.player : null;
-  const enemyAt = (x,y) => (window.G && G.enemies || []).find(e=>e && e.hp>0 && e.x===x && e.y===y);
-  const currentWeapon = () => player()?.weapon || {name:'Training Sword', atk:3, kind:'sword', weaponClass:'edge', desc:'Starter melee weapon.'};
-  function st(){ return safe(()=>getStats()) || {atk:player()?.atk||3,def:player()?.def||0,crit:0,dodge:0,steal:0}; }
-  function wClass(w=currentWeapon()){
-    let raw = (w.weaponClass||w.kind||w.weaponType||'').toString().toLowerCase();
-    const name = (w.name||'').toLowerCase();
-    if(/crossbow|bow|sling|javelin|throw/.test(name+raw)) return 'ranged';
-    if(/wand|staff|arcane/.test(name+raw)) return 'arcane';
-    if(/hammer|mace|club|crush/.test(name+raw)) return 'crush';
-    if(/spear|dagger|fang|pierce/.test(name+raw)) return 'pierce';
-    return 'edge';
-  }
-  function isRanged(w=currentWeapon()){ const c=wClass(w); return c==='ranged'||c==='arcane'||w.ranged||w.range>1; }
-  function rangeOf(w=currentWeapon()){ if(!isRanged(w)) return 1; const n=(w.name||'').toLowerCase(); if(n.includes('crossbow')) return 6; if(n.includes('bow')) return 5; if(n.includes('wand')||n.includes('staff')) return 5; return w.range || 4; }
-  function spellSelected(){ const p=player(); if(!p) return null; if(Number.isInteger(p.selectedSpellIndex) && p.spells && p.spells[p.selectedSpellIndex]) return p.spells[p.selectedSpellIndex]; if(Number.isInteger(p.selectedSpell) && p.spells && p.spells[p.selectedSpell]) return p.spells[p.selectedSpell]; return null; }
-  function clearSpell(){ const p=player(); if(!p) return; p.selectedSpellIndex=null; p.selectedSpell=null; safe(()=>updateSpellUI()); safe(()=>updateSpellSlots && updateSpellSlots()); updateHelp(); }
-  function visible(x,y){ return !!(window.G && G.visible && G.visible[y] && G.visible[y][x]); }
-  function tileFromClient(clientX,clientY){
-    const c=byId('game'); const rect=c.getBoundingClientRect();
-    const sx=(clientX-rect.left)*(c.width/rect.width); const sy=(clientY-rect.top)*(c.height/rect.height);
-    return {x:Math.floor(sx/TILE_SIZE)+(G.camera?.x||0), y:Math.floor(sy/TILE_SIZE)+(G.camera?.y||0)};
-  }
-  function insideCanvas(clientX,clientY){ const c=byId('game'); if(!c) return false; const r=c.getBoundingClientRect(); return clientX>=r.left && clientX<=r.right && clientY>=r.top && clientY<=r.bottom; }
-  function passableMapValue(v){ return v!==undefined && v!==0; }
-  function hasLine(x1,y1,x2,y2){
-    if(typeof lineClear==='function') return safe(()=>lineClear(x1,y1,x2,y2)) !== false;
-    let dx=Math.abs(x2-x1), dy=Math.abs(y2-y1), sx=x1<x2?1:-1, sy=y1<y2?1:-1, err=dx-dy, x=x1, y=y1;
-    while(!(x===x2 && y===y2)){
-      const e2=2*err; if(e2>-dy){err-=dy;x+=sx} if(e2<dx){err+=dx;y+=sy}
-      if(x===x2 && y===y2) break;
-      if(!passableMapValue(G.map?.[y]?.[x])) return false;
-    }
-    return true;
-  }
-  function ensureUI(){
-    const wrap=byId('canvas-wrap');
-    if(wrap && !byId('clean-forecast')){ const f=document.createElement('div'); f.id='clean-forecast'; f.style.display='none'; wrap.appendChild(f); }
-    if(wrap && !byId('target-help-chip')){ const h=document.createElement('div'); h.id='target-help-chip'; wrap.appendChild(h); }
-    updateHelp();
-  }
-  function weaponEffectText(w=currentWeapon()){
-    const name=(w.name||'').toLowerCase(); const c=wClass(w);
-    if(name.includes('crossbow')) return 'Fires a heavy bolt. Can miss. On hit, 40% chance to knock the enemy back 1 tile. Cannot shoot adjacent enemies.';
-    if(name.includes('bow')) return 'Fires a quick arrow. Can miss. On hit, 40% chance to slow the enemy. Cannot shoot adjacent enemies.';
-    if(name.includes('wand')||name.includes('staff')||c==='arcane') return 'Fires an arcane bolt. Can miss. On hit, 30% chance to stagger the enemy. Cannot shoot adjacent enemies.';
-    if(c==='crush') return 'Melee hit. Better against armored and ooze enemies. Good damage, simple trade.';
-    if(c==='pierce') return 'Melee hit. Better against soft and caster enemies. Slightly higher hit chance.';
-    return 'Melee hit. Reliable adjacent attack. Swords are the simple, stable baseline.';
-  }
-  function attackForecast(enemy, sp=null){
-    const p=player(); if(!p||!enemy) return null; const dist=man(p.x,p.y,enemy.x,enemy.y); const stats=st();
-    if(sp){
-      const range=sp.range || 5; const valid = dist<=range && visible(enemy.x,enemy.y) && hasLine(p.x,p.y,enemy.x,enemy.y) && p.mp >= (sp.cost||0);
-      const dmg=Math.max(0, (sp.dmg||0) + (stats.spellPower||0));
-      let why = valid ? 'Click to cast' : (p.mp<(sp.cost||0)?'Not enough mana':dist>range?'Out of range':!visible(enemy.x,enemy.y)?'Not visible':'No line of sight');
-      return {name:sp.name,target:enemy.name,valid,why,low:dmg,high:dmg,hit:valid?.96:0,range:String(range),afterLow:Math.max(0,enemy.hp-dmg),afterHigh:Math.max(0,enemy.hp-dmg),effect:`Costs ${sp.cost||0} MP. ${sp.desc||''}`};
-    }
-    const w=currentWeapon(); const ranged=isRanged(w); const range=rangeOf(w); const valid = visible(enemy.x,enemy.y) && hasLine(p.x,p.y,enemy.x,enemy.y) && (ranged ? dist>=2 && dist<=range : dist===1);
-    let base=Math.max(1,(stats.atk||1)-(enemy.def||0));
-    if(ranged && (w.name||'').toLowerCase().includes('crossbow')) base+=1;
-    const low=Math.max(1,base-1), high=Math.max(low,base+1+(w.hits===2?1:0));
-    let hit = ranged ? .82 : .92; if(wClass(w)==='pierce') hit+=.04; if(ranged) hit-=Math.max(0,dist-3)*.04; hit=Math.max(.55,Math.min(.97,hit+(stats.crit||0)*.10));
-    const why = valid ? 'Click to attack' : (ranged ? (dist<=1?'Too close for ranged. Step back first.':dist>range?'Out of range':!visible(enemy.x,enemy.y)?'Not visible':'No line of sight') : (dist!==1?'Melee needs adjacent target. Move closer.':'Not visible'));
-    return {name:ranged?`${w.name} Shot`:`${w.name} Attack`,target:enemy.name,valid,why,low,high,hit:valid?hit:0,range:ranged?`2-${range}`:'1',afterLow:Math.max(0,enemy.hp-high),afterHigh:Math.max(0,enemy.hp-low),effect:weaponEffectText(w)};
-  }
-  function showForecast(enemy){
-    ensureUI(); const f=attackForecast(enemy, spellSelected()); const el=byId('clean-forecast'); if(!el||!f) return;
-    el.style.display='block';
-    el.innerHTML=`<div class="cf-top"><div class="cf-action">${f.name}</div><div class="cf-target">${f.target}</div></div><div class="cf-grid"><div class="cf-box"><div class="cf-label">Damage</div><div class="cf-val ${f.valid?'cf-good':'cf-bad'}">${f.low}-${f.high}</div></div><div class="cf-box"><div class="cf-label">Hit</div><div class="cf-val">${Math.round(f.hit*100)}%</div></div><div class="cf-box"><div class="cf-label">Range</div><div class="cf-val">${f.range}</div></div><div class="cf-box"><div class="cf-label">Enemy HP after</div><div class="cf-val">${f.afterLow}-${f.afterHigh}</div></div></div><div class="cf-note ${f.valid?'':'cf-warn'}">${f.why}. ${f.effect}</div>`;
-  }
-  function hideForecast(){ const el=byId('clean-forecast'); if(el) el.style.display='none'; }
-  function updateHelp(){
-    const h=byId('target-help-chip'); if(!h||!player()) return;
-    const sp=spellSelected(), w=currentWeapon();
-    if(sp) h.innerHTML=`<strong>${sp.name} selected.</strong> Click a mob to cast. Cost ${sp.cost||0} MP. Range ${sp.range||'self'}. ${sp.desc||''}`;
-    else if(isRanged(w)) h.innerHTML=`<strong>${w.name}</strong>: click a mob ${2}-${rangeOf(w)} tiles away to shoot. Adjacent mobs are too close. Empty tiles move.`;
-    else h.innerHTML=`<strong>${w.name}</strong>: click an adjacent mob to attack. Empty tiles move. Walking into mobs never attacks.`;
-  }
-  function damageEnemy(enemy,dmg,color){
-    enemy.hp -= dmg; enemy.hitFlash=1;
-    safe(()=>spawnDamageText(enemy.x,enemy.y,String(dmg),color||'#ff9b5b'));
-    safe(()=>spawnP(enemy.x,enemy.y,color||'#ff9b5b',7));
-    if(enemy.hp<=0){ const before=player()?.xp||0; safe(()=>killEnemy(enemy)); setTimeout(()=>{ const p=player(); if(p){ log(`EXP +${Math.max(0,p.xp-before)}. XP bar: ${p.xp}/${p.xpNext}.`,'level'); const bar=byId('bar-xp'); if(bar){bar.style.filter='brightness(2)'; setTimeout(()=>bar.style.filter='',250);} } },30); }
-  }
-  function pushEnemy(enemy,dx,dy){
-    const nx=enemy.x+dx, ny=enemy.y+dy;
-    if(G.map?.[ny]?.[nx] && !enemyAt(nx,ny) && !(G.player.x===nx&&G.player.y===ny)){ enemy.x=nx; enemy.y=ny; log(`${enemy.name} is knocked back.`,'info'); }
-  }
-  function fireWeapon(enemy){
-    const p=player(), w=currentWeapon(), f=attackForecast(enemy,null); if(!f) return false; showForecast(enemy);
-    if(!f.valid){ log(f.why,'info'); return false; }
-    if(typeof clearAutoMove==='function') safe(()=>clearAutoMove());
-    const ranged=isRanged(w); const color=w.projectileColor||w.glowColor||(ranged?'#d8e9ff':'#ff9b5b');
-    if(ranged) safe(()=>spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color,life:18,maxLife:18}));
-    else safe(()=>spawnSpellFx({kind:'slash',x:p.x,y:p.y,dx:Math.sign(enemy.x-p.x),dy:Math.sign(enemy.y-p.y),color,life:10,maxLife:10}));
-    if(Math.random()>f.hit){ safe(()=>spawnDamageText(enemy.x,enemy.y,'MISS','#dbe6ff')); log(`${f.name} misses ${enemy.name}.`,'combat'); safe(()=>SFX.play('step')); safe(()=>endTurn()); return true; }
-    const dmg=Math.floor(f.low + Math.random()*(f.high-f.low+1));
-    damageEnemy(enemy,dmg,color); log(`${f.name} hits ${enemy.name} for ${dmg}.`,'combat');
-    const name=(w.name||'').toLowerCase();
-    if(enemy.hp>0 && ranged){
-      if(name.includes('crossbow') && Math.random()<.40) pushEnemy(enemy,Math.sign(enemy.x-p.x),Math.sign(enemy.y-p.y));
-      if(name.includes('bow') && Math.random()<.40){ enemy.slowed=true; log(`${enemy.name} is slowed.`,'info'); }
-      if((name.includes('wand')||name.includes('staff')) && Math.random()<.30){ enemy.stunned=Math.max(enemy.stunned||0,1); log(`${enemy.name} staggers.`,'spell'); }
-    }
-    safe(()=>SFX.play(ranged?'spell':'hit')); safe(()=>endTurn()); return true;
-  }
-  function castAt(enemy){
-    const sp=spellSelected(); if(!sp) return fireWeapon(enemy); const p=player(); const f=attackForecast(enemy,sp); showForecast(enemy); if(!f.valid){ log(f.why,'info'); return false; }
-    p.mp -= sp.cost||0; const color={fire:'#ff7040',ice:'#5bdfff',lightning:'#ffd866',poison:'#5bff7f',earth:'#c8a050'}[sp.type]||'#c89bff';
-    safe(()=>spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color,life:16,maxLife:16})); safe(()=>spawnSpellFx({kind:'burst',x:enemy.x,y:enemy.y,color,life:18,maxLife:18}));
-    const targets=[enemy];
-    if(sp.aoe){ (G.enemies||[]).forEach(e=>{ if(e!==enemy&&e.hp>0&&man(e.x,e.y,enemy.x,enemy.y)<=sp.aoe) targets.push(e); }); }
-    targets.forEach(e=>{ damageEnemy(e, Math.max(1,(sp.dmg||1)+(st().spellPower||0)), color); if(e.hp>0){ if(sp.slow)e.slowed=true; if(sp.dot)e.poisoned=sp.dot; }});
-    log(`${sp.name} hits ${targets.length} target${targets.length===1?'':'s'}.`,'spell'); clearSpell(); safe(()=>SFX.play('spell')); safe(()=>endTurn()); return true;
-  }
-  function clickCombat(clientX,clientY){
-    if(!player()||G.gameOver||G.paused||!insideCanvas(clientX,clientY)) return false;
-    const t=tileFromClient(clientX,clientY); const enemy=enemyAt(t.x,t.y);
-    if(enemy){ safe(()=>pinInspect({kind:'world',x:t.x,y:t.y})); return spellSelected()?castAt(enemy):fireWeapon(enemy); }
-    hideForecast(); if(spellSelected()){ log(`Click an enemy target for ${spellSelected().name}.`,'info'); return true; }
-    const d=man(G.player.x,G.player.y,t.x,t.y);
-    if(d===0){ safe(()=>waitTurn()); return true; }
-    if(typeof clearPinnedInspect==='function') safe(()=>clearPinnedInspect());
-    if(typeof startAutoMoveTo==='function') safe(()=>startAutoMoveTo(t.x,t.y));
-    return true;
-  }
-  function patchInput(){
-    const c=byId('game'); if(!c||c.__finalDirectCombat) return; c.__finalDirectCombat=true;
-    let last=0;
-    const handler=e=>{
-      const src=e.changedTouches?e.changedTouches[0]:e;
-      if(!src || !insideCanvas(src.clientX,src.clientY)) return;
-      const now=performance.now(); if(now-last<120){ e.preventDefault(); e.stopImmediatePropagation(); return; } last=now;
-      e.preventDefault(); e.stopImmediatePropagation(); clickCombat(src.clientX,src.clientY);
-    };
-    ['pointerup','click','mouseup','touchend'].forEach(type=>document.addEventListener(type,handler,{capture:true,passive:false}));
-    document.addEventListener('mousemove',e=>{ if(!player()||!insideCanvas(e.clientX,e.clientY)) return; const t=tileFromClient(e.clientX,e.clientY); const en=enemyAt(t.x,t.y); if(en) showForecast(en); else hideForecast(); },true);
-  }
-  function patchMove(){
-    if(typeof movePlayer!=='function'||movePlayer.__finalNoBump) return; const old=movePlayer;
-    const wrapped=function(dx,dy,viaAuto=false){ const p=player(); if(p && !G.gameOver && !G.paused){ const nx=p.x+dx, ny=p.y+dy; const en=enemyAt(nx,ny); if(en){ showForecast(en); log('That tile is occupied. Click the mob to attack. Movement never bump-attacks.','info'); safe(()=>clearAutoMove()); return; } } return old.apply(this,arguments); };
-    wrapped.__finalNoBump=true; window.movePlayer=wrapped; safe(()=>{movePlayer=wrapped});
-  }
-  function patchSpells(){
-    if(typeof castSpell==='function' && !castSpell.__finalTarget){ const old=castSpell; const wrapped=function(idx){ const p=player(); if(!p||G.gameOver||G.paused) return; const sp=p.spells?.[idx]; if(!sp) return; if(['heal','shield','blink'].includes(sp.type)) return old.apply(this,arguments); if(p.mp<(sp.cost||0)){ log('Not enough MP.','info'); return; } p.selectedSpellIndex = p.selectedSpellIndex===idx ? null : idx; updateHelp(); safe(()=>updateSpellUI()); log(p.selectedSpellIndex===idx?`${sp.name} selected. Click a mob to cast. ${sp.desc||''}`:`${sp.name} canceled.`,'spell'); }; wrapped.__finalTarget=true; window.castSpell=wrapped; safe(()=>{castSpell=wrapped}); }
-  }
-  function patchStats(){
-    if(typeof getStats==='function' && !getStats.__finalGearStats){ const old=getStats; const wrapped=function(){ const p=player(); if(!p) return old.apply(this,arguments); let out={atk:p.atk||0,def:p.def||0,crit:0,dodge:0,steal:0,spellPower:0,damageTaken:1}; for(const slot of ['weapon','armor','ring','amulet']){ const it=p[slot]; if(!it) continue; out.atk+=it.atk||0; out.def+=it.def||0; out.crit+=it.crit||0; out.dodge+=it.dodge||0; out.steal+=it.lifesteal||0; out.spellPower+=it.spellPower||0; if(it.absorb) out.damageTaken*=Math.max(.35,1-it.absorb); if(it.mdef) out.def+=Math.floor(it.mdef*.5); } if(p.relicStats){ out.crit+=p.relicStats.crit||0; out.dodge+=p.relicStats.dodge||0; out.steal+=p.relicStats.steal||0; out.spellPower+=p.relicStats.spellPower||0; if(p.relicStats.damageTaken) out.damageTaken*=p.relicStats.damageTaken; } return out; }; wrapped.__finalGearStats=true; window.getStats=wrapped; safe(()=>{getStats=wrapped}); }
-  }
-  function starterBalance(){
-    const p=player(); if(!p||p.__finalStarterBalance) return; p.__finalStarterBalance=true;
-    if(!p.weapon || /rusty|bare/i.test(p.weapon.name||'')){ p.weapon={name:'Training Sword',atk:3,kind:'sword',weaponClass:'edge',rarity:'starter',desc:'Starter weapon. Click an adjacent mob to attack for reliable melee damage.'}; }
-    p.maxHp=Math.max(p.maxHp||25,32); p.hp=Math.min(p.maxHp, Math.max(p.hp||p.maxHp, p.maxHp)); p.potions=p.potions||{}; p.potions.hp=Math.max(p.potions.hp||0,2); p.potions.mp=Math.max(p.potions.mp||0,1);
-    log('Starter kit equipped: Training Sword, 2 health potions, 1 mana potion. Early floors are tuned for learning, not instant death.','item');
-    safe(()=>updatePotionUI()); safe(()=>updateEquipUI()); safe(()=>updateStatsUI && updateStatsUI());
-  }
-  function softenCurrentFloor(){
-    if(!player()||!G.enemies) return; const f=G.player.floor||1;
-    if(f<=1){
-      G.enemies=G.enemies.filter((e,i)=>i<3 || e.boss || e.miniBoss);
-      G.enemies.forEach(e=>{ if(!e.boss&&!e.miniBoss){ e.maxHp=Math.min(e.maxHp||e.hp,6); e.hp=Math.min(e.hp,e.maxHp); e.atk=Math.min(e.atk||2,2); e.def=Math.min(e.def||0,1); e.xp=Math.max(e.xp||2,4); e.gold=Math.max(e.gold||1,3); } });
-    } else if(f===2){ G.enemies.forEach(e=>{ if(!e.boss&&!e.miniBoss){ e.atk=Math.max(1,Math.floor((e.atk||2)*.85)); } }); }
-  }
-  function patchFloor(){
-    if(typeof generateFloor==='function' && !generateFloor.__finalEasier){ const old=generateFloor; const wrapped=function(depth){ const r=old.apply(this,arguments); starterBalance(); softenCurrentFloor(); return r; }; wrapped.__finalEasier=true; window.generateFloor=wrapped; safe(()=>{generateFloor=wrapped}); }
-  }
-  function patchRelics(){
-    safe(()=>{
-      if(typeof ITEMS==='undefined') return;
-      (ITEMS.rings||[]).forEach(r=>{
-        if(r.name==='Ruby Ring') r.desc='Slay-style relic: Bigger health pool. Effect: +5 max HP while equipped. Cost: uses your ring slot.';
-        if(r.name==='Sapphire Ring') r.desc='Slay-style relic: More spell turns. Effect: +5 max MP while equipped. Cost: uses your ring slot.';
-        if(r.name==='Vampire Ring') r.desc='Slay-style relic: Sustain from aggression. Effect: heal for 15% of weapon damage dealt. Cost: weaker if you play slowly.';
-        if(r.name==='Haste Ring') r.desc='Slay-style relic: Tempo spike. Effect: sometimes act twice. Cost: no defensive stats.';
-        if(r.name==='Carnelian Ring') r.desc='Slay-style relic: Burst damage. Effect: +15% crit chance. Cost: less reliable than flat attack.';
-        if(r.name==='Jade Ring') r.desc='Slay-style relic: Slow recovery. Effect: regenerate 1 HP each turn. Cost: no burst damage.';
+  function byId(id){return document.getElementById(id)}
+  function safe(fn){try{return fn()}catch(e){console.warn('[stable-opening-fix]',e)}}
+  function clone(o){return o?JSON.parse(JSON.stringify(o)):o}
+  function item(list,name){try{return (ITEMS[list]||[]).find(function(x){return x&&x.name===name})}catch(e){return null}}
+  function ensureItemPools(){
+    safe(function(){
+      if(typeof ITEMS==='undefined')return;
+      ITEMS.weapons=ITEMS.weapons||[];
+      if(!ITEMS.weapons.some(function(w){return w.name==='Ash Bow'})) ITEMS.weapons.push({name:'Ash Bow',atk:2,range:5,ranged:true,desc:'Starter bow. Click a visible enemy 2 to 5 tiles away to fire a projectile. Cannot fire in melee.',rarity:'common',icon:'shortbow',weaponClass:'ranged',weaponType:'Bow',projectileColor:'#d8e9ff'});
+      if(!ITEMS.weapons.some(function(w){return w.name==='Light Crossbow'})) ITEMS.weapons.push({name:'Light Crossbow',atk:3,range:6,ranged:true,desc:'Heavy ranged weapon. Click a visible enemy 2 to 6 tiles away to fire a bolt. Cannot fire in melee. Higher damage, lower tempo.',rarity:'common',icon:'crossbow',weaponClass:'ranged',weaponType:'Crossbow',projectileColor:'#ffd866'});
+      if(!ITEMS.weapons.some(function(w){return w.name==='Arc Wand'})) ITEMS.weapons.push({name:'Arc Wand',atk:1,mp:3,range:5,ranged:true,desc:'Starter wand. Click a visible enemy 2 to 5 tiles away to fire an arcane bolt. Also supports spell builds.',rarity:'uncommon',icon:'arc_wand',weaponClass:'arcane',weaponType:'Wand',projectileColor:'#d7a8ff'});
+      ITEMS.weapons.forEach(function(w){
+        var n=(w.name||'').toLowerCase();
+        if(n.indexOf('bow')>-1||n.indexOf('crossbow')>-1||n.indexOf('wand')>-1||n.indexOf('staff')>-1){w.ranged=true;w.range=w.range||5;if(!w.weaponClass)w.weaponClass=(n.indexOf('wand')>-1||n.indexOf('staff')>-1)?'arcane':'ranged'}
+        if(n.indexOf('sword')>-1||n.indexOf('blade')>-1){w.weaponClass=w.weaponClass||'edge';w.desc=(w.desc||'')+' Control: click an adjacent enemy to attack.'}
       });
-      (ITEMS.amulets||[]).forEach(a=>{
-        if(a.name==='Amulet of Thorns') a.desc='Slay-style relic: Punishes contact. Effect: attackers take 2 reflected damage. Cost: does nothing against enemies you kill before they hit you.';
-        if(a.name==='Amulet of Warding') a.desc='Slay-style relic: Anti-magic defense. Effect: +3 magic defense. Cost: weak against basic melee mobs.';
-        if(a.name==='Amulet of Greed') a.desc='Slay-style relic: Economy engine. Effect: double gold drops. Cost: no direct combat help.';
-        if(a.name==='Amulet of Souls') a.desc='Slay-style relic: Scaling engine. Effect: +50% XP gain. Cost: no immediate survival.';
-      });
-      (ITEMS.weapons||[]).forEach(w=>{
-        const n=(w.name||'').toLowerCase();
-        if(n.includes('sword')||n.includes('blade')) w.desc=(w.desc||'')+' Control: click adjacent mobs. Role: reliable melee.';
-        if(n.includes('bow')){ w.ranged=true; w.range=w.range||5; w.desc='Ranged weapon. Click mobs 2-5 tiles away to shoot a projectile. Cannot fire adjacent. Can miss. On hit, may slow.'; }
-        if(n.includes('crossbow')){ w.ranged=true; w.range=w.range||6; w.desc='Heavy ranged weapon. Click mobs 2-6 tiles away to fire a bolt. Cannot fire adjacent. Can miss. On hit, may knock back.'; }
-        if(n.includes('wand')||n.includes('staff')){ w.ranged=true; w.range=w.range||5; w.weaponClass='arcane'; w.desc='Arcane ranged weapon. Click mobs 2-5 tiles away to fire a spell bolt. Cannot fire adjacent. Can miss. On hit, may stagger.'; }
-      });
+      ITEMS.spells=ITEMS.spells||[];
+      if(!ITEMS.spells.some(function(s){return s.name==='Spark'})) ITEMS.spells.unshift({name:'Spark',cost:1,dmg:3,range:5,desc:'Cheap starter spell. Select Spark, then click a visible enemy. Good for safe chip damage.',type:'fire'});
     });
   }
-  function patchRelicSkip(){
-    if(typeof showNextRelicChoice!=='function' || showNextRelicChoice.__finalSkip) return;
-    const old=showNextRelicChoice;
-    const wrapped=function(){
-      const beforeOpen = !!(window.G && G.relicChoiceOpen);
-      const r=old.apply(this,arguments);
-      setTimeout(()=>{
-        const grid=byId('relic-choice-grid'); const modal=byId('relic-choice-modal');
-        if(!grid||!modal||modal.classList.contains('hidden')||grid.querySelector('.cc-relic-skip')) return;
-        const btn=document.createElement('button'); btn.type='button'; btn.className='relic-choice-card cc-relic-skip';
-        btn.innerHTML='<div class="relic-choice-name" style="color:#ffd866">Skip Relic</div><div class="relic-choice-type">Safe choice</div><div class="relic-choice-blessing"><strong>Gain</strong><div>Take 25 gold and avoid a downside.</div></div><div class="relic-choice-curse"><strong>Cost</strong><div>You pass on a build-changing relic.</div></div><div class="relic-choice-footer">Use this when both relics push your run in the wrong direction.</div>';
-        btn.onclick=()=>{ const p=player(); if(p)p.gold=(p.gold||0)+25; if(window.G){G.relicChoiceOpen=false;G.paused=false;} modal.classList.add('hidden'); log('Skipped the relic and took 25 gold.','item'); };
-        grid.appendChild(btn);
-      },30);
-      return r;
-    };
-    wrapped.__finalSkip=true; window.showNextRelicChoice=wrapped; safe(()=>{showNextRelicChoice=wrapped});
+  function hideAllModalsExceptStarter(){
+    ['enemy-modal','level-up','inventory-modal','relic-choice-modal'].forEach(function(id){var el=byId(id);if(!el)return;el.classList.add('hidden');el.classList.remove('show')});
   }
-  function boot(){
-    ensureUI(); patchInput(); patchMove(); patchSpells(); patchStats(); patchFloor(); patchRelics(); patchRelicSkip();
-    setInterval(()=>{ if(player()){ starterBalance(); updateHelp(); } },1500);
-    log('Fixed controls loaded: click a mob to attack or shoot. Click empty tiles to move. Ranged weapons now need distance and fire projectiles.','info');
+  function showMainGameBehindModal(){
+    document.body.classList.add('playing');
+    var overlay=byId('overlay');
+    if(overlay){overlay.classList.add('hidden');overlay.style.display='none'}
+    hideAllModalsExceptStarter();
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  function refresh(){
+    safe(function(){drawStatIcons()});safe(function(){drawPotionIcon()});safe(function(){updateEquipUI()});safe(function(){updateSpellUI()});safe(function(){updateStoryPanel()});safe(function(){updatePotionUI()});safe(function(){updateMobileHUD()});safe(function(){renderInventoryModal()});safe(function(){updateCombatButtons()});safe(function(){resize()});safe(function(){render()});
+  }
+  function startRender(){safe(function(){stopRenderLoop()});safe(function(){render()})}
+  function giveWeapon(name){var w=item('weapons',name)||((typeof ITEMS!=='undefined'&&ITEMS.weapons&&ITEMS.weapons[0])?ITEMS.weapons[0]:null);if(w)G.player.weapon=clone(w)}
+  function giveArmor(name){var a=item('armors',name);if(a)G.player.armor=clone(a)}
+  function giveSpell(name){var s=item('spells',name);if(!s)return;G.player.spells=G.player.spells||[];if(!G.player.spells.some(function(x){return x.name===s.name})&&G.player.spells.length<4)G.player.spells.push(clone(s))}
+  function basePlayerReset(){
+    var p=G.player;
+    p.weapon=null;p.armor=null;p.ring=null;p.amulet=null;p.inventory=[];p.spells=[];p.potions={hp:0,mp:0};p.hp=p.maxHp;p.mp=p.maxMp;p.loadoutChosen=false;
+  }
+  function makeFirstFloorPlayable(){
+    if(!window.G||!G.player)return;
+    G.player.maxHp=Math.max(G.player.maxHp||0,30);G.player.hp=Math.max(G.player.hp||0,Math.min(G.player.maxHp,30));
+    G.player.maxMp=Math.max(G.player.maxMp||0,12);G.player.mp=Math.max(G.player.mp||0,8);
+    G.player.potions=G.player.potions||{hp:0,mp:0};
+    if(!G.player.weapon)giveWeapon('Iron Sword');
+    if(!G.player.spells||!G.player.spells.length){giveSpell('Spark');giveSpell('Heal')}
+    if(Array.isArray(G.enemies)&&G.player.floor===1){
+      var keep=[];
+      for(var i=0;i<G.enemies.length;i++){var e=G.enemies[i];if(!e)continue;if(e.boss||e.miniBoss||e.elite||keep.length<2)keep.push(e)}
+      G.enemies=keep;
+      G.enemies.forEach(function(e){if(e.boss||e.miniBoss)return;e.maxHp=Math.min(e.maxHp||e.hp||5,5);e.hp=Math.min(e.hp||e.maxHp,e.maxHp);e.atk=Math.min(e.atk||1,1);e.def=Math.min(e.def||0,0);e.xp=Math.max(e.xp||3,4);e.gold=Math.max(e.gold||2,3)});
+    }
+  }
+  function ensureOpeningModal(){
+    var m=byId('starter-modal');
+    if(!m){m=document.createElement('div');m.id='starter-modal';document.body.appendChild(m)}
+    m.className='cc-opening-modal';
+    m.innerHTML='<div class="v19-modal-card"><div class="v19-modal-kicker">Dungeon Run Setup</div><div class="v19-modal-title">Choose your opening, then build the class as you go.</div><p class="cc-open-copy">This works like a Slay the Spire start choice. You are not locked into a class forever. This only decides the first problem you are equipped to solve.</p><div class="starter-choices"></div><div class="cc-start-warning">Early floors are now tuned for learning: fewer mobs, weaker first enemies, real starter gear, starter spells, and enough potions to survive mistakes.</div></div>';
+    return m;
+  }
+  var choices=[
+    {key:'warden',title:'Blade Warden',sub:'simple melee start',desc:'Reliable sword, armor, healing, and one safe spell. Best if you want the game to feel fair immediately.',rule:'Start: Iron Sword, Leather Vest, 3 HP potions, Spark, Heal. Floor 1 is softened.',tags:['Melee','Safe','Beginner friendly'],apply:function(){giveWeapon('Iron Sword');giveArmor('Leather Vest');G.player.potions.hp=3;G.player.potions.mp=1;giveSpell('Spark');giveSpell('Heal')}},
+    {key:'ranger',title:'Cavern Ranger',sub:'ranged positioning start',desc:'Bow start for tactical spacing. Click distant mobs to shoot. If they get adjacent, back up or use a spell.',rule:'Start: Ash Bow, Leather Vest, 2 HP potions, Ice Shard, Spark. Ranged weapons need distance.',tags:['Ranged','Positioning','Projectile'],apply:function(){giveWeapon('Ash Bow');giveArmor('Leather Vest');G.player.potions.hp=2;G.player.potions.mp=1;giveSpell('Spark');giveSpell('Ice Shard')}},
+    {key:'arcanist',title:'Glass Arcanist',sub:'spell start',desc:'Wand and spell package. More buttons that actually do things, but lower health.',rule:'Start: Arc Wand, Spark, Ice Shard, Blink, Heal, 3 MP potions. Lower HP, higher MP.',tags:['Magic','Control','High upside'],apply:function(){giveWeapon('Arc Wand');G.player.maxHp=Math.max(22,G.player.maxHp-4);G.player.hp=G.player.maxHp;G.player.maxMp+=5;G.player.mp=G.player.maxMp;G.player.potions.hp=1;G.player.potions.mp=3;giveSpell('Spark');giveSpell('Ice Shard');giveSpell('Blink');giveSpell('Heal')}}
+  ];
+  function showOpeningChoice(){
+    var m=ensureOpeningModal();
+    var wrap=m.querySelector('.starter-choices');
+    wrap.innerHTML=choices.map(function(c){return '<button class="starter-choice" type="button" data-key="'+c.key+'"><div><div class="sc-title">'+c.title+'</div><div class="sc-sub">'+c.sub+'</div><div class="sc-desc">'+c.desc+'</div><div class="sc-rule"><strong>Run rule:</strong> '+c.rule+'</div></div><div class="sc-tags">'+c.tags.map(function(t){return '<span class="sc-tag">'+t+'</span>'}).join('')+'</div></button>'}).join('');
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-key]'),function(btn){btn.onclick=function(){applyOpening(btn.dataset.key)}});
+    G.paused=true;G.gameOver=false;G.running=true;G.player.loadoutChosen=false;m.classList.add('show');m.style.display='flex';
+    safe(function(){addLog('Choose an opening. The run starts after this choice.','info')});
+  }
+  function applyOpening(key){
+    var c=choices.find(function(x){return x.key===key})||choices[0];
+    basePlayerReset();
+    c.apply();
+    makeFirstFloorPlayable();
+    G.player.loadoutChosen=true;G.paused=false;G.gameOver=false;G.running=true;
+    var m=byId('starter-modal');if(m){m.classList.remove('show');m.style.display='none'}
+    refresh();startRender();
+    safe(function(){addLog('Opening chosen: '+c.title+'. Click enemies to attack. Click empty tiles to move.','item')});
+  }
+  function stableStart(ev){
+    if(ev){safe(function(){ev.preventDefault()});safe(function(){ev.stopPropagation()});safe(function(){ev.stopImmediatePropagation()})}
+    ensureItemPools();
+    safe(function(){if(typeof stopRenderLoop==='function')stopRenderLoop()});
+    safe(function(){if(typeof RNG==='function')rng=new RNG(Date.now())});
+    safe(function(){initGame()});
+    if(window.G){G.running=true;G.gameOver=false;G.paused=true;G.inventoryOpen=false;G.relicChoiceOpen=false;G.autoMove=false;G.autoPath=[]}
+    makeFirstFloorPlayable();
+    showMainGameBehindModal();
+    refresh();startRender();showOpeningChoice();
+    safe(function(){if(window.SFX&&SFX.init)SFX.init()});safe(function(){if(window.SFX&&SFX.setAmbience)SFX.setAmbience(1,0)});
+    return false;
+  }
+  function stableGameOver(){
+    safe(function(){if(typeof stopRenderLoop==='function')stopRenderLoop()});
+    if(window.G){G.gameOver=true;G.running=false;G.paused=false}
+    safe(function(){if(window.SFX&&SFX.play)SFX.play('death')});
+    var ov=byId('overlay');
+    if(ov){
+      ov.classList.remove('hidden');ov.style.display='flex';document.body.classList.remove('playing');
+      var f=(window.G&&G.player)?G.player.floor:1,l=(window.G&&G.player)?G.player.level:1,k=(window.G&&G.player)?G.player.kills:0,g=(window.G&&G.player)?G.player.gold:0;
+      ov.innerHTML='<h1 style="color:var(--red)">YOU HAVE FALLEN</h1><div class="subtitle">Floor '+f+' — Level '+l+'</div><p>Kills: '+k+' &nbsp;•&nbsp; Gold: '+g+'</p><p>The run ended. Start again with a cleaner opening.</p><button class="btn" id="start-btn" type="button">START A NEW RUN</button>';
+    }
+    wireButtons();
+  }
+  function wireButtons(){
+    var btn=byId('start-btn');
+    if(btn){
+      btn.onclick=stableStart;btn.onpointerup=stableStart;btn.ontouchend=stableStart;
+      ['click','pointerup','touchend','mouseup'].forEach(function(type){btn.addEventListener(type,stableStart,{capture:true,passive:false})});
+    }
+    var overlay=byId('overlay');
+    if(overlay&&!overlay.__stableStartOverlay){
+      overlay.__stableStartOverlay=true;
+      ['click','pointerup','touchend'].forEach(function(type){overlay.addEventListener(type,function(ev){var t=ev.target;if(t&&t.closest&&t.closest('#start-btn'))stableStart(ev)},{capture:true,passive:false})});
+    }
+  }
+  function patchDeathAndStart(){
+    window.startGame=stableStart;safe(function(){startGame=stableStart});
+    window.doGameOver=stableGameOver;safe(function(){doGameOver=stableGameOver});
+    wireButtons();
+    document.addEventListener('keydown',function(ev){var ov=byId('overlay');var visible=ov&&!ov.classList.contains('hidden')&&ov.style.display!=='none';if(visible&&(ev.key==='Enter'||ev.key===' '))stableStart(ev)},{capture:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchDeathAndStart);else patchDeathAndStart();
 })();
 </script>
-
 </body>
 </html>
