@@ -7798,5 +7798,311 @@ resize();
 })();
 </script>
 
+
+<style id="cc-floor-relic-style-patch">
+  #canvas-wrap{background:radial-gradient(circle at 50% 40%,rgba(21,35,68,.55),rgba(5,7,14,.98) 72%)!important}
+  #cc-floor-badge{position:absolute;left:12px;top:12px;z-index:12;pointer-events:none;padding:10px 12px;border:1px solid rgba(180,235,255,.22);border-radius:14px;background:linear-gradient(180deg,rgba(16,20,39,.86),rgba(9,12,24,.74));box-shadow:0 10px 28px rgba(0,0,0,.35),inset 0 0 0 1px rgba(127,255,212,.04);backdrop-filter:blur(4px)}
+  #cc-floor-badge .cc-floor-kicker{font-size:8px;letter-spacing:2px;color:#87ffe1;text-transform:uppercase;margin-bottom:4px}
+  #cc-floor-badge .cc-floor-title{font-size:12px;line-height:1.35;color:#f4f8ff;max-width:250px}
+  #cc-floor-badge .cc-floor-sub{font-size:8px;line-height:1.5;color:#c8d2ef;margin-top:5px;max-width:250px}
+  #cc-floor-banner{position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-10px);z-index:60;pointer-events:none;padding:12px 18px;border-radius:18px;border:1px solid rgba(200,225,255,.22);background:linear-gradient(180deg,rgba(18,23,44,.92),rgba(8,11,24,.88));box-shadow:0 18px 42px rgba(0,0,0,.42),0 0 0 1px rgba(127,255,212,.05);opacity:0;transition:opacity .3s ease,transform .3s ease;min-width:min(72vw,560px);text-align:center}
+  #cc-floor-banner.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #cc-floor-banner .cc-floor-banner-kicker{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#88ffe5;margin-bottom:6px}
+  #cc-floor-banner .cc-floor-banner-title{font-size:18px;color:#f7f9ff;line-height:1.35}
+  #cc-floor-banner .cc-floor-banner-sub{font-size:10px;color:#cfdbfb;line-height:1.5;margin-top:6px}
+  #relic-choice-modal .modal-panel{max-width:1180px!important}
+  #relic-choice-modal .relic-choice-grid{grid-template-columns:repeat(3,1fr)!important;gap:16px!important}
+  #relic-choice-modal .relic-choice-card{min-height:0!important;padding:16px!important;background:linear-gradient(180deg,rgba(22,27,48,.98),rgba(11,15,28,.98))!important;border:1px solid rgba(140,175,255,.18)!important;box-shadow:0 10px 30px rgba(0,0,0,.3)!important}
+  #relic-choice-modal .relic-choice-card:hover{transform:translateY(-3px)!important;box-shadow:0 16px 36px rgba(0,0,0,.38),0 0 0 1px rgba(127,255,212,.16)!important}
+  #relic-choice-modal .cc-relic-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  #relic-choice-modal .cc-relic-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(180deg,rgba(35,46,78,.85),rgba(16,19,34,.9));border:1px solid rgba(200,220,255,.14);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
+  #relic-choice-modal .cc-relic-head{min-width:0;flex:1}
+  #relic-choice-modal .cc-rarity{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.04);font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#dbe5ff}
+  #relic-choice-modal .cc-relic-line{display:flex;gap:8px;align-items:flex-start;padding:10px 11px;border-radius:12px;margin-top:8px;border:1px solid rgba(255,255,255,.08)}
+  #relic-choice-modal .cc-relic-line .cc-rk{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#9bb0d9;min-width:58px;padding-top:3px}
+  #relic-choice-modal .cc-relic-line .cc-rv{font-size:13px;line-height:1.45;color:#f4f7ff}
+  #relic-choice-modal .cc-relic-line.effect{background:rgba(127,255,212,.08);border-color:rgba(127,255,212,.16)}
+  #relic-choice-modal .cc-relic-line.cost{background:rgba(255,180,120,.08);border-color:rgba(255,180,120,.16)}
+  #relic-choice-modal .cc-relic-tip{font-size:11px;line-height:1.5;color:#cdd7f4;margin-top:10px}
+  #relic-choice-modal .cc-skip-relic .cc-relic-line.effect{background:rgba(255,216,102,.08)!important;border-color:rgba(255,216,102,.18)!important}
+  #relic-choice-modal .cc-skip-relic .cc-relic-line.cost{background:rgba(180,210,255,.06)!important;border-color:rgba(180,210,255,.14)!important}
+  @media(max-width:1200px){#relic-choice-modal .relic-choice-grid{grid-template-columns:1fr 1fr!important}}
+  @media(max-width:820px){#cc-floor-badge{left:8px;top:8px;padding:8px 10px}#cc-floor-badge .cc-floor-title{font-size:10px}#cc-floor-badge .cc-floor-sub{display:none}#relic-choice-modal .relic-choice-grid{grid-template-columns:1fr!important}#cc-floor-banner{width:calc(100vw - 20px);min-width:0;padding:10px 12px}}
+</style>
+<script id="cc-floor-relic-balance-patch">
+(function(){
+  'use strict';
+  function byId(id){return document.getElementById(id)}
+  function safe(fn,fallback){try{return fn()}catch(err){console.warn('[cc-floor-relic-balance]',err);return fallback}}
+  function cap(s){return (s||'').replace(/\b\w/g,function(m){return m.toUpperCase()})}
+  function floorStyleFor(depth){
+    var styles=[
+      {name:'The Upper Caverns',biome:'ruins',subtitle:'Weathered halls and safe early rooms',accent:'rgba(110,190,255,.16)',banner:'#7fe5ff',roomThemes:['plain','moss','treasure'],feature:'A wider first floor built to teach spacing and pathing.'},
+      {name:'Glowroot Hollows',biome:'moss',subtitle:'Overgrown tunnels and living walls',accent:'rgba(95,255,160,.14)',banner:'#83ffa7',roomThemes:['moss','plain','shrine'],feature:'Longer routes and healing pockets reward exploring the whole floor.'},
+      {name:'The Crystal Grotto',biome:'crystal',subtitle:'Shimmering chambers and focused sightlines',accent:'rgba(205,155,255,.15)',banner:'#cfb7ff',roomThemes:['crystal','plain','treasure'],feature:'Bright ranged lanes and high value side rooms.'},
+      {name:'The Ember Forge',biome:'lava',subtitle:'Molten corridors and aggressive pressure',accent:'rgba(255,120,92,.14)',banner:'#ffab7a',roomThemes:['forge','lava','treasure'],feature:'Harder pushes, stronger loot, and hotter choke points.'},
+      {name:'The Sunken Ossuary',biome:'bones',subtitle:'Silent graves and brittle halls',accent:'rgba(236,214,156,.12)',banner:'#ffe7a4',roomThemes:['bones','plain','shrine'],feature:'Defensive positioning matters more than speed.'},
+      {name:'The Umbral Galleries',biome:'shadow',subtitle:'Low light rooms and hunter lanes',accent:'rgba(124,130,255,.14)',banner:'#adb4ff',roomThemes:['gloom','shadow','treasure'],feature:'You can see farther, but enemies hit harder.'},
+      {name:'The Cathedral of Echoes',biome:'ruins',subtitle:'Sanctified halls and ritual chambers',accent:'rgba(110,230,255,.14)',banner:'#9af4ff',roomThemes:['shrine','royal','plain'],feature:'Relic themed rooms and cleaner arena fights.'},
+      {name:'The Inferno Gate',biome:'lava',subtitle:'Cracked stone above a burning drop',accent:'rgba(255,122,84,.16)',banner:'#ff9a6a',roomThemes:['lava','forge','gloom'],feature:'Short brutal routes with strong rewards.'},
+      {name:'The Void Archive',biome:'abyss',subtitle:'Impossible geometry and empty light',accent:'rgba(120,110,255,.16)',banner:'#b9adff',roomThemes:['void','shadow','crystal'],feature:'Weirder layouts and more magical pressure.'},
+      {name:'The Heart Vault',biome:'dragon',subtitle:'A final descent into the core',accent:'rgba(255,80,130,.16)',banner:'#ff9cc1',roomThemes:['royal','lava','void'],feature:'Big rooms, dangerous elites, and a boss floor feel.'}
+    ];
+    return styles[Math.max(0,Math.min(styles.length-1,(depth||1)-1))];
+  }
+  function weightedTheme(style,index,count){
+    if(index===0) return 'sanctum';
+    if(index===count-1) return style.roomThemes[0]||'plain';
+    if(index===count-2) return style.roomThemes[1]||style.roomThemes[0]||'plain';
+    var pool=(style.roomThemes||['plain']).slice();
+    if(Math.random()<0.22) pool.push('treasure');
+    if(Math.random()<0.16) pool.push('shrine');
+    return pool[Math.floor(Math.random()*pool.length)]||'plain';
+  }
+  var oldGetThemePalette = typeof getThemePalette==='function' ? getThemePalette : null;
+  getThemePalette=function(theme){
+    var extra={
+      sanctum:{floorA:'#20273d',floorB:'#151b2f',line:'#4d5d86',spark:'rgba(127,255,212,.12)'},
+      forge:{floorA:'#311b17',floorB:'#24110f',line:'#703c25',spark:'rgba(255,122,84,.12)'},
+      gloom:{floorA:'#18172d',floorB:'#101024',line:'#3e4472',spark:'rgba(138,140,255,.10)'},
+      void:{floorA:'#171228',floorB:'#0e0b1c',line:'#5b4da8',spark:'rgba(180,145,255,.13)'},
+      royal:{floorA:'#231c34',floorB:'#171225',line:'#61507f',spark:'rgba(255,216,102,.09)'},
+      shadow:{floorA:'#151426',floorB:'#0f1020',line:'#39406a',spark:'rgba(110,145,255,.10)'}
+    };
+    return extra[theme] || (oldGetThemePalette ? oldGetThemePalette(theme) : {floorA:'#1d203a',floorB:'#17192f',line:'#23264a',spark:'rgba(127,255,212,.08)'});
+  };
+  getBiomeForDepth=function(depth){ return floorStyleFor(depth).biome; };
+  function ensureFloorOverlays(){
+    var wrap=byId('canvas-wrap');
+    if(wrap && !byId('cc-floor-badge')){
+      var badge=document.createElement('div'); badge.id='cc-floor-badge';
+      badge.innerHTML='<div class="cc-floor-kicker">Floor</div><div class="cc-floor-title">Awaiting descent</div><div class="cc-floor-sub">Every floor now uses more of the map and carries its own visual identity.</div>';
+      wrap.appendChild(badge);
+    }
+    if(!byId('cc-floor-banner')){
+      var banner=document.createElement('div'); banner.id='cc-floor-banner'; document.body.appendChild(banner);
+    }
+  }
+  function updateFloorOverlays(depth){
+    ensureFloorOverlays();
+    var style=floorStyleFor(depth || (G&&G.player&&G.player.floor) || 1);
+    if(G) G.floorStyle = style;
+    var badge=byId('cc-floor-badge');
+    if(badge){
+      badge.style.boxShadow='0 10px 28px rgba(0,0,0,.35),0 0 0 1px '+style.accent;
+      badge.innerHTML='<div class="cc-floor-kicker">Floor '+(depth||1)+'</div><div class="cc-floor-title">'+style.name+'</div><div class="cc-floor-sub">'+style.subtitle+' · '+style.feature+'</div>';
+    }
+    var banner=byId('cc-floor-banner');
+    if(banner){
+      banner.innerHTML='<div class="cc-floor-banner-kicker">Dungeon Level '+(depth||1)+'</div><div class="cc-floor-banner-title" style="color:'+style.banner+'">'+style.name+'</div><div class="cc-floor-banner-sub">'+style.subtitle+' · '+style.feature+'</div>';
+      banner.classList.add('show');
+      clearTimeout(window.__ccFloorBannerTimer);
+      window.__ccFloorBannerTimer=setTimeout(function(){banner.classList.remove('show')},2400);
+    }
+    var fi=byId('fi-floor'); if(fi) fi.textContent='Floor '+(depth||1)+' · '+style.name;
+    var sub=byId('fi-sub'); if(sub) sub.textContent=style.subtitle;
+    var chip=byId('mobile-floor-chip'); if(chip) chip.textContent='F'+(depth||1)+' '+style.name.split(' ')[0];
+  }
+  var fallbackGenerate = typeof generateFloor==='function' ? generateFloor : null;
+  generateFloor=function(depth){
+    try{
+      if(typeof ensureRelicState==='function') ensureRelicState();
+      if(typeof ensureUI==='function') ensureUI();
+      ensureFloorOverlays();
+      var style=floorStyleFor(depth);
+      if(G) G.floorStyle = style;
+      var map=Array.from({length:MAP_H},function(){return Array(MAP_W).fill(T.WALL)});
+      var rooms=[];
+      var numRooms=10 + Math.min(depth,5) + Math.floor(Math.random()*3);
+      var attempts=numRooms*18;
+      for(var i=0;i<attempts && rooms.length<numRooms;i++){
+        var w=rng.int(7,13), h=rng.int(6,11), x=rng.int(2,MAP_W-w-3), y=rng.int(2,MAP_H-h-3);
+        var ok=true;
+        for(var r=0;r<rooms.length;r++){
+          var other=rooms[r];
+          if(x < other.x + other.w + 2 && x + w + 2 > other.x && y < other.y + other.h + 2 && y + h + 2 > other.y){ ok=false; break; }
+        }
+        if(!ok) continue;
+        var room={x:x,y:y,w:w,h:h,cx:Math.floor(x+w/2),cy:Math.floor(y+h/2),theme:'plain'};
+        rooms.push(room);
+        for(var ry=y;ry<y+h;ry++) for(var rx=x;rx<x+w;rx++) map[ry][rx]=T.FLOOR;
+      }
+      if(rooms.length<4 && fallbackGenerate) return fallbackGenerate(depth);
+      function carveHall(a,b,wide){
+        var cx=a.cx, cy=a.cy;
+        if(rng.chance(.5)){
+          while(cx!==b.cx){ cx += cx<b.cx?1:-1; carveBrush(map,cx,cy,wide?1:0); }
+          while(cy!==b.cy){ cy += cy<b.cy?1:-1; carveBrush(map,cx,cy,wide?1:0); }
+        } else {
+          while(cy!==b.cy){ cy += cy<b.cy?1:-1; carveBrush(map,cx,cy,wide?1:0); }
+          while(cx!==b.cx){ cx += cx<b.cx?1:-1; carveBrush(map,cx,cy,wide?1:0); }
+        }
+      }
+      rooms.sort(function(a,b){ return a.cx-b.cx || a.cy-b.cy });
+      for(var j=1;j<rooms.length;j++) carveHall(rooms[j-1],rooms[j],rng.chance(.28));
+      for(var ex=0;ex<Math.floor(rooms.length/3);ex++){
+        var a=rooms[rng.int(0,rooms.length-1)], b=rooms[rng.int(0,rooms.length-1)];
+        if(a!==b) carveHall(a,b,false);
+      }
+      for(var y=1;y<MAP_H-1;y++) for(var x=1;x<MAP_W-1;x++){
+        if(map[y][x]!==T.FLOOR) continue;
+        var n=map[y-1][x]!==T.WALL,s=map[y+1][x]!==T.WALL,w2=map[y][x-1]!==T.WALL,e=map[y][x+1]!==T.WALL;
+        var isDoor=(n&&s&&!w2&&!e)||(!n&&!s&&w2&&e);
+        if(isDoor && rng.chance(.12)) map[y][x]=T.DOOR;
+        else if(rng.chance(0.004 + depth*0.0015)) map[y][x]=T.TRAP;
+      }
+      for(var idx=0; idx<rooms.length; idx++) rooms[idx].theme = weightedTheme(style,idx,rooms.length);
+      var startRoom=rooms[0], endRoom=rooms[rooms.length-1], arenaRoom=rooms[Math.max(1,rooms.length-2)], treasureRoom=rooms[Math.min(rooms.length-1,Math.max(2,Math.floor(rooms.length*0.55)))];
+      if(startRoom) startRoom.theme='sanctum';
+      if(endRoom) endRoom.theme=style.roomThemes[0] || 'plain';
+      if(arenaRoom && arenaRoom!==endRoom) arenaRoom.theme=style.roomThemes[1] || style.roomThemes[0] || 'gloom';
+      if(treasureRoom && treasureRoom!==arenaRoom && treasureRoom!==endRoom) treasureRoom.theme='treasure';
+      if(startRoom){ map[startRoom.cy][startRoom.cx] = depth>1 ? T.STAIR_UP : T.FLOOR; }
+      if(endRoom) map[endRoom.cy][endRoom.cx]=T.STAIR_DOWN;
+      G.map=map; G.rooms=rooms; G.floorBiome=style.biome;
+      G.explored=Array.from({length:MAP_H},function(){return Array(MAP_W).fill(false)});
+      G.visible=Array.from({length:MAP_H},function(){return Array(MAP_W).fill(false)});
+      G.trapSeen=Array.from({length:MAP_H},function(){return Array(MAP_W).fill(false)});
+      G.player.x=startRoom.cx; G.player.y=startRoom.cy;
+      G.enemies=[];
+      var normalRoster=ENEMIES.filter(function(en){return !en.boss});
+      for(var ri=1;ri<rooms.length;ri++){
+        var room=rooms[ri];
+        var baseCount = room===arenaRoom ? rng.int(2,3) : rng.int(1,2+Math.floor(depth/3));
+        for(var spawn=0;spawn<baseCount;spawn++){
+          var exx=rng.int(room.x+1,room.x+room.w-2), eyy=rng.int(room.y+1,room.y+room.h-2);
+          if(map[eyy][exx]===T.WALL || G.enemies.some(function(o){return o.x===exx && o.y===eyy})) continue;
+          var tier=Math.min(Math.floor((depth+ri*0.15)/2), normalRoster.length-1);
+          var base=Object.assign({}, normalRoster[rng.int(Math.max(0,tier-1), Math.min(normalRoster.length-1,tier+1))]);
+          var sMul=1+(depth-1)*0.16+(room===arenaRoom?0.08:0);
+          base.hp=Math.floor(base.hp*sMul); base.atk=Math.floor(base.atk*sMul); base.def=Math.floor(base.def*sMul); base.xp=Math.floor(base.xp*sMul); base.gold=Math.floor(base.gold*sMul);
+          if(depth>=2 && room===arenaRoom && rng.chance(.36)) base=maybePromoteElite(base,depth+1);
+          G.enemies.push(Object.assign(base,{x:exx,y:eyy,maxHp:base.hp,id:Math.random(),alert:room===arenaRoom||depth>2,poisoned:0,stunned:0,slowed:false,hitFlash:0,bobOffset:Math.random()*10}));
+        }
+      }
+      if(depth>=2 && arenaRoom){
+        var apex;
+        if(depth%3===0){ apex=Object.assign({}, rng.pick(ENEMIES.filter(function(e){return e.boss}))); }
+        else { var idx2=Math.min(normalRoster.length-1, Math.max(3, Math.floor(depth/2)+2)); apex=maybePromoteElite(Object.assign({}, normalRoster[idx2]), depth+2); apex.miniBoss=true; }
+        var bossScale=1.14+(depth-1)*0.22; apex.hp=Math.floor(apex.hp*bossScale); apex.atk=Math.floor(apex.atk*bossScale); apex.def=Math.floor(apex.def*bossScale); apex.xp=Math.floor(apex.xp*bossScale); apex.gold=Math.floor(apex.gold*bossScale); apex.maxHp=apex.hp;
+        G.enemies.push(Object.assign(apex,{x:arenaRoom.cx,y:arenaRoom.cy,id:Math.random(),alert:true,poisoned:0,stunned:0,slowed:false,hitFlash:0,bobOffset:Math.random()*10}));
+      }
+      if(depth===1){
+        G.enemies=G.enemies.filter(function(e,i){ return e && (e.boss||e.elite||e.miniBoss||i<3); });
+        G.enemies.forEach(function(e){ if(e&&!e.boss&&!e.elite&&!e.miniBoss){ e.maxHp=Math.min(e.maxHp||e.hp,7); e.hp=Math.min(e.hp||e.maxHp,e.maxHp); e.atk=Math.min(e.atk||1,2); e.def=Math.min(e.def||0,0); e.xp=Math.max(e.xp||3,4); e.gold=Math.max(e.gold||2,4); } });
+      }
+      G.items=[];
+      rooms.forEach(function(room,idxRoom){
+        if(idxRoom===0) return;
+        var dropRoll = room.theme==='treasure' ? 0.95 : room.theme==='shrine' ? 0.6 : 0.48;
+        if(rng.chance(dropRoll)){
+          var ix=rng.int(room.x+1,room.x+room.w-2), iy=rng.int(room.y+1,room.y+room.h-2);
+          if(map[iy][ix]===T.FLOOR){
+            var pool = room.theme==='shrine' ? ['shrine','potion_hp','potion_mp','crystal'] : room.theme==='treasure' ? ['gold','chest','crystal'] : ['potion_hp','potion_mp','gold','chest','crystal'];
+            G.items.push({x:ix,y:iy,type:rng.pick(pool),id:Math.random()});
+          }
+        }
+        if((room.theme==='treasure'||room.theme==='crystal'||room.theme==='shrine'||room.theme==='forge'||room.theme==='royal') && rng.chance(room.theme==='treasure'?0.95:0.58)){
+          var exi=rng.int(room.x+1,room.x+room.w-2), eyi=rng.int(room.y+1,room.y+room.h-2);
+          if(map[eyi][exi]===T.FLOOR && !G.items.some(function(it){return it.x===exi && it.y===eyi})){
+            var pref = room.theme==='treasure'||room.theme==='forge' ? rng.pick(['weapon','armor']) : room.theme==='crystal' ? rng.pick(['ring','amulet']) : null;
+            G.items.push(createEquipmentPickup(exi,eyi,depth,pref,room.theme==='treasure'||room.theme==='forge'?2:1,'pedestal'));
+          }
+        }
+      });
+      G.particles=[];
+      computeFOV(); updateCamera(); updateEquipUI(); updateSpellUI(); updatePotionUI(); if(typeof updateStoryPanel==='function') updateStoryPanel(); if(typeof updateRelicUI==='function') updateRelicUI(); updateFloorOverlays(depth);
+    } catch(err){ console.error('cc generateFloor patch failed',err); if(fallbackGenerate) return fallbackGenerate(depth); }
+  };
+  var oldRender = typeof render==='function' ? render : null;
+  render=function(){
+    if(oldRender) oldRender();
+    try{
+      if(!G || !ctx || !canvas || !G.floorStyle) return;
+      var style=G.floorStyle;
+      ctx.save();
+      ctx.globalAlpha=0.08; ctx.fillStyle=style.accent || 'rgba(120,160,255,.08)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.globalAlpha=0.12;
+      for(var sy=0; sy<ROWS; sy++){
+        for(var sx=0; sx<COLS; sx++){
+          var mx=G.camera.x+sx, my=G.camera.y+sy;
+          if(mx<0||my<0||mx>=MAP_W||my>=MAP_H||!G.visible[my]||!G.visible[my][mx]) continue;
+          if(G.map[my][mx]===T.WALL) continue;
+          var room = typeof getRoomAt==='function' ? getRoomAt(mx,my) : null;
+          var pal = getThemePalette(room && room.theme || 'plain');
+          if(!pal) continue;
+          var px=sx*TILE, py=sy*TILE;
+          ctx.globalAlpha=0.05;
+          ctx.fillStyle=pal.spark || style.accent;
+          ctx.fillRect(px+2,py+2,TILE-4,TILE-4);
+          if((mx*3+my*5+Math.floor(performance.now()/220))%19===0){
+            ctx.globalAlpha=0.10;
+            ctx.fillRect(px+6,py+6,3,3);
+          }
+        }
+      }
+      ctx.restore();
+    }catch(err){ console.warn('cc render visual patch',err); }
+  };
+  function strongerRelics(){
+    return [
+      {id:'r_predator_fang',name:'Predator Fang',icon:'🗡️',rarity:'Uncommon',color:'#ffb26b',effect:'+4 ATK on all weapon strikes.',cost:'Potions restore 2 less HP.',tip:'Great for melee or thrown weapon starts.',apply:function(p){p.atk+=4;p.relicStats.healTax=(p.relicStats.healTax||0)+0.12;}},
+      {id:'r_mirror_shard',name:'Mirror Shard',icon:'🔷',rarity:'Rare',color:'#cfb7ff',effect:'+20% crit chance.',cost:'Lose 1 DEF.',tip:'Turns precise builds into real finishers.',apply:function(p){p.relicStats.crit+=0.20;p.def=Math.max(0,p.def-1);}},
+      {id:'r_windstep_anklet',name:'Windstep Anklet',icon:'💨',rarity:'Uncommon',color:'#9af4ff',effect:'+18% dodge.',cost:'Lose 3 max HP.',tip:'A real movement relic with a tiny life tax.',apply:function(p){p.relicStats.dodge+=0.18;p.maxHp=Math.max(8,p.maxHp-3);p.hp=Math.min(p.hp,p.maxHp);}},
+      {id:'r_mana_prism',name:'Mana Prism',icon:'💎',rarity:'Rare',color:'#8fb8ff',effect:'+12 max MP and +2 MAG.',cost:'Lose 2 ATK.',tip:'Big upgrade for wand, staff, and spell starts.',apply:function(p){p.maxMp+=12;p.mp=Math.min(p.maxMp,p.mp+12);p.magicAtk=(p.magicAtk||0)+2;p.atk=Math.max(1,p.atk-2);}},
+      {id:'r_thorn_crown',name:'Thorn Crown',icon:'🌵',rarity:'Uncommon',color:'#89ffb4',effect:'+4 thorns and +1 DEF.',cost:'Lose 4% dodge.',tip:'Rewards enemy contact without feeling punishing.',apply:function(p){p.relicStats.thorns+=4;p.def+=1;p.relicStats.dodge=Math.max(0,(p.relicStats.dodge||0)-0.04);}},
+      {id:'r_blood_chalice',name:'Blood Chalice',icon:'🩸',rarity:'Rare',color:'#ff8da6',effect:'+16% lifesteal.',cost:'Lose 1 max MP every fight start.',tip:'Excellent if you prefer sustain over mana depth.',apply:function(p){p.relicStats.steal+=0.16;p.relicStats.mpDrain=(p.relicStats.mpDrain||0)+0.4;}},
+      {id:'r_storm_lens',name:'Storm Lens',icon:'⚡',rarity:'Rare',color:'#ffd866',effect:'+45% spell power and +1 MAG.',cost:'Lose 1 DEF.',tip:'A huge caster spike with a small body tax.',apply:function(p){p.relicStats.spellPower+=0.45;p.magicAtk=(p.magicAtk||0)+1;p.def=Math.max(0,p.def-1);}},
+      {id:'r_flask_rack',name:'Flask Rack',icon:'⚗️',rarity:'Uncommon',color:'#9fffd7',effect:'+60% potion power and +1 HP potion.',cost:'Lose 2 max MP.',tip:'Strong for sustain and alchemist runs.',apply:function(p){p.relicStats.potionBoost+=0.60;p.potions=p.potions||{hp:0,mp:0};p.potions.hp=(p.potions.hp||0)+1;p.maxMp=Math.max(4,p.maxMp-2);p.mp=Math.min(p.mp,p.maxMp);}},
+      {id:'r_bastion_plate',name:'Bastion Plate',icon:'🛡️',rarity:'Rare',color:'#b3d0ff',effect:'+3 DEF and +10 max HP.',cost:'Lose 2% crit chance.',tip:'Makes defensive starts feel genuinely sturdy.',apply:function(p){p.def+=3;p.maxHp+=10;p.hp=Math.min(p.maxHp,p.hp+10);p.relicStats.crit=Math.max(0,(p.relicStats.crit||0)-0.02);}},
+      {id:'r_hunters_compass',name:'Hunter Compass',icon:'🎯',rarity:'Uncommon',color:'#c7ff8b',effect:'+3 ATK for ranged weapons and +8% crit.',cost:'Lose 1 DEF.',tip:'Ideal for ranger, hex hunter, and crossbows.',apply:function(p){p.atk+=3;p.relicStats.crit+=0.08;p.def=Math.max(0,p.def-1);}},
+      {id:'r_ember_heart',name:'Ember Heart',icon:'🔥',rarity:'Rare',color:'#ff9e71',effect:'+5 ATK on the first hit each fight and +1 MAG.',cost:'Potions heal 1 less HP.',tip:'Strong opener that changes how you start combat.',apply:function(p){p.atk+=2;p.magicAtk=(p.magicAtk||0)+1;p.relicStats.healTax=(p.relicStats.healTax||0)+0.08;}},
+      {id:'r_frost_seal',name:'Frost Seal',icon:'❄️',rarity:'Uncommon',color:'#9fe6ff',effect:'+2 DEF and +1 MAG.',cost:'Lose 2 ATK.',tip:'Safer control fights for slower classes.',apply:function(p){p.def+=2;p.magicAtk=(p.magicAtk||0)+1;p.atk=Math.max(1,p.atk-2);}},
+      {id:'r_golden_scarab',name:'Golden Scarab',icon:'🪙',rarity:'Uncommon',color:'#ffd866',effect:'+50% gold gain and +8 max HP.',cost:'Lose 2 max MP.',tip:'Greedy without being miserable.',apply:function(p){p.relicStats.goldMult=(p.relicStats.goldMult||1)*1.5;p.maxHp+=8;p.hp=Math.min(p.maxHp,p.hp+8);p.maxMp=Math.max(4,p.maxMp-2);p.mp=Math.min(p.mp,p.maxMp);}},
+      {id:'r_void_diadem',name:'Void Diadem',icon:'👑',rarity:'Rare',color:'#c6a4ff',effect:'+2 MAG and +10 max MP.',cost:'Lose 4 max HP.',tip:'High ceiling for pure magic starts.',apply:function(p){p.magicAtk=(p.magicAtk||0)+2;p.maxMp+=10;p.mp=Math.min(p.maxMp,p.mp+10);p.maxHp=Math.max(8,p.maxHp-4);p.hp=Math.min(p.hp,p.maxHp);}},
+      {id:'r_sanctum_bell',name:'Sanctum Bell',icon:'🔔',rarity:'Uncommon',color:'#abfff0',effect:'+2 DEF and potions grant +1 MP.',cost:'Lose 1 ATK.',tip:'Smooth sustain relic for slower runs.',apply:function(p){p.def+=2;p.relicStats.potionBoost=(p.relicStats.potionBoost||0)+0.20;p.atk=Math.max(1,p.atk-1);}},
+      {id:'r_night_veil',name:'Night Veil',icon:'🌙',rarity:'Rare',color:'#9da7ff',effect:'+14% dodge and +10% crit.',cost:'Lose 2 max HP.',tip:'A clean evasive relic with real upside.',apply:function(p){p.relicStats.dodge+=0.14;p.relicStats.crit+=0.10;p.maxHp=Math.max(8,p.maxHp-2);p.hp=Math.min(p.hp,p.maxHp);}},
+      {id:'r_spire_battery',name:'Spire Battery',icon:'🔋',rarity:'Rare',color:'#ffe28a',effect:'+1 MAG, +1 ATK, and +25% spell power.',cost:'Lose 1 DEF.',tip:'Good hybrid relic for battlemages.',apply:function(p){p.magicAtk=(p.magicAtk||0)+1;p.atk+=1;p.relicStats.spellPower+=0.25;p.def=Math.max(0,p.def-1);}},
+      {id:'r_revenant_chain',name:'Revenant Chain',icon:'⛓️',rarity:'Uncommon',color:'#f3d8ff',effect:'+14 max HP and +2 thorns.',cost:'Lose 1 max MP.',tip:'Best on front line builds that expect contact.',apply:function(p){p.maxHp+=14;p.hp=Math.min(p.maxHp,p.hp+14);p.relicStats.thorns+=2;p.maxMp=Math.max(4,p.maxMp-1);p.mp=Math.min(p.mp,p.maxMp);}}
+    ];
+  }
+  function relicPool(){ window.__ccStrongRelics = window.__ccStrongRelics || strongerRelics(); return window.__ccStrongRelics; }
+  function remainingRelics(){ var taken=((G&&G.player&&G.player.relics)||[]).map(function(r){return r.id}); return relicPool().filter(function(r){return taken.indexOf(r.id)===-1}); }
+  requestRelicChoice=function(source){ if(!G) return; G.relicQueue=G.relicQueue||[]; G.relicQueue.push(source||'elite'); };
+  showNextRelicChoice=function(){
+    if(!G || G.gameOver || G.relicChoiceOpen || !(G.relicQueue||[]).length) return;
+    ensureFloorOverlays();
+    var pool=remainingRelics().slice(); if(pool.length<2) return;
+    G.relicChoiceOpen=true; G.paused=true;
+    var source=G.relicQueue.shift();
+    var choices=[]; while(choices.length<3 && pool.length){ choices.push(pool.splice(rng.int(0,pool.length-1),1)[0]); }
+    var modal=byId('relic-choice-modal'), grid=byId('relic-choice-grid'), sub=byId('relic-choice-sub');
+    if(sub) sub.textContent=(source==='boss' ? 'Boss relics hit harder. ' : 'Elite relics can define a run. ') + 'Each one is strong in one direction and asks for only a tiny tradeoff.';
+    if(grid){
+      grid.innerHTML='';
+      choices.forEach(function(r){
+        var card=document.createElement('button'); card.type='button'; card.className='relic-choice-card';
+        card.innerHTML='<div class="cc-relic-top"><div class="cc-relic-icon">'+r.icon+'</div><div class="cc-relic-head"><div class="relic-choice-name" style="color:'+r.color+'">'+r.name+'</div><div class="cc-rarity">'+r.rarity+' relic</div></div></div><div class="cc-relic-line effect"><div class="cc-rk">Effect</div><div class="cc-rv">'+r.effect+'</div></div><div class="cc-relic-line cost"><div class="cc-rk">Tradeoff</div><div class="cc-rv">'+r.cost+'</div></div><div class="cc-relic-tip">'+r.tip+'</div>';
+        card.onclick=function(){ if(G.player.relics.some(function(x){return x.id===r.id})) return; r.apply(G.player); G.player.relics.push({id:r.id,name:r.name,icon:r.icon,rarity:r.rarity,color:r.color,desc:r.effect+' Small cost: '+r.cost,boon:{desc:r.effect},curse:{desc:r.cost}}); G.player.hp=Math.min(G.player.hp,G.player.maxHp); G.player.mp=Math.min(G.player.mp,G.player.maxMp); if(typeof addLog==='function') addLog('Relic claimed: '+r.name,'item'); modal.classList.add('hidden'); G.relicChoiceOpen=false; G.paused=false; safe(function(){updateEquipUI()}); safe(function(){renderInventoryModal()}); safe(function(){updateRelicUI()}); safe(function(){updateStatsUI()}); if((G.relicQueue||[]).length) setTimeout(showNextRelicChoice,120); };
+        grid.appendChild(card);
+      });
+      var skip=document.createElement('button'); skip.type='button'; skip.className='relic-choice-card cc-skip-relic';
+      skip.innerHTML='<div class="cc-relic-top"><div class="cc-relic-icon">🪙</div><div class="cc-relic-head"><div class="relic-choice-name" style="color:#ffd866">Skip Relic</div><div class="cc-rarity">Clean choice</div></div></div><div class="cc-relic-line effect"><div class="cc-rk">Effect</div><div class="cc-rv">Gain 24 gold immediately.</div></div><div class="cc-relic-line cost"><div class="cc-rk">Tradeoff</div><div class="cc-rv">Your build stays the same for now.</div></div><div class="cc-relic-tip">Best when the relics do not fit your current run.</div>';
+      skip.onclick=function(){ G.player.gold=(G.player.gold||0)+24; if(typeof addLog==='function') addLog('Skipped relic. +24 gold.','item'); modal.classList.add('hidden'); G.relicChoiceOpen=false; G.paused=false; safe(function(){updateStatsUI()}); safe(function(){updateRelicUI()}); safe(function(){renderInventoryModal()}); if((G.relicQueue||[]).length) setTimeout(showNextRelicChoice,120); };
+      grid.appendChild(skip);
+    }
+    if(modal) modal.classList.remove('hidden');
+  };
+  updateRelicUI=function(){
+    var count=byId('relic-count'); if(count&&G&&G.player) count.textContent=(G.player.relics||[]).length+' / '+relicPool().length;
+    var renderList=function(arr){ return arr.map(function(r){ var txt=(r.boon&&r.boon.desc?r.boon.desc:r.desc||''); var cost=(r.curse&&r.curse.desc?r.curse.desc:''); return '<div class="relic-chip" title="'+(txt+' '+cost).replace(/"/g,'&quot;')+'">'+(r.icon||'✦')+' '+r.name+'<small>'+txt+(cost?' • '+cost:'')+'</small></div>'; }).join(''); };
+    var list=byId('relic-list'); if(list&&G&&G.player){ list.innerHTML=!(G.player.relics||[]).length?'<div class="relic-chip"><small>No relics yet</small>Beat elites and bosses</div>':renderList(G.player.relics.slice(-6).reverse()); }
+    var inv=byId('inventory-relics'); if(inv&&G&&G.player){ inv.innerHTML=(G.player.relics||[]).length?renderList(G.player.relics):'<div class="inventory-empty" style="padding:0;margin:0">No relics claimed yet.</div>'; }
+  };
+  function boot(){ ensureFloorOverlays(); updateFloorOverlays(1); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+
 </body>
 </html>
