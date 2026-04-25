@@ -7357,7 +7357,7 @@ resize();
 </script>
 
 
-<!-- ===== STABLE START + SLAY-STYLE OPENING PATCH ===== -->
+<!-- ===== STABLE START + OPENING PATCH ===== -->
 <style id="cc-stable-opening-style">
   #starter-modal.cc-opening-modal{display:none;align-items:center;justify-content:center;position:fixed;inset:0;z-index:95;background:rgba(3,5,12,.86);backdrop-filter:blur(7px);padding:18px}
   #starter-modal.cc-opening-modal.show{display:flex!important}
@@ -7439,7 +7439,7 @@ resize();
     var m=byId('starter-modal');
     if(!m){m=document.createElement('div');m.id='starter-modal';document.body.appendChild(m)}
     m.className='cc-opening-modal';
-    m.innerHTML='<div class="v19-modal-card"><div class="v19-modal-kicker">Dungeon Run Setup</div><div class="v19-modal-title">Choose your opening, then build the class as you go.</div><p class="cc-open-copy">This works like a Slay the Spire start choice. You are not locked into a class forever. This only decides the first problem you are equipped to solve.</p><div class="starter-choices"></div><div class="cc-start-warning">Early floors are now tuned for learning: fewer mobs, weaker first enemies, real starter gear, starter spells, and enough potions to survive mistakes.</div></div>';
+    m.innerHTML='<div class="v19-modal-card"><div class="v19-modal-kicker">Dungeon Run Setup</div><div class="v19-modal-title">Choose your opening, then build the class as you go.</div><p class="cc-open-copy">Pick one starting direction. You are not locked into a class forever. This only decides the first problem you are equipped to solve.</p><div class="starter-choices"></div><div class="cc-start-warning">Early floors are now tuned for learning: fewer mobs, weaker first enemies, real starter gear, starter spells, and enough potions to survive mistakes.</div></div>';
     return m;
   }
   var choices=[
@@ -7511,5 +7511,292 @@ resize();
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',patchDeathAndStart);else patchDeathAndStart();
 })();
 </script>
+
+<!-- ===== VISUAL 10-CLASS OPENING + MAGIC ATTACK + RELIC ICON PATCH ===== -->
+<style id="cc-visual-class-opening-style">
+  #starter-modal.cc-opening-modal .v19-modal-card{
+    width:min(1120px,96vw)!important;
+    padding:22px!important;
+  }
+  #starter-modal.cc-opening-modal .v19-modal-title{
+    font-size:28px!important;
+    letter-spacing:1.5px!important;
+    margin-bottom:6px!important;
+  }
+  #starter-modal.cc-opening-modal .cc-open-copy{
+    font-size:12px!important;
+    line-height:1.55!important;
+    max-width:900px!important;
+    margin-bottom:14px!important;
+  }
+  #starter-modal.cc-opening-modal .starter-choice{
+    min-height:292px!important;
+    padding:16px!important;
+    gap:12px!important;
+  }
+  #starter-modal.cc-opening-modal .cc-class-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  #starter-modal.cc-opening-modal .cc-class-icon{
+    width:54px;
+    height:54px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:27px;
+    background:linear-gradient(180deg,rgba(127,255,212,.16),rgba(255,255,255,.04));
+    border:1px solid rgba(127,255,212,.28);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 10px 25px rgba(0,0,0,.22);
+    flex:0 0 auto;
+  }
+  #starter-modal.cc-opening-modal .cc-loadout-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin:11px 0 8px;
+  }
+  #starter-modal.cc-opening-modal .cc-loadout-chip{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.055);
+    color:#eff7ff;
+    border-radius:999px;
+    padding:5px 8px;
+    font-size:8px;
+    line-height:1.2;
+    white-space:nowrap;
+  }
+  #starter-modal.cc-opening-modal .cc-loadout-chip b{
+    color:#ffd866;
+    font-weight:normal;
+  }
+  #starter-modal.cc-opening-modal .sc-rule{
+    font-size:9px!important;
+    line-height:1.55!important;
+    padding:9px!important;
+  }
+  #starter-modal.cc-opening-modal .cc-start-warning{
+    margin-top:14px!important;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:10px!important;
+    line-height:1.55!important;
+  }
+  #starter-modal.cc-opening-modal .cc-start-warning:before{content:'✦';color:#ffd866;font-size:18px;}
+  .stat-num-row.cc-matk-row .sn-val{color:#c89bff!important}
+  #relic-choice-modal .relic-choice-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+  #relic-choice-modal .relic-choice-card{min-height:210px!important;padding:14px!important;position:relative;overflow:hidden}
+  #relic-choice-modal .cc-relic-icon{
+    width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);margin-bottom:9px;
+    box-shadow:0 10px 20px rgba(0,0,0,.24)
+  }
+  #relic-choice-modal .relic-choice-name{font-size:14px!important;line-height:1.35!important;margin-bottom:4px!important}
+  #relic-choice-modal .relic-choice-type{font-size:8px!important;margin-bottom:8px!important}
+  #relic-choice-modal .relic-choice-blessing,#relic-choice-modal .relic-choice-curse{padding:8px 9px!important;margin-bottom:8px!important;border-radius:10px!important}
+  #relic-choice-modal .relic-choice-blessing strong,#relic-choice-modal .relic-choice-curse strong{font-size:9px!important;margin-bottom:3px!important}
+  #relic-choice-modal .relic-choice-blessing div,#relic-choice-modal .relic-choice-curse div{font-size:11px!important;line-height:1.35!important}
+  #relic-choice-modal .relic-choice-footer{display:none!important}
+  #relic-choice-modal .cc-skip-relic{border-color:rgba(255,216,102,.32)!important;background:linear-gradient(180deg,#1f1c2d,#10131f)!important}
+  .relic-chip:before{content:'✦ ';color:#ffd866}
+  @media(max-width:960px){#relic-choice-modal .relic-choice-grid{grid-template-columns:1fr!important}}
+</style>
+<script id="cc-visual-class-opening-patch">
+(function(){
+  'use strict';
+  function byId(id){return document.getElementById(id)}
+  function safe(fn){try{return fn()}catch(e){console.warn('[visual-class-patch]',e)}}
+  function clone(o){return o?JSON.parse(JSON.stringify(o)):o}
+  function randPick(arr,n){var a=arr.slice(),out=[];while(a.length&&out.length<n){out.push(a.splice(Math.floor(Math.random()*a.length),1)[0])}return out}
+  function ensurePools(){
+    if(typeof ITEMS==='undefined')return;
+    ITEMS.weapons=ITEMS.weapons||[];ITEMS.armors=ITEMS.armors||[];ITEMS.spells=ITEMS.spells||[];ITEMS.rings=ITEMS.rings||[];ITEMS.amulets=ITEMS.amulets||[];
+    function addWeapon(w){if(!ITEMS.weapons.some(function(x){return x.name===w.name}))ITEMS.weapons.push(w)}
+    function addArmor(a){if(!ITEMS.armors.some(function(x){return x.name===a.name}))ITEMS.armors.push(a)}
+    function addSpell(s){if(!ITEMS.spells.some(function(x){return x.name===s.name}))ITEMS.spells.push(s)}
+    function addRing(r){if(!ITEMS.rings.some(function(x){return x.name===r.name}))ITEMS.rings.push(r)}
+    addWeapon({name:'Ash Bow',atk:2,range:5,ranged:true,desc:'Light bow. Click enemies at range to shoot. Cannot fire while adjacent.',rarity:'common',icon:'shortbow',weaponClass:'ranged',weaponType:'Bow',projectileColor:'#d8e9ff'});
+    addWeapon({name:'Light Crossbow',atk:3,range:6,ranged:true,desc:'Heavy ranged weapon. Higher hit impact, needs space.',rarity:'common',icon:'crossbow',weaponClass:'ranged',weaponType:'Crossbow',projectileColor:'#ffd866'});
+    addWeapon({name:'Arc Wand',atk:1,magicAtk:2,mp:2,range:5,ranged:true,desc:'Wand for magic starts. Uses Magic Attack for spells and arcane bolts.',rarity:'uncommon',icon:'arc_wand',weaponClass:'arcane',weaponType:'Wand',projectileColor:'#c89bff'});
+    addWeapon({name:'Shadow Knife',atk:2,crit:.12,range:3,ranged:true,desc:'Knife starter. Can play close or thrown. Crit leaning.',rarity:'uncommon',icon:'shadow_dagger',weaponClass:'thrown',weaponType:'Knife',projectileColor:'#9a7aba'});
+    addWeapon({name:'Censer Mace',atk:2,magicAtk:1,desc:'Cleric weapon. Physical enough to survive, blessed enough to scale with support magic.',rarity:'common',icon:'doom_hammer',weaponClass:'holy',weaponType:'Mace'});
+    addWeapon({name:'Ember Staff',atk:1,magicAtk:3,range:5,ranged:true,desc:'Fire caster starter. Low physical power, strong Magic Attack.',rarity:'uncommon',icon:'arc_wand',weaponClass:'fire',weaponType:'Staff',projectileColor:'#ff8a45'});
+    addWeapon({name:'Frost Wand',atk:1,magicAtk:2,range:5,ranged:true,desc:'Control caster starter. Better at slowing than bursting.',rarity:'uncommon',icon:'arc_wand',weaponClass:'ice',weaponType:'Wand',projectileColor:'#5bdfff'});
+    addWeapon({name:'Hunter Crossbow',atk:3,range:6,ranged:true,desc:'Crossbow for marked targets and careful spacing.',rarity:'common',icon:'crossbow',weaponClass:'ranged',weaponType:'Crossbow',projectileColor:'#ffd866'});
+    addWeapon({name:'Throwing Vials',atk:1,magicAtk:1,range:4,ranged:true,desc:'Alchemist tool. Lower direct damage, better potion and utility scaling.',rarity:'common',icon:'potion',weaponClass:'alchemy',weaponType:'Thrown',projectileColor:'#79ff9f'});
+    addArmor({name:'Padded Coat',def:1,desc:'Light armor. Enough protection to learn the dungeon without becoming a full tank.',rarity:'common',icon:'leather',torsoColor:'#6a4a30',torsoHi:'#a0744d',trimColor:'#2a1608'});
+    addRing({name:'Apprentice Focus',magicAtk:1,desc:'+1 Magic Attack. A simple focus for early spell builds.',rarity:'common',icon:'ring_mp',glowColor:'#c89bff'});
+    addSpell({name:'Spark',cost:1,dmg:3,range:5,desc:'Cheap magic poke. Uses Magic Attack. Select it, then click an enemy.',type:'lightning'});
+    addSpell({name:'Ember',cost:2,dmg:4,range:5,desc:'Small fire attack. Uses Magic Attack. Good starter burst.',type:'fire'});
+    addSpell({name:'Frost Pin',cost:2,dmg:3,range:6,desc:'Ice spell that slows. Uses Magic Attack. Good for safer fights.',type:'ice',slow:true});
+    addSpell({name:'Hex Dart',cost:2,dmg:3,range:5,desc:'Curse shot. Uses Magic Attack and pressures dangerous enemies.',type:'poison',dot:2});
+    addSpell({name:'Minor Heal',cost:2,heal:6,desc:'Small heal for sustain starts. Lower power than full Heal.',type:'heal'});
+    addSpell({name:'Smoke Step',cost:2,range:4,desc:'Mobility spell for knife builds. Repositions like Blink but cheaper themed utility.',type:'blink'});
+    addSpell({name:'Brew Splash',cost:2,dmg:3,range:4,aoe:1,desc:'Alchemical splash. Small area damage. Uses Magic Attack.',type:'poison',dot:1});
+  }
+  function findItem(pool,name){try{return (ITEMS[pool]||[]).find(function(x){return x.name===name})}catch(e){return null}}
+  function giveWeapon(name){var it=findItem('weapons',name);if(it)G.player.weapon=clone(it)}
+  function giveArmor(name){var it=findItem('armors',name);if(it)G.player.armor=clone(it)}
+  function giveRing(name){var it=findItem('rings',name);if(it)G.player.ring=clone(it)}
+  function giveAmulet(name){var it=findItem('amulets',name);if(it)G.player.amulet=clone(it)}
+  function giveSpell(name){var sp=findItem('spells',name);if(!sp)return;G.player.spells=G.player.spells||[];if(G.player.spells.length<4&&!G.player.spells.some(function(s){return s.name===sp.name}))G.player.spells.push(clone(sp))}
+  function clearLoadout(){var p=G.player;p.weapon=null;p.armor=null;p.ring=null;p.amulet=null;p.inventory=[];p.spells=[];p.potions={hp:0,mp:0};p.magicAtk=0;p.atk=Math.max(2,p.atk||2);p.def=Math.max(0,p.def||0);p.hp=p.maxHp;p.mp=p.maxMp}
+  var CLASSES=[
+    {key:'blade',icon:'⚔️',title:'Blade Warden',sub:'safe melee',summary:'Sword first. Simple, sturdy, forgiving.',weapon:'Iron Sword',armor:'Padded Coat',spells:['Minor Heal'],hp:1,mp:0,atk:1,def:1,magic:0,tags:['Melee','Safe','Heal']},
+    {key:'ranger',icon:'🏹',title:'Cavern Ranger',sub:'ranged spacing',summary:'Bow start. Win by keeping distance.',weapon:'Ash Bow',armor:null,spells:['Frost Pin'],hp:1,mp:0,atk:0,def:0,magic:0,tags:['Ranged','Slow','Position']},
+    {key:'arcanist',icon:'🔮',title:'Glass Arcanist',sub:'fragile magic',summary:'Wand and mana. Strong spells, low margin.',weapon:'Arc Wand',armor:null,spells:['Spark','Blink'],hp:0,mp:2,atk:0,def:0,magic:2,maxHp:-3,maxMp:4,tags:['Magic','Blink','Fragile']},
+    {key:'knife',icon:'🗡️',title:'Shadow Knife',sub:'crit + mobility',summary:'Knife build. Fast, risky, flexible range.',weapon:'Shadow Knife',armor:null,spells:['Smoke Step'],hp:1,mp:0,atk:1,def:0,magic:0,crit:.05,tags:['Crit','Mobile','Thrown']},
+    {key:'cleric',icon:'✨',title:'Battle Cleric',sub:'sustain',summary:'Small heals and steady damage. Survives messy rooms.',weapon:'Censer Mace',armor:'Padded Coat',spells:['Minor Heal','Shield'],hp:2,mp:0,atk:0,def:1,magic:1,tags:['Heal','Defense','Holy']},
+    {key:'pyro',icon:'🔥',title:'Pyromancer',sub:'burst fire',summary:'Fire magic. Deletes threats before they crowd you.',weapon:'Ember Staff',armor:null,spells:['Ember','Fireball'],hp:0,mp:1,atk:0,def:0,magic:2,maxHp:-2,tags:['Fire','Burst','Magic']},
+    {key:'frost',icon:'❄️',title:'Frostbinder',sub:'control',summary:'Slow enemies and make fights safer.',weapon:'Frost Wand',armor:null,spells:['Frost Pin','Ice Shard'],hp:1,mp:1,atk:0,def:0,magic:1,tags:['Ice','Slow','Control']},
+    {key:'guardian',icon:'🛡️',title:'Guardian',sub:'armor start',summary:'Low damage, high safety. Good for learning enemy patterns.',weapon:'Rusty Sword',armor:'Chain Mail',spells:['Shield'],hp:2,mp:0,atk:0,def:2,magic:0,tags:['Armor','Safe','Low damage']},
+    {key:'hex',icon:'☠️',title:'Hex Hunter',sub:'curse utility',summary:'Crossbow plus curse damage. Good against dangerous targets.',weapon:'Hunter Crossbow',armor:null,spells:['Hex Dart'],hp:1,mp:1,atk:0,def:0,magic:1,tags:['Curse','Crossbow','Utility']},
+    {key:'alchemist',icon:'⚗️',title:'Alchemist',sub:'potions + splash',summary:'More consumables and utility damage. Weird, but sturdy.',weapon:'Throwing Vials',armor:null,spells:['Brew Splash'],hp:2,mp:1,atk:0,def:0,magic:1,pots:{hp:2,mp:1},tags:['Potions','AoE','Utility']}
+  ];
+  function card(c){
+    var chips=[];
+    chips.push(['⚔',c.weapon]);
+    if(c.armor)chips.push(['▣',c.armor]);
+    (c.spells||[]).forEach(function(s){chips.push(['✦',s])});
+    chips.push(['♥',(c.pots&&c.pots.hp!=null?c.pots.hp:c.hp)+' HP']);
+    chips.push(['◆',(c.pots&&c.pots.mp!=null?c.pots.mp:c.mp)+' MP']);
+    if(c.magic)chips.push(['MAG','+'+c.magic]);
+    return '<button class="starter-choice" type="button" data-key="'+c.key+'"><div><div class="cc-class-top"><div class="cc-class-icon">'+c.icon+'</div><div><div class="sc-title">'+c.title+'</div><div class="sc-sub">'+c.sub+'</div></div></div><div class="sc-desc">'+c.summary+'</div><div class="cc-loadout-row">'+chips.map(function(x){return '<span class="cc-loadout-chip"><b>'+x[0]+'</b> '+x[1]+'</span>'}).join('')+'</div><div class="sc-rule"><strong>Focus:</strong> '+c.tags.join(' • ')+'</div></div><div class="sc-tags">'+c.tags.map(function(t){return '<span class="sc-tag">'+t+'</span>'}).join('')+'</div></button>';
+  }
+  function makePlayableFloor(){
+    if(!G||!G.player)return;
+    G.player.potions=G.player.potions||{hp:0,mp:0};
+    if(Array.isArray(G.enemies)&&G.player.floor===1){
+      var kept=[];
+      G.enemies.forEach(function(e){if(e&&(e.boss||e.elite||e.miniBoss||kept.length<2))kept.push(e)});
+      G.enemies=kept;
+      G.enemies.forEach(function(e){if(!e||e.boss||e.elite||e.miniBoss)return;e.maxHp=Math.min(e.maxHp||e.hp||6,6);e.hp=Math.min(e.hp||e.maxHp,e.maxHp);e.atk=Math.min(e.atk||1,2);e.def=Math.min(e.def||0,0);e.xp=Math.max(e.xp||3,4);e.gold=Math.max(e.gold||2,3)});
+    }
+  }
+  function refresh(){safe(function(){updateEquipUI()});safe(function(){updateSpellUI()});safe(function(){updatePotionUI()});safe(function(){updateStoryPanel()});safe(function(){renderInventoryModal()});safe(function(){updateMobileHUD()});safe(function(){updateStatsUI()});safe(function(){resize()});safe(function(){render()})}
+  function applyClass(key){
+    var c=CLASSES.find(function(x){return x.key===key})||CLASSES[0];
+    clearLoadout();
+    G.player.maxHp=Math.max(18,(G.player.maxHp||25)+(c.maxHp||0));G.player.hp=G.player.maxHp;
+    G.player.maxMp=Math.max(6,(G.player.maxMp||12)+(c.maxMp||0));G.player.mp=G.player.maxMp;
+    G.player.atk=(G.player.atk||2)+(c.atk||0);G.player.def=(G.player.def||0)+(c.def||0);G.player.magicAtk=(G.player.magicAtk||0)+(c.magic||0);
+    if(c.crit){G.player.relicStats=G.player.relicStats||{};G.player.relicStats.crit=(G.player.relicStats.crit||0)+c.crit}
+    giveWeapon(c.weapon);if(c.armor)giveArmor(c.armor);(c.spells||[]).forEach(giveSpell);
+    G.player.potions.hp=(c.pots&&c.pots.hp!=null)?c.pots.hp:(c.hp||1);
+    G.player.potions.mp=(c.pots&&c.pots.mp!=null)?c.pots.mp:(c.mp||0);
+    if(c.key==='arcanist')giveRing('Apprentice Focus');
+    G.player.classSeed=c.title;G.player.loadoutChosen=true;G.paused=false;G.gameOver=false;G.running=true;
+    makePlayableFloor();
+    var m=byId('starter-modal');if(m){m.classList.remove('show');m.style.display='none'}
+    safe(function(){addLog('Opening chosen: '+c.title+'. Click enemies to attack. Build the class from here.','item')});
+    refresh();safe(function(){render()});
+  }
+  function showClassDraft(){
+    var m=byId('starter-modal');if(!m){m=document.createElement('div');m.id='starter-modal';document.body.appendChild(m)}
+    m.className='cc-opening-modal';
+    var draft=randPick(CLASSES,3);
+    m.innerHTML='<div class="v19-modal-card"><div class="v19-modal-kicker">Dungeon Run Setup</div><div class="v19-modal-title">Choose an opening. Build the class as you go.</div><p class="cc-open-copy">Pick one starting direction. It gives you a weapon, a small spell package, light resources, and one stat lean. Your build can still change with loot and relics.</p><div class="starter-choices">'+draft.map(card).join('')+'</div><div class="cc-start-warning">Early floors are tuned for learning: fewer first enemies, real starter gear, readable relics, and no oversized starter kit.</div></div>';
+    Array.prototype.forEach.call(m.querySelectorAll('[data-key]'),function(btn){btn.onclick=function(){applyClass(btn.dataset.key)}});
+    m.classList.add('show');m.style.display='flex';
+    if(G){G.paused=true;G.gameOver=false;G.running=true}
+  }
+  function startFresh(ev){
+    if(ev){safe(function(){ev.preventDefault()});safe(function(){ev.stopPropagation()});safe(function(){ev.stopImmediatePropagation()})}
+    ensurePools();
+    var overlay=byId('overlay'); if(overlay){overlay.classList.add('hidden');overlay.style.display='none'}
+    document.body.classList.add('playing');
+    safe(function(){if(typeof stopRenderLoop==='function')stopRenderLoop()});
+    safe(function(){if(typeof RNG==='function')rng=new RNG(Date.now())});
+    safe(function(){initGame()});
+    if(G){G.running=true;G.gameOver=false;G.paused=true;G.inventoryOpen=false;G.relicChoiceOpen=false;G.autoMove=false;G.autoPath=[];G.player.classSeed='Unchosen';G.player.magicAtk=0;}
+    makePlayableFloor();refresh();safe(function(){render()});showClassDraft();
+    safe(function(){if(window.SFX&&SFX.init)SFX.init()});safe(function(){if(window.SFX&&SFX.setAmbience)SFX.setAmbience(1,0)});
+    return false;
+  }
+  function wire(){
+    window.startGame=startFresh;safe(function(){startGame=startFresh});
+    var btn=byId('start-btn');
+    if(btn){btn.onclick=startFresh;btn.onpointerup=startFresh;btn.ontouchend=startFresh;['click','pointerup','touchend','mouseup'].forEach(function(type){btn.addEventListener(type,startFresh,{capture:true,passive:false})})}
+  }
+  function addMagicStatRow(){
+    var atk=byId('val-atk');if(!atk)return;
+    if(byId('val-matk'))return;
+    var row=document.createElement('div');row.className='stat-num-row cc-matk-row';row.innerHTML='<span class="sn-label">MAG</span><span class="sn-val" id="val-matk">0</span>';
+    var atkRow=atk.closest('.stat-num-row');if(atkRow&&atkRow.parentNode)atkRow.parentNode.insertBefore(row,atkRow.nextSibling);
+  }
+  function magicAtkValue(){
+    if(!G||!G.player)return 0;var p=G.player,v=p.magicAtk||0;
+    ['weapon','ring','amulet','armor'].forEach(function(slot){var it=p[slot];if(it&&it.magicAtk)v+=it.magicAtk;if(it&&it.mp&&slot==='weapon')v+=Math.floor(it.mp/2)});
+    if(p.relicStats&&p.relicStats.spellPower)v+=Math.round(p.relicStats.spellPower*10);
+    return v;
+  }
+  function patchStatsAndSpells(){
+    addMagicStatRow();
+    if(typeof getStats==='function'&&!getStats.__ccMagicPatched){
+      var oldGet=getStats;
+      getStats=function(){var s=oldGet.apply(this,arguments)||{};s.magicAtk=magicAtkValue();return s};
+      getStats.__ccMagicPatched=true;
+    }
+    if(typeof updateStatsUI==='function'&&!updateStatsUI.__ccMagicPatched){
+      var oldUI=updateStatsUI;
+      updateStatsUI=function(){var r=oldUI.apply(this,arguments);addMagicStatRow();var el=byId('val-matk');if(el)el.textContent=magicAtkValue();return r};
+      updateStatsUI.__ccMagicPatched=true;
+    }
+    if(typeof castSpell==='function'&&!castSpell.__ccMagicDamagePatched){
+      var oldCast=castSpell;
+      castSpell=function(idx){
+        if(!G||!G.player||idx>=G.player.spells.length)return oldCast.apply(this,arguments);
+        var sp=G.player.spells[idx];
+        if(sp&&sp.dmg&&!sp.__magicAtkApplied){sp=G.player.spells[idx]=Object.assign({},sp,{dmg:(sp.dmg||0)+Math.max(0,Math.floor(magicAtkValue()/2)),__magicAtkApplied:true,desc:(sp.desc||'')+' Uses Magic Attack.'});}
+        var out=oldCast.apply(this,arguments);
+        if(sp&&sp.__magicAtkApplied){delete sp.__magicAtkApplied;}
+        return out;
+      };
+      castSpell.__ccMagicDamagePatched=true;
+    }
+  }
+  function relicIconFor(name){
+    name=(name||'').toLowerCase();
+    if(name.indexOf('razor')>-1||name.indexOf('fang')>-1)return '🗡️';
+    if(name.indexOf('mist')>-1||name.indexOf('cloak')>-1)return '🌫️';
+    if(name.indexOf('leech')>-1||name.indexOf('blood')>-1)return '🩸';
+    if(name.indexOf('volt')>-1||name.indexOf('spark')>-1)return '⚡';
+    if(name.indexOf('flask')>-1||name.indexOf('potion')>-1)return '⚗️';
+    if(name.indexOf('thorn')>-1)return '🌵';
+    if(name.indexOf('glass')>-1)return '🔷';
+    if(name.indexOf('gold')>-1||name.indexOf('tribute')>-1)return '🪙';
+    return '✦';
+  }
+  function improveRelicModal(){
+    var modal=byId('relic-choice-modal'),grid=byId('relic-choice-grid');if(!modal||!grid||modal.classList.contains('hidden'))return;
+    var sub=byId('relic-choice-sub');if(sub)sub.textContent='Choose one relic or skip for gold. Relics shape your build with clear upside and small cost.';
+    Array.prototype.forEach.call(grid.querySelectorAll('.relic-choice-card:not(.cc-relic-enhanced)'),function(card){
+      card.classList.add('cc-relic-enhanced');
+      var nm=card.querySelector('.relic-choice-name');
+      var icon=document.createElement('div');icon.className='cc-relic-icon';icon.textContent=relicIconFor(nm?nm.textContent:'');
+      card.insertBefore(icon,card.firstChild);
+      var type=card.querySelector('.relic-choice-type');if(type)type.textContent='Relic · build item';
+      var bless=card.querySelector('.relic-choice-blessing strong');if(bless)bless.textContent='Effect';
+      var curse=card.querySelector('.relic-choice-curse strong');if(curse)curse.textContent='Small cost';
+    });
+    if(!grid.querySelector('.cc-skip-relic')){
+      var skip=document.createElement('button');skip.className='relic-choice-card cc-skip-relic';skip.type='button';skip.innerHTML='<div class="cc-relic-icon">🪙</div><div class="relic-choice-name" style="color:#ffd866">Skip Relic</div><div class="relic-choice-type">Clean choice</div><div class="relic-choice-blessing"><strong>Effect</strong><div>Gain 18 gold instead.</div></div><div class="relic-choice-curse"><strong>Small cost</strong><div>No relic added to this build.</div></div>';
+      skip.onclick=function(){if(G&&G.player){G.player.gold=(G.player.gold||0)+18;safe(function(){addLog('Skipped relic. +18 gold.','item')})}modal.classList.add('hidden');if(G){G.relicChoiceOpen=false;G.paused=false}safe(function(){updateStatsUI()});safe(function(){updateRelicUI()});safe(function(){renderInventoryModal()})};
+      grid.appendChild(skip);
+    }
+  }
+  var mo=new MutationObserver(function(){improveRelicModal();patchStatsAndSpells()});
+  function boot(){ensurePools();wire();patchStatsAndSpells();improveRelicModal();mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
+
 </body>
 </html>
