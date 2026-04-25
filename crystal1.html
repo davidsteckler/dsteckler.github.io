@@ -7413,445 +7413,411 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 
 <!-- ===== FINAL PATCH: tactical relics, weapon spacing, click attack, XP clarity ===== -->
-<style id="final-tactical-style">
-  #stats-area{font-size:12px!important;line-height:1.55!important;padding:12px!important}
-  .stat-label{font-size:10px!important;width:44px!important}.stat-val{font-size:10px!important;width:78px!important}.stat-num-row{font-size:12px!important;padding:5px 4px!important}.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:12px!important}
-  #gear-summary .gs-label,#story-panel .sp-label,#inspect-panel .ip-label,#floor-info .fi-sub{font-size:10px!important}
-  #gear-summary .gs-sub,#story-panel .sp-text,#story-panel .sp-objective,#inspect-panel .ip-desc,#inspect-panel .ip-stats,#inspect-panel .ip-empty,#msg-area{font-size:11px!important;line-height:1.65!important}
-  #story-panel .sp-title,#inspect-panel .ip-name{font-size:15px!important;line-height:1.35!important}#msg-area{max-height:190px!important}#action-log{font-size:10px!important;line-height:1.6!important}
-  #ability-help{min-width:270px!important;max-width:520px!important}#ability-help .ah-name{font-size:12px!important}#ability-help .ah-desc{font-size:10px!important;line-height:1.6!important}#ability-help .ah-tag{font-size:8px!important}
-  .mini-action-btn.combat em{font-size:9px!important;line-height:1.25!important}
-  .xp-pulse{animation:xpPulse 900ms ease-out 1;box-shadow:0 0 0 1px rgba(200,155,255,.55),0 0 18px rgba(200,155,255,.35)!important}@keyframes xpPulse{0%{filter:brightness(1.7)}100%{filter:brightness(1)}}
-  .relic-choice-card.skip-relic{border:1px dashed rgba(255,255,255,.24)!important;background:linear-gradient(180deg,#121624,#0a0e18)!important}.relic-choice-card.skip-relic .relic-choice-name{color:#dbe5ff!important}
-  .tactical-note{display:inline-block;margin-top:7px;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:10px;color:#eaf2ff}
+<style id="cc-clean-class-combat-style">
+  /* Clean, readable bottom bar. Early game is now click to attack, not button soup. */
+  #slash-btn,#bash-btn,#kick-btn,#guard-btn,#attack-btn,#ability-help,#mobile-tactical-bar{display:none!important}
+  #bottom-bar{height:76px;min-height:76px;padding:8px 12px;gap:10px;overflow:visible;background:linear-gradient(180deg,#111629,#090d18);border-top:1px solid rgba(127,255,212,.16)}
+  #bottom-bar .bar-sep{display:none}
+  #action-log{display:none!important}
+  .inv-mini{font-size:9px;color:#dbe6ff;margin-left:4px;white-space:nowrap}
+  .spell-slot,#potion-btn,#mana-btn,.mini-action-btn{width:62px!important;height:56px!important;min-width:62px!important;border-radius:12px!important;font-size:9px!important}
+  .spell-slot .spell-key,#potion-btn .spell-key,#mana-btn .spell-key{font-size:8px!important;color:#9fb4e8!important}
+  .spell-slot .spell-cost,.potion-count,.potion-label{font-size:8px!important}
+  #inv-open-btn,#wait-btn{font-size:10px!important;min-width:78px!important;color:#f4fbff!important}
+  .spell-slot.clean-selected{border-color:#ffd866!important;box-shadow:0 0 0 1px rgba(255,216,102,.35) inset,0 0 16px rgba(255,216,102,.20)!important}
+  .spell-slot .spell-name-tip{font-size:9px!important;line-height:1.65!important;min-width:270px!important;max-width:340px!important;padding:10px 12px!important;border-radius:12px!important}
+  .clean-tip-title{display:block;color:#fff;margin-bottom:4px}.clean-tip-line{display:block;color:#dce7ff}.clean-tip-target{display:block;color:#ffd866;margin-top:6px}
+
+  /* Bigger left-side stats. */
+  #stats-area{font-size:11px!important;padding:14px!important}
+  .stat-row{gap:10px!important;margin:9px 0!important}
+  .stat-label{font-size:10px!important;width:42px!important}.stat-val{font-size:10px!important;width:72px!important}
+  .stat-num-row{padding:6px 4px!important}.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:11px!important}
+  #char-title{font-size:11px!important;color:#d8e8ff!important}#char-name{font-size:10px!important;color:#8dffe0!important}
+  #class-build-panel{margin:10px 0 4px;padding:10px;border:1px solid rgba(127,255,212,.14);border-radius:12px;background:linear-gradient(180deg,rgba(18,28,48,.94),rgba(9,13,25,.94))}
+  #class-build-panel .cb-label{font-size:8px;color:#9fb4e8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  #class-build-panel .cb-name{font-size:12px;color:#ffd866;line-height:1.4;margin-bottom:5px}
+  #class-build-panel .cb-text{font-size:9px;color:#e1eaff;line-height:1.55}
+  #class-build-panel .cb-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.cb-tag{font-size:7px;color:#f7fbff;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);padding:3px 6px;border-radius:999px}
+
+  /* Forecast panel: simple Fire Emblem style preview. */
+  #clean-forecast{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:14;width:min(720px,calc(100% - 26px));display:none;pointer-events:none;border:1px solid rgba(127,255,212,.28);border-radius:18px;background:linear-gradient(180deg,rgba(9,14,28,.97),rgba(5,8,16,.94));box-shadow:0 20px 42px rgba(0,0,0,.42),0 0 0 1px rgba(127,255,212,.08) inset;padding:12px 14px;color:#eef5ff;font-family:var(--ui-font,'Press Start 2P',monospace)}
+  #clean-forecast .cf-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px}.cf-action{font-size:12px;color:#fff;line-height:1.4}.cf-target{font-size:11px;color:#ffd866;line-height:1.4;text-align:right}
+  #clean-forecast .cf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cf-box{border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.045);padding:8px;min-height:48px}.cf-label{font-size:7px;color:#9fb0dd;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.cf-val{font-size:12px;color:#f7fbff;line-height:1.35}.cf-note{font-size:9px;line-height:1.55;color:#dbe6ff;margin-top:10px}.cf-good{color:#7fffd4}.cf-warn{color:#ffcc7a}.cf-bad{color:#ff7b96}.cf-mana{color:#8eb0ff}
+  #target-help-chip{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:13;width:min(640px,calc(100% - 28px));border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(10,15,29,.88);padding:9px 12px;color:#eaf2ff;font-size:9px;line-height:1.5;text-align:center;pointer-events:none}
+  #target-help-chip strong{color:#7fffd4;font-weight:normal}
+
+  @media (max-width:900px){
+    #bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:50;height:auto;min-height:84px;justify-content:center;gap:7px;padding:8px 8px calc(10px + env(safe-area-inset-bottom));flex-wrap:wrap}
+    .spell-slot,#potion-btn,#mana-btn,.mini-action-btn{width:54px!important;height:50px!important;min-width:54px!important}
+    #inv-open-btn,#wait-btn{min-width:62px!important;font-size:8px!important}.inv-mini{display:none!important}
+    #clean-forecast{bottom:108px;width:calc(100% - 18px);padding:10px}.cf-action,.cf-target{font-size:9px!important}.cf-val{font-size:10px!important}#clean-forecast .cf-grid{grid-template-columns:repeat(2,1fr)}.cf-note{font-size:8px!important}
+    #target-help-chip{bottom:92px;width:calc(100% - 18px);font-size:8px}
+    #mobile-controls{bottom:calc(92px + env(safe-area-inset-bottom))!important}
+  }
 </style>
-<script id="final-tactical-patch">
+<script id="cc-clean-class-combat-patch">
 (function(){
-  if(window.__finalTacticalPatch) return; window.__finalTacticalPatch=true;
-  const $=id=>document.getElementById(id), safe=fn=>{try{return fn()}catch(e){console.warn('final tactical patch',e)}};
-  const dist=(a,b,c,d)=>Math.abs(a-c)+Math.abs(b-d);
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const log=(m,t='info')=>{try{addLog(m,t)}catch(e){console.log(m)}};
+  const safe=fn=>{try{return fn()}catch(e){console.warn('[clean-combat]',e)}};
+  const player=()=>window.G&&G.player?G.player:null;
+  const man=(a,b,c,d)=>Math.abs(a-c)+Math.abs(b-d);
   function enemyAt(x,y){return (window.G&&G.enemies||[]).find(e=>e.hp>0&&e.x===x&&e.y===y)}
-  function weapon(){return window.G&&G.player?G.player.weapon:null}
-  function kind(w=weapon()){const s=((w&&((w.weaponType||'')+' '+(w.name||'')+' '+(w.weaponClass||'')))||'').toLowerCase();if(/crossbow/.test(s))return'crossbow';if(/bow/.test(s))return'bow';if(/wand|arcane/.test(s))return'wand';if(/hammer|maul|mace|axe|crush/.test(s))return'crush';if(/spear|lance|pierce/.test(s))return'pierce';if(/sword|blade|dagger|edge/.test(s))return'blade';return w?'melee':'unarmed'}
-  function isRanged(w=weapon()){return !!(w&&(w.ranged||w.range>1||/bow|crossbow|wand/i.test((w.name||'')+' '+(w.weaponType||''))))}
-  function range(w=weapon()){const k=kind(w);return k==='crossbow'?Math.max(5,w?.range||5):k==='bow'?Math.max(4,w?.range||4):k==='wand'?Math.max(5,w?.range||5):1}
-  function lineClear(x0,y0,x1,y1){if(!window.G||!G.map)return false;let dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx-dy,x=x0,y=y0;while(!(x===x1&&y===y1)){let e2=2*err;if(e2>-dy){err-=dy;x+=sx}if(e2<dx){err+=dx;y+=sy}if(x===x1&&y===y1)break;if(!G.map[y]||G.map[y][x]===T.WALL||G.map[y][x]===T.DOOR)return false}return true}
-  function canShoot(e){if(!window.G||!G.player||!e||!isRanged())return false;const d=dist(G.player.x,G.player.y,e.x,e.y);return d>1&&d<=range()&&G.visible?.[e.y]?.[e.x]&&lineClear(G.player.x,G.player.y,e.x,e.y)}
-  window.canRangedAttack=canShoot;
-  function push(e,dx,dy,tiles,label){let moved=false;for(let i=0;i<tiles;i++){const nx=e.x+dx,ny=e.y+dy;if(typeof canPushTo==='function'&&canPushTo(nx,ny)){e.x=nx;e.y=ny;moved=true;if(G.map?.[ny]?.[nx]===T.TRAP&&typeof triggerTrapAt==='function')triggerTrapAt(nx,ny,e.name,e)}else{if(typeof spawnDamageText==='function')spawnDamageText(e.x,e.y,'WALL','#5bdfff');break}}if(moved&&typeof addLog==='function')addLog(`${e.name} is ${label}.`,'info');return moved}
-  function rangedShot(e){const w=weapon(),k=kind(w);if(!w||!e)return false;const d=dist(G.player.x,G.player.y,e.x,e.y);if(d<=1){addLog(`${w.weaponType||w.name||'Ranged weapon'} needs space. Kick them back or swap to melee.`,'info');return true}if(!canShoot(e)){addLog('No clean shot. Move for line of sight or range.','info');return true}const st=typeof getStats==='function'?getStats():{atk:G.player.atk,crit:0};let dmg=Math.max(1,st.atk+(w.atk||0)-e.def+rng.int(0,2));let label='Shot',color=w.projectileColor||'#d8e9ff';if(k==='crossbow'){dmg=Math.floor(dmg*1.22)+1;label='Crossbow bolt'}if(k==='bow'){dmg=Math.max(1,Math.floor(dmg*.95));label='Bow shot'}if(k==='wand'){dmg=Math.max(1,Math.floor(dmg*.80+(G.player.maxMp||0)/6));label='Arc bolt';color='#d7a8ff'}if(typeof spawnSpellFx==='function')spawnSpellFx({kind:'projectile',from:{x:G.player.x,y:G.player.y},to:{x:e.x,y:e.y},color,life:16,maxLife:16});if(typeof playerDealDamage==='function')playerDealDamage(e,dmg,{label,color,sound:k==='wand'?'spell':'hit',critScale:k==='bow'?1.25:1,critMult:k==='crossbow'?2.05:1.75,shake:3});if(e.hp>0){const dx=Math.sign(e.x-G.player.x),dy=Math.sign(e.y-G.player.y);if(k==='crossbow'&&rng.chance(.55))push(e,dx,dy,1,'knocked back by the bolt');if(k==='bow'&&rng.chance(.35)){e.slowed=true;addLog(`${e.name} is slowed by the arrow.`,'info')}if(k==='wand'&&rng.chance(.35)){e.stunned=Math.max(e.stunned||0,1);addLog(`${e.name} flickers and loses a beat.`,'spell')}}addLog(`${label}: ${k==='crossbow'?'heavy damage and knockback chance':k==='bow'?'safe damage and slow chance':'arcane damage and stun chance'}.`,'combat');if(typeof endTurn==='function')endTurn();return true}
-  function patchAttack(){if(typeof attack!=='function'||attack.__finalPatch)return;const old=attack;attack=function(a,d,isP){if(isP&&window.G&&a===G.player&&isRanged()&&d)return rangedShot(d);return old.apply(this,arguments)};attack.__finalPatch=true;window.attack=attack}
-  function patchActions(){if(typeof tryCombatAction!=='function'||tryCombatAction.__finalPatch)return;const old=tryCombatAction;tryCombatAction=function(action,dx,dy){if(!action||!window.G||G.gameOver||G.paused)return false;const e=enemyAt(G.player.x+dx,G.player.y+dy),w=weapon(),k=kind(w),st=typeof getStats==='function'?getStats():{atk:G.player.atk};if(action==='slash'){if(isRanged()){addLog('Slash needs a melee weapon. Ranged weapons shoot from distance.','info');return false}if(k==='blade'&&e){const hits=getSlashTiles(dx,dy).map(p=>enemyAt(p.x,p.y)).filter(Boolean);G.player.swingAnim=1;spawnSpellFx({kind:'slash',x:G.player.x,y:G.player.y,dx,dy,color:w?.glowColor||'#7fffd4',life:12,maxLife:12});hits.forEach((x,i)=>playerDealDamage(x,Math.max(1,Math.floor(st.atk*(i?0.70:1.08))-x.def+rng.int(0,1)),{label:i?'Cleave':'Sword slash',color:'#7fffd4',critScale:.9,shake:i?2:4}));addLog('Slash is best when enemies are grouped beside your target.','info');clearQueuedAction();endTurn();return true}}
-    if(action==='bash'&&e){G.player.swingAnim=1;spawnSpellFx({kind:'bash',x:e.x,y:e.y,dx,dy,color:'#5bdfff',life:14,maxLife:14});playerDealDamage(e,Math.max(1,Math.floor(st.atk*(k==='crush'?1.15:.82))-e.def+rng.int(0,1)),{label:k==='crush'?'Crushing bash':'Bash',color:'#5bdfff',allowCrit:false,stun:1,shake:5});if(e.hp>0){const moved=push(e,dx,dy,k==='crush'?2:1,'shoved back');if(!moved){e.hp-=k==='crush'?3:2;spawnDamageText(e.x,e.y,k==='crush'?'3':'2','#5bdfff');if(e.hp<=0)killEnemy(e);else addLog('Bash is strongest when a wall or trap is behind the target.','info')}}G.player.skillCooldowns.bash=2+(G.player.relicStats?.cooldownPlus||0);clearQueuedAction();endTurn();return true}
-    if(action==='kick'&&e){spawnSpellFx({kind:'kick',x:e.x,y:e.y,dx,dy,color:'#ffb35b',life:14,maxLife:14});const danger=!!(e.range||e.intentCharge||e.elite||e.boss||e.miniBoss);playerDealDamage(e,Math.max(1,Math.floor(st.atk*.55)+1-e.def+rng.int(0,1)),{label:danger?'Interrupt kick':'Kick',color:'#ffb35b',allowCrit:false,stun:danger?2:1,shake:4,noSteal:true});if(e.hp>0)push(e,dx,dy,1,'kicked out of position');if(danger)addLog('Kick is best as an interrupt against ranged, elite, boss, or charging enemies.','info');G.player.skillCooldowns.kick=2+(G.player.relicStats?.cooldownPlus||0);clearQueuedAction();endTurn();return true}
-    return old.apply(this,arguments)};tryCombatAction.__finalPatch=true;window.tryCombatAction=tryCombatAction}
-  function patchClick(){if(typeof handleCanvasPoint!=='function'||handleCanvasPoint.__finalPatch)return;handleCanvasPoint=function(clientX,clientY){if(!window.G||G.gameOver||G.paused)return;const rect=canvas.getBoundingClientRect(),sx=(clientX-rect.left)*(canvas.width/rect.width),sy=(clientY-rect.top)*(canvas.height/rect.height),tx=Math.floor(sx/TILE)+G.camera.x,ty=Math.floor(sy/TILE)+G.camera.y,e=enemyAt(tx,ty),d=dist(G.player.x,G.player.y,tx,ty),same=G.selectedInspect&&G.selectedInspect.kind==='world'&&G.selectedInspect.x===tx&&G.selectedInspect.y===ty;if(e){if(typeof pinInspect==='function')pinInspect({kind:'world',x:tx,y:ty});if(canShoot(e))return rangedShot(e);if(d===1){if(isRanged()){addLog('Too close to shoot. Kick them back, move away, or switch to melee.','info');return}if(G.player.queuedAction&&typeof tryCombatAction==='function'&&tryCombatAction(G.player.queuedAction,Math.sign(tx-G.player.x),Math.sign(ty-G.player.y)))return;attack(G.player,e,true);endTurn();return}if(same&&typeof openEnemyModal==='function'){openEnemyModal(e);return}return}const interactive=(G.interactives||[]).find(o=>o.x===tx&&o.y===ty&&!o.used),info=typeof getWorldHoverInfo==='function'?getWorldHoverInfo(tx,ty):null;if(interactive){if(!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x:tx,y:ty});return}if(d<=1){activateInteractive(interactive);endTurn()}else startAutoMoveTo(tx,ty);return}if(info&&!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x:tx,y:ty});return}if(same&&typeof clearPinnedInspect==='function')clearPinnedInspect();if(d===0){waitTurn();return}startAutoMoveTo(tx,ty)};handleCanvasPoint.__finalPatch=true;window.handleCanvasPoint=handleCanvasPoint}
-  function patchAbilityHelp(){const refresh=()=>{const help=$('ability-help');if(!help||!window.G||!G.player)return;const w=weapon(),k=kind(w);let msg='Click an adjacent enemy to attack. Q Slash hits an arc, E Bash shoves, F Kick interrupts.';if(k==='crossbow')msg='Crossbow: click a visible enemy 2 to 5 tiles away. Heavy shot, high crit, can knock back. Cannot fire in melee.';else if(k==='bow')msg='Bow: click a visible enemy 2 to 4 tiles away. Safer poke, can slow. Cannot fire in melee.';else if(k==='wand')msg='Wand: click a visible enemy 2 to 5 tiles away. Lower weapon damage, can stun, fits spell builds.';else if(k==='blade')msg='Sword/blade: best in melee. Q Slash can hit the front target plus side tiles.';else if(k==='crush')msg='Crush weapon: E Bash hits harder and shoves farther into walls or traps.';else if(k==='pierce')msg='Pierce weapon: strong direct melee trades. Use Kick or positioning before you get surrounded.';help.innerHTML='<div class="ah-tag">Current weapon</div><div class="ah-name">'+(w?w.name:'Unarmed')+'</div><div class="ah-desc">'+msg+'</div>'};['slash-btn','bash-btn','kick-btn','guard-btn'].forEach(id=>{const b=$(id);if(b&&!b.__finalHint){b.__finalHint=true;b.addEventListener('mouseenter',refresh);b.addEventListener('click',()=>setTimeout(refresh,30))}});setInterval(refresh,2000);setTimeout(refresh,600)}
-  function relics(){return[{id:'anchor',name:'Anchor Bell',color:'#5bdfff',boon:'Bash deals +2 damage and pushes 1 extra tile.',cost:'Kick cooldown is +1 turn.',note:'Great when you use walls, corners, and traps.',apply(){G.player.relicStats.bashBonus=(G.player.relicStats.bashBonus||0)+2;G.player.relicStats.kickTax=(G.player.relicStats.kickTax||0)+1}},{id:'string',name:"Hunter's String",color:'#8af0ff',boon:'Ranged attacks deal +1 damage and slow more often.',cost:'You lose 1 defense while holding a ranged weapon.',note:'A real ranged build relic. Strong, but spacing matters.',apply(){G.player.relicStats.rangedBonus=(G.player.relicStats.rangedBonus||0)+1;G.player.relicStats.rangedDefTax=(G.player.relicStats.rangedDefTax||0)+1}},{id:'crown',name:'Splinter Crown',color:'#ffd866',boon:'+8% crit forever.',cost:'Potions restore 10% less.',note:'Reliable upside with a small recovery cost.',apply(){G.player.relicStats.crit=(G.player.relicStats.crit||0)+.08;G.player.relicStats.healTax=(G.player.relicStats.healTax||0)+.10}},{id:'shield',name:'Pocket Shield',color:'#7fffd4',boon:'Kick gives 1 Guard turn when used on dangerous enemies.',cost:'-1 max MP.',note:'For players who time interrupts.',apply(){G.player.maxMp=Math.max(4,G.player.maxMp-1);G.player.mp=Math.min(G.player.mp,G.player.maxMp);G.player.relicStats.kickGuard=1}},{id:'lantern',name:'Greedy Lantern',color:'#ffb35b',boon:'Gold rewards are 25% larger.',cost:'Elites are slightly more alert.',note:'Economy upside with a small pressure cost.',apply(){G.player.relicStats.goldMult=(G.player.relicStats.goldMult||1)*1.25;G.player.relicStats.eliteNoise=(G.player.relicStats.eliteNoise||0)+.10}},{id:'grip',name:'Second Grip',color:'#c89bff',boon:'Slash and basic melee attacks deal +1 damage.',cost:'Ranged shots deal -1 damage.',note:'Clean melee identity.',apply(){G.player.relicStats.meleeBonus=(G.player.relicStats.meleeBonus||0)+1;G.player.relicStats.rangedPenalty=(G.player.relicStats.rangedPenalty||0)+1}}]}
-  function closeRelic(){const m=$('relic-choice-modal');if(m)m.classList.add('hidden');if(window.G){G.relicChoiceOpen=false;G.paused=false}}
-  function drawRelics(){if(!window.G||!G.player)return;const list=$('relic-list');if(list){const rs=G.player.relics||[];list.innerHTML=rs.length?rs.slice(-8).map(r=>`<span class="relic-chip" style="border-color:${r.color||'#7fffd4'}66">${r.name}<small>${r.boon?.desc||''}</small></span>`).join(''):'<span class="relic-chip">No relics yet<small>Skip is allowed.</small></span>'}const c=$('relic-count');if(c)c.textContent=(G.player.relics||[]).length+' relics'}
-  function takeRelic(r){G.player.relicStats=G.player.relicStats||{};G.player.relics=G.player.relics||[];G.player.vFinalRelics=G.player.vFinalRelics||[];if(G.player.vFinalRelics.includes(r.id))return;r.apply();const stored={id:'final_'+r.id,name:r.name,color:r.color,boon:{desc:r.boon},curse:{desc:r.cost},desc:r.note};G.player.vFinalRelics.push(r.id);G.player.relics.push(stored);addLog('Relic claimed: '+r.name,'item');closeRelic();drawRelics();safe(()=>updateStatsUI());safe(()=>updateEquipUI());safe(()=>renderInventoryModal())}
-  function replaceRelicDraft(){const modal=$('relic-choice-modal'),grid=$('relic-choice-grid');if(!modal||!grid||modal.classList.contains('hidden')||grid.__finalReplacing)return;grid.__finalReplacing=true;const pool=relics().filter(r=>!(G.player?.vFinalRelics||[]).includes(r.id));const choices=[];while(pool.length&&choices.length<2)choices.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);const sub=$('relic-choice-sub');if(sub)sub.textContent='Pick one tactical relic or skip. Upsides matter more than costs, but the cost should shape your plan.';grid.innerHTML=choices.map((r,i)=>`<button class="relic-choice-card" type="button" data-final-relic="${i}"><div class="relic-choice-name" style="color:${r.color}">${r.name}</div><div class="relic-choice-type">Tactical relic</div><div class="relic-choice-blessing"><strong>Upside</strong><div>${r.boon}</div></div><div class="relic-choice-curse"><strong>Small cost</strong><div>${r.cost}</div></div><div class="relic-choice-footer">${r.note}<br><span class="tactical-note">Build-around choice</span></div></button>`).join('')+`<button class="relic-choice-card skip-relic" type="button" id="skip-relic-final"><div class="relic-choice-name">Skip Relic</div><div class="relic-choice-type">Safe choice</div><div class="relic-choice-blessing"><strong>Upside</strong><div>Gain 12 gold and avoid the downside.</div></div><div class="relic-choice-curse"><strong>Cost</strong><div>No relic power this time.</div></div><div class="relic-choice-footer">Use this when neither relic fits your build.</div></button>`;grid.querySelectorAll('[data-final-relic]').forEach(btn=>btn.onclick=()=>takeRelic(choices[Number(btn.dataset.finalRelic)]));const skip=$('skip-relic-final');if(skip)skip.onclick=()=>{G.player.gold+=12;addLog('Skipped relic. +12 gold instead.','item');closeRelic();drawRelics();safe(()=>updateStatsUI())};setTimeout(()=>grid.__finalReplacing=false,500)}
-  function patchRelicModal(){const obs=new MutationObserver(()=>setTimeout(replaceRelicDraft,25));obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});setInterval(()=>{replaceRelicDraft();drawRelics()},1200)}
-  function patchStats(){if(typeof getStats!=='function'||getStats.__finalStats)return;const old=getStats;getStats=function(){const st=old.apply(this,arguments),rs=G.player?.relicStats||{},k=kind();if(isRanged()&&rs.rangedDefTax)st.def=Math.max(0,(st.def||0)-rs.rangedDefTax);if(k==='blade'||k==='crush'||k==='pierce'||k==='unarmed')st.atk=(st.atk||0)+(rs.meleeBonus||0);if(isRanged())st.atk=(st.atk||0)+(rs.rangedBonus||0)-(rs.rangedPenalty||0);return st};getStats.__finalStats=true;window.getStats=getStats}
-  function patchXP(){if(typeof killEnemy!=='function'||killEnemy.__finalXP)return;const old=killEnemy;killEnemy=function(e){const out=old.apply(this,arguments),bar=$('bar-xp');if(bar){bar.classList.add('xp-pulse');setTimeout(()=>bar.classList.remove('xp-pulse'),900)}if(typeof addLog==='function')addLog(`EXP bar updated: ${G.player.xp}/${G.player.xpNext} XP toward next level.`,'level');safe(()=>updateStatsUI());return out};killEnemy.__finalXP=true;window.killEnemy=killEnemy}
-  function patchInspect(){if(typeof getWorldHoverInfo==='function'&&!getWorldHoverInfo.__finalInspect){const old=getWorldHoverInfo;getWorldHoverInfo=function(x,y){const info=old.apply(this,arguments),e=enemyAt(x,y);if(info&&e&&window.G){const d=dist(G.player.x,G.player.y,e.x,e.y),w=weapon();const read=isRanged(w)?(d<=1?'Too close to shoot. Kick or move.':d<=range(w)&&lineClear(G.player.x,G.player.y,e.x,e.y)?'Clean ranged shot available.':'Move for line of sight or range.'):(d===1?'Click to melee attack.':'Click once to inspect, again to approach.');info.stats=(info.stats||[]).concat([`YOUR WEAPON: ${w?w.name:'Unarmed'}`,`TACTICAL READ: ${read}`]);info.compare=read}return info};getWorldHoverInfo.__finalInspect=true;window.getWorldHoverInfo=getWorldHoverInfo}}
-  function boot(){patchStats();patchAttack();patchActions();patchClick();patchAbilityHelp();patchRelicModal();patchXP();patchInspect();drawRelics();safe(()=>updateStatsUI());safe(()=>updateEquipUI())}
+  function visible(x,y){return !!(window.G&&G.visible&&G.visible[y]&&G.visible[y][x])}
+  function sight(x1,y1,x2,y2){try{return typeof lineClear==='function'?lineClear(x1,y1,x2,y2):true}catch(e){return true}}
+  function stats(){try{return getStats()}catch(e){const p=player();return {atk:p?.atk||1,def:p?.def||0,crit:p?.crit||0,dodge:p?.dodge||0}}}
+  function weapon(){const p=player();return p&&p.weapon?p.weapon:{name:'Bare Hands',atk:0,kind:'fist',weaponClass:'edge',desc:'Basic melee attack.'}}
+  function wClass(w=weapon()){if(typeof weaponClassOf==='function')return weaponClassOf(w);return w.weaponClass||w.kind||'edge'}
+  function isRanged(w=weapon()){const c=wClass(w);return !!(w.ranged||w.range>1||c==='ranged'||c==='arcane'||/bow|crossbow|wand|staff/i.test((w.name||'')+' '+(w.weaponType||'')+' '+(w.kind||'')))}
+  function wRange(w=weapon()){return isRanged(w)?(w.range||(/crossbow/i.test(w.name||'')?5:/bow/i.test(w.name||'')?4:5)):1}
+  function selectedSpell(){const p=player();return p&&Number.isInteger(p.selectedSpellIndex)?p.spells[p.selectedSpellIndex]:null}
+  function clearSpell(){const p=player();if(p)p.selectedSpellIndex=null; updateSpellSlots(); updateHelp();}
+  function spellIsSelf(sp){return sp&&['heal','shield','blink'].includes(sp.type)}
+  function spellColor(sp){return {fire:'#ff6b3a',ice:'#5bdfff',lightning:'#ffd866',poison:'#40ff40',earth:'#c8a050',heal:'#7fffd4',shield:'#7ac8ff',blink:'#c89bff'}[sp?.type]||'#c89bff'}
+  function spellDetails(sp){if(!sp)return''; if(sp.type==='heal')return `Self • ${sp.cost} MP • Heal ${sp.heal||0} HP`; if(sp.type==='shield')return `Self • ${sp.cost} MP • Shield +${sp.shield||0}`; if(sp.type==='blink')return `Self • ${sp.cost} MP • Blink up to ${sp.range||5}`; return `Target • ${sp.cost} MP • Range ${sp.range||5} • Damage ${sp.dmg||0}${sp.aoe?' • AoE '+sp.aoe:''}${sp.chain?' • Chain '+sp.chain:''}${sp.slow?' • Slow':''}${sp.dot?' • Poison':''}`}
+
+  function ensureUI(){
+    const wrap=$('canvas-wrap');
+    if(wrap&&!$('clean-forecast')){const f=document.createElement('div');f.id='clean-forecast';wrap.appendChild(f)}
+    if(wrap&&!$('target-help-chip')){const h=document.createElement('div');h.id='target-help-chip';h.innerHTML='<strong>Click an enemy</strong> to attack or shoot. Click empty tiles to move.';wrap.appendChild(h)}
+    const statsArea=$('stats-area');
+    if(statsArea&&!$('class-build-panel')){const panel=document.createElement('div');panel.id='class-build-panel';statsArea.appendChild(panel)}
+  }
+  function updateHelp(){
+    const chip=$('target-help-chip'); if(!chip||!player())return;
+    const sp=selectedSpell(), w=weapon();
+    if(sp) chip.innerHTML=`<strong>${sp.name} selected:</strong> tap an enemy to cast. ${spellDetails(sp)}`;
+    else if(isRanged(w)) chip.innerHTML=`<strong>${w.name}:</strong> tap an enemy ${2}-${wRange(w)} tiles away to shoot. Too close means step back first.`;
+    else chip.innerHTML=`<strong>${w.name}:</strong> tap an adjacent enemy to attack. Movement into enemies only blocks.`;
+  }
+
+  function forecast(enemy, sp=selectedSpell()){
+    if(!player()||!enemy)return null; const p=player(), st=stats(), d=man(p.x,p.y,enemy.x,enemy.y), w=weapon();
+    if(sp){
+      const range=sp.range||5, valid=!spellIsSelf(sp)&&p.mp>=sp.cost&&d<=range&&visible(enemy.x,enemy.y)&&sight(p.x,p.y,enemy.x,enemy.y);
+      const dmg=sp.dmg||0, hit=valid?0.94:0; return {kind:'spell',name:sp.name,target:enemy.name,valid,why:!valid?(p.mp<sp.cost?'Not enough mana':d>range?'Out of range':!visible(enemy.x,enemy.y)?'Not visible':'No line'):'Click to cast',low:dmg,high:dmg,hit,range,cost:sp.cost,effect:spellDetails(sp),afterLow:Math.max(0,enemy.hp-dmg),afterHigh:Math.max(0,enemy.hp-dmg)};
+    }
+    const ranged=isRanged(w), range=wRange(w), inRange=ranged?(d>=2&&d<=range):(d===1), line=!ranged||sight(p.x,p.y,enemy.x,enemy.y), valid=inRange&&visible(enemy.x,enemy.y)&&line;
+    const base=Math.max(1,(st.atk||1)-((enemy.def||0)));
+    const low=Math.max(1,base-1), high=Math.max(low,base+1+(w.hits===2?1:0)+(/crossbow/i.test(w.name||'')?1:0));
+    let hit=ranged?0.82:0.90; if(ranged)hit-=Math.max(0,d-3)*0.05; hit=Math.max(.55,Math.min(.96,hit+(st.crit||0)*0.15));
+    let effect=ranged?'Projectile. Can miss. ': 'Melee strike. Can miss. ';
+    if(/crossbow/i.test(w.name||'')) effect+='Crossbow may knock back.'; else if(/bow/i.test(w.name||'')) effect+='Bow may slow.'; else if(/wand|staff/i.test((w.name||'')+' '+(w.weaponType||''))) effect+='Wand may stagger.'; else effect+='Class grows from this weapon.';
+    let why='Click to attack'; if(!valid){why=ranged?(d<=1?'Too close':d>range?'Out of range':!line?'No line of sight':'Not visible'):(d!==1?'Too far':'Not visible')}
+    return {kind:ranged?'ranged':'melee',name:ranged?`${w.name} Shot`:`${w.name} Attack`,target:enemy.name,valid,why,low,high,hit:valid?hit:0,range:ranged?`2-${range}`:'1',cost:0,effect,afterLow:Math.max(0,enemy.hp-high),afterHigh:Math.max(0,enemy.hp-low)};
+  }
+  function showForecast(enemy){ensureUI();const f=forecast(enemy);const el=$('clean-forecast'); if(!el||!f){return} el.style.display='block';
+    el.innerHTML=`<div class="cf-top"><div class="cf-action">${f.name}</div><div class="cf-target">${f.target}</div></div><div class="cf-grid"><div class="cf-box"><div class="cf-label">Damage</div><div class="cf-val ${f.valid?'cf-good':'cf-bad'}">${f.low}-${f.high}</div></div><div class="cf-box"><div class="cf-label">Hit</div><div class="cf-val">${Math.round(f.hit*100)}%</div></div><div class="cf-box"><div class="cf-label">Range</div><div class="cf-val">${f.range}</div></div><div class="cf-box"><div class="cf-label">After Hit</div><div class="cf-val">${f.afterLow}-${f.afterHigh} HP</div></div></div><div class="cf-note ${f.valid?'':'cf-warn'}">${f.why}. ${f.cost?`Cost: ${f.cost} MP. `:''}${f.effect}</div>`;
+  }
+  function hideForecast(){const el=$('clean-forecast'); if(el)el.style.display='none'}
+  function rollHit(chance){return Math.random()<chance}
+  function dealToEnemy(enemy,dmg,label,color){enemy.hp-=dmg;enemy.hitFlash=1;spawnP(enemy.x,enemy.y,color||'#ff9b5b',7);spawnDamageText(enemy.x,enemy.y,String(dmg),color||'#ff9b5b');if(enemy.hp<=0)killEnemy(enemy)}
+  function weaponAttack(enemy){
+    if(!player()||!enemy)return false; const p=player(), w=weapon(), f=forecast(enemy,null); showForecast(enemy); if(!f.valid){log(f.why,'info');return false}
+    if(typeof clearAutoMove==='function')clearAutoMove();
+    const col=w.projectileColor||w.glowColor||(isRanged(w)?'#d8e9ff':'#ff9b5b');
+    if(isRanged(w))spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color:col,life:16,maxLife:16}); else {p.swingAnim=1;spawnSpellFx({kind:'slash',x:p.x,y:p.y,dx:Math.sign(enemy.x-p.x),dy:Math.sign(enemy.y-p.y),color:col,life:10,maxLife:10})}
+    if(!rollHit(f.hit)){spawnDamageText(enemy.x,enemy.y,'MISS','#dbe6ff');log(`${f.name} misses ${enemy.name}.`,'combat');SFX.play('step');clearSpell();endTurn();return true}
+    const dmg=Math.floor(f.low+Math.random()*(f.high-f.low+1)); dealToEnemy(enemy,dmg,f.name,col); log(`${f.name} hits ${enemy.name} for ${dmg}.`,'combat');
+    if(enemy.hp>0&&isRanged(w)){
+      if(/crossbow/i.test(w.name||'')&&Math.random()<.35)pushEnemy(enemy,Math.sign(enemy.x-p.x),Math.sign(enemy.y-p.y),1,'Crossbow knockback');
+      else if(/bow/i.test(w.name||'')&&Math.random()<.40){enemy.slowed=true;log(`${enemy.name} is slowed.`,'info')}
+      else if(/wand|staff/i.test((w.name||'')+' '+(w.weaponType||''))&&Math.random()<.25){enemy.stunned=Math.max(enemy.stunned||0,1);log(`${enemy.name} staggers.`,'spell')}
+    }
+    clearSpell();endTurn();return true;
+  }
+  function pushEnemy(enemy,dx,dy,tiles,label){for(let i=0;i<tiles;i++){const nx=enemy.x+dx,ny=enemy.y+dy;if(typeof canPushTo==='function'&&canPushTo(nx,ny)){enemy.x=nx;enemy.y=ny;if(G.map[ny][nx]===T.TRAP&&typeof triggerTrapAt==='function')triggerTrapAt(nx,ny,enemy.name,enemy)}else break}log(label||'Knockback','info')}
+  function castTarget(enemy){
+    const sp=selectedSpell(); if(!sp)return weaponAttack(enemy); const p=player(), f=forecast(enemy,sp); showForecast(enemy); if(!f.valid){log(f.why,'info');return false}
+    p.mp-=sp.cost; const col=spellColor(sp); let hit=[enemy];
+    if(sp.aoe)for(const e of G.enemies)if(e!==enemy&&e.hp>0&&man(e.x,e.y,enemy.x,enemy.y)<=sp.aoe)hit.push(e);
+    if(sp.chain){let last=enemy;for(let c=0;c<sp.chain;c++){const nx=G.enemies.find(e=>e.hp>0&&!hit.includes(e)&&man(e.x,e.y,last.x,last.y)<=3);if(nx){hit.push(nx);last=nx}}}
+    if(sp.type==='lightning')spawnSpellFx({kind:'chain',points:[{x:p.x,y:p.y},...hit.map(h=>({x:h.x,y:h.y}))],color:col,life:14,maxLife:14});else if(sp.type==='poison')spawnSpellFx({kind:'cloud',x:enemy.x,y:enemy.y,color:col,life:24,maxLife:24});else{spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color:col,life:16,maxLife:16});spawnSpellFx({kind:'burst',x:enemy.x,y:enemy.y,color:col,life:18,maxLife:18})}
+    for(const e of hit){dealToEnemy(e,sp.dmg||0,sp.name,col);if(e.hp>0){if(sp.slow)e.slowed=true;if(sp.dot)e.poisoned=sp.dot}}
+    log(`${sp.name} hits ${hit.length} target${hit.length===1?'':'s'}.`,'spell');SFX.play('spell');clearSpell();endTurn();return true;
+  }
+  function screenToTile(clientX,clientY){const rect=canvas.getBoundingClientRect();const sx=(clientX-rect.left)*(canvas.width/rect.width);const sy=(clientY-rect.top)*(canvas.height/rect.height);return {x:Math.floor(sx/TILE)+G.camera.x,y:Math.floor(sy/TILE)+G.camera.y}}
+  function cleanHandle(clientX,clientY){
+    if(!player()||G.gameOver||G.paused)return; const {x,y}=screenToTile(clientX,clientY), enemy=enemyAt(x,y);
+    if(enemy){try{pinInspect({kind:'world',x,y})}catch(e){}; if(selectedSpell())return castTarget(enemy); return weaponAttack(enemy)}
+    hideForecast(); if(selectedSpell()){log('Choose an enemy target for '+selectedSpell().name+'.','info');return}
+    const d=man(G.player.x,G.player.y,x,y), same=G.selectedInspect&&G.selectedInspect.kind==='world'&&G.selectedInspect.x===x&&G.selectedInspect.y===y;
+    const interactive=(G.interactives||[]).find(o=>o.x===x&&o.y===y&&!o.used), info=typeof getWorldHoverInfo==='function'?getWorldHoverInfo(x,y):null;
+    if(interactive){if(!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x,y});return} if(d<=1&&typeof activateInteractive==='function'){activateInteractive(interactive);endTurn()}else if(typeof startAutoMoveTo==='function')startAutoMoveTo(x,y);return}
+    if(info&&!same&&typeof pinInspect==='function'){pinInspect({kind:'world',x,y});return}
+    if(d===0){waitTurn();return} if(typeof clearPinnedInspect==='function')clearPinnedInspect(); if(typeof startAutoMoveTo==='function')startAutoMoveTo(x,y)
+  }
+  function patchMove(){if(typeof movePlayer!=='function'||movePlayer.__cleanClassCombat)return;const old=movePlayer;const wrapped=function(dx,dy,viaAuto=false){if(!player())return old.apply(this,arguments);const nx=G.player.x+dx,ny=G.player.y+dy;if(!G.gameOver&&!G.paused&&G.map?.[ny]?.[nx]!==T.WALL&&enemyAt(nx,ny)){if(typeof clearAutoMove==='function')clearAutoMove();showForecast(enemyAt(nx,ny));log('Enemy blocks that tile. Click the enemy to attack. Movement never bump-attacks.','info');return}return old.apply(this,arguments)};wrapped.__cleanClassCombat=true;window.movePlayer=wrapped;try{movePlayer=wrapped}catch(e){}}
+  function patchCastSpell(){if(typeof castSpell!=='function'||castSpell.__cleanClassCombat)return;const original=castSpell;const wrapped=function(idx){if(!player()||G.gameOver||G.paused)return;const sp=G.player.spells[idx];if(!sp)return;if(G.player.mp<sp.cost){log('Not enough MP.','info');return}if(spellIsSelf(sp)){clearSpell();return original.call(this,idx)}G.player.selectedSpellIndex=G.player.selectedSpellIndex===idx?null:idx;updateSpellSlots();updateHelp();if(G.player.selectedSpellIndex===idx)log(`${sp.name} selected. Click an enemy target. ${spellDetails(sp)}`,'spell')};wrapped.__cleanClassCombat=true;window.castSpell=wrapped;try{castSpell=wrapped}catch(e){}}
+  function updateSpellSlots(){if(!player())return;for(let i=0;i<4;i++){const el=$('spell'+i);if(el)el.classList.toggle('clean-selected',G.player.selectedSpellIndex===i)}}
+  function patchSpellUI(){if(typeof updateSpellUI!=='function'||updateSpellUI.__cleanClassCombat)return;const old=updateSpellUI;const wrapped=function(){old.apply(this,arguments);if(!player())return;for(let i=0;i<4;i++){const el=$('spell'+i),sp=G.player.spells[i];if(!el||!sp)continue;el.onclick=(ev)=>{if(ev){ev.preventDefault();ev.stopPropagation()}castSpell(i)};el.onpointerup=(ev)=>{ev.preventDefault();ev.stopPropagation();castSpell(i)};const tip=el.querySelector('.spell-name-tip');if(tip)tip.innerHTML=`<span class="clean-tip-title">${sp.name}</span><span class="clean-tip-line">${sp.desc||''}</span><span class="clean-tip-target">${spellDetails(sp)}</span>`}updateSpellSlots()};wrapped.__cleanClassCombat=true;window.updateSpellUI=wrapped;try{updateSpellUI=wrapped}catch(e){}}
+  function patchKillXP(){if(typeof killEnemy!=='function'||killEnemy.__cleanXP)return;const old=killEnemy;const wrapped=function(e){const before=player()?G.player.xp:0;const r=old.apply(this,arguments);setTimeout(()=>{if(!player())return;const gained=Math.max(0,G.player.xp-before);const bar=$('bar-xp');if(bar){bar.style.transition='width .25s, filter .25s';bar.style.filter='brightness(1.8)';setTimeout(()=>bar.style.filter='',220)}log(`EXP gained. XP bar is now ${G.player.xp}/${G.player.xpNext}.`,'level');updateClassPanel()},40);return r};wrapped.__cleanXP=true;window.killEnemy=wrapped;try{killEnemy=wrapped}catch(e){}}
+  function classInfo(){const p=player();if(!p)return {name:'Wanderer',text:'No build yet.',tags:[]};let melee=0,ranged=0,magic=0,def=0,trick=0;const w=weapon();if(isRanged(w))ranged+=3;else melee+=2;if(wClass(w)==='arcane')magic+=2;if(wClass(w)==='crush')def+=1;if(wClass(w)==='pierce')trick+=1;(p.spells||[]).forEach(s=>{if(spellIsSelf(s))def+=1;else magic+=1});[p.armor,p.ring,p.amulet].forEach(it=>{if(!it)return;if(it.def||it.hp||it.absorb||it.thorns)def+=2;if(it.crit||it.dodge||it.speed)trick+=2;if(it.mp||it.mdef||it.spellPower)magic+=2;if(it.atk)melee+=1});let name='Wanderer',text='Your class forms from the gear and spells you keep.';if(magic>=5&&ranged>=3){name='Spellshot';text='Ranged weapons and spells are shaping you into a backline controller.'}else if(magic>=5){name='Spellweaver';text='Your spell choices are becoming the center of the run.'}else if(ranged>=4){name='Sharpshooter';text='Your build wants space, line of sight, and clean first shots.'}else if(melee>=4&&def>=3){name='Iron Duelist';text='You are becoming a close-range fighter who can stay in bad trades.'}else if(melee>=4){name='Blademaster';text='Your build is leaning into direct melee pressure.'}else if(def>=5){name='Guardian';text='Armor, sustain, and safe trades define this run.'}else if(trick>=4){name='Skirmisher';text='Crit, speed, and awkward angles are becoming your identity.'}return {name,text,tags:[`Melee ${melee}`,`Ranged ${ranged}`,`Magic ${magic}`,`Defense ${def}`]}}
+  function updateClassPanel(){ensureUI();const info=classInfo();const panel=$('class-build-panel');if(panel)panel.innerHTML=`<div class="cb-label">Class forming</div><div class="cb-name">${info.name}</div><div class="cb-text">${info.text}</div><div class="cb-tags">${info.tags.map(t=>`<span class="cb-tag">${t}</span>`).join('')}</div>`;const title=$('char-title');if(title)title.textContent=info.name;updateHelp()}
+  function patchEvents(){
+    window.handleCanvasPoint=cleanHandle;try{handleCanvasPoint=cleanHandle}catch(e){}
+    if(window.canvas&&!canvas.__cleanClassPointer){canvas.__cleanClassPointer=true;let last=0;const run=e=>{if(!player())return;const now=performance.now();if(now-last<90)return;last=now;e.preventDefault();e.stopImmediatePropagation();const p=e.changedTouches?e.changedTouches[0]:e;cleanHandle(p.clientX,p.clientY)};canvas.addEventListener('pointerup',run,true);canvas.addEventListener('touchend',run,{capture:true,passive:false});canvas.addEventListener('click',run,true);canvas.addEventListener('mousemove',e=>{if(!player())return;const {x,y}=screenToTile(e.clientX,e.clientY);const en=enemyAt(x,y);if(en)showForecast(en);else hideForecast()},true)}
+  }
+  function hideOldButtons(){['slash-btn','bash-btn','kick-btn','guard-btn','attack-btn'].forEach(id=>{const b=$(id);if(b)b.onclick=null})}
+  function boot(){ensureUI();hideOldButtons();patchMove();patchCastSpell();patchSpellUI();patchKillXP();patchEvents();safe(()=>updateSpellUI());updateClassPanel();updateHelp();setInterval(()=>{if(player())updateClassPanel()},1800);log('Clean controls: click enemies to attack or shoot. Spells select first, then click a target. Movement never attacks.','info')}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
 
-
-<!-- V24 TARGETED CONTROLS PATCH: no bump attacks, ability-first targeting -->
-<style id="cc-v24-targeted-controls-style">
-  #attack-btn.target-ready,
-  #slash-btn.target-ready,
-  #bash-btn.target-ready,
-  #kick-btn.target-ready,
-  #guard-btn.target-ready {
-    border-color: rgba(127,255,212,.75) !important;
-    box-shadow: 0 0 14px rgba(127,255,212,.28), inset 0 0 0 1px rgba(127,255,212,.18) !important;
-    color: #9dffe4 !important;
-  }
-  #target-help-chip {
-    min-width: 230px;
-    max-width: 460px;
-    padding: 8px 10px;
-    border: 1px solid rgba(127,255,212,.16);
-    border-radius: 10px;
-    background: linear-gradient(180deg,#121a30,#0b1020);
-    font-size: 8px;
-    line-height: 1.55;
-    color: #dfeaff;
-  }
-  #target-help-chip strong {
-    color: #7fffd4;
-    font-weight: normal;
-  }
-  @media (max-width: 900px) {
-    #target-help-chip { display:none; }
+<!-- FINAL FIX PATCH: direct click combat, easier first floor, meaningful relic text -->
+<style id="cc-final-fix-style">
+  /* stop the bottom bar from becoming a tiny unreadable cockpit */
+  #slash-btn,#bash-btn,#kick-btn,#guard-btn,#attack-btn{display:none!important}
+  #bottom-bar{min-height:72px!important;height:auto!important;gap:8px!important;align-items:center!important;justify-content:center!important;overflow:visible!important;padding:8px 12px!important}
+  .spell-slot,#potion-btn,#mana-btn,#inv-open-btn,#wait-btn{width:62px!important;min-width:62px!important;height:54px!important;font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:11px!important;font-weight:800!important}
+  #action-log{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:13px!important;line-height:1.35!important;max-height:54px!important;text-align:left!important;min-width:260px!important}
+  #target-help-chip{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:13px!important;line-height:1.35!important;left:50%!important;transform:translateX(-50%)!important;max-width:min(760px,94%)!important;background:rgba(7,10,18,.92)!important;border:1px solid rgba(127,255,212,.25)!important;border-radius:14px!important;padding:10px 14px!important;z-index:8!important;pointer-events:none!important}
+  #clean-forecast{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:13px!important;line-height:1.35!important;z-index:9!important;pointer-events:none!important;max-width:min(520px,92%)!important}
+  #clean-forecast .cf-action{font-size:15px!important}.cf-val{font-size:15px!important}.cf-note{font-size:12px!important}
+  #stats-area,.stat-row,.stat-num-row{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:14px!important;line-height:1.35!important}
+  .stat-label,.stat-val,.stat-num-row .sn-label,.stat-num-row .sn-val{font-size:14px!important;font-weight:800!important}
+  .stat-label{width:42px!important}.stat-val{width:80px!important}
+  #gear-summary .gs-sub,#relic-panel .rp-help,#inspect-panel .ip-desc,#inspect-panel .ip-stats,#msg-area{font-family:system-ui,-apple-system,Segoe UI,sans-serif!important;font-size:12px!important;line-height:1.45!important}
+  #cc-click-shield{position:fixed;inset:0;pointer-events:none;z-index:99999}
+  .cc-relic-skip{border:1px dashed rgba(255,216,102,.45)!important;background:linear-gradient(180deg,#1c1722,#0f1018)!important}
+  @media(max-width:900px){
+    #bottom-bar{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:60!important;min-height:88px!important;padding:8px 8px calc(10px + env(safe-area-inset-bottom))!important;flex-wrap:wrap!important}
+    #center{padding-bottom:92px!important}
+    #target-help-chip{bottom:98px!important;font-size:12px!important}
+    #clean-forecast{bottom:132px!important;width:calc(100% - 18px)!important}
+    .spell-slot,#potion-btn,#mana-btn,#inv-open-btn,#wait-btn{width:58px!important;min-width:58px!important;height:54px!important}
+    #mobile-controls{display:none!important}
   }
 </style>
-
-<script id="cc-v24-targeted-controls-patch">
+<script id="cc-final-fix-direct-combat">
 (function(){
-  "use strict";
-
+  'use strict';
+  const TILE_SIZE = 22;
   const byId = id => document.getElementById(id);
-  const safe = fn => { try { return fn(); } catch(e) { console.warn('[V24 target controls]', e); } };
-
-  function enemyAt(x,y){
-    return window.G && Array.isArray(G.enemies) ? G.enemies.find(e => e.hp > 0 && e.x === x && e.y === y) : null;
+  const log = (m,t='info') => { try{ addLog(m,t); } catch(e){ console.log(m); } };
+  const safe = fn => { try { return fn(); } catch(e){ console.warn('[final-fix]', e); return undefined; } };
+  const man = (a,b,c,d)=>Math.abs(a-c)+Math.abs(b-d);
+  const player = () => window.G && G.player ? G.player : null;
+  const enemyAt = (x,y) => (window.G && G.enemies || []).find(e=>e && e.hp>0 && e.x===x && e.y===y);
+  const currentWeapon = () => player()?.weapon || {name:'Training Sword', atk:3, kind:'sword', weaponClass:'edge', desc:'Starter melee weapon.'};
+  function st(){ return safe(()=>getStats()) || {atk:player()?.atk||3,def:player()?.def||0,crit:0,dodge:0,steal:0}; }
+  function wClass(w=currentWeapon()){
+    let raw = (w.weaponClass||w.kind||w.weaponType||'').toString().toLowerCase();
+    const name = (w.name||'').toLowerCase();
+    if(/crossbow|bow|sling|javelin|throw/.test(name+raw)) return 'ranged';
+    if(/wand|staff|arcane/.test(name+raw)) return 'arcane';
+    if(/hammer|mace|club|crush/.test(name+raw)) return 'crush';
+    if(/spear|dagger|fang|pierce/.test(name+raw)) return 'pierce';
+    return 'edge';
   }
-
-  function manhattan(ax,ay,bx,by){ return Math.abs(ax-bx) + Math.abs(ay-by); }
-
-  function currentWeapon(){ return window.G && G.player ? G.player.weapon : null; }
-
-  function weaponKind(w=currentWeapon()){
-    const raw = String((w && (w.kind || w.type || w.weaponClass || w.name)) || '').toLowerCase();
-    if(raw.includes('crossbow')) return 'crossbow';
-    if(raw.includes('bow')) return 'bow';
-    if(raw.includes('wand') || raw.includes('staff') || raw.includes('arc')) return 'wand';
-    if(raw.includes('hammer') || raw.includes('mace') || raw.includes('club') || raw.includes('axe') || raw.includes('crush')) return 'crush';
-    if(raw.includes('spear') || raw.includes('dagger') || raw.includes('pierce') || raw.includes('rapier')) return 'pierce';
-    if(raw.includes('sword') || raw.includes('blade') || raw.includes('edge')) return 'blade';
-    return 'blade';
+  function isRanged(w=currentWeapon()){ const c=wClass(w); return c==='ranged'||c==='arcane'||w.ranged||w.range>1; }
+  function rangeOf(w=currentWeapon()){ if(!isRanged(w)) return 1; const n=(w.name||'').toLowerCase(); if(n.includes('crossbow')) return 6; if(n.includes('bow')) return 5; if(n.includes('wand')||n.includes('staff')) return 5; return w.range || 4; }
+  function spellSelected(){ const p=player(); if(!p) return null; if(Number.isInteger(p.selectedSpellIndex) && p.spells && p.spells[p.selectedSpellIndex]) return p.spells[p.selectedSpellIndex]; if(Number.isInteger(p.selectedSpell) && p.spells && p.spells[p.selectedSpell]) return p.spells[p.selectedSpell]; return null; }
+  function clearSpell(){ const p=player(); if(!p) return; p.selectedSpellIndex=null; p.selectedSpell=null; safe(()=>updateSpellUI()); safe(()=>updateSpellSlots && updateSpellSlots()); updateHelp(); }
+  function visible(x,y){ return !!(window.G && G.visible && G.visible[y] && G.visible[y][x]); }
+  function tileFromClient(clientX,clientY){
+    const c=byId('game'); const rect=c.getBoundingClientRect();
+    const sx=(clientX-rect.left)*(c.width/rect.width); const sy=(clientY-rect.top)*(c.height/rect.height);
+    return {x:Math.floor(sx/TILE_SIZE)+(G.camera?.x||0), y:Math.floor(sy/TILE_SIZE)+(G.camera?.y||0)};
   }
-
-  function isRangedWeapon(w=currentWeapon()){
-    const k = weaponKind(w);
-    return k === 'crossbow' || k === 'bow' || k === 'wand';
-  }
-
-  function weaponRange(w=currentWeapon()){
-    const k = weaponKind(w);
-    if(k === 'crossbow') return 5;
-    if(k === 'wand') return 5;
-    if(k === 'bow') return 4;
-    return 1;
-  }
-
-  function lineClear(x1,y1,x2,y2){
-    if(!window.G || !G.map) return false;
-    const dx = Math.sign(x2-x1), dy = Math.sign(y2-y1);
-    if(dx !== 0 && dy !== 0) return false;
-    let x = x1 + dx, y = y1 + dy;
-    while(x !== x2 || y !== y2){
-      if(!G.map[y] || G.map[y][x] === T.WALL) return false;
-      if(enemyAt(x,y)) return false;
-      x += dx; y += dy;
+  function insideCanvas(clientX,clientY){ const c=byId('game'); if(!c) return false; const r=c.getBoundingClientRect(); return clientX>=r.left && clientX<=r.right && clientY>=r.top && clientY<=r.bottom; }
+  function passableMapValue(v){ return v!==undefined && v!==0; }
+  function hasLine(x1,y1,x2,y2){
+    if(typeof lineClear==='function') return safe(()=>lineClear(x1,y1,x2,y2)) !== false;
+    let dx=Math.abs(x2-x1), dy=Math.abs(y2-y1), sx=x1<x2?1:-1, sy=y1<y2?1:-1, err=dx-dy, x=x1, y=y1;
+    while(!(x===x2 && y===y2)){
+      const e2=2*err; if(e2>-dy){err-=dy;x+=sx} if(e2<dx){err+=dx;y+=sy}
+      if(x===x2 && y===y2) break;
+      if(!passableMapValue(G.map?.[y]?.[x])) return false;
     }
     return true;
   }
-
-  function faceToward(tx,ty){
-    if(!window.G || !G.player) return;
-    const dx = Math.sign(tx - G.player.x);
-    const dy = Math.sign(ty - G.player.y);
-    if(Math.abs(tx-G.player.x) >= Math.abs(ty-G.player.y)) {
-      if(dx < 0) G.player.facing = 'left';
-      else if(dx > 0) G.player.facing = 'right';
-    } else {
-      if(dy < 0) G.player.facing = 'up';
-      else if(dy > 0) G.player.facing = 'down';
-    }
+  function ensureUI(){
+    const wrap=byId('canvas-wrap');
+    if(wrap && !byId('clean-forecast')){ const f=document.createElement('div'); f.id='clean-forecast'; f.style.display='none'; wrap.appendChild(f); }
+    if(wrap && !byId('target-help-chip')){ const h=document.createElement('div'); h.id='target-help-chip'; wrap.appendChild(h); }
+    updateHelp();
   }
-
-  function log(msg,type='info'){
-    if(typeof addLog === 'function') addLog(msg,type);
+  function weaponEffectText(w=currentWeapon()){
+    const name=(w.name||'').toLowerCase(); const c=wClass(w);
+    if(name.includes('crossbow')) return 'Fires a heavy bolt. Can miss. On hit, 40% chance to knock the enemy back 1 tile. Cannot shoot adjacent enemies.';
+    if(name.includes('bow')) return 'Fires a quick arrow. Can miss. On hit, 40% chance to slow the enemy. Cannot shoot adjacent enemies.';
+    if(name.includes('wand')||name.includes('staff')||c==='arcane') return 'Fires an arcane bolt. Can miss. On hit, 30% chance to stagger the enemy. Cannot shoot adjacent enemies.';
+    if(c==='crush') return 'Melee hit. Better against armored and ooze enemies. Good damage, simple trade.';
+    if(c==='pierce') return 'Melee hit. Better against soft and caster enemies. Slightly higher hit chance.';
+    return 'Melee hit. Reliable adjacent attack. Swords are the simple, stable baseline.';
   }
-
-  function setQueuedTargetAction(action){
-    if(!window.G || !G.player || G.gameOver || G.paused) return;
-    G.player.queuedAction = (G.player.queuedAction === action) ? null : action;
-    updateTargetButtons();
-
-    if(!G.player.queuedAction){
-      log('Targeting cancelled.','info');
-      return;
+  function attackForecast(enemy, sp=null){
+    const p=player(); if(!p||!enemy) return null; const dist=man(p.x,p.y,enemy.x,enemy.y); const stats=st();
+    if(sp){
+      const range=sp.range || 5; const valid = dist<=range && visible(enemy.x,enemy.y) && hasLine(p.x,p.y,enemy.x,enemy.y) && p.mp >= (sp.cost||0);
+      const dmg=Math.max(0, (sp.dmg||0) + (stats.spellPower||0));
+      let why = valid ? 'Click to cast' : (p.mp<(sp.cost||0)?'Not enough mana':dist>range?'Out of range':!visible(enemy.x,enemy.y)?'Not visible':'No line of sight');
+      return {name:sp.name,target:enemy.name,valid,why,low:dmg,high:dmg,hit:valid?.96:0,range:String(range),afterLow:Math.max(0,enemy.hp-dmg),afterHigh:Math.max(0,enemy.hp-dmg),effect:`Costs ${sp.cost||0} MP. ${sp.desc||''}`};
     }
-
-    const labels = {
-      weapon: isRangedWeapon() ? 'Aim primed. Click a visible enemy in a straight line.' : 'Attack primed. Click an adjacent enemy.',
-      slash: 'Slash primed. Click an adjacent enemy to swing through the front arc.',
-      bash: 'Bash primed. Click an adjacent enemy to shove it into walls, traps, or space.',
-      kick: 'Kick primed. Click an adjacent enemy to interrupt, stun, or make room.',
-      guard: 'Guard does not need a target. It protects your next exchange.'
+    const w=currentWeapon(); const ranged=isRanged(w); const range=rangeOf(w); const valid = visible(enemy.x,enemy.y) && hasLine(p.x,p.y,enemy.x,enemy.y) && (ranged ? dist>=2 && dist<=range : dist===1);
+    let base=Math.max(1,(stats.atk||1)-(enemy.def||0));
+    if(ranged && (w.name||'').toLowerCase().includes('crossbow')) base+=1;
+    const low=Math.max(1,base-1), high=Math.max(low,base+1+(w.hits===2?1:0));
+    let hit = ranged ? .82 : .92; if(wClass(w)==='pierce') hit+=.04; if(ranged) hit-=Math.max(0,dist-3)*.04; hit=Math.max(.55,Math.min(.97,hit+(stats.crit||0)*.10));
+    const why = valid ? 'Click to attack' : (ranged ? (dist<=1?'Too close for ranged. Step back first.':dist>range?'Out of range':!visible(enemy.x,enemy.y)?'Not visible':'No line of sight') : (dist!==1?'Melee needs adjacent target. Move closer.':'Not visible'));
+    return {name:ranged?`${w.name} Shot`:`${w.name} Attack`,target:enemy.name,valid,why,low,high,hit:valid?hit:0,range:ranged?`2-${range}`:'1',afterLow:Math.max(0,enemy.hp-high),afterHigh:Math.max(0,enemy.hp-low),effect:weaponEffectText(w)};
+  }
+  function showForecast(enemy){
+    ensureUI(); const f=attackForecast(enemy, spellSelected()); const el=byId('clean-forecast'); if(!el||!f) return;
+    el.style.display='block';
+    el.innerHTML=`<div class="cf-top"><div class="cf-action">${f.name}</div><div class="cf-target">${f.target}</div></div><div class="cf-grid"><div class="cf-box"><div class="cf-label">Damage</div><div class="cf-val ${f.valid?'cf-good':'cf-bad'}">${f.low}-${f.high}</div></div><div class="cf-box"><div class="cf-label">Hit</div><div class="cf-val">${Math.round(f.hit*100)}%</div></div><div class="cf-box"><div class="cf-label">Range</div><div class="cf-val">${f.range}</div></div><div class="cf-box"><div class="cf-label">Enemy HP after</div><div class="cf-val">${f.afterLow}-${f.afterHigh}</div></div></div><div class="cf-note ${f.valid?'':'cf-warn'}">${f.why}. ${f.effect}</div>`;
+  }
+  function hideForecast(){ const el=byId('clean-forecast'); if(el) el.style.display='none'; }
+  function updateHelp(){
+    const h=byId('target-help-chip'); if(!h||!player()) return;
+    const sp=spellSelected(), w=currentWeapon();
+    if(sp) h.innerHTML=`<strong>${sp.name} selected.</strong> Click a mob to cast. Cost ${sp.cost||0} MP. Range ${sp.range||'self'}. ${sp.desc||''}`;
+    else if(isRanged(w)) h.innerHTML=`<strong>${w.name}</strong>: click a mob ${2}-${rangeOf(w)} tiles away to shoot. Adjacent mobs are too close. Empty tiles move.`;
+    else h.innerHTML=`<strong>${w.name}</strong>: click an adjacent mob to attack. Empty tiles move. Walking into mobs never attacks.`;
+  }
+  function damageEnemy(enemy,dmg,color){
+    enemy.hp -= dmg; enemy.hitFlash=1;
+    safe(()=>spawnDamageText(enemy.x,enemy.y,String(dmg),color||'#ff9b5b'));
+    safe(()=>spawnP(enemy.x,enemy.y,color||'#ff9b5b',7));
+    if(enemy.hp<=0){ const before=player()?.xp||0; safe(()=>killEnemy(enemy)); setTimeout(()=>{ const p=player(); if(p){ log(`EXP +${Math.max(0,p.xp-before)}. XP bar: ${p.xp}/${p.xpNext}.`,'level'); const bar=byId('bar-xp'); if(bar){bar.style.filter='brightness(2)'; setTimeout(()=>bar.style.filter='',250);} } },30); }
+  }
+  function pushEnemy(enemy,dx,dy){
+    const nx=enemy.x+dx, ny=enemy.y+dy;
+    if(G.map?.[ny]?.[nx] && !enemyAt(nx,ny) && !(G.player.x===nx&&G.player.y===ny)){ enemy.x=nx; enemy.y=ny; log(`${enemy.name} is knocked back.`,'info'); }
+  }
+  function fireWeapon(enemy){
+    const p=player(), w=currentWeapon(), f=attackForecast(enemy,null); if(!f) return false; showForecast(enemy);
+    if(!f.valid){ log(f.why,'info'); return false; }
+    if(typeof clearAutoMove==='function') safe(()=>clearAutoMove());
+    const ranged=isRanged(w); const color=w.projectileColor||w.glowColor||(ranged?'#d8e9ff':'#ff9b5b');
+    if(ranged) safe(()=>spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color,life:18,maxLife:18}));
+    else safe(()=>spawnSpellFx({kind:'slash',x:p.x,y:p.y,dx:Math.sign(enemy.x-p.x),dy:Math.sign(enemy.y-p.y),color,life:10,maxLife:10}));
+    if(Math.random()>f.hit){ safe(()=>spawnDamageText(enemy.x,enemy.y,'MISS','#dbe6ff')); log(`${f.name} misses ${enemy.name}.`,'combat'); safe(()=>SFX.play('step')); safe(()=>endTurn()); return true; }
+    const dmg=Math.floor(f.low + Math.random()*(f.high-f.low+1));
+    damageEnemy(enemy,dmg,color); log(`${f.name} hits ${enemy.name} for ${dmg}.`,'combat');
+    const name=(w.name||'').toLowerCase();
+    if(enemy.hp>0 && ranged){
+      if(name.includes('crossbow') && Math.random()<.40) pushEnemy(enemy,Math.sign(enemy.x-p.x),Math.sign(enemy.y-p.y));
+      if(name.includes('bow') && Math.random()<.40){ enemy.slowed=true; log(`${enemy.name} is slowed.`,'info'); }
+      if((name.includes('wand')||name.includes('staff')) && Math.random()<.30){ enemy.stunned=Math.max(enemy.stunned||0,1); log(`${enemy.name} staggers.`,'spell'); }
+    }
+    safe(()=>SFX.play(ranged?'spell':'hit')); safe(()=>endTurn()); return true;
+  }
+  function castAt(enemy){
+    const sp=spellSelected(); if(!sp) return fireWeapon(enemy); const p=player(); const f=attackForecast(enemy,sp); showForecast(enemy); if(!f.valid){ log(f.why,'info'); return false; }
+    p.mp -= sp.cost||0; const color={fire:'#ff7040',ice:'#5bdfff',lightning:'#ffd866',poison:'#5bff7f',earth:'#c8a050'}[sp.type]||'#c89bff';
+    safe(()=>spawnSpellFx({kind:'projectile',from:{x:p.x,y:p.y},to:{x:enemy.x,y:enemy.y},color,life:16,maxLife:16})); safe(()=>spawnSpellFx({kind:'burst',x:enemy.x,y:enemy.y,color,life:18,maxLife:18}));
+    const targets=[enemy];
+    if(sp.aoe){ (G.enemies||[]).forEach(e=>{ if(e!==enemy&&e.hp>0&&man(e.x,e.y,enemy.x,enemy.y)<=sp.aoe) targets.push(e); }); }
+    targets.forEach(e=>{ damageEnemy(e, Math.max(1,(sp.dmg||1)+(st().spellPower||0)), color); if(e.hp>0){ if(sp.slow)e.slowed=true; if(sp.dot)e.poisoned=sp.dot; }});
+    log(`${sp.name} hits ${targets.length} target${targets.length===1?'':'s'}.`,'spell'); clearSpell(); safe(()=>SFX.play('spell')); safe(()=>endTurn()); return true;
+  }
+  function clickCombat(clientX,clientY){
+    if(!player()||G.gameOver||G.paused||!insideCanvas(clientX,clientY)) return false;
+    const t=tileFromClient(clientX,clientY); const enemy=enemyAt(t.x,t.y);
+    if(enemy){ safe(()=>pinInspect({kind:'world',x:t.x,y:t.y})); return spellSelected()?castAt(enemy):fireWeapon(enemy); }
+    hideForecast(); if(spellSelected()){ log(`Click an enemy target for ${spellSelected().name}.`,'info'); return true; }
+    const d=man(G.player.x,G.player.y,t.x,t.y);
+    if(d===0){ safe(()=>waitTurn()); return true; }
+    if(typeof clearPinnedInspect==='function') safe(()=>clearPinnedInspect());
+    if(typeof startAutoMoveTo==='function') safe(()=>startAutoMoveTo(t.x,t.y));
+    return true;
+  }
+  function patchInput(){
+    const c=byId('game'); if(!c||c.__finalDirectCombat) return; c.__finalDirectCombat=true;
+    let last=0;
+    const handler=e=>{
+      const src=e.changedTouches?e.changedTouches[0]:e;
+      if(!src || !insideCanvas(src.clientX,src.clientY)) return;
+      const now=performance.now(); if(now-last<120){ e.preventDefault(); e.stopImmediatePropagation(); return; } last=now;
+      e.preventDefault(); e.stopImmediatePropagation(); clickCombat(src.clientX,src.clientY);
     };
-    log(labels[action] || 'Ability primed. Click a target.','info');
+    ['pointerup','click','mouseup','touchend'].forEach(type=>document.addEventListener(type,handler,{capture:true,passive:false}));
+    document.addEventListener('mousemove',e=>{ if(!player()||!insideCanvas(e.clientX,e.clientY)) return; const t=tileFromClient(e.clientX,e.clientY); const en=enemyAt(t.x,t.y); if(en) showForecast(en); else hideForecast(); },true);
   }
-
-  function updateTargetButtons(){
-    if(!window.G || !G.player) return;
-    const map = [
-      ['weapon','attack-btn'],
-      ['slash','slash-btn'],
-      ['bash','bash-btn'],
-      ['kick','kick-btn'],
-      ['guard','guard-btn']
-    ];
-    for(const [action,id] of map){
-      const btn = byId(id);
-      if(!btn) continue;
-      const active = G.player.queuedAction === action;
-      btn.classList.toggle('active', active);
-      btn.classList.toggle('target-ready', active);
-      const cd = (G.player.skillCooldowns && G.player.skillCooldowns[action]) || 0;
-      if(id === 'attack-btn') {
-        const ranged = isRangedWeapon();
-        btn.innerHTML = `<strong>A</strong><em>${active ? 'Target' : (ranged ? 'Aim' : 'Attack')}</em>`;
-        btn.title = ranged ? 'Select, then click a visible enemy 2 or more tiles away.' : 'Select, then click an adjacent enemy.';
-      }
-      if(action === 'slash') btn.innerHTML = `<strong>Q</strong><em>${active ? 'Target' : 'Slash'}</em>`;
-      if(action === 'bash') btn.innerHTML = `<strong>E</strong><em>${cd > 0 ? 'Bash '+cd+'t' : (active ? 'Target' : 'Bash')}</em>`;
-      if(action === 'kick') btn.innerHTML = `<strong>F</strong><em>${cd > 0 ? 'Kick '+cd+'t' : (active ? 'Target' : 'Kick')}</em>`;
-    }
-    updateTargetHelp();
+  function patchMove(){
+    if(typeof movePlayer!=='function'||movePlayer.__finalNoBump) return; const old=movePlayer;
+    const wrapped=function(dx,dy,viaAuto=false){ const p=player(); if(p && !G.gameOver && !G.paused){ const nx=p.x+dx, ny=p.y+dy; const en=enemyAt(nx,ny); if(en){ showForecast(en); log('That tile is occupied. Click the mob to attack. Movement never bump-attacks.','info'); safe(()=>clearAutoMove()); return; } } return old.apply(this,arguments); };
+    wrapped.__finalNoBump=true; window.movePlayer=wrapped; safe(()=>{movePlayer=wrapped});
   }
-
-  function ensureAttackButton(){
-    const slash = byId('slash-btn');
-    if(!slash || byId('attack-btn')) return;
-    const btn = document.createElement('button');
-    btn.id = 'attack-btn';
-    btn.className = 'mini-action-btn combat';
-    btn.type = 'button';
-    btn.innerHTML = '<strong>A</strong><em>Attack</em>';
-    btn.onclick = () => setQueuedTargetAction('weapon');
-    slash.before(btn);
+  function patchSpells(){
+    if(typeof castSpell==='function' && !castSpell.__finalTarget){ const old=castSpell; const wrapped=function(idx){ const p=player(); if(!p||G.gameOver||G.paused) return; const sp=p.spells?.[idx]; if(!sp) return; if(['heal','shield','blink'].includes(sp.type)) return old.apply(this,arguments); if(p.mp<(sp.cost||0)){ log('Not enough MP.','info'); return; } p.selectedSpellIndex = p.selectedSpellIndex===idx ? null : idx; updateHelp(); safe(()=>updateSpellUI()); log(p.selectedSpellIndex===idx?`${sp.name} selected. Click a mob to cast. ${sp.desc||''}`:`${sp.name} canceled.`,'spell'); }; wrapped.__finalTarget=true; window.castSpell=wrapped; safe(()=>{castSpell=wrapped}); }
   }
-
-  function ensureTargetHelp(){
-    const bar = byId('bottom-bar');
-    if(!bar || byId('target-help-chip')) return;
-    const chip = document.createElement('div');
-    chip.id = 'target-help-chip';
-    chip.innerHTML = '<strong>Targeting:</strong> choose Attack, Slash, Bash, or Kick, then click an enemy.';
-    const actionLog = byId('action-log');
-    if(actionLog) bar.insertBefore(chip, actionLog);
-    else bar.appendChild(chip);
+  function patchStats(){
+    if(typeof getStats==='function' && !getStats.__finalGearStats){ const old=getStats; const wrapped=function(){ const p=player(); if(!p) return old.apply(this,arguments); let out={atk:p.atk||0,def:p.def||0,crit:0,dodge:0,steal:0,spellPower:0,damageTaken:1}; for(const slot of ['weapon','armor','ring','amulet']){ const it=p[slot]; if(!it) continue; out.atk+=it.atk||0; out.def+=it.def||0; out.crit+=it.crit||0; out.dodge+=it.dodge||0; out.steal+=it.lifesteal||0; out.spellPower+=it.spellPower||0; if(it.absorb) out.damageTaken*=Math.max(.35,1-it.absorb); if(it.mdef) out.def+=Math.floor(it.mdef*.5); } if(p.relicStats){ out.crit+=p.relicStats.crit||0; out.dodge+=p.relicStats.dodge||0; out.steal+=p.relicStats.steal||0; out.spellPower+=p.relicStats.spellPower||0; if(p.relicStats.damageTaken) out.damageTaken*=p.relicStats.damageTaken; } return out; }; wrapped.__finalGearStats=true; window.getStats=wrapped; safe(()=>{getStats=wrapped}); }
   }
-
-  function updateTargetHelp(){
-    const chip = byId('target-help-chip');
-    if(!chip || !window.G || !G.player) return;
-    const q = G.player.queuedAction;
-    const w = currentWeapon();
-    const wName = w && w.name ? w.name : 'weapon';
-    if(q === 'weapon') {
-      chip.innerHTML = isRangedWeapon()
-        ? `<strong>Aim ready:</strong> click a visible enemy 2-${weaponRange()} tiles away. ${wName} cannot fire in melee.`
-        : `<strong>Attack ready:</strong> click an adjacent enemy. Walking into enemies no longer attacks.`;
-    } else if(q === 'slash') {
-      chip.innerHTML = '<strong>Slash ready:</strong> click an adjacent enemy. Best when enemies are grouped beside the target.';
-    } else if(q === 'bash') {
-      chip.innerHTML = '<strong>Bash ready:</strong> click an adjacent enemy. Best near walls, traps, doors, or ledges of space.';
-    } else if(q === 'kick') {
-      chip.innerHTML = '<strong>Kick ready:</strong> click an adjacent enemy. Best against ranged enemies, elites, bosses, or anything charging.';
-    } else {
-      chip.innerHTML = '<strong>Targeting:</strong> choose Attack/Aim, Slash, Bash, or Kick, then click an enemy. Movement only moves.';
-    }
+  function starterBalance(){
+    const p=player(); if(!p||p.__finalStarterBalance) return; p.__finalStarterBalance=true;
+    if(!p.weapon || /rusty|bare/i.test(p.weapon.name||'')){ p.weapon={name:'Training Sword',atk:3,kind:'sword',weaponClass:'edge',rarity:'starter',desc:'Starter weapon. Click an adjacent mob to attack for reliable melee damage.'}; }
+    p.maxHp=Math.max(p.maxHp||25,32); p.hp=Math.min(p.maxHp, Math.max(p.hp||p.maxHp, p.maxHp)); p.potions=p.potions||{}; p.potions.hp=Math.max(p.potions.hp||0,2); p.potions.mp=Math.max(p.potions.mp||0,1);
+    log('Starter kit equipped: Training Sword, 2 health potions, 1 mana potion. Early floors are tuned for learning, not instant death.','item');
+    safe(()=>updatePotionUI()); safe(()=>updateEquipUI()); safe(()=>updateStatsUI && updateStatsUI());
   }
-
-  function clearQueued(){
-    if(window.G && G.player) G.player.queuedAction = null;
-    updateTargetButtons();
+  function softenCurrentFloor(){
+    if(!player()||!G.enemies) return; const f=G.player.floor||1;
+    if(f<=1){
+      G.enemies=G.enemies.filter((e,i)=>i<3 || e.boss || e.miniBoss);
+      G.enemies.forEach(e=>{ if(!e.boss&&!e.miniBoss){ e.maxHp=Math.min(e.maxHp||e.hp,6); e.hp=Math.min(e.hp,e.maxHp); e.atk=Math.min(e.atk||2,2); e.def=Math.min(e.def||0,1); e.xp=Math.max(e.xp||2,4); e.gold=Math.max(e.gold||1,3); } });
+    } else if(f===2){ G.enemies.forEach(e=>{ if(!e.boss&&!e.miniBoss){ e.atk=Math.max(1,Math.floor((e.atk||2)*.85)); } }); }
   }
-
-  function weaponTarget(enemy){
-    if(!window.G || !G.player || !enemy) return false;
-    const d = manhattan(G.player.x,G.player.y,enemy.x,enemy.y);
-    faceToward(enemy.x,enemy.y);
-
-    if(isRangedWeapon()){
-      const r = weaponRange();
-      if(d <= 1){ log('Too close to shoot. Kick them back, move away, or switch to a melee weapon.','info'); return false; }
-      if(d > r){ log(`Target is too far. This weapon reaches ${r} tiles.`, 'info'); return false; }
-      if(!lineClear(G.player.x,G.player.y,enemy.x,enemy.y)){ log('No clean line of sight. Move into a straight lane first.','info'); return false; }
-      if(typeof rangedShot === 'function') { rangedShot(enemy); clearQueued(); return true; }
-      if(typeof attack === 'function') { attack(G.player, enemy, true); if(typeof endTurn === 'function') endTurn(); clearQueued(); return true; }
-      return false;
-    }
-
-    if(d !== 1){ log('Melee attacks need an adjacent target. Move closer, then attack.','info'); return false; }
-    if(typeof attack === 'function') {
-      attack(G.player,enemy,true);
-      if(typeof endTurn === 'function') endTurn();
-      clearQueued();
-      return true;
-    }
-    return false;
+  function patchFloor(){
+    if(typeof generateFloor==='function' && !generateFloor.__finalEasier){ const old=generateFloor; const wrapped=function(depth){ const r=old.apply(this,arguments); starterBalance(); softenCurrentFloor(); return r; }; wrapped.__finalEasier=true; window.generateFloor=wrapped; safe(()=>{generateFloor=wrapped}); }
   }
-
-  function targetedAbility(enemy){
-    if(!window.G || !G.player || !enemy) return false;
-    const action = G.player.queuedAction;
-    if(!action) return false;
-    const dx = Math.sign(enemy.x - G.player.x);
-    const dy = Math.sign(enemy.y - G.player.y);
-    const d = manhattan(G.player.x,G.player.y,enemy.x,enemy.y);
-    faceToward(enemy.x,enemy.y);
-
-    if(action === 'weapon') return weaponTarget(enemy);
-
-    if(action === 'slash' || action === 'bash' || action === 'kick'){
-      if(d !== 1){ log(`${action[0].toUpperCase()+action.slice(1)} needs an adjacent target.`, 'info'); return false; }
-      if(typeof tryCombatAction === 'function') {
-        const used = tryCombatAction(action, dx, dy);
-        if(used) { clearQueued(); return true; }
-      }
-      return false;
-    }
-
-    return false;
+  function patchRelics(){
+    safe(()=>{
+      if(typeof ITEMS==='undefined') return;
+      (ITEMS.rings||[]).forEach(r=>{
+        if(r.name==='Ruby Ring') r.desc='Slay-style relic: Bigger health pool. Effect: +5 max HP while equipped. Cost: uses your ring slot.';
+        if(r.name==='Sapphire Ring') r.desc='Slay-style relic: More spell turns. Effect: +5 max MP while equipped. Cost: uses your ring slot.';
+        if(r.name==='Vampire Ring') r.desc='Slay-style relic: Sustain from aggression. Effect: heal for 15% of weapon damage dealt. Cost: weaker if you play slowly.';
+        if(r.name==='Haste Ring') r.desc='Slay-style relic: Tempo spike. Effect: sometimes act twice. Cost: no defensive stats.';
+        if(r.name==='Carnelian Ring') r.desc='Slay-style relic: Burst damage. Effect: +15% crit chance. Cost: less reliable than flat attack.';
+        if(r.name==='Jade Ring') r.desc='Slay-style relic: Slow recovery. Effect: regenerate 1 HP each turn. Cost: no burst damage.';
+      });
+      (ITEMS.amulets||[]).forEach(a=>{
+        if(a.name==='Amulet of Thorns') a.desc='Slay-style relic: Punishes contact. Effect: attackers take 2 reflected damage. Cost: does nothing against enemies you kill before they hit you.';
+        if(a.name==='Amulet of Warding') a.desc='Slay-style relic: Anti-magic defense. Effect: +3 magic defense. Cost: weak against basic melee mobs.';
+        if(a.name==='Amulet of Greed') a.desc='Slay-style relic: Economy engine. Effect: double gold drops. Cost: no direct combat help.';
+        if(a.name==='Amulet of Souls') a.desc='Slay-style relic: Scaling engine. Effect: +50% XP gain. Cost: no immediate survival.';
+      });
+      (ITEMS.weapons||[]).forEach(w=>{
+        const n=(w.name||'').toLowerCase();
+        if(n.includes('sword')||n.includes('blade')) w.desc=(w.desc||'')+' Control: click adjacent mobs. Role: reliable melee.';
+        if(n.includes('bow')){ w.ranged=true; w.range=w.range||5; w.desc='Ranged weapon. Click mobs 2-5 tiles away to shoot a projectile. Cannot fire adjacent. Can miss. On hit, may slow.'; }
+        if(n.includes('crossbow')){ w.ranged=true; w.range=w.range||6; w.desc='Heavy ranged weapon. Click mobs 2-6 tiles away to fire a bolt. Cannot fire adjacent. Can miss. On hit, may knock back.'; }
+        if(n.includes('wand')||n.includes('staff')){ w.ranged=true; w.range=w.range||5; w.weaponClass='arcane'; w.desc='Arcane ranged weapon. Click mobs 2-5 tiles away to fire a spell bolt. Cannot fire adjacent. Can miss. On hit, may stagger.'; }
+      });
+    });
   }
-
-  function patchAbilityButtons(){
-    ensureAttackButton();
-    ensureTargetHelp();
-
-    const binds = [
-      ['slash-btn','slash'],
-      ['bash-btn','bash'],
-      ['kick-btn','kick']
-    ];
-    for(const [id,action] of binds){
-      const btn = byId(id);
-      if(!btn || btn.__v24Targeted) continue;
-      btn.__v24Targeted = true;
-      btn.onclick = () => setQueuedTargetAction(action);
-    }
-
-    const atk = byId('attack-btn');
-    if(atk && !atk.__v24Targeted){
-      atk.__v24Targeted = true;
-      atk.onclick = () => setQueuedTargetAction('weapon');
-    }
-
-    document.addEventListener('keydown', e => {
-      if(!window.G || G.gameOver || G.paused) return;
-      const tag = String(document.activeElement && document.activeElement.tagName || '').toLowerCase();
-      if(tag === 'input' || tag === 'textarea') return;
-      if(e.key === 'a' || e.key === 'A') { e.preventDefault(); setQueuedTargetAction('weapon'); }
-      if(e.key === 'q' || e.key === 'Q') { e.preventDefault(); setQueuedTargetAction('slash'); }
-      if(e.key === 'e' || e.key === 'E') { e.preventDefault(); setQueuedTargetAction('bash'); }
-      if(e.key === 'f' || e.key === 'F') { e.preventDefault(); setQueuedTargetAction('kick'); }
-      if(e.key === 'Escape') { clearQueued(); }
-    }, true);
-
-    setInterval(updateTargetButtons, 750);
-    updateTargetButtons();
-  }
-
-  function patchClickTargeting(){
-    const newHandle = function(clientX, clientY){
-      if(!window.G || G.gameOver || G.paused) return;
-      const rect = canvas.getBoundingClientRect();
-      const sx = (clientX - rect.left) * (canvas.width / rect.width);
-      const sy = (clientY - rect.top) * (canvas.height / rect.height);
-      const tx = Math.floor(sx / TILE) + G.camera.x;
-      const ty = Math.floor(sy / TILE) + G.camera.y;
-      const enemy = enemyAt(tx,ty);
-      const d = manhattan(G.player.x,G.player.y,tx,ty);
-      const samePinned = G.selectedInspect && G.selectedInspect.kind === 'world' && G.selectedInspect.x === tx && G.selectedInspect.y === ty;
-
-      if(enemy){
-        if(typeof clearAutoMove === 'function') clearAutoMove();
-        if(typeof pinInspect === 'function') pinInspect({kind:'world',x:tx,y:ty});
-
-        if(G.player.queuedAction){
-          targetedAbility(enemy);
-          return;
-        }
-
-        if(samePinned && typeof openEnemyModal === 'function') openEnemyModal(enemy);
-        log('Enemy selected. Choose Attack/Aim, Slash, Bash, or Kick, then click the enemy again.', 'info');
-        return;
-      }
-
-      const interactive = (G.interactives || []).find(o => o.x === tx && o.y === ty && !o.used);
-      const info = typeof getWorldHoverInfo === 'function' ? getWorldHoverInfo(tx,ty) : null;
-
-      if(interactive){
-        if(!samePinned && typeof pinInspect === 'function'){ pinInspect({kind:'world',x:tx,y:ty}); return; }
-        if(d <= 1 && typeof activateInteractive === 'function') { activateInteractive(interactive); if(typeof endTurn === 'function') endTurn(); }
-        else if(typeof startAutoMoveTo === 'function') startAutoMoveTo(tx,ty);
-        return;
-      }
-
-      if(info && !samePinned && typeof pinInspect === 'function') { pinInspect({kind:'world',x:tx,y:ty}); return; }
-      if(samePinned && typeof clearPinnedInspect === 'function') clearPinnedInspect();
-      if(d === 0){ if(typeof waitTurn === 'function') waitTurn(); return; }
-      if(typeof startAutoMoveTo === 'function') startAutoMoveTo(tx,ty);
+  function patchRelicSkip(){
+    if(typeof showNextRelicChoice!=='function' || showNextRelicChoice.__finalSkip) return;
+    const old=showNextRelicChoice;
+    const wrapped=function(){
+      const beforeOpen = !!(window.G && G.relicChoiceOpen);
+      const r=old.apply(this,arguments);
+      setTimeout(()=>{
+        const grid=byId('relic-choice-grid'); const modal=byId('relic-choice-modal');
+        if(!grid||!modal||modal.classList.contains('hidden')||grid.querySelector('.cc-relic-skip')) return;
+        const btn=document.createElement('button'); btn.type='button'; btn.className='relic-choice-card cc-relic-skip';
+        btn.innerHTML='<div class="relic-choice-name" style="color:#ffd866">Skip Relic</div><div class="relic-choice-type">Safe choice</div><div class="relic-choice-blessing"><strong>Gain</strong><div>Take 25 gold and avoid a downside.</div></div><div class="relic-choice-curse"><strong>Cost</strong><div>You pass on a build-changing relic.</div></div><div class="relic-choice-footer">Use this when both relics push your run in the wrong direction.</div>';
+        btn.onclick=()=>{ const p=player(); if(p)p.gold=(p.gold||0)+25; if(window.G){G.relicChoiceOpen=false;G.paused=false;} modal.classList.add('hidden'); log('Skipped the relic and took 25 gold.','item'); };
+        grid.appendChild(btn);
+      },30);
+      return r;
     };
-
-    window.handleCanvasPoint = newHandle;
-    try { handleCanvasPoint = newHandle; } catch(e) {}
+    wrapped.__finalSkip=true; window.showNextRelicChoice=wrapped; safe(()=>{showNextRelicChoice=wrapped});
   }
-
-  function patchNoBumpAttack(){
-    if(typeof movePlayer !== 'function') return;
-    const oldMove = movePlayer;
-    const newMove = function(dx,dy,viaAuto=false){
-      if(!window.G || !G.player) return oldMove.apply(this, arguments);
-      if(!viaAuto && typeof clearAutoMove === 'function') clearAutoMove();
-      if(G.gameOver || G.paused) return;
-
-      if(dx < 0) G.player.facing = 'left';
-      else if(dx > 0) G.player.facing = 'right';
-      else if(dy < 0) G.player.facing = 'up';
-      else if(dy > 0) G.player.facing = 'down';
-
-      const nx = G.player.x + dx;
-      const ny = G.player.y + dy;
-      if(nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) return;
-      if(G.map[ny][nx] === T.WALL) return;
-
-      const enemy = enemyAt(nx,ny);
-      if(enemy){
-        if(typeof clearAutoMove === 'function') clearAutoMove();
-        if(typeof pinInspect === 'function') pinInspect({kind:'world',x:nx,y:ny});
-        log('Enemy blocks the tile. Movement no longer attacks. Choose an ability, then click the enemy.', 'info');
-        return;
-      }
-
-      return oldMove.call(this, dx, dy, viaAuto);
-    };
-
-    window.movePlayer = newMove;
-    try { movePlayer = newMove; } catch(e) {}
-  }
-
-  function patchHoverPathStopsAtEnemies(){
-    if(typeof updateHoverPath !== 'function') return;
-    const newHover = function(){
-      if(!window.G || !G.hover) return;
-      if(!G.hover.active){ G.hover.path = []; return; }
-      const {tileX,tileY} = G.hover;
-      if(enemyAt(tileX,tileY)){ G.hover.path = []; return; }
-      if(typeof canPathTo === 'function' && !canPathTo(tileX,tileY)){ G.hover.path = []; return; }
-      if(typeof findPath === 'function'){
-        const path = findPath(G.player.x,G.player.y,tileX,tileY,120,true);
-        G.hover.path = path && path.length ? path : [];
-      }
-    };
-    window.updateHoverPath = newHover;
-    try { updateHoverPath = newHover; } catch(e) {}
-  }
-
   function boot(){
-    patchAbilityButtons();
-    patchClickTargeting();
-    patchNoBumpAttack();
-    patchHoverPathStopsAtEnemies();
-    updateTargetButtons();
-    log('Controls updated: movement only moves. Choose an ability, then click a target.', 'info');
+    ensureUI(); patchInput(); patchMove(); patchSpells(); patchStats(); patchFloor(); patchRelics(); patchRelicSkip();
+    setInterval(()=>{ if(player()){ starterBalance(); updateHelp(); } },1500);
+    log('Fixed controls loaded: click a mob to attack or shoot. Click empty tiles to move. Ranged weapons now need distance and fire projectiles.','info');
   }
-
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 </script>
+
 </body>
 </html>
