@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11561,6 +11562,406 @@ body.focus-mode #cc-room-enter-banner{display:none !important}
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(afterUiReady, 700); setTimeout(afterUiReady, 1600); });
   window.addEventListener('resize', function(){ setTimeout(afterUiReady, 120); });
   setTimeout(afterUiReady, 2200);
+})();
+</script>
+
+
+<!-- CLEAN GAMEPLAY DEBUG PATCH: layout, no rogue right buttons, decluttered rooms -->
+<style id="cc-clean-gameplay-debug-patch">
+  /* 1) Kill the accidental raw desktop mobile widgets seen as Spell 1 / Run Info / Close. */
+  #cc-mobile-action-tray,
+  #cc-mobile-sheet,
+  #mobile-topbar,
+  #mobile-controls,
+  #cc-native-start-link,
+  #cc-focus-dock,
+  #cc-room-hud,
+  #cc-objective-panel,
+  #cc-intent-legend,
+  #cc-action-tip,
+  #floor-banner,
+  #cc-room-enter-banner,
+  #threat-panel,
+  .mobile-stat-chip{
+    display:none !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+  }
+
+  /* 2) Stable desktop layout: left stats, 75% play field, slim right equipment. */
+  @media (min-width:901px){
+    #app{
+      display:grid !important;
+      grid-template-columns:12vw 75vw 13vw !important;
+      width:100vw !important;
+      height:100vh !important;
+      overflow:hidden !important;
+    }
+    #char-panel,
+    #inv-panel,
+    #center{
+      min-width:0 !important;
+      width:auto !important;
+      max-width:none !important;
+    }
+    #char-panel{grid-column:1 !important;}
+    #center{grid-column:2 !important;}
+    #inv-panel{grid-column:3 !important;}
+    #canvas-wrap{
+      width:100% !important;
+      height:calc(100vh - 58px) !important;
+      min-width:0 !important;
+      min-height:0 !important;
+      border-left:1px solid var(--border) !important;
+      border-right:1px solid var(--border) !important;
+      overflow:hidden !important;
+    }
+    canvas#game{
+      display:block !important;
+      margin:auto !important;
+      image-rendering:pixelated !important;
+    }
+    #bottom-bar{
+      height:58px !important;
+      min-height:58px !important;
+      overflow:hidden !important;
+      gap:8px !important;
+    }
+
+    /* Right panel remains useful, but stops becoming a second game screen. */
+    #floor-info,
+    #story-panel,
+    #inspect-panel,
+    #msg-area,
+    #minimap-wrap,
+    #gear-summary .gs-tags{
+      display:none !important;
+    }
+    #equip-area{padding:8px !important;}
+    .equip-grid{gap:6px !important;}
+    .equip-slot{min-height:62px !important;padding:6px !important;}
+    .equip-slot .item-icon-wrap{width:32px !important;height:32px !important;}
+    .equip-slot .item-name{font-size:6px !important;line-height:1.35 !important;}
+    .equip-slot .item-stat{font-size:5px !important;line-height:1.35 !important;}
+  }
+
+  /* 3) Mobile fallback: map first, no floating right side buttons. */
+  @media (max-width:900px){
+    body.playing #char-panel,
+    body.playing #inv-panel,
+    body.playing #bottom-bar{display:none !important;}
+    body.playing #canvas-wrap{
+      position:fixed !important;
+      inset:0 !important;
+      width:100vw !important;
+      height:100dvh !important;
+      border:0 !important;
+      padding:0 !important;
+      z-index:1 !important;
+    }
+  }
+</style>
+
+<script id="cc-clean-gameplay-debug-patch">
+(function(){
+  'use strict';
+  function byId(id){ return document.getElementById(id); }
+  function hasGame(){ return typeof G !== 'undefined' && G && G.player; }
+
+  function forceHideRogueUI(){
+    [
+      'cc-mobile-action-tray','cc-mobile-sheet','mobile-topbar','mobile-controls','cc-focus-dock',
+      'cc-room-hud','cc-objective-panel','cc-intent-legend','cc-action-tip','floor-banner',
+      'cc-room-enter-banner','threat-panel','cc-native-start-link'
+    ].forEach(function(id){
+      var el=byId(id);
+      if(el){ el.style.display='none'; el.style.visibility='hidden'; el.style.pointerEvents='none'; }
+    });
+    document.querySelectorAll('.mobile-stat-chip').forEach(function(el){
+      el.style.display='none'; el.style.visibility='hidden'; el.style.pointerEvents='none';
+    });
+  }
+
+  function roomOf(x,y){
+    if(!hasGame() || !Array.isArray(G.rooms)) return null;
+    return G.rooms.find(function(r){ return x>=r.x && x<r.x+r.w && y>=r.y && y<r.y+r.h; }) || null;
+  }
+  function keyForRoom(r){ return r ? (r.x+','+r.y+','+r.w+','+r.h) : 'none'; }
+  function distToPlayer(o){ return Math.abs(o.x-G.player.x)+Math.abs(o.y-G.player.y); }
+
+  function declutterFloor(){
+    if(!hasGame()) return;
+
+    /* Make room purpose labels stop painting all over the canvas. Keep only information that changes decisions. */
+    if(Array.isArray(G.rooms)){
+      G.rooms.forEach(function(r){
+        if(r.ccPurpose && ['stairs','key','locked'].indexOf(r.ccPurpose) === -1){
+          r.ccPurpose = 'route';
+        }
+      });
+    }
+
+    /* Cap enemies per room so the first read is visual, not noise. */
+    if(Array.isArray(G.enemies)){
+      var seenEnemies = Object.create(null);
+      var limit = (G.player.floor || 1) <= 1 ? 2 : 3;
+      G.enemies = G.enemies.filter(function(e){
+        if(!e || e.hp<=0) return false;
+        var r=roomOf(e.x,e.y), k=keyForRoom(r);
+        seenEnemies[k]=(seenEnemies[k]||0)+1;
+        return e.boss || e.miniBoss || e.elite || seenEnemies[k] <= limit;
+      });
+    }
+
+    /* Keep loot meaningful: max two visible pickups per room, always preserving keys/equipment/chests. */
+    if(Array.isArray(G.items)){
+      var seenItems = Object.create(null);
+      G.items = G.items
+        .slice()
+        .sort(function(a,b){
+          function rank(it){
+            if(!it) return 99;
+            if(it.type==='key') return 0;
+            if(it.type==='equipment' || it.type==='chest') return 1;
+            if(it.type==='potion_hp' || it.type==='potion_mp') return 2;
+            if(it.type==='gold') return 3;
+            return 4;
+          }
+          return rank(a)-rank(b) || distToPlayer(a)-distToPlayer(b);
+        })
+        .filter(function(it){
+          if(!it) return false;
+          var r=roomOf(it.x,it.y), k=keyForRoom(r);
+          seenItems[k]=(seenItems[k]||0)+1;
+          if(it.type==='key') return true;
+          return seenItems[k] <= 2;
+        });
+    }
+
+    /* Remove extra puzzle/event icons from normal rooms. These were creating the clutter in your screenshot. */
+    if(Array.isArray(G.roomEvents)){
+      G.roomEvents = G.roomEvents.filter(function(o){ return o && o.type === 'crystalSwitch'; }).slice(0,1);
+    }
+    if(Array.isArray(G.interactives)){
+      G.interactives = G.interactives.slice(0,1);
+    }
+    if(G.mystery && Array.isArray(G.mystery.markers)){
+      G.mystery.markers = G.mystery.markers.slice(0,1);
+    }
+  }
+
+  function fitCanvas(){
+    var canvas=byId('game'), wrap=byId('canvas-wrap');
+    if(!canvas || !wrap) return;
+    var aw=Math.max(0,wrap.clientWidth-4), ah=Math.max(0,wrap.clientHeight-4);
+    if(!aw || !ah || !canvas.width || !canvas.height) return;
+    var scale=Math.min(aw/canvas.width, ah/canvas.height);
+    canvas.style.width=Math.floor(canvas.width*scale)+'px';
+    canvas.style.height=Math.floor(canvas.height*scale)+'px';
+  }
+
+  function wrapGenerateFloor(){
+    if(typeof generateFloor === 'function' && !generateFloor.__ccCleanDebugWrapped){
+      var old=generateFloor;
+      generateFloor=function(){
+        var out=old.apply(this,arguments);
+        setTimeout(function(){ declutterFloor(); fitCanvas(); forceHideRogueUI(); }, 0);
+        setTimeout(function(){ declutterFloor(); fitCanvas(); forceHideRogueUI(); }, 80);
+        return out;
+      };
+      generateFloor.__ccCleanDebugWrapped=true;
+      window.generateFloor=generateFloor;
+    }
+  }
+
+  function tick(){
+    forceHideRogueUI();
+    declutterFloor();
+    fitCanvas();
+  }
+
+  function boot(){
+    wrapGenerateFloor();
+    tick();
+    setTimeout(tick,100);
+    setTimeout(tick,500);
+    setInterval(function(){ forceHideRogueUI(); fitCanvas(); }, 900);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  window.addEventListener('resize',function(){ setTimeout(tick,50); });
+  window.CC_CLEAN_DEBUG = { declutterFloor:declutterFloor, fitCanvas:fitCanvas, forceHideRogueUI:forceHideRogueUI };
+})();
+</script>
+
+
+<!-- UX DECLUTTER PATCH v2: visible start button, compact enemy info, no repeated reward drafts -->
+<style id="cc-ux-declutter-v2-style">
+body:not(.playing) #cc-native-start-link{display:flex !important;visibility:visible !important;pointer-events:auto !important;}
+body.playing #cc-native-start-link{display:none !important;visibility:hidden !important;pointer-events:none !important;}
+#threat-panel.cc-compact-threat{display:block !important;visibility:visible !important;pointer-events:none !important;width:260px !important;min-width:0 !important;max-width:260px !important;top:14px !important;left:50% !important;transform:translateX(-50%) !important;padding:8px 9px !important;border-radius:12px !important;background:rgba(7,10,20,.88) !important;border:1px solid rgba(127,255,212,.22) !important;box-shadow:0 10px 24px rgba(0,0,0,.32) !important;}
+#threat-panel.cc-compact-threat .tp-name{font-size:10px !important;line-height:1.35 !important;margin-bottom:5px !important;color:#fff !important;}
+#threat-panel.cc-compact-threat .tp-line{display:flex !important;gap:5px !important;flex-wrap:wrap !important;font-size:6px !important;line-height:1.3 !important;}
+#threat-panel.cc-compact-threat .tp-pill{padding:3px 6px !important;border-radius:999px !important;background:rgba(255,255,255,.06) !important;border:1px solid rgba(255,255,255,.08) !important;color:#dfeaff !important;}
+#threat-panel.cc-compact-threat .tp-pill.danger{color:#ff8ca0 !important;border-color:rgba(255,80,112,.22) !important;}
+#threat-panel.cc-compact-threat .tp-right{margin-top:6px !important;font-size:7px !important;color:#dfeaff !important;}
+#threat-panel.cc-compact-threat .tp-right strong{color:#ffe08a !important;font-size:8px !important;margin-right:7px !important;}
+#threat-panel.cc-compact-threat .tp-desc,#threat-panel.cc-compact-threat .tp-extra,#threat-panel.cc-compact-threat .tp-section{display:none !important;}
+#cc-reward-modal .cc-rw-card{width:min(780px,92vw) !important;padding:14px !important;}
+#cc-reward-modal .cc-rw-title{font-size:20px !important;}
+#cc-reward-modal .cc-rw-copy{font-size:10px !important;line-height:1.45 !important;}
+#cc-reward-modal .cc-rw-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:10px !important;}
+#cc-reward-modal .cc-rw-choice{min-height:175px !important;padding:10px !important;border-radius:14px !important;}
+#cc-reward-modal .cc-rw-icon{width:38px !important;height:38px !important;min-width:38px !important;font-size:19px !important;border-radius:11px !important;}
+#cc-reward-modal .cc-rw-name{font-size:10px !important;line-height:1.3 !important;}
+#cc-reward-modal .cc-rw-type{font-size:6px !important;}
+#cc-reward-modal .cc-rw-desc{font-size:7px !important;line-height:1.4 !important;min-height:0 !important;}
+#cc-reward-modal .cc-rw-fit,#cc-reward-modal .cc-rw-action,#cc-reward-modal .cc-rw-stat{font-size:7px !important;}
+@media(max-width:720px){#cc-reward-modal .cc-rw-grid{grid-template-columns:1fr !important;}}
+</style>
+<script id="cc-ux-declutter-v2-script">
+(function(){
+'use strict';
+function byId(id){return document.getElementById(id)}
+function safe(fn){try{return fn()}catch(err){console.warn('[cc-ux-declutter-v2]',err)}}
+function hasGame(){return typeof G!=='undefined' && G && G.player}
+function showStartButtonWhenNeeded(){var link=byId('cc-native-start-link'), overlay=byId('overlay'); if(!link)return; var playing=document.body.classList.contains('playing') || (overlay && overlay.classList.contains('hidden')); link.style.display=playing?'none':'flex'; link.style.visibility=playing?'hidden':'visible'; link.style.pointerEvents=playing?'none':'auto';}
+function currentEnemy(){if(!hasGame() || !Array.isArray(G.enemies)) return null; var p=G.player; return G.enemies.find(function(e){return e && e.hp>0 && Math.abs(e.x-p.x)+Math.abs(e.y-p.y)<=2 && (!G.visible || !G.visible[e.y] || G.visible[e.y][e.x]!==false);}) || null;}
+function compactThreat(){var panel=byId('threat-panel'); if(!panel)return; var e=currentEnemy(); if(!e){panel.classList.remove('cc-compact-threat');panel.style.display='none';return;} var hp=(e.hp||0)+'/'+(e.maxHp||e.hp||0)+' HP'; var atk=e.atk?('ATK '+e.atk):'ATK ?'; var def=e.def?('DEF '+e.def):'DEF 0'; var move=e.intentLabel || e.nextAction || e.intent || 'Nearby threat'; panel.className='cc-compact-threat'; panel.innerHTML='<div class="tp-name">'+(e.name||'Enemy')+'</div><div class="tp-line"><span class="tp-pill danger">'+move+'</span><span class="tp-pill">'+atk+'</span><span class="tp-pill">'+def+'</span></div><div class="tp-right"><strong>'+hp+'</strong> move or attack</div>'; panel.style.display='block'; panel.style.visibility='visible';}
+function removeQuestionMarks(){if(!hasGame())return; if(G.mystery && Array.isArray(G.mystery.markers)) G.mystery.markers=[]; if(Array.isArray(G.roomEvents)) G.roomEvents=G.roomEvents.filter(function(o){return o && o.type!=='mystery' && o.type!=='question' && o.type!=='rumor' && o.icon!=='?';}).slice(0,1); if(Array.isArray(G.interactives)) G.interactives=G.interactives.filter(function(o){return o && o.type!=='mystery' && o.type!=='question' && o.icon!=='?';}).slice(0,1);}
+function patchRewardDrafts(){if(window.__ccRewardDraftV2Patched || typeof window.showRewardDraft!=='function') return; var original=window.showRewardDraft; window.__ccRewardDraftV2Patched=true; window.__ccRewardDraftOriginal=original; window.showRewardDraft=function(source,title){source=source||'misc'; if(source!=='floorStart' && source!=='stairs'){ if(hasGame()){G.player.gold=(G.player.gold||0)+(source==='merchant'?0:8); if(typeof addLog==='function' && source!=='merchant') addLog('Extra reward converted to +8 gold to keep the screen moving.','item'); safe(function(){updateStatsUI()});} return;} return original.call(this,source,title||'Choose your floor reward.');};}
+function patchFloorRewardOnce(){if(window.__ccFloorRewardOnceV2 || typeof generateFloor!=='function') return; var old=generateFloor; window.__ccFloorRewardOnceV2=true; generateFloor=function(){var out=old.apply(this,arguments); setTimeout(function(){if(!hasGame())return; removeQuestionMarks(); var f=G.player.floor||1; G.__rewardDraftFloors=G.__rewardDraftFloors||{}; if(f>1 && !G.__rewardDraftFloors[f] && typeof window.__ccRewardDraftOriginal==='function'){G.__rewardDraftFloors[f]=true; window.__ccRewardDraftOriginal('floorStart','Choose your floor reward.');}},180); return out;}; window.generateFloor=generateFloor;}
+function tick(){showStartButtonWhenNeeded();removeQuestionMarks();compactThreat();patchRewardDrafts();patchFloorRewardOnce();}
+function boot(){tick();setTimeout(tick,200);setTimeout(tick,900);setInterval(tick,750)}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+window.addEventListener('resize',function(){setTimeout(tick,80)});
+})();
+</script>
+
+
+<!-- VIEWPORT FIT PATCH v3: keeps bottom action bar inside browser and resizes canvas safely -->
+<style id="cc-viewport-fit-v3-style">
+html,body{
+  width:100% !important;
+  height:100dvh !important;
+  max-height:100dvh !important;
+  overflow:hidden !important;
+}
+#app{
+  width:100vw !important;
+  height:100dvh !important;
+  max-height:100dvh !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+  display:flex !important;
+}
+#center{
+  min-height:0 !important;
+  height:100dvh !important;
+  max-height:100dvh !important;
+  overflow:hidden !important;
+  display:flex !important;
+  flex-direction:column !important;
+}
+#canvas-wrap{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  height:auto !important;
+  overflow:hidden !important;
+  padding:6px !important;
+}
+canvas#game{
+  max-width:100% !important;
+  max-height:100% !important;
+}
+#bottom-bar{
+  flex:0 0 auto !important;
+  height:auto !important;
+  min-height:62px !important;
+  max-height:86px !important;
+  overflow:visible !important;
+  align-items:center !important;
+  padding:7px 10px calc(9px + env(safe-area-inset-bottom)) !important;
+  margin:0 !important;
+  gap:7px !important;
+}
+#bottom-bar .spell-slot,
+#bottom-bar #potion-btn,
+#bottom-bar #mana-btn,
+#bottom-bar .mini-action-btn{
+  flex:0 0 auto !important;
+  width:46px !important;
+  height:42px !important;
+  min-width:46px !important;
+}
+#bottom-bar .mini-action-btn{
+  min-width:70px !important;
+}
+#action-log{max-height:38px !important;overflow:hidden !important;}
+@media (max-width:900px){
+  #center{width:100vw !important;}
+  #canvas-wrap{padding:4px !important;}
+  #bottom-bar{
+    min-height:70px !important;
+    max-height:112px !important;
+    flex-wrap:wrap !important;
+    justify-content:center !important;
+    padding:7px 8px calc(11px + env(safe-area-inset-bottom)) !important;
+  }
+  #bottom-bar .spell-slot,
+  #bottom-bar #potion-btn,
+  #bottom-bar #mana-btn,
+  #bottom-bar .mini-action-btn{
+    width:42px !important;
+    height:40px !important;
+    min-width:42px !important;
+  }
+  #bottom-bar .mini-action-btn{min-width:62px !important;}
+}
+@media (max-height:760px){
+  #portrait-area{height:112px !important;}
+  #bottom-bar{min-height:58px !important;max-height:78px !important;padding-top:5px !important;padding-bottom:calc(7px + env(safe-area-inset-bottom)) !important;}
+  #bottom-bar .spell-slot,
+  #bottom-bar #potion-btn,
+  #bottom-bar #mana-btn{width:42px !important;height:38px !important;min-width:42px !important;}
+  #bottom-bar .mini-action-btn{height:38px !important;min-width:64px !important;}
+}
+@media (max-height:620px){
+  #bottom-bar{min-height:52px !important;max-height:64px !important;}
+  #bottom-bar .spell-slot,
+  #bottom-bar #potion-btn,
+  #bottom-bar #mana-btn{width:38px !important;height:34px !important;min-width:38px !important;}
+  #bottom-bar .mini-action-btn{height:34px !important;min-width:58px !important;font-size:5px !important;}
+}
+</style>
+<script id="cc-viewport-fit-v3-script">
+(function(){
+'use strict';
+function byId(id){return document.getElementById(id)}
+function fitGameToViewport(){
+  var app=byId('app'), center=byId('center'), wrap=byId('canvas-wrap'), bar=byId('bottom-bar'), canvas=byId('game');
+  if(!center || !wrap || !bar || !canvas) return;
+  var vh=(window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+  if(app){app.style.height=vh+'px';app.style.maxHeight=vh+'px';}
+  center.style.height=vh+'px';center.style.maxHeight=vh+'px';
+  var barH=Math.ceil(bar.getBoundingClientRect().height || bar.offsetHeight || 70);
+  var topOffset=center.getBoundingClientRect().top || 0;
+  var available=Math.max(180, Math.floor(vh - topOffset - barH));
+  wrap.style.height=available+'px';
+  wrap.style.maxHeight=available+'px';
+  var aw=Math.max(1, wrap.clientWidth-12), ah=Math.max(1, wrap.clientHeight-12);
+  if(canvas.width && canvas.height){
+    var scale=Math.min(aw/canvas.width, ah/canvas.height);
+    scale=Math.max(0.18, Math.min(scale, 4));
+    canvas.style.width=Math.floor(canvas.width*scale)+'px';
+    canvas.style.height=Math.floor(canvas.height*scale)+'px';
+  }
+}
+function boot(){fitGameToViewport();setTimeout(fitGameToViewport,60);setTimeout(fitGameToViewport,240);setTimeout(fitGameToViewport,900);}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+window.addEventListener('resize',function(){setTimeout(fitGameToViewport,40);});
+if(window.visualViewport){window.visualViewport.addEventListener('resize',function(){setTimeout(fitGameToViewport,40);});}
+window.CC_FIT_VIEWPORT_V3=fitGameToViewport;
 })();
 </script>
 
