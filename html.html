@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schoology Story Formatter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --bg2: #edf1f7;
+      --panel: rgba(255,255,255,0.88);
+      --text: #0f172a;
+      --muted: #475569;
+      --faint: #7c8798;
+      --line: rgba(15,23,42,0.10);
+      --line2: rgba(15,23,42,0.16);
+      --violet: #5b5ff7;
+      --blue: #0ea5e9;
+      --green: #16a34a;
+      --amber: #d97706;
+      --red: #dc2626;
+      --shadow: 0 24px 70px rgba(15,23,42,0.12);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(91,95,247,0.14), transparent 32rem),
+        radial-gradient(circle at 94% 8%, rgba(14,165,233,0.12), transparent 34rem),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+    }
+
+    body:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(15,23,42,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15,23,42,0.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+
+    .page {
+      width: min(1340px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 14px 0 46px;
+      position: relative;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 0 18px;
+    }
+
+    .compact-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 12px 0 16px;
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      box-shadow: 0 14px 32px rgba(91,95,247,0.24);
+      color: white;
+      font-weight: 900;
+    }
+
+    .nav-note {
+      max-width: 500px;
+      color: var(--faint);
+      text-align: right;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 22px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-card {
+      border-radius: var(--radius);
+      padding: clamp(28px, 5vw, 54px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card:after {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      right: -190px;
+      top: -190px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(14,165,233,0.14), transparent 70%);
+    }
+
+    .eyebrow {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(15,23,42,0.045);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .spark {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--blue);
+      box-shadow: 0 0 0 6px rgba(14,165,233,0.12), 0 0 24px rgba(14,165,233,0.55);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 860px;
+      font-size: clamp(48px, 7vw, 92px);
+      line-height: 0.91;
+      letter-spacing: -0.07em;
+      background: linear-gradient(135deg, #0f172a, #4f46e5 48%, #0284c7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card p {
+      margin: 22px 0 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: clamp(17px, 1.8vw, 21px);
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .principles {
+      display: grid;
+      gap: 12px;
+    }
+
+    .principle {
+      border-radius: 22px;
+      padding: 18px;
+    }
+
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: rgba(91,95,247,0.10);
+      color: #4f46e5;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 13px;
+    }
+
+    .principle strong, .suggestion strong, .coach-card strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 6px;
+      letter-spacing: -0.025em;
+    }
+
+    .principle span, .suggestion span, .coach-card span {
+      display: block;
+      color: var(--faint);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+      margin-top: 0;
+    }
+
+    .panel {
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-head, .shell-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.45);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.035em;
+    }
+
+    .panel-head p {
+      margin: 7px 0 0;
+      color: var(--faint);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .panel-body { padding: 16px; }
+
+    .type-grid { display: grid; gap: 8px; }
+
+    .type-btn {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 17px;
+      padding: 14px;
+      text-align: left;
+      color: var(--text);
+      background: rgba(15,23,42,0.045);
+      cursor: pointer;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .type-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(15,23,42,0.06);
+      border-color: var(--line);
+    }
+
+    .type-btn.active {
+      background: linear-gradient(135deg, rgba(91,95,247,0.12), rgba(14,165,233,0.09));
+      border-color: rgba(91,95,247,0.28);
+      box-shadow: 0 0 0 4px rgba(91,95,247,0.08);
+    }
+
+    .type-btn strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .type-btn span {
+      display: block;
+      color: var(--faint);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    label em {
+      color: var(--faint);
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.92);
+      color: var(--text);
+      font: inherit;
+      outline: none;
+      padding: 14px 15px;
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    textarea {
+      min-height: 104px;
+      resize: vertical;
+      line-height: 1.48;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(14,165,233,0.45);
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(14,165,233,0.11);
+    }
+
+    .meter {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+    }
+
+    .meter-card, .coach-card {
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: rgba(15,23,42,0.035);
+      padding: 13px;
+    }
+
+    .meter-card strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -0.055em;
+      margin-bottom: 5px;
+    }
+
+    .meter-card span {
+      color: var(--faint);
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .coach-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .score-card {
+      border-radius: 20px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(91,95,247,0.11), rgba(14,165,233,0.08));
+      border: 1px solid rgba(91,95,247,0.18);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .score-row strong {
+      font-size: 15px;
+    }
+
+    .score-badge {
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #ffffff;
+      color: #4f46e5;
+      font-size: 12px;
+      font-weight: 900;
+      border: 1px solid var(--line);
+    }
+
+    .bar {
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.08);
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--violet), var(--blue));
+      transition: width .25s ease;
+    }
+
+    .coach-card {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .check-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 900;
+      background: rgba(22,163,74,0.1);
+      color: var(--green);
+    }
+
+    .coach-card.warn .check-icon {
+      background: rgba(217,119,6,0.1);
+      color: var(--amber);
+    }
+
+    .coach-card.bad .check-icon {
+      background: rgba(220,38,38,0.1);
+      color: var(--red);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    button.primary, button.secondary, .mini-copy {
+      appearance: none;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .16s ease, opacity .16s ease, background .16s ease;
+    }
+
+    button.primary {
+      border: 0;
+      padding: 12px 16px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #4f46e5, #0284c7);
+      box-shadow: 0 16px 36px rgba(14,165,233,0.18), 0 14px 32px rgba(91,95,247,0.18);
+    }
+
+    button.secondary {
+      border: 1px solid var(--line);
+      padding: 12px 16px;
+      color: var(--text);
+      background: rgba(255,255,255,0.78);
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); opacity: .82; }
+
+    .status {
+      min-height: 20px;
+      margin-top: 12px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .preview-shell, .code-shell {
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .shell-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .dots { display: flex; gap: 6px; }
+    .dots span { width: 10px; height: 10px; border-radius: 999px; background: #fb7185; }
+    .dots span:nth-child(2) { background: #fbbf24; }
+    .dots span:nth-child(3) { background: #22c55e; }
+
+    .preview {
+      min-height: 560px;
+      max-height: 720px;
+      overflow: auto;
+      padding: 18px;
+      background: #eef2f7;
+    }
+
+    .code-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .code-pill {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(22,163,74,0.1);
+      color: #15803d;
+      border: 1px solid rgba(22,163,74,0.18);
+      font-size: 11px;
+    }
+
+    .mini-copy {
+      border: 1px solid rgba(14,165,233,0.2);
+      background: #eff6ff;
+      color: #0369a1;
+      font-size: 12px;
+      padding: 7px 11px;
+    }
+
+    .mini-copy:hover { background: #dbeafe; }
+
+    .code-output-wrap {
+      position: relative;
+      background: #ffffff;
+    }
+
+    .code-output-wrap:before {
+      content: "HTML";
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      z-index: 2;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .code-output {
+      min-height: 560px;
+      max-height: 720px;
+      overflow: auto;
+      margin: 0;
+      background: #ffffff;
+      color: #334155;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.7;
+      padding: 24px 26px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      outline: none;
+      border-left: 54px solid #f8fafc;
+      box-shadow: inset 1px 0 0 rgba(15,23,42,0.08);
+    }
+
+    .code-output .tag { color: #0284c7; font-weight: 800; }
+    .code-output .attr { color: #7c3aed; font-weight: 700; }
+    .code-output .value { color: #b45309; }
+
+    .suggestions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .suggestion {
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 310px 1fr; }
+      .coach-panel { grid-column: 1 / -1; }
+      .coach-grid { grid-template-columns: repeat(3, 1fr); }
+      .score-card { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 1060px) {
+      .hero, .workspace, .output-grid { grid-template-columns: 1fr; }
+      .principles, .suggestions, .coach-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .page { width: min(100% - 18px, 1340px); padding-top: 10px; }
+      .nav { flex-direction: column; align-items: stretch; padding-bottom: 12px; }
+      .nav-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .hero-card { padding: 26px; }
+      h1 { letter-spacing: -0.055em; }
+      .principles, .form-grid, .meter, .suggestions, .coach-grid { grid-template-columns: 1fr; }
+      .actions button, .nav-actions button { width: 100%; }
+      .preview, .code-output { min-height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="nav compact-nav">
+      <div class="brand"><div class="brand-icon">S</div><span>Schoology Story Formatter</span></div>
+      <div class="nav-actions"><button class="secondary" onclick="nextExample()">New Example</button><button class="primary" onclick="copyHtml()">Copy HTML</button></div>
+    </nav>
+
+    <section class="workspace">
+      <aside class="panel card">
+        <div class="panel-head"><h2>Post type</h2><p>Pick a starting structure. Each click rotates through a different school subject.</p></div>
+        <div class="panel-body">
+          <div class="type-grid">
+            <button class="type-btn active" data-type="lesson" onclick="setPostType('lesson')"><strong>Lesson Plan</strong><span>Daily classwork and normal instructions.</span></button>
+            <button class="type-btn" data-type="sub" onclick="setPostType('sub')"><strong>Sub Plans</strong><span>Clear work students can follow independently.</span></button>
+            <button class="type-btn" data-type="checklist" onclick="setPostType('checklist')"><strong>Turn In Checklist</strong><span>Final checks before Schoology submission.</span></button>
+            <button class="type-btn" data-type="announcement" onclick="setPostType('announcement')"><strong>Announcement</strong><span>Quick reminders and schedule changes.</span></button>
+            <button class="type-btn" data-type="project" onclick="setPostType('project')"><strong>Project Launch</strong><span>Bigger tasks with a clear finish line.</span></button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel card">
+        <div class="panel-head"><h2>Build the post</h2><p>Write like a small story: what, why, first move, main steps, finish line.</p></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="field full"><label for="headline">Headline <em>what students see first</em></label><input id="headline" oninput="updateAll()" /></div>
+            <div class="field full"><label for="why">Why this matters <em>one sentence</em></label><textarea id="why" oninput="updateAll()"></textarea></div>
+            <div class="field"><label for="startHere">Start here <em>first move</em></label><textarea id="startHere" oninput="updateAll()"></textarea></div>
+            <div class="field"><label for="workTime">Work time <em>one step per line</em></label><textarea id="workTime" oninput="updateAll()"></textarea></div>
+            <div class="field"><label for="doneWhen">Done when <em>finish line</em></label><textarea id="doneWhen" oninput="updateAll()"></textarea></div>
+            <div class="field"><label for="afterDone">If you finish early <em>extension</em></label><textarea id="afterDone" oninput="updateAll()"></textarea></div>
+            <div class="field"><label for="toneSelect">Tone <em>label style</em></label><select id="toneSelect" oninput="updateAll()"><option value="direct">Direct and calm</option><option value="warm">Warm teacher voice</option><option value="strict">Very clear</option><option value="student">Middle school friendly</option></select></div>
+            <div class="field"><label for="styleSelect">Output style <em>Schoology safe</em></label><select id="styleSelect" oninput="updateAll()"><option value="slate">Sleek Slate</option><option value="blue">Clean Blue</option><option value="green">Green Focus</option><option value="orange">Tiger Orange</option></select></div>
+          </div>
+
+          <div class="meter">
+            <div class="meter-card"><strong id="wordCount">0</strong><span>total words</span></div>
+            <div class="meter-card"><strong id="stepCount">0</strong><span>student actions</span></div>
+            <div class="meter-card"><strong id="sectionCount">5</strong><span>clear sections</span></div>
+            <div class="meter-card"><strong id="readScore">Good</strong><span>readability signal</span></div>
+          </div>
+
+          <div class="actions"><button class="primary" onclick="copyHtml()">Copy Schoology HTML</button><button class="secondary" onclick="copyPlainText()">Copy Plain Text</button><button class="secondary" onclick="nextExample()">New Example</button></div>
+          <div id="status" class="status"></div>
+        </div>
+      </section>
+
+      <aside class="panel card coach-panel">
+        <div class="panel-head"><h2>Quality coach</h2><p>Live checks for clarity, length, and student readability.</p></div>
+        <div class="panel-body coach-grid">
+          <div class="score-card">
+            <div class="score-row"><strong>Readability score</strong><span id="scoreBadge" class="score-badge">0%</span></div>
+            <div class="bar"><span id="scoreBar"></span></div>
+          </div>
+          <div id="checkHeadline" class="coach-card"><div class="check-icon">✓</div><div><strong>Clear headline</strong><span>Name the assignment or task first.</span></div></div>
+          <div id="checkWhy" class="coach-card"><div class="check-icon">✓</div><div><strong>Reason to care</strong><span>Give students one sentence explaining why this matters.</span></div></div>
+          <div id="checkSteps" class="coach-card"><div class="check-icon">✓</div><div><strong>Step count</strong><span>Keep work time around 3 to 6 actions.</span></div></div>
+          <div id="checkFinish" class="coach-card"><div class="check-icon">✓</div><div><strong>Finish line</strong><span>Say what students submit or how they know they are done.</span></div></div>
+          <div id="checkLength" class="coach-card"><div class="check-icon">✓</div><div><strong>Total length</strong><span>Short enough to read before students tune out.</span></div></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="output-grid">
+      <div class="preview-shell card">
+        <div class="shell-head"><span>Preview</span><div class="dots"><span></span><span></span><span></span></div></div>
+        <div id="preview" class="preview"></div>
+      </div>
+      <div class="code-shell card">
+        <div class="shell-head"><span>Generated HTML</span><span class="code-pill">ready to paste</span></div>
+        <div class="code-toolbar"><span>Schoology safe inline HTML</span><button class="mini-copy" onclick="copyHtml()">Copy</button></div>
+        <div class="code-output-wrap"><pre id="htmlOutput" class="code-output" tabindex="0"></pre></div>
+      </div>
+    </section>
+</main>
+
+  <script>
+    const subjects = [
+      { subject: "Science", headline: "Today: Build a Food Chain Model", why: "Today you are showing how energy moves through an ecosystem from one living thing to another.", startHere: "Open your notebook and write the words producer, consumer, and decomposer.", workTime: ["Choose one ecosystem.", "Add at least one producer.", "Add two consumers.", "Add one decomposer.", "Use arrows to show how energy moves."], doneWhen: "Your model is done when every organism is labeled and the arrows make sense.", afterDone: "Add one sentence explaining what would happen if one organism disappeared." },
+      { subject: "ELA", headline: "Today: Find Evidence That Proves Your Claim", why: "Good writing gets stronger when your opinion is backed up by exact evidence from the text.", startHere: "Open the reading passage and reread the paragraph you chose yesterday.", workTime: ["Write your claim.", "Find one quote that supports it.", "Explain what the quote shows.", "Revise one sentence so it is clearer."], doneWhen: "You are done when your claim, evidence, and explanation are all submitted in Schoology.", afterDone: "Find a second quote that could make your argument stronger." },
+      { subject: "Math", headline: "Today: Solve Multi Step Equations", why: "Multi step equations help you practice slowing down, keeping work organized, and checking if your answer actually makes sense.", startHere: "Open your worksheet and complete the warm up problem at the top.", workTime: ["Circle the operation you see first.", "Undo the operations in the correct order.", "Show every step.", "Check your answer by substituting it back in."], doneWhen: "You are done when problems 1 through 8 are complete and your work is shown.", afterDone: "Choose one problem and write a short explanation of your solving process." },
+      { subject: "Social Studies", headline: "Today: Explain One Cause of the American Revolution", why: "History makes more sense when you can connect events instead of memorizing them one at a time.", startHere: "Open the class reading and look for the section on taxes and colonial protests.", workTime: ["Choose one cause.", "Summarize it in your own words.", "Find one detail from the reading.", "Explain how colonists reacted."], doneWhen: "You are done when your cause, evidence, and explanation are submitted.", afterDone: "Add one sentence connecting your cause to another event we studied." },
+      { subject: "Art", headline: "Today: Create a Mood With Color", why: "Artists use color choices to guide how people feel before they even understand the image.", startHere: "Choose one emotion you want your artwork to communicate.", workTime: ["Pick a limited color palette.", "Sketch your main shape.", "Add a background that supports the mood.", "Use contrast to create a focal point."], doneWhen: "You are done when your artwork has a clear mood, a background, and a focal point.", afterDone: "Write one sentence explaining why you chose those colors." }
+    ];
+
+    let subjectIndex = Math.floor(Math.random() * subjects.length);
+    let currentType = "lesson";
+
+    const themes = {
+      slate: { bg: "#f8fafc", border: "#dbe4ef", top: "#111827", title: "#0f172a", accent: "#6366f1", text: "#111827", muted: "#64748b", block: "#ffffff", whyBg: "#f1f5ff", iconBg: "#eef2ff", finishBg: "#111827", finishText: "#ffffff", pillBg: "#eef2ff", pillText: "#3730a3" },
+      blue: { bg: "#f5f9ff", border: "#cfe0ff", top: "#2563eb", title: "#172554", accent: "#2563eb", text: "#111827", muted: "#546172", block: "#ffffff", whyBg: "#eff6ff", iconBg: "#dbeafe", finishBg: "#111827", finishText: "#ffffff", pillBg: "#dbeafe", pillText: "#1d4ed8" },
+      green: { bg: "#f4fcf6", border: "#cce9d5", top: "#16a34a", title: "#052e16", accent: "#16a34a", text: "#111827", muted: "#536258", block: "#ffffff", whyBg: "#ecfdf5", iconBg: "#dcfce7", finishBg: "#111827", finishText: "#ffffff", pillBg: "#dcfce7", pillText: "#166534" },
+      orange: { bg: "#fff7ed", border: "#fed7aa", top: "#f97316", title: "#431407", accent: "#f97316", text: "#111827", muted: "#57534e", block: "#ffffff", whyBg: "#fff1e4", iconBg: "#ffedd5", finishBg: "#111827", finishText: "#ffffff", pillBg: "#ffedd5", pillText: "#9a3412" }
+    };
+
+    const els = {
+      headline: document.getElementById("headline"), why: document.getElementById("why"), startHere: document.getElementById("startHere"), workTime: document.getElementById("workTime"), doneWhen: document.getElementById("doneWhen"), afterDone: document.getElementById("afterDone"), toneSelect: document.getElementById("toneSelect"), styleSelect: document.getElementById("styleSelect"), preview: document.getElementById("preview"), htmlOutput: document.getElementById("htmlOutput"), status: document.getElementById("status"), wordCount: document.getElementById("wordCount"), stepCount: document.getElementById("stepCount"), sectionCount: document.getElementById("sectionCount"), readScore: document.getElementById("readScore"), scoreBadge: document.getElementById("scoreBadge"), scoreBar: document.getElementById("scoreBar"), checkHeadline: document.getElementById("checkHeadline"), checkWhy: document.getElementById("checkWhy"), checkSteps: document.getElementById("checkSteps"), checkFinish: document.getElementById("checkFinish"), checkLength: document.getElementById("checkLength")
+    };
+
+    function subject() { return subjects[subjectIndex]; }
+    function lineBreak() { return String.fromCharCode(10); }
+    function clean(value) { return String(value || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+    function lines(text) { return String(text || "").split(lineBreak()).map(x => x.trim()).filter(Boolean); }
+    function countWords(text) { return String(text || "").trim().split(/\s+/).filter(Boolean).length; }
+
+    function preset(type) {
+      const s = subject();
+      if (type === "sub") return { headline: "Sub Plans: " + s.headline.replace("Today: ", ""), why: "The goal today is simple: follow the posted directions, work independently, and leave clear evidence of what you completed.", startHere: "Read this whole post once before opening anything else.", workTime: [s.startHere].concat(s.workTime).join(lineBreak()), doneWhen: s.doneWhen, afterDone: "Check for missing work, then quietly continue with the next assignment." };
+      if (type === "checklist") return { headline: "Before You Submit: " + s.subject, why: "A quick final check helps you avoid losing points for something easy to fix.", startHere: "Look over your work one final time before clicking submit.", workTime: ["Check that every required part is complete.", "Make sure your name is on the work.", "Attach the correct file or screenshot.", "Read the directions again before submitting."].join(lineBreak()), doneWhen: s.doneWhen, afterDone: "Improve one detail that would make your work clearer or stronger." };
+      if (type === "announcement") return { headline: s.subject + " Reminder", why: "This reminder is here so everyone knows what to focus on before class starts.", startHere: "Read the update before beginning today’s work.", workTime: ["Check the assignment page.", "Finish anything that is missing.", "Ask one specific question if you are stuck."].join(lineBreak()), doneWhen: "You are ready when you know the task, the due item, and the next step.", afterDone: "Continue improving your current assignment." };
+      if (type === "project") return { headline: "Project Launch: " + s.subject + " Challenge", why: "This project is your chance to show that you can turn what we learned into something another person can understand.", startHere: "Read the project goal first, then sketch or outline your idea before starting the final version.", workTime: ["Choose your idea.", "Break it into smaller parts.", "Build the simplest version first.", "Check the rubric before adding extra details.", "Revise one part before submitting."].join(lineBreak()), doneWhen: "Your project is done when it meets the requirements and includes a short explanation of your choices.", afterDone: "Add one detail that makes the final product clearer, stronger, or more polished." };
+      return { headline: s.headline, why: s.why, startHere: s.startHere, workTime: s.workTime.join(lineBreak()), doneWhen: s.doneWhen, afterDone: s.afterDone };
+    }
+
+    function toneLabel() {
+      if (els.toneSelect.value === "warm") return "Read this first";
+      if (els.toneSelect.value === "strict") return "Follow these steps";
+      if (els.toneSelect.value === "student") return "Here’s the plan";
+      return "Today’s plan";
+    }
+
+    function checklist(items, t) {
+      if (!items.length) return "";
+      return items.map(item => `
+        <div style="display:flex; gap:12px; align-items:flex-start; margin:10px 0;">
+          <span style="display:inline-flex; align-items:center; justify-content:center; flex:0 0 24px; width:24px; height:24px; border-radius:999px; background:${t.accent}; color:#ffffff; font-size:15px; font-weight:bold; line-height:1; margin-top:3px;">✓</span>
+          <span style="font-size:21px; line-height:1.45; color:${t.text};">${clean(item)}</span>
+        </div>`).join("");
+    }
+
+    function sectionCard(icon, title, content, t) {
+      return `<div style="margin-top:18px; padding:22px; background:${t.block}; border:1px solid ${t.border}; border-radius:18px; box-shadow:0 8px 22px rgba(15,23,42,0.06);">
+        <div style="display:grid; grid-template-columns:48px 1fr; gap:16px; align-items:start;">
+          <div style="width:48px; height:48px; border-radius:16px; background:${t.iconBg}; color:${t.accent}; display:flex; align-items:center; justify-content:center; font-size:25px; font-weight:bold;">${icon}</div>
+          <div>
+            <h3 style="margin:0 0 8px; color:${t.text}; font-size:25px; line-height:1.15; letter-spacing:-0.3px;">${title}</h3>
+            ${content}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function buildHtml() {
+      const t = themes[els.styleSelect.value];
+      const workItems = lines(els.workTime.value);
+      const doneItems = lines(els.doneWhen.value);
+      const doneContent = doneItems.length > 1
+        ? checklist(doneItems, t)
+        : `<p style="margin:0; font-size:21px; line-height:1.5; color:${t.text};">${clean(els.doneWhen.value)}</p>`;
+
+      return `<div style="max-width:980px; margin:0 auto; font-family:Arial, Helvetica, sans-serif; color:${t.text}; line-height:1.55; background:${t.bg}; border:1px solid ${t.border}; border-top:14px solid ${t.top}; border-radius:24px; padding:34px; box-sizing:border-box; box-shadow:0 12px 34px rgba(15,23,42,0.10);">
+  <div style="display:inline-flex; align-items:center; gap:8px; background:${t.pillBg}; color:${t.pillText}; border-radius:999px; padding:9px 13px; font-size:15px; font-weight:bold; margin-bottom:18px;">
+    <span style="font-size:17px; line-height:1;">●</span>
+    <span>${toneLabel()}</span>
+  </div>
+
+  <h2 style="margin:0; color:${t.title}; font-size:40px; line-height:1.06; letter-spacing:-1.4px; font-weight:bold;">${clean(els.headline.value)}</h2>
+
+  <div style="margin:22px 0 0; padding:22px; background:${t.whyBg}; border-left:8px solid ${t.accent}; border-radius:18px; box-shadow:0 8px 22px rgba(15,23,42,0.06);">
+    <div style="display:grid; grid-template-columns:48px 1fr; gap:16px; align-items:start;">
+      <div style="width:48px; height:48px; border-radius:16px; background:${t.iconBg}; color:${t.accent}; display:flex; align-items:center; justify-content:center; font-size:25px; font-weight:bold;">?</div>
+      <p style="margin:2px 0 0; font-size:23px; line-height:1.45; color:${t.text};"><strong style="color:${t.accent};">Why:</strong> ${clean(els.why.value)}</p>
+    </div>
+  </div>
+
+  ${sectionCard("→", "Start here", `<p style="margin:0; font-size:21px; line-height:1.5; color:${t.text};">${clean(els.startHere.value)}</p>`, t)}
+
+  ${sectionCard("✓", "Work time", checklist(workItems, t), t)}
+
+  ${sectionCard("★", "Done when", doneContent, t)}
+
+  <div style="margin-top:18px; padding:20px 22px; background:${t.finishBg}; color:${t.finishText}; border-radius:18px; font-size:22px; line-height:1.45; font-weight:bold; box-shadow:0 8px 22px rgba(15,23,42,0.10);">
+    <span style="opacity:0.86;">If you finish early:</span> ${clean(els.afterDone.value)}
+  </div>
+
+  <p style="margin:18px 0 0; color:${t.muted}; font-size:17px; line-height:1.4;">Read the whole post once before asking what to do next.</p>
+</div>`;
+    }
+
+    function highlight(code) {
+      return clean(code).replaceAll("&lt;div", "&lt;<span class='tag'>div</span>").replaceAll("&lt;/div&gt;", "&lt;/<span class='tag'>div</span>&gt;").replaceAll("&lt;h2", "&lt;<span class='tag'>h2</span>").replaceAll("&lt;/h2&gt;", "&lt;/<span class='tag'>h2</span>&gt;").replaceAll("&lt;h3", "&lt;<span class='tag'>h3</span>").replaceAll("&lt;/h3&gt;", "&lt;/<span class='tag'>h3</span>&gt;").replaceAll("&lt;p", "&lt;<span class='tag'>p</span>").replaceAll("&lt;/p&gt;", "&lt;/<span class='tag'>p</span>&gt;").replaceAll("&lt;ul", "&lt;<span class='tag'>ul</span>").replaceAll("&lt;/ul&gt;", "&lt;/<span class='tag'>ul</span>&gt;").replaceAll("&lt;li", "&lt;<span class='tag'>li</span>").replaceAll("&lt;/li&gt;", "&lt;/<span class='tag'>li</span>&gt;").replaceAll("style=", "<span class='attr'>style</span>=");
+    }
+
+    function setCheck(el, state, icon) {
+      el.classList.remove("warn", "bad");
+      if (state) el.classList.add(state);
+      el.querySelector(".check-icon").textContent = icon;
+    }
+
+    function updateCoach(words, steps) {
+      const headlineWords = countWords(els.headline.value);
+      const whyWords = countWords(els.why.value);
+      const done = els.doneWhen.value.toLowerCase();
+      const finishWords = ["submit", "done", "complete", "screenshot", "link", "attach", "turn in", "finished", "file"];
+      const hasFinish = finishWords.some(word => done.includes(word));
+
+      let score = 100;
+      if (headlineWords < 3 || headlineWords > 12) score -= 15;
+      if (whyWords < 6 || whyWords > 26) score -= 15;
+      if (steps < 3 || steps > 6) score -= 20;
+      if (!hasFinish) score -= 25;
+      if (words > 135) score -= 20;
+      if (words < 45) score -= 10;
+      score = Math.max(0, Math.min(100, score));
+
+      els.scoreBadge.textContent = score + "%";
+      els.scoreBar.style.width = score + "%";
+
+      setCheck(els.checkHeadline, headlineWords < 3 || headlineWords > 12 ? "warn" : "", headlineWords < 3 || headlineWords > 12 ? "!" : "✓");
+      setCheck(els.checkWhy, whyWords < 6 || whyWords > 26 ? "warn" : "", whyWords < 6 || whyWords > 26 ? "!" : "✓");
+      setCheck(els.checkSteps, steps < 3 || steps > 6 ? "warn" : "", steps < 3 || steps > 6 ? "!" : "✓");
+      setCheck(els.checkFinish, hasFinish ? "" : "bad", hasFinish ? "✓" : "!");
+      setCheck(els.checkLength, words > 135 ? "warn" : "", words > 135 ? "!" : "✓");
+    }
+
+    function updateMeter() {
+      const words = countWords([els.headline.value, els.why.value, els.startHere.value, els.workTime.value, els.doneWhen.value, els.afterDone.value].join(" "));
+      const steps = lines(els.workTime.value).length;
+      els.wordCount.textContent = words;
+      els.stepCount.textContent = steps;
+      els.sectionCount.textContent = "5";
+      els.readScore.textContent = words > 135 || steps > 7 ? "Trim" : words < 45 ? "Thin" : "Good";
+      updateCoach(words, steps);
+    }
+
+    function updateAll() {
+      const html = buildHtml();
+      els.preview.innerHTML = html;
+      els.htmlOutput.innerHTML = highlight(html);
+      updateMeter();
+    }
+
+    function setPostType(type) {
+      currentType = type;
+      document.querySelectorAll(".type-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.type === type));
+      const p = preset(type);
+      els.headline.value = p.headline;
+      els.why.value = p.why;
+      els.startHere.value = p.startHere;
+      els.workTime.value = p.workTime;
+      els.doneWhen.value = p.doneWhen;
+      els.afterDone.value = p.afterDone;
+      updateAll();
+    }
+
+    function nextExample() {
+      subjectIndex = (subjectIndex + 1) % subjects.length;
+      setPostType(currentType);
+      flash("Loaded a new subject example.");
+    }
+
+    async function copyHtml() {
+      try { await navigator.clipboard.writeText(buildHtml()); flash("Schoology HTML copied."); }
+      catch (error) { flash("Copy failed. Select the code manually."); }
+    }
+
+    async function copyPlainText() {
+      const text = [els.headline.value, "", "Why: " + els.why.value, "", "Start here:", els.startHere.value, "", "Work time:", els.workTime.value, "", "Done when:", els.doneWhen.value, "", "If you finish early:", els.afterDone.value].join(lineBreak());
+      try { await navigator.clipboard.writeText(text); flash("Plain text copied."); }
+      catch (error) { flash("Copy failed."); }
+    }
+
+    function flash(message) {
+      els.status.textContent = message;
+      setTimeout(() => els.status.textContent = "", 2200);
+    }
+
+    setPostType("lesson");
+  </script>
+</body>
+</html>
