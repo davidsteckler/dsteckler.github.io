@@ -3911,11 +3911,11 @@ function render(){
     if(!G.visible[item.y]||!G.visible[item.y][item.x])continue;
     const px=(item.x-cx_)*TILE,py=(item.y-cy_)*TILE;
     if(px<-TILE||px>canvas.width||py<-TILE||py>canvas.height)continue;
-    const bob=Math.sin(t*3+item.id*7)*2.5;
+    const bob=0;
     if(item.type==='equipment'&&item.loot){
       const col=rarityColor(item.loot.rarity);
       // Loot beam (Terraria style!)
-      const beamAlpha=0.12+Math.sin(t*3+item.id)*.06;
+      const beamAlpha=0;
       ctx.globalAlpha=beamAlpha;ctx.fillStyle=col;
       ctx.fillRect(px+TILE/2-3,py-24+bob,6,32);
       ctx.globalAlpha=1;
@@ -8566,7 +8566,7 @@ resize();
     var pts=[[room.cx,room.cy],[room.x+1,room.y+1],[room.x+room.w-2,room.y+room.h-2]];
     return pts.some(function(p){return G.visible[p[1]]&&G.visible[p[1]][p[0]]})
   }
-  function showRoomBanner(room,info){
+  function showRoomBanner(room,info){ return;
     var b=byId('cc-room-enter-banner'); if(!b)return;
     var d=info.data;
     b.innerHTML='<div class="cc-room-enter-kicker">'+d.icon+' '+(info.kind==='corridor'?'Passage':'Room discovered')+'</div><div class="cc-room-enter-title" style="color:'+d.color+'">'+d.name+'</div><div class="cc-room-enter-goal">'+d.goal+'</div>';
@@ -8586,7 +8586,7 @@ resize();
     var key=roomKey(room)+'|'+info.kind;
     if(window.__ccLastRoomKey!==key){ window.__ccLastRoomKey=key; showRoomBanner(room,info); if(typeof setActionTip==='function') setActionTip(info.data.name,info.data.goal); }
   }
-  function drawRoomMarkers(){
+  function drawRoomMarkers(){ return;
     if(!G||!G.rooms||!ctx||!canvas||typeof TILE==='undefined')return;
     annotateRooms();
     ctx.save();
@@ -11965,5 +11965,790 @@ window.CC_FIT_VIEWPORT_V3=fitGameToViewport;
 })();
 </script>
 
+
+<!-- CC v4: tile-clean overlay + better dungeon music -->
+<style id="cc-v4-overlap-music-style">
+  #cc-room-enter-banner{display:none!important;opacity:0!important;pointer-events:none!important;}
+  #cc-hover-grid{inset:auto!important;position:absolute!important;pointer-events:none!important;z-index:7!important;}
+  #cc-room-hud{opacity:.72;transform:scale(.96);transform-origin:top right;}
+  #cc-room-hud:hover{opacity:1;}
+  @media(max-width:900px){#cc-room-hud{display:none!important;}}
+</style>
+<script id="cc-v4-overlap-music-script">
+(function(){
+  'use strict';
+  function byId(id){return document.getElementById(id)}
+  try{window.drawRoomMarkers=function(){}}catch(e){}
+  try{window.showRoomBanner=function(){}}catch(e){}
+  function alignHoverCanvas(){var game=byId('game'),hover=byId('cc-hover-grid'),wrap=byId('canvas-wrap');if(!game||!hover||!wrap)return;var gr=game.getBoundingClientRect(),wr=wrap.getBoundingClientRect();hover.style.left=(gr.left-wr.left)+'px';hover.style.top=(gr.top-wr.top)+'px';hover.style.width=gr.width+'px';hover.style.height=gr.height+'px';if(hover.width!==game.width)hover.width=game.width;if(hover.height!==game.height)hover.height=game.height;}
+  function suppressInterruptPopups(){['event-room-modal','cc-evolution-modal','cc-evolution-toast','cc-room-enter-banner'].forEach(function(id){var el=byId(id);if(!el)return;el.classList.remove('show','open');el.style.display='none';el.style.pointerEvents='none';});if(window.G&&G.paused){var level=byId('level-up'),reward=byId('cc-reward-modal'),shop=byId('cc-shop-modal'),inv=byId('inventory-modal');var allowed=(level&&!level.classList.contains('hidden'))||(reward&&reward.classList.contains('show'))||(shop&&shop.classList.contains('show'))||(inv&&inv.classList.contains('show'));if(!allowed)G.paused=false;}}
+  function cleanFloatingText(){try{window.drawRoomMarkers=function(){}}catch(e){}try{window.showRoomBanner=function(){}}catch(e){}}
+  function patchMusic(){if(!window.SFX||SFX.__ccV4Music)return;SFX.__ccV4Music=true;SFX.stopMusic=function(){if(this.musicTimer){clearTimeout(this.musicTimer);this.musicTimer=null;}};SFX.midiToFreq=SFX.midiToFreq||function(n){return 440*Math.pow(2,(n-69)/12)};SFX.ensureMusicBus=function(){if(!this.ctx)return;if(!this.musicCompressor){this.musicCompressor=this.ctx.createDynamicsCompressor();this.musicCompressor.threshold.value=-30;this.musicCompressor.knee.value=18;this.musicCompressor.ratio.value=2.4;this.musicCompressor.attack.value=.025;this.musicCompressor.release.value=.35;this.musicCompressor.connect(this.masterGain||this.ctx.destination);}if(!this.musicGain){this.musicGain=this.ctx.createGain();this.musicGain.gain.value=this.muted?0:.105;}try{this.musicGain.disconnect()}catch(e){}this.musicGain.connect(this.musicCompressor);};SFX.dungeonTone=function(freq,when,dur,wave,gain,lp,detune){if(this.muted||!this.ctx||!freq)return;this.ensureMusicBus();var osc=this.ctx.createOscillator(),g=this.ctx.createGain(),f=this.ctx.createBiquadFilter();osc.type=wave||'triangle';osc.frequency.setValueAtTime(freq,when);osc.detune.setValueAtTime(detune||0,when);f.type='lowpass';f.frequency.setValueAtTime(lp||1200,when);f.Q.value=.35;g.gain.setValueAtTime(.0001,when);g.gain.linearRampToValueAtTime(gain||.01,when+.04);g.gain.setTargetAtTime(.0001,when+Math.max(.08,dur-.14),.10);osc.connect(f);f.connect(g);g.connect(this.musicGain);osc.start(when);osc.stop(when+dur+.18);};SFX.softNoise=function(when,gain){if(this.muted||!this.ctx)return;this.ensureMusicBus();var len=Math.floor(this.ctx.sampleRate*.12),buffer=this.ctx.createBuffer(1,len,this.ctx.sampleRate),data=buffer.getChannelData(0);for(var i=0;i<len;i++)data[i]=(Math.random()*2-1)*(1-i/len);var src=this.ctx.createBufferSource(),g=this.ctx.createGain(),f=this.ctx.createBiquadFilter();src.buffer=buffer;f.type='highpass';f.frequency.value=1600;g.gain.setValueAtTime(gain||.006,when);g.gain.exponentialRampToValueAtTime(.0001,when+.11);src.connect(f);f.connect(g);g.connect(this.musicGain);src.start(when);src.stop(when+.13);};SFX.chooseTrack=function(depth,danger){return danger>=4?'danger':'crawl'};SFX.tracks={crawl:{tempo:84,root:[38,38,41,36],lead:[null,null,62,null,null,65,null,null,60,null,null,67,null,null,65,null]},danger:{tempo:96,root:[36,36,35,38],lead:[60,null,63,null,65,null,66,null,63,null,60,null,58,null,60,null]}};SFX.setAmbience=function(depth,danger){this.musicMood={depth:depth||1,danger:danger||0};this.ensureMusicBus();var next=this.chooseTrack(depth,danger);if(this.musicTrackKey!==next){this.musicTrackKey=next;this.musicStep=0;this.stopMusic();this.startMusic(true)}if(this.musicGain&&this.ctx)this.musicGain.gain.setTargetAtTime(this.muted?0:(danger>=4?.13:.105),this.ctx.currentTime,.35);};SFX.startMusic=function(force){if(!this.ctx||this.muted)return;this.ensureMusicBus();if(force){this.stopMusic();this.musicStep=0}if(!this.musicTimer)this.scheduleMusic();};SFX.scheduleMusic=function(){if(!this.ctx||this.muted){this.musicTimer=null;return;}this.ensureMusicBus();var mood=this.musicMood||{depth:1,danger:0};var key=this.musicTrackKey||this.chooseTrack(mood.depth,mood.danger);var track=this.tracks[key]||this.tracks.crawl;var now=this.ctx.currentTime+.06;var stepDur=60/track.tempo/4;var steps=16;for(var i=0;i<steps;i++){var step=(this.musicStep+i)%16,t=now+i*stepDur,root=track.root[Math.floor(step/4)%track.root.length],lead=track.lead[step];if(step%4===0){this.dungeonTone(this.midiToFreq(root),t,stepDur*3.7,'sine',key==='danger'?.017:.013,520,-4);this.dungeonTone(this.midiToFreq(root+7),t+.025,stepDur*3.3,'triangle',key==='danger'?.007:.0055,900,3);}if(step%4===2)this.softNoise(t,key==='danger'?.006:.0035);if(lead!=null){this.dungeonTone(this.midiToFreq(lead),t+.02,stepDur*1.25,'triangle',key==='danger'?.011:.0085,1700,0);this.dungeonTone(this.midiToFreq(lead+12),t+.035,stepDur*.85,'sine',key==='danger'?.004:.003,2400,5);}}this.musicStep=(this.musicStep+steps)%16;var self=this;this.musicTimer=setTimeout(function(){self.musicTimer=null;self.scheduleMusic()},stepDur*steps*1000*.96);};var oldToggle=SFX.toggleMute;SFX.toggleMute=function(){if(oldToggle)oldToggle.apply(this,arguments);else this.muted=!this.muted;if(this.musicGain&&this.ctx)this.musicGain.gain.setTargetAtTime(this.muted?0:.105,this.ctx.currentTime,.08);if(this.muted)this.stopMusic();else this.startMusic(true);var b=byId('mute-btn');if(b)b.textContent=this.muted?'♪ OFF':'♪ ON';};}
+  function boot(){alignHoverCanvas();suppressInterruptPopups();cleanFloatingText();patchMusic();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();window.addEventListener('resize',alignHoverCanvas,{passive:true});setInterval(boot,300);
+})();
+</script>
+
 </body>
 </html>
+<!-- =========================================================
+     CHARACTER-PRESERVED PLAYABILITY PATCH
+     Keeps the original hero, portrait, gear, relics, spells,
+     inventory, classes, shops, story, and progression.
+     Changes only the screen behavior so the game is playable.
+========================================================= -->
+<style id="cc-character-preserved-playability-patch">
+:root{
+  --cc-drawer-bg: linear-gradient(180deg, rgba(18,24,43,.98), rgba(8,12,24,.98));
+  --cc-glass: rgba(8,12,24,.88);
+}
+
+/* Desktop: keep the character panel because the character identity matters.
+   The right panel becomes less greedy and can be tucked away. */
+@media (min-width:901px){
+  body.cc-map-focus #inv-panel{
+    position:fixed!important;
+    right:0!important;
+    top:0!important;
+    bottom:0!important;
+    z-index:60!important;
+    transform:translateX(calc(100% - 38px));
+    transition:transform .18s ease;
+    border-left:2px solid var(--border-hi)!important;
+    box-shadow:-18px 0 40px rgba(0,0,0,.35)!important;
+  }
+  body.cc-map-focus #inv-panel:hover,
+  body.cc-map-focus.cc-bag-open #inv-panel{
+    transform:translateX(0);
+  }
+  body.cc-map-focus #center{
+    padding-right:38px;
+  }
+  body.cc-map-focus #canvas-wrap{
+    border-right:2px solid var(--border)!important;
+  }
+}
+
+/* Mobile and narrow screens: map first, character and inventory as real drawers. */
+@media (max-width:900px){
+  html,body,#app{height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;}
+  #center{height:100dvh!important;width:100vw!important;min-width:0!important;}
+
+  #canvas-wrap{
+    position:relative!important;
+    height:calc(100dvh - 84px)!important;
+    min-height:0!important;
+    padding-top:54px!important;
+    padding-bottom:156px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    overflow:hidden!important;
+    border:0!important;
+    background:radial-gradient(circle at 50% 18%, #1a2131, #070a12 68%)!important;
+  }
+  canvas#game{
+    max-width:100vw!important;
+    max-height:calc(100dvh - 238px)!important;
+    width:auto!important;
+    height:auto!important;
+  }
+
+  #bottom-bar{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    z-index:48!important;
+    height:auto!important;
+    min-height:78px!important;
+    padding:8px 8px calc(10px + env(safe-area-inset-bottom))!important;
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    justify-content:flex-start!important;
+    background:linear-gradient(180deg, rgba(19,25,43,.96), rgba(9,12,23,.98))!important;
+    border-top:1px solid rgba(217,191,136,.65)!important;
+    box-shadow:0 -12px 34px rgba(0,0,0,.42)!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  #bottom-bar::-webkit-scrollbar{display:none;}
+  .spell-slot,#potion-btn,#mana-btn,.mini-action-btn{
+    flex:0 0 auto!important;
+    width:58px!important;
+    min-width:58px!important;
+    height:52px!important;
+    border-radius:12px!important;
+    font-size:7px!important;
+  }
+  .mini-action-btn.combat strong{font-size:8px!important;}
+  .mini-action-btn.combat em{font-size:5px!important;}
+  #action-log,#ability-help,.bar-sep,.inv-mini{display:none!important;}
+
+  #mobile-controls{
+    display:flex!important;
+    bottom:calc(92px + env(safe-area-inset-bottom))!important;
+    padding:0 12px!important;
+    z-index:47!important;
+  }
+  #mobile-controls .mobile-pad{
+    grid-template-columns:54px 54px 54px!important;
+    grid-template-rows:54px 54px 54px!important;
+    gap:7px!important;
+  }
+  #mobile-controls .mobile-actions{
+    grid-template-columns:60px 60px!important;
+    grid-template-rows:54px 54px!important;
+    gap:7px!important;
+  }
+  .mobile-btn{
+    background:rgba(9,13,25,.86)!important;
+    border-color:rgba(217,191,136,.82)!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.32)!important;
+  }
+
+  /* Bring back the character instead of deleting it. */
+  #char-panel,#inv-panel{
+    display:flex!important;
+    position:fixed!important;
+    top:0!important;
+    bottom:0!important;
+    width:min(86vw,360px)!important;
+    min-width:0!important;
+    max-width:360px!important;
+    z-index:80!important;
+    background:var(--cc-drawer-bg)!important;
+    transition:transform .2s ease!important;
+    box-shadow:0 0 50px rgba(0,0,0,.55)!important;
+  }
+  #char-panel{
+    left:0!important;
+    transform:translateX(-104%);
+    border-right:2px solid var(--border-hi)!important;
+  }
+  #inv-panel{
+    right:0!important;
+    transform:translateX(104%);
+    border-left:2px solid var(--border-hi)!important;
+  }
+  body.cc-hero-open #char-panel{transform:translateX(0)!important;}
+  body.cc-bag-open #inv-panel{transform:translateX(0)!important;}
+  body.cc-hero-open:before,body.cc-bag-open:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:76;
+    background:rgba(0,0,0,.55);
+    backdrop-filter:blur(2px);
+  }
+  #portrait-area{height:142px!important;}
+  #stats-area,#inv-scroll{overflow-y:auto!important;}
+
+  #cc-preserve-toolbar{
+    display:flex!important;
+  }
+}
+
+#cc-preserve-toolbar{
+  position:fixed;
+  left:10px;
+  right:10px;
+  top:calc(8px + env(safe-area-inset-top));
+  z-index:90;
+  gap:8px;
+  display:none;
+  pointer-events:none;
+}
+.cc-preserve-btn{
+  pointer-events:auto;
+  flex:1;
+  height:40px;
+  border-radius:14px;
+  border:1px solid rgba(217,191,136,.7);
+  background:rgba(8,12,24,.86);
+  color:#f8fbff;
+  font-family:var(--ui-font,'Press Start 2P',monospace);
+  font-size:9px;
+  box-shadow:0 10px 26px rgba(0,0,0,.28);
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.cc-preserve-btn:active{transform:translateY(1px);filter:brightness(1.08);}
+.cc-drawer-close{
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:3;
+  border:1px solid rgba(217,191,136,.65);
+  background:rgba(8,12,24,.9);
+  color:#fff;
+  border-radius:10px;
+  padding:7px 9px;
+  font-family:var(--ui-font,'Press Start 2P',monospace);
+  font-size:8px;
+  cursor:pointer;
+}
+
+/* Cleaner targeting feedback without removing existing art. */
+#game{cursor:crosshair!important;}
+body.cc-map-focus .spell-slot:hover,
+body.cc-map-focus .mini-action-btn:hover,
+body.cc-map-focus #potion-btn:hover,
+body.cc-map-focus #mana-btn:hover{
+  transform:translateY(-1px);
+}
+
+/* Keep modals readable but less suffocating. */
+.modal-backdrop,#inventory-modal,#enemy-modal,#starter-modal,#level-up{
+  overscroll-behavior:contain;
+}
+.modal-panel,.v19-modal-card,.cc-universal-card{
+  max-width:min(96vw,980px)!important;
+  max-height:min(92dvh,780px)!important;
+}
+</style>
+
+<script id="cc-character-preserved-playability-script">
+(function(){
+  'use strict';
+  function byId(id){return document.getElementById(id)}
+  function closeDrawers(){document.body.classList.remove('cc-hero-open','cc-bag-open')}
+  function addCloseButton(panel,label){
+    if(!panel || panel.querySelector('.cc-drawer-close')) return;
+    var b=document.createElement('button');
+    b.className='cc-drawer-close';
+    b.type='button';
+    b.textContent=label || 'Close';
+    b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();closeDrawers();});
+    panel.appendChild(b);
+  }
+  function ensureToolbar(){
+    if(byId('cc-preserve-toolbar')) return;
+    var bar=document.createElement('div');
+    bar.id='cc-preserve-toolbar';
+    bar.innerHTML='<button class="cc-preserve-btn" id="cc-hero-btn" type="button">Hero</button><button class="cc-preserve-btn" id="cc-map-btn" type="button">Map</button><button class="cc-preserve-btn" id="cc-bag-btn" type="button">Gear</button>';
+    document.body.appendChild(bar);
+    byId('cc-hero-btn').addEventListener('click',function(){document.body.classList.toggle('cc-hero-open');document.body.classList.remove('cc-bag-open')});
+    byId('cc-bag-btn').addEventListener('click',function(){document.body.classList.toggle('cc-bag-open');document.body.classList.remove('cc-hero-open')});
+    byId('cc-map-btn').addEventListener('click',closeDrawers);
+  }
+  function wireExistingButtons(){
+    var inv=byId('mobile-inventory-btn')||byId('inv-open-btn')||byId('mobile-bag-btn');
+    if(inv && !inv.dataset.ccPreserveWired){
+      inv.dataset.ccPreserveWired='1';
+      inv.addEventListener('click',function(){document.body.classList.add('cc-bag-open');document.body.classList.remove('cc-hero-open')},{passive:true});
+    }
+  }
+  function reduceAccidentalModalTrap(){
+    ['enemy-modal','starter-modal','inventory-modal'].forEach(function(id){
+      var el=byId(id);
+      if(!el || el.dataset.ccEscWired) return;
+      el.dataset.ccEscWired='1';
+      el.addEventListener('click',function(ev){ if(ev.target===el) el.classList.remove('show'); });
+    });
+  }
+  function keepHeroAliveEarly(){
+    // Gentle safety only. Does not replace the character, class, gear, spells, or relics.
+    try{
+      if(!window.G || !G.player) return;
+      if(!G._ccPreserveTuned){
+        G._ccPreserveTuned=true;
+        if(G.player.potions){
+          G.player.potions.hp=Math.max(G.player.potions.hp||0,2);
+          G.player.potions.mp=Math.max(G.player.potions.mp||0,1);
+        }
+      }
+      if(G.player.floor===1 && Array.isArray(G.enemies)){
+        G.enemies.forEach(function(e){
+          if(e && !e.boss && !e.miniBoss){
+            e.maxHp=Math.min(e.maxHp||e.hp||6,7);
+            e.hp=Math.min(e.hp||e.maxHp,e.maxHp);
+            e.atk=Math.min(e.atk||1,2);
+          }
+        });
+      }
+    }catch(err){console.warn('[cc-preserve-playability]',err)}
+  }
+  function boot(){
+    document.body.classList.add('cc-map-focus');
+    ensureToolbar();
+    addCloseButton(byId('char-panel'),'Map');
+    addCloseButton(byId('inv-panel'),'Map');
+    wireExistingButtons();
+    reduceAccidentalModalTrap();
+    keepHeroAliveEarly();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  setInterval(function(){wireExistingButtons();reduceAccidentalModalTrap();keepHeroAliveEarly();},900);
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape') closeDrawers();
+    if(ev.key && ev.key.toLowerCase()==='c'){document.body.classList.toggle('cc-hero-open');document.body.classList.remove('cc-bag-open')}
+    if(ev.key && ev.key.toLowerCase()==='i'){document.body.classList.toggle('cc-bag-open');document.body.classList.remove('cc-hero-open')}
+  });
+})();
+</script>
+
+<!-- CC v3: dungeon-first playability patch requested by David -->
+<style id="cc-v3-dungeon-first-style">
+  /* Remove the red threat squares and the floating threat readout. Hover now carries the information instead. */
+  #threat-overlay,
+  #threat-panel,
+  #cc-evolution-modal,
+  #cc-evolution-toast,
+  #cc-class-path-panel,
+  #event-room-modal {
+    display:none!important;
+    pointer-events:none!important;
+  }
+  #canvas-wrap{position:relative!important;}
+  #cc-hover-grid{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:5;
+    pointer-events:none;
+    image-rendering:pixelated;
+  }
+  #cc-info-btn{
+    position:fixed;
+    right:12px;
+    top:calc(12px + env(safe-area-inset-top));
+    z-index:96;
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    border:1px solid rgba(127,255,212,.55);
+    background:rgba(8,12,24,.88);
+    color:#7fffd4;
+    font-family:var(--ui-font,'Press Start 2P',monospace);
+    font-size:16px;
+    box-shadow:0 12px 30px rgba(0,0,0,.36),0 0 18px rgba(127,255,212,.10);
+    cursor:pointer;
+  }
+  #cc-info-btn:hover{border-color:#7fffd4;box-shadow:0 12px 30px rgba(0,0,0,.36),0 0 24px rgba(127,255,212,.18)}
+  #cc-info-drawer{
+    position:fixed;
+    right:12px;
+    top:calc(64px + env(safe-area-inset-top));
+    z-index:96;
+    width:min(390px,calc(100vw - 24px));
+    max-height:min(76dvh,720px);
+    overflow:auto;
+    display:none;
+    border:1px solid rgba(127,255,212,.25);
+    border-radius:20px;
+    background:linear-gradient(180deg,rgba(15,22,40,.98),rgba(7,10,20,.98));
+    box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.04);
+    color:#eef5ff;
+    padding:14px;
+  }
+  #cc-info-drawer.open{display:block;}
+  #cc-info-drawer .cc-info-kicker{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7fffd4;margin-bottom:6px}
+  #cc-info-drawer .cc-info-title{font-size:18px;line-height:1.25;color:#fff;margin-bottom:8px;font-weight:900}
+  #cc-info-drawer .cc-info-section{border-top:1px solid rgba(255,255,255,.08);padding-top:10px;margin-top:10px}
+  #cc-info-drawer .cc-info-line{font-size:11px;line-height:1.65;color:#d9e6ff;margin:4px 0}
+  #cc-info-drawer .cc-info-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;margin:3px;border:1px solid rgba(255,255,255,.10);border-radius:999px;background:rgba(255,255,255,.05);font-size:10px;color:#eff6ff}
+  #cc-info-drawer .cc-info-close{float:right;border:1px solid rgba(255,255,255,.12);background:#10182c;color:#fff;border-radius:10px;padding:6px 8px;font-family:var(--ui-font,'Press Start 2P',monospace);font-size:8px;cursor:pointer}
+  #cc-tile-tip{
+    position:fixed;
+    z-index:95;
+    left:12px;
+    bottom:calc(14px + env(safe-area-inset-bottom));
+    width:min(420px,calc(100vw - 24px));
+    display:none;
+    border:1px solid rgba(127,255,212,.18);
+    border-radius:16px;
+    background:rgba(8,12,24,.92);
+    box-shadow:0 16px 44px rgba(0,0,0,.42);
+    padding:10px 12px;
+    pointer-events:none;
+  }
+  #cc-tile-tip .name{font-size:12px;color:#fff;margin-bottom:4px}
+  #cc-tile-tip .type{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:#7fffd4;margin-bottom:5px}
+  #cc-tile-tip .desc{font-size:10px;line-height:1.45;color:#d9e6ff}
+  #cc-tile-tip .stats{font-size:9px;line-height:1.55;color:#f5fbff;margin-top:5px}
+  .inventory-card,.inv-equip-slot,.equip-slot{position:relative;}
+  .inventory-card.cc-has-icon{padding-left:58px!important;min-height:86px;}
+  .inventory-card .cc-item-icon,
+  .inv-equip-slot .cc-item-icon,
+  .equip-slot .cc-item-icon{
+    position:absolute;
+    left:10px;
+    top:12px;
+    width:34px;
+    height:34px;
+    border:1px solid rgba(255,255,255,.13);
+    border-radius:9px;
+    background:radial-gradient(circle at 50% 35%,rgba(127,255,212,.12),rgba(6,8,16,.95));
+    image-rendering:pixelated;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+  .inv-equip-slot .cc-item-icon{left:auto;right:8px;top:8px;width:30px;height:30px;}
+  .equip-slot .cc-item-icon{display:none;}
+  .cc-grant-line{margin-top:6px;padding:6px 8px;border-radius:10px;background:rgba(127,255,212,.07);border:1px solid rgba(127,255,212,.16);color:#9dffe3!important;font-size:9px!important;line-height:1.45!important;}
+  #bottom-bar .spell-slot{min-width:46px;}
+  #spell4{display:flex;}
+  @media(max-width:900px){
+    #cc-info-btn{right:10px;top:calc(58px + env(safe-area-inset-top));width:40px;height:40px;font-size:14px;}
+    #cc-info-drawer{top:calc(104px + env(safe-area-inset-top));}
+    #cc-tile-tip{display:none!important;}
+  }
+</style>
+<script id="cc-v3-dungeon-first-script">
+(function(){
+  'use strict';
+  const MAX_SPELLS=5;
+  function byId(id){return document.getElementById(id)}
+  function safe(fn,fallback){try{return fn()}catch(err){console.warn('[cc-v3]',err);return fallback}}
+  function clone(o){return o?JSON.parse(JSON.stringify(o)):o}
+
+  function ensureNoAnnoyingPopups(){
+    ['cc-evolution-modal','event-room-modal'].forEach(id=>{
+      const el=byId(id);
+      if(!el) return;
+      el.classList.remove('show','open');
+      el.style.display='none';
+    });
+    if(window.G){
+      if(G.paused && !G.inventoryOpen && !G.relicChoiceOpen){
+        const level=byId('level-up');
+        const reward=byId('cc-reward-modal');
+        const shop=byId('cc-shop-modal');
+        const starter=byId('starter-modal');
+        const stillOpen=(level&&!level.classList.contains('hidden'))||(reward&&reward.classList.contains('show'))||(shop&&shop.classList.contains('show'))||(starter&&starter.classList.contains('show'));
+        if(!stillOpen) G.paused=false;
+      }
+      if(G.player && G.player.classPath){
+        G.player.classPath.offered=G.player.classPath.offered||{};
+        for(let n=0;n<999;n++) G.player.classPath.offered[n]=true;
+      }
+    }
+  }
+
+  function ensureInfoUI(){
+    if(!byId('cc-info-btn')){
+      const btn=document.createElement('button');
+      btn.id='cc-info-btn';btn.type='button';btn.textContent='i';btn.title='Open dungeon info';
+      btn.addEventListener('click',()=>toggleInfo());
+      document.body.appendChild(btn);
+    }
+    if(!byId('cc-info-drawer')){
+      const d=document.createElement('div');d.id='cc-info-drawer';document.body.appendChild(d);
+    }
+    if(!byId('cc-tile-tip')){
+      const t=document.createElement('div');t.id='cc-tile-tip';document.body.appendChild(t);
+    }
+    const wrap=byId('canvas-wrap');
+    if(wrap && !byId('cc-hover-grid')){
+      const c=document.createElement('canvas');c.id='cc-hover-grid';wrap.appendChild(c);
+    }
+  }
+  function toggleInfo(force){
+    ensureInfoUI();
+    const d=byId('cc-info-drawer');
+    const open=force===undefined?!d.classList.contains('open'):!!force;
+    d.classList.toggle('open',open);
+    if(open) renderInfoDrawer();
+  }
+  function equippedList(){
+    if(!window.G||!G.player) return [];
+    return ['weapon','armor','ring','amulet'].map(slot=>({slot,item:G.player[slot]})).filter(x=>x.item);
+  }
+  function spellNameList(){return safe(()=> (G.player.spells||[]).map(s=>s.name+(s.__gearGranted?' ⚙':'')).join(', '),'');}
+  function renderInfoDrawer(tileInfo){
+    ensureInfoUI();
+    const d=byId('cc-info-drawer'); if(!d) return;
+    const p=window.G&&G.player;
+    const current=tileInfo || (p&&G.hover&&G.hover.active&&typeof getWorldHoverInfo==='function'?getWorldHoverInfo(G.hover.tileX,G.hover.tileY):null);
+    const gear=equippedList().map(x=>`<span class="cc-info-chip">${x.slot}: ${x.item.name}</span>`).join('') || '<span class="cc-info-chip">No gear equipped</span>';
+    const tile=current?`<div class="cc-info-section"><div class="cc-info-kicker">Hovered Tile</div><div class="cc-info-title" style="color:${current.color||'#fff'}">${current.name}</div><div class="cc-info-line">${current.desc||''}</div><div>${(current.stats||[]).map(s=>`<span class="cc-info-chip">${s}</span>`).join('')}</div></div>`:'';
+    d.innerHTML=`<button class="cc-info-close" type="button">Close</button><div class="cc-info-kicker">Dungeon Info</div><div class="cc-info-title">Read the room, then keep crawling.</div>
+      <div class="cc-info-section"><div class="cc-info-kicker">Controls</div><div class="cc-info-line">Hover a tile for details. Click a floor tile to move. Click an enemy to attack or inspect. Press I for gear. Press 1–5 for spells.</div></div>
+      ${p?`<div class="cc-info-section"><div class="cc-info-kicker">Hero</div><div class="cc-info-line">HP ${p.hp}/${p.maxHp} · MP ${p.mp}/${p.maxMp} · Gold ${p.gold||0} · Floor ${p.floor||1}</div><div>${gear}</div><div class="cc-info-line">Spells: ${spellNameList()||'none'}</div></div>`:''}
+      ${tile}`;
+    const close=d.querySelector('.cc-info-close'); if(close) close.onclick=()=>toggleInfo(false);
+  }
+
+  function tileFromEvent(ev){
+    const canvas=byId('game'); if(!canvas||!window.G) return null;
+    const rect=canvas.getBoundingClientRect();
+    const sx=(ev.clientX-rect.left)*(canvas.width/rect.width);
+    const sy=(ev.clientY-rect.top)*(canvas.height/rect.height);
+    const tx=Math.floor(sx/TILE)+G.camera.x;
+    const ty=Math.floor(sy/TILE)+G.camera.y;
+    return {tx,ty,sx,sy};
+  }
+  function syncHoverCanvas(){
+    const canvas=byId('game'), hover=byId('cc-hover-grid');
+    if(!canvas||!hover) return null;
+    if(hover.width!==canvas.width) hover.width=canvas.width;
+    if(hover.height!==canvas.height) hover.height=canvas.height;
+    return hover.getContext('2d');
+  }
+  function drawExactHover(tx,ty,info){
+    const ctx=syncHoverCanvas(); if(!ctx||!window.G) return;
+    ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    const sx=(tx-G.camera.x)*TILE, sy=(ty-G.camera.y)*TILE;
+    if(sx<-TILE||sy<-TILE||sx>ctx.canvas.width||sy>ctx.canvas.height) return;
+    ctx.save();
+    ctx.strokeStyle=info?(info.color||'#7fffd4'):'rgba(127,255,212,.65)';
+    ctx.lineWidth=2;
+    ctx.strokeRect(Math.floor(sx)+1,Math.floor(sy)+1,TILE-2,TILE-2);
+    ctx.globalAlpha=.10;
+    ctx.fillStyle=info?(info.color||'#7fffd4'):'#7fffd4';
+    ctx.fillRect(Math.floor(sx),Math.floor(sy),TILE,TILE);
+    ctx.restore();
+  }
+  function showTileTip(info){
+    const tip=byId('cc-tile-tip'); if(!tip) return;
+    if(!info){tip.style.display='none';return;}
+    tip.innerHTML=`<div class="name" style="color:${info.color||'#fff'}">${info.name}</div><div class="type">${info.type||'tile'}</div><div class="desc">${info.desc||''}</div><div class="stats">${(info.stats||[]).slice(0,5).join(' · ')}</div>`;
+    tip.style.display='block';
+  }
+  function wireHover(){
+    const canvas=byId('game'); if(!canvas||canvas.__ccV3Hover) return;
+    canvas.__ccV3Hover=true;
+    canvas.addEventListener('pointermove',ev=>{
+      if(!window.G||!G.running) return;
+      const t=tileFromEvent(ev); if(!t) return;
+      const info=typeof getWorldHoverInfo==='function'?getWorldHoverInfo(t.tx,t.ty):null;
+      drawExactHover(t.tx,t.ty,info);
+      showTileTip(info);
+      const d=byId('cc-info-drawer'); if(d&&d.classList.contains('open')) renderInfoDrawer(info);
+    },{passive:true});
+    canvas.addEventListener('pointerleave',()=>{
+      const ctx=syncHoverCanvas(); if(ctx) ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+      showTileTip(null);
+    },{passive:true});
+  }
+
+  function iconKeyForLoot(slot,loot){
+    if(!loot) return null;
+    if(loot.icon) return loot.icon;
+    const s=((loot.name||'')+' '+(loot.weaponType||'')+' '+(loot.weaponClass||'')+' '+slot).toLowerCase();
+    if(s.includes('bow')) return 'shortbow';
+    if(s.includes('crossbow')) return 'crossbow';
+    if(s.includes('wand')||s.includes('staff')||s.includes('arc')) return 'arc_wand';
+    if(s.includes('dagger')||s.includes('knife')||s.includes('claw')||s.includes('fang')) return 'shadow_dagger';
+    if(s.includes('axe')||s.includes('cleaver')) return 'flame_axe';
+    if(s.includes('armor')||s.includes('mail')||s.includes('plate')||s.includes('coat')||s.includes('mantle')||s.includes('wrap')) return 'chain_mail';
+    if(slot==='ring') return 'ring';
+    if(slot==='amulet') return 'amulet';
+    return 'iron_sword';
+  }
+  function makeIcon(key){
+    const cvs=document.createElement('canvas');cvs.width=28;cvs.height=28;cvs.className='cc-item-icon';
+    safe(()=>{const d=ITEM_ICONS[key]||ITEM_ICONS.iron_sword;if(typeof drawIconToCanvas==='function') drawIconToCanvas(cvs,d.px,d.w,d.h,d.colors);});
+    return cvs;
+  }
+  function decorateInventoryIcons(){
+    if(!window.G||!G.player) return;
+    document.querySelectorAll('.inventory-card[data-index]').forEach(card=>{
+      if(card.querySelector('.cc-item-icon')) return;
+      const entry=G.player.inventory[Number(card.dataset.index)]; if(!entry) return;
+      card.classList.add('cc-has-icon');
+      card.prepend(makeIcon(iconKeyForLoot(entry.slot,entry.loot)));
+      const grant=spellGrantForItem(entry.loot,entry.slot);
+      if(grant && !card.querySelector('.cc-grant-line')) card.insertAdjacentHTML('beforeend',`<div class="cc-grant-line">While equipped: grants ${grant.name}.</div>`);
+    });
+    document.querySelectorAll('.inv-equip-slot[data-slot]').forEach(slotEl=>{
+      if(slotEl.querySelector('.cc-item-icon')) return;
+      const slot=slotEl.dataset.slot, loot=G.player[slot]; if(!loot) return;
+      slotEl.appendChild(makeIcon(iconKeyForLoot(slot,loot)));
+    });
+  }
+  function spellGrantForItem(loot,slot){
+    if(!loot||!window.ITEMS) return null;
+    const text=((loot.name||'')+' '+(loot.desc||'')+' '+(loot.set||'')+' '+(loot.element||'')).toLowerCase();
+    let names=[];
+    if(loot.grantedSpell) names=[loot.grantedSpell];
+    else if(text.includes('frost')||text.includes('ice')||loot.slow) names=['Frost Pin','Ice Shard'];
+    else if(text.includes('fire')||text.includes('ember')||loot.fire) names=['Ember','Fireball'];
+    else if(text.includes('volt')||text.includes('storm')||text.includes('lightning')) names=['Spark','Chain Lightning'];
+    else if(text.includes('venom')||text.includes('poison')) names=['Poison Cloud'];
+    else if(text.includes('leech')||text.includes('mend')||loot.lifesteal||loot.regen) names=['Minor Heal','Heal'];
+    else if(slot==='amulet') names=['Shield'];
+    else if(slot==='ring') names=['Spark'];
+    for(const n of names){const sp=(ITEMS.spells||[]).find(s=>s.name===n); if(sp) return sp;}
+    return null;
+  }
+  function syncGearSpells(){
+    if(!window.G||!G.player||!Array.isArray(G.player.spells)) return;
+    G.player.spells=G.player.spells.filter(s=>!s.__gearGranted);
+    const equipped=equippedList();
+    for(const {slot,item} of equipped){
+      if(G.player.spells.length>=MAX_SPELLS) break;
+      const sp=spellGrantForItem(item,slot);
+      if(sp && !G.player.spells.some(x=>x.name===sp.name)) G.player.spells.push(Object.assign(clone(sp),{__gearGranted:true,desc:(sp.desc||'')+' Granted by equipped gear.'}));
+    }
+    if(G.player.spells.length>MAX_SPELLS) G.player.spells=G.player.spells.slice(0,MAX_SPELLS);
+    if(typeof updateSpellUI==='function') updateSpellUI();
+  }
+  function blessLoot(loot,slot,source){
+    if(!loot) return loot;
+    const rareSource=/boss|elite|pedestal|chest|reward|shop/i.test(source||'');
+    loot.power=loot.power||safe(()=>calcItemPower(loot,slot),0);
+    if(rareSource){
+      loot.rarity=loot.rarity==='common'?'uncommon':loot.rarity||'uncommon';
+      if(!loot.grantedSpell){
+        const fallback=slot==='weapon'?(loot.fire?'Ember':loot.ranged?'Frost Pin':'Spark'):slot==='armor'?'Shield':slot==='amulet'?'Minor Heal':'Spark';
+        loot.grantedSpell=fallback;
+      }
+      if(!/grants/i.test(loot.desc||'')) loot.desc=(loot.desc||'Recovered gear.')+' While equipped, it grants a spell slot effect.';
+    }
+    return loot;
+  }
+  function patchLootAndInventory(){
+    if(typeof rollEquipmentReward==='function' && !rollEquipmentReward.__ccV3){
+      const old=rollEquipmentReward;
+      rollEquipmentReward=function(slot,depth,bonus){return blessLoot(old.apply(this,arguments),slot,'reward')};
+      rollEquipmentReward.__ccV3=true;
+    }
+    if(typeof createEquipmentPickup==='function' && !createEquipmentPickup.__ccV3){
+      const old=createEquipmentPickup;
+      createEquipmentPickup=function(x,y,depth,preferredSlot,bonus,source){const p=old.apply(this,arguments); if(p&&p.loot) blessLoot(p.loot,p.slot,source); return p;};
+      createEquipmentPickup.__ccV3=true;
+    }
+    if(typeof dropEquipmentPickup==='function' && !dropEquipmentPickup.__ccV3){
+      const old=dropEquipmentPickup;
+      dropEquipmentPickup=function(x,y,depth,preferredSlot,bonus,source){
+        const rare=/boss|elite|pedestal|chest|reward/i.test(source||'');
+        if(!rare && Math.random()<0.65){ if(window.G&&G.player) G.player.gold=(G.player.gold||0)+Math.max(3,Math.floor((depth||1)*2)); return null; }
+        return old.apply(this,arguments);
+      };
+      dropEquipmentPickup.__ccV3=true;
+    }
+    if(typeof storeEquipment==='function' && !storeEquipment.__ccV3){
+      const old=storeEquipment;
+      storeEquipment=function(slot,item,sourceLabel){ blessLoot(item,slot,sourceLabel); const out=old.apply(this,arguments); trimInventory(); decorateInventoryIcons(); return out; };
+      storeEquipment.__ccV3=true;
+    }
+    if(typeof equipLoot==='function' && !equipLoot.__ccV3){
+      const old=equipLoot;
+      equipLoot=function(slot,item,sourceLabel){ blessLoot(item,slot,sourceLabel); const out=old.apply(this,arguments); syncGearSpells(); decorateInventoryIcons(); return out; };
+      equipLoot.__ccV3=true;
+    }
+    if(typeof unequipSlot==='function' && !unequipSlot.__ccV3){
+      const old=unequipSlot;
+      unequipSlot=function(slot){ const out=old.apply(this,arguments); syncGearSpells(); decorateInventoryIcons(); return out; };
+      unequipSlot.__ccV3=true;
+    }
+    if(typeof renderInventoryModal==='function' && !renderInventoryModal.__ccV3){
+      const old=renderInventoryModal;
+      renderInventoryModal=function(){ const out=old.apply(this,arguments); decorateInventoryIcons(); return out; };
+      renderInventoryModal.__ccV3=true;
+    }
+    if(typeof generateFloor==='function' && !generateFloor.__ccV3){
+      const old=generateFloor;
+      generateFloor=function(depth){ const out=old.apply(this,arguments); pruneFloorItems(); ensureNoAnnoyingPopups(); return out; };
+      generateFloor.__ccV3=true;
+    }
+  }
+  function trimInventory(){
+    if(!window.G||!G.player||!Array.isArray(G.player.inventory)) return;
+    const max=8;
+    if(G.player.inventory.length<=max) return;
+    const extra=G.player.inventory.splice(max);
+    G.player.gold=(G.player.gold||0)+extra.length*12;
+    if(typeof addLog==='function') addLog('Packed excess junk into gold. Gear now stays meaningful.','item');
+  }
+  function pruneFloorItems(){
+    if(!window.G||!Array.isArray(G.items)) return;
+    const keep=[]; const counts={equipment:0,chest:0,potion:0,gold:0,boon:0};
+    for(const it of G.items){
+      if(!it) continue;
+      if(it.type==='equipment'){
+        blessLoot(it.loot,it.slot,it.source);
+        const rare=/boss|elite|pedestal/i.test(it.source||'');
+        if(rare || counts.equipment<2){keep.push(it);counts.equipment++;}
+      } else if(it.type==='chest'){
+        if(counts.chest<1){keep.push(it);counts.chest++;}
+      } else if(it.type==='potion_hp'||it.type==='potion_mp'){
+        if(counts.potion<2){keep.push(it);counts.potion++;}
+      } else if(it.type==='gold'){
+        if(counts.gold<1){keep.push(it);counts.gold++;}
+      } else if(it.type==='crystal'||it.type==='shrine'){
+        if(counts.boon<1){keep.push(it);counts.boon++;}
+      } else keep.push(it);
+    }
+    G.items=keep;
+  }
+
+  function patchSpellUI(){
+    const bar=byId('bottom-bar');
+    if(bar && !byId('spell4')){
+      const s=document.createElement('div');s.className='spell-slot empty';s.id='spell4';s.innerHTML='<span class="spell-key">5</span>';
+      const sep=bar.querySelector('.bar-sep'); bar.insertBefore(s,sep||bar.firstChild);
+    }
+    if(typeof updateSpellUI==='function' && !updateSpellUI.__ccV3){
+      const old=updateSpellUI;
+      updateSpellUI=function(){
+        old.apply(this,arguments);
+        if(!window.G||!G.player) return;
+        for(let i=0;i<MAX_SPELLS;i++){
+          const el=byId('spell'+i); if(!el) continue;
+          const sp=G.player.spells[i];
+          if(sp){
+            el.className='spell-slot';
+            el.dataset.hot=String(i+1);
+            el.innerHTML='<span class="spell-key">'+(i+1)+'</span><div class="spell-icon" id="spell-icon-'+i+'"></div><span class="spell-cost">'+(sp.cost||0)+'</span><span class="spell-name-tip">'+sp.name+(sp.__gearGranted?' · gear granted':'')+'</span>';
+            el.onclick=()=>castSpell(i);
+          } else {
+            el.className='spell-slot empty';
+            el.innerHTML='<span class="spell-key">'+(i+1)+'</span>';el.onclick=null;
+          }
+        }
+      };
+      updateSpellUI.__ccV3=true;
+    }
+    if(!document.__ccV3SpellKey){
+      document.__ccV3SpellKey=true;
+      document.addEventListener('keydown',ev=>{
+        if(ev.key==='5'&&window.G&&G.player&&G.player.spells&&G.player.spells[4]){ev.preventDefault();ev.stopImmediatePropagation();castSpell(4);}
+      },true);
+    }
+  }
+
+  function patchGearVisuals(){
+    if(typeof drawPlayerBody!=='function'||drawPlayerBody.__ccV3) return;
+    const old=drawPlayerBody;
+    drawPlayerBody=function(target,px,py,t,scale){
+      old.apply(this,arguments);
+      if(!window.G||!G.player) return;
+      const bob=Math.sin(t*3)*0.8*scale;
+      target.save();
+      if(G.player.armor){
+        const col=G.player.armor.torsoHi||G.player.armor.torsoColor||'#9fb4e9';
+        target.fillStyle=col; target.globalAlpha=.95;
+        target.fillRect(px+6*scale,py+(5*scale)+bob,10*scale,2*scale);
+        target.fillRect(px+5*scale,py+(9*scale)+bob,12*scale,2*scale);
+        target.fillStyle=G.player.armor.trimColor||'#d9bf88';
+        target.fillRect(px+8*scale,py+(3*scale)+bob,6*scale,2*scale);
+      }
+      if(G.player.amulet){
+        target.fillStyle=rarityColor?rarityColor(G.player.amulet.rarity):'#ffd866';
+        target.globalAlpha=.98;
+        target.fillRect(px+10*scale,py+(11*scale)+bob,3*scale,3*scale);
+        target.globalAlpha=.25+Math.sin(t*4)*.08;
+        target.fillRect(px+8*scale,py+(9*scale)+bob,7*scale,7*scale);
+      }
+      if(G.player.ring){
+        target.strokeStyle=rarityColor?rarityColor(G.player.ring.rarity):'#7fffd4';
+        target.lineWidth=Math.max(1,scale);
+        target.globalAlpha=.42+Math.sin(t*5)*.08;
+        target.strokeRect(px+3*scale,py+(2*scale)+bob,17*scale,20*scale);
+      }
+      target.restore();
+    };
+    drawPlayerBody.__ccV3=true;
+  }
+
+  function boot(){
+    ensureInfoUI(); wireHover(); patchLootAndInventory(); patchSpellUI(); patchGearVisuals(); syncGearSpells(); ensureNoAnnoyingPopups(); decorateInventoryIcons();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  setInterval(boot,1000);
+  setInterval(ensureNoAnnoyingPopups,150);
+})();
+</script>
