@@ -168,6 +168,37 @@
     opacity: 0.8;
   }
 
+  .learn-more {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    text-decoration: none;
+    text-transform: lowercase;
+    border-bottom: 1px dotted rgba(139, 111, 71, 0.4);
+    padding-bottom: 1px;
+    transition: all 0.3s;
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  .learn-more.shown {
+    opacity: 0.85;
+    transform: translateY(0);
+  }
+
+  .learn-more:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .learn-more::before {
+    content: '↗ ';
+    font-size: 0.85em;
+    margin-right: 0.2em;
+  }
+
   .reflection {
     font-size: 1rem;
     color: var(--ink-soft);
@@ -274,6 +305,49 @@
   .action.active::after { width: 100%; }
   .action:disabled { opacity: 0.5; cursor: wait; }
 
+  /* Drift button — the prominent "show me another" */
+  .drift {
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: 0.7rem 2rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.35em;
+    text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.4s ease;
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .drift::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+    transition: transform 0.6s ease;
+  }
+
+  .drift:hover {
+    background: var(--ink);
+    color: var(--paper);
+    letter-spacing: 0.4em;
+  }
+
+  .drift:hover::before {
+    transform: translateX(8px) translateY(-2px);
+    background: var(--paper);
+  }
+
+  .drift:active { transform: scale(0.98); }
+
   .stats {
     font-size: 0.65rem;
     letter-spacing: 0.2em;
@@ -348,8 +422,11 @@
       <div class="quote" id="quote">…</div>
       <div class="attribution" id="attribution"></div>
       <div class="tradition-tag" id="traditionTag"></div>
+      <a class="learn-more" id="learnMore" target="_blank" rel="noopener noreferrer">learn more</a>
       <div class="reflection" id="reflection"></div>
     </div>
+
+    <button class="drift" id="driftBtn">drift</button>
 
     <div class="filters">
       <div class="filter-label">tradition</div>
@@ -359,7 +436,7 @@
     </div>
 
     <div class="actions">
-      <button class="action" id="newQuote">new wisdom</button>
+      <button class="action" id="newQuote">summon</button>
       <button class="action" id="reflectBtn">sit with this</button>
       <button class="action" id="breatheBtn">breathe</button>
       <button class="action" id="chimeBtn">chime</button>
@@ -695,11 +772,698 @@ const CORPUS = [
   { q: "The person who says it cannot be done should not interrupt the person doing it.", a: "Chinese Proverb", t: "chinese", themes: ["courage"] },
   { q: "A book holds a house of gold.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
   { q: "Patience is a bitter plant, but its fruit is sweet.", a: "Chinese Proverb", t: "chinese", themes: ["acceptance"] },
+  { q: "A journey of a thousand miles must begin with a single step.", a: "Chinese Proverb", t: "chinese", themes: ["practice", "courage"] },
+  { q: "Dig the well before you are thirsty.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
+  { q: "Better a diamond with a flaw than a pebble without.", a: "Confucius", t: "chinese", themes: ["acceptance"] },
+  { q: "If you are patient in a moment of anger, you will avoid a hundred days of sorrow.", a: "Chinese Proverb", t: "chinese", themes: ["acceptance", "practice"] },
+  { q: "An inch of time is an inch of gold, but you can't buy that inch of time with an inch of gold.", a: "Chinese Proverb", t: "chinese", themes: ["presence", "impermanence"] },
+  { q: "If your strength is small, do not carry heavy burdens. If your words are worthless, do not give advice.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
+  { q: "Words are the voice of the heart.", a: "Confucius", t: "chinese", themes: ["practice"] },
+  { q: "He who asks is a fool for five minutes, but he who does not ask remains a fool forever.", a: "Chinese Proverb", t: "chinese", themes: ["practice", "courage"] },
+
+  // --- ADDITIONAL ZEN ---
+  { q: "The mind is like water. When it is turbulent, it is difficult to see. When it is calm, everything becomes clear.", a: "Zen Saying", t: "zen", themes: ["presence"] },
+  { q: "Wherever you are is the entry point.", a: "Kabir", t: "zen", themes: ["presence"] },
+  { q: "Empty your cup so that it may be filled.", a: "Bruce Lee / Zen Saying", t: "zen", themes: ["emptiness"] },
+  { q: "The barn's burnt down — now I can see the moon.", a: "Mizuta Masahide", t: "zen", themes: ["impermanence", "joy"] },
+  { q: "Sit in stillness until the mud settles and the water is clear.", a: "Lao Tzu / Zen", t: "zen", themes: ["presence", "practice"] },
+  { q: "After ecstasy, the laundry.", a: "Jack Kornfield (Zen saying)", t: "zen", themes: ["ordinary"] },
+  { q: "Where there is great doubt, there will be great awakening; small doubt, small awakening; no doubt, no awakening.", a: "Zen Saying", t: "zen", themes: ["practice", "courage"] },
+  { q: "The instant you speak about a thing, you miss the mark.", a: "Zen Saying", t: "zen", themes: ["emptiness", "presence"] },
+  { q: "When you seek it, you cannot find it.", a: "Zen Saying", t: "zen", themes: ["emptiness"] },
+  { q: "Sitting in silence, doing nothing — and time passes.", a: "Zen Saying", t: "zen", themes: ["presence"] },
+  { q: "The pupil is not far from the teacher.", a: "Hakuin Ekaku", t: "zen", themes: ["practice"] },
+  { q: "Inside this clay jug there are canyons and pine mountains.", a: "Kabir", t: "zen", themes: ["emptiness"] },
+
+  // --- ADDITIONAL TIBETAN ---
+  { q: "Compassion is not a luxury; it is a necessity for human survival.", a: "Dalai Lama XIV", t: "tibetan", themes: ["compassion"] },
+  { q: "Our prime purpose in this life is to help others. And if you can't help them, at least don't hurt them.", a: "Dalai Lama XIV", t: "tibetan", themes: ["compassion"] },
+  { q: "Happiness is not something ready made. It comes from your own actions.", a: "Dalai Lama XIV", t: "tibetan", themes: ["practice", "joy"] },
+  { q: "The roots of all goodness lie in the soil of appreciation for goodness.", a: "Dalai Lama XIV", t: "tibetan", themes: ["compassion", "joy"] },
+  { q: "If you want others to be happy, practice compassion. If you want to be happy, practice compassion.", a: "Dalai Lama XIV", t: "tibetan", themes: ["compassion"] },
+  { q: "Just as ripples spread out when a single pebble is dropped into water, the actions of individuals can have far-reaching effects.", a: "Dalai Lama XIV", t: "tibetan", themes: ["practice"] },
+  { q: "Start where you are. The path is right under your feet.", a: "Pema Chödrön", t: "tibetan", themes: ["presence", "practice"] },
+  { q: "Things are not permanent, they don't last, there is no final security.", a: "Pema Chödrön", t: "tibetan", themes: ["impermanence"] },
+  { q: "Rejoicing in ordinary things is not sentimental or trite. It actually takes guts.", a: "Pema Chödrön", t: "tibetan", themes: ["ordinary", "courage"] },
+  { q: "Only to the extent that we expose ourselves over and over to annihilation can that which is indestructible be found in us.", a: "Pema Chödrön", t: "tibetan", themes: ["courage"] },
+  { q: "May all that have life be delivered from suffering.", a: "Tibetan prayer", t: "tibetan", themes: ["compassion"] },
+  { q: "When you recognize the emptiness of all phenomena, you experience true freedom.", a: "Tibetan Buddhist teaching", t: "tibetan", themes: ["emptiness"] },
+  { q: "Wherever I have wandered, I came home to you.", a: "Milarepa", t: "tibetan", themes: ["practice"] },
+  { q: "Hasten slowly and you shall soon arrive.", a: "Milarepa", t: "tibetan", themes: ["practice"] },
+  { q: "All the joy the world contains has come through wishing happiness for others.", a: "Shantideva", t: "tibetan", themes: ["compassion"] },
+  { q: "If a problem can be solved, no need to worry. If it cannot be solved, worrying will do no good.", a: "Shantideva", t: "tibetan", themes: ["acceptance"] },
+
+  // --- ADDITIONAL TAOIST ---
+  { q: "Those who flow as life flows know they need no other force.", a: "Lao Tzu", t: "taoist", themes: ["acceptance"] },
+  { q: "Stop leaving and you will arrive. Stop searching and you will see. Stop running away and you will be found.", a: "Lao Tzu", t: "taoist", themes: ["presence"] },
+  { q: "Govern a great nation as you would cook a small fish — do not overdo it.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "By letting it go it all gets done. The world is won by those who let it go.", a: "Lao Tzu", t: "taoist", themes: ["acceptance"] },
+  { q: "The truth is not always beautiful, nor beautiful words the truth.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "A tree that fills a man's embrace grows from a seedling.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "Anticipate the difficult by managing the easy.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "There is a time for being ahead, a time for being behind; a time for being in motion, a time for being at rest.", a: "Lao Tzu", t: "taoist", themes: ["impermanence", "acceptance"] },
+  { q: "The sage does not attempt anything very big, and thus achieves greatness.", a: "Lao Tzu", t: "taoist", themes: ["ordinary"] },
+  { q: "Empty yourself of everything. Let the mind become still.", a: "Lao Tzu", t: "taoist", themes: ["emptiness", "presence"] },
+  { q: "When you are content to be simply yourself and don't compare or compete, everybody will respect you.", a: "Lao Tzu", t: "taoist", themes: ["acceptance"] },
+  { q: "The further one goes, the less one knows.", a: "Lao Tzu", t: "taoist", themes: ["emptiness"] },
+  { q: "When the great Tao is forgotten, kindness and morality arise.", a: "Lao Tzu", t: "taoist", themes: ["emptiness"] },
+  { q: "The usefulness of a cup is its emptiness.", a: "Bruce Lee on Lao Tzu", t: "taoist", themes: ["emptiness"] },
+  { q: "Great acts are made up of small deeds.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+
+  // --- ADDITIONAL HINDU / VEDANTIC ---
+  { q: "There is more to be gained from one moment of self-knowledge than from a hundred years of hearing the wise.", a: "Sri Aurobindo", t: "hindu", themes: ["practice"] },
+  { q: "All life is yoga.", a: "Sri Aurobindo", t: "hindu", themes: ["practice", "presence"] },
+  { q: "When you arise in the morning, take care to remember the day is a gift.", a: "Hindu teaching", t: "hindu", themes: ["joy", "presence"] },
+  { q: "Before you speak, ask yourself: Is it kind, is it necessary, is it true, does it improve upon the silence?", a: "Sai Baba", t: "hindu", themes: ["practice", "compassion"] },
+  { q: "God has given you one face, and you make yourself another.", a: "Hindu teaching", t: "hindu", themes: ["practice"] },
+  { q: "When the heart speaks, the mind finds it indecent to object.", a: "Milan Kundera (echoing Vedantic thought)", t: "hindu", themes: ["compassion"] },
+  { q: "There are hundreds of paths up the mountain, all leading to the same place.", a: "Hindu teaching", t: "hindu", themes: ["acceptance"] },
+  { q: "The world is the great gymnasium where we come to make ourselves strong.", a: "Swami Vivekananda", t: "hindu", themes: ["practice", "courage"] },
+  { q: "Comfort is no test of truth. Truth is often far from being comfortable.", a: "Swami Vivekananda", t: "hindu", themes: ["courage"] },
+  { q: "Anything that makes you weak — physically, intellectually and spiritually, reject as poison.", a: "Swami Vivekananda", t: "hindu", themes: ["courage"] },
+  { q: "Self-realization can be obtained only by self-effort.", a: "Sri Ramakrishna", t: "hindu", themes: ["practice"] },
+  { q: "As long as I live, so long do I learn.", a: "Sri Ramakrishna", t: "hindu", themes: ["practice"] },
+  { q: "All religions are like different paths leading to the same destination.", a: "Sri Ramakrishna", t: "hindu", themes: ["acceptance"] },
+  { q: "Surrender is not a weakness; it is the strength of those who know.", a: "Vedantic teaching", t: "hindu", themes: ["acceptance", "courage"] },
+  { q: "Just as the ocean cannot exist apart from the waves, so the divine cannot exist apart from the world.", a: "Vedantic teaching", t: "hindu", themes: ["emptiness"] },
+  { q: "What you are looking for is what is looking.", a: "Hindu / Sufi saying", t: "hindu", themes: ["emptiness"] },
+  { q: "Asato ma sad gamaya. Lead me from untruth to truth.", a: "Brihadaranyaka Upanishad", t: "hindu", themes: ["practice"] },
+  { q: "The world is not a problem to be solved; it is a reality to be experienced.", a: "Vedantic teaching", t: "hindu", themes: ["presence", "acceptance"] },
+
+  // --- ADDITIONAL SUFI / RUMI / HAFIZ ---
+  { q: "I want to sing like the birds sing, not worrying about who hears or what they think.", a: "Rumi", t: "sufi", themes: ["joy", "courage"] },
+  { q: "Stop acting so small. You are the universe in ecstatic motion.", a: "Rumi", t: "sufi", themes: ["courage", "joy"] },
+  { q: "Why do you stay in prison when the door is so wide open?", a: "Rumi", t: "sufi", themes: ["courage"] },
+  { q: "Goodbyes are only for those who love with their eyes. Because for those who love with heart and soul there is no such thing as separation.", a: "Rumi", t: "sufi", themes: ["compassion", "emptiness"] },
+  { q: "When you let go of who you are, you become who you might be.", a: "Rumi", t: "sufi", themes: ["acceptance"] },
+  { q: "The cure for pain is in the pain.", a: "Rumi", t: "sufi", themes: ["acceptance"] },
+  { q: "Don't be satisfied with stories, how things have gone with others. Unfold your own myth.", a: "Rumi", t: "sufi", themes: ["courage"] },
+  { q: "I once had a thousand desires, but in my one desire to know you, all else melted away.", a: "Rumi", t: "sufi", themes: ["practice"] },
+  { q: "Ever since happiness heard your name, it has been running through the streets trying to find you.", a: "Hafiz", t: "sufi", themes: ["joy"] },
+  { q: "I wish I could show you, when you are lonely or in darkness, the astonishing light of your own being.", a: "Hafiz", t: "sufi", themes: ["compassion"] },
+  { q: "Fear is the cheapest room in the house. I would like to see you living in better conditions.", a: "Hafiz", t: "sufi", themes: ["courage"] },
+  { q: "We are people who need to love, because love is the soul's life.", a: "Hafiz", t: "sufi", themes: ["compassion"] },
+  { q: "An awake heart is like a sky that pours light.", a: "Hafiz", t: "sufi", themes: ["presence", "compassion"] },
+  { q: "What we speak becomes the house we live in.", a: "Hafiz", t: "sufi", themes: ["practice"] },
+  { q: "When the violin can forgive the past, it starts singing.", a: "Hafiz", t: "sufi", themes: ["acceptance", "joy"] },
+  { q: "Stay close to anything that makes you glad you are alive.", a: "Hafiz", t: "sufi", themes: ["joy"] },
+  { q: "The heart that gives, gathers.", a: "Sufi saying", t: "sufi", themes: ["compassion"] },
+  { q: "Speak only if it improves upon the silence.", a: "Sufi saying / Gandhi", t: "sufi", themes: ["presence"] },
+  { q: "Die before you die.", a: "Hadith / Sufi saying", t: "sufi", themes: ["emptiness", "courage"] },
+  { q: "What you are seeking is also seeking you.", a: "Sufi saying", t: "sufi", themes: ["practice"] },
+
+  // --- ADDITIONAL CHRISTIAN ---
+  { q: "Have patience with all things, but first of all with yourself.", a: "Francis de Sales", t: "christian", themes: ["compassion", "acceptance"] },
+  { q: "Nothing is so strong as gentleness. Nothing is so gentle as real strength.", a: "Francis de Sales", t: "christian", themes: ["compassion", "courage"] },
+  { q: "Faith is taking the first step even when you don't see the whole staircase.", a: "Martin Luther King Jr.", t: "christian", themes: ["courage"] },
+  { q: "Darkness cannot drive out darkness; only light can do that. Hate cannot drive out hate; only love can do that.", a: "Martin Luther King Jr.", t: "christian", themes: ["compassion"] },
+  { q: "The arc of the moral universe is long, but it bends toward justice.", a: "Martin Luther King Jr. / Theodore Parker", t: "christian", themes: ["acceptance", "courage"] },
+  { q: "We can do no great things, only small things with great love.", a: "Mother Teresa", t: "christian", themes: ["compassion", "ordinary"] },
+  { q: "Peace begins with a smile.", a: "Mother Teresa", t: "christian", themes: ["compassion", "presence"] },
+  { q: "Not all of us can do great things. But we can do small things with great love.", a: "Mother Teresa", t: "christian", themes: ["compassion"] },
+  { q: "Spread love everywhere you go. Let no one ever come to you without leaving happier.", a: "Mother Teresa", t: "christian", themes: ["compassion"] },
+  { q: "If you judge people, you have no time to love them.", a: "Mother Teresa", t: "christian", themes: ["compassion"] },
+  { q: "Be still and let the Mystery lift you up.", a: "Quaker saying", t: "christian", themes: ["presence"] },
+  { q: "Let your life speak.", a: "Quaker saying", t: "christian", themes: ["practice", "courage"] },
+  { q: "There is that of God in every one.", a: "George Fox (Quaker)", t: "christian", themes: ["compassion"] },
+  { q: "The kingdom of God is within you.", a: "Luke 17:21", t: "christian", themes: ["presence", "emptiness"] },
+  { q: "Consider the lilies of the field, how they grow; they neither toil nor spin.", a: "Matthew 6:28", t: "christian", themes: ["acceptance", "presence"] },
+  { q: "Sufficient unto the day is the evil thereof.", a: "Matthew 6:34", t: "christian", themes: ["presence"] },
+  { q: "Resist not evil.", a: "Matthew 5:39", t: "christian", themes: ["acceptance"] },
+  { q: "Blessed are the meek, for they shall inherit the earth.", a: "Matthew 5:5", t: "christian", themes: ["acceptance"] },
+  { q: "The truth shall set you free.", a: "John 8:32", t: "christian", themes: ["practice", "courage"] },
+  { q: "We must not cease from exploration. And the end of all our exploring will be to arrive where we began and to know the place for the first time.", a: "T.S. Eliot", t: "christian", themes: ["practice", "presence"] },
+  { q: "Everything that is done in this world is done by hope.", a: "Martin Luther", t: "christian", themes: ["courage"] },
+
+  // --- ADDITIONAL JEWISH ---
+  { q: "Where there are no men, strive to be a man.", a: "Pirkei Avot 2:5", t: "jewish", themes: ["courage"] },
+  { q: "Say little, do much.", a: "Pirkei Avot 1:15", t: "jewish", themes: ["practice"] },
+  { q: "If I am not for myself, who will be for me? If I am only for myself, what am I? If not now, when?", a: "Hillel the Elder", t: "jewish", themes: ["courage", "compassion"] },
+  { q: "What is hateful to you, do not do to your neighbor. That is the whole Torah; the rest is commentary.", a: "Hillel the Elder", t: "jewish", themes: ["compassion"] },
+  { q: "In a place where there are no human beings, strive to be one.", a: "Hillel", t: "jewish", themes: ["courage"] },
+  { q: "Be of the disciples of Aaron, loving peace and pursuing peace, loving people and bringing them near to the Torah.", a: "Pirkei Avot 1:12", t: "jewish", themes: ["compassion"] },
+  { q: "Do not separate yourself from the community.", a: "Hillel", t: "jewish", themes: ["compassion"] },
+  { q: "Make for yourself a teacher, acquire for yourself a friend, and judge every person on the side of merit.", a: "Pirkei Avot 1:6", t: "jewish", themes: ["practice"] },
+  { q: "All Israel is responsible one for the other.", a: "Talmud", t: "jewish", themes: ["compassion"] },
+  { q: "The world stands on three things: on truth, on justice, and on peace.", a: "Pirkei Avot 1:18", t: "jewish", themes: ["practice"] },
+  { q: "Do not judge your fellow until you have stood in his place.", a: "Hillel", t: "jewish", themes: ["compassion"] },
+  { q: "We do not see the world as it is; we see it as we are.", a: "Talmudic teaching", t: "jewish", themes: ["practice"] },
+  { q: "When you sweep your house, do not throw out the hidden treasure with the dust.", a: "Hasidic saying", t: "jewish", themes: ["practice"] },
+  { q: "Joy breaks all barriers.", a: "Rebbe Nachman", t: "jewish", themes: ["joy"] },
+  { q: "If you always assume the man sitting next to you is the Messiah waiting for some simple human kindness, you will soon come to weigh your words and watch your hands.", a: "Hasidic saying", t: "jewish", themes: ["compassion"] },
+  { q: "Pray as if everything depends on God; act as if everything depends on you.", a: "Jewish saying", t: "jewish", themes: ["practice"] },
+  { q: "When you have a choice between being right and being kind, choose kind.", a: "Jewish saying", t: "jewish", themes: ["compassion"] },
+
+  // --- ADDITIONAL STOIC ---
+  { q: "Confine yourself to the present.", a: "Marcus Aurelius", t: "stoic", themes: ["presence"] },
+  { q: "Dwell on the beauty of life. Watch the stars, and see yourself running with them.", a: "Marcus Aurelius", t: "stoic", themes: ["joy", "presence"] },
+  { q: "Begin each day by telling yourself: Today I shall be meeting with interference, ingratitude, insolence, disloyalty, ill-will, and selfishness.", a: "Marcus Aurelius", t: "stoic", themes: ["acceptance"] },
+  { q: "Receive without conceit, release without struggle.", a: "Marcus Aurelius", t: "stoic", themes: ["acceptance"] },
+  { q: "Very little is needed to make a happy life; it is all within yourself.", a: "Marcus Aurelius", t: "stoic", themes: ["joy"] },
+  { q: "Loss is nothing else but change, and change is Nature's delight.", a: "Marcus Aurelius", t: "stoic", themes: ["impermanence"] },
+  { q: "Look well into thyself; there is a source of strength which will always spring up if thou wilt always look there.", a: "Marcus Aurelius", t: "stoic", themes: ["practice"] },
+  { q: "How much trouble he avoids who does not look to see what his neighbor says or does.", a: "Marcus Aurelius", t: "stoic", themes: ["practice"] },
+  { q: "Don't explain your philosophy. Embody it.", a: "Epictetus", t: "stoic", themes: ["practice"] },
+  { q: "No man is free who is not master of himself.", a: "Epictetus", t: "stoic", themes: ["practice"] },
+  { q: "Make the best use of what is in your power, and take the rest as it happens.", a: "Epictetus", t: "stoic", themes: ["acceptance"] },
+  { q: "If you wish to improve, be content to appear clueless or stupid in extraneous matters.", a: "Epictetus", t: "stoic", themes: ["acceptance", "courage"] },
+  { q: "Don't seek for everything to happen as you wish; wish for what happens to happen as it does, and you will be content.", a: "Epictetus", t: "stoic", themes: ["acceptance"] },
+  { q: "It's not what happens to you, but how you react to it that matters.", a: "Epictetus", t: "stoic", themes: ["acceptance"] },
+  { q: "Difficulties strengthen the mind, as labor does the body.", a: "Seneca", t: "stoic", themes: ["practice"] },
+  { q: "As long as you live, keep learning how to live.", a: "Seneca", t: "stoic", themes: ["practice"] },
+  { q: "Sometimes even to live is an act of courage.", a: "Seneca", t: "stoic", themes: ["courage"] },
+  { q: "Begin at once to live, and count each separate day as a separate life.", a: "Seneca", t: "stoic", themes: ["presence"] },
+  { q: "True happiness is to enjoy the present, without anxious dependence upon the future.", a: "Seneca", t: "stoic", themes: ["presence", "joy"] },
+  { q: "He who fears death will never do anything worthy of a man who is alive.", a: "Seneca", t: "stoic", themes: ["courage"] },
+  { q: "All cruelty springs from weakness.", a: "Seneca", t: "stoic", themes: ["compassion"] },
+  { q: "Be tolerant with others and strict with yourself.", a: "Marcus Aurelius", t: "stoic", themes: ["practice", "compassion"] },
+
+  // --- ADDITIONAL AFRICAN ---
+  { q: "He who does not cultivate his field will die of hunger.", a: "Guinean Proverb", t: "african", themes: ["practice"] },
+  { q: "Cross the river in a crowd and the crocodile won't eat you.", a: "African Proverb", t: "african", themes: ["compassion"] },
+  { q: "Do not look where you fell, but where you slipped.", a: "African Proverb", t: "african", themes: ["practice"] },
+  { q: "When spider webs unite, they can tie up a lion.", a: "Ethiopian Proverb", t: "african", themes: ["compassion", "courage"] },
+  { q: "The fool speaks, the wise man listens.", a: "Ethiopian Proverb", t: "african", themes: ["presence"] },
+  { q: "Knowledge is like a garden; if it is not cultivated, it cannot be harvested.", a: "Guinean Proverb", t: "african", themes: ["practice"] },
+  { q: "However far the stream flows, it never forgets its source.", a: "Yoruba Proverb (Nigeria)", t: "african", themes: ["practice"] },
+  { q: "Not to know is bad; not to wish to know is worse.", a: "Nigerian Proverb", t: "african", themes: ["practice"] },
+  { q: "Patience is the mother of a beautiful child.", a: "Bantu Proverb", t: "african", themes: ["acceptance"] },
+  { q: "Do not be like the cat who wanted a fish but was afraid to get his paws wet.", a: "Shakespeare / African echo", t: "african", themes: ["courage"] },
+  { q: "It takes a village to raise a child.", a: "African Proverb", t: "african", themes: ["compassion"] },
+  { q: "The death of an elder is like a burning library.", a: "African Proverb", t: "african", themes: ["impermanence"] },
+  { q: "He who is unable to dance says the yard is stony.", a: "Yoruba Proverb", t: "african", themes: ["acceptance"] },
+  { q: "Wisdom is wealth.", a: "Swahili Proverb", t: "african", themes: ["practice"] },
+  { q: "If you don't stand for something, you'll fall for anything.", a: "African Proverb", t: "african", themes: ["courage"] },
+  { q: "The earth is a beehive; we all enter by the same door.", a: "African Proverb", t: "african", themes: ["compassion"] },
+
+  // --- ADDITIONAL INDIGENOUS ---
+  { q: "When we show our respect for other living things, they respond with respect for us.", a: "Arapaho saying", t: "indigenous", themes: ["compassion"] },
+  { q: "Treat the earth well: it was not given to you by your parents, it was loaned to you by your children.", a: "Native American Proverb", t: "indigenous", themes: ["compassion", "acceptance"] },
+  { q: "Hold on to what is good, even if it is a handful of earth.", a: "Pueblo blessing", t: "indigenous", themes: ["acceptance"] },
+  { q: "The frog does not drink up the pond in which it lives.", a: "Sioux saying", t: "indigenous", themes: ["acceptance"] },
+  { q: "All who have died are equal.", a: "Comanche saying", t: "indigenous", themes: ["impermanence"] },
+  { q: "When you are in doubt, be still, and wait; when doubt no longer exists for you, then go forward with courage.", a: "Ponca Chief White Eagle", t: "indigenous", themes: ["courage", "presence"] },
+  { q: "Today is a good day to die, for all the things of my life are present.", a: "Crazy Horse / Lakota saying", t: "indigenous", themes: ["presence", "courage"] },
+  { q: "What the people believe is true.", a: "Anishinaabe saying", t: "indigenous", themes: ["practice"] },
+  { q: "Even a small mouse has anger.", a: "Native American saying", t: "indigenous", themes: ["acceptance"] },
+  { q: "Those who have one foot in the canoe, and one foot in the boat, are going to fall into the river.", a: "Tuscarora saying", t: "indigenous", themes: ["practice", "courage"] },
+  { q: "All things share the same breath — the beast, the tree, the man.", a: "Chief Seattle", t: "indigenous", themes: ["compassion"] },
+  { q: "What befalls the earth befalls all the sons of the earth.", a: "Chief Seattle", t: "indigenous", themes: ["compassion"] },
+
+  // --- ADDITIONAL MODERN ---
+  { q: "You can search throughout the entire universe for someone who is more deserving of your love and affection than you are yourself, and that person is not to be found anywhere.", a: "Sharon Salzberg", t: "modern", themes: ["compassion"] },
+  { q: "We can travel a long way and do many things, but our deepest happiness is not born from accumulating new experiences. It is born from letting go of what is unnecessary.", a: "Sharon Salzberg", t: "modern", themes: ["acceptance", "joy"] },
+  { q: "The faintest ink is more powerful than the strongest memory.", a: "Modern proverb", t: "modern", themes: ["practice"] },
+  { q: "What you are not changing, you are choosing.", a: "Contemporary saying", t: "modern", themes: ["courage", "acceptance"] },
+  { q: "You can't pour from an empty cup. Take care of yourself first.", a: "Modern saying", t: "modern", themes: ["compassion"] },
+  { q: "Almost everything will work again if you unplug it for a few minutes, including you.", a: "Anne Lamott", t: "modern", themes: ["acceptance"] },
+  { q: "When all is said and done, more is said than done.", a: "Lou Holtz", t: "modern", themes: ["practice"] },
+  { q: "The cave you fear to enter holds the treasure you seek.", a: "Joseph Campbell", t: "modern", themes: ["courage"] },
+  { q: "We must let go of the life we have planned, so as to accept the one that is waiting for us.", a: "Joseph Campbell", t: "modern", themes: ["acceptance"] },
+  { q: "Follow your bliss and the universe will open doors where there were only walls.", a: "Joseph Campbell", t: "modern", themes: ["courage", "joy"] },
+  { q: "The privilege of a lifetime is being who you are.", a: "Joseph Campbell", t: "modern", themes: ["acceptance"] },
+  { q: "An unhurried sense of time is in itself a form of wealth.", a: "Bonnie Friedman", t: "modern", themes: ["presence"] },
+  { q: "Don't ask what the world needs. Ask what makes you come alive, and go do it.", a: "Howard Thurman", t: "modern", themes: ["courage", "joy"] },
+  { q: "Tell me, what is it you plan to do with your one wild and precious life?", a: "Mary Oliver", t: "modern", themes: ["presence", "courage"] },
+  { q: "Pay attention. Be astonished. Tell about it.", a: "Mary Oliver", t: "modern", themes: ["presence"] },
+  { q: "When it is over, I want to say: all my life I was a bride married to amazement.", a: "Mary Oliver", t: "modern", themes: ["joy", "presence"] },
+  { q: "You do not have to be good. You only have to let the soft animal of your body love what it loves.", a: "Mary Oliver", t: "modern", themes: ["compassion", "acceptance"] },
+  { q: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", a: "Ralph Waldo Emerson", t: "modern", themes: ["courage"] },
+  { q: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", a: "Ralph Waldo Emerson", t: "modern", themes: ["courage"] },
+  { q: "Finish each day and be done with it. You have done what you could.", a: "Ralph Waldo Emerson", t: "modern", themes: ["acceptance"] },
+  { q: "Adopt the pace of nature: her secret is patience.", a: "Ralph Waldo Emerson", t: "modern", themes: ["acceptance", "presence"] },
+  { q: "Most men lead lives of quiet desperation.", a: "Henry David Thoreau", t: "modern", themes: ["courage"] },
+  { q: "Go confidently in the direction of your dreams. Live the life you have imagined.", a: "Henry David Thoreau", t: "modern", themes: ["courage"] },
+  { q: "Our life is frittered away by detail. Simplify, simplify.", a: "Henry David Thoreau", t: "modern", themes: ["ordinary"] },
+  { q: "Everything you've ever wanted is on the other side of fear.", a: "George Addair", t: "modern", themes: ["courage"] },
+  { q: "What you resist not only persists, but will grow in size.", a: "Carl Jung", t: "modern", themes: ["acceptance"] },
+  { q: "Until you make the unconscious conscious, it will direct your life and you will call it fate.", a: "Carl Jung", t: "modern", themes: ["practice"] },
+  { q: "I am not what happened to me, I am what I choose to become.", a: "Carl Jung", t: "modern", themes: ["courage"] },
+  { q: "Where wisdom reigns, there is no conflict between thinking and feeling.", a: "Carl Jung", t: "modern", themes: ["practice"] },
+
+  // --- PERSIAN / OMAR KHAYYAM ---
+  { q: "Be happy for this moment. This moment is your life.", a: "Omar Khayyam", t: "persian", themes: ["presence", "joy"] },
+  { q: "The moving finger writes; and, having writ, moves on.", a: "Omar Khayyam, Rubaiyat", t: "persian", themes: ["impermanence"] },
+  { q: "Drink wine. This is life eternal. This is all that youth will give you.", a: "Omar Khayyam", t: "persian", themes: ["presence", "joy"] },
+  { q: "The thoughtful soul to solitude retires.", a: "Omar Khayyam", t: "persian", themes: ["practice"] },
+  { q: "Myself when young did eagerly frequent doctor and saint, and heard great argument… but evermore came out by the same door wherein I went.", a: "Omar Khayyam, Rubaiyat", t: "persian", themes: ["emptiness"] },
+  { q: "A loaf of bread, a jug of wine, and thou.", a: "Omar Khayyam", t: "persian", themes: ["ordinary", "joy"] },
+  { q: "The wise man is satisfied with what he has, but the foolish never has enough.", a: "Persian Proverb", t: "persian", themes: ["acceptance"] },
+  { q: "What you sow, you shall reap.", a: "Persian Proverb", t: "persian", themes: ["practice"] },
+  { q: "A good companion shortens the longest road.", a: "Persian Proverb", t: "persian", themes: ["compassion"] },
+  { q: "Drops in succession make a river.", a: "Persian Proverb", t: "persian", themes: ["practice"] },
+  { q: "Patience is a tree whose root is bitter, but its fruit is very sweet.", a: "Persian Proverb", t: "persian", themes: ["acceptance"] },
+
+  // --- CELTIC / IRISH ---
+  { q: "May the road rise to meet you, may the wind be always at your back.", a: "Irish Blessing", t: "celtic", themes: ["joy"] },
+  { q: "There are good ships and there are wood ships, but the best ships are friendships.", a: "Irish Saying", t: "celtic", themes: ["compassion"] },
+  { q: "It is in the shelter of each other that the people live.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+  { q: "Praise the young and they will flourish.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+  { q: "A good word never broke a tooth.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+  { q: "When God made time, he made plenty of it.", a: "Irish Proverb", t: "celtic", themes: ["presence"] },
+  { q: "Quiet people are well able to look after themselves.", a: "Irish Proverb", t: "celtic", themes: ["presence"] },
+  { q: "It is often that a person's mouth broke their nose.", a: "Irish Proverb", t: "celtic", themes: ["practice"] },
+  { q: "A friend's eye is a good mirror.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+  { q: "Do not resent growing old. Many are denied the privilege.", a: "Irish Saying", t: "celtic", themes: ["acceptance", "joy"] },
+  { q: "Listen to the sound of the river and you will get a trout.", a: "Irish Proverb", t: "celtic", themes: ["presence"] },
+  { q: "Two shorten the road.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+
+  // --- HAWAIIAN / POLYNESIAN ---
+  { q: "I ka ʻōlelo no ke ola, i ka ʻōlelo no ka make. In language there is life, in language there is death.", a: "Hawaiian Proverb", t: "polynesian", themes: ["practice"] },
+  { q: "ʻAʻohe pau ka ʻike i ka hālau hoʻokahi. All knowledge is not learned in just one school.", a: "Hawaiian Proverb", t: "polynesian", themes: ["practice"] },
+  { q: "He aliʻi ka ʻāina, he kauwā ke kanaka. The land is chief, man is its servant.", a: "Hawaiian Proverb", t: "polynesian", themes: ["acceptance"] },
+  { q: "Nānā ka maka; hoʻolohe ka pepeiao; paʻa ka waha. Observe with the eyes; listen with the ears; close the mouth.", a: "Hawaiian Proverb", t: "polynesian", themes: ["presence"] },
+  { q: "ʻAʻohe hana nui ke alu ʻia. No task is too big when done together.", a: "Hawaiian Proverb", t: "polynesian", themes: ["compassion"] },
+  { q: "Whāia te iti kahurangi. Pursue that which is precious.", a: "Maori Proverb", t: "polynesian", themes: ["courage"] },
+  { q: "He aha te mea nui o te ao? He tangata, he tangata, he tangata. What is the most important thing in the world? It is people, it is people, it is people.", a: "Maori Proverb", t: "polynesian", themes: ["compassion"] },
+  { q: "Ehara taku toa i te toa takitahi, engari he toa takitini. My strength is not as an individual, but as a collective.", a: "Maori Proverb", t: "polynesian", themes: ["compassion"] },
+  { q: "Ka mua, ka muri. Walk backwards into the future.", a: "Maori Proverb", t: "polynesian", themes: ["practice"] },
+
+  // --- VIETNAMESE / SOUTHEAST ASIAN ---
+  { q: "Live simply that others may simply live.", a: "Vietnamese Buddhist saying / Gandhi", t: "vietnamese", themes: ["acceptance", "compassion"] },
+  { q: "The longer the night lasts, the more our dreams will be.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["acceptance"] },
+  { q: "Soft words win hard hearts.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["compassion"] },
+  { q: "Wood may remain ten years in the water, but it will never become a crocodile.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["practice"] },
+  { q: "When eating fruit, remember the one who planted the tree.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["compassion"] },
+  { q: "Don't lift your foot too high; you will trip.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["practice"] },
+  { q: "A fall into a ditch makes you wiser.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["acceptance", "practice"] },
+  { q: "If two people give you the same advice, you should listen.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["practice"] },
+
+  // --- ABORIGINAL AUSTRALIAN ---
+  { q: "We are all visitors to this time, this place. We are just passing through.", a: "Aboriginal Proverb", t: "aboriginal", themes: ["impermanence", "presence"] },
+  { q: "Those who lose dreaming are lost.", a: "Aboriginal Proverb", t: "aboriginal", themes: ["practice"] },
+  { q: "Listen to the land. Country knows us.", a: "Aboriginal saying", t: "aboriginal", themes: ["presence"] },
+  { q: "If you are coming to help me, you are wasting your time. If you are coming because your liberation is bound up with mine, then let us walk together.", a: "Lilla Watson", t: "aboriginal", themes: ["compassion"] },
+
+  // --- THIRD EXPANSION: more Zen masters ---
+  { q: "From the withered tree, a flower blooms.", a: "Zen Saying", t: "zen", themes: ["impermanence", "joy"] },
+  { q: "Sitting peacefully on a cushion on a sunny day is itself enlightenment.", a: "Hakuin Ekaku", t: "zen", themes: ["presence", "ordinary"] },
+  { q: "The ten thousand things return to the One. Where does the One return?", a: "Zhaozhou Congshen", t: "zen", themes: ["koan", "emptiness"] },
+  { q: "Wash your bowl.", a: "Zhaozhou Congshen", t: "zen", themes: ["ordinary", "presence"] },
+  { q: "Gain is delusion, loss is enlightenment.", a: "Zen Saying", t: "zen", themes: ["acceptance", "emptiness"] },
+  { q: "The way is perfect like vast space, where nothing is lacking and nothing is in excess.", a: "Sengcan, Xinxin Ming", t: "zen", themes: ["acceptance", "emptiness"] },
+  { q: "Make haste slowly.", a: "Zen Saying", t: "zen", themes: ["practice"] },
+  { q: "Don't seek the truth — only cease to cherish opinions.", a: "Sengcan, Xinxin Ming", t: "zen", themes: ["emptiness", "acceptance"] },
+  { q: "Stillness in stillness is not real stillness; only when there is stillness in movement does the universal rhythm manifest.", a: "Bruce Lee (Zen-influenced)", t: "zen", themes: ["presence"] },
+  { q: "When the mind is empty, it is open to all things.", a: "Shunryu Suzuki", t: "zen", themes: ["emptiness"] },
+  { q: "There are, strictly speaking, no enlightened people; there is only enlightened activity.", a: "Shunryu Suzuki", t: "zen", themes: ["practice"] },
+  { q: "What we call I is just a swinging door which moves when we inhale and when we exhale.", a: "Shunryu Suzuki", t: "zen", themes: ["emptiness", "presence"] },
+  { q: "Without accepting the fact that everything changes, we cannot find perfect composure.", a: "Shunryu Suzuki", t: "zen", themes: ["impermanence", "acceptance"] },
+
+  // --- More Thich Nhat Hanh ---
+  { q: "Because you are alive, everything is possible.", a: "Thich Nhat Hanh", t: "zen", themes: ["joy", "courage"] },
+  { q: "Hope is important because it can make the present moment less difficult to bear.", a: "Thich Nhat Hanh", t: "zen", themes: ["acceptance", "courage"] },
+  { q: "People have a hard time letting go of their suffering. Out of a fear of the unknown, they prefer suffering that is familiar.", a: "Thich Nhat Hanh", t: "zen", themes: ["acceptance", "courage"] },
+  { q: "Many people think excitement is happiness. But when you are excited you are not peaceful.", a: "Thich Nhat Hanh", t: "zen", themes: ["joy", "presence"] },
+  { q: "Letting go gives us freedom, and freedom is the only condition for happiness.", a: "Thich Nhat Hanh", t: "zen", themes: ["acceptance"] },
+  { q: "Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.", a: "Thich Nhat Hanh", t: "zen", themes: ["impermanence", "presence"] },
+
+  // --- More Buddhist (canonical) ---
+  { q: "An idea that is developed and put into action is more important than an idea that exists only as an idea.", a: "Buddha", t: "buddhist", themes: ["practice"] },
+  { q: "There is no fire like passion, no shark like hatred, no snare like folly, no torrent like greed.", a: "Dhammapada 251", t: "buddhist", themes: ["practice"] },
+  { q: "All that we are is the result of what we have thought.", a: "Dhammapada", t: "buddhist", themes: ["practice"] },
+  { q: "Better than a thousand useless words is one useful word, hearing which one attains peace.", a: "Dhammapada 100", t: "buddhist", themes: ["presence"] },
+  { q: "Just as a mother would protect her only child with her life, even so let one cultivate a boundless love towards all beings.", a: "Metta Sutta", t: "buddhist", themes: ["compassion"] },
+  { q: "Do not believe in anything simply because you have heard it.", a: "Buddha, Kalama Sutta", t: "buddhist", themes: ["practice"] },
+  { q: "Just as treasures are uncovered from the earth, so virtue appears from good deeds.", a: "Buddha", t: "buddhist", themes: ["practice"] },
+  { q: "When watching after yourself, you watch after others. When watching after others, you watch after yourself.", a: "Buddha, Sedaka Sutta", t: "buddhist", themes: ["compassion"] },
+  { q: "Conquer the angry one by not getting angry; conquer the wicked by goodness.", a: "Dhammapada", t: "buddhist", themes: ["compassion", "practice"] },
+  { q: "He is able who thinks he is able.", a: "Buddha", t: "buddhist", themes: ["courage"] },
+
+  // --- More Hindu / Vedantic ---
+  { q: "Yoga is the practice of tolerating the consequences of being yourself.", a: "Bhagavad Gita / modern paraphrase", t: "hindu", themes: ["acceptance", "courage"] },
+  { q: "There is nothing on earth more lovely than a heart that has surrendered to God.", a: "Mirabai", t: "hindu", themes: ["acceptance"] },
+  { q: "I am dancing, mad with love.", a: "Mirabai", t: "hindu", themes: ["joy"] },
+  { q: "Who looks outside, dreams; who looks inside, awakes.", a: "Carl Jung (Vedantic resonance)", t: "hindu", themes: ["practice"] },
+  { q: "The Self is not something to be attained — it is what you already are.", a: "Nisargadatta Maharaj", t: "hindu", themes: ["emptiness", "presence"] },
+  { q: "Wisdom tells me I am nothing. Love tells me I am everything. Between the two, my life flows.", a: "Nisargadatta Maharaj", t: "hindu", themes: ["emptiness", "compassion"] },
+  { q: "The mind creates the abyss. The heart crosses it.", a: "Nisargadatta Maharaj", t: "hindu", themes: ["compassion"] },
+  { q: "All that you see, hear, taste, touch and smell is but a dream — a movement in consciousness.", a: "Nisargadatta Maharaj", t: "hindu", themes: ["emptiness"] },
+  { q: "Remove what is not, and what remains is what is.", a: "Nisargadatta Maharaj", t: "hindu", themes: ["emptiness"] },
+
+  // --- More Sufi / Rumi / Hafiz / Attar / Saadi ---
+  { q: "Whoever has heart's doors wide open, could see the sun itself in every atom.", a: "Mahmud Shabistari", t: "sufi", themes: ["presence", "joy"] },
+  { q: "The soul has been given its own ears to hear things mind does not understand.", a: "Rumi", t: "sufi", themes: ["presence"] },
+  { q: "Lovers don't finally meet somewhere. They're in each other all along.", a: "Rumi", t: "sufi", themes: ["compassion"] },
+  { q: "If light is in your heart you will find your way home.", a: "Rumi", t: "sufi", themes: ["courage", "presence"] },
+  { q: "The breeze at dawn has secrets to tell you. Don't go back to sleep.", a: "Rumi", t: "sufi", themes: ["presence", "courage"] },
+  { q: "Every story is us.", a: "Rumi", t: "sufi", themes: ["compassion"] },
+  { q: "Inside this new love, die. Your way begins on the other side.", a: "Rumi", t: "sufi", themes: ["courage", "emptiness"] },
+  { q: "Raise your words, not your voice. It is rain that grows flowers, not thunder.", a: "Rumi", t: "sufi", themes: ["compassion"] },
+  { q: "There is a candle in your heart, ready to be kindled.", a: "Rumi", t: "sufi", themes: ["practice"] },
+  { q: "Suffering is a gift. In it is hidden mercy.", a: "Rumi", t: "sufi", themes: ["acceptance"] },
+  { q: "Have patience. All things are difficult before they become easy.", a: "Saadi Shirazi", t: "sufi", themes: ["acceptance", "practice"] },
+  { q: "A traveler without observation is a bird without wings.", a: "Saadi Shirazi", t: "sufi", themes: ["presence"] },
+  { q: "Whatever is produced in haste goes hastily to waste.", a: "Saadi Shirazi", t: "sufi", themes: ["practice"] },
+  { q: "Human beings are members of a whole, in creation of one essence and soul.", a: "Saadi Shirazi (inscribed at the UN)", t: "sufi", themes: ["compassion"] },
+  { q: "If you do not want to fall, do not walk in slippery places.", a: "Saadi Shirazi", t: "sufi", themes: ["practice"] },
+  { q: "Be a sea, not a small pond.", a: "Attar of Nishapur", t: "sufi", themes: ["courage"] },
+  { q: "The road through the valley of love leads at last to a different country.", a: "Attar, Conference of the Birds", t: "sufi", themes: ["courage"] },
+
+  // --- More Christian contemplative ---
+  { q: "If you cannot teach me to fly, teach me to sing.", a: "J.M. Barrie", t: "christian", themes: ["joy"] },
+  { q: "Make of yourself a light.", a: "Buddha (often quoted in Christian contemplative circles)", t: "christian", themes: ["practice"] },
+  { q: "The wound is the place where the soul comes through.", a: "Christian contemplative saying", t: "christian", themes: ["acceptance", "compassion"] },
+  { q: "Earth's crammed with heaven, and every common bush afire with God.", a: "Elizabeth Barrett Browning", t: "christian", themes: ["presence", "ordinary"] },
+  { q: "Just to be is a blessing. Just to live is holy.", a: "Abraham Joshua Heschel", t: "christian", themes: ["joy", "presence"] },
+  { q: "Wonder rather than doubt is the root of knowledge.", a: "Abraham Joshua Heschel", t: "christian", themes: ["practice"] },
+  { q: "Our goal should be to live life in radical amazement.", a: "Abraham Joshua Heschel", t: "christian", themes: ["joy", "presence"] },
+  { q: "Faith is not the clinging to a shrine but an endless pilgrimage of the heart.", a: "Abraham Joshua Heschel", t: "christian", themes: ["practice"] },
+  { q: "The opposite of love is not hate, it's indifference.", a: "Elie Wiesel", t: "christian", themes: ["compassion"] },
+  { q: "Sometimes I think we're alone. Sometimes I think we're not. In either case, the thought is staggering.", a: "R. Buckminster Fuller", t: "christian", themes: ["emptiness"] },
+  { q: "I have decided to stick with love. Hate is too great a burden to bear.", a: "Martin Luther King Jr.", t: "christian", themes: ["compassion"] },
+  { q: "We must accept finite disappointment, but never lose infinite hope.", a: "Martin Luther King Jr.", t: "christian", themes: ["acceptance", "courage"] },
+  { q: "If you can't fly, then run; if you can't run, then walk; if you can't walk, then crawl. But by all means, keep moving.", a: "Martin Luther King Jr.", t: "christian", themes: ["courage", "practice"] },
+
+  // --- More Stoic ---
+  { q: "First learn the meaning of what you say, and then speak.", a: "Epictetus", t: "stoic", themes: ["practice"] },
+  { q: "If anyone tells you that a certain person speaks ill of you, do not make excuses about what is said of you, but answer: 'He was ignorant of my other faults, else he would not have mentioned only these.'", a: "Epictetus", t: "stoic", themes: ["acceptance", "compassion"] },
+  { q: "No great thing is created suddenly.", a: "Epictetus", t: "stoic", themes: ["practice"] },
+  { q: "It is impossible for a man to learn what he thinks he already knows.", a: "Epictetus", t: "stoic", themes: ["emptiness", "practice"] },
+  { q: "Circumstances don't make the man, they only reveal him to himself.", a: "Epictetus", t: "stoic", themes: ["acceptance", "practice"] },
+  { q: "He who has so much as to be satisfied is rich.", a: "Laozi / Stoic echo", t: "stoic", themes: ["acceptance"] },
+  { q: "The whole future lies in uncertainty: live immediately.", a: "Seneca", t: "stoic", themes: ["presence"] },
+  { q: "If a man knows not which port he sails, no wind is favorable.", a: "Seneca", t: "stoic", themes: ["practice", "courage"] },
+  { q: "Anger, if not restrained, is frequently more hurtful to us than the injury that provokes it.", a: "Seneca", t: "stoic", themes: ["practice"] },
+  { q: "Hang on to your youthful enthusiasms — you'll be able to use them better when you're older.", a: "Seneca", t: "stoic", themes: ["joy"] },
+  { q: "Throw me to the wolves and I will return leading the pack.", a: "Seneca (attributed)", t: "stoic", themes: ["courage"] },
+
+  // --- More Jewish / Hasidic ---
+  { q: "If you save one life, it is as if you saved the entire world.", a: "Talmud", t: "jewish", themes: ["compassion"] },
+  { q: "Each person is obligated to say: the world was created for my sake.", a: "Mishnah Sanhedrin 4:5", t: "jewish", themes: ["courage"] },
+  { q: "You are not obligated to complete the work, but neither are you free to abandon it.", a: "Pirkei Avot 2:16", t: "jewish", themes: ["practice"] },
+  { q: "The day is short, the work is much, the workers are lazy, the reward is great, and the Master is pressing.", a: "Pirkei Avot 2:15", t: "jewish", themes: ["practice"] },
+  { q: "Who is honored? One who honors others.", a: "Pirkei Avot 4:1", t: "jewish", themes: ["compassion"] },
+  { q: "All beginnings are difficult.", a: "Talmud, Mekhilta", t: "jewish", themes: ["acceptance", "practice"] },
+  { q: "There is no greater wisdom than kindness.", a: "Hasidic teaching", t: "jewish", themes: ["compassion"] },
+  { q: "Always remember: Joy is not incidental to spiritual quest. It is vital.", a: "Rebbe Nachman", t: "jewish", themes: ["joy"] },
+  { q: "It is a great mitzvah to be in joy always.", a: "Rebbe Nachman", t: "jewish", themes: ["joy"] },
+  { q: "Be a master of your own will, not a slave to others' opinions.", a: "Hasidic saying", t: "jewish", themes: ["courage"] },
+
+  // --- More Taoist ---
+  { q: "Knowing yourself is the beginning of all wisdom.", a: "Lao Tzu / Aristotle", t: "taoist", themes: ["practice"] },
+  { q: "Heaven and earth endure. They endure because they do not exist for themselves.", a: "Lao Tzu", t: "taoist", themes: ["acceptance"] },
+  { q: "True words are not beautiful; beautiful words are not true.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "When the best leader's work is done, the people say, 'We did it ourselves.'", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "The wise man does not lay up his own treasures. The more he gives to others, the more he has for his own.", a: "Lao Tzu", t: "taoist", themes: ["compassion"] },
+  { q: "If you do not change direction, you may end up where you are heading.", a: "Lao Tzu", t: "taoist", themes: ["practice", "courage"] },
+  { q: "The valley spirit never dies. It is the woman, primal mother.", a: "Lao Tzu, Tao Te Ching", t: "taoist", themes: ["emptiness"] },
+  { q: "He who knows when he has enough is rich.", a: "Lao Tzu", t: "taoist", themes: ["acceptance"] },
+  { q: "Do you have the patience to wait until your mud settles and the water is clear?", a: "Lao Tzu", t: "taoist", themes: ["acceptance", "presence"] },
+  { q: "Doing nothing is better than being busy doing nothing.", a: "Lao Tzu", t: "taoist", themes: ["presence"] },
+
+  // --- More African ---
+  { q: "Do not call the forest that shelters you a jungle.", a: "Akan Proverb", t: "african", themes: ["acceptance"] },
+  { q: "He who refuses to obey cannot command.", a: "Kenyan Proverb", t: "african", themes: ["practice"] },
+  { q: "However long the moon disappears, someday it must shine again.", a: "African Proverb", t: "african", themes: ["acceptance"] },
+  { q: "Even the best cooking pot will not produce food.", a: "African Proverb", t: "african", themes: ["practice"] },
+  { q: "Fine words do not produce food.", a: "Nigerian Proverb", t: "african", themes: ["practice"] },
+  { q: "When the roots of a tree begin to decay, it spreads death to the branches.", a: "African Proverb", t: "african", themes: ["practice"] },
+  { q: "The young bird does not crow until it hears the old ones.", a: "Tswana Proverb", t: "african", themes: ["practice"] },
+  { q: "If we stand tall it is because we stand on the shoulders of our ancestors.", a: "Yoruba Proverb", t: "african", themes: ["compassion"] },
+  { q: "A close friend can become a close enemy.", a: "Ethiopian Proverb", t: "african", themes: ["impermanence", "acceptance"] },
+
+  // --- More Indigenous ---
+  { q: "Live your life that the fear of death can never enter your heart.", a: "Tecumseh, Shawnee", t: "indigenous", themes: ["courage"] },
+  { q: "Trouble no one about their religion; respect others in their view.", a: "Tecumseh, Shawnee", t: "indigenous", themes: ["compassion"] },
+  { q: "When it comes your time to die, be not like those whose hearts are filled with the fear of death.", a: "Tecumseh, Shawnee", t: "indigenous", themes: ["courage", "acceptance"] },
+  { q: "Sing your death song and die like a hero going home.", a: "Tecumseh, Shawnee", t: "indigenous", themes: ["courage"] },
+  { q: "You already possess everything necessary to become great.", a: "Crow proverb", t: "indigenous", themes: ["courage"] },
+  { q: "Force, no matter how concealed, begets resistance.", a: "Lakota saying", t: "indigenous", themes: ["practice"] },
+  { q: "The greatest strength is gentleness.", a: "Iroquois saying", t: "indigenous", themes: ["compassion"] },
+  { q: "Knowledge that is not used is abused.", a: "Cree saying", t: "indigenous", themes: ["practice"] },
+  { q: "The soul would have no rainbow had the eyes no tears.", a: "Native American Proverb", t: "indigenous", themes: ["acceptance"] },
+  { q: "Each person is his own judge.", a: "Shawnee saying", t: "indigenous", themes: ["practice"] },
+  { q: "Walk softly, for you tread on my dreams.", a: "Native American saying / W.B. Yeats", t: "indigenous", themes: ["compassion"] },
+
+  // --- More Modern ---
+  { q: "The best way out is always through.", a: "Robert Frost", t: "modern", themes: ["courage", "acceptance"] },
+  { q: "In three words I can sum up everything I've learned about life: it goes on.", a: "Robert Frost", t: "modern", themes: ["impermanence"] },
+  { q: "Not all those who wander are lost.", a: "J.R.R. Tolkien", t: "modern", themes: ["acceptance"] },
+  { q: "Even the smallest person can change the course of the future.", a: "J.R.R. Tolkien", t: "modern", themes: ["courage"] },
+  { q: "All we have to decide is what to do with the time that is given us.", a: "J.R.R. Tolkien", t: "modern", themes: ["presence", "courage"] },
+  { q: "We do not see things as they are, we see them as we are.", a: "Anaïs Nin", t: "modern", themes: ["practice"] },
+  { q: "Life shrinks or expands in proportion to one's courage.", a: "Anaïs Nin", t: "modern", themes: ["courage"] },
+  { q: "And the day came when the risk to remain tight in a bud was more painful than the risk it took to blossom.", a: "Anaïs Nin", t: "modern", themes: ["courage"] },
+  { q: "Each friend represents a world in us, a world not born until they arrive, and it is only by this meeting that a new world is born.", a: "Anaïs Nin", t: "modern", themes: ["compassion"] },
+  { q: "It is by acts and not by ideas that people live.", a: "Anatole France", t: "modern", themes: ["practice"] },
+  { q: "Whatever you do, do it well.", a: "Walt Disney", t: "modern", themes: ["practice"] },
+  { q: "There are years that ask questions and years that answer.", a: "Zora Neale Hurston", t: "modern", themes: ["acceptance"] },
+  { q: "Love yourself first and everything else falls into line.", a: "Lucille Ball", t: "modern", themes: ["compassion"] },
+  { q: "Comparison is the thief of joy.", a: "Theodore Roosevelt", t: "modern", themes: ["joy"] },
+  { q: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt", t: "modern", themes: ["practice", "presence"] },
+  { q: "Whether you think you can or you think you can't, you're right.", a: "Henry Ford", t: "modern", themes: ["courage"] },
+  { q: "It always seems impossible until it's done.", a: "Nelson Mandela", t: "modern", themes: ["courage"] },
+  { q: "The greatest glory in living lies not in never falling, but in rising every time we fall.", a: "Nelson Mandela", t: "modern", themes: ["courage", "acceptance"] },
+  { q: "Education is the most powerful weapon which you can use to change the world.", a: "Nelson Mandela", t: "modern", themes: ["practice"] },
+  { q: "Living is no laughing matter: you must live with great seriousness like a squirrel, for example.", a: "Nazim Hikmet", t: "modern", themes: ["presence", "courage"] },
+  { q: "I have always lived violently, drunk hugely, eaten too much or not at all, slept around the clock or missed two nights of sleeping, worked too hard and too long in glory, or slobbed for a time in utter laziness.", a: "John Steinbeck", t: "modern", themes: ["acceptance"] },
+  { q: "Tomorrow is fresh, with no mistakes in it yet.", a: "L.M. Montgomery", t: "modern", themes: ["acceptance", "joy"] },
+  { q: "What lies behind us and what lies ahead of us are tiny matters compared to what lives within us.", a: "Henry David Thoreau", t: "modern", themes: ["courage"] },
+  { q: "Not until we are lost do we begin to understand ourselves.", a: "Henry David Thoreau", t: "modern", themes: ["practice"] },
+  { q: "How vain it is to sit down to write when you have not stood up to live.", a: "Henry David Thoreau", t: "modern", themes: ["presence", "practice"] },
+  { q: "I am a slow walker, but I never walk back.", a: "Abraham Lincoln", t: "modern", themes: ["practice"] },
+  { q: "Almost all men can stand adversity, but if you want to test a man's character, give him power.", a: "Abraham Lincoln", t: "modern", themes: ["practice"] },
+  { q: "When you reach the end of your rope, tie a knot in it and hang on.", a: "Franklin D. Roosevelt", t: "modern", themes: ["courage"] },
+
+  // --- More Persian ---
+  { q: "If a single grain of barley is sown in proper soil, it will grow up into a hundred grains. So one good deed of yours may be the source of a hundred such deeds in others.", a: "Rumi", t: "persian", themes: ["practice", "compassion"] },
+  { q: "Today, like every other day, we wake up empty and frightened. Don't open the door to the study and begin reading. Take down a musical instrument.", a: "Rumi", t: "persian", themes: ["joy", "presence"] },
+  { q: "Not Christian or Jew or Muslim, not Hindu, Buddhist, sufi, or zen. Not any religion or cultural system.", a: "Rumi", t: "persian", themes: ["emptiness"] },
+  { q: "I belong to no religion. My religion is love. Every heart is my temple.", a: "Rumi", t: "persian", themes: ["compassion"] },
+  { q: "If everything around you seems dark, look again, you may be the light.", a: "Rumi", t: "persian", themes: ["courage"] },
+
+  // --- More Celtic ---
+  { q: "Even a tin knocker will shine on a dirty door.", a: "Irish Proverb", t: "celtic", themes: ["practice"] },
+  { q: "What's nearest the heart is nearest the mouth.", a: "Irish Proverb", t: "celtic", themes: ["presence"] },
+  { q: "It is easy to halve the potato where there's love.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+  { q: "There is no need like the lack of a friend.", a: "Irish Proverb", t: "celtic", themes: ["compassion"] },
+  { q: "The wearer best knows where the shoe pinches.", a: "Irish Proverb", t: "celtic", themes: ["acceptance"] },
+  { q: "Better good manners than good looks.", a: "Irish Proverb", t: "celtic", themes: ["practice"] },
+  { q: "Walk straight, my son — as the old crab said to the young crab.", a: "Irish Proverb", t: "celtic", themes: ["practice"] },
+  { q: "May you have warm words on a cold evening, a full moon on a dark night, and the road downhill all the way to your door.", a: "Irish Blessing", t: "celtic", themes: ["joy"] },
+  { q: "If you do not sow in the spring you will not reap in the autumn.", a: "Irish Proverb", t: "celtic", themes: ["practice"] },
+
+  // --- More Vietnamese / Southeast Asian ---
+  { q: "Better to die than live with shame.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["courage"] },
+  { q: "When drinking the water, remember its source.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["compassion"] },
+  { q: "When you eat the fruit, think of the man who planted the tree.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["compassion"] },
+  { q: "Talkers are no good doers.", a: "Vietnamese Proverb", t: "vietnamese", themes: ["practice"] },
+  { q: "An ounce of prevention is worth a pound of cure.", a: "Vietnamese Proverb / Benjamin Franklin", t: "vietnamese", themes: ["practice"] },
+
+  // --- More Polynesian ---
+  { q: "Mauri tū, mauri ora. An active soul is a healthy soul.", a: "Maori Proverb", t: "polynesian", themes: ["practice"] },
+  { q: "Naku te rourou nau te rourou ka ora ai te iwi. With your basket and my basket, the people will live.", a: "Maori Proverb", t: "polynesian", themes: ["compassion"] },
+  { q: "Kaua e mate wheke mate ururoa. Don't die like an octopus, die like a hammerhead shark.", a: "Maori Proverb", t: "polynesian", themes: ["courage"] },
+  { q: "He waka eke noa. We are all in this canoe together.", a: "Maori Proverb", t: "polynesian", themes: ["compassion"] },
+  { q: "Aloha mai no, aloha aku; o ka huhu ka mea e ola ole ai. When love is given, love should be returned; anger is the thing that gives no life.", a: "Hawaiian Proverb", t: "polynesian", themes: ["compassion"] },
+
+  // --- More Aboriginal ---
+  { q: "We are all mothers and fathers of country, all of us walking together.", a: "Aboriginal saying", t: "aboriginal", themes: ["compassion"] },
+  { q: "The more you know, the less you need.", a: "Aboriginal Proverb", t: "aboriginal", themes: ["acceptance"] },
+  { q: "Country is everything: father, mother, sister, brother. The land gives us our identity, our religion and law.", a: "Aboriginal Elder, paraphrased", t: "aboriginal", themes: ["presence"] },
 ];
 
 // ============================================================
-// STATE
+// LEARN-MORE LINK RESOLVER
+// Maps attribution → Wikipedia search URL.
+// Uses Wikipedia's search redirect, which handles fuzzy matching
+// gracefully (so "Rumi" → Rumi article, "Dogen" → Dōgen, etc.)
+// Returns null for generic attributions where no specific page exists.
 // ============================================================
+const GENERIC_ATTRIBUTIONS = [
+  'proverb', 'saying', 'blessing', 'tradition', 'teaching', 'koan',
+  'hadith', 'sutra', 'dhammapada', 'upanishad' // these we link separately
+];
+
+// Specific pages where the attribution string differs from the best Wikipedia title
+const ATTRIBUTION_OVERRIDES = {
+  "Buddha's last words": "Mahaparinibbana_Sutta",
+  "Buddha": "Gautama_Buddha",
+  "Heart Sutra": "Heart_Sutra",
+  "Diamond Sutra": "Diamond_Sutra",
+  "Dhammapada": "Dhammapada",
+  "Bhagavad Gita": "Bhagavad_Gita",
+  "Pirkei Avot": "Pirkei_Avot",
+  "Talmud": "Talmud",
+  "Zenrin Kushū": "Zenrin_Kushu",
+  "Tao Te Ching": "Tao_Te_Ching",
+  "Brihadaranyaka Upanishad": "Brihadaranyaka_Upanishad",
+  "Chandogya Upanishad": "Chandogya_Upanishad",
+  "Mahaparinibbana Sutta": "Mahaparinibbana_Sutta",
+  "Hadith": "Hadith",
+  "Ubuntu philosophy": "Ubuntu_philosophy",
+  "Rubaiyat": "Rubaiyat_of_Omar_Khayyam",
+  "Genjōkōan": "Shōbōgenzō",
+  "Uji": "Uji_(Being-Time)",
+  "Mumonkan": "The_Gateless_Gate",
+  "Blue Cliff Record": "Blue_Cliff_Record",
+  "Chief Seattle": "Chief_Seattle",
+  "Crazy Horse": "Crazy_Horse",
+  "Tecumseh": "Tecumseh",
+  "Crowfoot": "Crowfoot",
+  "Lilla Watson": "Lilla_Watson",
+  "Hillel the Elder": "Hillel_the_Elder",
+  "Hillel": "Hillel_the_Elder",
+  "Baal Shem Tov": "Baal_Shem_Tov",
+  "Rebbe Nachman": "Nachman_of_Breslov",
+  "Rabbi Nachman of Breslov": "Nachman_of_Breslov",
+  "Rabbi Zusya of Hanipol": "Zusha_of_Hanipoli",
+  "Rumi": "Rumi",
+  "Hafiz": "Hafez",
+  "Saadi Shirazi": "Saadi_Shirazi",
+  "Attar of Nishapur": "Attar_of_Nishapur",
+  "Omar Khayyam": "Omar_Khayyam",
+  "Ibn Arabi": "Ibn_Arabi",
+  "Mahmud Shabistari": "Mahmud_Shabistari",
+  "Lao Tzu": "Laozi",
+  "Zhuangzi": "Zhuangzi_(book)",
+  "Confucius": "Confucius",
+  "Mazu Daoyi": "Mazu_Daoyi",
+  "Linji Yixuan": "Linji_Yixuan",
+  "Hakuin Ekaku": "Hakuin_Ekaku",
+  "Zhaozhou Congshen": "Zhaozhou_Congshen",
+  "Zhaozhou": "Zhaozhou_Congshen",
+  "Sengcan": "Sengcan",
+  "Yunmen Wenyan": "Yunmen_Wenyan",
+  "Dōgen": "Dōgen",
+  "Shunryu Suzuki": "Shunryū_Suzuki",
+  "Thich Nhat Hanh": "Thích_Nhất_Hạnh",
+  "Pema Chödrön": "Pema_Chödrön",
+  "Dalai Lama XIV": "14th_Dalai_Lama",
+  "Milarepa": "Milarepa",
+  "Shantideva": "Shantideva",
+  "Seung Sahn": "Seungsahn",
+  "Ramana Maharshi": "Ramana_Maharshi",
+  "Ram Dass": "Ram_Dass",
+  "Swami Vivekananda": "Swami_Vivekananda",
+  "Sri Aurobindo": "Sri_Aurobindo",
+  "Sri Ramakrishna": "Ramakrishna",
+  "Nisargadatta Maharaj": "Nisargadatta_Maharaj",
+  "Mirabai": "Mirabai",
+  "Kabir": "Kabir",
+  "Sai Baba": "Sathya_Sai_Baba",
+  "Marcus Aurelius": "Marcus_Aurelius",
+  "Epictetus": "Epictetus",
+  "Seneca": "Seneca_the_Younger",
+  "Socrates": "Socrates",
+  "Plato": "Plato",
+  "Aristotle": "Aristotle",
+  "Meister Eckhart": "Meister_Eckhart",
+  "Julian of Norwich": "Julian_of_Norwich",
+  "Teresa of Ávila": "Teresa_of_Ávila",
+  "Francis of Assisi": "Francis_of_Assisi",
+  "Catherine of Siena": "Catherine_of_Siena",
+  "John of the Cross": "John_of_the_Cross",
+  "Henri Nouwen": "Henri_Nouwen",
+  "Richard Rohr": "Richard_Rohr",
+  "Francis de Sales": "Francis_de_Sales",
+  "Augustine of Hippo": "Augustine_of_Hippo",
+  "George Fox": "George_Fox",
+  "Abraham Joshua Heschel": "Abraham_Joshua_Heschel",
+  "Elie Wiesel": "Elie_Wiesel",
+  "Martin Luther King Jr.": "Martin_Luther_King_Jr.",
+  "Mother Teresa": "Mother_Teresa",
+  "Mahatma Gandhi": "Mahatma_Gandhi",
+  "Viktor Frankl": "Viktor_Frankl",
+  "Joseph Campbell": "Joseph_Campbell",
+  "Eckhart Tolle": "Eckhart_Tolle",
+  "Jon Kabat-Zinn": "Jon_Kabat-Zinn",
+  "Jack Kornfield": "Jack_Kornfield",
+  "Sharon Salzberg": "Sharon_Salzberg",
+  "Mary Oliver": "Mary_Oliver",
+  "Rainer Maria Rilke": "Rainer_Maria_Rilke",
+  "Anne Lamott": "Anne_Lamott",
+  "Carl Jung": "Carl_Jung",
+  "Ralph Waldo Emerson": "Ralph_Waldo_Emerson",
+  "Henry David Thoreau": "Henry_David_Thoreau",
+  "Robert Frost": "Robert_Frost",
+  "T.S. Eliot": "T._S._Eliot",
+  "Anaïs Nin": "Anaïs_Nin",
+  "J.R.R. Tolkien": "J._R._R._Tolkien",
+  "C.S. Lewis": "C._S._Lewis",
+  "Howard Thurman": "Howard_Thurman",
+  "Matsuo Bashō": "Matsuo_Bashō",
+  "Bashō": "Matsuo_Bashō",
+  "Mizuta Masahide": "Mizuta_Masahide",
+  "Bruce Lee": "Bruce_Lee",
+  "Nelson Mandela": "Nelson_Mandela",
+  "Abraham Lincoln": "Abraham_Lincoln",
+  "Theodore Roosevelt": "Theodore_Roosevelt",
+  "Franklin D. Roosevelt": "Franklin_D._Roosevelt",
+  "Nazim Hikmet": "Nâzım_Hikmet",
+  "Zora Neale Hurston": "Zora_Neale_Hurston",
+  "L.M. Montgomery": "L._M._Montgomery",
+  "John Steinbeck": "John_Steinbeck",
+};
+
+function learnMoreUrl(attribution) {
+  if (!attribution) return null;
+  const a = attribution.trim();
+  const lower = a.toLowerCase();
+
+  // Skip pure generic attributions like "Zen Proverb", "African Proverb"
+  const purelyGeneric = /^(zen|sufi|hasidic|hadith|christian|jewish|buddhist|hindu|taoist|stoic|chinese|japanese|korean|vietnamese|persian|irish|hawaiian|maori|tibetan|aboriginal|native american|cherokee|kiowa|arapaho|hopi|sioux|pueblo|comanche|anishinaabe|tuscarora|crow|lakota|akan|yoruba|igbo|bambara|swahili|bantu|guinean|nigerian|ethiopian|cameroonian|ugandan|kenyan|tswana|polynesian|celtic|african|indigenous|modern|contemporary|vedantic|talmudic|talmud|hadith|vedic|shawnee|iroquois|cree|blackfoot|metta|mishnah|bantu)\s+(proverb|saying|blessing|teaching|tradition|principle|chief|elder|saying)s?$/i;
+  if (purelyGeneric.test(a)) return null;
+
+  // Skip anonymous/paraphrased attributions
+  if (/paraphrased|anonymous|attributed|inscribed|often quoted/i.test(a)) {
+    // unless there's a specific name we can extract
+    const namedMatch = a.match(/^([A-Z][a-zà-ÿ\u0080-\uFFFF]+(?:\s+[A-Z][a-zà-ÿ\u0080-\uFFFF]+)+)/);
+    if (!namedMatch) return null;
+  }
+
+  // Strip trailing source after comma: "Dōgen, Genjōkōan" → "Dōgen"
+  // But preserve textual references like "Pirkei Avot 4:1" or "Matthew 6:28"
+  let primary = a;
+  if (a.includes(',') && !/\d/.test(a.split(',')[1] || '')) {
+    primary = a.split(',')[0].trim();
+  }
+
+  // Strip trailing parenthetical: "Akan Proverb (Ghana)" → "Akan Proverb"
+  primary = primary.replace(/\s*\([^)]*\)\s*$/, '').trim();
+
+  // Strip "/ X" disjunction — pick the first attributed name
+  if (primary.includes('/')) {
+    primary = primary.split('/')[0].trim();
+  }
+
+  // Strip generic honorifics — but preserve them when the rest is just one name
+  // (e.g., "Chief Seattle" should stay as "Chief Seattle" since "Seattle" alone is ambiguous)
+  const namedTitle = /^(Rabbi|Sri|Swami|Saint|St\.|Master|Sister|Brother|Mother|Father)\s+/i;
+  if (namedTitle.test(primary)) {
+    const stripped = primary.replace(namedTitle, '');
+    // Only strip if what remains is two or more words (a fuller name)
+    if (stripped.split(/\s+/).length >= 2) primary = stripped;
+  }
+
+  // Re-check generic after stripping
+  if (purelyGeneric.test(primary)) return null;
+
+  // Apply overrides for known specific page mismatches
+  for (const [key, slug] of Object.entries(ATTRIBUTION_OVERRIDES)) {
+    if (primary.toLowerCase().includes(key.toLowerCase())) {
+      return `https://en.wikipedia.org/wiki/${slug}`;
+    }
+  }
+
+  // Biblical/scripture references
+  const bibleMatch = primary.match(/^(Matthew|Mark|Luke|John|Psalm|Genesis|Exodus)\s/i);
+  if (bibleMatch) {
+    const book = bibleMatch[1];
+    const slug = book.toLowerCase() === 'psalm' ? 'Psalms'
+               : `Gospel_of_${book.charAt(0).toUpperCase() + book.slice(1).toLowerCase()}`;
+    return `https://en.wikipedia.org/wiki/${slug}`;
+  }
+
+  // Pirkei Avot citations
+  if (/^Pirkei Avot/i.test(primary)) {
+    return 'https://en.wikipedia.org/wiki/Pirkei_Avot';
+  }
+
+  // Default: Wikipedia search-redirect on the cleaned attribution
+  return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(primary)}&go=Go`;
+}
 let currentTradition = 'all';
 let currentTheme = 'all';
 let currentQuote = null;
@@ -709,22 +1473,55 @@ let audioCtx = null;
 let seenInSession = new Set(); // avoid immediate repeats
 
 // ============================================================
-// FILTER POPULATION (built from corpus, so no manual sync)
+// TRADITION GROUPING
+// 21 traditions collapse into 5 broad regional/cultural groups
+// for a less overwhelming UX. Selecting a group filters to all
+// traditions within it; specific traditions are still selectable
+// via the API generation (or, if needed later, a sub-filter).
+// ============================================================
+const TRADITION_GROUPS = {
+  'eastern': {
+    label: 'eastern',
+    traditions: ['zen', 'buddhist', 'tibetan', 'taoist', 'confucian', 'hindu', 'chinese', 'japanese', 'korean', 'vietnamese']
+  },
+  'middle eastern': {
+    label: 'middle eastern',
+    traditions: ['sufi', 'persian', 'jewish']
+  },
+  'western': {
+    label: 'western',
+    traditions: ['stoic', 'christian', 'modern', 'celtic']
+  },
+  'earth & ancestral': {
+    label: 'earth & ancestral',
+    traditions: ['african', 'indigenous', 'aboriginal', 'polynesian']
+  }
+};
+
+// Reverse lookup: tradition → group
+const TRADITION_TO_GROUP = {};
+Object.entries(TRADITION_GROUPS).forEach(([group, info]) => {
+  info.traditions.forEach(t => { TRADITION_TO_GROUP[t] = group; });
+});
+
+// ============================================================
+// FILTER POPULATION
 // ============================================================
 function populateFilters() {
-  const traditions = [...new Set(CORPUS.map(c => c.t))].sort();
   const themes = [...new Set(CORPUS.flatMap(c => c.themes))].sort();
 
+  // Tradition row: groups instead of individual traditions
   const tRow = document.getElementById('traditionRow');
   const allT = mkPill('all', 'all', true);
   allT.dataset.kind = 'tradition';
   tRow.appendChild(allT);
-  traditions.forEach(t => {
-    const p = mkPill(t, t, false);
+  Object.entries(TRADITION_GROUPS).forEach(([key, info]) => {
+    const p = mkPill(info.label, key, false);
     p.dataset.kind = 'tradition';
     tRow.appendChild(p);
   });
 
+  // Theme row: keep flat themes (only 10, very legible)
   const thRow = document.getElementById('themeRow');
   const allTh = mkPill('all', 'all', true);
   allTh.dataset.kind = 'theme';
@@ -760,10 +1557,15 @@ function mkPill(label, value, active) {
 // QUOTE SELECTION
 // ============================================================
 function filteredPool() {
-  return CORPUS.filter(c =>
-    (currentTradition === 'all' || c.t === currentTradition) &&
-    (currentTheme === 'all' || c.themes.includes(currentTheme))
-  );
+  return CORPUS.filter(c => {
+    const traditionMatch =
+      currentTradition === 'all' ||
+      (TRADITION_GROUPS[currentTradition] &&
+       TRADITION_GROUPS[currentTradition].traditions.includes(c.t));
+    const themeMatch =
+      currentTheme === 'all' || c.themes.includes(currentTheme);
+    return traditionMatch && themeMatch;
+  });
 }
 
 function pickQuote() {
@@ -787,6 +1589,18 @@ function renderQuote(item) {
     document.getElementById('quote').textContent = `"${item.q}"`;
     document.getElementById('attribution').textContent = `— ${item.a}`;
     document.getElementById('traditionTag').textContent = item.t;
+
+    // Set up learn-more link
+    const link = document.getElementById('learnMore');
+    const url = learnMoreUrl(item.a);
+    if (url) {
+      link.href = url;
+      link.classList.add('shown');
+    } else {
+      link.removeAttribute('href');
+      link.classList.remove('shown');
+    }
+
     const r = document.getElementById('reflection');
     r.classList.remove('shown');
     r.textContent = '';
@@ -800,13 +1614,19 @@ function renderQuote(item) {
 // CLAUDE API — fresh contemplation
 // ============================================================
 async function generateFreshQuote() {
-  const traditionStr = currentTradition === 'all'
-    ? 'any wisdom tradition (Zen, Sufi, Hasidic, Christian contemplative, Stoic, Taoist, Hindu, African, Indigenous, etc.)'
-    : `the ${currentTradition} tradition`;
+  let traditionStr;
+  if (currentTradition === 'all') {
+    traditionStr = 'any wisdom tradition (Zen, Sufi, Hasidic, Christian contemplative, Stoic, Taoist, Hindu, African, Indigenous, etc.)';
+  } else {
+    const group = TRADITION_GROUPS[currentTradition];
+    traditionStr = `the ${group.label} contemplative traditions (such as ${group.traditions.join(', ')})`;
+  }
   const themeStr = currentTheme === 'all' ? 'any contemplative theme' : `the theme of ${currentTheme}`;
+  const fallbackTradition = currentTradition === 'all' ? 'modern' :
+    (TRADITION_GROUPS[currentTradition].traditions[0]);
 
   const prompt = `Offer ONE authentic contemplative saying from ${traditionStr}, on ${themeStr}. It should be either a real well-known saying from that tradition, or — only if you cannot recall a real one — composed faithfully in that tradition's voice and labeled honestly. Keep it under 30 words. Respond ONLY with valid JSON, no other text:
-{"q": "the saying", "a": "specific source if known (real teacher, text), or '${currentTradition === 'all' ? 'Contemplative tradition' : currentTradition + ' saying'}' if newly composed", "t": "${currentTradition === 'all' ? 'modern' : currentTradition}", "themes": ["one-or-two-relevant-themes"]}`;
+{"q": "the saying", "a": "specific source if known (real teacher, text), or generic tradition label if newly composed", "t": "${fallbackTradition}", "themes": ["one-or-two-relevant-themes"]}`;
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -964,6 +1784,9 @@ document.getElementById('reflectBtn').addEventListener('click', async () => {
 document.getElementById('breatheBtn').addEventListener('click', toggleBreathing);
 document.getElementById('ensoWrap').addEventListener('click', toggleBreathing);
 document.getElementById('chimeBtn').addEventListener('click', playChime);
+document.getElementById('driftBtn').addEventListener('click', () => {
+  renderQuote(pickQuote());
+});
 
 setDateStamp();
 populateFilters();
