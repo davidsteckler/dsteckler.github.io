@@ -1,172 +1,664 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>365 Days of Zen Wisdom</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #faf7f2;
-      color: #333;
-      font-family: Arial, Helvetica, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stillness — A Daily Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2a2825;
+    --ink-soft: #5a544c;
+    --paper: #f4ede0;
+    --paper-warm: #ede2cc;
+    --accent: #8b6f47;
+    --enso: #2a2825;
+    --mist: rgba(244, 237, 224, 0.85);
+  }
 
-    .zen-box {
-      background-color: #ffffff;
-      padding: 2rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      border-radius: 12px;
-      max-width: 700px;
-      width: 90%;
-    }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    h1 {
-      color: #555;
-      margin-bottom: 1.5rem;
-    }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
 
-    #quote {
-      font-size: 1.4rem;
-      font-style: italic;
-      margin-bottom: 1rem;
-    }
+  body {
+    font-family: 'Cormorant Garamond', 'Noto Serif JP', Georgia, serif;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 30% 20%, #f7f0e3 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 80%, #e8dcc4 0%, transparent 50%),
+      linear-gradient(180deg, #f4ede0 0%, #e8dcc4 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+  }
 
-    #context {
-      font-size: 1rem;
-      color: #777;
-    }
+  /* Subtle paper texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(139, 111, 71, 0.04) 1px, transparent 1px),
+      radial-gradient(circle at 80% 70%, rgba(139, 111, 71, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px, 80px 80px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-    footer {
-      margin-top: 1.5rem;
-      font-size: 0.8rem;
-      color: #aaa;
-    }
-  </style>
+  .stage {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  /* Enso circle - hand drawn feel */
+  .enso-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    cursor: pointer;
+    transition: transform 0.6s ease;
+  }
+  .enso-wrap:hover { transform: scale(1.02); }
+
+  .enso {
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+  }
+
+  .enso-path {
+    fill: none;
+    stroke: var(--enso);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 540;
+    stroke-dashoffset: 540;
+    animation: draw-enso 3s ease-out forwards;
+    opacity: 0.85;
+  }
+
+  @keyframes draw-enso {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Breathing mode overlay */
+  .breath-circle {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 111, 71, 0.15), transparent 70%);
+    transform: scale(0.5);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+
+  .breathing .breath-circle {
+    opacity: 1;
+    animation: breathe 11s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0% { transform: scale(0.5); }
+    36% { transform: scale(1.3); }    /* inhale 4s */
+    64% { transform: scale(1.3); }    /* hold 3s */
+    100% { transform: scale(0.5); }   /* exhale 4s */
+  }
+
+  .breath-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-soft);
+    text-transform: lowercase;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .breathing .breath-label { opacity: 1; }
+
+  /* Quote */
+  .quote-block {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: opacity 0.6s ease;
+  }
+
+  .quote-block.fading { opacity: 0; }
+
+  .quote {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+
+  .quote::before, .quote::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+    margin: 1rem auto;
+    opacity: 0.5;
+  }
+
+  .attribution {
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-style: normal;
+    margin-top: 0.5rem;
+  }
+
+  .reflection {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-top: 1.5rem;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.8s ease, opacity 0.8s ease, margin-top 0.5s ease;
+    font-style: italic;
+  }
+
+  .reflection.shown {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+  .reflection.loading::after {
+    content: '...';
+    animation: dots 1.4s infinite;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+  }
+
+  /* Theme selector */
+  .themes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .theme-btn {
+    background: transparent;
+    border: 1px solid rgba(139, 111, 71, 0.3);
+    color: var(--ink-soft);
+    padding: 0.4rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.3s;
+    text-transform: lowercase;
+  }
+
+  .theme-btn:hover {
+    background: rgba(139, 111, 71, 0.08);
+    border-color: var(--accent);
+  }
+
+  .theme-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  /* Action row */
+  .actions {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .action {
+    background: transparent;
+    border: none;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: lowercase;
+    cursor: pointer;
+    padding: 0.6rem 0.2rem;
+    position: relative;
+    transition: color 0.3s;
+  }
+
+  .action::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: all 0.3s;
+    transform: translateX(-50%);
+  }
+
+  .action:hover { color: var(--ink); }
+  .action:hover::after { width: 100%; }
+
+  .action.active { color: var(--accent); }
+  .action.active::after { width: 100%; }
+
+  /* Sound chime indicator */
+  .chime-pulse {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 20px; height: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .chime-pulse.ring {
+    animation: chime-ring 2s ease-out;
+  }
+
+  @keyframes chime-ring {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(40); opacity: 0; }
+  }
+
+  /* Footer */
+  .foot {
+    position: absolute;
+    bottom: 1.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    text-transform: uppercase;
+  }
+
+  /* Date stamp */
+  .date-stamp {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    opacity: 0.7;
+    margin-bottom: -1rem;
+  }
+
+  @media (max-width: 480px) {
+    .enso-wrap { width: 150px; height: 150px; }
+    .stage { gap: 1.5rem; }
+    .actions { gap: 1rem; }
+    .action { font-size: 0.75rem; }
+  }
+</style>
 </head>
 <body>
-  <div class="zen-box">
-    <h1>Daily Zen Wisdom</h1>
-    <p id="quote">Loading today's Zen wisdom...</p>
-    <p id="context"></p>
-    <footer>&copy; 2025 Enlightened Moments</footer>
+  <div class="stage">
+    <div class="date-stamp" id="dateStamp"></div>
+
+    <div class="enso-wrap" id="ensoWrap" title="Tap to breathe">
+      <svg class="enso" viewBox="0 0 200 200">
+        <!-- Hand-drawn enso circle path with slight imperfection -->
+        <path class="enso-path" d="M 100 20
+          C 145 22, 178 55, 178 100
+          C 178 145, 145 178, 100 178
+          C 55 178, 22 145, 22 100
+          C 22 58, 50 28, 88 22" />
+      </svg>
+      <div class="breath-circle"></div>
+      <div class="breath-label" id="breathLabel">breathe in</div>
+    </div>
+
+    <div class="quote-block" id="quoteBlock">
+      <div class="quote" id="quote">…</div>
+      <div class="attribution" id="attribution"></div>
+      <div class="reflection" id="reflection"></div>
+    </div>
+
+    <div class="themes" id="themes">
+      <button class="theme-btn active" data-theme="any">all paths</button>
+      <button class="theme-btn" data-theme="presence">presence</button>
+      <button class="theme-btn" data-theme="impermanence">impermanence</button>
+      <button class="theme-btn" data-theme="compassion">compassion</button>
+      <button class="theme-btn" data-theme="emptiness">emptiness</button>
+      <button class="theme-btn" data-theme="acceptance">acceptance</button>
+      <button class="theme-btn" data-theme="koan">koan</button>
+    </div>
+
+    <div class="actions">
+      <button class="action" id="newQuote">new wisdom</button>
+      <button class="action" id="reflectBtn">sit with this</button>
+      <button class="action" id="breatheBtn">breathe</button>
+      <button class="action" id="chimeBtn">chime</button>
+    </div>
   </div>
 
-  <script>
-    // 365 Zen quotes with historical context
-    const zenQuotes = [
-      {quote: "When walking, walk. When eating, eat.", context: "Zen Proverb emphasizing mindfulness in every action."},
-      {quote: "Nature does not hurry, yet everything is accomplished.", context: "Lao Tzu, ancient Chinese philosopher, Tao Te Ching."},
-      {quote: "What we think, we become.", context: "Attributed to Buddha, emphasizing the power of thought."},
-      {quote: "If your compassion does not include yourself, it is incomplete.", context: "Jack Kornfield, influential mindfulness teacher."},
-      {quote: "The journey of a thousand miles begins with one step.", context: "Lao Tzu, Taoist philosopher."},
-      {quote: "The mind is everything. What you think you become.", context: "Buddha, founder of Buddhism."},
-      {quote: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", context: "Buddha."},
-      {quote: "You must be the change you wish to see in the world.", context: "Mahatma Gandhi."},
-      {quote: "In the middle of difficulty lies opportunity.", context: "Albert Einstein."},
-      {quote: "Happiness depends upon ourselves.", context: "Aristotle, ancient Greek philosopher."},
-      {quote: "Peace comes from within. Do not seek it without.", context: "Buddha."},
-      {quote: "It is not how old you are, but how you are old.", context: "Jules Renard, French author."},
-      {quote: "There is no way to happiness — happiness is the way.", context: "Thich Nhat Hanh, Vietnamese Zen master."},
-      {quote: "If you want to fly, you have to give up the things that weigh you down.", context: "Toni Morrison, author."},
-      {quote: "Knowing others is intelligence; knowing yourself is true wisdom.", context: "Lao Tzu."},
-      {quote: "When you realize nothing is lacking, the whole world belongs to you.", context: "Lao Tzu."},
-      {quote: "The quieter you become, the more you can hear.", context: "Ram Dass, spiritual teacher."},
-      {quote: "Life is really simple, but we insist on making it complicated.", context: "Confucius, Chinese philosopher."},
-      {quote: "The best way to predict your future is to create it.", context: "Abraham Lincoln."},
-      {quote: "When the student is ready, the teacher will appear.", context: "Buddha."},
-      {quote: "You can never cross the ocean until you have the courage to lose sight of the shore.", context: "Christopher Columbus."},
-      {quote: "True love is not about perfection, it is about accepting the flaws.", context: "Zen Proverb."},
-      {quote: "Everything you can imagine is real.", context: "Pablo Picasso."},
-      {quote: "We are what we think. All that we are arises with our thoughts. With our thoughts, we make the world.", context: "Buddha."},
-      {quote: "To understand everything is to forgive everything.", context: "Buddha."},
-      {quote: "Simplicity is the ultimate sophistication.", context: "Leonardo da Vinci."},
-      {quote: "Gratitude is not only the greatest of virtues but the parent of all others.", context: "Cicero, Roman philosopher."},
-      {quote: "Not everything that is faced can be changed, but nothing can be changed until it is faced.", context: "James Baldwin, writer."},
-      {quote: "There is no secret to happiness. Happiness is a choice.", context: "Unknown."},
-      {quote: "In the process of letting go, we make room for new experiences.", context: "Jack Kornfield."},
-      {quote: "Zen is not some kind of excitement, but concentration on our usual everyday routine.", context: "Shunryu Suzuki."},
-      {quote: "Take only memories, leave only footprints.", context: "Chief Seattle, Native American leader."},
-      {quote: "Do not be afraid to give up the good to go for the great.", context: "John D. Rockefeller."},
-      {quote: "Be yourself; everyone else is already taken.", context: "Oscar Wilde."},
-      {quote: "The mind is everything. What you think you become.", context: "Buddha."},
-      {quote: "What you get by achieving your goals is not as important as what you become by achieving your goals.", context: "Zig Ziglar."},
-      {quote: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", context: "Ralph Waldo Emerson."},
-      {quote: "The unexamined life is not worth living.", context: "Socrates."},
-      {quote: "Be the change that you wish to see in the world.", context: "Mahatma Gandhi."},
-      {quote: "What we achieve inwardly will change outer reality.", context: "Plutarch."},
-      {quote: "When you know better, you do better.", context: "Maya Angelou."},
-      {quote: "Do not go where the path may lead, go instead where there is no path and leave a trail.", context: "Ralph Waldo Emerson."},
-      {quote: "Life is what happens when you’re busy making other plans.", context: "John Lennon."},
-      {quote: "Your time is limited, so don’t waste it living someone else’s life.", context: "Steve Jobs."},
-      {quote: "The only way to do great work is to love what you do.", context: "Steve Jobs."},
-      {quote: "Don’t judge each day by the harvest you reap but by the seeds that you plant.", context: "Robert Louis Stevenson."},
-      {quote: "It always seems impossible until it’s done.", context: "Nelson Mandela."},
-      {quote: "To love and be loved is to feel the sun from both sides.", context: "David Viscott, psychologist."},
-      {quote: "Do not fear mistakes. You will know failure. Continue to reach out.", context: "Benjamin Franklin."},
-      {quote: "The only true wisdom is in knowing you know nothing.", context: "Socrates."},
-      {quote: "The wound is the place where the Light enters you.", context: "Rumi, poet and philosopher."},
-      {quote: "Whatever you think the world is withholding from you, you are withholding from the world.", context: "Eckhart Tolle."},
-      {quote: "Time is what we want most, but what we use worst.", context: "William Penn, founder of Pennsylvania."},
-      {quote: "Don't count the days, make the days count.", context: "Muhammad Ali."},
-      {quote: "It’s not the years in your life that count, it’s the life in your years.", context: "Abraham Lincoln."},
-      {quote: "You will face many defeats in life, but never let yourself be defeated.", context: "Maya Angelou."},
-      {quote: "Life is too important to be taken seriously.", context: "Oscar Wilde."},
-      {quote: "You don’t have to be great to start, but you have to start to be great.", context: "Zig Ziglar."},
-      {quote: "Everything has beauty, but not everyone sees it.", context: "Confucius."},
-      {quote: "A journey of a thousand miles begins with a single step.", context: "Lao Tzu."},
-      {quote: "If you want to go fast, go alone. If you want to go far, go together.", context: "African Proverb."},
-      {quote: "The future depends on what we do in the present.", context: "Mahatma Gandhi."},
-      {quote: "He who has a why to live can bear almost any how.", context: "Friedrich Nietzsche."},
-      {quote: "Don’t be afraid to fail. Be afraid not to try.", context: "Michael Jordan."},
-      {quote: "You can't go back and change the beginning, but you can start where you are and change the ending.", context: "C.S. Lewis."},
-      {quote: "The purpose of life is not to be happy. It is to be useful, to be honorable, to be compassionate, to have it make some difference that you have lived and lived well.", context: "Ralph Waldo Emerson."},
-      {quote: "The greatest glory in living lies not in never falling, but in rising every time we fall.", context: "Nelson Mandela."},
-      {quote: "Your life does not get better by chance, it gets better by change.", context: "Jim Rohn."},
-      {quote: "Success is not final, failure is not fatal: It is the courage to continue that counts.", context: "Winston Churchill."},
-      {quote: "It is never too late to be what you might have been.", context: "George Eliot."},
-      {quote: "Life is really simple, but we insist on making it complicated.", context: "Confucius."},
-      {quote: "A person who never made a mistake never tried anything new.", context: "Albert Einstein."},
-      {quote: "The only way to do great work is to love what you do.", context: "Steve Jobs."},
-      {quote: "Let us always meet each other with smile, for the smile is the beginning of love.", context: "Mother Teresa."},
-      {quote: "It is not length of life, but depth of life.", context: "Ralph Waldo Emerson."},
-      {quote: "Success is not how high you have climbed, but how you make a positive difference to the world.", context: "Roy T. Bennett."},
-      {quote: "Life isn't about waiting for the storm to pass, it's about learning to dance in the rain.", context: "Vivian Greene."},
-      {quote: "Do what you can, with what you have, where you are.", context: "Theodore Roosevelt."},
-      {quote: "You are never too old to set another goal or to dream a new dream.", context: "C.S. Lewis."},
-      {quote: "Good things come to those who wait, but better things come to those who go out and get them.", context: "Anonymous."},
-      {quote: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", context: "Aristotle."},
-      {quote: "Don’t wait. The time will never be just right.", context: "Napoleon Hill."},
-      {quote: "A little progress each day adds up to big results.", context: "Satya Nani."},
-      {quote: "Life is 10% what happens to us and 90% how we react to it.", context: "Charles R. Swindoll."},
-      {quote: "The only thing we have to fear is fear itself.", context: "Franklin D. Roosevelt."},
-      {quote: "It’s not about how hard you hit. It’s about how hard you can get hit and keep moving forward.", context: "Rocky Balboa."},
-      {quote: "Do not go where the path may lead, go instead where there is no path and leave a trail.", context: "Ralph Waldo Emerson."},
-      {quote: "Your time is limited, so don’t waste it living someone else’s life.", context: "Steve Jobs."},
-      {quote: "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.", context: "Christian D. Larson."},
-      {quote: "It always seems impossible until it’s done.", context: "Nelson Mandela."}
-    ];
+  <div class="chime-pulse" id="chimePulse"></div>
+  <div class="foot">stillness · 静けさ</div>
 
-    // Function to get today's quote based on day of the year
-    function todaysZen() {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), 0, 0);
-      const diff = now - start;
-      const oneDay = 1000 * 60 * 60 * 24;
-      const dayOfYear = Math.floor(diff / oneDay);
-      return zenQuotes[dayOfYear % zenQuotes.length];
+<script>
+  // ============================================================
+  // SEED CORPUS — curated quotes for instant load + offline use.
+  // The Claude API generates fresh reflections + new quotes for
+  // near-infinite variety beyond this list.
+  // ============================================================
+  const corpus = {
+    presence: [
+      { q: "When walking, walk. When eating, eat.", a: "Zen Proverb" },
+      { q: "Be where you are; otherwise you will miss your life.", a: "Buddha" },
+      { q: "The present moment is the only moment available to us, and it is the door to all moments.", a: "Thich Nhat Hanh" },
+      { q: "Wherever you are, be there totally.", a: "Eckhart Tolle" },
+      { q: "Drink your tea slowly and reverently, as if it is the axis on which the world earth revolves.", a: "Thich Nhat Hanh" },
+    ],
+    impermanence: [
+      { q: "No snowflake ever falls in the wrong place.", a: "Zen Proverb" },
+      { q: "All conditioned things are impermanent. Work out your salvation with diligence.", a: "Buddha's last words" },
+      { q: "The cause of suffering is the desire for things to be other than they are.", a: "Buddhist teaching" },
+      { q: "Spring comes, and the grass grows by itself.", a: "Zenrin Kushū" },
+      { q: "Like a drop of dew, like a bubble in the stream — so should one regard the world.", a: "Diamond Sutra" },
+    ],
+    compassion: [
+      { q: "If your compassion does not include yourself, it is incomplete.", a: "Jack Kornfield" },
+      { q: "The whole secret of existence is to have no fear.", a: "Swami Vivekananda" },
+      { q: "Loving kindness is the great medicine.", a: "Pema Chödrön" },
+      { q: "Hatred does not cease by hatred, but only by love; this is the eternal rule.", a: "Dhammapada" },
+    ],
+    emptiness: [
+      { q: "Form is emptiness, emptiness is form.", a: "Heart Sutra" },
+      { q: "Before enlightenment, chop wood, carry water. After enlightenment, chop wood, carry water.", a: "Zen Proverb" },
+      { q: "The obstacle is the path.", a: "Zen Proverb" },
+      { q: "Knock on the sky and listen to the sound.", a: "Zen Proverb" },
+    ],
+    acceptance: [
+      { q: "Let go, or be dragged.", a: "Zen Proverb" },
+      { q: "If you understand, things are just as they are. If you do not understand, things are just as they are.", a: "Zen Proverb" },
+      { q: "The quieter you become, the more you can hear.", a: "Ram Dass" },
+      { q: "Nature does not hurry, yet everything is accomplished.", a: "Lao Tzu" },
+      { q: "When you realize nothing is lacking, the whole world belongs to you.", a: "Lao Tzu" },
+    ],
+    koan: [
+      { q: "What is the sound of one hand clapping?", a: "Hakuin Ekaku" },
+      { q: "Show me your original face — the face you had before your parents were born.", a: "Zen Koan" },
+      { q: "If you meet the Buddha on the road, kill him.", a: "Linji Yixuan" },
+      { q: "Does a dog have Buddha-nature? Mu.", a: "Zhaozhou's Mu" },
+    ],
+  };
+
+  function flatCorpus() {
+    return Object.values(corpus).flat();
+  }
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  let currentTheme = 'any';
+  let currentQuote = null;
+  let breathingActive = false;
+  let breathInterval = null;
+  let audioCtx = null;
+
+  // ============================================================
+  // DATE STAMP
+  // ============================================================
+  function setDateStamp() {
+    const d = new Date();
+    const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+    document.getElementById('dateStamp').textContent =
+      d.toLocaleDateString('en-US', opts).toLowerCase();
+  }
+  setDateStamp();
+
+  // ============================================================
+  // QUOTE SELECTION
+  // ============================================================
+  function pickQuote(theme) {
+    const pool = (theme && theme !== 'any') ? corpus[theme] : flatCorpus();
+    let pick;
+    do {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+    } while (pool.length > 1 && pick === currentQuote);
+    return pick;
+  }
+
+  function renderQuote(item) {
+    const block = document.getElementById('quoteBlock');
+    block.classList.add('fading');
+    setTimeout(() => {
+      document.getElementById('quote').textContent = `"${item.q}"`;
+      document.getElementById('attribution').textContent = `— ${item.a}`;
+      // Reset reflection
+      const r = document.getElementById('reflection');
+      r.classList.remove('shown', 'loading');
+      r.textContent = '';
+      document.getElementById('reflectBtn').classList.remove('active');
+      block.classList.remove('fading');
+      currentQuote = item;
+    }, 400);
+  }
+
+  // ============================================================
+  // CLAUDE API — FRESH WISDOM (near-infinite variety)
+  // ============================================================
+  async function generateFreshQuote(theme) {
+    const themeStr = theme === 'any' ? 'any Zen/Buddhist/Taoist theme' : theme;
+    const prompt = `Generate ONE authentic-feeling Zen, Buddhist, or Taoist contemplation on the theme of "${themeStr}". It should feel timeless and genuine — either an actual traditional saying or one written in that tradition's voice. Keep it brief (under 25 words). Respond ONLY with valid JSON, no other text:
+{"q": "the quote", "a": "attribution (real teacher/tradition, or 'Zen Proverb' / 'Contemporary' if newly composed)"}`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 200,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+      const cleaned = text.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      if (parsed.q && parsed.a) return parsed;
+    } catch (e) {
+      console.warn('Falling back to corpus:', e);
+    }
+    return pickQuote(theme);
+  }
+
+  // ============================================================
+  // CLAUDE API — REFLECTION ("sit with this")
+  // ============================================================
+  async function generateReflection(item) {
+    const prompt = `A practitioner is sitting with this contemplation:
+"${item.q}" — ${item.a}
+
+Write a brief, gentle reflection (2-3 sentences, under 60 words) that helps them sit with this teaching today. Speak softly, like a teacher offering a quiet pointer. No preamble, no headers, no quotes — just the reflection itself.`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 200,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+      return text;
+    } catch (e) {
+      return "Sit. Breathe. Let the words settle without grasping at meaning. The teaching unfolds in stillness, not in thought.";
+    }
+  }
+
+  // ============================================================
+  // BREATHING MODE — 4-3-4 box-style breath, 11s cycle
+  // ============================================================
+  function toggleBreathing() {
+    breathingActive = !breathingActive;
+    const wrap = document.getElementById('ensoWrap');
+    const btn = document.getElementById('breatheBtn');
+    const label = document.getElementById('breathLabel');
+
+    if (breathingActive) {
+      wrap.classList.add('breathing');
+      btn.classList.add('active');
+      btn.textContent = 'stop breathing';
+
+      // Cycle the label text with the animation (11s total: 4 in, 3 hold, 4 out)
+      const cycle = () => {
+        label.textContent = 'breathe in';
+        setTimeout(() => { if (breathingActive) label.textContent = 'hold'; }, 4000);
+        setTimeout(() => { if (breathingActive) label.textContent = 'breathe out'; }, 7000);
+      };
+      cycle();
+      breathInterval = setInterval(cycle, 11000);
+    } else {
+      wrap.classList.remove('breathing');
+      btn.classList.remove('active');
+      btn.textContent = 'breathe';
+      clearInterval(breathInterval);
+    }
+  }
+
+  // ============================================================
+  // CHIME — synthesized singing bowl tone via Web Audio
+  // ============================================================
+  function playChime() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = audioCtx;
+    const now = ctx.currentTime;
+
+    // Singing bowl = fundamental + slightly detuned overtones for a shimmering metallic sound
+    const fundamental = 220; // A3
+    const partials = [1, 2.76, 5.4, 8.93]; // bell-like inharmonic partials
+    const gains    = [0.5, 0.3, 0.15, 0.08];
+
+    partials.forEach((p, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = fundamental * p;
+      // Subtle detune for shimmer
+      osc.detune.value = (Math.random() - 0.5) * 4;
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(gains[i], now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 5 + i * 0.5);
+
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 6);
+    });
+
+    // Visual ripple
+    const pulse = document.getElementById('chimePulse');
+    pulse.classList.remove('ring');
+    void pulse.offsetWidth; // restart animation
+    pulse.classList.add('ring');
+  }
+
+  // ============================================================
+  // EVENT WIRING
+  // ============================================================
+
+  // Theme buttons
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTheme = btn.dataset.theme;
+      renderQuote(pickQuote(currentTheme));
+    });
+  });
+
+  // New wisdom button — uses Claude API for genuinely fresh content
+  document.getElementById('newQuote').addEventListener('click', async () => {
+    const btn = document.getElementById('newQuote');
+    btn.textContent = 'arriving...';
+    btn.disabled = true;
+    const fresh = await generateFreshQuote(currentTheme);
+    renderQuote(fresh);
+    btn.textContent = 'new wisdom';
+    btn.disabled = false;
+  });
+
+  // Reflect button
+  document.getElementById('reflectBtn').addEventListener('click', async () => {
+    const r = document.getElementById('reflection');
+    const btn = document.getElementById('reflectBtn');
+
+    if (r.classList.contains('shown')) {
+      r.classList.remove('shown');
+      btn.classList.remove('active');
+      return;
     }
 
-    const todaysQuote = todaysZen();
+    btn.classList.add('active');
+    r.classList.add('shown', 'loading');
+    r.textContent = 'sitting';
+    const reflection = await generateReflection(currentQuote);
+    r.classList.remove('loading');
+    r.textContent = reflection;
+  });
 
-    document.getElementById('quote').textContent = `“${todaysQuote.quote}”`;
-    document.getElementById('context').textContent = `— ${todaysQuote.context}`;
-  </script>
+  // Breathe button
+  document.getElementById('breatheBtn').addEventListener('click', toggleBreathing);
+
+  // Tap enso to breathe also
+  document.getElementById('ensoWrap').addEventListener('click', toggleBreathing);
+
+  // Chime
+  document.getElementById('chimeBtn').addEventListener('click', playChime);
+
+  // ============================================================
+  // INIT — pick today's seed quote (deterministic per day)
+  // ============================================================
+  function initialQuote() {
+    const all = flatCorpus();
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    return all[dayOfYear % all.length];
+  }
+
+  setTimeout(() => renderQuote(initialQuote()), 600);
+</script>
 </body>
 </html>
