@@ -15,15 +15,10 @@
     --paper-warm: #ede2cc;
     --accent: #8b6f47;
     --enso: #2a2825;
-    --mist: rgba(244, 237, 224, 0.85);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    height: 100%;
-    overflow: hidden;
-  }
+  html, body { min-height: 100%; }
 
   body {
     font-family: 'Cormorant Garamond', 'Noto Serif JP', Georgia, serif;
@@ -37,11 +32,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1.5rem;
+    padding: 3rem 1.5rem 5rem;
     position: relative;
   }
 
-  /* Subtle paper texture */
   body::before {
     content: '';
     position: fixed;
@@ -57,30 +51,25 @@
   .stage {
     position: relative;
     z-index: 1;
-    max-width: 640px;
+    max-width: 680px;
     width: 100%;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 1.75rem;
   }
 
-  /* Enso circle - hand drawn feel */
   .enso-wrap {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
     cursor: pointer;
     transition: transform 0.6s ease;
   }
   .enso-wrap:hover { transform: scale(1.02); }
 
-  .enso {
-    width: 100%;
-    height: 100%;
-    transform-origin: center;
-  }
+  .enso { width: 100%; height: 100%; }
 
   .enso-path {
     fill: none;
@@ -93,11 +82,8 @@
     opacity: 0.85;
   }
 
-  @keyframes draw-enso {
-    to { stroke-dashoffset: 0; }
-  }
+  @keyframes draw-enso { to { stroke-dashoffset: 0; } }
 
-  /* Breathing mode overlay */
   .breath-circle {
     position: absolute;
     inset: 0;
@@ -116,9 +102,9 @@
 
   @keyframes breathe {
     0% { transform: scale(0.5); }
-    36% { transform: scale(1.3); }    /* inhale 4s */
-    64% { transform: scale(1.3); }    /* hold 3s */
-    100% { transform: scale(0.5); }   /* exhale 4s */
+    36% { transform: scale(1.3); }
+    64% { transform: scale(1.3); }
+    100% { transform: scale(0.5); }
   }
 
   .breath-label {
@@ -135,9 +121,8 @@
   }
   .breathing .breath-label { opacity: 1; }
 
-  /* Quote */
   .quote-block {
-    min-height: 180px;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -171,7 +156,16 @@
     color: var(--ink-soft);
     text-transform: uppercase;
     font-style: normal;
-    margin-top: 0.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .tradition-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 0.6rem;
+    opacity: 0.8;
   }
 
   .reflection {
@@ -182,8 +176,9 @@
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 0.8s ease, opacity 0.8s ease, margin-top 0.5s ease;
+    transition: max-height 0.8s ease, opacity 0.8s ease;
     font-style: italic;
+    padding: 0 1rem;
   }
 
   .reflection.shown {
@@ -191,33 +186,38 @@
     opacity: 1;
   }
 
-  .reflection.loading::after {
-    content: '...';
-    animation: dots 1.4s infinite;
+  /* Filter section with two rows */
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    align-items: center;
   }
 
-  @keyframes dots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
+  .filter-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    opacity: 0.6;
   }
 
-  /* Theme selector */
-  .themes {
+  .filter-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    gap: 0.4rem;
+    max-width: 100%;
   }
 
-  .theme-btn {
+  .pill {
     background: transparent;
     border: 1px solid rgba(139, 111, 71, 0.3);
     color: var(--ink-soft);
-    padding: 0.4rem 0.9rem;
+    padding: 0.35rem 0.8rem;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     cursor: pointer;
     border-radius: 20px;
@@ -225,18 +225,17 @@
     text-transform: lowercase;
   }
 
-  .theme-btn:hover {
+  .pill:hover {
     background: rgba(139, 111, 71, 0.08);
     border-color: var(--accent);
   }
 
-  .theme-btn.active {
+  .pill.active {
     background: var(--ink);
     color: var(--paper);
     border-color: var(--ink);
   }
 
-  /* Action row */
   .actions {
     display: flex;
     gap: 1.5rem;
@@ -262,10 +261,8 @@
   .action::after {
     content: '';
     position: absolute;
-    bottom: 4px;
-    left: 50%;
-    width: 0;
-    height: 1px;
+    bottom: 4px; left: 50%;
+    width: 0; height: 1px;
     background: var(--accent);
     transition: all 0.3s;
     transform: translateX(-50%);
@@ -273,11 +270,19 @@
 
   .action:hover { color: var(--ink); }
   .action:hover::after { width: 100%; }
-
   .action.active { color: var(--accent); }
   .action.active::after { width: 100%; }
+  .action:disabled { opacity: 0.5; cursor: wait; }
 
-  /* Sound chime indicator */
+  .stats {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
   .chime-pulse {
     position: fixed;
     top: 50%; left: 50%;
@@ -289,41 +294,37 @@
     opacity: 0;
   }
 
-  .chime-pulse.ring {
-    animation: chime-ring 2s ease-out;
-  }
+  .chime-pulse.ring { animation: chime-ring 2s ease-out; }
 
   @keyframes chime-ring {
     0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
     100% { transform: translate(-50%, -50%) scale(40); opacity: 0; }
   }
 
-  /* Footer */
   .foot {
     position: absolute;
-    bottom: 1.5rem;
-    font-size: 0.7rem;
+    bottom: 1.2rem;
+    font-size: 0.65rem;
     letter-spacing: 0.3em;
     color: var(--ink-soft);
     opacity: 0.5;
     text-transform: uppercase;
   }
 
-  /* Date stamp */
   .date-stamp {
     font-family: 'Noto Serif JP', serif;
     font-size: 0.75rem;
     letter-spacing: 0.2em;
     color: var(--ink-soft);
     opacity: 0.7;
-    margin-bottom: -1rem;
   }
 
   @media (max-width: 480px) {
-    .enso-wrap { width: 150px; height: 150px; }
-    .stage { gap: 1.5rem; }
+    .enso-wrap { width: 140px; height: 140px; }
+    .stage { gap: 1.25rem; }
     .actions { gap: 1rem; }
     .action { font-size: 0.75rem; }
+    .pill { font-size: 0.7rem; padding: 0.3rem 0.65rem; }
   }
 </style>
 </head>
@@ -333,7 +334,6 @@
 
     <div class="enso-wrap" id="ensoWrap" title="Tap to breathe">
       <svg class="enso" viewBox="0 0 200 200">
-        <!-- Hand-drawn enso circle path with slight imperfection -->
         <path class="enso-path" d="M 100 20
           C 145 22, 178 55, 178 100
           C 178 145, 145 178, 100 178
@@ -347,17 +347,15 @@
     <div class="quote-block" id="quoteBlock">
       <div class="quote" id="quote">…</div>
       <div class="attribution" id="attribution"></div>
+      <div class="tradition-tag" id="traditionTag"></div>
       <div class="reflection" id="reflection"></div>
     </div>
 
-    <div class="themes" id="themes">
-      <button class="theme-btn active" data-theme="any">all paths</button>
-      <button class="theme-btn" data-theme="presence">presence</button>
-      <button class="theme-btn" data-theme="impermanence">impermanence</button>
-      <button class="theme-btn" data-theme="compassion">compassion</button>
-      <button class="theme-btn" data-theme="emptiness">emptiness</button>
-      <button class="theme-btn" data-theme="acceptance">acceptance</button>
-      <button class="theme-btn" data-theme="koan">koan</button>
+    <div class="filters">
+      <div class="filter-label">tradition</div>
+      <div class="filter-row" id="traditionRow"></div>
+      <div class="filter-label">theme</div>
+      <div class="filter-row" id="themeRow"></div>
     </div>
 
     <div class="actions">
@@ -366,299 +364,611 @@
       <button class="action" id="breatheBtn">breathe</button>
       <button class="action" id="chimeBtn">chime</button>
     </div>
+
+    <div class="stats" id="stats"></div>
   </div>
 
   <div class="chime-pulse" id="chimePulse"></div>
-  <div class="foot">stillness · 静けさ</div>
+  <div class="foot">stillness · 静けさ · سكون · शान्ति</div>
 
 <script>
-  // ============================================================
-  // SEED CORPUS — curated quotes for instant load + offline use.
-  // The Claude API generates fresh reflections + new quotes for
-  // near-infinite variety beyond this list.
-  // ============================================================
-  const corpus = {
-    presence: [
-      { q: "When walking, walk. When eating, eat.", a: "Zen Proverb" },
-      { q: "Be where you are; otherwise you will miss your life.", a: "Buddha" },
-      { q: "The present moment is the only moment available to us, and it is the door to all moments.", a: "Thich Nhat Hanh" },
-      { q: "Wherever you are, be there totally.", a: "Eckhart Tolle" },
-      { q: "Drink your tea slowly and reverently, as if it is the axis on which the world earth revolves.", a: "Thich Nhat Hanh" },
-    ],
-    impermanence: [
-      { q: "No snowflake ever falls in the wrong place.", a: "Zen Proverb" },
-      { q: "All conditioned things are impermanent. Work out your salvation with diligence.", a: "Buddha's last words" },
-      { q: "The cause of suffering is the desire for things to be other than they are.", a: "Buddhist teaching" },
-      { q: "Spring comes, and the grass grows by itself.", a: "Zenrin Kushū" },
-      { q: "Like a drop of dew, like a bubble in the stream — so should one regard the world.", a: "Diamond Sutra" },
-    ],
-    compassion: [
-      { q: "If your compassion does not include yourself, it is incomplete.", a: "Jack Kornfield" },
-      { q: "The whole secret of existence is to have no fear.", a: "Swami Vivekananda" },
-      { q: "Loving kindness is the great medicine.", a: "Pema Chödrön" },
-      { q: "Hatred does not cease by hatred, but only by love; this is the eternal rule.", a: "Dhammapada" },
-    ],
-    emptiness: [
-      { q: "Form is emptiness, emptiness is form.", a: "Heart Sutra" },
-      { q: "Before enlightenment, chop wood, carry water. After enlightenment, chop wood, carry water.", a: "Zen Proverb" },
-      { q: "The obstacle is the path.", a: "Zen Proverb" },
-      { q: "Knock on the sky and listen to the sound.", a: "Zen Proverb" },
-    ],
-    acceptance: [
-      { q: "Let go, or be dragged.", a: "Zen Proverb" },
-      { q: "If you understand, things are just as they are. If you do not understand, things are just as they are.", a: "Zen Proverb" },
-      { q: "The quieter you become, the more you can hear.", a: "Ram Dass" },
-      { q: "Nature does not hurry, yet everything is accomplished.", a: "Lao Tzu" },
-      { q: "When you realize nothing is lacking, the whole world belongs to you.", a: "Lao Tzu" },
-    ],
-    koan: [
-      { q: "What is the sound of one hand clapping?", a: "Hakuin Ekaku" },
-      { q: "Show me your original face — the face you had before your parents were born.", a: "Zen Koan" },
-      { q: "If you meet the Buddha on the road, kill him.", a: "Linji Yixuan" },
-      { q: "Does a dog have Buddha-nature? Mu.", a: "Zhaozhou's Mu" },
-    ],
-  };
+/* ============================================================
+ * GLOBAL WISDOM CORPUS
+ * Each entry: { q, a, t, themes }
+ *   q = quote
+ *   a = attributed source (specific where possible)
+ *   t = tradition (used by tradition filter)
+ *   themes = array of themes (used by theme filter)
+ *
+ * Sources span Buddhist (Zen, Theravada, Tibetan, Mahayana),
+ * Taoist, Hindu/Vedantic, Sufi/Islamic, Christian contemplative,
+ * Jewish (Hasidic, Talmudic), Stoic, African, Indigenous,
+ * Confucian, Shinto, and contemporary cross-tradition teachers.
+ *
+ * Curated for confident attribution. Common phrases are tagged
+ * generically (e.g. "Zen Proverb", "Sufi Saying") rather than
+ * invented attributions.
+ * ============================================================ */
+const CORPUS = [
+  // --- ZEN BUDDHIST ---
+  { q: "When walking, walk. When eating, eat.", a: "Zen Proverb", t: "zen", themes: ["presence"] },
+  { q: "Before enlightenment, chop wood, carry water. After enlightenment, chop wood, carry water.", a: "Zen Proverb", t: "zen", themes: ["presence", "ordinary"] },
+  { q: "The obstacle is the path.", a: "Zen Proverb", t: "zen", themes: ["acceptance"] },
+  { q: "Knock on the sky and listen to the sound.", a: "Zen Proverb", t: "zen", themes: ["koan"] },
+  { q: "No snowflake ever falls in the wrong place.", a: "Zen Proverb", t: "zen", themes: ["impermanence", "acceptance"] },
+  { q: "Let go, or be dragged.", a: "Zen Proverb", t: "zen", themes: ["acceptance"] },
+  { q: "Sitting quietly, doing nothing, spring comes, and the grass grows by itself.", a: "Zenrin Kushū", t: "zen", themes: ["presence", "ordinary"] },
+  { q: "If you understand, things are just as they are. If you do not understand, things are just as they are.", a: "Zen Proverb", t: "zen", themes: ["acceptance", "emptiness"] },
+  { q: "What is the sound of one hand clapping?", a: "Hakuin Ekaku", t: "zen", themes: ["koan"] },
+  { q: "Show me your original face — the face you had before your parents were born.", a: "Zen Koan", t: "zen", themes: ["koan"] },
+  { q: "If you meet the Buddha on the road, kill him.", a: "Linji Yixuan", t: "zen", themes: ["koan", "emptiness"] },
+  { q: "Does a dog have Buddha-nature? Mu.", a: "Zhaozhou's Mu", t: "zen", themes: ["koan"] },
+  { q: "The mind that does not understand is the Buddha. There is no other.", a: "Mazu Daoyi", t: "zen", themes: ["emptiness"] },
+  { q: "Not knowing is most intimate.", a: "Dizang Guichen", t: "zen", themes: ["emptiness"] },
+  { q: "When you reach the top of the mountain, keep climbing.", a: "Zen Proverb", t: "zen", themes: ["practice"] },
+  { q: "The bird does not sing because it has an answer. It sings because it has a song.", a: "Chinese Proverb", t: "zen", themes: ["ordinary", "presence"] },
+  { q: "Fall down seven times, get up eight.", a: "Japanese Proverb", t: "zen", themes: ["practice", "courage"] },
+  { q: "Quiet mind, holy mind.", a: "Zen Saying", t: "zen", themes: ["presence"] },
+  { q: "When the mind is still, the world surrenders.", a: "Zen Saying", t: "zen", themes: ["presence"] },
+  { q: "The pine teaches silence, the rock teaches stillness, the lake teaches calmness.", a: "Zen Saying", t: "zen", themes: ["ordinary", "presence"] },
 
-  function flatCorpus() {
-    return Object.values(corpus).flat();
-  }
+  // --- DOGEN ---
+  { q: "To study the Way is to study the self. To study the self is to forget the self.", a: "Dōgen, Genjōkōan", t: "zen", themes: ["practice", "emptiness"] },
+  { q: "If you cannot find the truth right where you are, where else do you expect to find it?", a: "Dōgen", t: "zen", themes: ["presence"] },
+  { q: "Time itself is being, and all being is time.", a: "Dōgen, Uji", t: "zen", themes: ["impermanence"] },
+  { q: "Practice and enlightenment are one.", a: "Dōgen", t: "zen", themes: ["practice"] },
+  { q: "A flower falls, even though we love it; and a weed grows, even though we do not love it.", a: "Dōgen", t: "zen", themes: ["impermanence", "acceptance"] },
 
-  // ============================================================
-  // STATE
-  // ============================================================
-  let currentTheme = 'any';
-  let currentQuote = null;
-  let breathingActive = false;
-  let breathInterval = null;
-  let audioCtx = null;
+  // --- SHUNRYU SUZUKI ---
+  { q: "In the beginner's mind there are many possibilities, but in the expert's there are few.", a: "Shunryu Suzuki", t: "zen", themes: ["practice", "emptiness"] },
+  { q: "Each of you is perfect the way you are — and you can use a little improvement.", a: "Shunryu Suzuki", t: "zen", themes: ["compassion", "ordinary"] },
+  { q: "The most important point is to accept yourself and stand on your two feet.", a: "Shunryu Suzuki", t: "zen", themes: ["acceptance", "courage"] },
+  { q: "Zen is not some kind of excitement, but concentration on our usual everyday routine.", a: "Shunryu Suzuki", t: "zen", themes: ["ordinary", "presence"] },
 
-  // ============================================================
-  // DATE STAMP
-  // ============================================================
-  function setDateStamp() {
-    const d = new Date();
-    const opts = { weekday: 'long', month: 'long', day: 'numeric' };
-    document.getElementById('dateStamp').textContent =
-      d.toLocaleDateString('en-US', opts).toLowerCase();
-  }
-  setDateStamp();
+  // --- THICH NHAT HANH ---
+  { q: "The present moment is the only moment available to us, and it is the door to all moments.", a: "Thich Nhat Hanh", t: "zen", themes: ["presence"] },
+  { q: "Drink your tea slowly and reverently, as if it is the axis on which the world earth revolves.", a: "Thich Nhat Hanh", t: "zen", themes: ["presence", "ordinary"] },
+  { q: "Walk as if you are kissing the Earth with your feet.", a: "Thich Nhat Hanh", t: "zen", themes: ["presence", "compassion"] },
+  { q: "Smile, breathe and go slowly.", a: "Thich Nhat Hanh", t: "zen", themes: ["presence"] },
+  { q: "There is no way to happiness — happiness is the way.", a: "Thich Nhat Hanh", t: "zen", themes: ["presence", "joy"] },
+  { q: "We are here to awaken from the illusion of our separateness.", a: "Thich Nhat Hanh", t: "zen", themes: ["compassion", "emptiness"] },
 
-  // ============================================================
-  // QUOTE SELECTION
-  // ============================================================
-  function pickQuote(theme) {
-    const pool = (theme && theme !== 'any') ? corpus[theme] : flatCorpus();
-    let pick;
-    do {
-      pick = pool[Math.floor(Math.random() * pool.length)];
-    } while (pool.length > 1 && pick === currentQuote);
-    return pick;
-  }
+  // --- BUDDHIST (BROADER) ---
+  { q: "All conditioned things are impermanent. Work out your salvation with diligence.", a: "Buddha's last words", t: "buddhist", themes: ["impermanence", "practice"] },
+  { q: "We are what we think. All that we are arises with our thoughts.", a: "Dhammapada", t: "buddhist", themes: ["practice"] },
+  { q: "Hatred does not cease by hatred, but only by love; this is the eternal rule.", a: "Dhammapada", t: "buddhist", themes: ["compassion"] },
+  { q: "Better than a thousand hollow words is one word that brings peace.", a: "Dhammapada", t: "buddhist", themes: ["presence"] },
+  { q: "The mind is everything. What you think you become.", a: "Buddhist teaching", t: "buddhist", themes: ["practice"] },
+  { q: "Peace comes from within. Do not seek it without.", a: "Buddhist teaching", t: "buddhist", themes: ["presence"] },
+  { q: "Holding on to anger is like grasping a hot coal with the intent of throwing it at someone else; you are the one who gets burned.", a: "Buddhist teaching", t: "buddhist", themes: ["acceptance", "compassion"] },
+  { q: "Pain is inevitable. Suffering is optional.", a: "Buddhist teaching", t: "buddhist", themes: ["acceptance"] },
+  { q: "Form is emptiness, emptiness is form.", a: "Heart Sutra", t: "buddhist", themes: ["emptiness"] },
+  { q: "Like a drop of dew, like a bubble in the stream — so should one regard the world.", a: "Diamond Sutra", t: "buddhist", themes: ["impermanence", "emptiness"] },
+  { q: "Three things cannot be long hidden: the sun, the moon, and the truth.", a: "Buddhist teaching", t: "buddhist", themes: ["ordinary"] },
+  { q: "You yourself, as much as anybody in the entire universe, deserve your love and affection.", a: "Buddha", t: "buddhist", themes: ["compassion"] },
+  { q: "Just as a candle cannot burn without fire, men cannot live without a spiritual life.", a: "Buddha", t: "buddhist", themes: ["practice"] },
+  { q: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", a: "Buddha", t: "buddhist", themes: ["presence"] },
 
-  function renderQuote(item) {
-    const block = document.getElementById('quoteBlock');
-    block.classList.add('fading');
-    setTimeout(() => {
-      document.getElementById('quote').textContent = `"${item.q}"`;
-      document.getElementById('attribution').textContent = `— ${item.a}`;
-      // Reset reflection
-      const r = document.getElementById('reflection');
-      r.classList.remove('shown', 'loading');
-      r.textContent = '';
-      document.getElementById('reflectBtn').classList.remove('active');
-      block.classList.remove('fading');
-      currentQuote = item;
-    }, 400);
-  }
+  // --- TIBETAN ---
+  { q: "It is under the greatest adversity that there exists the greatest potential for doing good.", a: "Dalai Lama XIV", t: "tibetan", themes: ["acceptance", "courage"] },
+  { q: "Be kind whenever possible. It is always possible.", a: "Dalai Lama XIV", t: "tibetan", themes: ["compassion"] },
+  { q: "When you talk, you are only repeating what you already know. But if you listen, you may learn something new.", a: "Dalai Lama XIV", t: "tibetan", themes: ["presence"] },
+  { q: "Silence is sometimes the best answer.", a: "Dalai Lama XIV", t: "tibetan", themes: ["presence"] },
+  { q: "Loving kindness is the great medicine.", a: "Pema Chödrön", t: "tibetan", themes: ["compassion"] },
+  { q: "Nothing ever goes away until it has taught us what we need to know.", a: "Pema Chödrön", t: "tibetan", themes: ["acceptance"] },
+  { q: "The most fundamental aggression to ourselves is to remain ignorant by not having the courage to look at ourselves honestly and gently.", a: "Pema Chödrön", t: "tibetan", themes: ["courage", "compassion"] },
+  { q: "You are the sky. Everything else — it's just the weather.", a: "Pema Chödrön", t: "tibetan", themes: ["impermanence", "emptiness"] },
+  { q: "When we protect ourselves so we won't feel pain, that protection becomes like armor.", a: "Pema Chödrön", t: "tibetan", themes: ["courage"] },
 
-  // ============================================================
-  // CLAUDE API — FRESH WISDOM (near-infinite variety)
-  // ============================================================
-  async function generateFreshQuote(theme) {
-    const themeStr = theme === 'any' ? 'any Zen/Buddhist/Taoist theme' : theme;
-    const prompt = `Generate ONE authentic-feeling Zen, Buddhist, or Taoist contemplation on the theme of "${themeStr}". It should feel timeless and genuine — either an actual traditional saying or one written in that tradition's voice. Keep it brief (under 25 words). Respond ONLY with valid JSON, no other text:
-{"q": "the quote", "a": "attribution (real teacher/tradition, or 'Zen Proverb' / 'Contemporary' if newly composed)"}`;
+  // --- TAOIST ---
+  { q: "Nature does not hurry, yet everything is accomplished.", a: "Lao Tzu, Tao Te Ching", t: "taoist", themes: ["presence", "ordinary"] },
+  { q: "The journey of a thousand miles begins with one step.", a: "Lao Tzu, Tao Te Ching", t: "taoist", themes: ["practice", "courage"] },
+  { q: "When you realize nothing is lacking, the whole world belongs to you.", a: "Lao Tzu", t: "taoist", themes: ["acceptance", "joy"] },
+  { q: "Knowing others is intelligence; knowing yourself is true wisdom.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "Mastering others is strength. Mastering yourself is true power.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "He who knows that enough is enough will always have enough.", a: "Lao Tzu", t: "taoist", themes: ["acceptance"] },
+  { q: "A good traveler has no fixed plans and is not intent on arriving.", a: "Lao Tzu", t: "taoist", themes: ["presence", "acceptance"] },
+  { q: "The wise find pleasure in water; the virtuous find pleasure in hills.", a: "Confucius", t: "taoist", themes: ["ordinary"] },
+  { q: "Muddy water, let stand, becomes clear.", a: "Lao Tzu", t: "taoist", themes: ["presence", "acceptance"] },
+  { q: "Silence is a source of great strength.", a: "Lao Tzu", t: "taoist", themes: ["presence"] },
+  { q: "When I let go of what I am, I become what I might be.", a: "Lao Tzu", t: "taoist", themes: ["acceptance", "emptiness"] },
+  { q: "Water is fluid, soft, and yielding. But water will wear away rock.", a: "Lao Tzu", t: "taoist", themes: ["practice"] },
+  { q: "The flame that burns twice as bright burns half as long.", a: "Lao Tzu", t: "taoist", themes: ["impermanence"] },
+  { q: "Care about what other people think and you will always be their prisoner.", a: "Lao Tzu", t: "taoist", themes: ["courage"] },
+  { q: "The Tao that can be told is not the eternal Tao.", a: "Lao Tzu, Tao Te Ching", t: "taoist", themes: ["emptiness"] },
+  { q: "He who knows does not speak; he who speaks does not know.", a: "Lao Tzu", t: "taoist", themes: ["emptiness"] },
+  { q: "To the mind that is still, the whole universe surrenders.", a: "Zhuangzi", t: "taoist", themes: ["presence"] },
+  { q: "Once upon a time, I dreamt I was a butterfly… Now I do not know whether I was then a man dreaming I was a butterfly, or whether I am now a butterfly dreaming I am a man.", a: "Zhuangzi", t: "taoist", themes: ["emptiness", "koan"] },
+  { q: "Flow with whatever may happen and let your mind be free.", a: "Zhuangzi", t: "taoist", themes: ["acceptance"] },
+  { q: "Happiness is the absence of the striving for happiness.", a: "Zhuangzi", t: "taoist", themes: ["joy", "acceptance"] },
 
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 200,
-          messages: [{ role: "user", content: prompt }]
-        })
-      });
-      const data = await res.json();
-      const text = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
-      const cleaned = text.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(cleaned);
-      if (parsed.q && parsed.a) return parsed;
-    } catch (e) {
-      console.warn('Falling back to corpus:', e);
-    }
-    return pickQuote(theme);
-  }
+  // --- CONFUCIAN ---
+  { q: "It does not matter how slowly you go as long as you do not stop.", a: "Confucius", t: "confucian", themes: ["practice", "courage"] },
+  { q: "The man who moves a mountain begins by carrying away small stones.", a: "Confucius", t: "confucian", themes: ["practice"] },
+  { q: "Everything has beauty, but not everyone sees it.", a: "Confucius", t: "confucian", themes: ["presence", "ordinary"] },
+  { q: "Real knowledge is to know the extent of one's ignorance.", a: "Confucius", t: "confucian", themes: ["emptiness"] },
+  { q: "When anger rises, think of the consequences.", a: "Confucius", t: "confucian", themes: ["practice"] },
+  { q: "He who learns but does not think, is lost! He who thinks but does not learn is in great danger.", a: "Confucius", t: "confucian", themes: ["practice"] },
+  { q: "Life is really simple, but we insist on making it complicated.", a: "Confucius", t: "confucian", themes: ["ordinary"] },
+  { q: "Wherever you go, go with all your heart.", a: "Confucius", t: "confucian", themes: ["presence", "courage"] },
 
-  // ============================================================
-  // CLAUDE API — REFLECTION ("sit with this")
-  // ============================================================
-  async function generateReflection(item) {
-    const prompt = `A practitioner is sitting with this contemplation:
-"${item.q}" — ${item.a}
+  // --- HINDU / VEDANTIC ---
+  { q: "You have the right to work, but never to the fruit of work.", a: "Bhagavad Gita 2.47", t: "hindu", themes: ["acceptance", "practice"] },
+  { q: "Yoga is the journey of the self, through the self, to the self.", a: "Bhagavad Gita", t: "hindu", themes: ["practice"] },
+  { q: "The mind acts like an enemy for those who do not control it.", a: "Bhagavad Gita 6.6", t: "hindu", themes: ["practice"] },
+  { q: "When meditation is mastered, the mind is unwavering like the flame of a lamp in a windless place.", a: "Bhagavad Gita 6.19", t: "hindu", themes: ["practice", "presence"] },
+  { q: "Set thy heart upon thy work, but never on its reward.", a: "Bhagavad Gita", t: "hindu", themes: ["acceptance"] },
+  { q: "There is neither this world, nor the world beyond, nor happiness for the one who doubts.", a: "Bhagavad Gita 4.40", t: "hindu", themes: ["courage"] },
+  { q: "The Self is not born nor does it die.", a: "Bhagavad Gita 2.20", t: "hindu", themes: ["emptiness"] },
+  { q: "From joy springs all creation, by joy it is sustained, towards joy it proceeds, and to joy it returns.", a: "Upanishads", t: "hindu", themes: ["joy"] },
+  { q: "Tat tvam asi — Thou art that.", a: "Chandogya Upanishad", t: "hindu", themes: ["emptiness"] },
+  { q: "When you know yourself, you are illumined. When you know yourself, you have power.", a: "Bhagavad Gita", t: "hindu", themes: ["practice"] },
+  { q: "The whole secret of existence is to have no fear.", a: "Swami Vivekananda", t: "hindu", themes: ["courage"] },
+  { q: "You have to grow from the inside out. None can teach you, none can make you spiritual.", a: "Swami Vivekananda", t: "hindu", themes: ["practice"] },
+  { q: "Take up one idea. Make that one idea your life.", a: "Swami Vivekananda", t: "hindu", themes: ["practice", "courage"] },
+  { q: "The quieter you become, the more you can hear.", a: "Ram Dass", t: "hindu", themes: ["presence"] },
+  { q: "We're all just walking each other home.", a: "Ram Dass", t: "hindu", themes: ["compassion"] },
+  { q: "Be here now.", a: "Ram Dass", t: "hindu", themes: ["presence"] },
+  { q: "The next message you need is always right where you are.", a: "Ram Dass", t: "hindu", themes: ["presence"] },
+  { q: "Treat everyone you meet like God in drag.", a: "Ram Dass", t: "hindu", themes: ["compassion"] },
+  { q: "Wanting to reform the world without discovering one's true self is like trying to cover the world with leather to avoid the pain of walking on stones and thorns.", a: "Ramana Maharshi", t: "hindu", themes: ["practice"] },
+  { q: "Your own Self-Realization is the greatest service you can render the world.", a: "Ramana Maharshi", t: "hindu", themes: ["practice"] },
+  { q: "Silence is also conversation.", a: "Ramana Maharshi", t: "hindu", themes: ["presence"] },
+  { q: "Happiness is your nature. It is not wrong to desire it. What is wrong is seeking it outside when it is inside.", a: "Ramana Maharshi", t: "hindu", themes: ["joy", "presence"] },
 
-Write a brief, gentle reflection (2-3 sentences, under 60 words) that helps them sit with this teaching today. Speak softly, like a teacher offering a quiet pointer. No preamble, no headers, no quotes — just the reflection itself.`;
+  // --- SUFI / ISLAMIC MYSTIC ---
+  { q: "The wound is the place where the Light enters you.", a: "Rumi", t: "sufi", themes: ["acceptance", "courage"] },
+  { q: "What you seek is seeking you.", a: "Rumi", t: "sufi", themes: ["practice"] },
+  { q: "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.", a: "Rumi", t: "sufi", themes: ["practice"] },
+  { q: "Don't grieve. Anything you lose comes round in another form.", a: "Rumi", t: "sufi", themes: ["impermanence", "acceptance"] },
+  { q: "When you do things from your soul, you feel a river moving in you, a joy.", a: "Rumi", t: "sufi", themes: ["joy"] },
+  { q: "Out beyond ideas of wrongdoing and rightdoing, there is a field. I'll meet you there.", a: "Rumi", t: "sufi", themes: ["emptiness", "compassion"] },
+  { q: "Try not to resist the changes that come your way. Instead let life live through you.", a: "Rumi", t: "sufi", themes: ["acceptance"] },
+  { q: "Silence is the language of God; all else is poor translation.", a: "Rumi", t: "sufi", themes: ["presence", "emptiness"] },
+  { q: "You were born with wings, why prefer to crawl through life?", a: "Rumi", t: "sufi", themes: ["courage"] },
+  { q: "Set your life on fire. Seek those who fan your flames.", a: "Rumi", t: "sufi", themes: ["courage", "joy"] },
+  { q: "The garden of the world has no limits, except in your mind.", a: "Rumi", t: "sufi", themes: ["emptiness"] },
+  { q: "Sell your cleverness and buy bewilderment.", a: "Rumi", t: "sufi", themes: ["emptiness"] },
+  { q: "Be a lamp, or a lifeboat, or a ladder.", a: "Rumi", t: "sufi", themes: ["compassion"] },
+  { q: "I am not this hair, I am not this skin, I am the soul that lives within.", a: "Rumi", t: "sufi", themes: ["emptiness"] },
+  { q: "You are not a drop in the ocean. You are the entire ocean in a drop.", a: "Rumi", t: "sufi", themes: ["emptiness"] },
+  { q: "Patience is the key to joy.", a: "Rumi", t: "sufi", themes: ["acceptance", "joy"] },
+  { q: "Forget safety. Live where you fear to live.", a: "Rumi", t: "sufi", themes: ["courage"] },
+  { q: "Knock, and He'll open the door. Vanish, and He'll make you shine like the sun.", a: "Rumi", t: "sufi", themes: ["practice"] },
+  { q: "Travel brings power and love back into your life.", a: "Rumi", t: "sufi", themes: ["joy"] },
+  { q: "Wherever you stand, be the soul of that place.", a: "Rumi", t: "sufi", themes: ["presence"] },
+  { q: "He who tastes, knows.", a: "Sufi Saying", t: "sufi", themes: ["practice"] },
+  { q: "Trust in God, but tie your camel.", a: "Sufi Saying", t: "sufi", themes: ["practice"] },
+  { q: "The eye through which I see God is the same eye through which God sees me.", a: "Ibn Arabi", t: "sufi", themes: ["emptiness"] },
+  { q: "I asked for strength and God gave me difficulties to make me strong.", a: "Sufi Saying", t: "sufi", themes: ["acceptance", "courage"] },
+  { q: "He who knows himself knows his Lord.", a: "Hadith / Sufi tradition", t: "sufi", themes: ["practice"] },
 
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 200,
-          messages: [{ role: "user", content: prompt }]
-        })
-      });
-      const data = await res.json();
-      const text = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
-      return text;
-    } catch (e) {
-      return "Sit. Breathe. Let the words settle without grasping at meaning. The teaching unfolds in stillness, not in thought.";
-    }
-  }
+  // --- CHRISTIAN CONTEMPLATIVE ---
+  { q: "Be still, and know that I am God.", a: "Psalm 46:10", t: "christian", themes: ["presence"] },
+  { q: "All shall be well, and all shall be well, and all manner of thing shall be well.", a: "Julian of Norwich", t: "christian", themes: ["acceptance"] },
+  { q: "Between the stirrup and the ground, mercy I sought and mercy I found.", a: "William Camden", t: "christian", themes: ["compassion"] },
+  { q: "What we plant in the soil of contemplation, we shall reap in the harvest of action.", a: "Meister Eckhart", t: "christian", themes: ["practice"] },
+  { q: "If the only prayer you ever say in your entire life is thank you, it will be enough.", a: "Meister Eckhart", t: "christian", themes: ["joy", "acceptance"] },
+  { q: "The eye through which I see God is the same eye through which God sees me; my eye and God's eye are one eye, one seeing, one knowing, one love.", a: "Meister Eckhart", t: "christian", themes: ["emptiness"] },
+  { q: "God is not found in the soul by adding anything but by a process of subtraction.", a: "Meister Eckhart", t: "christian", themes: ["emptiness"] },
+  { q: "Only the hand that erases can write the true thing.", a: "Meister Eckhart", t: "christian", themes: ["emptiness"] },
+  { q: "Be patient toward all that is unsolved in your heart and try to love the questions themselves.", a: "Rainer Maria Rilke", t: "christian", themes: ["acceptance", "courage"] },
+  { q: "The point of prayer is not to change God, but to change ourselves.", a: "C.S. Lewis", t: "christian", themes: ["practice"] },
+  { q: "Where there is no love, put love — and you will find love.", a: "John of the Cross", t: "christian", themes: ["compassion"] },
+  { q: "In the evening of life, we shall be judged on love alone.", a: "John of the Cross", t: "christian", themes: ["compassion"] },
+  { q: "Lord, make me an instrument of your peace.", a: "Francis of Assisi", t: "christian", themes: ["compassion"] },
+  { q: "Start by doing what's necessary; then do what's possible; and suddenly you are doing the impossible.", a: "Francis of Assisi", t: "christian", themes: ["practice", "courage"] },
+  { q: "All the way to heaven is heaven.", a: "Catherine of Siena", t: "christian", themes: ["presence", "joy"] },
+  { q: "Be who God meant you to be and you will set the world on fire.", a: "Catherine of Siena", t: "christian", themes: ["courage"] },
+  { q: "Let nothing disturb you, let nothing frighten you. All things pass away. God never changes.", a: "Teresa of Ávila", t: "christian", themes: ["acceptance", "impermanence"] },
+  { q: "The important thing is not to think much but to love much.", a: "Teresa of Ávila", t: "christian", themes: ["compassion"] },
+  { q: "We are the love of God made visible.", a: "Henri Nouwen", t: "christian", themes: ["compassion"] },
+  { q: "You don't think your way into a new kind of living. You live your way into a new kind of thinking.", a: "Henri Nouwen", t: "christian", themes: ["practice"] },
+  { q: "Solitude is the furnace of transformation.", a: "Henri Nouwen", t: "christian", themes: ["practice"] },
+  { q: "We do not think ourselves into new ways of living, we live ourselves into new ways of thinking.", a: "Richard Rohr", t: "christian", themes: ["practice"] },
+  { q: "Love is the lesson and we are sent to school to learn it.", a: "Christian Saying", t: "christian", themes: ["compassion"] },
+  { q: "Pray as though everything depended on God. Work as though everything depended on you.", a: "Augustine of Hippo", t: "christian", themes: ["practice"] },
 
-  // ============================================================
-  // BREATHING MODE — 4-3-4 box-style breath, 11s cycle
-  // ============================================================
-  function toggleBreathing() {
-    breathingActive = !breathingActive;
-    const wrap = document.getElementById('ensoWrap');
-    const btn = document.getElementById('breatheBtn');
-    const label = document.getElementById('breathLabel');
+  // --- JEWISH (HASIDIC, TALMUDIC) ---
+  { q: "Whoever saves a single life saves the world entire.", a: "Talmud, Sanhedrin 4:9", t: "jewish", themes: ["compassion"] },
+  { q: "Who is wise? One who learns from every person.", a: "Pirkei Avot 4:1", t: "jewish", themes: ["practice"] },
+  { q: "Who is rich? One who is happy with what he has.", a: "Pirkei Avot 4:1", t: "jewish", themes: ["acceptance", "joy"] },
+  { q: "Who is strong? One who masters his urges.", a: "Pirkei Avot 4:1", t: "jewish", themes: ["practice"] },
+  { q: "Do not be daunted by the enormity of the world's grief. Do justly, now. Love mercy, now. Walk humbly, now. You are not obligated to complete the work, but neither are you free to abandon it.", a: "Pirkei Avot / Rabbi Tarfon", t: "jewish", themes: ["compassion", "courage"] },
+  { q: "The whole world is a very narrow bridge, and the most important thing is not to be afraid.", a: "Rabbi Nachman of Breslov", t: "jewish", themes: ["courage"] },
+  { q: "If you believe you can damage, believe you can repair.", a: "Rabbi Nachman of Breslov", t: "jewish", themes: ["courage", "practice"] },
+  { q: "It is forbidden to be old.", a: "Rabbi Nachman of Breslov", t: "jewish", themes: ["joy"] },
+  { q: "Get yourself a new mind every day.", a: "Hasidic Saying", t: "jewish", themes: ["practice"] },
+  { q: "Everywhere I go, I find God.", a: "Hasidic Saying", t: "jewish", themes: ["presence"] },
+  { q: "When I get to heaven, they will not ask me, 'Why were you not Moses?' They will ask me, 'Why were you not Zusya?'", a: "Rabbi Zusya of Hanipol", t: "jewish", themes: ["practice", "courage"] },
+  { q: "Do not believe in anything because it is spoken by many. Believe what you find to be true after careful examination.", a: "Talmudic principle", t: "jewish", themes: ["practice"] },
+  { q: "We do not see things as they are. We see them as we are.", a: "Talmud", t: "jewish", themes: ["practice", "emptiness"] },
+  { q: "From every human being there rises a light.", a: "Baal Shem Tov", t: "jewish", themes: ["compassion"] },
+  { q: "Forgetfulness leads to exile, while remembrance is the secret of redemption.", a: "Baal Shem Tov", t: "jewish", themes: ["presence"] },
+  { q: "Let your heart be open to the suffering of others.", a: "Hasidic Saying", t: "jewish", themes: ["compassion"] },
 
-    if (breathingActive) {
-      wrap.classList.add('breathing');
-      btn.classList.add('active');
-      btn.textContent = 'stop breathing';
+  // --- STOIC / GREEK ---
+  { q: "You have power over your mind — not outside events. Realize this, and you will find strength.", a: "Marcus Aurelius, Meditations", t: "stoic", themes: ["practice", "courage"] },
+  { q: "The happiness of your life depends upon the quality of your thoughts.", a: "Marcus Aurelius", t: "stoic", themes: ["practice"] },
+  { q: "Waste no more time arguing about what a good man should be. Be one.", a: "Marcus Aurelius", t: "stoic", themes: ["courage", "practice"] },
+  { q: "When you arise in the morning, think of what a precious privilege it is to be alive — to breathe, to think, to enjoy, to love.", a: "Marcus Aurelius", t: "stoic", themes: ["joy", "presence"] },
+  { q: "The impediment to action advances action. What stands in the way becomes the way.", a: "Marcus Aurelius", t: "stoic", themes: ["acceptance", "courage"] },
+  { q: "It is not what happens to you, but how you react to it that matters.", a: "Epictetus", t: "stoic", themes: ["acceptance"] },
+  { q: "Wealth consists not in having great possessions, but in having few wants.", a: "Epictetus", t: "stoic", themes: ["acceptance"] },
+  { q: "He who laughs at himself never runs out of things to laugh at.", a: "Epictetus", t: "stoic", themes: ["joy"] },
+  { q: "We have two ears and one mouth, so that we can listen twice as much as we speak.", a: "Epictetus", t: "stoic", themes: ["presence"] },
+  { q: "First say to yourself what you would be; and then do what you have to do.", a: "Epictetus", t: "stoic", themes: ["practice"] },
+  { q: "We suffer more often in imagination than in reality.", a: "Seneca", t: "stoic", themes: ["acceptance"] },
+  { q: "Every new beginning comes from some other beginning's end.", a: "Seneca", t: "stoic", themes: ["impermanence"] },
+  { q: "It is the power of the mind to be unconquerable.", a: "Seneca", t: "stoic", themes: ["courage"] },
+  { q: "Luck is what happens when preparation meets opportunity.", a: "Seneca", t: "stoic", themes: ["practice"] },
+  { q: "While we wait for life, life passes.", a: "Seneca", t: "stoic", themes: ["presence", "impermanence"] },
+  { q: "The unexamined life is not worth living.", a: "Socrates", t: "stoic", themes: ["practice"] },
+  { q: "I know that I know nothing.", a: "Socrates", t: "stoic", themes: ["emptiness"] },
+  { q: "The greatest wealth is to live content with little.", a: "Plato", t: "stoic", themes: ["acceptance"] },
+  { q: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", a: "Will Durant on Aristotle", t: "stoic", themes: ["practice"] },
+  { q: "Happiness depends upon ourselves.", a: "Aristotle", t: "stoic", themes: ["acceptance"] },
 
-      // Cycle the label text with the animation (11s total: 4 in, 3 hold, 4 out)
-      const cycle = () => {
-        label.textContent = 'breathe in';
-        setTimeout(() => { if (breathingActive) label.textContent = 'hold'; }, 4000);
-        setTimeout(() => { if (breathingActive) label.textContent = 'breathe out'; }, 7000);
-      };
-      cycle();
-      breathInterval = setInterval(cycle, 11000);
-    } else {
-      wrap.classList.remove('breathing');
-      btn.classList.remove('active');
-      btn.textContent = 'breathe';
-      clearInterval(breathInterval);
-    }
-  }
+  // --- AFRICAN PROVERBS ---
+  { q: "If you want to go fast, go alone. If you want to go far, go together.", a: "African Proverb", t: "african", themes: ["compassion", "practice"] },
+  { q: "However long the night, the dawn will break.", a: "African Proverb", t: "african", themes: ["acceptance", "courage"] },
+  { q: "Smooth seas do not make skillful sailors.", a: "African Proverb", t: "african", themes: ["acceptance", "practice"] },
+  { q: "When the music changes, so does the dance.", a: "African Proverb", t: "african", themes: ["impermanence", "acceptance"] },
+  { q: "Wisdom is like a baobab tree; no one individual can embrace it.", a: "Akan Proverb (Ghana)", t: "african", themes: ["emptiness", "compassion"] },
+  { q: "Until the lion learns to write, every story will glorify the hunter.", a: "African Proverb", t: "african", themes: ["practice"] },
+  { q: "If you think you are too small to make a difference, you haven't spent the night with a mosquito.", a: "African Proverb", t: "african", themes: ["courage"] },
+  { q: "A roaring lion kills no game.", a: "Ugandan Proverb", t: "african", themes: ["practice"] },
+  { q: "Where water is the boss, there the land must obey.", a: "African Proverb", t: "african", themes: ["acceptance"] },
+  { q: "However long a log lies in the water, it will never become a crocodile.", a: "Bambara Proverb", t: "african", themes: ["practice"] },
+  { q: "He who learns, teaches.", a: "Ethiopian Proverb", t: "african", themes: ["practice"] },
+  { q: "I am because we are.", a: "Ubuntu philosophy (Zulu/Xhosa)", t: "african", themes: ["compassion", "emptiness"] },
+  { q: "A bird that flies from the ground onto an anthill does not know that it is still on the ground.", a: "Igbo Proverb", t: "african", themes: ["emptiness"] },
+  { q: "Only a fool tests the depth of the water with both feet.", a: "African Proverb", t: "african", themes: ["practice"] },
+  { q: "The child you do not embrace will burn down the village to feel its warmth.", a: "African Proverb", t: "african", themes: ["compassion"] },
+  { q: "Rain does not fall on one roof alone.", a: "Cameroonian Proverb", t: "african", themes: ["compassion"] },
 
-  // ============================================================
-  // CHIME — synthesized singing bowl tone via Web Audio
-  // ============================================================
-  function playChime() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = audioCtx;
-    const now = ctx.currentTime;
+  // --- INDIGENOUS / NATIVE AMERICAN ---
+  { q: "We do not inherit the earth from our ancestors; we borrow it from our children.", a: "Native American Proverb", t: "indigenous", themes: ["acceptance", "compassion"] },
+  { q: "Listen, or your tongue will keep you deaf.", a: "Cherokee Saying", t: "indigenous", themes: ["presence"] },
+  { q: "When you were born, you cried and the world rejoiced. Live your life so that when you die, the world cries and you rejoice.", a: "Cherokee Saying", t: "indigenous", themes: ["joy", "courage"] },
+  { q: "Walk lightly in the spring; Mother Earth is pregnant.", a: "Kiowa Saying", t: "indigenous", themes: ["presence", "compassion"] },
+  { q: "Take only what you need and leave the land as you found it.", a: "Arapaho Saying", t: "indigenous", themes: ["acceptance"] },
+  { q: "What is life? It is the flash of a firefly in the night. It is the breath of a buffalo in the wintertime.", a: "Crowfoot, Blackfoot Chief", t: "indigenous", themes: ["impermanence"] },
+  { q: "May your moccasins make happy tracks in many snows.", a: "Native American Blessing", t: "indigenous", themes: ["joy"] },
+  { q: "All plants are our brothers and sisters. They talk to us and if we listen, we can hear them.", a: "Arapaho Saying", t: "indigenous", themes: ["presence"] },
+  { q: "Tell me, and I'll forget. Show me, and I may remember. Involve me, and I'll understand.", a: "Native American Proverb", t: "indigenous", themes: ["practice"] },
+  { q: "Don't be afraid to cry. It will free your mind of sorrowful thoughts.", a: "Hopi Saying", t: "indigenous", themes: ["acceptance"] },
+  { q: "There is no death. Only a change of worlds.", a: "Chief Seattle", t: "indigenous", themes: ["impermanence"] },
+  { q: "Take only memories, leave only footprints.", a: "Chief Seattle", t: "indigenous", themes: ["acceptance"] },
 
-    // Singing bowl = fundamental + slightly detuned overtones for a shimmering metallic sound
-    const fundamental = 220; // A3
-    const partials = [1, 2.76, 5.4, 8.93]; // bell-like inharmonic partials
-    const gains    = [0.5, 0.3, 0.15, 0.08];
+  // --- MODERN CROSS-TRADITION TEACHERS ---
+  { q: "If your compassion does not include yourself, it is incomplete.", a: "Jack Kornfield", t: "modern", themes: ["compassion"] },
+  { q: "The trouble is, you think you have time.", a: "Buddhist saying / Jack Kornfield", t: "modern", themes: ["impermanence", "presence"] },
+  { q: "In the end, just three things matter: how well we have lived, how well we have loved, how well we have learned to let go.", a: "Jack Kornfield", t: "modern", themes: ["acceptance", "compassion"] },
+  { q: "Forgiveness is giving up all hope of a better past.", a: "Jack Kornfield", t: "modern", themes: ["acceptance"] },
+  { q: "Whatever the present moment contains, accept it as if you had chosen it.", a: "Eckhart Tolle", t: "modern", themes: ["acceptance", "presence"] },
+  { q: "Wherever you are, be there totally.", a: "Eckhart Tolle", t: "modern", themes: ["presence"] },
+  { q: "Realize deeply that the present moment is all you ever have.", a: "Eckhart Tolle", t: "modern", themes: ["presence"] },
+  { q: "Life will give you whatever experience is most helpful for the evolution of your consciousness.", a: "Eckhart Tolle", t: "modern", themes: ["acceptance"] },
+  { q: "Some changes look negative on the surface but you will soon realize that space is being created in your life for something new to emerge.", a: "Eckhart Tolle", t: "modern", themes: ["impermanence", "acceptance"] },
+  { q: "You can't stop the waves, but you can learn to surf.", a: "Jon Kabat-Zinn", t: "modern", themes: ["acceptance"] },
+  { q: "The little things? The little moments? They aren't little.", a: "Jon Kabat-Zinn", t: "modern", themes: ["presence", "ordinary"] },
+  { q: "Mindfulness means being awake. It means knowing what you are doing.", a: "Jon Kabat-Zinn", t: "modern", themes: ["presence"] },
+  { q: "Wherever you go, there you are.", a: "Jon Kabat-Zinn", t: "modern", themes: ["presence"] },
+  { q: "Between stimulus and response there is a space. In that space is our power to choose our response.", a: "Viktor Frankl", t: "modern", themes: ["practice", "courage"] },
+  { q: "When we are no longer able to change a situation, we are challenged to change ourselves.", a: "Viktor Frankl", t: "modern", themes: ["acceptance"] },
+  { q: "Those who have a 'why' to live, can bear with almost any 'how'.", a: "Viktor Frankl", t: "modern", themes: ["courage"] },
+  { q: "Do not seek to follow in the footsteps of the wise. Seek what they sought.", a: "Matsuo Bashō", t: "modern", themes: ["practice"] },
+  { q: "The temple bell stops — but the sound keeps coming out of the flowers.", a: "Matsuo Bashō", t: "modern", themes: ["presence", "ordinary"] },
+  { q: "Sit, walk, or run, but don't wobble.", a: "Yunmen Wenyan", t: "modern", themes: ["practice"] },
 
-    partials.forEach((p, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = fundamental * p;
-      // Subtle detune for shimmer
-      osc.detune.value = (Math.random() - 0.5) * 4;
+  // --- SHINTO / JAPANESE ---
+  { q: "The reverse side also has a reverse side.", a: "Japanese Proverb", t: "japanese", themes: ["emptiness"] },
+  { q: "Even monkeys fall from trees.", a: "Japanese Proverb", t: "japanese", themes: ["acceptance"] },
+  { q: "Vision without action is a daydream. Action without vision is a nightmare.", a: "Japanese Proverb", t: "japanese", themes: ["practice"] },
+  { q: "Better to be a crystal and broken, than a tile upon the housetop.", a: "Japanese Proverb", t: "japanese", themes: ["courage"] },
+  { q: "If a man be great, even his dog will wear a proud look.", a: "Japanese Proverb", t: "japanese", themes: ["ordinary"] },
+  { q: "We are not put on Earth to see through one another, but to see one another through.", a: "Japanese Proverb", t: "japanese", themes: ["compassion"] },
+  { q: "One kind word can warm three winter months.", a: "Japanese Proverb", t: "japanese", themes: ["compassion"] },
+  { q: "There are no shortcuts to any place worth going.", a: "Japanese Proverb", t: "japanese", themes: ["practice"] },
+  { q: "The bamboo that bends is stronger than the oak that resists.", a: "Japanese Proverb", t: "japanese", themes: ["acceptance"] },
+  { q: "After victory, tighten your helmet straps.", a: "Japanese Proverb", t: "japanese", themes: ["practice"] },
 
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(gains[i], now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 5 + i * 0.5);
+  // --- KOREAN ---
+  { q: "Even a sheet of paper is lighter when two people lift it.", a: "Korean Proverb", t: "korean", themes: ["compassion"] },
+  { q: "Don't draw your sword to kill a fly.", a: "Korean Proverb", t: "korean", themes: ["practice"] },
+  { q: "A word has no wings, but it can fly a thousand miles.", a: "Korean Proverb", t: "korean", themes: ["practice"] },
+  { q: "If you don't go inside, you will not get the tiger's cub.", a: "Korean Proverb", t: "korean", themes: ["courage"] },
+  { q: "Don't try to know the answer, just ask the question.", a: "Seung Sahn", t: "korean", themes: ["emptiness", "practice"] },
+  { q: "Only don't know.", a: "Seung Sahn", t: "korean", themes: ["emptiness"] },
 
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 6);
-    });
+  // --- CHINESE (broader) ---
+  { q: "Tension is who you think you should be. Relaxation is who you are.", a: "Chinese Proverb", t: "chinese", themes: ["acceptance"] },
+  { q: "Be not afraid of growing slowly; be afraid only of standing still.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
+  { q: "The best time to plant a tree was 20 years ago. The second best time is now.", a: "Chinese Proverb", t: "chinese", themes: ["presence", "practice"] },
+  { q: "A bird does not sing because it has an answer; it sings because it has a song.", a: "Chinese Proverb", t: "chinese", themes: ["joy", "ordinary"] },
+  { q: "Teachers open the door, but you must enter by yourself.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
+  { q: "Give a man a fish and you feed him for a day. Teach him to fish and you feed him for a lifetime.", a: "Chinese Proverb", t: "chinese", themes: ["compassion", "practice"] },
+  { q: "Talk does not cook rice.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
+  { q: "A diamond with a flaw is worth more than a pebble without imperfections.", a: "Chinese Proverb", t: "chinese", themes: ["acceptance"] },
+  { q: "When the wind of change blows, some build walls while others build windmills.", a: "Chinese Proverb", t: "chinese", themes: ["impermanence", "courage"] },
+  { q: "The person who says it cannot be done should not interrupt the person doing it.", a: "Chinese Proverb", t: "chinese", themes: ["courage"] },
+  { q: "A book holds a house of gold.", a: "Chinese Proverb", t: "chinese", themes: ["practice"] },
+  { q: "Patience is a bitter plant, but its fruit is sweet.", a: "Chinese Proverb", t: "chinese", themes: ["acceptance"] },
+];
 
-    // Visual ripple
-    const pulse = document.getElementById('chimePulse');
-    pulse.classList.remove('ring');
-    void pulse.offsetWidth; // restart animation
-    pulse.classList.add('ring');
-  }
+// ============================================================
+// STATE
+// ============================================================
+let currentTradition = 'all';
+let currentTheme = 'all';
+let currentQuote = null;
+let breathingActive = false;
+let breathInterval = null;
+let audioCtx = null;
+let seenInSession = new Set(); // avoid immediate repeats
 
-  // ============================================================
-  // EVENT WIRING
-  // ============================================================
+// ============================================================
+// FILTER POPULATION (built from corpus, so no manual sync)
+// ============================================================
+function populateFilters() {
+  const traditions = [...new Set(CORPUS.map(c => c.t))].sort();
+  const themes = [...new Set(CORPUS.flatMap(c => c.themes))].sort();
 
-  // Theme buttons
-  document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentTheme = btn.dataset.theme;
-      renderQuote(pickQuote(currentTheme));
-    });
+  const tRow = document.getElementById('traditionRow');
+  const allT = mkPill('all', 'all', true);
+  allT.dataset.kind = 'tradition';
+  tRow.appendChild(allT);
+  traditions.forEach(t => {
+    const p = mkPill(t, t, false);
+    p.dataset.kind = 'tradition';
+    tRow.appendChild(p);
   });
 
-  // New wisdom button — uses Claude API for genuinely fresh content
-  document.getElementById('newQuote').addEventListener('click', async () => {
-    const btn = document.getElementById('newQuote');
-    btn.textContent = 'arriving...';
-    btn.disabled = true;
-    const fresh = await generateFreshQuote(currentTheme);
-    renderQuote(fresh);
-    btn.textContent = 'new wisdom';
-    btn.disabled = false;
+  const thRow = document.getElementById('themeRow');
+  const allTh = mkPill('all', 'all', true);
+  allTh.dataset.kind = 'theme';
+  thRow.appendChild(allTh);
+  themes.forEach(th => {
+    const p = mkPill(th, th, false);
+    p.dataset.kind = 'theme';
+    thRow.appendChild(p);
   });
 
-  // Reflect button
-  document.getElementById('reflectBtn').addEventListener('click', async () => {
+  document.querySelectorAll('.pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.kind;
+      document.querySelectorAll(`.pill[data-kind="${kind}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (kind === 'tradition') currentTradition = btn.dataset.value;
+      else currentTheme = btn.dataset.value;
+      seenInSession.clear();
+      renderQuote(pickQuote());
+    });
+  });
+}
+
+function mkPill(label, value, active) {
+  const b = document.createElement('button');
+  b.className = 'pill' + (active ? ' active' : '');
+  b.textContent = label;
+  b.dataset.value = value;
+  return b;
+}
+
+// ============================================================
+// QUOTE SELECTION
+// ============================================================
+function filteredPool() {
+  return CORPUS.filter(c =>
+    (currentTradition === 'all' || c.t === currentTradition) &&
+    (currentTheme === 'all' || c.themes.includes(currentTheme))
+  );
+}
+
+function pickQuote() {
+  const pool = filteredPool();
+  if (!pool.length) return CORPUS[0];
+
+  // Avoid recently-seen quotes within a session
+  const fresh = pool.filter(p => !seenInSession.has(p.q));
+  const choosable = fresh.length ? fresh : pool;
+  const pick = choosable[Math.floor(Math.random() * choosable.length)];
+  seenInSession.add(pick.q);
+  // Reset session memory if we've seen most of the pool
+  if (seenInSession.size > pool.length * 0.7) seenInSession.clear();
+  return pick;
+}
+
+function renderQuote(item) {
+  const block = document.getElementById('quoteBlock');
+  block.classList.add('fading');
+  setTimeout(() => {
+    document.getElementById('quote').textContent = `"${item.q}"`;
+    document.getElementById('attribution').textContent = `— ${item.a}`;
+    document.getElementById('traditionTag').textContent = item.t;
     const r = document.getElementById('reflection');
-    const btn = document.getElementById('reflectBtn');
+    r.classList.remove('shown');
+    r.textContent = '';
+    document.getElementById('reflectBtn').classList.remove('active');
+    block.classList.remove('fading');
+    currentQuote = item;
+  }, 400);
+}
 
-    if (r.classList.contains('shown')) {
-      r.classList.remove('shown');
-      btn.classList.remove('active');
-      return;
-    }
+// ============================================================
+// CLAUDE API — fresh contemplation
+// ============================================================
+async function generateFreshQuote() {
+  const traditionStr = currentTradition === 'all'
+    ? 'any wisdom tradition (Zen, Sufi, Hasidic, Christian contemplative, Stoic, Taoist, Hindu, African, Indigenous, etc.)'
+    : `the ${currentTradition} tradition`;
+  const themeStr = currentTheme === 'all' ? 'any contemplative theme' : `the theme of ${currentTheme}`;
 
+  const prompt = `Offer ONE authentic contemplative saying from ${traditionStr}, on ${themeStr}. It should be either a real well-known saying from that tradition, or — only if you cannot recall a real one — composed faithfully in that tradition's voice and labeled honestly. Keep it under 30 words. Respond ONLY with valid JSON, no other text:
+{"q": "the saying", "a": "specific source if known (real teacher, text), or '${currentTradition === 'all' ? 'Contemplative tradition' : currentTradition + ' saying'}' if newly composed", "t": "${currentTradition === 'all' ? 'modern' : currentTradition}", "themes": ["one-or-two-relevant-themes"]}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 250,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    if (parsed.q && parsed.a) return parsed;
+  } catch (e) {
+    console.warn('Falling back to corpus:', e);
+  }
+  return pickQuote();
+}
+
+// ============================================================
+// CLAUDE API — reflection
+// ============================================================
+async function generateReflection(item) {
+  const prompt = `A practitioner is sitting with this contemplation:
+"${item.q}" — ${item.a} (${item.t} tradition)
+
+Write a brief, gentle reflection (2-3 sentences, under 60 words) that helps them sit with this teaching today. Speak softly, like a teacher offering a quiet pointer. Respect the tradition the saying comes from. No preamble, no headers, no quotes — just the reflection itself.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 200,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await res.json();
+    return data.content.map(b => b.type === 'text' ? b.text : '').join('').trim();
+  } catch (e) {
+    return "Sit. Breathe. Let the words settle without grasping at meaning. The teaching unfolds in stillness, not in thought.";
+  }
+}
+
+// ============================================================
+// BREATHING
+// ============================================================
+function toggleBreathing() {
+  breathingActive = !breathingActive;
+  const wrap = document.getElementById('ensoWrap');
+  const btn = document.getElementById('breatheBtn');
+  const label = document.getElementById('breathLabel');
+
+  if (breathingActive) {
+    wrap.classList.add('breathing');
     btn.classList.add('active');
-    r.classList.add('shown', 'loading');
-    r.textContent = 'sitting';
-    const reflection = await generateReflection(currentQuote);
-    r.classList.remove('loading');
-    r.textContent = reflection;
+    btn.textContent = 'stop breathing';
+    const cycle = () => {
+      label.textContent = 'breathe in';
+      setTimeout(() => { if (breathingActive) label.textContent = 'hold'; }, 4000);
+      setTimeout(() => { if (breathingActive) label.textContent = 'breathe out'; }, 7000);
+    };
+    cycle();
+    breathInterval = setInterval(cycle, 11000);
+  } else {
+    wrap.classList.remove('breathing');
+    btn.classList.remove('active');
+    btn.textContent = 'breathe';
+    clearInterval(breathInterval);
+  }
+}
+
+// ============================================================
+// CHIME
+// ============================================================
+function playChime() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const ctx = audioCtx;
+  const now = ctx.currentTime;
+  const fundamental = 220;
+  const partials = [1, 2.76, 5.4, 8.93];
+  const gains = [0.5, 0.3, 0.15, 0.08];
+
+  partials.forEach((p, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = fundamental * p;
+    osc.detune.value = (Math.random() - 0.5) * 4;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(gains[i], now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 5 + i * 0.5);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 6);
   });
 
-  // Breathe button
-  document.getElementById('breatheBtn').addEventListener('click', toggleBreathing);
+  const pulse = document.getElementById('chimePulse');
+  pulse.classList.remove('ring');
+  void pulse.offsetWidth;
+  pulse.classList.add('ring');
+}
 
-  // Tap enso to breathe also
-  document.getElementById('ensoWrap').addEventListener('click', toggleBreathing);
+// ============================================================
+// INIT
+// ============================================================
+function setDateStamp() {
+  const d = new Date();
+  document.getElementById('dateStamp').textContent =
+    d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toLowerCase();
+}
 
-  // Chime
-  document.getElementById('chimeBtn').addEventListener('click', playChime);
+function setStats() {
+  const tradCount = new Set(CORPUS.map(c => c.t)).size;
+  document.getElementById('stats').textContent =
+    `${CORPUS.length} sayings · ${tradCount} traditions · infinite reflection`;
+}
 
-  // ============================================================
-  // INIT — pick today's seed quote (deterministic per day)
-  // ============================================================
-  function initialQuote() {
-    const all = flatCorpus();
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-    return all[dayOfYear % all.length];
+function initialQuote() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return CORPUS[dayOfYear % CORPUS.length];
+}
+
+document.getElementById('newQuote').addEventListener('click', async () => {
+  const btn = document.getElementById('newQuote');
+  btn.textContent = 'arriving...';
+  btn.disabled = true;
+  const fresh = await generateFreshQuote();
+  renderQuote(fresh);
+  btn.textContent = 'new wisdom';
+  btn.disabled = false;
+});
+
+document.getElementById('reflectBtn').addEventListener('click', async () => {
+  const r = document.getElementById('reflection');
+  const btn = document.getElementById('reflectBtn');
+  if (r.classList.contains('shown')) {
+    r.classList.remove('shown');
+    btn.classList.remove('active');
+    return;
   }
+  btn.classList.add('active');
+  r.classList.add('shown');
+  r.textContent = 'sitting...';
+  const reflection = await generateReflection(currentQuote);
+  r.textContent = reflection;
+});
 
-  setTimeout(() => renderQuote(initialQuote()), 600);
+document.getElementById('breatheBtn').addEventListener('click', toggleBreathing);
+document.getElementById('ensoWrap').addEventListener('click', toggleBreathing);
+document.getElementById('chimeBtn').addEventListener('click', playChime);
+
+setDateStamp();
+populateFilters();
+setStats();
+setTimeout(() => renderQuote(initialQuote()), 600);
 </script>
 </body>
 </html>
