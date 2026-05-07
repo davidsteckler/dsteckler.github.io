@@ -6,15 +6,22 @@
 <title>Stillness — A Daily Practice</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
+  /* ============================================================
+   * COLOR & TYPE SYSTEM
+   * Sumi-e palette: warm rice paper, ink, faded gold seal.
+   * ============================================================ */
   :root {
-    --ink: #2a2825;
-    --ink-soft: #5a544c;
-    --paper: #f4ede0;
-    --paper-warm: #ede2cc;
-    --accent: #8b6f47;
-    --enso: #2a2825;
+    --ink: #2a2520;
+    --ink-soft: #6b6157;
+    --ink-faint: #a39988;
+    --paper-1: #f6efe0;
+    --paper-2: #ecdfc4;
+    --paper-3: #ddc89e;
+    --seal: #9a3a2a;       /* hanko red, used sparingly */
+    --gold: #b08856;
+    --wash: rgba(42, 37, 32, 0.04);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,72 +30,172 @@
   body {
     font-family: 'Cormorant Garamond', 'Noto Serif JP', Georgia, serif;
     color: var(--ink);
-    background:
-      radial-gradient(ellipse at 30% 20%, #f7f0e3 0%, transparent 50%),
-      radial-gradient(ellipse at 70% 80%, #e8dcc4 0%, transparent 50%),
-      linear-gradient(180deg, #f4ede0 0%, #e8dcc4 100%);
+    background: var(--paper-1);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1.5rem 5rem;
+    padding: 2.5rem 1.5rem 5rem;
     position: relative;
+    overflow-x: hidden;
   }
 
-  body::before {
-    content: '';
+  /* ============================================================
+   * BACKGROUND LAYERS — building a painted feel
+   * Layer 1: warm gradient washes
+   * Layer 2: large soft sumi-e ink stains
+   * Layer 3: paper grain
+   * Layer 4: drifting particles (JS-driven dust motes)
+   * ============================================================ */
+  .bg-layer {
     position: fixed;
     inset: 0;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(139, 111, 71, 0.04) 1px, transparent 1px),
-      radial-gradient(circle at 80% 70%, rgba(139, 111, 71, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px, 80px 80px;
     pointer-events: none;
     z-index: 0;
   }
 
+  .bg-wash {
+    background:
+      radial-gradient(ellipse 80% 60% at 25% 20%, rgba(255, 246, 224, 0.6) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 75%, rgba(221, 200, 158, 0.5) 0%, transparent 65%),
+      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(176, 136, 86, 0.15) 0%, transparent 70%),
+      linear-gradient(180deg, var(--paper-1) 0%, var(--paper-2) 100%);
+  }
+
+  /* Soft ink stains drift in the background — sumi-e atmosphere */
+  .bg-stain {
+    opacity: 0.5;
+  }
+  .bg-stain svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bg-grain {
+    background-image:
+      radial-gradient(circle at 13% 27%, rgba(42, 37, 32, 0.05) 0.5px, transparent 1px),
+      radial-gradient(circle at 67% 83%, rgba(42, 37, 32, 0.04) 0.5px, transparent 1px),
+      radial-gradient(circle at 91% 38%, rgba(42, 37, 32, 0.03) 0.5px, transparent 1px);
+    background-size: 37px 37px, 53px 53px, 71px 71px;
+    mix-blend-mode: multiply;
+  }
+
+  /* Drifting dust motes — set by JS */
+  .mote {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(0.5px);
+  }
+
+  /* ============================================================
+   * STAGE — the central composition
+   * ============================================================ */
   .stage {
     position: relative;
-    z-index: 1;
-    max-width: 680px;
+    z-index: 2;
+    max-width: 720px;
     width: 100%;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.75rem;
+    gap: 2rem;
   }
 
+  /* Date — small, refined, top of composition */
+  .date-stamp {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-faint);
+    text-transform: lowercase;
+    font-weight: 300;
+  }
+
+  /* ============================================================
+   * ENSO — the centerpiece
+   * Now with hand-drawn texture and brush feel
+   * ============================================================ */
   .enso-wrap {
     position: relative;
-    width: 180px;
-    height: 180px;
+    width: 220px;
+    height: 220px;
     cursor: pointer;
-    transition: transform 0.6s ease;
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .enso-wrap:hover { transform: scale(1.02); }
+  .enso-wrap:hover { transform: scale(1.02) rotate(-1deg); }
 
   .enso { width: 100%; height: 100%; }
 
+  /* Two paths: thick base, hairline highlight = brush ink dimensionality */
   .enso-path {
     fill: none;
-    stroke: var(--enso);
-    stroke-width: 6;
+    stroke: var(--ink);
     stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .enso-path.base {
+    stroke-width: 9;
     stroke-dasharray: 540;
     stroke-dashoffset: 540;
-    animation: draw-enso 3s ease-out forwards;
-    opacity: 0.85;
+    animation: draw-enso 3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+    opacity: 0.92;
+    filter: url(#brush);
+  }
+
+  .enso-path.highlight {
+    stroke: var(--paper-1);
+    stroke-width: 1.5;
+    stroke-dasharray: 540;
+    stroke-dashoffset: 540;
+    animation: draw-enso 3s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+    opacity: 0.4;
   }
 
   @keyframes draw-enso { to { stroke-dashoffset: 0; } }
 
+  /* The seal stamp — a tiny red square that fades in after the enso draws */
+  .seal {
+    position: absolute;
+    bottom: 18px;
+    right: 30px;
+    width: 24px;
+    height: 24px;
+    background: var(--seal);
+    border-radius: 2px;
+    opacity: 0;
+    animation: seal-fade-in 1s ease 3.2s forwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper-1);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    font-weight: 400;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transform: rotate(2deg);
+  }
+
+  @keyframes seal-fade-in {
+    from { opacity: 0; transform: rotate(2deg) scale(0.7); }
+    to { opacity: 0.85; transform: rotate(2deg) scale(1); }
+  }
+
+  /* Breath ripple */
   .breath-circle {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(139, 111, 71, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(176, 136, 86, 0.18), transparent 70%);
     transform: scale(0.5);
     opacity: 0;
     transition: opacity 0.5s;
@@ -102,8 +209,8 @@
 
   @keyframes breathe {
     0% { transform: scale(0.5); }
-    36% { transform: scale(1.3); }
-    64% { transform: scale(1.3); }
+    36% { transform: scale(1.4); }
+    64% { transform: scale(1.4); }
     100% { transform: scale(0.5); }
   }
 
@@ -112,71 +219,79 @@
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Noto Serif JP', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.3em;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
     color: var(--ink-soft);
     text-transform: lowercase;
+    font-weight: 300;
     opacity: 0;
     transition: opacity 0.3s;
   }
-  .breathing .breath-label { opacity: 1; }
+  .breathing .breath-label { opacity: 0.85; }
 
+  /* ============================================================
+   * QUOTE BLOCK
+   * ============================================================ */
   .quote-block {
     min-height: 200px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     transition: opacity 0.6s ease;
+    padding: 0 0.5rem;
   }
 
   .quote-block.fading { opacity: 0; }
 
   .quote {
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-size: clamp(1.5rem, 3.2vw, 2.05rem);
     font-style: italic;
     font-weight: 300;
     line-height: 1.5;
     color: var(--ink);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.005em;
   }
 
+  /* Replace the line dividers with subtle brush-stroke marks */
   .quote::before, .quote::after {
     content: '';
     display: block;
-    width: 40px;
+    width: 28px;
     height: 1px;
-    background: var(--accent);
-    margin: 1rem auto;
-    opacity: 0.5;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1.1rem auto;
+    opacity: 0.7;
   }
 
   .attribution {
     font-size: 0.85rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
     color: var(--ink-soft);
     text-transform: uppercase;
     font-style: normal;
-    margin-top: 0.4rem;
+    font-weight: 400;
+    margin-top: 0.3rem;
   }
 
   .tradition-tag {
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
-    color: var(--accent);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
     text-transform: uppercase;
-    margin-top: 0.6rem;
-    opacity: 0.8;
+    margin-top: 0.7rem;
+    font-weight: 300;
   }
 
   .learn-more {
     display: inline-block;
-    margin-top: 0.5rem;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    color: var(--ink-soft);
+    margin-top: 0.45rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
     text-decoration: none;
     text-transform: lowercase;
-    border-bottom: 1px dotted rgba(139, 111, 71, 0.4);
+    border-bottom: 1px dotted rgba(176, 136, 86, 0.4);
     padding-bottom: 1px;
     transition: all 0.3s;
     opacity: 0;
@@ -184,95 +299,93 @@
   }
 
   .learn-more.shown {
-    opacity: 0.85;
+    opacity: 0.7;
     transform: translateY(0);
   }
 
   .learn-more:hover {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    opacity: 1;
   }
 
   .learn-more::before {
-    content: '↗ ';
-    font-size: 0.85em;
-    margin-right: 0.2em;
+    content: '↗';
+    margin-right: 0.4em;
+    opacity: 0.6;
   }
 
   .reflection {
     font-size: 1rem;
     color: var(--ink-soft);
-    line-height: 1.7;
-    margin-top: 1.5rem;
+    line-height: 1.75;
+    margin-top: 1.2rem;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
     transition: max-height 0.8s ease, opacity 0.8s ease;
     font-style: italic;
     padding: 0 1rem;
+    font-weight: 300;
   }
 
   .reflection.shown {
     max-height: 400px;
-    opacity: 1;
+    opacity: 0.95;
   }
 
-  /* Filter section with two rows */
-  .filters {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    width: 100%;
-    align-items: center;
-  }
-
-  .filter-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-    color: var(--ink-soft);
-    text-transform: uppercase;
-    opacity: 0.6;
-  }
-
-  .filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.4rem;
-    max-width: 100%;
-  }
-
-  .pill {
+  /* ============================================================
+   * DRIFT BUTTON — kept prominent
+   * ============================================================ */
+  .drift {
     background: transparent;
-    border: 1px solid rgba(139, 111, 71, 0.3);
-    color: var(--ink-soft);
-    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: 0.75rem 2.2rem;
     font-family: inherit;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    border-radius: 20px;
-    transition: all 0.3s;
+    font-size: 0.85rem;
+    letter-spacing: 0.4em;
     text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    position: relative;
+    overflow: hidden;
+    font-weight: 400;
   }
 
-  .pill:hover {
-    background: rgba(139, 111, 71, 0.08);
-    border-color: var(--accent);
+  .drift::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.7;
+    transition: transform 0.7s ease;
   }
 
-  .pill.active {
+  .drift:hover {
     background: var(--ink);
-    color: var(--paper);
-    border-color: var(--ink);
+    color: var(--paper-1);
+    letter-spacing: 0.45em;
   }
+  .drift:hover::before {
+    transform: translateX(10px) translateY(-3px);
+    background: var(--paper-1);
+  }
+  .drift:active { transform: scale(0.97); }
 
+  /* ============================================================
+   * ACTIONS — small text-button row
+   * ============================================================ */
   .actions {
     display: flex;
-    gap: 1.5rem;
-    margin-top: 0.5rem;
+    gap: 1.8rem;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 0.3rem;
   }
 
   .action {
@@ -280,94 +393,355 @@
     border: none;
     color: var(--ink-soft);
     font-family: inherit;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
     text-transform: lowercase;
     cursor: pointer;
-    padding: 0.6rem 0.2rem;
+    padding: 0.5rem 0.2rem;
     position: relative;
     transition: color 0.3s;
+    font-weight: 400;
   }
 
   .action::after {
     content: '';
     position: absolute;
-    bottom: 4px; left: 50%;
+    bottom: 2px; left: 50%;
     width: 0; height: 1px;
-    background: var(--accent);
-    transition: all 0.3s;
+    background: var(--gold);
+    transition: width 0.3s ease;
     transform: translateX(-50%);
   }
 
   .action:hover { color: var(--ink); }
   .action:hover::after { width: 100%; }
-  .action.active { color: var(--accent); }
+  .action.active { color: var(--gold); }
   .action.active::after { width: 100%; }
   .action:disabled { opacity: 0.5; cursor: wait; }
 
-  /* Drift button — the prominent "show me another" */
-  .drift {
+  /* ============================================================
+   * FILTERS — now a single tiny "refine" link that opens a panel
+   * Massively reduced visual weight
+   * ============================================================ */
+  .refine-trigger {
     background: transparent;
-    border: 1px solid var(--ink);
-    color: var(--ink);
-    padding: 0.7rem 2rem;
+    border: none;
+    color: var(--ink-faint);
     font-family: inherit;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: lowercase;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s;
+    margin-top: 0.5rem;
+    font-weight: 300;
+  }
+  .refine-trigger:hover { color: var(--ink-soft); }
+  .refine-trigger.open { color: var(--gold); }
+
+  .refine-panel {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    opacity: 0;
+  }
+  .refine-panel.open {
+    max-height: 360px;
+    opacity: 1;
+  }
+
+  .refine-inner {
+    padding: 1rem 0.5rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .pill {
+    background: transparent;
+    border: 1px solid rgba(176, 136, 86, 0.35);
+    color: var(--ink-soft);
+    padding: 0.3rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.3s;
+    text-transform: lowercase;
+    font-weight: 400;
+  }
+
+  .pill:hover {
+    background: rgba(176, 136, 86, 0.08);
+    border-color: var(--gold);
+  }
+
+  .pill.active {
+    background: var(--ink);
+    color: var(--paper-1);
+    border-color: var(--ink);
+  }
+
+  /* ============================================================
+   * STILLNESS MODE — full-screen meditation overlay
+   * The quote stays as the seat; everything else quiets
+   * ============================================================ */
+  .stillness {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--paper-1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+
+  .stillness.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Stillness has its own atmospheric layer — slowly drifting darker wash */
+  .stillness::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 50%, transparent 0%, rgba(42, 37, 32, 0.06) 100%);
+    pointer-events: none;
+  }
+
+  .stillness-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .stillness-quote {
+    font-size: clamp(1.3rem, 2.8vw, 1.7rem);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--ink);
+    opacity: 0.95;
+  }
+
+  .stillness-attribution {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    opacity: 0.8;
+  }
+
+  /* Breathing orb in stillness mode — larger, central */
+  .stillness-orb {
+    width: 140px;
+    height: 140px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stillness-orb::before, .stillness-orb::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(176, 136, 86, 0.3), rgba(176, 136, 86, 0.05) 60%, transparent 80%);
+  }
+
+  .stillness-orb::before {
+    inset: 0;
+    animation: orb-breathe 11s ease-in-out infinite;
+  }
+
+  .stillness-orb::after {
+    inset: 20%;
+    background: radial-gradient(circle, rgba(154, 58, 42, 0.18), transparent 70%);
+    animation: orb-breathe 11s ease-in-out infinite reverse;
+    opacity: 0.6;
+  }
+
+  @keyframes orb-breathe {
+    0% { transform: scale(0.6); opacity: 0.5; }
+    36% { transform: scale(1.15); opacity: 1; }
+    64% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(0.6); opacity: 0.5; }
+  }
+
+  .stillness-phase {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.5em;
+    color: var(--ink-soft);
+    text-transform: lowercase;
+    font-weight: 300;
+    margin-top: 0.5rem;
+    opacity: 0;
+    animation: phase-fade 11s ease-in-out infinite;
+  }
+
+  @keyframes phase-fade {
+    0%, 100% { opacity: 0; }
+    15%, 85% { opacity: 0.85; }
+  }
+
+  .stillness-timer {
+    font-family: 'Noto Serif JP', serif;
     font-size: 0.85rem;
-    letter-spacing: 0.35em;
+    letter-spacing: 0.3em;
+    color: var(--ink-faint);
+    font-weight: 300;
+  }
+
+  .stillness-controls {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .stillness-end {
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    color: var(--ink-soft);
+    padding: 0.5rem 1.4rem;
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
     text-transform: lowercase;
     cursor: pointer;
     border-radius: 999px;
-    transition: all 0.4s ease;
-    margin-top: 0.5rem;
-    display: inline-flex;
+    transition: all 0.3s;
+  }
+  .stillness-end:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* Duration picker before entering stillness */
+  .duration-picker {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(246, 239, 224, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
     align-items: center;
-    gap: 0.7rem;
-    position: relative;
-    overflow: hidden;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .duration-picker.active {
+    opacity: 1;
+    pointer-events: auto;
   }
 
-  .drift::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    opacity: 0.6;
-    transition: transform 0.6s ease;
+  .duration-inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
   }
 
-  .drift:hover {
-    background: var(--ink);
-    color: var(--paper);
+  .duration-prompt {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
     letter-spacing: 0.4em;
-  }
-
-  .drift:hover::before {
-    transform: translateX(8px) translateY(-2px);
-    background: var(--paper);
-  }
-
-  .drift:active { transform: scale(0.98); }
-
-  .stats {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
     color: var(--ink-soft);
-    opacity: 0.5;
-    text-transform: uppercase;
-    margin-top: 0.3rem;
+    text-transform: lowercase;
+    font-weight: 300;
   }
 
+  .duration-options {
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .duration-btn {
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink);
+    padding: 0.7rem 1.4rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.3s;
+    font-weight: 400;
+  }
+  .duration-btn:hover {
+    background: var(--ink);
+    color: var(--paper-1);
+    border-color: var(--ink);
+  }
+
+  .duration-cancel {
+    background: transparent;
+    border: none;
+    color: var(--ink-faint);
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    text-transform: lowercase;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+  }
+  .duration-cancel:hover { color: var(--ink-soft); }
+
+  /* ============================================================
+   * MISC
+   * ============================================================ */
   .chime-pulse {
     position: fixed;
     top: 50%; left: 50%;
     width: 20px; height: 20px;
-    border: 2px solid var(--accent);
+    border: 2px solid var(--gold);
     border-radius: 50%;
     transform: translate(-50%, -50%) scale(0);
     pointer-events: none;
     opacity: 0;
+    z-index: 200;
   }
-
   .chime-pulse.ring { animation: chime-ring 2s ease-out; }
 
   @keyframes chime-ring {
@@ -378,42 +752,80 @@
   .foot {
     position: absolute;
     bottom: 1.2rem;
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-    color: var(--ink-soft);
-    opacity: 0.5;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.45em;
+    color: var(--ink-faint);
+    opacity: 0.6;
     text-transform: uppercase;
+    font-weight: 300;
   }
 
-  .date-stamp {
+  .stats {
     font-family: 'Noto Serif JP', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    color: var(--ink-soft);
-    opacity: 0.7;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--ink-faint);
+    opacity: 0.5;
+    text-transform: lowercase;
+    margin-top: 0.5rem;
+    font-weight: 300;
   }
 
   @media (max-width: 480px) {
-    .enso-wrap { width: 140px; height: 140px; }
-    .stage { gap: 1.25rem; }
-    .actions { gap: 1rem; }
-    .action { font-size: 0.75rem; }
-    .pill { font-size: 0.7rem; padding: 0.3rem 0.65rem; }
+    .enso-wrap { width: 170px; height: 170px; }
+    .stage { gap: 1.5rem; }
+    .actions { gap: 1.2rem; }
+    .action { font-size: 0.7rem; }
+    .pill { font-size: 0.65rem; padding: 0.25rem 0.6rem; }
+    .stillness-orb { width: 120px; height: 120px; }
   }
 </style>
 </head>
 <body>
+  <!-- Atmospheric background layers -->
+  <div class="bg-layer bg-wash"></div>
+  <div class="bg-layer bg-stain">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="blur1"><feGaussianBlur stdDeviation="40" /></filter>
+        <filter id="blur2"><feGaussianBlur stdDeviation="60" /></filter>
+        <filter id="brush">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3"/>
+          <feDisplacementMap in="SourceGraphic" scale="2.5"/>
+        </filter>
+      </defs>
+      <!-- Distant ink wash mountain forms -->
+      <ellipse cx="200" cy="700" rx="350" ry="80" fill="rgba(42, 37, 32, 0.06)" filter="url(#blur1)" />
+      <ellipse cx="900" cy="120" rx="280" ry="60" fill="rgba(42, 37, 32, 0.05)" filter="url(#blur2)" />
+      <ellipse cx="1100" cy="650" rx="200" ry="55" fill="rgba(154, 58, 42, 0.03)" filter="url(#blur1)" />
+    </svg>
+  </div>
+  <div class="bg-layer bg-grain"></div>
+
   <div class="stage">
     <div class="date-stamp" id="dateStamp"></div>
 
     <div class="enso-wrap" id="ensoWrap" title="Tap to breathe">
       <svg class="enso" viewBox="0 0 200 200">
-        <path class="enso-path" d="M 100 20
+        <defs>
+          <filter id="brush">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="1.8"/>
+          </filter>
+        </defs>
+        <path class="enso-path base" d="M 100 20
+          C 145 22, 178 55, 178 100
+          C 178 145, 145 178, 100 178
+          C 55 178, 22 145, 22 100
+          C 22 58, 50 28, 88 22" />
+        <path class="enso-path highlight" d="M 100 20
           C 145 22, 178 55, 178 100
           C 178 145, 145 178, 100 178
           C 55 178, 22 145, 22 100
           C 22 58, 50 28, 88 22" />
       </svg>
+      <div class="seal" title="seal">心</div>
       <div class="breath-circle"></div>
       <div class="breath-label" id="breathLabel">breathe in</div>
     </div>
@@ -428,21 +840,58 @@
 
     <button class="drift" id="driftBtn">drift</button>
 
-    <div class="filters">
-      <div class="filter-label">tradition</div>
-      <div class="filter-row" id="traditionRow"></div>
-      <div class="filter-label">theme</div>
-      <div class="filter-row" id="themeRow"></div>
-    </div>
-
     <div class="actions">
-      <button class="action" id="newQuote">summon</button>
+      <button class="action" id="sitTimerBtn">enter stillness</button>
       <button class="action" id="reflectBtn">sit with this</button>
+      <button class="action" id="newQuote">summon</button>
       <button class="action" id="breatheBtn">breathe</button>
       <button class="action" id="chimeBtn">chime</button>
     </div>
 
+    <button class="refine-trigger" id="refineTrigger">refine ▾</button>
+
+    <div class="refine-panel" id="refinePanel">
+      <div class="refine-inner">
+        <div class="filter-label">tradition</div>
+        <div class="filter-row" id="traditionRow"></div>
+        <div class="filter-label">theme</div>
+        <div class="filter-row" id="themeRow"></div>
+      </div>
+    </div>
+
     <div class="stats" id="stats"></div>
+  </div>
+
+  <!-- Duration picker -->
+  <div class="duration-picker" id="durationPicker">
+    <div class="duration-inner">
+      <div class="duration-prompt">how long will you sit?</div>
+      <div class="duration-options">
+        <button class="duration-btn" data-minutes="1">1 minute</button>
+        <button class="duration-btn" data-minutes="3">3 minutes</button>
+        <button class="duration-btn" data-minutes="5">5 minutes</button>
+        <button class="duration-btn" data-minutes="10">10 minutes</button>
+        <button class="duration-btn" data-minutes="20">20 minutes</button>
+      </div>
+      <button class="duration-cancel" id="durationCancel">not now</button>
+    </div>
+  </div>
+
+  <!-- Stillness mode -->
+  <div class="stillness" id="stillness">
+    <div class="stillness-inner">
+      <div>
+        <div class="stillness-quote" id="stillnessQuote">…</div>
+        <div class="stillness-attribution" id="stillnessAttr"></div>
+      </div>
+      <div class="stillness-orb">
+        <div class="stillness-phase" id="stillnessPhase">in</div>
+      </div>
+      <div class="stillness-timer" id="stillnessTimer">5:00</div>
+      <div class="stillness-controls">
+        <button class="stillness-end" id="stillnessEnd">end sit</button>
+      </div>
+    </div>
   </div>
 
   <div class="chime-pulse" id="chimePulse"></div>
@@ -1708,6 +2157,8 @@ function toggleBreathing() {
 // ============================================================
 function playChime() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Browsers may suspend the audio context until user interaction
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   const ctx = audioCtx;
   const now = ctx.currentTime;
   const fundamental = 220;
@@ -1788,9 +2239,173 @@ document.getElementById('driftBtn').addEventListener('click', () => {
   renderQuote(pickQuote());
 });
 
+// ============================================================
+// REFINE PANEL — collapsible filter section
+// ============================================================
+const refineTrigger = document.getElementById('refineTrigger');
+const refinePanel = document.getElementById('refinePanel');
+refineTrigger.addEventListener('click', () => {
+  const isOpen = refinePanel.classList.toggle('open');
+  refineTrigger.classList.toggle('open', isOpen);
+  refineTrigger.textContent = isOpen ? 'refine ▴' : 'refine ▾';
+});
+
+// ============================================================
+// STILLNESS MODE — guided meditation timer
+// The quote becomes the seat. Everything else quiets.
+// Chime at start and end. Optional periodic interval bells.
+// ============================================================
+let stillnessActive = false;
+let stillnessInterval = null;
+let stillnessPhaseInterval = null;
+let stillnessRemaining = 0;
+
+const durationPicker = document.getElementById('durationPicker');
+const stillness = document.getElementById('stillness');
+
+function showDurationPicker() {
+  durationPicker.classList.add('active');
+}
+function hideDurationPicker() {
+  durationPicker.classList.remove('active');
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function enterStillness(minutes) {
+  if (!currentQuote) return;
+  hideDurationPicker();
+
+  // Stop any active breathing on the main page
+  if (breathingActive) toggleBreathing();
+
+  // Populate the stillness view with the current quote
+  document.getElementById('stillnessQuote').textContent = `"${currentQuote.q}"`;
+  document.getElementById('stillnessAttr').textContent = `— ${currentQuote.a}`;
+
+  stillness.classList.add('active');
+  stillnessActive = true;
+  stillnessRemaining = minutes * 60;
+  document.getElementById('stillnessTimer').textContent = formatTime(stillnessRemaining);
+
+  // Opening chime
+  setTimeout(() => playChime(), 800);
+
+  // Cycle the breath phase label (in / hold / out) — synced with the orb's 11s animation
+  const phaseEl = document.getElementById('stillnessPhase');
+  const cyclePhase = () => {
+    if (!stillnessActive) return;
+    phaseEl.textContent = 'in';
+    setTimeout(() => { if (stillnessActive) phaseEl.textContent = 'hold'; }, 4000);
+    setTimeout(() => { if (stillnessActive) phaseEl.textContent = 'out'; }, 7000);
+  };
+  cyclePhase();
+  stillnessPhaseInterval = setInterval(cyclePhase, 11000);
+
+  // Countdown
+  stillnessInterval = setInterval(() => {
+    stillnessRemaining--;
+    document.getElementById('stillnessTimer').textContent = formatTime(stillnessRemaining);
+
+    // Halfway chime for sits 5 minutes or longer
+    if (minutes >= 5 && stillnessRemaining === Math.floor(minutes * 30)) {
+      playChime();
+    }
+
+    if (stillnessRemaining <= 0) {
+      // Closing chime sequence
+      playChime();
+      setTimeout(() => playChime(), 1800);
+      setTimeout(() => exitStillness(), 4000);
+    }
+  }, 1000);
+}
+
+function exitStillness() {
+  stillnessActive = false;
+  clearInterval(stillnessInterval);
+  clearInterval(stillnessPhaseInterval);
+  stillness.classList.remove('active');
+}
+
+document.getElementById('sitTimerBtn').addEventListener('click', () => {
+  if (!currentQuote) return;
+  showDurationPicker();
+});
+
+document.querySelectorAll('.duration-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const minutes = parseInt(btn.dataset.minutes, 10);
+    enterStillness(minutes);
+  });
+});
+
+document.getElementById('durationCancel').addEventListener('click', hideDurationPicker);
+document.getElementById('stillnessEnd').addEventListener('click', exitStillness);
+
+// Allow ESC to exit stillness or cancel duration picker
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (stillnessActive) exitStillness();
+    else if (durationPicker.classList.contains('active')) hideDurationPicker();
+  }
+});
+
+// ============================================================
+// DRIFTING MOTES — subtle ambient particles
+// Tiny golden specks drift slowly across the page.
+// Intentionally minimal so they don't distract.
+// ============================================================
+function spawnMote() {
+  const mote = document.createElement('div');
+  mote.className = 'mote';
+  // Random size, position, drift parameters
+  const size = 2 + Math.random() * 3;
+  mote.style.width = size + 'px';
+  mote.style.height = size + 'px';
+  const startX = Math.random() * window.innerWidth;
+  const startY = window.innerHeight + 20;
+  const driftX = (Math.random() - 0.5) * 200;
+  const duration = 18000 + Math.random() * 12000;
+  const peakOpacity = 0.15 + Math.random() * 0.25;
+
+  mote.style.left = startX + 'px';
+  mote.style.top = startY + 'px';
+  document.body.appendChild(mote);
+
+  // Animate via Web Animations API
+  mote.animate([
+    { transform: 'translate(0, 0)', opacity: 0 },
+    { opacity: peakOpacity, offset: 0.1 },
+    { opacity: peakOpacity, offset: 0.85 },
+    { transform: `translate(${driftX}px, -${startY + 40}px)`, opacity: 0 }
+  ], {
+    duration: duration,
+    easing: 'linear'
+  }).onfinish = () => mote.remove();
+}
+
+// Spawn motes periodically — keep low density for subtlety
+function startMotes() {
+  // Initial spawn so motes are visible right away
+  for (let i = 0; i < 4; i++) {
+    setTimeout(spawnMote, Math.random() * 8000);
+  }
+  setInterval(() => {
+    // Don't spawn during stillness mode (cleaner meditation space)
+    if (stillnessActive) return;
+    if (Math.random() < 0.7) spawnMote();
+  }, 3500);
+}
+
 setDateStamp();
 populateFilters();
 setStats();
+startMotes();
 setTimeout(() => renderQuote(initialQuote()), 600);
 </script>
 </body>
