@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stillness — A Daily Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+   * COLOR & TYPE — sumi-e palette preserved
+   * ============================================================ */
+  :root {
+    --ink: #2a2520;
+    --ink-soft: #6b6157;
+    --ink-faint: #a39988;
+    --paper-1: #f6efe0;
+    --paper-2: #ecdfc4;
+    --paper-3: #ddc89e;
+    --seal: #9a3a2a;
+    --gold: #b08856;
+    --wash: rgba(42, 37, 32, 0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Cormorant Garamond', 'Noto Serif JP', Georgia, serif;
+    color: var(--ink);
+    background: var(--paper-1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem 5rem;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ============================================================
+   * BACKGROUND LAYERS — kept from the original
+   * ============================================================ */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-wash {
+    background:
+      radial-gradient(ellipse 80% 60% at 25% 20%, rgba(255, 246, 224, 0.6) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 75%, rgba(221, 200, 158, 0.5) 0%, transparent 65%),
+      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(176, 136, 86, 0.15) 0%, transparent 70%),
+      linear-gradient(180deg, var(--paper-1) 0%, var(--paper-2) 100%);
+  }
+
+  .bg-stain { opacity: 0.5; }
+  .bg-stain svg { position: absolute; width: 100%; height: 100%; }
+
+  .bg-grain {
+    background-image:
+      radial-gradient(circle at 13% 27%, rgba(42, 37, 32, 0.05) 0.5px, transparent 1px),
+      radial-gradient(circle at 67% 83%, rgba(42, 37, 32, 0.04) 0.5px, transparent 1px),
+      radial-gradient(circle at 91% 38%, rgba(42, 37, 32, 0.03) 0.5px, transparent 1px);
+    background-size: 37px 37px, 53px 53px, 71px 71px;
+    mix-blend-mode: multiply;
+  }
+
+  .mote {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    filter: blur(0.5px);
+  }
+
+  /* ============================================================
+   * STAGE
+   * ============================================================ */
+  .stage {
+    position: relative;
+    z-index: 2;
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .date-stamp {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-faint);
+    text-transform: lowercase;
+    font-weight: 300;
+  }
+
+  /* ============================================================
+   * ENSO — kept, but static. No breath ripple, no breathing class.
+   * The seal stays as a small flourish.
+   * ============================================================ */
+  .enso-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  .enso { width: 100%; height: 100%; }
+
+  .enso-path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .enso-path.base {
+    stroke-width: 9;
+    stroke-dasharray: 540;
+    stroke-dashoffset: 540;
+    animation: draw-enso 3s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+    opacity: 0.92;
+    filter: url(#brush);
+  }
+
+  .enso-path.highlight {
+    stroke: var(--paper-1);
+    stroke-width: 1.5;
+    stroke-dasharray: 540;
+    stroke-dashoffset: 540;
+    animation: draw-enso 3s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
+    opacity: 0.4;
+  }
+
+  @keyframes draw-enso { to { stroke-dashoffset: 0; } }
+
+  .seal {
+    position: absolute;
+    bottom: 14px;
+    right: 22px;
+    width: 22px;
+    height: 22px;
+    background: var(--seal);
+    border-radius: 2px;
+    opacity: 0;
+    animation: seal-fade-in 1s ease 3.2s forwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper-1);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    font-weight: 400;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    transform: rotate(2deg);
+  }
+
+  @keyframes seal-fade-in {
+    from { opacity: 0; transform: rotate(2deg) scale(0.7); }
+    to { opacity: 0.85; transform: rotate(2deg) scale(1); }
+  }
+
+  /* ============================================================
+   * QUOTE BLOCK
+   * The "for the anxious body" note replaces the old reflection.
+   * It sits inline with the passage, always visible — not a hidden
+   * feature you have to opt into.
+   * ============================================================ */
+  .passage-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 0 0.5rem;
+    transition: opacity 0.6s ease;
+  }
+
+  .quote {
+    font-size: clamp(1.5rem, 3.2vw, 2.05rem);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink);
+    letter-spacing: 0.005em;
+  }
+
+  .quote::before, .quote::after {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1.1rem auto;
+    opacity: 0.7;
+  }
+
+  .attribution {
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .body-note {
+    font-size: 1rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    font-style: italic;
+    font-weight: 300;
+    max-width: 540px;
+    margin: 0.5rem auto 0;
+    padding: 1.2rem 1.5rem 0;
+    border-top: 1px solid rgba(176, 136, 86, 0.25);
+    opacity: 0.95;
+  }
+
+  .body-note-label {
+    display: block;
+    font-family: 'Noto Serif JP', serif;
+    font-style: normal;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    font-weight: 300;
+    opacity: 0.85;
+  }
+
+  /* ============================================================
+   * ACTIONS — only two now
+   * "right now" for active spikes, "I noticed" for the log
+   * ============================================================ */
+  .actions {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  .action {
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink);
+    padding: 0.7rem 1.6rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    font-weight: 400;
+  }
+
+  .action:hover {
+    background: var(--ink);
+    color: var(--paper-1);
+    border-color: var(--ink);
+  }
+
+  .action.primary {
+    border-color: var(--seal);
+    color: var(--seal);
+  }
+  .action.primary:hover {
+    background: var(--seal);
+    color: var(--paper-1);
+    border-color: var(--seal);
+  }
+
+  /* ============================================================
+   * SECONDARY LINKS — quiet text buttons below the actions
+   * ============================================================ */
+  .quiet-links {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .quiet-link {
+    background: transparent;
+    border: none;
+    color: var(--ink-faint);
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: lowercase;
+    cursor: pointer;
+    padding: 0.4rem 0.2rem;
+    transition: color 0.3s;
+    font-weight: 400;
+    border-bottom: 1px dotted transparent;
+  }
+  .quiet-link:hover {
+    color: var(--ink-soft);
+    border-bottom-color: rgba(176, 136, 86, 0.4);
+  }
+
+  /* ============================================================
+   * RIGHT NOW — overlay for active anxiety spikes
+   * No breath instructions. Pulls attention OUT of the body
+   * via grounding through the senses.
+   * ============================================================ */
+  .right-now {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--paper-1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    overflow-y: auto;
+  }
+
+  .right-now.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .right-now-inner {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+    padding: 2rem 0;
+  }
+
+  .right-now-greeting {
+    font-size: 1.4rem;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1.5;
+    max-width: 480px;
+  }
+
+  .grounding-step {
+    width: 100%;
+    padding: 1.5rem 1.2rem;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(176, 136, 86, 0.2);
+    border-radius: 4px;
+    text-align: left;
+  }
+
+  .grounding-prompt {
+    font-size: 1.1rem;
+    color: var(--ink);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .grounding-prompt em {
+    color: var(--seal);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .grounding-counter {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+  }
+
+  .next-btn {
+    background: var(--ink);
+    color: var(--paper-1);
+    border: none;
+    padding: 0.8rem 2rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 999px;
+    transition: all 0.3s;
+    font-weight: 400;
+  }
+  .next-btn:hover { background: var(--seal); }
+
+  .right-now-close {
+    background: transparent;
+    border: none;
+    color: var(--ink-faint);
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    text-transform: lowercase;
+    padding: 0.5rem;
+    margin-top: 1rem;
+  }
+  .right-now-close:hover { color: var(--ink-soft); }
+
+  .reassurance {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    font-style: italic;
+    font-weight: 300;
+    max-width: 460px;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(176, 136, 86, 0.2);
+    border-bottom: 1px solid rgba(176, 136, 86, 0.2);
+  }
+
+  /* ============================================================
+   * NOTICING LOG — the data-collection tool
+   * Tab-based interface inside an overlay
+   * ============================================================ */
+  .log-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--paper-1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    overflow-y: auto;
+  }
+
+  .log-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .log-inner {
+    max-width: 560px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .log-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    color: var(--ink-soft);
+    text-transform: lowercase;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+
+  .log-prompt {
+    font-size: 1.1rem;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.6;
+    max-width: 480px;
+  }
+
+  .log-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(176, 136, 86, 0.3);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 4px;
+    resize: none;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+  .log-input:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  .log-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .log-evidence {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(176, 136, 86, 0.25);
+  }
+
+  .evidence-line {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--ink);
+    text-align: center;
+    font-style: italic;
+    font-weight: 300;
+    margin-bottom: 0.6rem;
+  }
+
+  .evidence-line strong {
+    color: var(--seal);
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  .log-list {
+    margin-top: 1.5rem;
+    width: 100%;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .log-entry {
+    padding: 0.7rem 0;
+    border-bottom: 1px dotted rgba(176, 136, 86, 0.2);
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-entry-meta {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--ink-faint);
+    text-transform: lowercase;
+    margin-bottom: 0.2rem;
+  }
+
+  .log-entry-note {
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .log-empty {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-size: 0.9rem;
+    padding: 1.5rem 0;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .log-close {
+    background: transparent;
+    border: 1px solid var(--ink-faint);
+    color: var(--ink-soft);
+    padding: 0.5rem 1.4rem;
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: lowercase;
+    cursor: pointer;
+    border-radius: 999px;
+    margin-top: 1rem;
+  }
+  .log-close:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* ============================================================
+   * ABOUT — short modal explaining what this is and isn't
+   * Important for honesty about scope
+   * ============================================================ */
+  .about-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(246, 239, 224, 0.97);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .about-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .about-inner {
+    max-width: 540px;
+    width: 100%;
+    text-align: left;
+    line-height: 1.7;
+  }
+
+  .about-inner h2 {
+    font-family: inherit;
+    font-size: 1.4rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .about-inner p {
+    font-size: 1rem;
+    color: var(--ink);
+    margin-bottom: 1rem;
+  }
+
+  .about-inner p.muted {
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .about-close-wrap {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .foot {
+    position: absolute;
+    bottom: 1.2rem;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.45em;
+    color: var(--ink-faint);
+    opacity: 0.6;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  @media (max-width: 480px) {
+    .enso-wrap { width: 160px; height: 160px; }
+    .stage { gap: 1.5rem; }
+    .actions { gap: 1rem; }
+    .action { font-size: 0.72rem; padding: 0.6rem 1.3rem; }
+    .body-note { padding: 1rem 0.5rem 0; font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg-layer bg-wash"></div>
+  <div class="bg-layer bg-stain">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="blur1"><feGaussianBlur stdDeviation="40" /></filter>
+        <filter id="blur2"><feGaussianBlur stdDeviation="60" /></filter>
+      </defs>
+      <ellipse cx="200" cy="700" rx="350" ry="80" fill="rgba(42, 37, 32, 0.06)" filter="url(#blur1)" />
+      <ellipse cx="900" cy="120" rx="280" ry="60" fill="rgba(42, 37, 32, 0.05)" filter="url(#blur2)" />
+      <ellipse cx="1100" cy="650" rx="200" ry="55" fill="rgba(154, 58, 42, 0.03)" filter="url(#blur1)" />
+    </svg>
+  </div>
+  <div class="bg-layer bg-grain"></div>
+
+  <div class="stage">
+    <div class="date-stamp" id="dateStamp"></div>
+
+    <div class="enso-wrap">
+      <svg class="enso" viewBox="0 0 200 200">
+        <defs>
+          <filter id="brush">
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="5"/>
+            <feDisplacementMap in="SourceGraphic" scale="1.8"/>
+          </filter>
+        </defs>
+        <path class="enso-path base" d="M 100 20
+          C 145 22, 178 55, 178 100
+          C 178 145, 145 178, 100 178
+          C 55 178, 22 145, 22 100
+          C 22 58, 50 28, 88 22" />
+        <path class="enso-path highlight" d="M 100 20
+          C 145 22, 178 55, 178 100
+          C 178 145, 145 178, 100 178
+          C 55 178, 22 145, 22 100
+          C 22 58, 50 28, 88 22" />
+      </svg>
+      <div class="seal">心</div>
+    </div>
+
+    <div class="passage-block" id="passageBlock">
+      <div class="quote" id="quote">…</div>
+      <div class="attribution" id="attribution"></div>
+      <div class="body-note" id="bodyNote">
+        <span class="body-note-label">for the anxious body</span>
+        <span id="bodyNoteText"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="action primary" id="rightNowBtn">right now</button>
+      <button class="action" id="noticedBtn">i noticed</button>
+    </div>
+
+    <div class="quiet-links">
+      <button class="quiet-link" id="viewLogBtn">the log</button>
+      <button class="quiet-link" id="aboutBtn">about</button>
+    </div>
+  </div>
+
+  <!-- RIGHT NOW overlay: grounding through senses, not breath -->
+  <div class="right-now" id="rightNow">
+    <div class="right-now-inner">
+      <div class="right-now-greeting" id="rightNowGreeting">
+        You're here. Your body is doing what bodies do. Let's pull attention outward together.
+      </div>
+
+      <div class="grounding-step" id="groundingStep">
+        <div class="grounding-counter" id="groundingCounter">step 1 of 5</div>
+        <div class="grounding-prompt" id="groundingPrompt"></div>
+      </div>
+
+      <button class="next-btn" id="nextStepBtn">next</button>
+
+      <div class="reassurance" id="reassurance">
+        What you're feeling is intense, not dangerous. Panic raises blood pressure; it does not drop it. The body cannot stay in alarm forever — the chemistry runs out. This passes. It always passes.
+      </div>
+
+      <button class="right-now-close" id="rightNowClose">i'm ok</button>
+    </div>
+  </div>
+
+  <!-- NOTICING LOG overlay -->
+  <div class="log-overlay" id="logOverlay">
+    <div class="log-inner">
+      <div class="log-title">the log</div>
+      <div class="log-prompt" id="logPrompt">
+        Mark a noticing. One sentence if you want, or none. The point isn't analysis — it's gathering evidence that they pass.
+      </div>
+
+      <textarea class="log-input" id="logInput" placeholder="optional: what triggered it, where you were, anything..." maxlength="240"></textarea>
+
+      <div class="log-buttons">
+        <button class="action primary" id="saveNoticingBtn">log this noticing</button>
+        <button class="action" id="cancelLogBtn">cancel</button>
+      </div>
+
+      <div class="log-evidence" id="logEvidence"></div>
+
+      <div class="log-list" id="logList"></div>
+
+      <button class="log-close" id="logCloseBtn">close</button>
+    </div>
+  </div>
+
+  <!-- ABOUT overlay -->
+  <div class="about-overlay" id="aboutOverlay">
+    <div class="about-inner">
+      <h2>What this is</h2>
+      <p>One passage per day, drawn mostly from Stoic and contemplative writers who wrote about the gap between sensation and the story we tell about it. New passage at midnight. The same passage all day, even if you reload.</p>
+      <p>Each passage has a small note translating it for an anxious body — for those of us who notice our heart and our breath and slide into alarm.</p>
+      <p>The "right now" button is for active spikes. It pulls attention outward through the senses, away from the body. No breath instructions, no "notice the sensation." The opposite move.</p>
+      <p>The log is private to your browser. It never leaves your device. Its purpose is not insight — it's quiet evidence, accumulated over weeks, that the spikes always pass.</p>
+      <p class="muted">This is a contemplative tool, not therapy or medical care. If panic is shaping your life, CBT with someone who specializes in panic disorder is the highest-leverage thing you can do. This page is a small companion, nothing more.</p>
+      <div class="about-close-wrap">
+        <button class="action" id="aboutCloseBtn">close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">stillness · 静けさ · سكون · शान्ति</div>
+
+<script>
+/* ============================================================
+ * CURATED CORPUS
+ * ~150 passages. Heavy on Stoics, plus contemplative voices
+ * who address the cognitive loop directly. Every passage
+ * has a "body note" written for interoceptive anxiety —
+ * specifically the pattern of noticing the body and sliding
+ * into alarm. Passages that direct attention to breath or
+ * body sensation were intentionally excluded.
+ * ============================================================ */
+const PASSAGES = [
+  // --- MARCUS AURELIUS ---
+  {
+    q: "You have power over your mind — not outside events. Realize this, and you will find strength.",
+    a: "Marcus Aurelius",
+    note: "The racing heart is an outside event. The story you tell about it — that something is wrong, that you might pass out — is the inside event. Only one of those is yours to work with."
+  },
+  {
+    q: "The impediment to action advances action. What stands in the way becomes the way.",
+    a: "Marcus Aurelius",
+    note: "The sensation that interrupts you is not the obstacle to your practice. It is the practice. The noticing itself is the place where the work happens."
+  },
+  {
+    q: "Confine yourself to the present.",
+    a: "Marcus Aurelius",
+    note: "The present moment never contains a future fainting. It contains only this heartbeat, this second, this breath you are already taking. The catastrophe lives entirely in the imagined next."
+  },
+  {
+    q: "The happiness of your life depends upon the quality of your thoughts.",
+    a: "Marcus Aurelius",
+    note: "A racing heart with the thought 'I am dying' is suffering. The same racing heart with the thought 'I have walked up stairs' is nothing. The body is identical. Only the second sentence is different."
+  },
+  {
+    q: "Begin each day by telling yourself: today I shall be meeting with interference.",
+    a: "Marcus Aurelius",
+    note: "Today your body may notice itself. Your heart may speed for no reason. This is not the ambush you fear — it is the expected weather. Greet it like rain you packed an umbrella for."
+  },
+  {
+    q: "Receive without conceit, release without struggle.",
+    a: "Marcus Aurelius",
+    note: "Sensations arrive. Sensations leave. The struggle is the part you add. Try, today, to do less of the adding."
+  },
+  {
+    q: "Loss is nothing else but change, and change is nature's delight.",
+    a: "Marcus Aurelius",
+    note: "Your heart speeds up; your heart slows down. Your breath quickens; your breath softens. This is what hearts and breaths do. Nothing is going wrong. Something is just changing."
+  },
+  {
+    q: "Look well into thyself; there is a source of strength which will always spring up if thou wilt always look there.",
+    a: "Marcus Aurelius",
+    note: "You have been afraid for years and you are still here. That is data. That is the source. The body that has scared you a thousand times has carried you through every single one."
+  },
+  {
+    q: "How much trouble he avoids who does not look to see what his neighbor says or does.",
+    a: "Marcus Aurelius",
+    note: "How much trouble you avoid when you stop checking on the body. The monitoring is the maintenance. Looking less often is itself a kind of healing."
+  },
+  {
+    q: "Dwell on the beauty of life. Watch the stars, and see yourself running with them.",
+    a: "Marcus Aurelius",
+    note: "Attention is the only currency you have. Spent inward on a heartbeat, it builds alarm. Spent outward on the world, it builds the rest of your life."
+  },
+  {
+    q: "Waste no more time arguing about what a good man should be. Be one.",
+    a: "Marcus Aurelius",
+    note: "Waste no more time arguing about what a calm person should feel. Whatever you feel today, you can move through your day anyway. That is the whole practice."
+  },
+  {
+    q: "When you arise in the morning, think of what a precious privilege it is to be alive — to breathe, to think, to enjoy, to love.",
+    a: "Marcus Aurelius",
+    note: "Even the heart you have been afraid of is the heart that lets you read this sentence. It is not your enemy. It has never been your enemy."
+  },
+  {
+    q: "Very little is needed to make a happy life; it is all within yourself, in your way of thinking.",
+    a: "Marcus Aurelius",
+    note: "You have likely already had a thousand racing heartbeats today and not noticed any of them. The ones that hurt are only the ones you told a frightening story about."
+  },
+  {
+    q: "Be tolerant with others and strict with yourself.",
+    a: "Marcus Aurelius",
+    note: "Reverse this for today. Be strict with the catastrophic story, and tolerant with the body that is just doing its job, somewhat loudly."
+  },
+
+  // --- EPICTETUS ---
+  {
+    q: "It is not what happens to you, but how you react to it that matters.",
+    a: "Epictetus",
+    note: "It is not the heart rate that harms you. It is the second arrow — the immediate, automatic 'something is wrong' that follows. The first arrow is just sensation. You can learn to stop firing the second."
+  },
+  {
+    q: "Make the best use of what is in your power, and take the rest as it happens.",
+    a: "Epictetus",
+    note: "Your heart rate is not in your power. Your interpretation is. Pour your effort there, and let the body be the body."
+  },
+  {
+    q: "Don't seek for everything to happen as you wish; wish for what happens to happen as it does.",
+    a: "Epictetus",
+    note: "Wish for the wave of sensation to pass when it passes — not sooner. Trying to make it leave faster is what makes it stay."
+  },
+  {
+    q: "Men are disturbed not by the things which happen, but by the opinions about the things.",
+    a: "Epictetus",
+    note: "Two thousand years ago, someone wrote down the engine of your panic loop. The sensation is not disturbing. The opinion 'this is dangerous' is. Pull the opinion apart and the disturbance loosens."
+  },
+  {
+    q: "First learn the meaning of what you say, and then speak.",
+    a: "Epictetus",
+    note: "When the inside voice says 'I am about to pass out,' meet it with a question: have I ever passed out from this? The voice has been speaking for years and has never once been right."
+  },
+  {
+    q: "No man is free who is not master of himself.",
+    a: "Epictetus",
+    note: "Mastery does not mean the body never alarms. It means the alarm no longer dictates your day. You can feel the spike and keep walking, keep working, keep being. That is the freedom."
+  },
+  {
+    q: "If you wish to improve, be content to appear clueless or stupid in extraneous matters.",
+    a: "Epictetus",
+    note: "Be content, today, to be the person who sometimes feels their heart and sometimes worries about it. Trying to be a person who never does that is its own trap."
+  },
+  {
+    q: "Circumstances don't make the man, they only reveal him to himself.",
+    a: "Epictetus",
+    note: "The spike does not break you. It shows you that the part of you doing the watching is steadier than the body that is racing. There is something here that does not race."
+  },
+  {
+    q: "Don't explain your philosophy. Embody it.",
+    a: "Epictetus",
+    note: "You don't have to convince yourself you're not in danger. You just have to act, today, as if the body is allowed to do what it does. The proof gets built that way."
+  },
+  {
+    q: "He who laughs at himself never runs out of things to laugh at.",
+    a: "Epictetus",
+    note: "Some days you will catch your mind mid-spiral, mid-catastrophe, mid 'this is the one,' and you will laugh. Not cruelly. Tenderly. The mind does this. It is one of the things minds do."
+  },
+  {
+    q: "We have two ears and one mouth, so that we can listen twice as much as we speak.",
+    a: "Epictetus",
+    note: "The body is talking. It always talks. Listening is not the same as obeying. You can hear the alarm and choose not to act on it."
+  },
+  {
+    q: "It is impossible for a man to learn what he thinks he already knows.",
+    a: "Epictetus",
+    note: "You think you know what a racing heart means. You learned it in 2020 and you have been certain since. But certainty is the wall. What if it doesn't mean what you think?"
+  },
+
+  // --- SENECA ---
+  {
+    q: "We suffer more often in imagination than in reality.",
+    a: "Seneca",
+    note: "The fainting has not happened. The collapse has not happened. None of the catastrophes you have rehearsed for years have happened. The suffering has all been in advance, for events that never arrived."
+  },
+  {
+    q: "Sometimes even to live is an act of courage.",
+    a: "Seneca",
+    note: "If you are reading this and your body has scared you in the last week, you are already practicing courage. Not the loud kind. The kind that just keeps going."
+  },
+  {
+    q: "Difficulties strengthen the mind, as labor does the body.",
+    a: "Seneca",
+    note: "Every spike you have moved through without it meaning anything has been a small repetition of the truth: the body alarms, and you continue. The reps add up."
+  },
+  {
+    q: "Begin at once to live, and count each separate day as a separate life.",
+    a: "Seneca",
+    note: "Yesterday's fear was yesterday's. It does not have to be paid forward into today. Each morning, the loop gets to be examined fresh."
+  },
+  {
+    q: "The whole future lies in uncertainty: live immediately.",
+    a: "Seneca",
+    note: "The certainty you crave — that today's body will behave, that no spike is coming — is not on offer for anyone. Nobody has it. The work is to live well without it."
+  },
+  {
+    q: "He who fears death will never do anything worthy of a man who is alive.",
+    a: "Seneca",
+    note: "Behind the fear of fainting is the fear of dying. Worth naming once. Behind every panic is the same old terror, dressed in a heartbeat. Naming it shrinks it."
+  },
+  {
+    q: "As long as you live, keep learning how to live.",
+    a: "Seneca",
+    note: "You are still learning. The body that scared you in 2020 is the same body, but you are not the same person. The relationship can keep changing."
+  },
+  {
+    q: "True happiness is to enjoy the present, without anxious dependence upon the future.",
+    a: "Seneca",
+    note: "The dependence is the disease. 'I will be happy if my body cooperates.' Try, today, the radical alternative: I am here whether it cooperates or not."
+  },
+  {
+    q: "While we wait for life, life passes.",
+    a: "Seneca",
+    note: "While you wait for the anxiety to be gone before you start living, you are missing the only life you have. The life is the part where you do things scared."
+  },
+  {
+    q: "Hang on to your youthful enthusiasms — you'll be able to use them better when you're older.",
+    a: "Seneca",
+    note: "Whatever you loved before 2020 is still allowed. The fear made you smaller for a while. You are allowed to be that size again — bigger, even. Today, slightly bigger."
+  },
+  {
+    q: "All cruelty springs from weakness.",
+    a: "Seneca",
+    note: "The voice that catastrophizes about your body is not your enemy. It is the part of you that got scared in 2020 and never got the all-clear. Speak to it kindly. It is doing its frightened best."
+  },
+
+  // --- SOCRATES / PLATO / ARISTOTLE ---
+  {
+    q: "The unexamined life is not worth living.",
+    a: "Socrates",
+    note: "The unexamined panic is not worth carrying. Pull the loop into the light — what exactly do I fear, what evidence do I have, what has actually happened? The light dissolves a great deal."
+  },
+  {
+    q: "I know that I know nothing.",
+    a: "Socrates",
+    note: "You don't actually know what your heart will do next. But you also don't know it will do the bad thing. The not-knowing cuts both ways — and the body has, so far, always been okay."
+  },
+  {
+    q: "We are what we repeatedly do.",
+    a: "Aristotle (paraphrased by Will Durant)",
+    note: "Repeatedly checking on the body trains a body-checker. Repeatedly returning attention outward trains someone who lives outside their chest. The repetition is the whole thing."
+  },
+  {
+    q: "Happiness depends upon ourselves.",
+    a: "Aristotle",
+    note: "Not on the body cooperating. Not on the spikes ending. On the relationship you build with the body that already exists, racing and all."
+  },
+
+  // --- BUDDHIST (cognitive-leaning, no breath focus) ---
+  {
+    q: "You are the sky. Everything else — it's just the weather.",
+    a: "Pema Chödrön",
+    note: "The racing heart is weather. The fear about the racing heart is weather. The part of you reading these words and recognizing them as true — that is sky. Sky doesn't have a heart rate."
+  },
+  {
+    q: "Nothing ever goes away until it has taught us what we need to know.",
+    a: "Pema Chödrön",
+    note: "The panic is here because there is something to learn. Not 'how to make my body stop' — that's the old answer. Maybe: how to stop treating my own body as the threat."
+  },
+  {
+    q: "The most fundamental aggression to ourselves is to remain ignorant by not having the courage to look at ourselves honestly and gently.",
+    a: "Pema Chödrön",
+    note: "Honestly: you have been scared of your body for years. Gently: that's understandable, given what 2020 was, and you are allowed to put it down."
+  },
+  {
+    q: "Start where you are. The path is right under your feet.",
+    a: "Pema Chödrön",
+    note: "You don't need to first get rid of the anxiety to begin living. You begin from the body that has anxiety. The path is built one ordinary anxious day at a time."
+  },
+  {
+    q: "Rejoicing in ordinary things is not sentimental or trite. It actually takes guts.",
+    a: "Pema Chödrön",
+    note: "Letting yourself enjoy a coffee, a walk, a song, while still occasionally noticing your heartbeat — that takes guts. Anyone who tells you it's small has not lived inside a body that scares them."
+  },
+  {
+    q: "Hatred does not cease by hatred, but only by love.",
+    a: "Dhammapada",
+    note: "Hating your body for alarming you keeps the alarm louder. The unfamiliar move is friendliness — toward the heart, the breath, the whole anxious system that has, after all, kept you alive this long."
+  },
+  {
+    q: "Pain is inevitable. Suffering is optional.",
+    a: "Buddhist teaching",
+    note: "The sensation of a spike is pain — uncomfortable, real. The story 'this means I'm dying' is suffering, and that part is, at least eventually, optional."
+  },
+  {
+    q: "Holding on to anger is like grasping a hot coal with the intent of throwing it at someone else; you are the one who gets burned.",
+    a: "Buddhist teaching",
+    note: "Holding on to fear of your body is the same. The body is not somebody else. The fear burns the holder."
+  },
+  {
+    q: "Peace comes from within. Do not seek it without.",
+    a: "Buddhist teaching",
+    note: "Seek it not in the body settling, not in the heart slowing. Seek it in the relationship you build with whatever the body is doing right now. That part is yours."
+  },
+  {
+    q: "Forgiveness is giving up all hope of a better past.",
+    a: "Jack Kornfield",
+    note: "Whatever happened in 2020 happened. The fear it left behind has been long enough. You can't have a different past. You can have a different next hour."
+  },
+  {
+    q: "The trouble is, you think you have time.",
+    a: "Buddhist saying",
+    note: "You have been waiting for the anxiety to end before you live again. Five years is a long wait. Maybe today is the day you stop waiting."
+  },
+  {
+    q: "If your compassion does not include yourself, it is incomplete.",
+    a: "Jack Kornfield",
+    note: "You are kinder to a stranger having a hard day than to your own body having a hard day. Try, just today, treating the racing heart the way you'd treat a frightened friend."
+  },
+  {
+    q: "When we are no longer able to change a situation, we are challenged to change ourselves.",
+    a: "Viktor Frankl",
+    note: "You cannot, in the moment, change what your body is doing. You can change how you stand in relation to it. That second thing is the entire freedom."
+  },
+  {
+    q: "Between stimulus and response there is a space. In that space is our power to choose our response.",
+    a: "Viktor Frankl",
+    note: "Heart speeds up — story 'something is wrong.' That sequence has felt instant for years, but there is a space between. The whole practice is finding that space and standing in it."
+  },
+  {
+    q: "Those who have a 'why' to live, can bear with almost any 'how'.",
+    a: "Viktor Frankl",
+    note: "Your why is bigger than your fear. The fear has been loud, but it is not the most important thing about you. The things you love still want your attention back."
+  },
+
+  // --- TAOIST (selected for cognitive content, not breath) ---
+  {
+    q: "Muddy water, let stand, becomes clear.",
+    a: "Lao Tzu",
+    note: "The mind, agitated by a racing heart, churns up every catastrophic thought. Don't fight the mud. Just stop stirring. Clarity returns on its own — it always has."
+  },
+  {
+    q: "When I let go of what I am, I become what I might be.",
+    a: "Lao Tzu",
+    note: "What you are right now: someone who fears their body. What you might be: someone who has a body and a fuller life around it. The first identity has to loosen for the second to arrive."
+  },
+  {
+    q: "Care about what other people think and you will always be their prisoner.",
+    a: "Lao Tzu",
+    note: "Care about whether your body is performing 'normal' enough, and you will always be its prisoner. Today, let it perform however it performs. You are not on trial."
+  },
+  {
+    q: "Nature does not hurry, yet everything is accomplished.",
+    a: "Lao Tzu",
+    note: "Healing from years of body-fear does not hurry. There is no quick fix you have failed to find. There is only the slow work, day after day, of not running."
+  },
+  {
+    q: "He who knows that enough is enough will always have enough.",
+    a: "Lao Tzu",
+    note: "You have done enough monitoring. Enough checking the pulse, enough scanning for the next spike. It has been enough for a long time. You are allowed to put it down today."
+  },
+  {
+    q: "The flame that burns twice as bright burns half as long.",
+    a: "Lao Tzu",
+    note: "An adrenaline spike, for all its drama, runs out of fuel within minutes. The body cannot sustain it. The thing that scares you most is also chemically incapable of lasting."
+  },
+  {
+    q: "Stop leaving and you will arrive. Stop searching and you will see.",
+    a: "Lao Tzu",
+    note: "Stop trying to escape the body. The body is where you live. The arrival is the moment you stop running from it."
+  },
+
+  // --- HINDU / VEDANTIC (cognitive-leaning) ---
+  {
+    q: "You have the right to work, but never to the fruit of work.",
+    a: "Bhagavad Gita 2.47",
+    note: "You have the right to live well today. You don't have the right to demand that the body cooperate. Do the living anyway. The body will be whatever it is."
+  },
+  {
+    q: "The mind acts like an enemy for those who do not control it.",
+    a: "Bhagavad Gita 6.6",
+    note: "The mind that catastrophizes a heart rate is the mind acting like an enemy. Catching it doing this — that is the beginning of it being a friend instead."
+  },
+  {
+    q: "The Self is not born nor does it die.",
+    a: "Bhagavad Gita 2.20",
+    note: "Whatever in you watches the panic — the witness, the observer, the part that notices the noticing — that part has never been in danger from a heartbeat, not for one second."
+  },
+  {
+    q: "Anything that makes you weak — physically, intellectually and spiritually, reject as poison.",
+    a: "Swami Vivekananda",
+    note: "The story 'I am fragile, my body might fail at any moment' makes you weak. It is not protective; it is corrosive. Reject it, gently and repeatedly."
+  },
+  {
+    q: "The whole secret of existence is to have no fear.",
+    a: "Swami Vivekananda",
+    note: "Not the absence of fear — the absence of being run by it. You can be afraid and still walk forward. That is the secret, and it is available today."
+  },
+  {
+    q: "What you are looking for is what is looking.",
+    a: "Hindu / Sufi saying",
+    note: "The peace you are searching for in a calm heart rate — it is already in the part of you doing the searching. It does not depend on the body. It never has."
+  },
+
+  // --- SUFI (selected for cognitive themes) ---
+  {
+    q: "The wound is the place where the Light enters you.",
+    a: "Rumi",
+    note: "The panic of 2020 was a wound. It was also, eventually, the doorway to knowing yourself differently. You don't have to be grateful for it. But it is teaching you something only it could teach."
+  },
+  {
+    q: "Why do you stay in prison when the door is so wide open?",
+    a: "Rumi",
+    note: "The prison is the loop: notice body, fear body, monitor body, fear more. The door is the simple act of looking outward instead. It really is that available."
+  },
+  {
+    q: "The cure for pain is in the pain.",
+    a: "Rumi",
+    note: "Not running from the spike is what eventually ends the spike's grip on you. You don't get to skip it. The way through is through."
+  },
+  {
+    q: "You are not a drop in the ocean. You are the entire ocean in a drop.",
+    a: "Rumi",
+    note: "You are not just an anxious body. You contain the anxious body, and also the part of you that watches it, and also everything else you've ever loved or wanted. The fear is small. You are not."
+  },
+  {
+    q: "Patience is the key to joy.",
+    a: "Rumi",
+    note: "Patience with the body that is still learning, again and again, that it is safe. The joy returns slowly. It does return."
+  },
+  {
+    q: "Forget safety. Live where you fear to live.",
+    a: "Rumi",
+    note: "The hyper-vigilance about safety is what is keeping you small. The way out is through the doors you have been avoiding — the run, the workout, the moment of stillness — done anyway, with the body as it is."
+  },
+  {
+    q: "Out beyond ideas of wrongdoing and rightdoing, there is a field. I'll meet you there.",
+    a: "Rumi",
+    note: "Beyond 'my body is doing this wrong' and 'my body should be doing this right' — there is a field where the body is just doing what it does, and you are just here, watching it, alive."
+  },
+  {
+    q: "Stop acting so small. You are the universe in ecstatic motion.",
+    a: "Rumi",
+    note: "The fear has made you smaller than you are. The body has been treated like a fragile vessel that might break. It is, in fact, a remarkable engine that has been working steadily this whole time."
+  },
+  {
+    q: "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.",
+    a: "Rumi",
+    note: "You cannot make the world hold still. You cannot make your heart promise to behave. You can change how you meet what is. That is the only project that has ever worked."
+  },
+  {
+    q: "Fear is the cheapest room in the house. I would like to see you living in better conditions.",
+    a: "Hafiz",
+    note: "Five years in the fear-room is enough. You have other rooms — curiosity, kindness, even boredom. Today, walk into one of them, even briefly."
+  },
+
+  // --- CHRISTIAN CONTEMPLATIVE ---
+  {
+    q: "Be patient toward all that is unsolved in your heart and try to love the questions themselves.",
+    a: "Rainer Maria Rilke",
+    note: "The question 'will I always be afraid of my body?' does not need an answer today. Loving the question — being curious about it instead of frantic — is itself the answer beginning to arrive."
+  },
+  {
+    q: "Have patience with all things, but first of all with yourself.",
+    a: "Francis de Sales",
+    note: "You are healing slowly from something that frightened you badly. The slowness is not a failure. It is the actual shape of this kind of healing."
+  },
+  {
+    q: "All shall be well, and all shall be well, and all manner of thing shall be well.",
+    a: "Julian of Norwich",
+    note: "Said by a woman who lived through plague and almost died. She knew about bodies in alarm. The 'all shall be well' is not denial — it is a deeper conviction underneath the fear."
+  },
+  {
+    q: "Let nothing disturb you, let nothing frighten you. All things pass away.",
+    a: "Teresa of Ávila",
+    note: "The spike will pass. It always passes. Not because you forced it — because passing is what spikes do. They are, by their nature, transient."
+  },
+  {
+    q: "Faith is taking the first step even when you don't see the whole staircase.",
+    a: "Martin Luther King Jr.",
+    note: "You don't need to know how this ends. You don't need to see yourself fully recovered. You only need today's step — opening this page, reading this sentence, going into your day anyway."
+  },
+  {
+    q: "Almost everything will work again if you unplug it for a few minutes, including you.",
+    a: "Anne Lamott",
+    note: "The hyper-vigilant system needs to be allowed to power down sometimes. Not by force, not by trying — by spending the next twenty minutes paying attention to anything other than your body."
+  },
+  {
+    q: "We must accept finite disappointment, but never lose infinite hope.",
+    a: "Martin Luther King Jr.",
+    note: "Some days the panic wins a round. That is finite disappointment. It does not mean you are not getting better. It does not mean you will never get better."
+  },
+  {
+    q: "What we plant in the soil of contemplation, we shall reap in the harvest of action.",
+    a: "Meister Eckhart",
+    note: "What you plant when you pause and read these words, instead of spiraling, builds the person you are becoming. Slowly, invisibly, and absolutely."
+  },
+  {
+    q: "The eye through which I see God is the same eye through which God sees me.",
+    a: "Meister Eckhart",
+    note: "The part of you watching the panic — that watching does not panic. There is something here that has never been in danger. Spend more time being it."
+  },
+
+  // --- JEWISH ---
+  {
+    q: "Whoever saves a single life saves the world entire.",
+    a: "Talmud",
+    note: "Including your own. Each time you talk yourself down from the catastrophe, each time you stay rather than run, each time you choose the gentler story — that is a life being saved, quietly."
+  },
+  {
+    q: "The whole world is a very narrow bridge, and the most important thing is not to be afraid.",
+    a: "Rabbi Nachman of Breslov",
+    note: "More precisely: the most important thing is not to be ruled by fear. You can be afraid and still cross the bridge. People do it every day."
+  },
+  {
+    q: "If I am not for myself, who will be for me? If I am only for myself, what am I? If not now, when?",
+    a: "Hillel the Elder",
+    note: "Be for yourself today. Not by demanding the body cooperate, but by treating the frightened part with the kindness you'd give anyone else."
+  },
+  {
+    q: "Get yourself a new mind every day.",
+    a: "Hasidic saying",
+    note: "Yesterday's mind decided your body was dangerous. Today's mind doesn't have to inherit that decision. You are allowed to wake up with a different relationship to your chest."
+  },
+  {
+    q: "It is a great mitzvah to be in joy always.",
+    a: "Rebbe Nachman",
+    note: "Joy, here, is not the absence of fear. It is choosing to keep noticing what is good while the fear does its thing in the background. Both can be true at the same time."
+  },
+
+  // --- MODERN ---
+  {
+    q: "Whatever the present moment contains, accept it as if you had chosen it.",
+    a: "Eckhart Tolle",
+    note: "If this moment contains a quickened heart, accept it as if you had chosen it. Not because it's pleasant — because the alternative, fighting it, is what makes it linger and grow."
+  },
+  {
+    q: "You can't stop the waves, but you can learn to surf.",
+    a: "Jon Kabat-Zinn",
+    note: "You cannot make spikes never come. You can learn to ride them — to feel the rise and fall and notice that you are still here when the wave is done."
+  },
+  {
+    q: "What you resist not only persists, but will grow in size.",
+    a: "Carl Jung",
+    note: "Resisting the body is what makes the body louder. The strange-feeling instruction, but the true one: let it. Let the heart race. Let the breath be weird. Don't try to make it stop. The not-trying is what eventually works."
+  },
+  {
+    q: "I am not what happened to me, I am what I choose to become.",
+    a: "Carl Jung",
+    note: "What happened in 2020 happened to you. It does not have to define what you are. Today, you get to be slightly more than that day's frightened version of yourself."
+  },
+  {
+    q: "Until you make the unconscious conscious, it will direct your life and you will call it fate.",
+    a: "Carl Jung",
+    note: "The loop runs underneath: notice body, fear body, escape, repeat. Naming it pulls it into the light. In the light, it has less power. You see the trick before it lands."
+  },
+  {
+    q: "The cave you fear to enter holds the treasure you seek.",
+    a: "Joseph Campbell",
+    note: "The cave is the body itself. The treasure is the discovery that you can be in it without it being an emergency. You cannot get the treasure without entering the cave."
+  },
+  {
+    q: "We must let go of the life we have planned, so as to accept the one that is waiting for us.",
+    a: "Joseph Campbell",
+    note: "Let go of the version of you that was supposed to never be afraid. Accept the version that is, and is also building something real anyway. That second version is more interesting."
+  },
+  {
+    q: "Don't ask what the world needs. Ask what makes you come alive, and go do it.",
+    a: "Howard Thurman",
+    note: "What makes you come alive is on the other side of the fear, not before it. Today, do one small thing that you would do if you weren't afraid. Just one."
+  },
+  {
+    q: "Tell me, what is it you plan to do with your one wild and precious life?",
+    a: "Mary Oliver",
+    note: "Not 'what would you do once you're recovered.' What are you doing today, in the body you have, anxious as it is. The life is happening now. The plan is now."
+  },
+  {
+    q: "You do not have to be good. You only have to let the soft animal of your body love what it loves.",
+    a: "Mary Oliver",
+    note: "The body that scares you is also the body that loves coffee, music, sun, sleep, the people you love. It is not just an alarm system. Remember the rest of what it is."
+  },
+  {
+    q: "The best way out is always through.",
+    a: "Robert Frost",
+    note: "There is no way around the panic. Around it has been tried — five years of avoidance, vigilance, monitoring. The way is straight through, with the body, doing the things anyway."
+  },
+  {
+    q: "Not all those who wander are lost.",
+    a: "J.R.R. Tolkien",
+    note: "Not every racing heart is a heart in trouble. Sometimes it's just a heart wandering. Sometimes the body just does things. Not every spike is a sign."
+  },
+  {
+    q: "Everything you've ever wanted is on the other side of fear.",
+    a: "George Addair",
+    note: "Including, possibly, the simple thing — getting through a workout without the loop, sitting bored without monitoring. Small lives on the other side of small fears. They count."
+  },
+  {
+    q: "Comparison is the thief of joy.",
+    a: "Theodore Roosevelt",
+    note: "Comparing your body to a body that doesn't worry — yours, before 2020, or someone else's now — steals the day you have. The body you have today is the only one that can be worked with."
+  },
+  {
+    q: "It always seems impossible until it's done.",
+    a: "Nelson Mandela",
+    note: "Living a full life with a sometimes-anxious body seems impossible. People do it. You will too. Some of them will tell you it was the slow accumulation of ordinary days that did it."
+  },
+  {
+    q: "And the day came when the risk to remain tight in a bud was more painful than the risk it took to blossom.",
+    a: "Anaïs Nin",
+    note: "Five years of staying tight against the body has its own cost. At some point, the cost of avoidance gets larger than the cost of doing the scary thing. Maybe today is one of those days."
+  },
+  {
+    q: "Life shrinks or expands in proportion to one's courage.",
+    a: "Anaïs Nin",
+    note: "The fear has shrunk the territory. Each small, courageous thing — staying with a spike, exercising anyway, sitting through boredom — expands it back. Slowly. But it expands."
+  },
+  {
+    q: "We do not see things as they are, we see them as we are.",
+    a: "Anaïs Nin",
+    note: "An anxious mind sees a racing heart as catastrophe. A calmer mind sees the same racing heart as Tuesday. The heart is identical. Only the seer changes."
+  },
+  {
+    q: "What you are not changing, you are choosing.",
+    a: "Contemporary saying",
+    note: "Not a guilt-trip. A clarity. The vigilance, the monitoring, the avoidance — these are choices, even when they feel automatic. Naming them as choices is what makes them changeable."
+  },
+  {
+    q: "Almost everything will work again if you unplug it for a few minutes, including you.",
+    a: "Anne Lamott",
+    note: "Including the alarm system. It is allowed to rest. The whole apparatus has been on high alert for years. Today is permission to power down for an hour."
+  },
+  {
+    q: "When all is said and done, more is said than done.",
+    a: "Lou Holtz",
+    note: "The mind says a lot of things about the body. Most of it is not true. Doing — moving, eating, working, walking through the world — quietly outvotes the saying."
+  },
+  {
+    q: "Tomorrow is fresh, with no mistakes in it yet.",
+    a: "L.M. Montgomery",
+    note: "Today's spike does not stain tomorrow. Each morning is a clean page. The body that scared you this afternoon is allowed to be unremarkable in the morning."
+  },
+  {
+    q: "Almost all men can stand adversity, but if you want to test a man's character, give him power.",
+    a: "Abraham Lincoln",
+    note: "You have stood adversity. You have stood five years of body-fear and you are still here, still trying. Whatever else you doubt about yourself, do not doubt your endurance."
+  },
+];
+
+/* ============================================================
+ * GROUNDING STEPS — for the "right now" overlay
+ * The 5-4-3-2-1 technique, modified.
+ * Pulls attention OUT through the senses.
+ * Crucially: nothing about breath, nothing about body sensation.
+ * ============================================================ */
+const GROUNDING_STEPS = [
+  {
+    label: "see",
+    prompt: "Look around. Find <em>five</em> things you can see. Say them, in your head or out loud. Be specific — not 'a wall' but 'the small crack near the corner of the wall.' Detail pulls attention forward."
+  },
+  {
+    label: "hear",
+    prompt: "Now listen. Find <em>four</em> distinct sounds. The hum of something electrical. A car passing. Your own swallow. The quiet itself, if it's quiet. Name them."
+  },
+  {
+    label: "touch",
+    prompt: "Find <em>three</em> things you can feel — not from inside your body, but from outside. The texture of your sleeve. The chair underneath you. The temperature of the air on your hands. Pick three external sensations and name each one."
+  },
+  {
+    label: "smell or taste",
+    prompt: "Find <em>two</em> smells or tastes available right now. Coffee on your breath. Soap on your hands. The smell of the room. If you can't find any, the not-finding is also a noticing. Name what you find."
+  },
+  {
+    label: "name",
+    prompt: "Say <em>one</em> simple, true sentence out loud. 'I am in [the room you're in].' 'It is [day of the week].' 'My name is [your name].' Hearing your own voice say something obvious is a way the system knows it's still here."
+  }
+];
+
+/* ============================================================
+ * STATE
+ * ============================================================ */
+let currentPassage = null;
+let groundingIndex = 0;
+
+/* ============================================================
+ * DAILY PASSAGE — deterministic by date
+ * Same passage all day. Same passage on reload.
+ * Tomorrow brings a new one. No "summon."
+ * ============================================================ */
+function getTodayPassage() {
+  const d = new Date();
+  // Days since epoch — stable for the whole day in user's local time
+  const localDay = Math.floor(
+    (d.getTime() - d.getTimezoneOffset() * 60000) / (1000 * 60 * 60 * 24)
+  );
+  return PASSAGES[localDay % PASSAGES.length];
+}
+
+function renderPassage(p) {
+  document.getElementById('quote').textContent = `"${p.q}"`;
+  document.getElementById('attribution').textContent = `— ${p.a}`;
+  document.getElementById('bodyNoteText').textContent = p.note;
+  currentPassage = p;
+}
+
+function setDateStamp() {
+  const d = new Date();
+  document.getElementById('dateStamp').textContent =
+    d.toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric'
+    }).toLowerCase();
+}
+
+/* ============================================================
+ * RIGHT NOW — grounding flow
+ * ============================================================ */
+const rightNow = document.getElementById('rightNow');
+const groundingPromptEl = document.getElementById('groundingPrompt');
+const groundingCounterEl = document.getElementById('groundingCounter');
+const nextStepBtn = document.getElementById('nextStepBtn');
+
+function openRightNow() {
+  groundingIndex = 0;
+  showGroundingStep();
+  rightNow.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function showGroundingStep() {
+  const step = GROUNDING_STEPS[groundingIndex];
+  groundingCounterEl.textContent = `${step.label} · step ${groundingIndex + 1} of ${GROUNDING_STEPS.length}`;
+  groundingPromptEl.innerHTML = step.prompt;
+  nextStepBtn.textContent = groundingIndex === GROUNDING_STEPS.length - 1 ? "done" : "next";
+}
+
+function nextGroundingStep() {
+  if (groundingIndex < GROUNDING_STEPS.length - 1) {
+    groundingIndex++;
+    showGroundingStep();
+  } else {
+    closeRightNow();
+  }
+}
+
+function closeRightNow() {
+  rightNow.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('rightNowBtn').addEventListener('click', openRightNow);
+nextStepBtn.addEventListener('click', nextGroundingStep);
+document.getElementById('rightNowClose').addEventListener('click', closeRightNow);
+
+/* ============================================================
+ * NOTICING LOG — local storage only
+ * ============================================================ */
+const LOG_KEY = 'stillness_noticing_log_v1';
+const logOverlay = document.getElementById('logOverlay');
+const logInput = document.getElementById('logInput');
+
+function loadLog() {
+  try {
+    const raw = localStorage.getItem(LOG_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveLogEntry(note) {
+  const log = loadLog();
+  log.unshift({
+    ts: Date.now(),
+    note: (note || '').trim().slice(0, 240)
+  });
+  // Cap at 500 entries to avoid unbounded growth
+  const capped = log.slice(0, 500);
+  try {
+    localStorage.setItem(LOG_KEY, JSON.stringify(capped));
+  } catch (e) {
+    console.warn('Log save failed', e);
+  }
+}
+
+function formatRelativeDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) {
+    return 'today · ' + d.toLocaleTimeString('en-US',
+      { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+  }
+  if (diffDays === 1) {
+    return 'yesterday · ' + d.toLocaleTimeString('en-US',
+      { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+  }
+  return d.toLocaleDateString('en-US',
+    { month: 'short', day: 'numeric' }).toLowerCase()
+    + ' · ' + d.toLocaleTimeString('en-US',
+      { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+}
+
+function renderLog() {
+  const log = loadLog();
+  const evidence = document.getElementById('logEvidence');
+  const list = document.getElementById('logList');
+
+  if (log.length === 0) {
+    evidence.innerHTML = '';
+    list.innerHTML = '<div class="log-empty">No noticings yet. The first one is just a button press — no meaning required.</div>';
+    return;
+  }
+
+  // Evidence summary — the medicine
+  const total = log.length;
+  const oldest = new Date(log[log.length - 1].ts);
+  const days = Math.max(1, Math.floor((Date.now() - oldest.getTime()) / (1000 * 60 * 60 * 24)));
+  const last7 = log.filter(e => Date.now() - e.ts < 7 * 24 * 60 * 60 * 1000).length;
+
+  evidence.innerHTML = `
+    <div class="evidence-line"><strong>${total}</strong> noticing${total !== 1 ? 's' : ''} logged over <strong>${days}</strong> day${days !== 1 ? 's' : ''}.</div>
+    <div class="evidence-line"><strong>${last7}</strong> in the last seven days.</div>
+    <div class="evidence-line">Every single one passed. You are still here.</div>
+  `;
+
+  // List
+  list.innerHTML = log.slice(0, 50).map(entry => `
+    <div class="log-entry">
+      <div class="log-entry-meta">${formatRelativeDate(entry.ts)}</div>
+      ${entry.note ? `<div class="log-entry-note">${entry.note.replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function openLog() {
+  logInput.value = '';
+  renderLog();
+  logOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => logInput.focus(), 300);
+}
+
+function closeLog() {
+  logOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('noticedBtn').addEventListener('click', openLog);
+document.getElementById('viewLogBtn').addEventListener('click', openLog);
+document.getElementById('logCloseBtn').addEventListener('click', closeLog);
+document.getElementById('cancelLogBtn').addEventListener('click', closeLog);
+
+document.getElementById('saveNoticingBtn').addEventListener('click', () => {
+  saveLogEntry(logInput.value);
+  logInput.value = '';
+  renderLog();
+});
+
+/* ============================================================
+ * ABOUT overlay
+ * ============================================================ */
+const aboutOverlay = document.getElementById('aboutOverlay');
+document.getElementById('aboutBtn').addEventListener('click', () => {
+  aboutOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+});
+document.getElementById('aboutCloseBtn').addEventListener('click', () => {
+  aboutOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+});
+
+/* ============================================================
+ * KEYBOARD — ESC closes any overlay
+ * ============================================================ */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (rightNow.classList.contains('active')) closeRightNow();
+    else if (logOverlay.classList.contains('active')) closeLog();
+    else if (aboutOverlay.classList.contains('active')) {
+      aboutOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+});
+
+/* ============================================================
+ * DRIFTING MOTES — kept, low density
+ * Don't spawn during overlays
+ * ============================================================ */
+function spawnMote() {
+  const mote = document.createElement('div');
+  mote.className = 'mote';
+  const size = 2 + Math.random() * 3;
+  mote.style.width = size + 'px';
+  mote.style.height = size + 'px';
+  const startX = Math.random() * window.innerWidth;
+  const startY = window.innerHeight + 20;
+  const driftX = (Math.random() - 0.5) * 200;
+  const duration = 18000 + Math.random() * 12000;
+  const peakOpacity = 0.15 + Math.random() * 0.25;
+
+  mote.style.left = startX + 'px';
+  mote.style.top = startY + 'px';
+  document.body.appendChild(mote);
+
+  mote.animate([
+    { transform: 'translate(0, 0)', opacity: 0 },
+    { opacity: peakOpacity, offset: 0.1 },
+    { opacity: peakOpacity, offset: 0.85 },
+    { transform: `translate(${driftX}px, -${startY + 40}px)`, opacity: 0 }
+  ], {
+    duration: duration,
+    easing: 'linear'
+  }).onfinish = () => mote.remove();
+}
+
+function startMotes() {
+  for (let i = 0; i < 4; i++) {
+    setTimeout(spawnMote, Math.random() * 8000);
+  }
+  setInterval(() => {
+    if (rightNow.classList.contains('active')
+        || logOverlay.classList.contains('active')
+        || aboutOverlay.classList.contains('active')) return;
+    if (Math.random() < 0.7) spawnMote();
+  }, 3500);
+}
+
+/* ============================================================
+ * INIT
+ * ============================================================ */
+setDateStamp();
+renderPassage(getTodayPassage());
+startMotes();
+</script>
+</body>
+</html>
