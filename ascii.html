@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCII Decoder Lab</title>
+  <style>
+    :root {
+      --bg: #07090f;
+      --panel: #101522;
+      --panel2: #151c2b;
+      --panel3: #1b2537;
+      --ink: #f4f7fb;
+      --muted: #9fa9bb;
+      --line: rgba(255,255,255,.13);
+      --hard-line: rgba(255,255,255,.22);
+      --green: #6fffb0;
+      --blue: #73c7ff;
+      --gold: #ffd36a;
+      --red: #ff7b7b;
+      --gray: #8d96a8;
+      --black: #05070b;
+      --shadow: 0 24px 80px rgba(0,0,0,.42);
+      --radius: 18px;
+      --mono: Consolas, Monaco, "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        radial-gradient(circle at 18% 0%, rgba(115,199,255,.18), transparent 34rem),
+        radial-gradient(circle at 92% 6%, rgba(255,211,106,.13), transparent 30rem),
+        linear-gradient(180deg, #080b12 0%, #06080d 100%);
+      background-size: 34px 34px, 34px 34px, auto, auto, auto;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(
+          180deg,
+          rgba(255,255,255,.03) 0,
+          rgba(255,255,255,.03) 1px,
+          transparent 1px,
+          transparent 5px
+        );
+      mix-blend-mode: overlay;
+      opacity: .32;
+    }
+
+    .page {
+      width: min(1440px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 26px 0 48px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .hero-main, .hero-side, .control-panel, .decoder-board, .info-panel {
+      background: linear-gradient(180deg, rgba(21,28,43,.96), rgba(10,14,23,.98));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .hero-main {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+    }
+
+    .hero-main::after {
+      content: "65 83 67 73 73";
+      position: absolute;
+      right: 18px;
+      bottom: -4px;
+      font-family: var(--mono);
+      font-size: clamp(34px, 7vw, 96px);
+      letter-spacing: -6px;
+      color: rgba(255,255,255,.045);
+      white-space: nowrap;
+    }
+
+    .kicker {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(46px, 7.2vw, 112px);
+      line-height: .82;
+      letter-spacing: -4px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: 14px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-side {
+      padding: 20px;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+    }
+
+    .stat-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .stat strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      font-weight: 800;
+    }
+
+    .sample {
+      background: var(--black);
+      border: 1px solid var(--hard-line);
+      border-radius: 16px;
+      padding: 14px;
+      font-family: var(--mono);
+      color: var(--green);
+      overflow-wrap: anywhere;
+      line-height: 1.45;
+    }
+
+    .control-panel {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .panel-header h2, .decoder-board h2, .info-panel h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -.3px;
+      text-transform: uppercase;
+    }
+
+    .help {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .tool {
+      background: rgba(0,0,0,.24);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 292px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tool-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .tool-title h3 {
+      margin: 0;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: .2px;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--blue);
+      border: 1px solid rgba(115,199,255,.32);
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(115,199,255,.08);
+      white-space: nowrap;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 86px;
+      background: #070a10;
+      color: var(--ink);
+      border: 1px solid var(--hard-line);
+      border-radius: 12px;
+      padding: 12px;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    textarea:focus {
+      border-color: rgba(115,199,255,.85);
+      box-shadow: 0 0 0 4px rgba(115,199,255,.12);
+    }
+
+    .output {
+      flex: 1;
+      min-height: 96px;
+      background: #05070b;
+      border: 1px dashed rgba(111,255,176,.36);
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-weight: 900;
+      cursor: pointer;
+      background: var(--blue);
+      color: #051018;
+      transition: transform .15s, filter .15s;
+    }
+
+    button:hover { transform: translateY(-1px); filter: brightness(1.08); }
+
+    button.secondary {
+      background: rgba(255,255,255,.08);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .copied {
+      min-height: 16px;
+      color: var(--gold);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .decoder-board {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .board-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+      background: var(--gray);
+      box-shadow: 0 0 14px currentColor;
+    }
+
+    .dot.control { color: var(--gray); background: var(--gray); }
+    .dot.symbol { color: var(--gold); background: var(--gold); }
+    .dot.number { color: var(--blue); background: var(--blue); }
+    .dot.upper, .dot.lower { color: var(--green); background: var(--green); }
+
+    .lookup-surface {
+      background: #d7d9e1;
+      border-radius: 16px;
+      padding: 10px;
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: inset 0 0 24px rgba(0,0,0,.22);
+    }
+
+    .compact-grid {
+      display: grid;
+      grid-template-columns: 1.85fr 1fr 1fr 1fr;
+      gap: 10px;
+      min-width: 1150px;
+      align-items: start;
+    }
+
+    .block-wrap {
+      background: #e7e7ec;
+      border: 1px solid #b9beca;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+    }
+
+    .block-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #e7e7ec;
+      color: #111827;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .block-table th {
+      background: #86b7f2;
+      color: #08111f;
+      text-align: center;
+      font-size: 14px;
+      padding: 4px 6px;
+      border-right: 1px solid rgba(255,255,255,.5);
+      border-bottom: 1px solid #b9beca;
+    }
+
+    .block-table th:last-child,
+    .block-table td:last-child { border-right: none; }
+
+    .block-table td {
+      padding: 3px 8px;
+      border-right: 1px solid #c4c8d0;
+      border-bottom: 1px solid #c4c8d0;
+      font-size: 12px;
+      line-height: 1.1;
+      text-align: center;
+      color: #111827;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .block-table tr:nth-child(even) td { background: rgba(255,255,255,.28); }
+    .block-table tr:hover td { background: rgba(255,211,106,.28); }
+
+    .block-table td.char {
+      font-size: 17px;
+      min-width: 48px;
+      font-family: "Segoe UI Symbol", "Apple Symbols", Arial, Helvetica, sans-serif;
+      font-weight: 800;
+    }
+
+    .block-table td.wide {
+      text-align: left;
+      min-width: 126px;
+      white-space: normal;
+      font-size: 11px;
+      cursor: default;
+      user-select: text;
+    }
+
+    .cell-control { color: #4b5563 !important; }
+    .cell-symbol { color: #8a5a00 !important; }
+    .cell-number { color: #005a94 !important; }
+    .cell-upper, .cell-lower { color: #096b3c !important; }
+
+    .board-note {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .info-panel {
+      padding: 16px;
+    }
+
+    details {
+      background: rgba(0,0,0,.2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 17px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    details p, details li {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    details ul { padding-left: 20px; margin-bottom: 0; }
+
+    .callout {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,211,106,.1);
+      border: 1px solid rgba(255,211,106,.24);
+      color: #ffe8a6;
+      line-height: 1.45;
+    }
+
+    .warning { color: var(--red); }
+
+    @media (max-width: 1180px) {
+      .hero, .tools { grid-template-columns: 1fr; }
+      .board-top, .panel-header, .board-note { flex-direction: column; align-items: stretch; }
+      .legend { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-main">
+        <div class="kicker">Classroom code breaker</div>
+        <h1>ASCII<br>Decoder Lab</h1>
+        <p class="subtitle">Turn numbers into text. Turn text into code. Use the board, test your message, then decode the pattern hiding underneath the letters.</p>
+      </div>
+      <aside class="hero-side">
+        <div class="stat-strip">
+          <div class="stat"><strong>65</strong><span>Decimal</span></div>
+          <div class="stat"><strong>01000001</strong><span>Binary</span></div>
+          <div class="stat"><strong>A</strong><span>Character</span></div>
+        </div>
+        <div class="sample">MISSION:<br>Encode a word.<br>Trade it with someone.<br>Decode it back.</div>
+      </aside>
+    </section>
+
+    <section class="control-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Converter Console</h2>
+          <p class="help">Live decoding. Type and the answer updates immediately.</p>
+        </div>
+      </div>
+
+      <div class="tools">
+        <article class="tool">
+          <div class="tool-title">
+            <h3>Encode Text</h3>
+            <span class="tag">text → code</span>
+          </div>
+          <p class="help">Type a word or sentence.</p>
+          <textarea id="textInput" placeholder="Example: CODE" oninput="encodeText()"></textarea>
+          <div class="actions">
+            <button onclick="encodeText()">Run</button>
+            <button class="secondary" onclick="clearBox('textInput','textOutput')">Clear</button>
+          </div>
+          <div id="textOutput" class="output">Output appears here.</div>
+        </article>
+
+        <article class="tool">
+          <div class="tool-title">
+            <h3>Decode Decimal</h3>
+            <span class="tag">65 → A</span>
+          </div>
+          <p class="help">Separate numbers with spaces or commas.</p>
+          <textarea id="decimalInput" placeholder="Example: 72 69 76 76 79" oninput="decodeDecimal()"></textarea>
+          <div class="actions">
+            <button onclick="decodeDecimal()">Run</button>
+            <button class="secondary" onclick="clearBox('decimalInput','decimalOutput')">Clear</button>
+          </div>
+          <div id="decimalOutput" class="output">Output appears here.</div>
+        </article>
+
+        <article class="tool">
+          <div class="tool-title">
+            <h3>Decode Binary</h3>
+            <span class="tag">01000001 → A</span>
+          </div>
+          <p class="help">Use 8 bit binary groups.</p>
+          <textarea id="binaryInput" placeholder="Example: 01001000 01001001" oninput="decodeBinary()"></textarea>
+          <div class="actions">
+            <button onclick="decodeBinary()">Run</button>
+            <button class="secondary" onclick="clearBox('binaryInput','binaryOutput')">Clear</button>
+          </div>
+          <div id="binaryOutput" class="output">Output appears here.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="decoder-board">
+      <div class="board-top">
+        <div>
+          <h2>ASCII Board</h2>
+          <p class="help">Dense on purpose. Scan it like a cipher sheet. Click a decimal, hex, or character cell to copy it.</p>
+        </div>
+        <div class="legend">
+          <span><i class="dot control"></i>control</span>
+          <span><i class="dot symbol"></i>symbol</span>
+          <span><i class="dot number"></i>number</span>
+          <span><i class="dot upper"></i>letter</span>
+        </div>
+      </div>
+
+      <div class="lookup-surface">
+        <div id="compactGrid" class="compact-grid"></div>
+      </div>
+
+      <div class="board-note">
+        <span>Printable characters start at decimal 32. Decimal 0 to 31 are control codes, which usually do not print visible letters.</span>
+        <span id="copyStatus" class="copied"></span>
+      </div>
+    </section>
+
+    <section class="info-panel">
+      <h2>How the code works</h2>
+
+      <details>
+        <summary>What is ASCII?</summary>
+        <p>ASCII is a character code. It gives common keyboard characters a number so computers can store and share text.</p>
+        <ul>
+          <li>The letter <strong>A</strong> is stored as decimal <strong>65</strong>.</li>
+          <li>The letter <strong>a</strong> is stored as decimal <strong>97</strong>.</li>
+          <li>A space is stored as decimal <strong>32</strong>.</li>
+        </ul>
+        <div class="callout">A word is really a list of character codes. For example, <strong>HI</strong> becomes <strong>72 73</strong>.</div>
+      </details>
+
+      <details>
+        <summary>What is binary?</summary>
+        <p>Binary is a number system that uses only two digits: <strong>0</strong> and <strong>1</strong>. Computers use binary because digital circuits are built around two states: off and on.</p>
+        <ul>
+          <li>Decimal is base 10 because it uses ten digits: 0 through 9.</li>
+          <li>Binary is base 2 because it uses two digits: 0 and 1.</li>
+          <li>ASCII numbers are often written as 8 bit binary groups.</li>
+        </ul>
+        <div class="callout">Decimal <strong>65</strong> becomes binary <strong>01000001</strong>, which represents the character <strong>A</strong>.</div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const compactGrid = document.getElementById('compactGrid');
+    const copyStatus = document.getElementById('copyStatus');
+
+    const controlAltChars = [
+      '', '☺', '☻', '♥', '♦', '♣', '♠', '•', '◘', '○', '◙', '♂', '♀', '♪', '♫', '☼',
+      '►', '◄', '↕', '‼', '¶', '§', '▬', '↨', '↑', '↓', '→', '←', '∟', '↔', '▲', '▼'
+    ];
+
+    const controlEscNames = [
+      'Ctrl-@', 'Ctrl-A', 'Ctrl-B', 'Ctrl-C', 'Ctrl-D', 'Ctrl-E', 'Ctrl-F', 'Ctrl-G',
+      'Ctrl-H', 'Ctrl-I', 'Ctrl-J', 'Ctrl-K', 'Ctrl-L', 'Ctrl-M', 'Ctrl-N', 'Ctrl-O',
+      'Ctrl-P', 'Ctrl-Q', 'Ctrl-R', 'Ctrl-S', 'Ctrl-T', 'Ctrl-U', 'Ctrl-V', 'Ctrl-W',
+      'Ctrl-X', 'Ctrl-Y', 'Ctrl-Z', 'Ctrl-[', 'Ctrl-\\', 'Ctrl-]', 'Ctrl-^', 'Ctrl-_'
+    ];
+
+    const controlNames = [
+      'NUL (Null)', 'SOH', 'STX', 'ETX', 'EOT', 'ENQ', 'ACK', 'BEL',
+      'BS Backspace', 'TAB', 'LF Line Feed', 'VT', 'FF Form Feed', 'CR Carriage Return', 'SO', 'SI',
+      'DLE', 'DC1', 'DC2', 'DC3', 'DC4', 'NAK', 'SYN', 'ETB',
+      'CAN', 'EM', 'SUB (EOF)', 'ESC (Escape)', 'FS', 'GS', 'RS', 'US'
+    ];
+
+    function toBinary(n) {
+      return n.toString(2).padStart(8, '0');
+    }
+
+    function toHex(n) {
+      return '0x' + n.toString(16).toUpperCase().padStart(2, '0');
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function compactCharLabel(code) {
+      if (code >= 0 && code <= 31) return controlAltChars[code] || controlNames[code];
+      if (code === 32) return '[Space]';
+      if (code === 127) return 'DEL';
+      return String.fromCharCode(code);
+    }
+
+    function category(code) {
+      if (code <= 31 || code === 127) return 'control';
+      if (code >= 48 && code <= 57) return 'number';
+      if (code >= 65 && code <= 90) return 'upper';
+      if (code >= 97 && code <= 122) return 'lower';
+      return 'symbol';
+    }
+
+    function copyValue(value) {
+      navigator.clipboard?.writeText(value).then(() => {
+        copyStatus.textContent = `Copied: ${value}`;
+        setTimeout(() => copyStatus.textContent = '', 1400);
+      }).catch(() => {
+        copyStatus.textContent = `Copy this: ${value}`;
+      });
+    }
+
+    function cell(value, code, extraClass = '') {
+      const clean = escapeHtml(String(value));
+      const cat = category(code);
+      return `<td class="cell-${cat} ${extraClass}" onclick="copyValue('${escapeHtml(String(value)).replace(/&#039;/g, "\\'")}')">${clean}</td>`;
+    }
+
+    function buildCompactTable() {
+      const groups = [
+        { start: 0, end: 31, headers: ['Dec', 'Hex', 'Alt', 'Esc', 'Character'], type: 'control' },
+        { start: 32, end: 63, headers: ['Dec', 'Hex', 'Character'], type: 'normal' },
+        { start: 64, end: 95, headers: ['Dec', 'Hex', 'Character'], type: 'normal' },
+        { start: 96, end: 127, headers: ['Dec', 'Hex', 'Character'], type: 'normal' }
+      ];
+
+      compactGrid.innerHTML = groups.map(group => {
+        let rows = '';
+        for (let code = group.start; code <= group.end; code++) {
+          if (group.type === 'control') {
+            rows += `
+              <tr>
+                ${cell(code, code)}
+                ${cell(toHex(code), code)}
+                ${cell(controlAltChars[code] || '', code, 'char')}
+                ${cell(controlEscNames[code], code)}
+                <td class="wide cell-control">${escapeHtml(controlNames[code])}</td>
+              </tr>
+            `;
+          } else {
+            rows += `
+              <tr>
+                ${cell(code, code)}
+                ${cell(toHex(code), code)}
+                ${cell(compactCharLabel(code), code, 'char')}
+              </tr>
+            `;
+          }
+        }
+
+        return `
+          <div class="block-wrap">
+            <table class="block-table">
+              <thead>
+                <tr>${group.headers.map(header => `<th>${header}</th>`).join('')}</tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function encodeText() {
+      const text = document.getElementById('textInput').value;
+      const out = document.getElementById('textOutput');
+      if (!text) {
+        out.textContent = 'Output appears here.';
+        return;
+      }
+      const decimals = [];
+      const binaries = [];
+      const pairs = [];
+      for (const ch of text) {
+        const code = ch.charCodeAt(0);
+        if (code > 127) {
+          out.innerHTML = '<span class="warning">Only standard ASCII characters are supported here. Try regular letters, numbers, punctuation, and spaces.</span>';
+          return;
+        }
+        decimals.push(code);
+        binaries.push(toBinary(code));
+        pairs.push(`${ch === ' ' ? '[space]' : ch} = ${code} = ${toBinary(code)}`);
+      }
+      out.textContent = `Text: ${text}\nDecimal: ${decimals.join(' ')}\nBinary: ${binaries.join(' ')}\n\n${pairs.join('\n')}`;
+    }
+
+    function parseDecimalInput(value) {
+      return value.trim().split(/[\s,]+/).filter(Boolean).map(Number);
+    }
+
+    function decodeDecimal() {
+      const value = document.getElementById('decimalInput').value;
+      const out = document.getElementById('decimalOutput');
+      const nums = parseDecimalInput(value);
+      if (!value.trim()) {
+        out.textContent = 'Output appears here.';
+        return;
+      }
+      if (!nums.length || nums.some(n => !Number.isInteger(n) || n < 0 || n > 127)) {
+        out.innerHTML = '<span class="warning">Use whole decimal numbers from 0 to 127.</span>';
+        return;
+      }
+      const text = nums.map(n => String.fromCharCode(n)).join('');
+      const binary = nums.map(toBinary).join(' ');
+      out.textContent = `Decoded text: ${text}\nBinary: ${binary}\n\n${nums.map(n => `${n} = ${toBinary(n)} = ${compactCharLabel(n)}`).join('\n')}`;
+    }
+
+    function parseBinaryInput(value) {
+      const cleaned = value.trim().replace(/,/g, ' ');
+      if (!cleaned) return [];
+      const groups = cleaned.split(/\s+/).filter(Boolean);
+      if (groups.length === 1 && groups[0].length > 8 && groups[0].length % 8 === 0) {
+        return groups[0].match(/.{1,8}/g);
+      }
+      return groups;
+    }
+
+    function decodeBinary() {
+      const value = document.getElementById('binaryInput').value;
+      const out = document.getElementById('binaryOutput');
+      const groups = parseBinaryInput(value);
+      if (!value.trim()) {
+        out.textContent = 'Output appears here.';
+        return;
+      }
+      if (!groups.length || groups.some(g => !/^[01]{8}$/.test(g))) {
+        out.innerHTML = '<span class="warning">Use 8 bit binary groups only. Example: 01001000 01001001</span>';
+        return;
+      }
+      const decimals = groups.map(g => parseInt(g, 2));
+      if (decimals.some(n => n > 127)) {
+        out.innerHTML = '<span class="warning">This classroom page focuses on standard ASCII from 0 to 127.</span>';
+        return;
+      }
+      const text = decimals.map(n => String.fromCharCode(n)).join('');
+      out.textContent = `Decoded text: ${text}\nDecimal: ${decimals.join(' ')}\n\n${groups.map((g, i) => `${g} = ${decimals[i]} = ${compactCharLabel(decimals[i])}`).join('\n')}`;
+    }
+
+    function clearBox(inputId, outputId) {
+      document.getElementById(inputId).value = '';
+      document.getElementById(outputId).textContent = 'Output appears here.';
+    }
+
+    buildCompactTable();
+  </script>
+</body>
+</html>
