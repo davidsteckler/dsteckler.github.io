@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supabase Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 18px;
+      line-height: 1.5;
+      background: #fbf6ea;
+      color: #2b241c;
+    }
+    button {
+      padding: 10px 14px;
+      border: 2px solid #2b241c;
+      border-radius: 8px;
+      background: #fff1a8;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: white;
+      border: 2px solid #e3d7c4;
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 120px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Supabase connection test</h1>
+  <p>This page tests reading and inserting into <strong>teacher_money_ideas</strong>.</p>
+
+  <button id="run">Run test</button>
+
+  <h2>Result</h2>
+  <pre id="result">Click Run test.</pre>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "https://rlbycipdwncmsugojjat.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYnljaXBkd25jbXN1Z29pamF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODE5MDUsImV4cCI6MjA5Njc1NzkwNX0.5ekh5LuXCZGVN3DR3igfRdypo5Jn8hs12PCcvQr0qz0";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const result = document.querySelector("#result");
+
+    function show(label, value) {
+      result.textContent += "\n\n" + label + ":\n" + JSON.stringify(value, null, 2);
+    }
+
+    document.querySelector("#run").addEventListener("click", async () => {
+      result.textContent = "Running...";
+
+      try {
+        const readTest = await supabase
+          .from("teacher_money_ideas")
+          .select("*")
+          .limit(3);
+
+        result.textContent = "READ TEST";
+        show("read data", readTest.data);
+        show("read error", readTest.error);
+
+        const insertTest = await supabase
+          .from("teacher_money_ideas")
+          .insert([{
+            title: "diagnostic test",
+            details: "testing insert from diagnostic page",
+            pay: "test",
+            speed: "start this week",
+            cost: "$0 to start",
+            name: "diagnostic"
+          }])
+          .select()
+          .single();
+
+        show("insert data", insertTest.data);
+        show("insert error", insertTest.error);
+
+      } catch (err) {
+        result.textContent = "JavaScript error:\n" + String(err);
+      }
+    });
+  </script>
+</body>
+</html>
