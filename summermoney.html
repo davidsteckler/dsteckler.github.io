@@ -151,13 +151,37 @@
       background: #f7fbf6;
     }
 
+    .form-intro {
+      max-width: 640px;
+      margin-bottom: 16px;
+    }
+
+    .mini-example {
+      background: #fffdf8;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 14px;
+      margin: 12px 0 16px;
+      color: var(--muted);
+    }
+
+    .mini-example strong {
+      color: var(--ink);
+    }
+
     label {
       display: block;
-      margin-top: 12px;
+      margin-top: 14px;
       margin-bottom: 4px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: .9rem;
-      font-weight: 800;
+      font-weight: 850;
+    }
+
+    .help {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: .96rem;
     }
 
     input, textarea, select {
@@ -171,7 +195,7 @@
     }
 
     textarea {
-      min-height: 82px;
+      min-height: 92px;
       resize: vertical;
     }
 
@@ -184,8 +208,13 @@
     .status {
       margin-top: 12px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: .93rem;
+      font-size: .96rem;
       color: var(--muted);
+    }
+
+    .status.good {
+      color: #315d3d;
+      font-weight: 750;
     }
 
     .small {
@@ -246,7 +275,7 @@
       <div id="ideasList" class="ideas">
         <div class="idea">
           <h3>private tutoring</h3>
-          <p>Send one clear offer to families who already know or trust you.</p>
+          <p>Text a few families who already know you. Offer one clear thing, like summer math review or writing help.</p>
           <div class="facts">
             <span class="pill">$40–$100/hr</span>
             <span class="pill">start this week</span>
@@ -256,7 +285,7 @@
 
         <div class="idea">
           <h3>pet sitting for local families</h3>
-          <p>Teachers are trusted. Families travel. Pets still need care.</p>
+          <p>Families travel in the summer. Teachers are already trusted people. That combination might be useful.</p>
           <div class="facts">
             <span class="pill">varies</span>
             <span class="pill">start fast</span>
@@ -266,11 +295,11 @@
 
         <div class="idea">
           <h3>teach adults one tech skill</h3>
-          <p>AI, Google Drive, Canva, spreadsheets, phone photos, basic organization.</p>
+          <p>Offer one simple help session: AI, Google Drive, Canva, spreadsheets, phone photos, or organizing files.</p>
           <div class="facts">
             <span class="pill">$50–$150/session?</span>
             <span class="pill">start this week</span>
-            <span class="pill">patient explainers</span>
+            <span class="pill">good for patient explainers</span>
           </div>
         </div>
       </div>
@@ -278,52 +307,56 @@
 
     <section class="submit" id="submit">
       <h2>add an idea</h2>
-      <p>
-        Add something you did, saw, or think a teacher could realistically try.
+
+      <p class="form-intro">
+        Add the kind of idea you would actually tell another teacher in the hallway.
+        It does not need to be polished. It just needs to be useful.
       </p>
 
-      <form id="ideaForm">
-        <label for="title">Idea</label>
-        <input id="title" name="title" required placeholder="Example: small group math review" />
+      <div class="mini-example">
+        <strong>Good submission:</strong> “I texted three families and offered a 2-week math review before school started. One family said yes.”
+        <br>
+        <strong>Less useful:</strong> “Tutoring.”
+      </div>
 
-        <label for="details">What is it?</label>
-        <textarea id="details" name="details" required placeholder="A short explanation."></textarea>
+      <form id="ideaForm">
+        <label for="title">What should we call the idea?</label>
+        <p class="help">Keep it short. Write it like a real person would search the list.</p>
+        <input id="title" name="title" required placeholder="Example: text 3 families about summer tutoring" />
+
+        <label for="details">How would another teacher actually start?</label>
+        <p class="help">This is the part that matters. What would they do first?</p>
+        <textarea id="details" name="details" required placeholder="Example: Pick one thing you can help with, then text a few families who already know you. Keep the offer specific: 4 summer math review sessions, 45 minutes each."></textarea>
 
         <div class="form-grid">
           <div>
-            <label for="pay">Pay</label>
-            <input id="pay" name="pay" placeholder="Example: $60/hr" />
+            <label for="pay">What might it pay?</label>
+            <p class="help">A guess is okay.</p>
+            <input id="pay" name="pay" placeholder="Example: $60/hr or $200 for 4 sessions" />
           </div>
 
           <div>
-            <label for="speed">How fast?</label>
-            <select id="speed" name="speed">
-              <option>start this week</option>
-              <option>1–2 weeks</option>
-              <option>later this summer</option>
-              <option>not sure</option>
-            </select>
+            <label for="speed">How quickly could someone try it?</label>
+            <p class="help">Write it naturally. A rough answer is fine.</p>
+            <input id="speed" name="speed" placeholder="Example: this week if you already know families" />
           </div>
         </div>
 
         <div class="form-grid">
           <div>
-            <label for="cost">Cost to start</label>
-            <select id="cost" name="cost">
-              <option>$0 to start</option>
-              <option>under $50</option>
-              <option>$50–$200</option>
-              <option>not sure</option>
-            </select>
+            <label for="cost">Does it cost anything to start?</label>
+            <p class="help">Include anything annoying: supplies, driving, platform fees, time.</p>
+            <input id="cost" name="cost" placeholder="Example: $0, unless you print flyers" />
           </div>
 
           <div>
             <label for="name">Credit</label>
+            <p class="help">Optional. Anonymous is fine.</p>
             <input id="name" name="name" placeholder="Anonymous or your first name" />
           </div>
         </div>
 
-        <button class="button" type="submit">Add idea</button>
+        <button class="button" type="submit">Add this idea</button>
         <div id="status" class="status"></div>
       </form>
     </section>
@@ -351,7 +384,7 @@
       const safeTitle = escapeHTML(idea.title || "untitled idea");
       const safeDetails = escapeHTML(idea.details || "");
       const safePay = escapeHTML(idea.pay || "pay unknown");
-      const safeSpeed = escapeHTML(idea.speed || "speed unknown");
+      const safeSpeed = escapeHTML(idea.speed || "timing unknown");
       const safeCost = escapeHTML(idea.cost || "cost unknown");
       const safeName = escapeHTML(idea.name || "anonymous");
 
@@ -376,7 +409,7 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        status.textContent = "Could not load ideas. Database connected, but the table or read policy is blocked.";
+        status.textContent = "Could not load ideas yet. Try refreshing in a minute.";
         return;
       }
 
@@ -398,7 +431,8 @@
         name: formData.get("name").trim() || "anonymous"
       };
 
-      status.textContent = "Adding idea...";
+      status.className = "status";
+      status.textContent = "Adding it to the list...";
 
       const { data, error } = await supabase
         .from("teacher_money_ideas")
@@ -408,13 +442,15 @@
 
       if (error) {
         console.error(error);
-        status.textContent = "Could not add idea. Supabase rejected the insert.";
+        status.textContent = "It did not add. Try again, or send it to me another way.";
         return;
       }
 
       ideasList.insertAdjacentHTML("afterbegin", ideaHTML(data));
       ideaForm.reset();
-      status.textContent = "Added. Thank you.";
+      status.className = "status good";
+      status.textContent = "Added. It should now show at the top of the ideas list.";
+      document.querySelector("#ideas").scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     function escapeHTML(value) {
