@@ -69,7 +69,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    a.button {
+    a.button, button.button {
       text-decoration: none;
       color: var(--ink);
       border: 2px solid var(--ink);
@@ -78,6 +78,9 @@
       background: var(--yellow);
       font-weight: 850;
       box-shadow: 4px 4px 0 rgba(43,36,28,.18);
+      cursor: pointer;
+      font: inherit;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     a.button.secondary { background: var(--paper); }
@@ -148,12 +151,42 @@
       background: #f7fbf6;
     }
 
-    ul {
-      margin: 8px 0 0 20px;
-      padding: 0;
+    label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 4px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: .9rem;
+      font-weight: 800;
     }
 
-    li { margin: 6px 0; }
+    input, textarea, select {
+      width: 100%;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: white;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: .93rem;
+      color: var(--muted);
+    }
 
     .small {
       color: var(--muted);
@@ -166,6 +199,10 @@
       text-align: center;
       font-size: .95rem;
       margin-top: 28px;
+    }
+
+    @media (max-width: 680px) {
+      .form-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -188,7 +225,7 @@
 
       <div class="buttons">
         <a class="button" href="#ideas">See ideas</a>
-        <a class="button secondary" href="YOUR_FORM_LINK_HERE">Share one</a>
+        <a class="button secondary" href="#submit">Add one</a>
       </div>
     </header>
 
@@ -205,9 +242,8 @@
     </section>
 
     <section id="ideas">
-      <h2>starter ideas</h2>
-
-      <div class="ideas">
+      <h2>ideas people added</h2>
+      <div id="ideasList" class="ideas">
         <div class="idea">
           <h3>private tutoring</h3>
           <p>Send one clear offer to families who already know or trust you.</p>
@@ -215,16 +251,6 @@
             <span class="pill">$40–$100/hr</span>
             <span class="pill">start this week</span>
             <span class="pill">$0 to start</span>
-          </div>
-        </div>
-
-        <div class="idea">
-          <h3>small group review</h3>
-          <p>One topic. A few students. Same prep, better use of time.</p>
-          <div class="facts">
-            <span class="pill">group pricing</span>
-            <span class="pill">1–2 weeks</span>
-            <span class="pill">math/writing</span>
           </div>
         </div>
 
@@ -247,55 +273,157 @@
             <span class="pill">patient explainers</span>
           </div>
         </div>
-
-        <div class="idea">
-          <h3>college essay help</h3>
-          <p>Help students brainstorm, organize, or revise.</p>
-          <div class="facts">
-            <span class="pill">higher pay</span>
-            <span class="pill">seasonal</span>
-            <span class="pill">writing/editing</span>
-          </div>
-        </div>
-
-        <div class="idea">
-          <h3>back-to-school setup</h3>
-          <p>Folders, calendar, laptop, routines, passwords, plan.</p>
-          <div class="facts">
-            <span class="pill">session-based</span>
-            <span class="pill">late summer</span>
-            <span class="pill">organized teachers</span>
-          </div>
-        </div>
       </div>
     </section>
 
     <section class="submit" id="submit">
-      <h2>share an idea</h2>
+      <h2>add an idea</h2>
       <p>
-        Did you do something that actually helped?
-        Send the idea. Name optional.
+        Add something you did, saw, or think a teacher could realistically try.
       </p>
 
-      <ul>
-        <li>What did you do?</li>
-        <li>How did you start?</li>
-        <li>How much did it pay?</li>
-        <li>Would you do it again?</li>
-      </ul>
+      <form id="ideaForm">
+        <label for="title">Idea</label>
+        <input id="title" name="title" required placeholder="Example: small group math review" />
 
-      <p>
-        <a class="button" href="YOUR_FORM_LINK_HERE">Share an idea</a>
-      </p>
+        <label for="details">What is it?</label>
+        <textarea id="details" name="details" required placeholder="A short explanation."></textarea>
 
-      <p class="small">
-        I’ll read the ideas and add the useful ones here.
-      </p>
+        <div class="form-grid">
+          <div>
+            <label for="pay">Pay</label>
+            <input id="pay" name="pay" placeholder="Example: $60/hr" />
+          </div>
+
+          <div>
+            <label for="speed">How fast?</label>
+            <select id="speed" name="speed">
+              <option>start this week</option>
+              <option>1–2 weeks</option>
+              <option>later this summer</option>
+              <option>not sure</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label for="cost">Cost to start</label>
+            <select id="cost" name="cost">
+              <option>$0 to start</option>
+              <option>under $50</option>
+              <option>$50–$200</option>
+              <option>not sure</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="name">Credit</label>
+            <input id="name" name="name" placeholder="Anonymous or your first name" />
+          </div>
+        </div>
+
+        <button class="button" type="submit">Add idea</button>
+        <div id="status" class="status"></div>
+      </form>
     </section>
 
     <footer>
       Made by a teacher trying to figure this out too.
     </footer>
   </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "https://rlbycipdwncmsugojjat.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_L7R53AO9JpmIf89bBvJn1A_FFdrW1kv";
+
+    const ideasList = document.querySelector("#ideasList");
+    const ideaForm = document.querySelector("#ideaForm");
+    const status = document.querySelector("#status");
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    loadIdeas();
+
+    function ideaHTML(idea) {
+      const safeTitle = escapeHTML(idea.title || "untitled idea");
+      const safeDetails = escapeHTML(idea.details || "");
+      const safePay = escapeHTML(idea.pay || "pay unknown");
+      const safeSpeed = escapeHTML(idea.speed || "speed unknown");
+      const safeCost = escapeHTML(idea.cost || "cost unknown");
+      const safeName = escapeHTML(idea.name || "anonymous");
+
+      return `
+        <div class="idea">
+          <h3>${safeTitle}</h3>
+          <p>${safeDetails}</p>
+          <div class="facts">
+            <span class="pill">${safePay}</span>
+            <span class="pill">${safeSpeed}</span>
+            <span class="pill">${safeCost}</span>
+            <span class="pill">added by ${safeName}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadIdeas() {
+      const { data, error } = await supabase
+        .from("teacher_money_ideas")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        status.textContent = "Could not load ideas. The database is connected, but something is wrong with the table or policy.";
+        return;
+      }
+
+      if (data && data.length) {
+        ideasList.insertAdjacentHTML("afterbegin", data.map(ideaHTML).join(""));
+      }
+    }
+
+    ideaForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(ideaForm);
+      const idea = {
+        title: formData.get("title").trim(),
+        details: formData.get("details").trim(),
+        pay: formData.get("pay").trim(),
+        speed: formData.get("speed"),
+        cost: formData.get("cost"),
+        name: formData.get("name").trim() || "anonymous"
+      };
+
+      status.textContent = "Adding idea...";
+
+      const { data, error } = await supabase
+        .from("teacher_money_ideas")
+        .insert([idea])
+        .select()
+        .single();
+
+      if (error) {
+        status.textContent = "Could not add idea. The database is connected, but insert permission may be blocked.";
+        return;
+      }
+
+      ideasList.insertAdjacentHTML("afterbegin", ideaHTML(data));
+      ideaForm.reset();
+      status.textContent = "Added. Thank you.";
+    });
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
 </body>
 </html>
