@@ -2,316 +2,582 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Second Door</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box 2</title>
+  <meta name="color-scheme" content="dark" />
 
   <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #111827, #020617 70%);
-      color: #e5e7eb;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+
+      --panel: rgba(255,255,255,0.055);
+      --border: rgba(255,255,255,0.12);
+
+      --text: rgba(245,248,255,0.90);
+      --muted: rgba(245,248,255,0.56);
+
+      --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffd07a;
+      --danger:#ff8c8c;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 980px;
+      --r: 18px;
+      --shadow: 0 22px 90px rgba(0,0,0,0.62);
     }
 
-    .page {
-      max-width: 780px;
-      width: 100%;
-      background: rgba(15, 23, 42, 0.94);
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      border-radius: 18px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    *{ box-sizing:border-box; }
+
+    html,body{
+      min-height:100%;
     }
 
-    .small {
-      color: #94a3b8;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-size: 12px;
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 16px 70px;
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(620px 260px at 15% 0%, rgba(125,182,255,0.18), transparent 55%),
+        radial-gradient(620px 260px at 85% 0%, rgba(134,243,198,0.16), transparent 55%);
+      opacity: 0.30;
+      pointer-events:none;
+      filter: blur(7px);
+    }
+
+    .content{
+      position:relative;
+      padding: 22px;
+      display:flex;
+      flex-direction:column;
+      gap: 18px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .trace{
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
+      opacity:0.40;
+      border-radius:999px;
+    }
+
+    .badge{
+      border: 1px solid rgba(134,243,198,0.24);
+      background: rgba(134,243,198,0.06);
+      color: rgba(134,243,198,0.86);
+      padding: 8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(26px, 4vw, 46px);
+      line-height:1.05;
+      letter-spacing:-0.05em;
+    }
+
+    .intro{
+      margin:0;
+      color: var(--muted);
+      line-height:1.7;
+      font-size:15px;
+      max-width: 820px;
+    }
+
+    .intro strong{
+      color: rgba(245,248,255,0.92);
+      font-weight:700;
+    }
+
+    .rule{
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.24);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: rgba(245,248,255,0.70);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .codeCard{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.26);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .codeCard.solved{
+      border-color: rgba(134,243,198,0.38);
+      box-shadow: 0 0 22px rgba(134,243,198,0.07);
+    }
+
+    .codeTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .codeTitle{
+      color: rgba(125,182,255,0.86);
+      font-size:13px;
+    }
+
+    .status{
+      color: rgba(245,248,255,0.38);
+      font-size:12px;
+    }
+
+    .codeCard.solved .status{
+      color: rgba(134,243,198,0.86);
+    }
+
+    pre{
+      margin:0;
+      padding: 15px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height:1.6;
+      font-size:14px;
+      color: rgba(245,248,255,0.88);
+    }
+
+    .answerRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 0 14px 14px;
+    }
+
+    .answerRow span{
+      color: rgba(245,248,255,0.48);
+      font-size:13px;
+    }
+
+    input{
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px;
+      background: rgba(0,0,0,0.30);
+      color: rgba(245,248,255,0.92);
+      font-family: var(--mono);
+      padding: 9px 10px;
+      outline: none;
+    }
+
+    input:focus{
+      border-color: rgba(134,243,198,0.45);
+      box-shadow: 0 0 18px rgba(134,243,198,0.10);
+    }
+
+    .miniInput{
+      width: 130px;
+    }
+
+    button{
+      border: 1px solid rgba(134,243,198,0.25);
+      background: rgba(134,243,198,0.09);
+      color: rgba(245,248,255,0.88);
+      font-family: var(--mono);
+      border-radius: 9px;
+      padding: 9px 11px;
+      cursor:pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    button:hover{
+      transform: translateY(-1px);
+      border-color: rgba(134,243,198,0.45);
+      background: rgba(134,243,198,0.13);
+    }
+
+    .collected{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.035);
+      padding: 16px;
+    }
+
+    .collectedTitle{
+      color: rgba(255,208,122,0.80);
+      font-size:13px;
       margin-bottom: 12px;
     }
 
-    h1 {
-      font-size: 34px;
-      margin: 0 0 16px;
-      line-height: 1.1;
+    .wordSlots{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
     }
 
-    p {
-      font-size: 18px;
-      line-height: 1.6;
-      color: #cbd5e1;
+    .slot{
+      min-width: 84px;
+      min-height: 38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      color: rgba(245,248,255,0.32);
+      font-size:13px;
+      padding: 8px 12px;
     }
 
-    .clue {
-      margin: 28px 0;
-      padding: 20px;
-      border-left: 4px solid #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
-      border-radius: 10px;
-      color: #e0f2fe;
-      font-size: 18px;
-      line-height: 1.6;
+    .slot.filled{
+      color: rgba(134,243,198,0.92);
+      border-color: rgba(134,243,198,0.28);
+      background: rgba(134,243,198,0.07);
     }
 
-    textarea {
-      width: 100%;
-      min-height: 170px;
-      box-sizing: border-box;
+    .finalGate{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.28);
       padding: 16px;
-      border-radius: 12px;
-      border: 1px solid #475569;
-      background: #020617;
-      color: #f8fafc;
-      font-size: 16px;
-      margin-top: 10px;
-      resize: vertical;
-      line-height: 1.5;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
     }
 
-    button {
-      margin-top: 14px;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 12px;
-      background: #38bdf8;
-      color: #020617;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
+    .finalGate label{
+      color: rgba(245,248,255,0.70);
+      line-height:1.6;
+      font-size:14px;
     }
 
-    button:hover {
-      background: #7dd3fc;
+    .finalRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
     }
 
-    .error {
-      color: #fca5a5;
-      margin-top: 14px;
-      display: none;
+    #finalInput{
+      flex:1;
+      min-width: 260px;
     }
 
-    .secret {
-      display: none;
-      margin-top: 32px;
-      border-top: 1px solid rgba(148, 163, 184, 0.3);
-      padding-top: 28px;
-      animation: fadeIn 0.8s ease forwards;
+    #finalMsg{
+      color: rgba(255,208,122,0.78);
+      font-size:13px;
+      min-height: 18px;
     }
 
-    .prize {
-      background: rgba(34, 197, 94, 0.12);
-      border: 1px solid rgba(34, 197, 94, 0.35);
-      color: #dcfce7;
-      padding: 16px;
-      border-radius: 12px;
-      margin: 20px 0;
-      font-size: 18px;
+    .locked{
+      opacity:0.45;
     }
 
-    .wisdom {
-      font-size: 20px;
-      color: #f8fafc;
+    .hiddenNote{
+      color: rgba(245,248,255,0.24);
+      font-size: 12px;
+      line-height:1.6;
     }
 
-    .final-line {
-      margin-top: 28px;
-      font-size: 22px;
-      color: #ffffff;
-      font-weight: bold;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
+    @media (max-width: 760px){
+      .grid{
+        grid-template-columns: 1fr;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+
+      .content{
+        padding: 16px;
+      }
+
+      .answerRow{
+        flex-wrap:wrap;
+      }
+
+      .miniInput{
+        width: 100%;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="page">
-    <div class="small">Hidden classroom page</div>
+  <div class="wrap">
+    <div class="card">
+      <div class="content">
 
-    <h1>The second door is locked.</h1>
+        <div class="topline">
+          <div class="trace" aria-hidden="true"></div>
+          <div class="badge">BLACK BOX 2</div>
+        </div>
 
-    <p>
-      A message can be more than a message.
-      Sometimes it is a key.
-    </p>
+        <h1>The Code Room</h1>
 
-    <div class="clue">
-      Paste the message you found.<br><br>
-      Do not shorten it.<br>
-      Do not explain it.<br>
-      Do not make it prettier.<br><br>
-      The whole thing is the password.
-    </div>
+        <p class="intro">
+          You opened the first door by turning <strong>binary</strong> into words.
+          Now do what you practiced in CodeHS:
+          read the code, predict what happens, and stay with the problem long enough for it to make sense.
+        </p>
 
-    <label for="password">Enter the password:</label>
-    <textarea id="password" placeholder="Paste the full message here..."></textarea>
+        <div class="rule">
+          Each program below prints one word. Type the printed word for each program.
+          When all six words are collected, put the sentence together to open the final door.
+        </div>
 
-    <button onclick="checkPassword()">Unlock</button>
+        <div class="grid">
 
-    <div id="error" class="error">
-      Not yet. The key only works when the whole message is there.
-    </div>
+          <div class="codeCard" data-answer="I" data-slot="0">
+            <div class="codeTop">
+              <div class="codeTitle">program 01</div>
+              <div class="status">waiting</div>
+            </div>
+<pre>message = "I can do hard things"
+print(message[0])</pre>
+            <div class="answerRow">
+              <span>prints:</span>
+              <input class="miniInput" autocomplete="off" />
+              <button>check</button>
+            </div>
+          </div>
 
-    <div id="secret" class="secret">
-      <div class="small">Unlocked</div>
+          <div class="codeCard" data-answer="CAN" data-slot="1">
+            <div class="codeTop">
+              <div class="codeTitle">program 02</div>
+              <div class="status">waiting</div>
+            </div>
+<pre>word = "can't"
+word = word.replace("n't", "")
+print(word.upper())</pre>
+            <div class="answerRow">
+              <span>prints:</span>
+              <input class="miniInput" autocomplete="off" />
+              <button>check</button>
+            </div>
+          </div>
 
-      <h1>You found the part most people miss.</h1>
+          <div class="codeCard" data-answer="SIT" data-slot="2">
+            <div class="codeTop">
+              <div class="codeTitle">program 03</div>
+              <div class="status">waiting</div>
+            </div>
+<pre>for try_number in range(3):
+    print("try again")
 
-      <div class="prize">
-        The first 3 students who show this screen to Mr. Steckler get a free stylus.
+print("sit")</pre>
+            <div class="answerRow">
+              <span>last word:</span>
+              <input class="miniInput" autocomplete="off" />
+              <button>check</button>
+            </div>
+          </div>
+
+          <div class="codeCard" data-answer="WITH" data-slot="3">
+            <div class="codeTop">
+              <div class="codeTitle">program 04</div>
+              <div class="status">waiting</div>
+            </div>
+<pre>words = ["run", "hide", "with", "quit"]
+print(words[2])</pre>
+            <div class="answerRow">
+              <span>prints:</span>
+              <input class="miniInput" autocomplete="off" />
+              <button>check</button>
+            </div>
+          </div>
+
+          <div class="codeCard" data-answer="HARD" data-slot="4">
+            <div class="codeTop">
+              <div class="codeTitle">program 05</div>
+              <div class="status">waiting</div>
+            </div>
+<pre>problem = "easy"
+problem = "hard"
+print(problem)</pre>
+            <div class="answerRow">
+              <span>prints:</span>
+              <input class="miniInput" autocomplete="off" />
+              <button>check</button>
+            </div>
+          </div>
+
+          <div class="codeCard" data-answer="THINGS" data-slot="5">
+            <div class="codeTop">
+              <div class="codeTitle">program 06</div>
+              <div class="status">waiting</div>
+            </div>
+<pre>things = ["loops", "bugs", "errors", "questions"]
+print("things")</pre>
+            <div class="answerRow">
+              <span>prints:</span>
+              <input class="miniInput" autocomplete="off" />
+              <button>check</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="collected">
+          <div class="collectedTitle">collected sentence</div>
+          <div class="wordSlots">
+            <div class="slot">word 1</div>
+            <div class="slot">word 2</div>
+            <div class="slot">word 3</div>
+            <div class="slot">word 4</div>
+            <div class="slot">word 5</div>
+            <div class="slot">word 6</div>
+          </div>
+        </div>
+
+        <div class="finalGate locked" id="finalGate">
+          <label for="finalInput">
+            When the six words make a sentence, type the full sentence below.
+          </label>
+
+          <div class="finalRow">
+            <input id="finalInput" placeholder="full sentence" autocomplete="off" />
+            <button id="finalButton">open final door</button>
+          </div>
+
+          <div id="finalMsg">collect all six words first.</div>
+        </div>
+
+        <div class="hiddenNote">
+          The point is not that the code was easy. The point is that it became readable after you stayed with it.
+        </div>
+
       </div>
-
-      <p class="wisdom">
-        But the stylus is not the real prize.
-      </p>
-
-      <p>
-        The real prize is that you just followed a chain of clues.
-      </p>
-
-      <p>
-        You typed words into a machine.
-        The machine turned those words into instructions.
-        The instructions changed what the page showed you.
-      </p>
-
-      <p>
-        That may sound small.
-        It is not small.
-      </p>
-
-      <p>
-        This is what coding really is:
-      </p>
-
-      <p class="wisdom">
-        You translate an idea into something a computer can understand.
-      </p>
-
-      <p>
-        Most students think they need to understand the whole thing before they start.
-        They wait until they feel smart.
-        They wait until they know the answer.
-        They wait until the project looks possible.
-      </p>
-
-      <p>
-        That is backwards.
-      </p>
-
-      <p>
-        The students who get better faster are usually the students who are willing to test one small thing before they fully understand it.
-      </p>
-
-      <p>
-        Change one number.
-        Run the code.
-        Read the error.
-        Move one block.
-        Try one ugly version.
-        Make it slightly better.
-      </p>
-
-      <p>
-        Here is a belief that is useful, even if it is not perfectly true:
-      </p>
-
-      <p class="wisdom">
-        “If I keep testing the next small thing, I will eventually find a way forward.”
-      </p>
-
-      <p>
-        It is not always true.
-        Some problems are unfair.
-        Some systems are broken.
-        Some people get luckier breaks than others.
-      </p>
-
-      <p>
-        But it is useful because it makes you do the thing that gives you new information.
-      </p>
-
-      <p>
-        Thinking does not always give you the answer.
-      </p>
-
-      <p>
-        Testing does.
-      </p>
-
-      <p>
-        The secret is not “work hard.”
-      </p>
-
-      <p>
-        The secret is more specific:
-      </p>
-
-      <p class="wisdom">
-        Work hard on the next visible step.
-      </p>
-
-      <p>
-        Do not stare at the whole mountain.
-        Find the next rock your hand can reach.
-      </p>
-
-      <p>
-        That is how people learn code.
-        That is how people build robots.
-        That is how people become the kind of person who can solve problems they were not shown how to solve.
-      </p>
-
-      <p class="final-line">
-        You were not lucky to find this. You followed a clue. That is a skill. Now go build.
-      </p>
     </div>
   </div>
 
   <script>
-    const correctPassword = `
-CONGRATS.
-YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
-A LOT OF FUTURES START WITH ONE LUCKY BREAK.
-THIS CAN BE YOURS, IF YOU KEEP GOING.
-NOW GO BUILD.
-`;
+    (function(){
+      const NEXT_URL = "https://dsteckler.com/blackbox3s";
 
-    function normalize(text) {
-      return text
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, " ");
-    }
+      const cards = Array.from(document.querySelectorAll(".codeCard"));
+      const slots = Array.from(document.querySelectorAll(".slot"));
+      const finalGate = document.getElementById("finalGate");
+      const finalInput = document.getElementById("finalInput");
+      const finalButton = document.getElementById("finalButton");
+      const finalMsg = document.getElementById("finalMsg");
 
-    function checkPassword() {
-      const input = document.getElementById("password").value;
-      const secret = document.getElementById("secret");
-      const error = document.getElementById("error");
+      const solved = new Set();
 
-      if (normalize(input) === normalize(correctPassword)) {
-        secret.style.display = "block";
-        error.style.display = "none";
-      } else {
-        secret.style.display = "none";
-        error.style.display = "block";
+      console.log("%cCodeHS rule: predict first, then test your thinking.", "color: rgba(134,243,198,0.65); font-family: ui-monospace; font-size: 12px;");
+
+      function clean(value){
+        return value
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "");
       }
-    }
+
+      function updateFinalGate(){
+        if(solved.size === cards.length){
+          finalGate.classList.remove("locked");
+          finalMsg.textContent = "the final door is listening.";
+        }
+      }
+
+      cards.forEach((card) => {
+        const answer = clean(card.dataset.answer);
+        const slotIndex = Number(card.dataset.slot);
+        const input = card.querySelector("input");
+        const button = card.querySelector("button");
+        const status = card.querySelector(".status");
+
+        function checkCard(){
+          const guess = clean(input.value);
+
+          if(guess === answer){
+            card.classList.add("solved");
+            status.textContent = "solved";
+            input.value = card.dataset.answer;
+            slots[slotIndex].textContent = card.dataset.answer;
+            slots[slotIndex].classList.add("filled");
+            solved.add(slotIndex);
+            updateFinalGate();
+          }else{
+            status.textContent = "not yet";
+            setTimeout(() => {
+              if(!card.classList.contains("solved")){
+                status.textContent = "waiting";
+              }
+            }, 900);
+          }
+        }
+
+        button.addEventListener("click", checkCard);
+
+        input.addEventListener("keydown", (e) => {
+          if(e.key === "Enter"){
+            checkCard();
+          }
+        });
+      });
+
+      function checkFinal(){
+        if(solved.size !== cards.length){
+          finalMsg.textContent = "collect all six words first.";
+          return;
+        }
+
+        const finalAnswer = clean(finalInput.value);
+
+        if(finalAnswer === "ICANSITWITHHARDTHINGS"){
+          finalMsg.textContent = "final door opening...";
+          window.location.href = NEXT_URL;
+        }else{
+          finalMsg.textContent = "not yet. read the sentence you collected.";
+        }
+      }
+
+      finalButton.addEventListener("click", checkFinal);
+
+      finalInput.addEventListener("keydown", (e) => {
+        if(e.key === "Enter"){
+          checkFinal();
+        }
+      });
+    })();
   </script>
 </body>
 </html>
