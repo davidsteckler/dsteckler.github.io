@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box Responses</title>
+  <meta name="color-scheme" content="dark" />
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(245,248,255,0.90);
+      --muted: rgba(245,248,255,0.56);
+      --mint:#86f3c6;
+      --blue:#7db6ff;
+      --warm:#ffd07a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 980px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      background:
+        radial-gradient(1100px 620px at 18% 12%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 18%, rgba(134,243,198,0.10), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      min-height:100vh;
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin:0 auto;
+      padding:34px 16px 70px;
+    }
+
+    .card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow:0 22px 90px rgba(0,0,0,0.62);
+      padding:22px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .trace{
+      height:1px;
+      flex:1;
+      background:linear-gradient(90deg, transparent, rgba(125,182,255,0.34), rgba(134,243,198,0.26), transparent);
+      opacity:0.5;
+    }
+
+    .badge{
+      border:1px solid rgba(134,243,198,0.24);
+      background:rgba(134,243,198,0.06);
+      color:rgba(134,243,198,0.86);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(28px, 5vw, 52px);
+      letter-spacing:-0.06em;
+      line-height:1.05;
+    }
+
+    .intro{
+      color:var(--muted);
+      line-height:1.7;
+      margin:0 0 20px;
+      max-width:800px;
+      font-size:15px;
+    }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    button{
+      border:1px solid rgba(134,243,198,0.25);
+      background:rgba(134,243,198,0.09);
+      color:rgba(245,248,255,0.88);
+      font-family:var(--mono);
+      border-radius:9px;
+      padding:10px 12px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      border-color:rgba(134,243,198,0.45);
+      background:rgba(134,243,198,0.13);
+    }
+
+    #status{
+      color:rgba(255,208,122,0.82);
+      font-size:13px;
+    }
+
+    .responses{
+      display:grid;
+      gap:14px;
+    }
+
+    .response{
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:16px;
+      background:rgba(0,0,0,0.26);
+      padding:16px;
+    }
+
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+      color:rgba(245,248,255,0.46);
+      font-size:12px;
+    }
+
+    .name{
+      color:rgba(134,243,198,0.92);
+      font-weight:700;
+      letter-spacing:0.03em;
+    }
+
+    .reflection{
+      color:rgba(245,248,255,0.82);
+      line-height:1.7;
+      white-space:pre-wrap;
+      font-size:15px;
+    }
+
+    .empty{
+      border:1px dashed rgba(255,255,255,0.14);
+      border-radius:16px;
+      padding:18px;
+      color:rgba(245,248,255,0.48);
+      line-height:1.6;
+    }
+
+    .tiny{
+      margin-top:18px;
+      color:rgba(245,248,255,0.28);
+      font-size:12px;
+      line-height:1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="topline">
+        <div class="trace"></div>
+        <div class="badge">BLACK BOX RESPONSES</div>
+      </div>
+
+      <h1>What Students Stayed With</h1>
+
+      <p class="intro">
+        These are the reflections submitted at the end of Black Box 3.
+      </p>
+
+      <div class="controls">
+        <button id="refreshBtn">refresh responses</button>
+        <div id="status">loading...</div>
+      </div>
+
+      <div class="responses" id="responses"></div>
+
+      <div class="tiny">
+        Hidden page: dsteckler.com/blackboxr
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "https://jcputmbarhjcdlhquxys.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5QgQKOilEHqE8w5tqLx_3A_V8Qwggwg";
+
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const responsesEl = document.getElementById("responses");
+    const statusEl = document.getElementById("status");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    function escapeHtml(value){
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatDate(value){
+      try{
+        return new Date(value).toLocaleString();
+      }catch(e){
+        return value || "";
+      }
+    }
+
+    async function loadResponses(){
+      statusEl.textContent = "loading...";
+      responsesEl.innerHTML = "";
+
+      const { data, error } = await db
+        .from("blackbox_reflections")
+        .select("created_at, student_name, reflection")
+        .eq("page", "blackbox3z")
+        .order("created_at", { ascending: false });
+
+      if(error){
+        console.error(error);
+        statusEl.textContent = "error: " + error.message;
+        responsesEl.innerHTML = `
+          <div class="empty">
+            Could not load responses. Make sure the SELECT policy was added in Supabase.
+          </div>
+        `;
+        return;
+      }
+
+      statusEl.textContent = data.length + " response" + (data.length === 1 ? "" : "s");
+
+      if(data.length === 0){
+        responsesEl.innerHTML = `
+          <div class="empty">
+            No responses yet.
+          </div>
+        `;
+        return;
+      }
+
+      responsesEl.innerHTML = data.map(row => `
+        <div class="response">
+          <div class="meta">
+            <div class="name">${escapeHtml(row.student_name)}</div>
+            <div>${escapeHtml(formatDate(row.created_at))}</div>
+          </div>
+          <div class="reflection">${escapeHtml(row.reflection)}</div>
+        </div>
+      `).join("");
+    }
+
+    refreshBtn.addEventListener("click", loadResponses);
+
+    loadResponses();
+  </script>
+</body>
+</html>
