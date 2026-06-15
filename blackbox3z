@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box 3</title>
+  <meta name="color-scheme" content="dark" />
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(245,248,255,0.90);
+      --muted: rgba(245,248,255,0.56);
+      --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffd07a;
+      --danger:#ff8c8c;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 980px;
+      --r: 18px;
+      --shadow: 0 22px 90px rgba(0,0,0,0.62);
+    }
+
+    *{ box-sizing:border-box; }
+
+    html,body{
+      min-height:100%;
+    }
+
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 16px 70px;
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(620px 260px at 15% 0%, rgba(125,182,255,0.18), transparent 55%),
+        radial-gradient(620px 260px at 85% 0%, rgba(134,243,198,0.16), transparent 55%);
+      opacity: 0.30;
+      pointer-events:none;
+      filter: blur(7px);
+    }
+
+    .content{
+      position:relative;
+      padding: 22px;
+      display:flex;
+      flex-direction:column;
+      gap: 18px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .trace{
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
+      opacity:0.40;
+      border-radius:999px;
+    }
+
+    .badge{
+      border: 1px solid rgba(134,243,198,0.24);
+      background: rgba(134,243,198,0.06);
+      color: rgba(134,243,198,0.86);
+      padding: 8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(28px, 5vw, 54px);
+      line-height:1.04;
+      letter-spacing:-0.06em;
+    }
+
+    .intro{
+      margin:0;
+      color: var(--muted);
+      line-height:1.7;
+      font-size:15px;
+      max-width: 850px;
+    }
+
+    .intro strong{
+      color: rgba(245,248,255,0.94);
+    }
+
+    .rule{
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.24);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: rgba(245,248,255,0.70);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .huntGrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:14px;
+    }
+
+    .huntCard{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.26);
+      overflow:hidden;
+      min-height: 235px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .huntCard.solved{
+      border-color: rgba(134,243,198,0.38);
+      box-shadow: 0 0 22px rgba(134,243,198,0.07);
+    }
+
+    .huntTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .huntTitle{
+      color: rgba(125,182,255,0.86);
+      font-size:13px;
+    }
+
+    .status{
+      color: rgba(245,248,255,0.38);
+      font-size:12px;
+    }
+
+    .huntCard.solved .status{
+      color: rgba(134,243,198,0.86);
+    }
+
+    .huntBody{
+      padding: 16px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      flex:1;
+    }
+
+    .huntBody p{
+      margin:0;
+      color: rgba(245,248,255,0.65);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    button{
+      border: 1px solid rgba(134,243,198,0.25);
+      background: rgba(134,243,198,0.09);
+      color: rgba(245,248,255,0.88);
+      font-family: var(--mono);
+      border-radius: 9px;
+      padding: 10px 12px;
+      cursor:pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    button:hover{
+      transform: translateY(-1px);
+      border-color: rgba(134,243,198,0.45);
+      background: rgba(134,243,198,0.13);
+    }
+
+    button:disabled{
+      opacity:0.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    input, textarea{
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px;
+      background: rgba(0,0,0,0.30);
+      color: rgba(245,248,255,0.92);
+      font-family: var(--mono);
+      padding: 10px;
+      outline: none;
+    }
+
+    input:focus, textarea:focus{
+      border-color: rgba(134,243,198,0.45);
+      box-shadow: 0 0 18px rgba(134,243,198,0.10);
+    }
+
+    textarea{
+      min-height: 125px;
+      resize: vertical;
+      line-height:1.55;
+    }
+
+    pre{
+      margin:0;
+      padding: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height:1.6;
+      font-size:14px;
+      color: rgba(245,248,255,0.88);
+      border-radius: 12px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .answerRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:auto;
+    }
+
+    .answerRow input{
+      flex:1;
+      min-width: 150px;
+    }
+
+    .blackBoxButton{
+      min-height: 82px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(260px 80px at 50% 0%, rgba(125,182,255,0.16), transparent 60%),
+        rgba(0,0,0,0.32);
+      color: rgba(245,248,255,0.60);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .blackBoxButton:hover{
+      color: rgba(245,248,255,0.88);
+    }
+
+    .holdBox{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.24);
+      padding: 14px;
+    }
+
+    .holdBarOuter{
+      height: 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.08);
+      overflow:hidden;
+      margin-top:12px;
+    }
+
+    .holdBarInner{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(125,182,255,0.70), rgba(134,243,198,0.78));
+      border-radius:999px;
+      transition: width 80ms linear;
+    }
+
+    .bulb{
+      width: 110px;
+      height: 110px;
+      margin: 2px auto 0;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(circle at 50% 36%, rgba(255,208,122,0.15), transparent 38%),
+        rgba(0,0,0,0.25);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:44px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .bulb.ready{
+      border-color: rgba(255,208,122,0.42);
+      box-shadow: 0 0 32px rgba(255,208,122,0.12);
+    }
+
+    .bulb:hover{
+      transform: translateY(-1px);
+    }
+
+    .revealedWord{
+      min-height: 28px;
+      color: rgba(134,243,198,0.92);
+      font-weight:700;
+      letter-spacing:0.08em;
+    }
+
+    .pattern{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.035);
+      padding: 16px;
+    }
+
+    .patternTitle{
+      color: rgba(255,208,122,0.80);
+      font-size:13px;
+      margin-bottom:12px;
+    }
+
+    .wordSlots{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .slot{
+      min-width: 110px;
+      min-height: 40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      color: rgba(245,248,255,0.32);
+      font-size:13px;
+      padding: 8px 12px;
+    }
+
+    .slot.filled{
+      color: rgba(134,243,198,0.92);
+      border-color: rgba(134,243,198,0.28);
+      background: rgba(134,243,198,0.07);
+    }
+
+    .lesson{
+      display:none;
+      border: 1px solid rgba(255,208,122,0.18);
+      border-radius: 16px;
+      background: rgba(255,208,122,0.045);
+      padding: 18px;
+      color: rgba(245,248,255,0.76);
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    .lesson.show{
+      display:block;
+    }
+
+    .lesson strong{
+      color: rgba(255,208,122,0.90);
+    }
+
+    .reflection{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.28);
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .reflection.locked{
+      opacity:0.45;
+    }
+
+    .reflection label{
+      color: rgba(245,248,255,0.72);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .formRow{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      gap:12px;
+    }
+
+    #submitMsg{
+      min-height:20px;
+      color: rgba(255,208,122,0.80);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .tiny{
+      color: rgba(245,248,255,0.28);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    @media (max-width: 760px){
+      .huntGrid{
+        grid-template-columns: 1fr;
+      }
+
+      .content{
+        padding: 16px;
+      }
+
+      .formRow{
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="content">
+
+        <div class="topline">
+          <div class="trace" aria-hidden="true"></div>
+          <div class="badge">BLACK BOX 3</div>
+        </div>
+
+        <h1>The Light Bulb</h1>
+
+        <p class="intro">
+          You decoded binary. You read Python. Now find the pattern underneath both.
+          This final room is not about being fast. It is about noticing what happens when you stay with something confusing.
+        </p>
+
+        <div class="rule">
+          Find the four words hidden in this room. Together, they describe the path from confusion to the light bulb moment.
+        </div>
+
+        <div class="huntGrid">
+
+          <div class="huntCard" id="card0">
+            <div class="huntTop">
+              <div class="huntTitle">clue 01</div>
+              <div class="status">waiting</div>
+            </div>
+            <div class="huntBody">
+              <p>
+                Every hard problem starts here. Click the black box to name the feeling.
+              </p>
+
+              <button class="blackBoxButton" id="blackBoxBtn">
+                open the black box
+              </button>
+
+              <div class="revealedWord" id="word0"></div>
+            </div>
+          </div>
+
+          <div class="huntCard" id="card1">
+            <div class="huntTop">
+              <div class="huntTitle">clue 02</div>
+              <div class="status">waiting</div>
+            </div>
+            <div class="huntBody">
+              <p>
+                Read the code like CodeHS. Predict the output.
+              </p>
+
+<pre>word = "try"
+word = word.replace("y", "ied")
+print(word.upper())</pre>
+
+              <div class="answerRow">
+                <input id="tryInput" placeholder="what prints?" autocomplete="off" />
+                <button id="tryBtn">check</button>
+              </div>
+
+              <div class="revealedWord" id="word1"></div>
+            </div>
+          </div>
+
+          <div class="huntCard" id="card2">
+            <div class="huntTop">
+              <div class="huntTitle">clue 03</div>
+              <div class="status">waiting</div>
+            </div>
+            <div class="huntBody">
+              <p>
+                Some problems do not open when you tap them once. Hold the button and stay with it.
+              </p>
+
+              <div class="holdBox">
+                <button id="holdBtn">hold this button</button>
+                <div class="holdBarOuter">
+                  <div class="holdBarInner" id="holdBar"></div>
+                </div>
+              </div>
+
+              <div class="revealedWord" id="word2"></div>
+            </div>
+          </div>
+
+          <div class="huntCard" id="card3">
+            <div class="huntTop">
+              <div class="huntTitle">clue 04</div>
+              <div class="status">waiting</div>
+            </div>
+            <div class="huntBody">
+              <p>
+                The last word appears after the first three. That is usually how the light bulb works too.
+              </p>
+
+              <div class="bulb" id="bulb" title="solve the first three clues first">💡</div>
+
+              <div class="revealedWord" id="word3"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="pattern">
+          <div class="patternTitle">the pattern you found</div>
+          <div class="wordSlots">
+            <div class="slot" id="slot0">word 1</div>
+            <div class="slot" id="slot1">word 2</div>
+            <div class="slot" id="slot2">word 3</div>
+            <div class="slot" id="slot3">word 4</div>
+          </div>
+        </div>
+
+        <div class="lesson" id="lesson">
+          <strong>CONFUSED → TRIED → STAYED → CLICKED</strong>
+          <br><br>
+          That is the light bulb moment.
+          It usually does not come before the hard part.
+          It comes after you stay with the hard part long enough for it to open.
+        </div>
+
+        <div class="reflection locked" id="reflectionBox">
+          <label for="studentName">
+            Final reflection. This submits to Mr. Steckler.
+          </label>
+
+          <div class="formRow">
+            <input id="studentName" placeholder="your name" autocomplete="off" />
+            <textarea id="reflectionText" placeholder="What was one problem this year that felt hard at first, and what did you do that helped you stay with it?"></textarea>
+          </div>
+
+          <button id="submitBtn" disabled>submit reflection</button>
+          <div id="submitMsg">finish the scavenger hunt first.</div>
+
+          <div class="tiny">
+            Your answer should be specific. Name the problem, then explain what you did when it did not make sense right away.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    (function(){
+      const SUPABASE_URL = "https://rlbycipdwncmsugoijat.supabase.co";
+
+      // Paste your full Supabase publishable key here.
+      // It should start with sb_publishable_
+      const SUPABASE_KEY = "PASTE_YOUR_FULL_SUPABASE_PUBLISHABLE_KEY_HERE";
+
+      const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      const words = ["CONFUSED", "TRIED", "STAYED", "CLICKED"];
+      const solved = new Set();
+
+      const lesson = document.getElementById("lesson");
+      const reflectionBox = document.getElementById("reflectionBox");
+      const submitBtn = document.getElementById("submitBtn");
+      const submitMsg = document.getElementById("submitMsg");
+
+      function clean(value){
+        return value
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "");
+      }
+
+      function markSolved(index){
+        if(solved.has(index)) return;
+
+        solved.add(index);
+
+        const card = document.getElementById("card" + index);
+        const status = card.querySelector(".status");
+        const wordSpot = document.getElementById("word" + index);
+        const slot = document.getElementById("slot" + index);
+
+        card.classList.add("solved");
+        status.textContent = "solved";
+        wordSpot.textContent = words[index];
+        slot.textContent = words[index];
+        slot.classList.add("filled");
+
+        if(solved.has(0) && solved.has(1) && solved.has(2)){
+          document.getElementById("bulb").classList.add("ready");
+          document.getElementById("bulb").title = "click";
+        }
+
+        if(solved.size === 4){
+          lesson.classList.add("show");
+          reflectionBox.classList.remove("locked");
+          submitBtn.disabled = false;
+          submitMsg.textContent = "ready to submit.";
+        }
+      }
+
+      // Clue 1
+      document.getElementById("blackBoxBtn").addEventListener("click", () => {
+        markSolved(0);
+      });
+
+      // Clue 2
+      const tryInput = document.getElementById("tryInput");
+      const tryBtn = document.getElementById("tryBtn");
+
+      function checkTry(){
+        if(clean(tryInput.value) === "TRIED"){
+          markSolved(1);
+        }else{
+          const status = document.querySelector("#card1 .status");
+          status.textContent = "not yet";
+          setTimeout(() => {
+            if(!solved.has(1)) status.textContent = "waiting";
+          }, 900);
+        }
+      }
+
+      tryBtn.addEventListener("click", checkTry);
+      tryInput.addEventListener("keydown", (e) => {
+        if(e.key === "Enter") checkTry();
+      });
+
+      // Clue 3: hold button
+      const holdBtn = document.getElementById("holdBtn");
+      const holdBar = document.getElementById("holdBar");
+      let holdTimer = null;
+      let holdProgress = 0;
+
+      function startHolding(){
+        if(solved.has(2)) return;
+
+        holdProgress = 0;
+        holdBar.style.width = "0%";
+
+        holdTimer = setInterval(() => {
+          holdProgress += 2;
+          holdBar.style.width = holdProgress + "%";
+
+          if(holdProgress >= 100){
+            clearInterval(holdTimer);
+            holdTimer = null;
+            markSolved(2);
+          }
+        }, 80);
+      }
+
+      function stopHolding(){
+        if(solved.has(2)) return;
+
+        if(holdTimer){
+          clearInterval(holdTimer);
+          holdTimer = null;
+        }
+
+        holdProgress = 0;
+        holdBar.style.width = "0%";
+      }
+
+      holdBtn.addEventListener("mousedown", startHolding);
+      holdBtn.addEventListener("mouseup", stopHolding);
+      holdBtn.addEventListener("mouseleave", stopHolding);
+
+      holdBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        startHolding();
+      });
+
+      holdBtn.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        stopHolding();
+      });
+
+      // Clue 4
+      document.getElementById("bulb").addEventListener("click", () => {
+        if(solved.has(0) && solved.has(1) && solved.has(2)){
+          markSolved(3);
+        }else{
+          const status = document.querySelector("#card3 .status");
+          status.textContent = "not yet";
+          setTimeout(() => {
+            if(!solved.has(3)) status.textContent = "waiting";
+          }, 900);
+        }
+      });
+
+      // Supabase submit
+      const studentName = document.getElementById("studentName");
+      const reflectionText = document.getElementById("reflectionText");
+
+      submitBtn.addEventListener("click", async () => {
+        if(solved.size !== 4){
+          submitMsg.textContent = "finish the scavenger hunt first.";
+          return;
+        }
+
+        const name = studentName.value.trim();
+        const reflection = reflectionText.value.trim();
+
+        if(name.length < 1){
+          submitMsg.textContent = "add your name.";
+          return;
+        }
+
+        if(reflection.length < 10){
+          submitMsg.textContent = "write a little more before submitting.";
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitMsg.textContent = "submitting...";
+
+        const { error } = await db
+          .from("blackbox_reflections")
+          .insert({
+            page: "blackbox3z",
+            student_name: name,
+            reflection: reflection
+          });
+
+        if(error){
+          console.error(error);
+          submitBtn.disabled = false;
+          submitMsg.textContent = "submission did not go through. Try again or tell Mr. Steckler.";
+          return;
+        }
+
+        submitMsg.textContent = "submitted. You finished the black box.";
+        studentName.disabled = true;
+        reflectionText.disabled = true;
+      });
+
+      console.log("%cThe light bulb comes after staying with the hard part.", "color: rgba(255,208,122,0.75); font-family: ui-monospace; font-size: 12px;");
+    })();
+  </script>
+</body>
+</html>
