@@ -1,16 +1,18 @@
+Yes — because that password is long, I’d switch the password box to a **textarea** and make the page say **“paste the message you found.”** This makes it feel like they are carrying one secret into another page.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Hidden Page</title>
+  <title>The Second Door</title>
 
   <style>
     body {
       margin: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at top, #1f2937, #020617 65%);
+      background: radial-gradient(circle at top, #111827, #020617 70%);
       color: #e5e7eb;
       font-family: Arial, sans-serif;
       display: flex;
@@ -20,18 +22,18 @@
     }
 
     .page {
-      max-width: 760px;
+      max-width: 780px;
       width: 100%;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.94);
       border: 1px solid rgba(148, 163, 184, 0.35);
       border-radius: 18px;
       padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
 
     .small {
       color: #94a3b8;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       font-size: 12px;
       margin-bottom: 12px;
@@ -60,16 +62,19 @@
       line-height: 1.6;
     }
 
-    input {
+    textarea {
       width: 100%;
+      min-height: 170px;
       box-sizing: border-box;
       padding: 16px;
       border-radius: 12px;
       border: 1px solid #475569;
       background: #020617;
       color: #f8fafc;
-      font-size: 18px;
+      font-size: 16px;
       margin-top: 10px;
+      resize: vertical;
+      line-height: 1.5;
     }
 
     button {
@@ -141,28 +146,28 @@
   <div class="page">
     <div class="small">Hidden classroom page</div>
 
-    <h1>This page is locked.</h1>
+    <h1>The second door is locked.</h1>
 
     <p>
-      Most people will stop here because they were not told exactly what to do.
-      That is the test.
+      A message can be more than a message.
+      Sometimes it is a key.
     </p>
 
     <div class="clue">
-      The password is three words.<br><br>
-      The first word means it helps.<br>
-      The second word means it refuses.<br>
-      The third word means it matches reality.<br><br>
-      A belief does not have to be perfect to move you forward.
+      Paste the message you found.<br><br>
+      Do not shorten it.<br>
+      Do not explain it.<br>
+      Do not make it prettier.<br><br>
+      The whole thing is the password.
     </div>
 
     <label for="password">Enter the password:</label>
-    <input id="password" type="text" placeholder="Type the three-word password..." />
+    <textarea id="password" placeholder="Paste the full message here..."></textarea>
 
     <button onclick="checkPassword()">Unlock</button>
 
     <div id="error" class="error">
-      Not yet. Do not guess harder. Read the clue better.
+      Not yet. The key only works when the whole message is there.
     </div>
 
     <div id="secret" class="secret">
@@ -179,17 +184,33 @@
       </p>
 
       <p>
-        The real prize is that you learned something before the rest of the class was shown it:
+        The real prize is that you just followed a chain of clues.
       </p>
 
       <p>
-        Most students wait too long to try.
+        You typed words into a machine.
+        The machine turned those words into instructions.
+        The instructions changed what the page showed you.
       </p>
 
       <p>
-        They wait until they understand the whole project.
-        They wait until their code makes sense.
+        That may sound small.
+        It is not small.
+      </p>
+
+      <p>
+        This is what coding really is:
+      </p>
+
+      <p class="wisdom">
+        You translate an idea into something a computer can understand.
+      </p>
+
+      <p>
+        Most students think they need to understand the whole thing before they start.
         They wait until they feel smart.
+        They wait until they know the answer.
+        They wait until the project looks possible.
       </p>
 
       <p>
@@ -197,21 +218,16 @@
       </p>
 
       <p>
-        The students who improve fastest are usually not the students who magically know the answer.
-        They are the students who test one small thing before they fully understand it.
+        The students who get better faster are usually the students who are willing to test one small thing before they fully understand it.
       </p>
 
       <p>
         Change one number.
         Run the code.
+        Read the error.
         Move one block.
-        Test the robot.
-        Ask one better question.
         Try one ugly version.
-      </p>
-
-      <p>
-        Then improve it.
+        Make it slightly better.
       </p>
 
       <p>
@@ -219,14 +235,14 @@
       </p>
 
       <p class="wisdom">
-        “If I test the next small thing, I will eventually find a way forward.”
+        “If I keep testing the next small thing, I will eventually find a way forward.”
       </p>
 
       <p>
-        That is not always true.
+        It is not always true.
         Some problems are unfair.
         Some systems are broken.
-        Some things take longer than they should.
+        Some people get luckier breaks than others.
       </p>
 
       <p>
@@ -265,18 +281,33 @@
       </p>
 
       <p class="final-line">
-        You were not lucky to find this. You followed a clue. That is a skill.
+        You were not lucky to find this. You followed a clue. That is a skill. Now go build.
       </p>
     </div>
   </div>
 
   <script>
+    const correctPassword = `
+CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOURS, IF YOU KEEP GOING.
+NOW GO BUILD.
+`;
+
+    function normalize(text) {
+      return text
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, " ");
+    }
+
     function checkPassword() {
-      const input = document.getElementById("password").value.trim().toLowerCase();
+      const input = document.getElementById("password").value;
       const secret = document.getElementById("secret");
       const error = document.getElementById("error");
 
-      if (input === "useful not true") {
+      if (normalize(input) === normalize(correctPassword)) {
         secret.style.display = "block";
         error.style.display = "none";
       } else {
@@ -284,12 +315,6 @@
         error.style.display = "block";
       }
     }
-
-    document.getElementById("password").addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
-        checkPassword();
-      }
-    });
   </script>
 </body>
 </html>
