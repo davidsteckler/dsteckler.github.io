@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,10 +14,10 @@
       --border: rgba(255,255,255,0.12);
       --text: rgba(245,248,255,0.90);
       --muted: rgba(245,248,255,0.58);
-      --blue:#7db6ff;
       --mint:#86f3c6;
       --warm:#ffff35;
       --gold:#ffd07a;
+      --danger:#ff8c8c;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
       --max: 1100px;
     }
@@ -129,6 +130,81 @@
       box-shadow:0 18px 80px rgba(0,0,0,0.55);
     }
 
+    .gate{
+      border:1px solid rgba(255,255,53,0.24);
+      border-radius:18px;
+      background:rgba(255,255,53,0.055);
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .gate label{
+      color:rgba(255,255,53,0.92);
+      font-size:13px;
+      letter-spacing:0.08em;
+    }
+
+    .gate p{
+      margin:0;
+      color:rgba(245,248,255,0.74);
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    textarea{
+      width:100%;
+      min-height:150px;
+      resize:vertical;
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:12px;
+      background:rgba(0,0,0,0.34);
+      color:rgba(245,248,255,0.92);
+      font-family:var(--mono);
+      padding:13px;
+      outline:none;
+      line-height:1.55;
+      font-size:14px;
+    }
+
+    textarea:focus{
+      border-color:rgba(134,243,198,0.45);
+      box-shadow:0 0 18px rgba(134,243,198,0.10);
+    }
+
+    .gateRow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:1px solid rgba(134,243,198,0.32);
+      background:rgba(134,243,198,0.10);
+      color:rgba(245,248,255,0.92);
+      font-family:var(--mono);
+      border-radius:11px;
+      padding:13px 16px;
+      cursor:pointer;
+      font-size:14px;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      border-color:rgba(134,243,198,0.55);
+      background:rgba(134,243,198,0.15);
+    }
+
+    #gateMsg{
+      color:rgba(255,208,122,0.85);
+      font-size:13px;
+      line-height:1.5;
+      min-height:20px;
+    }
+
     .storyGrid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -193,37 +269,6 @@
       font-size:15px;
     }
 
-    .startRow{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    button{
-      border:1px solid rgba(134,243,198,0.32);
-      background:rgba(134,243,198,0.10);
-      color:rgba(245,248,255,0.92);
-      font-family:var(--mono);
-      border-radius:11px;
-      padding:13px 16px;
-      cursor:pointer;
-      font-size:14px;
-      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-    }
-
-    button:hover{
-      transform:translateY(-1px);
-      border-color:rgba(134,243,198,0.55);
-      background:rgba(134,243,198,0.15);
-    }
-
-    .hint{
-      color:rgba(245,248,255,0.36);
-      font-size:12px;
-      line-height:1.6;
-    }
-
     .tiny{
       color:rgba(245,248,255,0.28);
       font-size:12px;
@@ -263,6 +308,35 @@
         <div class="imageFrame">
           <img src="Encoded%20Message.png" alt="Encoded binary message for the Black Box scavenger hunt">
         </div>
+
+        <p class="subtitle">
+          Need a tool? Use the Python program below to help translate the binary message into text.
+          Read the program carefully, type it into Python, and use it to decode the message above.
+        </p>
+
+        <div class="imageFrame">
+          <img src="Binary%20Python%20Program.png" alt="Python program students can use to decode the binary message">
+        </div>
+
+        <section class="gate">
+          <label for="decodedMessage">PASTE THE FULL DECODED MESSAGE</label>
+
+          <p>
+            Decode the message in the first image. When you think you have the full message, paste it below.
+            If it is correct, the first door opens.
+          </p>
+
+          <textarea id="decodedMessage" placeholder="paste the full decoded message here"></textarea>
+
+          <div class="gateRow">
+            <button id="checkBtn">open the first door</button>
+            <div id="gateMsg">waiting for the decoded message.</div>
+          </div>
+
+          <div class="tiny">
+            Capitalization, spaces, and punctuation do not have to be perfect. The full idea has to be there.
+          </div>
+        </section>
 
         <div class="storyGrid">
           <section class="storyCard">
@@ -305,11 +379,6 @@
           <p>
             The real question is whether you can stay with the confusion long enough for it to turn into thought.
           </p>
-
-          <div class="startRow">
-            <button id="startBtn">begin the black box</button>
-            <div class="hint">Start when you are ready to decode the first message.</div>
-          </div>
         </section>
 
         <div class="tiny">
@@ -321,11 +390,46 @@
   </div>
 
   <script>
-    const NEXT_URL = "https://dsteckler.com/blackbox1s";
+    const NEXT_URL = "https://dsteckler.com/blackbox.html";
 
-    document.getElementById("startBtn").addEventListener("click", () => {
-      window.location.href = NEXT_URL;
+    const CORRECT_MESSAGE = `
+CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOURS, IF YOU KEEP GOING.
+NOW GO BUILD.
+`;
+
+    function clean(value){
+      return value
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    }
+
+    function checkMessage(){
+      const userMessage = clean(document.getElementById("decodedMessage").value);
+      const correctMessage = clean(CORRECT_MESSAGE);
+      const gateMsg = document.getElementById("gateMsg");
+
+      if(userMessage === correctMessage){
+        gateMsg.textContent = "message accepted. opening...";
+        setTimeout(() => {
+          window.location.href = NEXT_URL;
+        }, 650);
+      }else{
+        gateMsg.textContent = "not yet. decode the full message, then paste it here.";
+      }
+    }
+
+    document.getElementById("checkBtn").addEventListener("click", checkMessage);
+
+    document.getElementById("decodedMessage").addEventListener("keydown", (e) => {
+      if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){
+        checkMessage();
+      }
     });
   </script>
 </body>
 </html>
+```
