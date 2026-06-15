@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box Intro</title>
+  <meta name="color-scheme" content="dark" />
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(245,248,255,0.90);
+      --muted: rgba(245,248,255,0.58);
+      --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffff35;
+      --gold:#ffd07a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 1100px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    html,body{
+      min-height:100%;
+    }
+
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1100px 620px at 18% 10%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 84% 16%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(900px 520px at 50% 100%, rgba(255,208,122,0.08), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 16px 80px;
+    }
+
+    .hero{
+      border:1px solid var(--border);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow:0 26px 100px rgba(0,0,0,0.65);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(720px 300px at 12% 0%, rgba(125,182,255,0.20), transparent 55%),
+        radial-gradient(720px 300px at 88% 0%, rgba(134,243,198,0.15), transparent 55%),
+        radial-gradient(780px 320px at 50% 100%, rgba(255,255,53,0.08), transparent 55%);
+      opacity:0.35;
+      filter:blur(8px);
+      pointer-events:none;
+    }
+
+    .content{
+      position:relative;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .trace{
+      height:1px;
+      flex:1;
+      background:linear-gradient(90deg, transparent, rgba(125,182,255,0.36), rgba(134,243,198,0.28), transparent);
+      opacity:0.55;
+    }
+
+    .badge{
+      border:1px solid rgba(134,243,198,0.24);
+      background:rgba(134,243,198,0.06);
+      color:rgba(134,243,198,0.88);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(36px, 7vw, 82px);
+      line-height:0.95;
+      letter-spacing:-0.075em;
+    }
+
+    .subtitle{
+      margin:0;
+      max-width:880px;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:16px;
+    }
+
+    .imageFrame{
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:18px;
+      background:rgba(0,0,0,0.28);
+      padding:14px;
+      overflow:hidden;
+    }
+
+    .imageFrame img{
+      width:100%;
+      display:block;
+      border-radius:12px;
+      box-shadow:0 18px 80px rgba(0,0,0,0.55);
+    }
+
+    .storyGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+
+    .storyCard{
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:18px;
+      background:rgba(0,0,0,0.25);
+      padding:18px;
+    }
+
+    .storyCard h2{
+      margin:0 0 10px;
+      font-size:18px;
+      color:rgba(255,208,122,0.90);
+    }
+
+    .storyCard p{
+      margin:0;
+      color:rgba(245,248,255,0.72);
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    .bigIdea{
+      border:1px solid rgba(255,255,53,0.24);
+      border-radius:18px;
+      background:rgba(255,255,53,0.055);
+      padding:20px;
+    }
+
+    .bigIdea .label{
+      color:var(--warm);
+      font-size:13px;
+      letter-spacing:0.08em;
+      margin-bottom:10px;
+    }
+
+    .bigIdea p{
+      margin:0;
+      color:rgba(245,248,255,0.82);
+      line-height:1.75;
+      font-size:16px;
+    }
+
+    .challenge{
+      border:1px solid rgba(134,243,198,0.20);
+      border-radius:18px;
+      background:rgba(134,243,198,0.045);
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .challenge p{
+      margin:0;
+      color:rgba(245,248,255,0.74);
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    .startRow{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:1px solid rgba(134,243,198,0.32);
+      background:rgba(134,243,198,0.10);
+      color:rgba(245,248,255,0.92);
+      font-family:var(--mono);
+      border-radius:11px;
+      padding:13px 16px;
+      cursor:pointer;
+      font-size:14px;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      border-color:rgba(134,243,198,0.55);
+      background:rgba(134,243,198,0.15);
+    }
+
+    .hint{
+      color:rgba(245,248,255,0.36);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .tiny{
+      color:rgba(245,248,255,0.28);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    @media (max-width: 800px){
+      .content{
+        padding:16px;
+      }
+
+      .storyGrid{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <main class="hero">
+      <div class="content">
+
+        <div class="topline">
+          <div class="trace"></div>
+          <div class="badge">BLACK BOX: START</div>
+        </div>
+
+        <h1>One Lucky Break</h1>
+
+        <p class="subtitle">
+          Before you begin the scavenger hunt, look at the message below.
+          Right now, it may look like nonsense. That is the point.
+          Most hard things start as a black box.
+        </p>
+
+        <div class="imageFrame">
+          <img src="Encoded%20Message.png" alt="Encoded binary message for the Black Box scavenger hunt">
+        </div>
+
+        <div class="storyGrid">
+          <section class="storyCard">
+            <h2>Bill Gates got rare access.</h2>
+            <p>
+              When Bill Gates was a student at Lakeside School, he got access to a computer terminal at a time when almost no high school students had that chance.
+              That did not make him successful by itself, but it gave him a door most people never got to open.
+            </p>
+          </section>
+
+          <section class="storyCard">
+            <h2>Morgan Housel calls this luck.</h2>
+            <p>
+              In <em>The Psychology of Money</em>, Morgan Housel uses Gates as an example of rare luck.
+              Gates had a one-in-a-million opening.
+              His friend Kent Evans faced the opposite force: one-in-a-million risk.
+            </p>
+          </section>
+        </div>
+
+        <section class="bigIdea">
+          <div class="label">LUCK AND RISK</div>
+          <p>
+            Luck and risk are both forces outside your control.
+            One can open a door. One can close a door.
+            So the lesson is not “successful people just worked harder.”
+            The better lesson is this:
+            when a lucky door opens, you still have to be the kind of person who can walk through it.
+          </p>
+        </section>
+
+        <section class="challenge">
+          <p>
+            This scavenger hunt is your lucky door today.
+            You are being handed a strange message, a few clues, and time to figure it out.
+            The question is not whether it feels confusing at first.
+            It will.
+          </p>
+
+          <p>
+            The real question is whether you can stay with the confusion long enough for it to turn into thought.
+          </p>
+
+          <div class="startRow">
+            <button id="startBtn">begin the black box</button>
+            <div class="hint">Start when you are ready to decode the first message.</div>
+          </div>
+        </section>
+
+        <div class="tiny">
+          The light bulb comes after staying with the hard part.
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const NEXT_URL = "https://dsteckler.com/blackbox1s";
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      window.location.href = NEXT_URL;
+    });
+  </script>
+</body>
+</html>
