@@ -75,7 +75,7 @@
       gap: 12px;
     }
 
-    /* TOP ELECTRIC “BUS” (now ABOVE the binary, not over it) */
+    /* TOP ELECTRIC “BUS” */
     .busRow{
       display:flex;
       justify-content:flex-end;
@@ -116,11 +116,11 @@
       transition: background 120ms ease, box-shadow 120ms ease, border-color 120ms ease, transform 120ms ease;
     }
 
-    /* idle “current” breath on hover */
     .bus:hover .led{
       animation: breathe 1.2s ease-in-out infinite;
       animation-delay: calc(var(--i) * 70ms);
     }
+
     @keyframes breathe{
       0%, 100%{ transform: translateY(0px); }
       50%{ transform: translateY(-1px); }
@@ -171,6 +171,60 @@
 
     ::selection{ background: rgba(134,243,198,0.22); }
 
+    /* hidden gate to Part 2 */
+    .gate{
+      margin-top: 10px;
+      display:flex;
+      align-items:center;
+      flex-wrap: wrap;
+      gap: 10px;
+      opacity: 0.10;
+      transition: opacity 180ms ease, transform 180ms ease;
+      font-size: 13px;
+    }
+
+    .gate:hover,
+    .gate:focus-within{
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .gatePrompt{
+      color: rgba(134,243,198,0.75);
+    }
+
+    .gateLabel{
+      color: rgba(245,248,255,0.58);
+    }
+
+    .gateHint{
+      color: rgba(245,248,255,0.42);
+      font-size: 12px;
+      width: 100%;
+      padding-left: 22px;
+    }
+
+    .gate input{
+      width: 145px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.28);
+      color: rgba(245,248,255,0.92);
+      font-family: var(--mono);
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    .gate input:focus{
+      border-color: rgba(134,243,198,0.45);
+      box-shadow: 0 0 18px rgba(134,243,198,0.10);
+    }
+
+    #gateMsg{
+      color: rgba(255,208,122,0.72);
+      font-size: 12px;
+    }
+
     @media (max-width: 520px){
       pre{ font-size: 13px; line-height: 1.6; }
       .wrap{ padding-top: 24px; }
@@ -179,6 +233,14 @@
       .bus{ padding: 7px 9px; }
       .trace{ display:none; }
       .busRow{ justify-content:flex-start; }
+
+      .gate input{
+        width: 100%;
+      }
+
+      .gateHint{
+        padding-left: 0;
+      }
     }
   </style>
 </head>
@@ -205,8 +267,24 @@
 
         <div class="binaryBox">
 <pre id="b" aria-label="binary message">
-01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010 01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100 01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000 01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100 01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111 01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111 01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010 01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111 01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101 01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000 01000010 01000101 00100000 01011001 01001111 01010101 01010010 01010011 00101100 00100000 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110 01000111 00101110 00001010 01001110 01001111 01010111 00100000 01000111 01001111 00100000 01000010 01010101 01001001 01001100 01000100 00101110 00001010
+01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010 01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100 01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000 01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100 01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111 01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111 01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010 01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111 01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101 01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000 01000010 01000101 00100000 01011001 01001111 01010101 01010011 00101100 00100000 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110 01000111 00101110 00001010 01001110 01001111 01010111 00100000 01000111 01001111 00100000 01000010 01010101 01001001 01001100 01000100 00101110 00001010
 </pre>
+        </div>
+
+        <div class="gate" title="The door opens when you prove what changed, and what comes next.">
+          <span class="gatePrompt">&gt;</span>
+
+          <span class="gateLabel">electricity became:</span>
+          <input id="gateThought" placeholder="_____" autocomplete="off" />
+
+          <span class="gateLabel">now go:</span>
+          <input id="gateBuild" placeholder="_____" autocomplete="off" />
+
+          <span id="gateMsg"></span>
+
+          <div class="gateHint">
+            the door opens when you prove what changed, and what comes next
+          </div>
         </div>
       </div>
     </div>
@@ -277,7 +355,7 @@
         }
       });
 
-      // Double click selects all (findable)
+      // Double click selects all
       pre.addEventListener("dblclick", () => {
         const range = document.createRange();
         range.selectNodeContents(pre);
@@ -286,7 +364,7 @@
         sel.addRange(range);
       });
 
-      // Clicking the bus cycles tooltip hints (no visible text)
+      // Clicking the bus cycles tooltip hints
       const tip = [
         "(click an 8-bit chunk)",
         "8 bits = 1 byte",
@@ -307,6 +385,38 @@
           bus.title = "(click an 8-bit chunk)";
         }
       });
+
+      // Hidden gate to Part 2
+      const gateThought = document.getElementById("gateThought");
+      const gateBuild = document.getElementById("gateBuild");
+      const gateMsg = document.getElementById("gateMsg");
+
+      function cleanAnswer(value){
+        return value
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "");
+      }
+
+      function checkGate(){
+        const thought = cleanAnswer(gateThought.value);
+        const build = cleanAnswer(gateBuild.value);
+
+        if(thought === "THOUGHT" && build === "BUILD"){
+          gateMsg.textContent = "door opening...";
+          window.location.href = "https://dsteckler.com/blackbox2s";
+        }else{
+          gateMsg.textContent = "not yet.";
+        }
+      }
+
+      gateThought.addEventListener("keydown", (e) => {
+        if(e.key === "Enter") checkGate();
+      });
+
+      gateBuild.addEventListener("keydown", (e) => {
+        if(e.key === "Enter") checkGate();
+      });
     })();
   </script>
 
@@ -319,6 +429,9 @@
     4) Inspect Element: pre[data-bytes], pre[data-format], pre[data-suggest]
     5) Console breadcrumb (DevTools)
     6) body[data-aux] ROT13 “view source” (ivrj fbhpr)
+    7) Hidden gate:
+       electricity became: THOUGHT
+       now go: BUILD
   -->
 </body>
 </html>
