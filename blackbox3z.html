@@ -108,6 +108,12 @@
       letter-spacing:-0.06em;
     }
 
+    h2{
+      margin:0;
+      font-size: 20px;
+      color: rgba(255,208,122,0.88);
+    }
+
     .intro{
       margin:0;
       color: var(--muted);
@@ -426,6 +432,57 @@
       line-height:1.5;
     }
 
+    .wisdomGate{
+      border: 1px solid rgba(255,208,122,0.18);
+      border-radius: 16px;
+      background: rgba(255,208,122,0.045);
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .wisdomGate.locked{
+      opacity:0.45;
+    }
+
+    .wisdomGate p{
+      margin:0;
+      color: rgba(245,248,255,0.70);
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    #wisdomPaste{
+      min-height: 145px;
+    }
+
+    #wisdomMsg{
+      min-height:20px;
+      color: rgba(255,208,122,0.80);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .wisdomReveal{
+      display:none;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      padding-top: 16px;
+      margin-top: 4px;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    .wisdomReveal.show{
+      display:flex;
+    }
+
+    .wisdomReveal .bigLine{
+      color: rgba(134,243,198,0.92);
+      font-weight:700;
+      letter-spacing:0.02em;
+    }
+
     .tiny{
       color: rgba(245,248,255,0.28);
       font-size:12px;
@@ -587,6 +644,54 @@ print(word.upper())</pre>
           </div>
         </div>
 
+        <div class="wisdomGate locked" id="wisdomGate">
+          <h2>Part 4: The First Message</h2>
+
+          <p>
+            The final door needs the full message from the first page.
+            Paste the decoded message below.
+          </p>
+
+          <textarea id="wisdomPaste" placeholder="paste the full decoded message from Part 1" disabled></textarea>
+
+          <button id="wisdomBtn" disabled>reveal final message</button>
+
+          <div id="wisdomMsg">submit your reflection first.</div>
+
+          <div class="wisdomReveal" id="wisdomReveal">
+            <p class="bigLine">
+              Here is what I wanted you to feel today:
+            </p>
+
+            <p>
+              Confusion is not proof that you cannot do something.
+              It is usually the first room.
+            </p>
+
+            <p>
+              If you run away the second something gets hard, you never get to the light bulb.
+              But when you stay, try, test, and fix, you build something more useful than a Python program:
+              you build trust in yourself.
+            </p>
+
+            <p>
+              Hard work does not guarantee every outcome.
+              But becoming someone who can do hard work gives you a kind of pride no one can hand you.
+              That pride becomes confidence.
+            </p>
+
+            <p class="bigLine">
+              Keep choosing the problem that makes you a little nervous.
+              Sit with it long enough.
+              Let it open.
+            </p>
+          </div>
+        </div>
+
+        <div class="tiny">
+          The light bulb comes after staying with the hard part.
+        </div>
+
       </div>
     </div>
   </div>
@@ -597,8 +702,6 @@ print(word.upper())</pre>
     (function(){
       const SUPABASE_URL = "https://rlbycipdwncmsugoijat.supabase.co";
 
-      // Paste your full Supabase publishable key here.
-      // It should start with sb_publishable_
       const SUPABASE_KEY = "PASTE_YOUR_FULL_SUPABASE_PUBLISHABLE_KEY_HERE";
 
       const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -610,6 +713,20 @@ print(word.upper())</pre>
       const reflectionBox = document.getElementById("reflectionBox");
       const submitBtn = document.getElementById("submitBtn");
       const submitMsg = document.getElementById("submitMsg");
+
+      const wisdomGate = document.getElementById("wisdomGate");
+      const wisdomPaste = document.getElementById("wisdomPaste");
+      const wisdomBtn = document.getElementById("wisdomBtn");
+      const wisdomMsg = document.getElementById("wisdomMsg");
+      const wisdomReveal = document.getElementById("wisdomReveal");
+
+      const FIRST_PAGE_MESSAGE = `
+CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOURS, IF YOU KEEP GOING.
+NOW GO BUILD.
+`;
 
       function clean(value){
         return value
@@ -647,12 +764,10 @@ print(word.upper())</pre>
         }
       }
 
-      // Clue 1
       document.getElementById("blackBoxBtn").addEventListener("click", () => {
         markSolved(0);
       });
 
-      // Clue 2
       const tryInput = document.getElementById("tryInput");
       const tryBtn = document.getElementById("tryBtn");
 
@@ -673,7 +788,6 @@ print(word.upper())</pre>
         if(e.key === "Enter") checkTry();
       });
 
-      // Clue 3: hold button
       const holdBtn = document.getElementById("holdBtn");
       const holdBar = document.getElementById("holdBar");
       let holdTimer = null;
@@ -723,7 +837,6 @@ print(word.upper())</pre>
         stopHolding();
       });
 
-      // Clue 4
       document.getElementById("bulb").addEventListener("click", () => {
         if(solved.has(0) && solved.has(1) && solved.has(2)){
           markSolved(3);
@@ -736,7 +849,6 @@ print(word.upper())</pre>
         }
       });
 
-      // Supabase submit
       const studentName = document.getElementById("studentName");
       const reflectionText = document.getElementById("reflectionText");
 
@@ -777,9 +889,36 @@ print(word.upper())</pre>
           return;
         }
 
-        submitMsg.textContent = "submitted. You finished the black box.";
+        submitMsg.textContent = "submitted. One final door opened below.";
         studentName.disabled = true;
         reflectionText.disabled = true;
+
+        wisdomGate.classList.remove("locked");
+        wisdomPaste.disabled = false;
+        wisdomBtn.disabled = false;
+        wisdomMsg.textContent = "paste the full decoded message from Part 1.";
+      });
+
+      function checkWisdomMessage(){
+        const studentMessage = clean(wisdomPaste.value);
+        const correctMessage = clean(FIRST_PAGE_MESSAGE);
+
+        if(studentMessage === correctMessage){
+          wisdomMsg.textContent = "message accepted.";
+          wisdomReveal.classList.add("show");
+          wisdomPaste.disabled = true;
+          wisdomBtn.disabled = true;
+        }else{
+          wisdomMsg.textContent = "not yet. paste the full decoded message from Part 1.";
+        }
+      }
+
+      wisdomBtn.addEventListener("click", checkWisdomMessage);
+
+      wisdomPaste.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){
+          checkWisdomMessage();
+        }
       });
 
       console.log("%cThe light bulb comes after staying with the hard part.", "color: rgba(255,208,122,0.75); font-family: ui-monospace; font-size: 12px;");
