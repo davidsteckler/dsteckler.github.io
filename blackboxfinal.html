@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box 4</title>
+  <meta name="color-scheme" content="dark" />
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(245,248,255,0.90);
+      --muted: rgba(245,248,255,0.56);
+      --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffd07a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 980px;
+      --r: 18px;
+      --shadow: 0 22px 90px rgba(0,0,0,0.62);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 16px 70px;
+    }
+
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(620px 260px at 15% 0%, rgba(125,182,255,0.18), transparent 55%),
+        radial-gradient(620px 260px at 85% 0%, rgba(134,243,198,0.16), transparent 55%);
+      opacity: 0.30;
+      pointer-events:none;
+      filter: blur(7px);
+    }
+
+    .content{
+      position:relative;
+      padding: 24px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .trace{
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
+      opacity:0.40;
+      border-radius:999px;
+    }
+
+    .badge{
+      border: 1px solid rgba(134,243,198,0.24);
+      background: rgba(134,243,198,0.06);
+      color: rgba(134,243,198,0.86);
+      padding: 8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(30px, 5vw, 56px);
+      line-height:1.04;
+      letter-spacing:-0.06em;
+    }
+
+    p{
+      margin:0;
+      color: var(--muted);
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    strong{
+      color: rgba(245,248,255,0.94);
+    }
+
+    .box{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.28);
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    textarea{
+      width:100%;
+      min-height: 170px;
+      resize: vertical;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.32);
+      color: rgba(245,248,255,0.92);
+      font-family: var(--mono);
+      padding: 12px;
+      outline: none;
+      line-height:1.55;
+    }
+
+    textarea:focus{
+      border-color: rgba(134,243,198,0.45);
+      box-shadow: 0 0 18px rgba(134,243,198,0.10);
+    }
+
+    button{
+      border: 1px solid rgba(134,243,198,0.25);
+      background: rgba(134,243,198,0.09);
+      color: rgba(245,248,255,0.88);
+      font-family: var(--mono);
+      border-radius: 10px;
+      padding: 11px 13px;
+      cursor:pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      width: fit-content;
+    }
+
+    button:hover{
+      transform: translateY(-1px);
+      border-color: rgba(134,243,198,0.45);
+      background: rgba(134,243,198,0.13);
+    }
+
+    #msg{
+      min-height:20px;
+      color: rgba(255,208,122,0.82);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .reveal{
+      display:none;
+      border: 1px solid rgba(255,208,122,0.18);
+      border-radius: 16px;
+      background: rgba(255,208,122,0.045);
+      padding: 20px;
+      flex-direction:column;
+      gap:14px;
+      line-height:1.7;
+    }
+
+    .reveal.show{
+      display:flex;
+    }
+
+    .bigLine{
+      color: rgba(134,243,198,0.92);
+      font-weight:700;
+      letter-spacing:0.02em;
+    }
+
+    .tiny{
+      color: rgba(245,248,255,0.30);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    @media (max-width: 760px){
+      .content{
+        padding: 16px;
+      }
+
+      button{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="content">
+
+        <div class="topline">
+          <div class="trace"></div>
+          <div class="badge">BLACK BOX 4</div>
+        </div>
+
+        <h1>The First Message</h1>
+
+        <p>
+          The final door needs the full message from the first page.
+          Paste the decoded message below.
+        </p>
+
+        <div class="box">
+          <textarea id="messageInput" placeholder="paste the full decoded message from Part 1"></textarea>
+          <button id="checkBtn">reveal final message</button>
+          <div id="msg">waiting for the first message.</div>
+          <div class="tiny">Punctuation and capitalization do not have to be perfect. The words do.</div>
+        </div>
+
+        <div class="reveal" id="reveal">
+          <p class="bigLine">
+            Here is what I wanted you to feel today:
+          </p>
+
+          <p>
+            Confusion is not proof that you cannot do something.
+            It is usually the first room.
+          </p>
+
+          <p>
+            In CodeHS, Python did not always make sense right away.
+            Sometimes the program looked strange. Sometimes the output surprised you.
+            Sometimes the mistake was tiny and annoying.
+          </p>
+
+          <p>
+            But when you predicted, tested, changed one thing, fixed one mistake, and kept going,
+            something happened:
+            the black box started to open.
+          </p>
+
+          <p>
+            That light bulb feeling is joy.
+            Not because the problem was easy.
+            Because it was hard, and you stayed long enough to understand it.
+          </p>
+
+          <p>
+            Hard work does not guarantee every outcome.
+            But becoming someone who can do hard work gives you a kind of pride no one can hand you.
+            That pride becomes confidence.
+          </p>
+
+          <p class="bigLine">
+            You may not always believe you can do it at first.
+            Choose the more useful belief:
+            if I sit with hard things long enough, they can open.
+          </p>
+
+          <p>
+            Now go build.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const FIRST_PAGE_MESSAGE = `
+CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOURS, IF YOU KEEP GOING.
+NOW GO BUILD.
+`;
+
+    const messageInput = document.getElementById("messageInput");
+    const checkBtn = document.getElementById("checkBtn");
+    const msg = document.getElementById("msg");
+    const reveal = document.getElementById("reveal");
+
+    function clean(value){
+      return value
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    }
+
+    function checkMessage(){
+      const student = clean(messageInput.value);
+      const correct = clean(FIRST_PAGE_MESSAGE);
+
+      if(student === correct){
+        msg.textContent = "message accepted.";
+        reveal.classList.add("show");
+        messageInput.disabled = true;
+        checkBtn.disabled = true;
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      }else{
+        msg.textContent = "not yet. paste the full decoded message from Part 1.";
+      }
+    }
+
+    checkBtn.addEventListener("click", checkMessage);
+
+    messageInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter" && (e.metaKey || e.ctrlKey)){
+        checkMessage();
+      }
+    });
+  </script>
+</body>
+</html>
