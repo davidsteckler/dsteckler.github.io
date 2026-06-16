@@ -3,345 +3,512 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Black Box Intro</title>
+  <title>The Black Box Scavenger Hunt</title>
   <meta name="color-scheme" content="dark" />
-
   <style>
     :root{
       --bg0:#05060a;
       --bg1:#070a12;
+
+      --panel: rgba(255,255,255,0.055);
       --border: rgba(255,255,255,0.12);
+
       --text: rgba(245,248,255,0.90);
       --muted: rgba(245,248,255,0.58);
-      --mint:#86f3c6;
-      --warm:#ffff35;
-      --gold:#ffd07a;
-      --danger:#ff8c8c;
+
+      /* electricity palette */
       --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffd07a;
+      --yellow:#ffff35;
+
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      --max: 1100px;
+      --max: 980px;
+      --r: 18px;
+      --shadow: 0 22px 90px rgba(0,0,0,0.62);
     }
 
     *{ box-sizing:border-box; }
-
-    html,body{
-      min-height:100%;
-    }
-
+    html,body{ min-height:100%; }
     body{
       margin:0;
       font-family: var(--mono);
       color: var(--text);
       overflow-x:hidden;
       background:
-        radial-gradient(1100px 620px at 18% 10%, rgba(125,182,255,0.12), transparent 55%),
-        radial-gradient(900px 520px at 84% 16%, rgba(134,243,198,0.10), transparent 55%),
-        radial-gradient(900px 520px at 50% 100%, rgba(255,208,122,0.08), transparent 55%),
+        radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
         linear-gradient(180deg, var(--bg1), var(--bg0));
     }
 
     .wrap{
       max-width: var(--max);
       margin: 0 auto;
-      padding: 34px 16px 80px;
+      padding: 34px 16px 70px;
     }
 
-    .hero{
-      border:1px solid var(--border);
-      border-radius:22px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
-      box-shadow:0 26px 100px rgba(0,0,0,0.65);
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
       overflow:hidden;
       position:relative;
     }
 
-    .hero::before{
+    .card::before{
       content:"";
       position:absolute;
       inset:-2px;
       background:
-        radial-gradient(720px 300px at 12% 0%, rgba(125,182,255,0.20), transparent 55%),
-        radial-gradient(720px 300px at 88% 0%, rgba(134,243,198,0.15), transparent 55%),
-        radial-gradient(780px 320px at 50% 100%, rgba(255,255,53,0.08), transparent 55%);
-      opacity:0.35;
-      filter:blur(8px);
+        radial-gradient(620px 260px at 15% 0%, rgba(125,182,255,0.18), transparent 55%),
+        radial-gradient(620px 260px at 85% 0%, rgba(134,243,198,0.16), transparent 55%);
+      opacity: 0.30;
       pointer-events:none;
+      filter: blur(7px);
     }
 
     .content{
       position:relative;
-      padding:24px;
+      padding: 18px;
       display:flex;
       flex-direction:column;
-      gap:22px;
+      gap: 16px;
     }
 
-    .topline{
+    .busRow{
       display:flex;
+      justify-content:flex-end;
       align-items:center;
-      gap:10px;
+      gap: 10px;
+      padding: 6px 2px 0;
     }
 
     .trace{
-      height:1px;
-      flex:1;
-      background:linear-gradient(90deg, transparent, rgba(125,182,255,0.36), rgba(134,243,198,0.28), transparent);
-      opacity:0.55;
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
+      opacity:0.40;
+      border-radius: 999px;
     }
 
-    .badge{
-      border:1px solid rgba(134,243,198,0.24);
-      background:rgba(134,243,198,0.06);
-      color:rgba(134,243,198,0.88);
-      padding:8px 10px;
-      border-radius:999px;
-      font-size:12px;
-      letter-spacing:0.08em;
-      white-space:nowrap;
+    .bus{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.035);
+      opacity:0.78;
+    }
+
+    .led{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(134,243,198,0.26);
+      background: rgba(134,243,198,0.14);
+      box-shadow: 0 0 12px rgba(134,243,198,0.10);
+    }
+
+    .led:nth-child(2n){
+      border-color: rgba(125,182,255,0.24);
+      background: rgba(125,182,255,0.12);
+      box-shadow:none;
     }
 
     h1{
       margin:0;
-      font-size:clamp(36px, 7vw, 82px);
-      line-height:0.95;
-      letter-spacing:-0.075em;
+      font-size: clamp(38px, 7vw, 78px);
+      line-height:0.96;
+      letter-spacing:-0.07em;
     }
 
     h2{
       margin:0;
-      font-size:22px;
-      color:rgba(255,208,122,0.92);
-      letter-spacing:-0.03em;
+      font-size: 22px;
+      line-height:1.2;
+      letter-spacing:-0.035em;
+      color: rgba(255,208,122,0.94);
+    }
+
+    h3{
+      margin:0;
+      font-size: 16px;
+      line-height:1.25;
+      color: rgba(134,243,198,0.92);
+    }
+
+    p{
+      margin:0;
+      line-height:1.75;
+      color: rgba(245,248,255,0.72);
+      font-size:15px;
+    }
+
+    ol{
+      margin:0;
+      padding-left: 22px;
+      color: rgba(245,248,255,0.76);
+      line-height:1.8;
+      font-size:15px;
+    }
+
+    li{
+      margin: 2px 0;
+    }
+
+    strong{
+      color: rgba(134,243,198,0.92);
     }
 
     .subtitle{
-      margin:0;
-      max-width:880px;
-      color:var(--muted);
+      max-width: 840px;
+      color: var(--muted);
       line-height:1.7;
       font-size:16px;
     }
 
+    .section{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.24);
+      padding: 16px;
+      position:relative;
+    }
+
+    .section.soft{
+      background: rgba(255,255,255,0.035);
+    }
+
+    .section.warm{
+      border-color: rgba(255,208,122,0.18);
+      background: rgba(255,208,122,0.045);
+    }
+
+    .section.mint{
+      border-color: rgba(134,243,198,0.18);
+      background: rgba(134,243,198,0.045);
+    }
+
+    .sectionHead{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sectionHead .miniTrace{
+      height:1px;
+      flex:1;
+      background: linear-gradient(90deg, rgba(134,243,198,0.22), transparent);
+      opacity:0.55;
+    }
+
+    .caption{
+      color: rgba(245,248,255,0.56);
+      font-size: 13px;
+      line-height:1.6;
+      margin-bottom: 10px;
+    }
+
     .imageFrame{
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:18px;
-      background:rgba(0,0,0,0.28);
-      padding:14px;
-      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.30);
+      padding: 12px;
+      position:relative;
     }
 
     .imageFrame img{
       width:100%;
       display:block;
-      border-radius:12px;
-      box-shadow:0 18px 80px rgba(0,0,0,0.55);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 18px 70px rgba(0,0,0,0.42);
     }
 
-    .gate{
-      border:1px solid rgba(255,255,53,0.24);
-      border-radius:18px;
-      background:rgba(255,255,53,0.055);
-      padding:20px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
+    .imageFrame.zoomable img{
+      cursor: zoom-in;
+      transition: filter 160ms ease, transform 160ms ease;
     }
 
-    .gate label{
-      color:rgba(255,255,53,0.92);
-      font-size:13px;
-      letter-spacing:0.08em;
+    .imageFrame.zoomable:hover img{
+      filter: brightness(1.06);
+      transform: translateY(-1px);
     }
 
-    .gate p{
-      margin:0;
-      color:rgba(245,248,255,0.74);
-      line-height:1.7;
-      font-size:14px;
+    .zoomHint{
+      margin-top: 9px;
+      color: rgba(255,208,122,0.72);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .stepList{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
     textarea{
       width:100%;
-      min-height:150px;
+      min-height:140px;
       resize:vertical;
       border:1px solid rgba(255,255,255,0.12);
-      border-radius:12px;
-      background:rgba(0,0,0,0.34);
-      color:rgba(245,248,255,0.92);
-      font-family:var(--mono);
-      padding:13px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.30);
+      color: rgba(245,248,255,0.92);
+      font-family: var(--mono);
+      padding: 12px;
       outline:none;
       line-height:1.55;
       font-size:14px;
     }
 
     textarea:focus{
-      border-color:rgba(134,243,198,0.45);
-      box-shadow:0 0 18px rgba(134,243,198,0.10);
+      border-color: rgba(134,243,198,0.45);
+      box-shadow: 0 0 18px rgba(134,243,198,0.10);
     }
 
     .gateRow{
       display:flex;
       align-items:center;
-      gap:12px;
+      gap: 12px;
       flex-wrap:wrap;
+      margin-top: 12px;
     }
 
     button{
       border:1px solid rgba(134,243,198,0.32);
-      background:rgba(134,243,198,0.10);
-      color:rgba(245,248,255,0.92);
-      font-family:var(--mono);
-      border-radius:11px;
-      padding:13px 16px;
+      background: rgba(134,243,198,0.10);
+      color: rgba(245,248,255,0.92);
+      font-family: var(--mono);
+      border-radius: 10px;
+      padding: 12px 15px;
       cursor:pointer;
       font-size:14px;
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
     button:hover{
-      transform:translateY(-1px);
-      border-color:rgba(134,243,198,0.55);
-      background:rgba(134,243,198,0.15);
+      transform: translateY(-1px);
+      border-color: rgba(134,243,198,0.55);
+      background: rgba(134,243,198,0.15);
     }
 
     #gateMsg{
-      color:rgba(255,208,122,0.85);
-      font-size:13px;
+      color: rgba(255,208,122,0.78);
+      font-size: 13px;
       line-height:1.5;
       min-height:20px;
     }
 
-    .storyIntro{
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:18px;
-      background:rgba(0,0,0,0.25);
-      padding:20px;
+    .tiny{
+      color: rgba(245,248,255,0.38);
+      font-size: 12px;
+      line-height:1.6;
+      margin-top: 8px;
+    }
+
+    .story{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap: 14px;
     }
 
-    .storyIntro p{
-      margin:0;
-      color:rgba(245,248,255,0.74);
-      line-height:1.75;
-      font-size:15px;
+    .story p{
+      max-width: 850px;
+      font-size: 16px;
+      line-height:1.82;
     }
 
-    .storyGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
+    .story .lead{
+      color: rgba(245,248,255,0.92);
+      font-size: 19px;
     }
 
-    .storyCard{
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:18px;
-      background:rgba(0,0,0,0.25);
-      padding:18px;
-    }
-
-    .storyCard h3{
-      margin:0 0 10px;
-      font-size:18px;
-      color:rgba(255,208,122,0.90);
-    }
-
-    .storyCard p{
-      margin:0;
-      color:rgba(245,248,255,0.72);
-      line-height:1.7;
-      font-size:14px;
-    }
-
-    .bigIdea{
-      border:1px solid rgba(255,255,53,0.24);
-      border-radius:18px;
-      background:rgba(255,255,53,0.055);
-      padding:20px;
-    }
-
-    .bigIdea .label{
-      color:var(--warm);
-      font-size:13px;
-      letter-spacing:0.08em;
-      margin-bottom:10px;
-    }
-
-    .bigIdea p{
-      margin:0;
-      color:rgba(245,248,255,0.82);
-      line-height:1.75;
-      font-size:16px;
-    }
-
-    .actionBox{
-      border:1px solid rgba(134,243,198,0.22);
-      border-radius:18px;
-      background:rgba(134,243,198,0.045);
-      padding:20px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .actionBox p{
-      margin:0;
-      color:rgba(245,248,255,0.76);
-      line-height:1.75;
-      font-size:15px;
-    }
-
-    .actionLine{
-      color:rgba(134,243,198,0.92);
+    .story .turn{
+      color: rgba(255,255,53,0.90);
       font-weight:700;
     }
 
-    .tiny{
-      color:rgba(245,248,255,0.28);
-      font-size:12px;
-      line-height:1.6;
+    .story .finish{
+      color: rgba(134,243,198,0.92);
+      font-weight:700;
     }
 
-    @media (max-width: 800px){
-      .content{
-        padding:16px;
-      }
+    .gatesPhoto img{
+      max-height: 520px;
+      object-fit: cover;
+      object-position: center;
+    }
 
-      .storyGrid{
-        grid-template-columns:1fr;
-      }
+    .zoomModal{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 56px 18px 44px;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(10px);
+      overflow:auto;
+    }
+
+    .zoomModal.open{
+      display:flex;
+    }
+
+    .zoomModal img{
+      max-width: 96vw;
+      max-height: 82vh;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 30px 120px rgba(0,0,0,0.85);
+      cursor: zoom-in;
+      background:#05060a;
+    }
+
+    .zoomModal img.zoomed{
+      max-width:none;
+      max-height:none;
+      width: 1800px;
+      cursor: zoom-out;
+    }
+
+    .zoomClose{
+      position:fixed;
+      top:18px;
+      right:18px;
+      z-index:10000;
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .zoomHelp{
+      position:fixed;
+      left:18px;
+      bottom:16px;
+      right:18px;
+      text-align:center;
+      color: rgba(245,248,255,0.66);
+      font-size:12px;
+      line-height:1.5;
+      pointer-events:none;
+    }
+
+    @media (max-width: 760px){
+      .wrap{ padding-top: 24px; }
+      .content{ padding: 14px; }
+      .section{ padding: 14px; }
+      .stepList{ grid-template-columns: 1fr; }
+      .trace{ display:none; }
+      .busRow{ justify-content:flex-start; }
+      h1{ letter-spacing:-0.055em; }
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <main class="hero">
+    <main class="card">
       <div class="content">
-
-        <div class="topline">
-          <div class="trace"></div>
-          <div class="badge">BLACK BOX: START</div>
+        <div class="busRow">
+          <div class="trace" aria-hidden="true"></div>
+          <div class="bus" aria-hidden="true">
+            <span class="led"></span>
+            <span class="led"></span>
+            <span class="led"></span>
+            <span class="led"></span>
+            <span class="led"></span>
+            <span class="led"></span>
+            <span class="led"></span>
+            <span class="led"></span>
+          </div>
         </div>
 
-        <h1>One Lucky Break</h1>
+        <h1>Start With the Black Box</h1>
 
         <p class="subtitle">
-          Start with the black box. Look closely. Use the tools in front of you.
+          A message is hidden in plain sight. Decode it, then see why lucky breaks only matter when you use them.
         </p>
 
-        <div class="imageFrame">
-          <img src="Encoded%20Message.png" alt="Encoded binary message for the Black Box scavenger hunt">
-        </div>
+        <section class="section">
+          <div class="sectionHead">
+            <h2>Step 1: Decode the message</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
 
-        <div class="imageFrame">
-          <img src="Binary%20Python%20Program.png" alt="Python program students can use to decode the binary message">
-        </div>
+          <div class="imageFrame zoomable">
+            <p class="caption">Start with the black box. Look closely at the binary digits.</p>
+            <img src="Encoded%20Message.png" alt="Encoded binary message for the Black Box scavenger hunt" data-zoom-src="Encoded%20Message.png">
+            <div class="zoomHint">Click the image to enlarge it. Click the enlarged image again to zoom in farther.</div>
+          </div>
+        </section>
 
-        <section class="gate">
-          <label for="decodedMessage">PASTE THE FULL DECODED MESSAGE</label>
+        <section class="section soft">
+          <div class="sectionHead">
+            <h2>Step 2: Set up the tool</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
+
+          <p>
+            The black box gives you the message. CodeHS gives you the tool to decode it.
+            Do this in order so the program has somewhere to run.
+          </p>
+
+          <div class="stepList">
+            <ol>
+              <li>Open <strong>CodeHS</strong>.</li>
+              <li>Go to <strong>Sandbox</strong>.</li>
+              <li>Create a new <strong>Python 3 Sandbox</strong>.</li>
+              <li>Use the picture if you are not sure what to click.</li>
+            </ol>
+
+            <div class="imageFrame zoomable">
+              <p class="caption">Make a Python 3 Sandbox in CodeHS.</p>
+              <img src="sandbox.png" alt="CodeHS screen showing where to make a Python 3 Sandbox" data-zoom-src="sandbox.png">
+              <div class="zoomHint">Click the image to enlarge it.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section soft">
+          <div class="sectionHead">
+            <h2>Step 3: Type the program</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
+
+          <p>
+            Now type the program shown below into your Python 3 Sandbox.
+            Run it, enter the binary from the black box, and let Python translate the message.
+          </p>
+
+          <div class="stepList">
+            <ol>
+              <li>Type the program exactly as shown.</li>
+              <li>Press <strong>Run</strong>.</li>
+              <li>Enter the binary message from the black box.</li>
+              <li>Copy the decoded message and paste it into the box below.</li>
+            </ol>
+
+            <div class="imageFrame zoomable">
+              <p class="caption">Type this program into your Python 3 Sandbox.</p>
+              <img src="Binary%20Python%20Program.png" alt="Python program students can use to decode the binary message" data-zoom-src="Binary%20Python%20Program.png">
+              <div class="zoomHint">Click the image to enlarge it.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section warm">
+          <div class="sectionHead">
+            <h2>Open the first door</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
 
           <p>
             When you have decoded the full message, paste it below.
@@ -360,110 +527,141 @@
           </div>
         </section>
 
-        <section class="storyIntro">
-          <h2>Now the story behind the door.</h2>
+        <section class="section mint story">
+          <div class="sectionHead">
+            <h2>Chapter 2: One lucky break</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
 
-          <p>
-            In <em>The Psychology of Money</em>, Morgan Housel tells a story about Bill Gates that is not just about intelligence.
-            It is about the strange mix of luck, risk, and action.
+          <p class="lead">
+            Bill Gates did not begin with Microsoft.
           </p>
 
           <p>
-            Gates was brilliant and hardworking. But he also had something almost no teenager in the world had in 1968:
-            access to a computer at school.
-          </p>
-        </section>
-
-        <div class="storyGrid">
-          <section class="storyCard">
-            <h3>The luck: Lakeside had a computer.</h3>
-            <p>
-              Housel walks through the math. There were hundreds of millions of high-school-age people in the world.
-              Only a tiny number attended Lakeside School in Seattle.
-              Lakeside had the money and foresight to get computer access when that was incredibly rare.
-              Gates happened to be one of the students there.
-            </p>
-          </section>
-
-          <section class="storyCard">
-            <h3>The action: Gates used the opening.</h3>
-            <p>
-              The computer did not automatically create Microsoft.
-              Gates and Paul Allen spent huge amounts of time learning, experimenting, and imagining what computers could become.
-              Gates was already thinking about building a company before most adults understood how important computers would be.
-            </p>
-          </section>
-
-          <section class="storyCard">
-            <h3>The proof: luck alone was not enough.</h3>
-            <p>
-              Many people can be near an opportunity and never notice it.
-              Others notice it but do not act.
-              Gates became famous because rare access was paired with unusual action:
-              curiosity, practice, ambition, and the willingness to keep going.
-            </p>
-          </section>
-
-          <section class="storyCard">
-            <h3>The risk: Kent Evans shows the other side.</h3>
-            <p>
-              Gates had a friend named Kent Evans who was also extremely talented.
-              Kent helped Gates build a program to solve Lakeside’s class scheduling problem.
-              He may have been part of Microsoft’s beginning.
-              But Kent died in a mountaineering accident before graduating high school.
-            </p>
-          </section>
-        </div>
-
-        <section class="bigIdea">
-          <div class="label">LUCK AND RISK</div>
-          <p>
-            Luck and risk are the same kind of force moving in opposite directions.
-            Gates had a one-in-a-million lucky opening.
-            Kent Evans faced a one-in-a-million risk.
-            That does not mean effort does not matter.
-            It means outcomes are never only effort.
-            The world is full of doors opening and closing for reasons we do not fully control.
-          </p>
-        </section>
-
-        <section class="actionBox">
-          <p class="actionLine">
-            The lesson is not: “Bill Gates was lucky, so nothing matters.”
+            He began with access.
           </p>
 
           <p>
-            The better lesson is:
-            luck may give you a door, but action is what turns the door into a future.
+            In 1968, Lakeside School had something almost no school had: a computer terminal connected to a time-sharing computer.
+            Gates was in eighth grade. He was thirteen. Most teenagers in the world never got near a computer. He did.
+          </p>
+
+          <div class="imageFrame gatesPhoto">
+            <img src="gates.png" alt="Bill Gates with early personal computers">
+          </div>
+
+          <p>
+            That was luck.
           </p>
 
           <p>
-            You may already have lucky breaks around you:
-            a class that teaches coding, a website you can build on, a teacher willing to give you strange challenges,
-            a tool that helps you learn faster, a friend with an idea, a problem nobody else wants to solve.
+            But luck was not the whole story.
           </p>
 
           <p>
-            Most lucky breaks do not announce themselves.
-            They look like assignments, problems, weird chances, boring practice, or confusing black boxes.
-            The people who benefit from luck are often the people paying enough attention to notice the door,
-            then taking enough action to walk through it.
+            A lucky break is only an opening. Gates used the opening. He stayed with the machine.
+            He learned the language. He wrote programs. He and his friends spent strange hours trying to understand what this new tool could do.
           </p>
 
-          <p class="actionLine">
-            Pay attention. Take action. Keep going.
+          <p>
+            The computer did not hand him a future.
+          </p>
+
+          <p>
+            It gave him a black box.
+          </p>
+
+          <p>
+            He looked inside.
+          </p>
+
+          <p>
+            That is why this scavenger hunt starts the way it does.
+            You are given something confusing. A block of binary. A program. A sandbox.
+            No full explanation at first. You have to slow down, use the tool, and make the hidden message appear.
+          </p>
+
+          <p class="turn">
+            Most lucky breaks do not look exciting when they arrive.
+          </p>
+
+          <p>
+            They look like a weird assignment. A tool you do not understand yet.
+            A class you did not know would matter. A problem that makes no sense until you stay with it longer than most people would.
+          </p>
+
+          <p>
+            Gates once said that without Lakeside, there would have been no Microsoft.
+          </p>
+
+          <p>
+            That does not mean effort does not matter. It means effort needs something to work on.
+            Sometimes the door is luck. Sometimes the work is noticing the door while it is still just a black box.
+          </p>
+
+          <p class="finish">
+            Pay attention. Use the tools. Keep going.
           </p>
         </section>
 
         <div class="tiny">
           The light bulb comes after staying with the hard part.
         </div>
-
       </div>
     </main>
   </div>
 
+  <div class="zoomModal" id="zoomModal" aria-hidden="true">
+    <button class="zoomClose" id="zoomClose" type="button">close</button>
+    <img id="zoomImg" alt="">
+    <div class="zoomHelp">Click the image to zoom in or out. Press Esc to close.</div>
+  </div>
+
   <script>
+    const zoomModal = document.getElementById("zoomModal");
+    const zoomImg = document.getElementById("zoomImg");
+    const zoomClose = document.getElementById("zoomClose");
+
+    function openZoom(src, alt){
+      zoomImg.src = src;
+      zoomImg.alt = alt || "enlarged image";
+      zoomImg.classList.remove("zoomed");
+      zoomModal.classList.add("open");
+      zoomModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeZoom(){
+      zoomModal.classList.remove("open");
+      zoomModal.setAttribute("aria-hidden", "true");
+      zoomImg.src = "";
+      zoomImg.classList.remove("zoomed");
+      document.body.style.overflow = "";
+    }
+
+    document.querySelectorAll("[data-zoom-src]").forEach((img) => {
+      img.addEventListener("click", () => openZoom(img.dataset.zoomSrc, img.alt));
+    });
+
+    zoomImg.addEventListener("click", (e) => {
+      e.stopPropagation();
+      zoomImg.classList.toggle("zoomed");
+    });
+
+    zoomClose.addEventListener("click", closeZoom);
+
+    zoomModal.addEventListener("click", (e) => {
+      if(e.target === zoomModal){
+        closeZoom();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && zoomModal.classList.contains("open")){
+        closeZoom();
+      }
+    });
+
     const NEXT_URL = "https://dsteckler.com/blackbox.html";
 
     const CORRECT_MESSAGE = `
@@ -506,4 +704,3 @@ NOW GO BUILD.
   </script>
 </body>
 </html>
-```
