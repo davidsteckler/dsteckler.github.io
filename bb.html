@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box Final</title>
+  <meta name="color-scheme" content="dark" />
+
+  <style>
+    :root{
+      --bg0:#05060a;
+      --bg1:#070a12;
+      --border: rgba(255,255,255,0.12);
+      --text: rgba(245,248,255,0.90);
+      --muted: rgba(245,248,255,0.56);
+      --blue:#7db6ff;
+      --mint:#86f3c6;
+      --warm:#ffd07a;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --max: 860px;
+      --r: 18px;
+      --shadow: 0 22px 90px rgba(0,0,0,0.62);
+    }
+
+    *{ box-sizing:border-box; }
+
+    html, body{
+      min-height:100%;
+    }
+
+    body{
+      margin:0;
+      font-family: var(--mono);
+      color: var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
+        radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
+        radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 34px 16px 70px;
+    }
+
+    .card{
+      min-height: calc(100vh - 68px);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      align-items:center;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background:
+        radial-gradient(620px 260px at 15% 0%, rgba(125,182,255,0.18), transparent 55%),
+        radial-gradient(620px 260px at 85% 0%, rgba(134,243,198,0.16), transparent 55%);
+      opacity: 0.30;
+      pointer-events:none;
+      filter: blur(7px);
+    }
+
+    .content{
+      width:100%;
+      position:relative;
+      padding: 26px;
+      display:flex;
+      flex-direction:column;
+      gap: 20px;
+    }
+
+    .topline{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .trace{
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
+      opacity:0.40;
+      border-radius:999px;
+    }
+
+    .badge{
+      border: 1px solid rgba(255,208,122,0.24);
+      background: rgba(255,208,122,0.06);
+      color: rgba(255,208,122,0.86);
+      padding: 8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      letter-spacing:0.08em;
+      white-space:nowrap;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(30px, 6vw, 64px);
+      line-height:1.02;
+      letter-spacing:-0.07em;
+    }
+
+    .intro{
+      margin:0;
+      color: var(--muted);
+      line-height:1.7;
+      font-size:15px;
+      max-width: 760px;
+    }
+
+    .room{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.28);
+      padding: 18px;
+      min-height: 230px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:14px;
+    }
+
+    .line{
+      margin:0;
+      color: rgba(245,248,255,0.70);
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    .statusBox{
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.24);
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .statusTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color: rgba(245,248,255,0.48);
+      font-size:13px;
+    }
+
+    .barOuter{
+      height: 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.08);
+      overflow:hidden;
+    }
+
+    .barInner{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(125,182,255,0.70), rgba(134,243,198,0.78));
+      border-radius:999px;
+      transition: width 250ms linear;
+    }
+
+    .hint{
+      min-height:22px;
+      color: rgba(255,208,122,0.80);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .reveal{
+      display:none;
+      border: 1px solid rgba(255,208,122,0.18);
+      border-radius: 16px;
+      background: rgba(255,208,122,0.045);
+      padding: 20px;
+      color: rgba(245,248,255,0.76);
+      line-height:1.75;
+      font-size:15px;
+      flex-direction:column;
+      gap:14px;
+      animation: appear 1200ms ease both;
+    }
+
+    .reveal.show{
+      display:flex;
+    }
+
+    .bigLine{
+      color: rgba(134,243,198,0.92);
+      font-weight:700;
+      letter-spacing:0.02em;
+      margin:0;
+    }
+
+    .reveal p{
+      margin:0;
+    }
+
+    .reward{
+      border: 1px solid rgba(134,243,198,0.18);
+      border-radius: 14px;
+      background: rgba(134,243,198,0.055);
+      padding: 14px;
+    }
+
+    .tiny{
+      color: rgba(245,248,255,0.28);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .hiddenNote{
+      opacity:0;
+      user-select:none;
+      pointer-events:none;
+      height:1px;
+      overflow:hidden;
+    }
+
+    @keyframes appear{
+      from{
+        opacity:0;
+        transform: translateY(8px);
+      }
+      to{
+        opacity:1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 760px){
+      .content{
+        padding: 16px;
+      }
+
+      .card{
+        min-height: calc(100vh - 32px);
+      }
+
+      .wrap{
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="content">
+
+        <div class="topline">
+          <div class="trace" aria-hidden="true"></div>
+          <div class="badge">FINAL BLACK BOX</div>
+        </div>
+
+        <h1>The Last File</h1>
+
+        <p class="intro">
+          Inside the black box was an SD card.
+          On the SD card was a file.
+          The file led you to dsteckler.com/blackboxintro.
+        </p>
+
+        <div class="room" id="room">
+          <p class="line">
+            That means this whole activity started with something small hidden inside something else.
+          </p>
+
+          <p class="line">
+            A black box.
+            An SD card.
+            A file.
+            A clue.
+            A page.
+            A pattern.
+          </p>
+
+          <p class="line">
+            The secret was never just the answer.
+            The secret was learning how to stay with a problem long enough to notice what was inside it.
+          </p>
+        </div>
+
+        <div class="statusBox">
+          <div class="statusTop">
+            <div id="statusText">stay with it.</div>
+            <div id="timerText">0 / 30</div>
+          </div>
+
+          <div class="barOuter">
+            <div class="barInner" id="barInner"></div>
+          </div>
+
+          <div class="hint" id="hintText">
+            Do less than you want to do.
+          </div>
+        </div>
+
+        <div class="reveal" id="reveal">
+          <p class="bigLine">
+            You found the last secret.
+          </p>
+
+          <p>
+            Inside the black box was not just an SD card.
+          </p>
+
+          <p>
+            It was a reminder that sometimes the important thing is hidden inside the thing you almost ignore.
+          </p>
+
+          <p>
+            You had to open the box.
+            Then open the file.
+            Then follow the page.
+            Then decode.
+            Then test.
+            Then stay with the confusing parts long enough for them to open.
+          </p>
+
+          <p>
+            That is the same skill you need when you are learning something hard.
+          </p>
+
+          <p>
+            Noticing is not passive.
+            Noticing is an action.
+          </p>
+
+          <p>
+            You notice more when you interact more carefully.
+            You notice more when you slow down.
+            You notice more when you try something, watch what happens, and adjust.
+          </p>
+
+          <div class="reward">
+            <p class="bigLine">
+              Your reward is a stylus.
+            </p>
+
+            <p>
+              It is not just a prize.
+              It is a tool for interacting more deeply with your iPad.
+            </p>
+
+            <p>
+              A stylus lets you mark things up, draw, circle, underline, sketch, test ideas, and leave traces of your thinking.
+            </p>
+
+            <p>
+              Deeper interaction helps you notice.
+              And noticing is where understanding starts.
+            </p>
+          </div>
+
+          <p>
+            The light bulb is not the reward for already understanding.
+          </p>
+
+          <p class="bigLine">
+            It is the reward for staying with the problem long enough to see what was there.
+          </p>
+        </div>
+
+        <div class="tiny">
+          The final door opens when you stay long enough to notice.
+        </div>
+
+        <div class="hiddenNote">
+          If you are reading the code: yes, this counts too. You looked underneath the surface.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const WAIT_SECONDS = 30;
+
+      const statusText = document.getElementById("statusText");
+      const timerText = document.getElementById("timerText");
+      const hintText = document.getElementById("hintText");
+      const barInner = document.getElementById("barInner");
+      const reveal = document.getElementById("reveal");
+
+      let seconds = 0;
+      let opened = false;
+      let interval = null;
+      let resetCount = 0;
+
+      const hints = [
+        "Do less than you want to do.",
+        "The page is still working.",
+        "The problem is not always solved by pressing harder.",
+        "Stay.",
+        "A little longer.",
+        "This is the hard part."
+      ];
+
+      function updateScreen(){
+        timerText.textContent = seconds + " / " + WAIT_SECONDS;
+        barInner.style.width = ((seconds / WAIT_SECONDS) * 100) + "%";
+
+        if(seconds < 5){
+          hintText.textContent = hints[0];
+        }else if(seconds < 10){
+          hintText.textContent = hints[1];
+        }else if(seconds < 16){
+          hintText.textContent = hints[2];
+        }else if(seconds < 22){
+          hintText.textContent = hints[3];
+        }else if(seconds < 28){
+          hintText.textContent = hints[4];
+        }else{
+          hintText.textContent = hints[5];
+        }
+      }
+
+      function openFinalMessage(){
+        opened = true;
+        clearInterval(interval);
+        statusText.textContent = "it opened.";
+        timerText.textContent = WAIT_SECONDS + " / " + WAIT_SECONDS;
+        barInner.style.width = "100%";
+        hintText.textContent = "The quiet part was the clue.";
+        reveal.classList.add("show");
+        reveal.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function startTimer(){
+        clearInterval(interval);
+
+        interval = setInterval(() => {
+          if(opened) return;
+
+          seconds++;
+          updateScreen();
+
+          if(seconds >= WAIT_SECONDS){
+            openFinalMessage();
+          }
+        }, 1000);
+      }
+
+      function reset(){
+        if(opened) return;
+
+        resetCount++;
+        seconds = 0;
+        updateScreen();
+
+        if(resetCount === 1){
+          statusText.textContent = "you moved too soon. start again.";
+        }else if(resetCount === 2){
+          statusText.textContent = "again. the page is teaching the rule.";
+        }else if(resetCount === 3){
+          statusText.textContent = "try doing nothing.";
+        }else{
+          statusText.textContent = "stay with it.";
+        }
+
+        startTimer();
+      }
+
+      updateScreen();
+      startTimer();
+
+      document.addEventListener("click", reset);
+      document.addEventListener("keydown", reset);
+      document.addEventListener("scroll", reset, { passive: true });
+      document.addEventListener("touchstart", reset, { passive: true });
+
+      console.log("%cThe final clue is waiting.", "color: rgba(255,208,122,0.80); font-family: ui-monospace; font-size: 12px;");
+    })();
+  </script>
+</body>
+</html>
