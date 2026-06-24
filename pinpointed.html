@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,6 +59,10 @@
     .score-box{min-width:145px;padding:12px 16px;background:linear-gradient(180deg, rgba(22,78,47,.96), rgba(18,66,40,.94))}
     .score-label{font-size:11px;line-height:1;text-transform:uppercase;letter-spacing:.4px;color:rgba(238,246,255,.84);font-weight:850}
     .score-value{margin-top:5px;font-size:28px;line-height:1;font-weight:950;letter-spacing:-.8px}
+    .hud-toggle{flex:0 0 auto}
+    .hud-right.collapsed .world-chip,
+    .hud-right.collapsed .score-box{display:none}
+    .hud-right.collapsed .hud-toggle{background:linear-gradient(180deg, var(--accent), var(--accent2));color:#072033}
 
     .toast{
       position:absolute;top:110px;left:50%;transform:translateX(-50%);z-index:60;
@@ -125,6 +128,13 @@
       stroke:rgba(255,255,255,.96);stroke-width:4;stroke-linecap:round;vector-effect:non-scaling-stroke;
       filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));
     }
+    .map-overlay-svg path{filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
+    .line-distance-label{
+      position:absolute;z-index:8;display:none;transform:translate(-50%, -50%);
+      padding:7px 10px;border-radius:999px;background:rgba(8,15,24,.94);
+      border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 24px rgba(0,0,0,.3);
+      color:var(--text);font-size:12px;font-weight:950;white-space:nowrap;pointer-events:none;
+    }
 
     .pin{
       position:absolute;width:24px;height:24px;border-radius:999px;transform:translate(-50%, -50%);
@@ -162,6 +172,19 @@
       border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);
     }
     .result-card.show{display:block}
+    .result-toggle{
+      position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:12px;font-size:18px;
+    }
+    .result-card.minimized{
+      width:auto;min-width:190px;padding:10px 48px 10px 12px;border-radius:999px;
+    }
+    .result-card.minimized .result-kicker,
+    .result-card.minimized .result-title,
+    .result-card.minimized .stat-grid,
+    .result-card.minimized .result-copy,
+    .result-card.minimized .progress,
+    .result-card.minimized .result-actions{display:none}
+    .result-card.minimized .distance-chip{margin:0;font-size:12px;padding:8px 11px}
     .result-kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:850;margin-bottom:6px}
     .result-title{font-size:27px;line-height:1;font-weight:950;letter-spacing:-.8px;margin:0 0 10px}
     .distance-chip{
@@ -178,6 +201,29 @@
     .progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:14px}
     .progress > div{width:0%;height:100%;border-radius:999px;background:linear-gradient(90deg, var(--danger), #ffd56e, #6ce287);transition:width .35s ease}
     .result-actions{display:flex;justify-content:flex-end}
+
+
+
+    .practice-options{
+      margin:18px auto 20px;max-width:610px;padding:14px;border-radius:22px;
+      background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);text-align:left;
+    }
+    .option-title{
+      color:var(--text);font-size:12px;text-transform:uppercase;letter-spacing:.45px;font-weight:900;margin-bottom:10px;
+    }
+    .continent-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:8px}
+    .continent-btn{
+      border:1px solid rgba(255,255,255,.11);border-radius:16px;padding:10px 9px;cursor:pointer;
+      background:rgba(255,255,255,.05);color:var(--text);font:inherit;font-size:12px;font-weight:900;
+      transition:transform .12s ease, filter .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .continent-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+    .continent-btn.active{
+      color:#072033;background:linear-gradient(180deg, var(--accent), var(--accent2));
+      border-color:rgba(104,210,255,.65);box-shadow:0 10px 24px rgba(51,169,231,.22);
+    }
+    .option-note{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.35;text-align:center}
+    .final-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 
     .start-screen,.final-screen{
       position:absolute;inset:0;z-index:90;display:grid;place-items:center;padding:18px;
@@ -219,6 +265,8 @@
       .result-card{top:112px;right:10px;width:min(94vw, 350px)}
       .overlay-card h2{font-size:38px}
       .final-score{font-size:54px}
+      .continent-grid{grid-template-columns:repeat(2, 1fr)}
+      .practice-options{padding:12px}
     }
   </style>
 </head>
@@ -235,7 +283,8 @@
         </div>
       </div>
 
-      <div class="hud-right">
+      <div class="hud-right" id="hudRight">
+        <button class="icon-btn hud-toggle" id="hudToggleBtn" type="button" title="Collapse score panel">▾</button>
         <div class="world-chip"><span id="packCount">Large pack</span></div>
         <div class="score-box">
           <div class="score-label">Round</div>
@@ -263,6 +312,7 @@
         <div class="tile-layer" id="tileLayer"></div>
         <div class="country-label-layer" id="countryLabelLayer"></div>
         <svg class="map-overlay-svg" id="mapSvg"></svg>
+        <div class="line-distance-label" id="lineDistanceLabel"></div>
 
         <div class="pin guess" id="guessPin"></div>
         <div class="pin answer" id="answerPin"></div>
@@ -286,6 +336,7 @@
     </section>
 
     <aside class="result-card" id="resultCard">
+      <button class="icon-btn result-toggle" id="resultToggleBtn" type="button" title="Collapse result">–</button>
       <div class="result-kicker">Round result</div>
       <h2 class="result-title" id="resultTitle">Nice guess.</h2>
       <div class="distance-chip" id="distanceChip">📏 0 km away</div>
@@ -313,9 +364,21 @@
       <div class="overlay-card">
         <h2>PinPointed</h2>
         <p>
-          Drop a pin on the world map after studying the street view. Each round reveals the real location, draws the miss distance, scores the guess,
-          and lets you keep exploring the map after the reveal.
+          Drop a pin after studying the street view. Practice the whole world, or focus one continent at a time so the map starts closer to the region you are learning.
         </p>
+        <div class="practice-options">
+          <div class="option-title">Practice pack</div>
+          <div class="continent-grid" id="continentButtons">
+            <button class="continent-btn active" type="button" data-continent="all">All world</button>
+            <button class="continent-btn" type="button" data-continent="north_america">North America</button>
+            <button class="continent-btn" type="button" data-continent="south_america">South America</button>
+            <button class="continent-btn" type="button" data-continent="europe">Europe</button>
+            <button class="continent-btn" type="button" data-continent="africa">Africa</button>
+            <button class="continent-btn" type="button" data-continent="asia">Asia</button>
+            <button class="continent-btn" type="button" data-continent="oceania">Oceania</button>
+          </div>
+          <div class="option-note" id="continentNote">All world pack selected.</div>
+        </div>
         <button class="primary-btn" id="startBtn" type="button">Start game</button>
       </div>
     </section>
@@ -325,7 +388,10 @@
         <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; font-weight:850;">Final score</div>
         <div class="final-score" id="finalScore">0</div>
         <div class="round-list" id="roundList"></div>
-        <button class="primary-btn" id="playAgainBtn" type="button">Play again</button>
+        <div class="final-actions">
+          <button class="ghost-btn" id="changePackBtn" type="button">Change pack</button>
+          <button class="primary-btn" id="playAgainBtn" type="button">Play again</button>
+        </div>
       </div>
     </section>
   </div>
@@ -1453,6 +1519,160 @@
             "heading": 250
       }
 ];
+
+    const EXTRA_LOCATIONS = [
+      { name: "Mystic river village", place: "Connecticut, USA", continent: "north_america", lat: 41.3543, lng: -71.9665, heading: 90 },
+      { name: "Newport harbor streets", place: "Rhode Island, USA", continent: "north_america", lat: 41.4901, lng: -71.3128, heading: 150 },
+      { name: "Portsmouth market square", place: "New Hampshire, USA", continent: "north_america", lat: 43.0770, lng: -70.7577, heading: 30 },
+      { name: "Cape May beach avenue", place: "New Jersey, USA", continent: "north_america", lat: 38.9351, lng: -74.9060, heading: 110 },
+      { name: "Annapolis harbor", place: "Maryland, USA", continent: "north_america", lat: 38.9784, lng: -76.4922, heading: 230 },
+      { name: "St. Augustine old street", place: "Florida, USA", continent: "north_america", lat: 29.8947, lng: -81.3132, heading: 80 },
+      { name: "Key West old town", place: "Florida, USA", continent: "north_america", lat: 24.5551, lng: -81.7800, heading: 140 },
+      { name: "New Orleans garden district", place: "Louisiana, USA", continent: "north_america", lat: 29.9288, lng: -90.0840, heading: 40 },
+      { name: "Boulder Pearl Street", place: "Colorado, USA", continent: "north_america", lat: 40.0176, lng: -105.2797, heading: 250 },
+      { name: "Telluride main street", place: "Colorado, USA", continent: "north_america", lat: 37.9375, lng: -107.8123, heading: 100 },
+      { name: "Sedona uptown", place: "Arizona, USA", continent: "north_america", lat: 34.8697, lng: -111.7609, heading: 190 },
+      { name: "Moab main street", place: "Utah, USA", continent: "north_america", lat: 38.5733, lng: -109.5498, heading: 20 },
+      { name: "Park City main street", place: "Utah, USA", continent: "north_america", lat: 40.6461, lng: -111.4980, heading: 70 },
+      { name: "Santa Barbara state street", place: "California, USA", continent: "north_america", lat: 34.4208, lng: -119.6982, heading: 130 },
+      { name: "Bend downtown", place: "Oregon, USA", continent: "north_america", lat: 44.0582, lng: -121.3153, heading: 210 },
+      { name: "Bozeman main street", place: "Montana, USA", continent: "north_america", lat: 45.6797, lng: -111.0386, heading: 80 },
+      { name: "Victoria inner harbour", place: "British Columbia, Canada", continent: "north_america", lat: 48.4216, lng: -123.3685, heading: 300 },
+      { name: "Whistler village", place: "British Columbia, Canada", continent: "north_america", lat: 50.1163, lng: -122.9574, heading: 180 },
+      { name: "Niagara-on-the-Lake", place: "Ontario, Canada", continent: "north_america", lat: 43.2557, lng: -79.0710, heading: 120 },
+      { name: "Kingston waterfront", place: "Ontario, Canada", continent: "north_america", lat: 44.2290, lng: -76.4808, heading: 240 },
+      { name: "Puebla historic center", place: "Puebla, Mexico", continent: "north_america", lat: 19.0433, lng: -98.2019, heading: 80 },
+      { name: "Campeche old town", place: "Campeche, Mexico", continent: "north_america", lat: 19.8450, lng: -90.5230, heading: 170 },
+      { name: "San Cristobal street", place: "Chiapas, Mexico", continent: "north_america", lat: 16.7370, lng: -92.6376, heading: 40 },
+      { name: "La Paz malecon", place: "Baja California Sur, Mexico", continent: "north_america", lat: 24.1426, lng: -110.3128, heading: 260 },
+
+      { name: "Buenos Aires Palermo", place: "Argentina", continent: "south_america", lat: -34.5889, lng: -58.4306, heading: 110 },
+      { name: "Mendoza plaza", place: "Argentina", continent: "south_america", lat: -32.8895, lng: -68.8458, heading: 200 },
+      { name: "Bariloche town center", place: "Argentina", continent: "south_america", lat: -41.1335, lng: -71.3103, heading: 70 },
+      { name: "Santiago Lastarria", place: "Chile", continent: "south_america", lat: -33.4378, lng: -70.6369, heading: 150 },
+      { name: "Valdivia riverfront", place: "Chile", continent: "south_america", lat: -39.8142, lng: -73.2459, heading: 250 },
+      { name: "Montevideo old city", place: "Uruguay", continent: "south_america", lat: -34.9065, lng: -56.2033, heading: 40 },
+      { name: "Punta del Este harbor", place: "Uruguay", continent: "south_america", lat: -34.9637, lng: -54.9446, heading: 210 },
+      { name: "Lima Miraflores", place: "Peru", continent: "south_america", lat: -12.1211, lng: -77.0295, heading: 90 },
+      { name: "Trujillo plaza", place: "Peru", continent: "south_america", lat: -8.1116, lng: -79.0287, heading: 180 },
+      { name: "Quito old town", place: "Ecuador", continent: "south_america", lat: -0.2202, lng: -78.5127, heading: 130 },
+      { name: "Medellin El Poblado", place: "Colombia", continent: "south_america", lat: 6.2088, lng: -75.5675, heading: 250 },
+      { name: "Bogota Candelaria", place: "Colombia", continent: "south_america", lat: 4.5981, lng: -74.0758, heading: 60 },
+      { name: "Salento town square", place: "Colombia", continent: "south_america", lat: 4.6379, lng: -75.5706, heading: 170 },
+      { name: "Sao Paulo Paulista", place: "Brazil", continent: "south_america", lat: -23.5617, lng: -46.6561, heading: 100 },
+      { name: "Rio Copacabana", place: "Brazil", continent: "south_america", lat: -22.9711, lng: -43.1822, heading: 230 },
+      { name: "Ouro Preto street", place: "Brazil", continent: "south_america", lat: -20.3856, lng: -43.5035, heading: 30 },
+      { name: "Curitiba downtown", place: "Brazil", continent: "south_america", lat: -25.4296, lng: -49.2719, heading: 150 },
+      { name: "Asuncion old center", place: "Paraguay", continent: "south_america", lat: -25.2822, lng: -57.6351, heading: 70 },
+
+      { name: "Tallinn old town", place: "Estonia", continent: "europe", lat: 59.4370, lng: 24.7453, heading: 120 },
+      { name: "Helsinki market square", place: "Finland", continent: "europe", lat: 60.1677, lng: 24.9558, heading: 230 },
+      { name: "Stockholm old town", place: "Sweden", continent: "europe", lat: 59.3250, lng: 18.0710, heading: 60 },
+      { name: "Copenhagen Nyhavn", place: "Denmark", continent: "europe", lat: 55.6797, lng: 12.5905, heading: 280 },
+      { name: "Oslo waterfront", place: "Norway", continent: "europe", lat: 59.9109, lng: 10.7514, heading: 140 },
+      { name: "Edinburgh Royal Mile", place: "Scotland, UK", continent: "europe", lat: 55.9503, lng: -3.1883, heading: 90 },
+      { name: "Oxford high street", place: "England, UK", continent: "europe", lat: 51.7520, lng: -1.2577, heading: 260 },
+      { name: "Cambridge old street", place: "England, UK", continent: "europe", lat: 52.2053, lng: 0.1218, heading: 40 },
+      { name: "Brighton seafront", place: "England, UK", continent: "europe", lat: 50.8198, lng: -0.1369, heading: 110 },
+      { name: "Belfast cathedral quarter", place: "Northern Ireland, UK", continent: "europe", lat: 54.6020, lng: -5.9286, heading: 180 },
+      { name: "Strasbourg Petite France", place: "France", continent: "europe", lat: 48.5819, lng: 7.7423, heading: 250 },
+      { name: "Lyon old town", place: "France", continent: "europe", lat: 45.7634, lng: 4.8270, heading: 130 },
+      { name: "Nice promenade", place: "France", continent: "europe", lat: 43.6951, lng: 7.2656, heading: 90 },
+      { name: "Bordeaux old town", place: "France", continent: "europe", lat: 44.8378, lng: -0.5792, heading: 210 },
+      { name: "Porto Ribeira", place: "Portugal", continent: "europe", lat: 41.1406, lng: -8.6110, heading: 160 },
+      { name: "Seville old quarter", place: "Spain", continent: "europe", lat: 37.3861, lng: -5.9923, heading: 70 },
+      { name: "Valencia old city", place: "Spain", continent: "europe", lat: 39.4740, lng: -0.3750, heading: 190 },
+      { name: "Toledo old town", place: "Spain", continent: "europe", lat: 39.8628, lng: -4.0273, heading: 120 },
+      { name: "San Sebastian bay", place: "Spain", continent: "europe", lat: 43.3183, lng: -1.9812, heading: 300 },
+      { name: "Florence side street", place: "Italy", continent: "europe", lat: 43.7696, lng: 11.2558, heading: 60 },
+      { name: "Siena old center", place: "Italy", continent: "europe", lat: 43.3188, lng: 11.3308, heading: 210 },
+      { name: "Verona old town", place: "Italy", continent: "europe", lat: 45.4384, lng: 10.9916, heading: 140 },
+      { name: "Bologna portico street", place: "Italy", continent: "europe", lat: 44.4949, lng: 11.3426, heading: 90 },
+      { name: "Palermo old street", place: "Sicily, Italy", continent: "europe", lat: 38.1157, lng: 13.3615, heading: 250 },
+      { name: "Salzburg old town", place: "Austria", continent: "europe", lat: 47.8006, lng: 13.0436, heading: 40 },
+      { name: "Graz old town", place: "Austria", continent: "europe", lat: 47.0707, lng: 15.4395, heading: 190 },
+      { name: "Prague old town", place: "Czechia", continent: "europe", lat: 50.0875, lng: 14.4213, heading: 80 },
+      { name: "Wroclaw market square", place: "Poland", continent: "europe", lat: 51.1100, lng: 17.0325, heading: 150 },
+      { name: "Zagreb upper town", place: "Croatia", continent: "europe", lat: 45.8150, lng: 15.9730, heading: 100 },
+      { name: "Split waterfront", place: "Croatia", continent: "europe", lat: 43.5081, lng: 16.4402, heading: 260 },
+      { name: "Lucerne lakeside", place: "Switzerland", continent: "europe", lat: 47.0502, lng: 8.3093, heading: 200 },
+      { name: "Geneva lakefront", place: "Switzerland", continent: "europe", lat: 46.2044, lng: 6.1432, heading: 110 },
+      { name: "Luxembourg old town", place: "Luxembourg", continent: "europe", lat: 49.6116, lng: 6.1319, heading: 30 },
+      { name: "Nicosia old city", place: "Cyprus", continent: "europe", lat: 35.1741, lng: 33.3636, heading: 170 },
+
+      { name: "Cape Town Bo-Kaap", place: "South Africa", continent: "africa", lat: -33.9215, lng: 18.4159, heading: 80 },
+      { name: "Johannesburg Melville", place: "South Africa", continent: "africa", lat: -26.1767, lng: 28.0084, heading: 220 },
+      { name: "Durban beachfront", place: "South Africa", continent: "africa", lat: -29.8567, lng: 31.0395, heading: 120 },
+      { name: "Pretoria central", place: "South Africa", continent: "africa", lat: -25.7479, lng: 28.2293, heading: 50 },
+      { name: "Hermanus waterfront", place: "South Africa", continent: "africa", lat: -34.4187, lng: 19.2438, heading: 260 },
+      { name: "Franschhoek main road", place: "South Africa", continent: "africa", lat: -33.9106, lng: 19.1190, heading: 140 },
+      { name: "Nairobi Westlands", place: "Kenya", continent: "africa", lat: -1.2652, lng: 36.8025, heading: 90 },
+      { name: "Mombasa old town edge", place: "Kenya", continent: "africa", lat: -4.0620, lng: 39.6735, heading: 180 },
+      { name: "Kampala central road", place: "Uganda", continent: "africa", lat: 0.3136, lng: 32.5811, heading: 70 },
+      { name: "Accra Osu street", place: "Ghana", continent: "africa", lat: 5.5560, lng: -0.1820, heading: 230 },
+      { name: "Tunis avenue", place: "Tunisia", continent: "africa", lat: 36.8065, lng: 10.1815, heading: 120 },
+      { name: "Marrakech street", place: "Morocco", continent: "africa", lat: 31.6295, lng: -7.9811, heading: 40 },
+      { name: "Rabat avenue", place: "Morocco", continent: "africa", lat: 34.0209, lng: -6.8416, heading: 190 },
+      { name: "Casablanca corniche", place: "Morocco", continent: "africa", lat: 33.5980, lng: -7.6658, heading: 260 },
+      { name: "Cairo Zamalek", place: "Egypt", continent: "africa", lat: 30.0606, lng: 31.2197, heading: 80 },
+      { name: "Alexandria corniche", place: "Egypt", continent: "africa", lat: 31.2001, lng: 29.9187, heading: 220 },
+      { name: "Luxor corniche", place: "Egypt", continent: "africa", lat: 25.6872, lng: 32.6396, heading: 150 },
+      { name: "Gaborone city center", place: "Botswana", continent: "africa", lat: -24.6282, lng: 25.9231, heading: 100 },
+
+      { name: "Singapore Chinatown", place: "Singapore", continent: "asia", lat: 1.2834, lng: 103.8449, heading: 170 },
+      { name: "Hong Kong Central", place: "Hong Kong", continent: "asia", lat: 22.2819, lng: 114.1587, heading: 80 },
+      { name: "Macau Senado Square", place: "Macau", continent: "asia", lat: 22.1935, lng: 113.5397, heading: 210 },
+      { name: "Seoul Hongdae", place: "South Korea", continent: "asia", lat: 37.5563, lng: 126.9236, heading: 130 },
+      { name: "Kyoto Gion", place: "Japan", continent: "asia", lat: 35.0037, lng: 135.7788, heading: 90 },
+      { name: "Osaka Dotonbori", place: "Japan", continent: "asia", lat: 34.6687, lng: 135.5010, heading: 260 },
+      { name: "Sapporo street", place: "Japan", continent: "asia", lat: 43.0618, lng: 141.3545, heading: 40 },
+      { name: "Fukuoka Tenjin", place: "Japan", continent: "asia", lat: 33.5904, lng: 130.4017, heading: 160 },
+      { name: "Hiroshima boulevard", place: "Japan", continent: "asia", lat: 34.3853, lng: 132.4553, heading: 110 },
+      { name: "Nagasaki hillside", place: "Japan", continent: "asia", lat: 32.7448, lng: 129.8737, heading: 230 },
+      { name: "Hualien street", place: "Taiwan", continent: "asia", lat: 23.9872, lng: 121.6015, heading: 70 },
+      { name: "Taichung city street", place: "Taiwan", continent: "asia", lat: 24.1477, lng: 120.6736, heading: 200 },
+      { name: "Kaohsiung harbor street", place: "Taiwan", continent: "asia", lat: 22.6273, lng: 120.3014, heading: 150 },
+      { name: "Bangkok Chinatown", place: "Thailand", continent: "asia", lat: 13.7407, lng: 100.5084, heading: 90 },
+      { name: "Phuket old town", place: "Thailand", continent: "asia", lat: 7.8840, lng: 98.3888, heading: 190 },
+      { name: "Chiang Rai clock tower", place: "Thailand", continent: "asia", lat: 19.9072, lng: 99.8309, heading: 60 },
+      { name: "Kuala Lumpur Bukit Bintang", place: "Malaysia", continent: "asia", lat: 3.1466, lng: 101.7114, heading: 120 },
+      { name: "Ipoh old town", place: "Malaysia", continent: "asia", lat: 4.5975, lng: 101.0752, heading: 250 },
+      { name: "Kota Kinabalu waterfront", place: "Malaysia", continent: "asia", lat: 5.9804, lng: 116.0735, heading: 200 },
+      { name: "Manila Intramuros", place: "Philippines", continent: "asia", lat: 14.5896, lng: 120.9747, heading: 40 },
+      { name: "Cebu city street", place: "Philippines", continent: "asia", lat: 10.3157, lng: 123.8854, heading: 160 },
+      { name: "Jakarta Kota Tua", place: "Indonesia", continent: "asia", lat: -6.1352, lng: 106.8133, heading: 80 },
+      { name: "Bandung city street", place: "Indonesia", continent: "asia", lat: -6.9175, lng: 107.6191, heading: 220 },
+      { name: "Surabaya street", place: "Indonesia", continent: "asia", lat: -7.2575, lng: 112.7521, heading: 130 },
+      { name: "Tel Aviv boulevard", place: "Israel", continent: "asia", lat: 32.0853, lng: 34.7818, heading: 90 },
+      { name: "Haifa German Colony", place: "Israel", continent: "asia", lat: 32.8191, lng: 34.9906, heading: 210 },
+      { name: "Dubai Marina street", place: "United Arab Emirates", continent: "asia", lat: 25.0800, lng: 55.1400, heading: 140 },
+      { name: "Sharjah heritage area", place: "United Arab Emirates", continent: "asia", lat: 25.3573, lng: 55.3910, heading: 30 },
+      { name: "Istanbul Balat", place: "Turkey", continent: "asia", lat: 41.0308, lng: 28.9486, heading: 100 },
+      { name: "Izmir waterfront", place: "Turkey", continent: "asia", lat: 38.4192, lng: 27.1287, heading: 260 },
+      { name: "Bursa old town", place: "Turkey", continent: "asia", lat: 40.1826, lng: 29.0665, heading: 170 },
+      { name: "Astana boulevard", place: "Kazakhstan", continent: "asia", lat: 51.1282, lng: 71.4304, heading: 80 },
+
+      { name: "Melbourne laneway", place: "Victoria, Australia", continent: "oceania", lat: -37.8136, lng: 144.9631, heading: 120 },
+      { name: "Brisbane South Bank", place: "Queensland, Australia", continent: "oceania", lat: -27.4750, lng: 153.0211, heading: 210 },
+      { name: "Gold Coast beach road", place: "Queensland, Australia", continent: "oceania", lat: -28.0024, lng: 153.4310, heading: 50 },
+      { name: "Cairns esplanade", place: "Queensland, Australia", continent: "oceania", lat: -16.9186, lng: 145.7781, heading: 260 },
+      { name: "Darwin waterfront", place: "Northern Territory, Australia", continent: "oceania", lat: -12.4667, lng: 130.8456, heading: 130 },
+      { name: "Canberra civic", place: "Australian Capital Territory, Australia", continent: "oceania", lat: -35.2809, lng: 149.1300, heading: 90 },
+      { name: "Launceston street", place: "Tasmania, Australia", continent: "oceania", lat: -41.4332, lng: 147.1441, heading: 200 },
+      { name: "Geelong waterfront", place: "Victoria, Australia", continent: "oceania", lat: -38.1471, lng: 144.3616, heading: 240 },
+      { name: "Wollongong beach street", place: "New South Wales, Australia", continent: "oceania", lat: -34.4240, lng: 150.8931, heading: 70 },
+      { name: "Newcastle Australia street", place: "New South Wales, Australia", continent: "oceania", lat: -32.9283, lng: 151.7817, heading: 160 },
+      { name: "Auckland waterfront", place: "New Zealand", continent: "oceania", lat: -36.8420, lng: 174.7635, heading: 220 },
+      { name: "Wellington Cuba Street", place: "New Zealand", continent: "oceania", lat: -41.2924, lng: 174.7749, heading: 80 },
+      { name: "Christchurch New Regent", place: "New Zealand", continent: "oceania", lat: -43.5309, lng: 172.6395, heading: 110 },
+      { name: "Napier art deco street", place: "New Zealand", continent: "oceania", lat: -39.4928, lng: 176.9120, heading: 170 },
+      { name: "Tauranga waterfront", place: "New Zealand", continent: "oceania", lat: -37.6868, lng: 176.1670, heading: 250 },
+      { name: "Wanaka lakefront", place: "New Zealand", continent: "oceania", lat: -44.6960, lng: 169.1336, heading: 60 },
+      { name: "Hamilton city street", place: "New Zealand", continent: "oceania", lat: -37.7870, lng: 175.2793, heading: 140 },
+      { name: "Nadi town road", place: "Fiji", continent: "oceania", lat: -17.7765, lng: 177.4356, heading: 100 }
+    ];
+
+    LOCATIONS.push(...EXTRA_LOCATIONS);
     const COUNTRY_LABELS = [
       ["Canada", 56.13, -106.35],["United States", 39.83, -98.58],["Mexico", 23.63, -102.55],
       ["Brazil", -14.24, -51.93],["Argentina", -38.42, -63.62],["Chile", -30.0, -71.0],["Colombia", 4.57, -74.3],
@@ -1472,6 +1692,47 @@
     const MAX_ZOOM = 16;
     const MAX_MERCATOR_LAT = 85.05112878;
 
+
+    const CONTINENT_OPTIONS = [
+      { id: "all", label: "All world", mapLabel: "World", centerLat: 20, centerLng: 0, zoom: 2 },
+      { id: "north_america", label: "North America", mapLabel: "North America", centerLat: 39, centerLng: -98, zoom: 3 },
+      { id: "south_america", label: "South America", mapLabel: "South America", centerLat: -18, centerLng: -60, zoom: 3 },
+      { id: "europe", label: "Europe", mapLabel: "Europe", centerLat: 50, centerLng: 12, zoom: 4 },
+      { id: "africa", label: "Africa", mapLabel: "Africa", centerLat: 3, centerLng: 20, zoom: 3 },
+      { id: "asia", label: "Asia", mapLabel: "Asia", centerLat: 28, centerLng: 90, zoom: 3 },
+      { id: "oceania", label: "Oceania", mapLabel: "Oceania", centerLat: -27, centerLng: 145, zoom: 3 }
+    ];
+
+    const CONTINENT_KEYWORDS = {
+      north_america: ["usa", "united states", "canada", "mexico", "guatemala", "panama", "costa rica", "connecticut", "rhode island", "new hampshire", "new jersey", "maryland", "florida", "louisiana", "colorado", "utah", "arizona", "california", "oregon", "montana", "maine", "north carolina", "texas", "new mexico", "vermont", "washington", "south carolina", "wyoming", "illinois", "south dakota", "nova scotia", "quebec", "alberta", "british columbia", "newfoundland", "ontario", "baja california", "chiapas", "puebla", "campeche"],
+      south_america: ["argentina", "chile", "uruguay", "peru", "ecuador", "colombia", "brazil", "bolivia", "paraguay"],
+      europe: ["czechia", "slovenia", "croatia", "montenegro", "bosnia", "albania", "north macedonia", "bulgaria", "romania", "hungary", "austria", "belgium", "netherlands", "denmark", "norway", "sweden", "finland", "estonia", "latvia", "lithuania", "poland", "spain", "portugal", "france", "italy", "malta", "greece", "iceland", "ireland", "england", "scotland", "uk", "united kingdom", "northern ireland", "switzerland", "luxembourg", "cyprus"],
+      africa: ["morocco", "tunisia", "tanzania", "zanzibar", "rwanda", "namibia", "south africa", "ethiopia", "kenya", "uganda", "ghana", "egypt", "botswana"],
+      asia: ["jordan", "oman", "qatar", "united arab emirates", "uae", "malaysia", "vietnam", "thailand", "laos", "cambodia", "indonesia", "bali", "taiwan", "japan", "south korea", "sri lanka", "bhutan", "nepal", "georgia", "armenia", "azerbaijan", "kazakhstan", "uzbekistan", "kyrgyzstan", "singapore", "hong kong", "macau", "philippines", "israel", "turkey"],
+      oceania: ["australia", "tasmania", "new zealand", "samoa", "fiji", "queensland", "victoria, australia", "new south wales", "northern territory", "australian capital"]
+    };
+
+    let selectedContinent = "all";
+
+    function getContinentOption(id = selectedContinent) {
+      return CONTINENT_OPTIONS.find(option => option.id === id) || CONTINENT_OPTIONS[0];
+    }
+
+    function getLocationContinent(location) {
+      if (location.continent) return location.continent;
+      const text = `${location.name || ""} ${location.place || ""}`.toLowerCase();
+      for (const [continent, keywords] of Object.entries(CONTINENT_KEYWORDS)) {
+        if (keywords.some(keyword => text.includes(keyword))) return continent;
+      }
+      return "all";
+    }
+
+    function getLocationPool(continent = selectedContinent) {
+      if (continent === "all") return LOCATIONS;
+      return LOCATIONS.filter(location => getLocationContinent(location) === continent);
+    }
+
+
     let currentRound = 0;
     let totalPoints = 0;
     let currentLocation = null;
@@ -1489,18 +1750,50 @@
     const els = {
       streetFrame: $("streetFrame"),
       roundText: $("roundText"), totalRoundsText: $("totalRoundsText"), totalPointsText: $("totalPointsText"),
+      hudRight: $("hudRight"), hudToggleBtn: $("hudToggleBtn"),
       packCount: $("packCount"), mapPanel: $("mapPanel"), mapHint: $("mapHint"), mapStyleChip: $("mapStyleChip"),
-      mapBody: $("mapBody"), tileLayer: $("tileLayer"), countryLabelLayer: $("countryLabelLayer"), mapSvg: $("mapSvg"),
+      mapBody: $("mapBody"), tileLayer: $("tileLayer"), countryLabelLayer: $("countryLabelLayer"), mapSvg: $("mapSvg"), lineDistanceLabel: $("lineDistanceLabel"),
       guessPin: $("guessPin"), answerPin: $("answerPin"), guessLabel: $("guessLabel"), answerLabel: $("answerLabel"),
       resetBtn: $("resetBtn"), guessBtn: $("guessBtn"), expandBtn: $("expandBtn"), zoomInBtn: $("zoomInBtn"), zoomOutBtn: $("zoomOutBtn"),
-      resultCard: $("resultCard"), resultTitle: $("resultTitle"), distanceChip: $("distanceChip"),
+      resultCard: $("resultCard"), resultToggleBtn: $("resultToggleBtn"), resultTitle: $("resultTitle"), distanceChip: $("distanceChip"),
       roundPointsValue: $("roundPointsValue"), resultTotalValue: $("resultTotalValue"), resultCopy: $("resultCopy"), scoreFill: $("scoreFill"),
       nextBtn: $("nextBtn"), startScreen: $("startScreen"), finalScreen: $("finalScreen"), finalScore: $("finalScore"), roundList: $("roundList"),
+      continentButtons: $("continentButtons"), continentNote: $("continentNote"), changePackBtn: $("changePackBtn"),
       startBtn: $("startBtn"), playAgainBtn: $("playAgainBtn"), toast: $("toast")
     };
 
     els.totalRoundsText.textContent = TOTAL_ROUNDS;
-    els.packCount.textContent = `${LOCATIONS.length} places`;
+
+    function updatePracticeSummary() {
+      const option = getContinentOption();
+      const pool = getLocationPool();
+      const countText = `${pool.length} ${option.id === "all" ? "world" : option.label} places`;
+      els.packCount.textContent = countText;
+      if (els.continentNote) {
+        els.continentNote.textContent = `${option.label} selected • ${pool.length} places available • ${TOTAL_ROUNDS} rounds per game`;
+      }
+      if (els.continentButtons) {
+        els.continentButtons.querySelectorAll(".continent-btn").forEach(button => {
+          button.classList.toggle("active", button.dataset.continent === selectedContinent);
+        });
+      }
+    }
+
+    function selectContinent(continent) {
+      selectedContinent = continent;
+      updatePracticeSummary();
+      resetMapView();
+    }
+
+    function changePack() {
+      els.finalScreen.style.display = "none";
+      els.startScreen.style.display = "grid";
+      els.resultCard.classList.remove("show");
+      resetMapView();
+      updatePracticeSummary();
+    }
+
+    updatePracticeSummary();
 
     function streetViewUrl(location) {
       const cbll = `${location.lat},${location.lng}`;
@@ -1519,14 +1812,16 @@
     }
 
     function chooseRoundLocations() {
+      const pool = getLocationPool();
+      const storageKey = `pinpointed_recent_locations_${selectedContinent}`;
       let recent = [];
-      try { recent = JSON.parse(localStorage.getItem("pinpointed_recent_locations") || "[]"); } catch(e) {}
+      try { recent = JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch(e) {}
       const recentSet = new Set(recent);
-      const fresh = LOCATIONS.filter(p => !recentSet.has(p.name + "|" + p.place));
-      const source = fresh.length >= TOTAL_ROUNDS ? fresh : LOCATIONS;
+      const fresh = pool.filter(p => !recentSet.has(p.name + "|" + p.place));
+      const source = fresh.length >= TOTAL_ROUNDS ? fresh : pool.length >= TOTAL_ROUNDS ? pool : LOCATIONS;
       const chosen = shuffle(source).slice(0, TOTAL_ROUNDS);
-      const updatedRecent = [...chosen.map(p => p.name + "|" + p.place), ...recent].slice(0, Math.min(80, LOCATIONS.length - TOTAL_ROUNDS));
-      try { localStorage.setItem("pinpointed_recent_locations", JSON.stringify(updatedRecent)); } catch(e) {}
+      const updatedRecent = [...chosen.map(p => p.name + "|" + p.place), ...recent].slice(0, Math.min(120, Math.max(0, pool.length - TOTAL_ROUNDS)) || 40);
+      try { localStorage.setItem(storageKey, JSON.stringify(updatedRecent)); } catch(e) {}
       return chosen;
     }
 
@@ -1639,13 +1934,35 @@
     }
 
     function setNodePx(node, x, y) { node.style.left = `${x}px`; node.style.top = `${y}px`; }
-    function clearReveal() { els.answerPin.style.display = "none"; els.answerLabel.style.display = "none"; els.mapSvg.innerHTML = ""; }
+    function clearReveal() {
+      els.answerPin.style.display = "none";
+      els.answerLabel.style.display = "none";
+      els.mapSvg.innerHTML = "";
+      els.lineDistanceLabel.style.display = "none";
+    }
 
     function drawRevealLine() {
-      if (!roundLocked || !guess || !currentLocation) { els.mapSvg.innerHTML = ""; return; }
+      if (!roundLocked || !guess || !currentLocation) {
+        els.mapSvg.innerHTML = "";
+        els.lineDistanceLabel.style.display = "none";
+        return;
+      }
       const g = screenPointForLatLng(guess.lat, guess.lng);
       const a = screenPointForLatLng(currentLocation.lat, currentLocation.lng);
-      els.mapSvg.innerHTML = `<line x1="${g.x}" y1="${g.y}" x2="${a.x}" y2="${a.y}"></line>`;
+      const distanceKm = haversineKm(guess.lat, guess.lng, currentLocation.lat, currentLocation.lng);
+      const midX = (g.x + a.x) / 2;
+      const midY = (g.y + a.y) / 2;
+
+      els.mapSvg.innerHTML = `
+        <defs>
+          <marker id="revealArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L8,3 z" fill="rgba(255,255,255,.96)"></path>
+          </marker>
+        </defs>
+        <line x1="${g.x}" y1="${g.y}" x2="${a.x}" y2="${a.y}" marker-end="url(#revealArrow)"></line>`;
+      els.lineDistanceLabel.textContent = distanceText(distanceKm);
+      setNodePx(els.lineDistanceLabel, midX, midY);
+      els.lineDistanceLabel.style.display = "block";
     }
 
     function showGuessPin() {
@@ -1695,9 +2012,10 @@
     }
 
     function resetMapView() {
-      mapState.centerLat = 20;
-      mapState.centerLng = 0;
-      mapState.zoom = 2;
+      const option = getContinentOption();
+      mapState.centerLat = option.centerLat;
+      mapState.centerLng = option.centerLng;
+      mapState.zoom = option.zoom;
       renderTiles();
     }
 
@@ -1728,6 +2046,7 @@
       currentRound = 0;
       totalPoints = 0;
       history = [];
+      updatePracticeSummary();
       roundLocations = chooseRoundLocations();
       els.totalPointsText.textContent = "0";
       els.startScreen.style.display = "none";
@@ -1740,10 +2059,12 @@
       currentLocation = roundLocations[currentRound];
       els.roundText.textContent = String(currentRound + 1);
       els.streetFrame.src = streetViewUrl(currentLocation);
-      els.mapHint.textContent = "Start with the Google labeled map. Scroll gently or use + / − to zoom.";
+      const option = getContinentOption();
+      const pool = getLocationPool();
+      els.mapHint.textContent = `Start with the Google labeled ${option.mapLabel.toLowerCase()} map. Scroll gently or use + / − to zoom.`;
       els.nextBtn.textContent = currentRound === TOTAL_ROUNDS - 1 ? "See final score" : "Next round";
       resetMapView();
-      showToast(`New location loaded from a ${LOCATIONS.length}-place pack.`);
+      showToast(`New ${option.label} location loaded from a ${pool.length}-place pack.`);
     }
 
     function clearRoundState() {
@@ -1752,7 +2073,9 @@
       els.mapPanel.classList.remove("expanded", "locked", "dragging");
       els.expandBtn.textContent = "⤢";
       els.guessBtn.disabled = true;
-      els.resultCard.classList.remove("show");
+      els.resultCard.classList.remove("show", "minimized");
+      els.resultToggleBtn.textContent = "–";
+      els.resultToggleBtn.title = "Collapse result";
       els.scoreFill.style.width = "0%";
       els.guessPin.style.display = "none";
       els.guessLabel.style.display = "none";
@@ -1854,6 +2177,20 @@
       setTimeout(renderTiles, 330);
     }
 
+    function toggleResultCard() {
+      els.resultCard.classList.toggle("minimized");
+      const minimized = els.resultCard.classList.contains("minimized");
+      els.resultToggleBtn.textContent = minimized ? "+" : "–";
+      els.resultToggleBtn.title = minimized ? "Expand result" : "Collapse result";
+    }
+
+    function toggleHud() {
+      els.hudRight.classList.toggle("collapsed");
+      const collapsed = els.hudRight.classList.contains("collapsed");
+      els.hudToggleBtn.textContent = collapsed ? "▸" : "▾";
+      els.hudToggleBtn.title = collapsed ? "Show score panel" : "Collapse score panel";
+    }
+
     function nextRound() {
       if (currentRound >= TOTAL_ROUNDS - 1) showFinal();
       else { currentRound += 1; loadRound(); }
@@ -1950,11 +2287,22 @@
     els.resetBtn.addEventListener("click", resetGuess);
     els.guessBtn.addEventListener("click", makeGuess);
     els.expandBtn.addEventListener("click", toggleExpand);
+    els.resultToggleBtn.addEventListener("click", toggleResultCard);
+    els.hudToggleBtn.addEventListener("click", toggleHud);
     els.nextBtn.addEventListener("click", nextRound);
+    if (els.continentButtons) {
+      els.continentButtons.addEventListener("click", (evt) => {
+        const button = evt.target.closest(".continent-btn");
+        if (!button) return;
+        selectContinent(button.dataset.continent);
+      });
+    }
     els.startBtn.addEventListener("click", startGame);
     els.playAgainBtn.addEventListener("click", startGame);
+    if (els.changePackBtn) els.changePackBtn.addEventListener("click", changePack);
     window.addEventListener("resize", renderTiles);
 
+    updatePracticeSummary();
     renderTiles();
   </script>
 </body>
