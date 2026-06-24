@@ -1,0 +1,1961 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PinPointed</title>
+  <style>
+    :root{
+      --bg:#06101a;
+      --text:#eef6ff;
+      --muted:#9cafc7;
+      --accent:#68d2ff;
+      --accent2:#33a9e7;
+      --danger:#ff7676;
+      --shadow:0 20px 60px rgba(0,0,0,.44);
+    }
+
+    *{box-sizing:border-box}
+
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#040a11;
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app{position:relative;width:100%;height:100%;overflow:hidden;background:#040a11}
+
+    #streetFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#08111a}
+
+    .topbar{
+      position:absolute;top:0;left:0;right:0;height:96px;z-index:40;
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:14px 18px;
+      background:linear-gradient(180deg, rgba(7,13,21,.99), rgba(7,13,21,.96) 74%, rgba(7,13,21,.86));
+      border-bottom:1px solid rgba(255,255,255,.08);
+      box-shadow:0 10px 32px rgba(0,0,0,.24);
+    }
+
+    .brand{display:flex;align-items:center;gap:14px;min-width:340px;max-width:560px}
+    .brand-badge{
+      width:48px;height:48px;flex:0 0 auto;display:grid;place-items:center;border-radius:17px;
+      background:linear-gradient(135deg, #73e8ff, #637fff);
+      box-shadow:0 12px 30px rgba(104,210,255,.24);font-size:25px;
+    }
+    .brand-copy h1{margin:0;font-size:36px;line-height:1;font-weight:950;letter-spacing:-1.1px}
+    .brand-copy p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.25}
+
+    .hud-right{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap}
+    .world-chip,.score-box{border-radius:22px;border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow)}
+    .world-chip{
+      padding:12px 15px;background:linear-gradient(180deg, rgba(39,109,64,.96), rgba(29,84,49,.95));
+      font-size:14px;font-weight:850;white-space:nowrap;
+    }
+    .score-box{min-width:145px;padding:12px 16px;background:linear-gradient(180deg, rgba(22,78,47,.96), rgba(18,66,40,.94))}
+    .score-label{font-size:11px;line-height:1;text-transform:uppercase;letter-spacing:.4px;color:rgba(238,246,255,.84);font-weight:850}
+    .score-value{margin-top:5px;font-size:28px;line-height:1;font-weight:950;letter-spacing:-.8px}
+
+    .toast{
+      position:absolute;top:110px;left:50%;transform:translateX(-50%);z-index:60;
+      max-width:calc(100vw - 40px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+      background:rgba(8,15,24,.94);border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);
+      color:var(--text);border-radius:999px;padding:10px 14px;font-size:13px;opacity:0;pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(2px)}
+
+    .map-panel{
+      position:absolute;right:18px;bottom:18px;width:560px;height:400px;z-index:45;
+      display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;border-radius:28px;
+      background:linear-gradient(180deg, rgba(9,17,27,.98), rgba(9,17,27,.95));
+      border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);
+      transition:top .32s ease,left .32s ease,right .32s ease,bottom .32s ease,width .32s ease,height .32s ease,border-radius .32s ease;
+    }
+
+    .map-panel.expanded{top:112px;left:18px;right:18px;bottom:18px;width:auto;height:auto;z-index:70;border-radius:28px}
+
+    .map-header,.map-footer{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;
+      background:linear-gradient(180deg, rgba(9,16,25,.98), rgba(9,16,25,.95));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .map-footer{border-bottom:0;border-top:1px solid rgba(255,255,255,.08)}
+    .map-hint{max-width:345px;color:var(--muted);font-size:12px;line-height:1.3}
+    .map-tools{display:flex;align-items:center;gap:8px}
+    .mini-chip{
+      padding:8px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04);color:var(--text);font-size:12px;font-weight:850;
+    }
+
+    .icon-btn,.ghost-btn,.primary-btn{border:0;font:inherit;cursor:pointer;transition:transform .12s ease, filter .12s ease, opacity .12s ease}
+    .icon-btn:hover,.ghost-btn:hover,.primary-btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+    .icon-btn:active,.ghost-btn:active,.primary-btn:active{transform:translateY(0)}
+    .icon-btn{
+      width:38px;height:38px;display:grid;place-items:center;border-radius:14px;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+      color:var(--text);font-size:19px;font-weight:900;
+    }
+    .ghost-btn{
+      padding:11px 16px;border-radius:999px;background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);color:var(--text);font-weight:850;
+    }
+    .primary-btn{
+      padding:11px 18px;border-radius:999px;background:linear-gradient(180deg, var(--accent), var(--accent2));
+      color:#072033;font-weight:950;box-shadow:0 10px 24px rgba(51,169,231,.28);
+    }
+    .primary-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none;box-shadow:none}
+
+    .map-body{position:relative;overflow:hidden;background:#d9edf3;touch-action:none;cursor:crosshair}
+    .map-panel.dragging .map-body{cursor:grabbing}
+    .map-panel.locked .map-body{cursor:default}
+
+    .tile-layer{position:absolute;inset:0;overflow:hidden;z-index:1;background:#d9edf3}
+    .map-tile{position:absolute;width:256px;height:256px;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+
+    .country-label-layer{display:none}
+
+    .map-overlay-svg{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+    .map-overlay-svg line{
+      stroke:rgba(255,255,255,.96);stroke-width:4;stroke-linecap:round;vector-effect:non-scaling-stroke;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));
+    }
+
+    .pin{
+      position:absolute;width:24px;height:24px;border-radius:999px;transform:translate(-50%, -50%);
+      border:3px solid white;box-shadow:0 0 0 3px rgba(0,0,0,.25), 0 10px 24px rgba(0,0,0,.32);
+      z-index:6;display:none;pointer-events:none;
+    }
+    .pin.guess{background:var(--accent)}
+    .pin.answer{background:#6ce287}
+
+    .pin-label{
+      position:absolute;transform:translate(-50%, calc(-100% - 18px));z-index:7;display:none;
+      padding:6px 8px;border-radius:999px;background:rgba(8,15,24,.93);border:1px solid rgba(255,255,255,.1);
+      color:var(--text);font-size:11px;font-weight:900;white-space:nowrap;pointer-events:none;
+    }
+
+    .zoom-stack{
+      position:absolute;left:12px;top:12px;z-index:8;display:grid;overflow:hidden;border-radius:12px;
+      border:1px solid rgba(0,0,0,.18);box-shadow:0 8px 24px rgba(0,0,0,.2);
+    }
+    .zoom-stack button{
+      width:36px;height:34px;border:0;border-bottom:1px solid rgba(0,0,0,.12);
+      background:rgba(255,255,255,.95);color:#102033;font-size:22px;font-weight:900;cursor:pointer;
+    }
+    .zoom-stack button:last-child{border-bottom:0}
+
+    .map-attribution{
+      position:absolute;right:8px;bottom:6px;z-index:8;padding:3px 6px;border-radius:7px;
+      background:rgba(255,255,255,.82);color:#1a2b3c;font-size:10px;line-height:1;
+    }
+    .map-attribution a{color:#1a2b3c;text-decoration:none;font-weight:700}
+
+    .result-card{
+      position:absolute;top:128px;right:30px;width:370px;z-index:80;display:none;padding:18px;border-radius:26px;
+      background:linear-gradient(180deg, rgba(10,18,29,.98), rgba(10,18,29,.95));
+      border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);
+    }
+    .result-card.show{display:block}
+    .result-kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:850;margin-bottom:6px}
+    .result-title{font-size:27px;line-height:1;font-weight:950;letter-spacing:-.8px;margin:0 0 10px}
+    .distance-chip{
+      display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;
+      background:rgba(104,210,255,.12);border:1px solid rgba(104,210,255,.28);
+      color:var(--text);font-size:14px;font-weight:950;margin-bottom:12px;
+    }
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .stat{padding:12px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+    .stat .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:850;margin-bottom:5px}
+    .stat .value{font-size:22px;line-height:1;font-weight:950;letter-spacing:-.5px}
+    .result-copy{color:var(--muted);font-size:14px;line-height:1.45;margin-bottom:14px}
+    .result-copy strong{color:var(--text)}
+    .progress{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:14px}
+    .progress > div{width:0%;height:100%;border-radius:999px;background:linear-gradient(90deg, var(--danger), #ffd56e, #6ce287);transition:width .35s ease}
+    .result-actions{display:flex;justify-content:flex-end}
+
+    .start-screen,.final-screen{
+      position:absolute;inset:0;z-index:90;display:grid;place-items:center;padding:18px;
+      background:linear-gradient(rgba(4,8,14,.8), rgba(4,8,14,.84));backdrop-filter:blur(6px);
+    }
+    .final-screen{display:none}
+    .overlay-card{
+      width:min(680px, 100%);padding:28px;border-radius:30px;text-align:center;
+      background:linear-gradient(180deg, rgba(12,20,31,.98), rgba(10,17,27,.95));
+      border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);
+    }
+    .overlay-card h2{margin:0 0 10px;font-size:50px;line-height:1;font-weight:950;letter-spacing:-1.6px}
+    .overlay-card p{margin:0 auto 18px;max-width:590px;color:var(--muted);font-size:15px;line-height:1.5}
+    .final-score{font-size:66px;line-height:1;font-weight:950;letter-spacing:-2px;margin:8px 0 16px}
+    .round-list{display:grid;gap:9px;margin:14px 0 20px;text-align:left}
+    .round-row{
+      display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:16px;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:14px;
+    }
+    .round-row strong{color:var(--text)}
+
+    @media (max-width:1000px){
+      .map-panel{width:480px;height:360px}
+      .result-card{width:340px}
+    }
+
+    @media (max-width:760px){
+      .topbar{height:90px;padding:12px}
+      .brand{min-width:235px}
+      .brand-badge{width:40px;height:40px;border-radius:14px;font-size:20px}
+      .brand-copy h1{font-size:25px}
+      .brand-copy p{font-size:11px}
+      .world-chip{display:none}
+      .score-box{min-width:118px;padding:10px 12px}
+      .score-value{font-size:22px}
+      .toast{top:100px}
+      .map-panel{right:10px;bottom:10px;width:min(94vw, 440px);height:330px}
+      .map-panel.expanded{top:102px;left:10px;right:10px;bottom:10px}
+      .result-card{top:112px;right:10px;width:min(94vw, 350px)}
+      .overlay-card h2{font-size:38px}
+      .final-score{font-size:54px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <iframe id="streetFrame" title="Street View" allowfullscreen referrerpolicy="no-referrer-when-downgrade" loading="eager"></iframe>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-badge">🧭</div>
+        <div class="brand-copy">
+          <h1>PinPointed</h1>
+          <p>Study the street. Drop your pin. See how close you got.</p>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <div class="world-chip"><span id="packCount">Large pack</span></div>
+        <div class="score-box">
+          <div class="score-label">Round</div>
+          <div class="score-value"><span id="roundText">1</span> / <span id="totalRoundsText">5</span></div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">Total points</div>
+          <div class="score-value" id="totalPointsText">0</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="toast" id="toast">Explore the view, then place your guess on the map.</div>
+
+    <section class="map-panel" id="mapPanel">
+      <div class="map-header">
+        <div class="map-hint" id="mapHint">Start with the Google labeled map. Scroll gently or use + / − to zoom.</div>
+        <div class="map-tools">
+          <div class="mini-chip" id="mapStyleChip">Google map</div>
+          <button class="icon-btn" id="expandBtn" type="button" title="Expand map">⤢</button>
+        </div>
+      </div>
+
+      <div class="map-body" id="mapBody">
+        <div class="tile-layer" id="tileLayer"></div>
+        <div class="country-label-layer" id="countryLabelLayer"></div>
+        <svg class="map-overlay-svg" id="mapSvg"></svg>
+
+        <div class="pin guess" id="guessPin"></div>
+        <div class="pin answer" id="answerPin"></div>
+        <div class="pin-label" id="guessLabel">Your guess</div>
+        <div class="pin-label" id="answerLabel">Actual location</div>
+
+        <div class="zoom-stack">
+          <button id="zoomInBtn" type="button" title="Zoom in">+</button>
+          <button id="zoomOutBtn" type="button" title="Zoom out">−</button>
+        </div>
+
+        <div class="map-attribution">
+          <a href="https://www.google.com/maps" target="_blank" rel="noopener">Map data © Google</a>
+        </div>
+      </div>
+
+      <div class="map-footer">
+        <button class="ghost-btn" id="resetBtn" type="button">Reset pin</button>
+        <button class="primary-btn" id="guessBtn" type="button" disabled>Guess</button>
+      </div>
+    </section>
+
+    <aside class="result-card" id="resultCard">
+      <div class="result-kicker">Round result</div>
+      <h2 class="result-title" id="resultTitle">Nice guess.</h2>
+      <div class="distance-chip" id="distanceChip">📏 0 km away</div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="label">Round points</div>
+          <div class="value" id="roundPointsValue">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Total points</div>
+          <div class="value" id="resultTotalValue">0</div>
+        </div>
+      </div>
+
+      <div class="result-copy" id="resultCopy"></div>
+      <div class="progress"><div id="scoreFill"></div></div>
+
+      <div class="result-actions">
+        <button class="primary-btn" id="nextBtn" type="button">Next round</button>
+      </div>
+    </aside>
+
+    <section class="start-screen" id="startScreen">
+      <div class="overlay-card">
+        <h2>PinPointed</h2>
+        <p>
+          Drop a pin on the world map after studying the street view. Each round reveals the real location, draws the miss distance, scores the guess,
+          and lets you keep exploring the map after the reveal.
+        </p>
+        <button class="primary-btn" id="startBtn" type="button">Start game</button>
+      </div>
+    </section>
+
+    <section class="final-screen" id="finalScreen">
+      <div class="overlay-card">
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; font-weight:850;">Final score</div>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="round-list" id="roundList"></div>
+        <button class="primary-btn" id="playAgainBtn" type="button">Play again</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const LOCATIONS = [
+      {
+            "name": "Santa Fe Plaza",
+            "place": "Santa Fe, New Mexico, USA",
+            "lat": 35.687,
+            "lng": -105.9378,
+            "heading": 45
+      },
+      {
+            "name": "Kennebunkport village",
+            "place": "Maine, USA",
+            "lat": 43.3618,
+            "lng": -70.4767,
+            "heading": 120
+      },
+      {
+            "name": "Downtown Asheville",
+            "place": "North Carolina, USA",
+            "lat": 35.5951,
+            "lng": -82.5515,
+            "heading": 80
+      },
+      {
+            "name": "Marfa main street",
+            "place": "Texas, USA",
+            "lat": 30.3095,
+            "lng": -104.0206,
+            "heading": 10
+      },
+      {
+            "name": "Taos town center",
+            "place": "New Mexico, USA",
+            "lat": 36.4072,
+            "lng": -105.5731,
+            "heading": 160
+      },
+      {
+            "name": "Burlington waterfront",
+            "place": "Vermont, USA",
+            "lat": 44.4759,
+            "lng": -73.2121,
+            "heading": 260
+      },
+      {
+            "name": "Leavenworth village",
+            "place": "Washington, USA",
+            "lat": 47.5962,
+            "lng": -120.6615,
+            "heading": 110
+      },
+      {
+            "name": "Carmel-by-the-Sea",
+            "place": "California, USA",
+            "lat": 36.5552,
+            "lng": -121.9233,
+            "heading": 20
+      },
+      {
+            "name": "Charleston historic district",
+            "place": "South Carolina, USA",
+            "lat": 32.7765,
+            "lng": -79.9311,
+            "heading": 200
+      },
+      {
+            "name": "Savannah historic square",
+            "place": "Georgia, USA",
+            "lat": 32.0809,
+            "lng": -81.0912,
+            "heading": 40
+      },
+      {
+            "name": "Jackson town square",
+            "place": "Wyoming, USA",
+            "lat": 43.4799,
+            "lng": -110.7624,
+            "heading": 130
+      },
+      {
+            "name": "Hood River downtown",
+            "place": "Oregon, USA",
+            "lat": 45.7089,
+            "lng": -121.5123,
+            "heading": 90
+      },
+      {
+            "name": "Galena main street",
+            "place": "Illinois, USA",
+            "lat": 42.4167,
+            "lng": -90.429,
+            "heading": 210
+      },
+      {
+            "name": "Deadwood historic street",
+            "place": "South Dakota, USA",
+            "lat": 44.3767,
+            "lng": -103.7296,
+            "heading": 45
+      },
+      {
+            "name": "Bar Harbor village",
+            "place": "Maine, USA",
+            "lat": 44.3876,
+            "lng": -68.2039,
+            "heading": 160
+      },
+      {
+            "name": "Montpelier downtown",
+            "place": "Vermont, USA",
+            "lat": 44.2601,
+            "lng": -72.5754,
+            "heading": 40
+      },
+      {
+            "name": "Flagstaff downtown",
+            "place": "Arizona, USA",
+            "lat": 35.1983,
+            "lng": -111.6513,
+            "heading": 180
+      },
+      {
+            "name": "Eureka Springs",
+            "place": "Arkansas, USA",
+            "lat": 36.4012,
+            "lng": -93.7379,
+            "heading": 70
+      },
+      {
+            "name": "Lunenburg waterfront",
+            "place": "Nova Scotia, Canada",
+            "lat": 44.377,
+            "lng": -64.309,
+            "heading": 240
+      },
+      {
+            "name": "Old Quebec street",
+            "place": "Quebec City, Canada",
+            "lat": 46.812,
+            "lng": -71.2057,
+            "heading": 90
+      },
+      {
+            "name": "Banff Avenue",
+            "place": "Alberta, Canada",
+            "lat": 51.1784,
+            "lng": -115.5708,
+            "heading": 230
+      },
+      {
+            "name": "Tofino village",
+            "place": "British Columbia, Canada",
+            "lat": 49.1529,
+            "lng": -125.9066,
+            "heading": 30
+      },
+      {
+            "name": "St. John's harbor",
+            "place": "Newfoundland, Canada",
+            "lat": 47.5615,
+            "lng": -52.7126,
+            "heading": 190
+      },
+      {
+            "name": "San Miguel de Allende",
+            "place": "Guanajuato, Mexico",
+            "lat": 20.9144,
+            "lng": -100.7452,
+            "heading": 100
+      },
+      {
+            "name": "Guanajuato center",
+            "place": "Guanajuato, Mexico",
+            "lat": 21.019,
+            "lng": -101.2574,
+            "heading": 260
+      },
+      {
+            "name": "Oaxaca city center",
+            "place": "Oaxaca, Mexico",
+            "lat": 17.0608,
+            "lng": -96.7253,
+            "heading": 20
+      },
+      {
+            "name": "Merida historic center",
+            "place": "Yucatan, Mexico",
+            "lat": 20.9674,
+            "lng": -89.5926,
+            "heading": 130
+      },
+      {
+            "name": "Antigua Guatemala street",
+            "place": "Antigua, Guatemala",
+            "lat": 14.5586,
+            "lng": -90.7339,
+            "heading": 80
+      },
+      {
+            "name": "Casco Viejo",
+            "place": "Panama City, Panama",
+            "lat": 8.9534,
+            "lng": -79.535,
+            "heading": 40
+      },
+      {
+            "name": "San Jose central avenue",
+            "place": "San Jose, Costa Rica",
+            "lat": 9.9333,
+            "lng": -84.0833,
+            "heading": 110
+      },
+      {
+            "name": "Valparaiso hillside street",
+            "place": "Valparaiso, Chile",
+            "lat": -33.0472,
+            "lng": -71.6127,
+            "heading": 180
+      },
+      {
+            "name": "Puerto Varas lakefront",
+            "place": "Chile",
+            "lat": -41.3195,
+            "lng": -72.9854,
+            "heading": 240
+      },
+      {
+            "name": "Ushuaia waterfront",
+            "place": "Argentina",
+            "lat": -54.8019,
+            "lng": -68.3029,
+            "heading": 70
+      },
+      {
+            "name": "Salta city center",
+            "place": "Argentina",
+            "lat": -24.7821,
+            "lng": -65.4232,
+            "heading": 120
+      },
+      {
+            "name": "Colonia del Sacramento",
+            "place": "Uruguay",
+            "lat": -34.4709,
+            "lng": -57.8442,
+            "heading": 160
+      },
+      {
+            "name": "Cuenca historic center",
+            "place": "Ecuador",
+            "lat": -2.9006,
+            "lng": -79.0045,
+            "heading": 60
+      },
+      {
+            "name": "Mindo village",
+            "place": "Ecuador",
+            "lat": -0.0523,
+            "lng": -78.7744,
+            "heading": 90
+      },
+      {
+            "name": "Arequipa plaza",
+            "place": "Peru",
+            "lat": -16.3988,
+            "lng": -71.5369,
+            "heading": 200
+      },
+      {
+            "name": "Cusco street",
+            "place": "Peru",
+            "lat": -13.5167,
+            "lng": -71.9789,
+            "heading": 140
+      },
+      {
+            "name": "Sucre white city",
+            "place": "Bolivia",
+            "lat": -19.0196,
+            "lng": -65.2619,
+            "heading": 30
+      },
+      {
+            "name": "La Paz street",
+            "place": "Bolivia",
+            "lat": -16.5,
+            "lng": -68.15,
+            "heading": 100
+      },
+      {
+            "name": "Cartagena old city",
+            "place": "Colombia",
+            "lat": 10.4236,
+            "lng": -75.5505,
+            "heading": 260
+      },
+      {
+            "name": "Villa de Leyva plaza",
+            "place": "Colombia",
+            "lat": 5.6341,
+            "lng": -73.524,
+            "heading": 40
+      },
+      {
+            "name": "Paraty historic street",
+            "place": "Brazil",
+            "lat": -23.2196,
+            "lng": -44.7136,
+            "heading": 190
+      },
+      {
+            "name": "Florianopolis neighborhood",
+            "place": "Brazil",
+            "lat": -27.5954,
+            "lng": -48.548,
+            "heading": 80
+      },
+      {
+            "name": "Punta Arenas main street",
+            "place": "Chile",
+            "lat": -53.1638,
+            "lng": -70.9171,
+            "heading": 220
+      },
+      {
+            "name": "Cesky Krumlov old town",
+            "place": "Czechia",
+            "lat": 48.8127,
+            "lng": 14.3175,
+            "heading": 30
+      },
+      {
+            "name": "Ljubljana riverside",
+            "place": "Slovenia",
+            "lat": 46.0511,
+            "lng": 14.5051,
+            "heading": 250
+      },
+      {
+            "name": "Piran harbor",
+            "place": "Slovenia",
+            "lat": 45.5283,
+            "lng": 13.5683,
+            "heading": 160
+      },
+      {
+            "name": "Rovinj old town",
+            "place": "Croatia",
+            "lat": 45.0812,
+            "lng": 13.6387,
+            "heading": 210
+      },
+      {
+            "name": "Kotor old town",
+            "place": "Montenegro",
+            "lat": 42.425,
+            "lng": 18.7712,
+            "heading": 70
+      },
+      {
+            "name": "Mostar bridge area",
+            "place": "Bosnia and Herzegovina",
+            "lat": 43.3378,
+            "lng": 17.8146,
+            "heading": 20
+      },
+      {
+            "name": "Gjirokaster street",
+            "place": "Albania",
+            "lat": 40.0758,
+            "lng": 20.1389,
+            "heading": 140
+      },
+      {
+            "name": "Ohrid lakeside",
+            "place": "North Macedonia",
+            "lat": 41.1231,
+            "lng": 20.8016,
+            "heading": 280
+      },
+      {
+            "name": "Veliko Tarnovo",
+            "place": "Bulgaria",
+            "lat": 43.0757,
+            "lng": 25.6172,
+            "heading": 120
+      },
+      {
+            "name": "Sibiu old town",
+            "place": "Romania",
+            "lat": 45.7936,
+            "lng": 24.1213,
+            "heading": 60
+      },
+      {
+            "name": "Sighisoara citadel",
+            "place": "Romania",
+            "lat": 46.2197,
+            "lng": 24.7925,
+            "heading": 170
+      },
+      {
+            "name": "Eger town center",
+            "place": "Hungary",
+            "lat": 47.9025,
+            "lng": 20.3772,
+            "heading": 30
+      },
+      {
+            "name": "Hallstatt lakeside",
+            "place": "Austria",
+            "lat": 47.5622,
+            "lng": 13.6493,
+            "heading": 200
+      },
+      {
+            "name": "Innsbruck old town",
+            "place": "Austria",
+            "lat": 47.2682,
+            "lng": 11.3923,
+            "heading": 110
+      },
+      {
+            "name": "Ghent canal",
+            "place": "Belgium",
+            "lat": 51.0543,
+            "lng": 3.72,
+            "heading": 190
+      },
+      {
+            "name": "Bruges side street",
+            "place": "Belgium",
+            "lat": 51.2093,
+            "lng": 3.2247,
+            "heading": 80
+      },
+      {
+            "name": "Delft canal",
+            "place": "Netherlands",
+            "lat": 52.0116,
+            "lng": 4.3571,
+            "heading": 260
+      },
+      {
+            "name": "Utrecht canal",
+            "place": "Netherlands",
+            "lat": 52.0907,
+            "lng": 5.1214,
+            "heading": 30
+      },
+      {
+            "name": "Aarhus street",
+            "place": "Denmark",
+            "lat": 56.1629,
+            "lng": 10.2039,
+            "heading": 140
+      },
+      {
+            "name": "Bergen harbor",
+            "place": "Norway",
+            "lat": 60.3971,
+            "lng": 5.3244,
+            "heading": 210
+      },
+      {
+            "name": "Tromso street",
+            "place": "Norway",
+            "lat": 69.6492,
+            "lng": 18.9553,
+            "heading": 90
+      },
+      {
+            "name": "Visby old town",
+            "place": "Sweden",
+            "lat": 57.6348,
+            "lng": 18.2948,
+            "heading": 260
+      },
+      {
+            "name": "Porvoo old town",
+            "place": "Finland",
+            "lat": 60.3923,
+            "lng": 25.6651,
+            "heading": 130
+      },
+      {
+            "name": "Tartu town center",
+            "place": "Estonia",
+            "lat": 58.378,
+            "lng": 26.729,
+            "heading": 40
+      },
+      {
+            "name": "Riga old town edge",
+            "place": "Latvia",
+            "lat": 56.9496,
+            "lng": 24.1052,
+            "heading": 200
+      },
+      {
+            "name": "Vilnius old town",
+            "place": "Lithuania",
+            "lat": 54.6872,
+            "lng": 25.2797,
+            "heading": 80
+      },
+      {
+            "name": "Gdansk old town",
+            "place": "Poland",
+            "lat": 54.352,
+            "lng": 18.6466,
+            "heading": 170
+      },
+      {
+            "name": "Krakow side street",
+            "place": "Poland",
+            "lat": 50.0647,
+            "lng": 19.945,
+            "heading": 30
+      },
+      {
+            "name": "Bilbao riverfront",
+            "place": "Spain",
+            "lat": 43.263,
+            "lng": -2.935,
+            "heading": 250
+      },
+      {
+            "name": "Girona old quarter",
+            "place": "Spain",
+            "lat": 41.9794,
+            "lng": 2.8214,
+            "heading": 120
+      },
+      {
+            "name": "Ronda viewpoint",
+            "place": "Spain",
+            "lat": 36.7423,
+            "lng": -5.1655,
+            "heading": 210
+      },
+      {
+            "name": "Sintra town",
+            "place": "Portugal",
+            "lat": 38.8029,
+            "lng": -9.3817,
+            "heading": 80
+      },
+      {
+            "name": "Evora old town",
+            "place": "Portugal",
+            "lat": 38.5714,
+            "lng": -7.9135,
+            "heading": 170
+      },
+      {
+            "name": "Annecy canal",
+            "place": "France",
+            "lat": 45.8992,
+            "lng": 6.1294,
+            "heading": 200
+      },
+      {
+            "name": "Colmar old street",
+            "place": "France",
+            "lat": 48.0794,
+            "lng": 7.3585,
+            "heading": 110
+      },
+      {
+            "name": "Dinan old town",
+            "place": "France",
+            "lat": 48.4556,
+            "lng": -2.0452,
+            "heading": 40
+      },
+      {
+            "name": "Lucca walls",
+            "place": "Italy",
+            "lat": 43.8429,
+            "lng": 10.5027,
+            "heading": 250
+      },
+      {
+            "name": "Matera stone street",
+            "place": "Italy",
+            "lat": 40.6664,
+            "lng": 16.6043,
+            "heading": 70
+      },
+      {
+            "name": "Orvieto old town",
+            "place": "Italy",
+            "lat": 42.7185,
+            "lng": 12.1107,
+            "heading": 160
+      },
+      {
+            "name": "Mdina gate area",
+            "place": "Malta",
+            "lat": 35.8858,
+            "lng": 14.4031,
+            "heading": 220
+      },
+      {
+            "name": "Nafplio old town",
+            "place": "Greece",
+            "lat": 37.5673,
+            "lng": 22.8016,
+            "heading": 90
+      },
+      {
+            "name": "Chania old harbor",
+            "place": "Crete, Greece",
+            "lat": 35.5172,
+            "lng": 24.0188,
+            "heading": 200
+      },
+      {
+            "name": "Reykjavik side street",
+            "place": "Iceland",
+            "lat": 64.1466,
+            "lng": -21.9426,
+            "heading": 100
+      },
+      {
+            "name": "Akureyri town center",
+            "place": "Iceland",
+            "lat": 65.6835,
+            "lng": -18.0878,
+            "heading": 20
+      },
+      {
+            "name": "Dingle town",
+            "place": "Ireland",
+            "lat": 52.1409,
+            "lng": -10.264,
+            "heading": 260
+      },
+      {
+            "name": "Galway Latin Quarter",
+            "place": "Ireland",
+            "lat": 53.2707,
+            "lng": -9.0568,
+            "heading": 110
+      },
+      {
+            "name": "York old street",
+            "place": "England, UK",
+            "lat": 53.959,
+            "lng": -1.0815,
+            "heading": 40
+      },
+      {
+            "name": "Bath street",
+            "place": "England, UK",
+            "lat": 51.3811,
+            "lng": -2.359,
+            "heading": 210
+      },
+      {
+            "name": "St Andrews street",
+            "place": "Scotland, UK",
+            "lat": 56.3398,
+            "lng": -2.7967,
+            "heading": 130
+      },
+      {
+            "name": "Portree harbor",
+            "place": "Scotland, UK",
+            "lat": 57.4125,
+            "lng": -6.1942,
+            "heading": 250
+      },
+      {
+            "name": "Essaouira medina edge",
+            "place": "Morocco",
+            "lat": 31.5085,
+            "lng": -9.7595,
+            "heading": 60
+      },
+      {
+            "name": "Chefchaouen street",
+            "place": "Morocco",
+            "lat": 35.1714,
+            "lng": -5.2697,
+            "heading": 120
+      },
+      {
+            "name": "Fes medina gate",
+            "place": "Morocco",
+            "lat": 34.0625,
+            "lng": -4.9828,
+            "heading": 210
+      },
+      {
+            "name": "Sidi Bou Said",
+            "place": "Tunisia",
+            "lat": 36.8702,
+            "lng": 10.347,
+            "heading": 80
+      },
+      {
+            "name": "Amman street",
+            "place": "Jordan",
+            "lat": 31.9539,
+            "lng": 35.9106,
+            "heading": 30
+      },
+      {
+            "name": "Aqaba waterfront",
+            "place": "Jordan",
+            "lat": 29.5319,
+            "lng": 35.0061,
+            "heading": 200
+      },
+      {
+            "name": "Muscat corniche",
+            "place": "Oman",
+            "lat": 23.6195,
+            "lng": 58.5634,
+            "heading": 250
+      },
+      {
+            "name": "Salalah road",
+            "place": "Oman",
+            "lat": 17.0194,
+            "lng": 54.1108,
+            "heading": 80
+      },
+      {
+            "name": "Doha souq area",
+            "place": "Qatar",
+            "lat": 25.2854,
+            "lng": 51.531,
+            "heading": 140
+      },
+      {
+            "name": "Abu Dhabi corniche",
+            "place": "United Arab Emirates",
+            "lat": 24.4667,
+            "lng": 54.3667,
+            "heading": 300
+      },
+      {
+            "name": "Stone Town street",
+            "place": "Zanzibar, Tanzania",
+            "lat": -6.1622,
+            "lng": 39.1921,
+            "heading": 70
+      },
+      {
+            "name": "Arusha city street",
+            "place": "Tanzania",
+            "lat": -3.3869,
+            "lng": 36.683,
+            "heading": 180
+      },
+      {
+            "name": "Kigali neighborhood",
+            "place": "Rwanda",
+            "lat": -1.9441,
+            "lng": 30.0619,
+            "heading": 100
+      },
+      {
+            "name": "Windhoek city street",
+            "place": "Namibia",
+            "lat": -22.5609,
+            "lng": 17.0658,
+            "heading": 40
+      },
+      {
+            "name": "Swakopmund street",
+            "place": "Namibia",
+            "lat": -22.6784,
+            "lng": 14.5266,
+            "heading": 220
+      },
+      {
+            "name": "Stellenbosch town",
+            "place": "South Africa",
+            "lat": -33.9321,
+            "lng": 18.8602,
+            "heading": 90
+      },
+      {
+            "name": "Knysna waterfront",
+            "place": "South Africa",
+            "lat": -34.0351,
+            "lng": 23.0465,
+            "heading": 160
+      },
+      {
+            "name": "Addis Ababa avenue",
+            "place": "Ethiopia",
+            "lat": 9.03,
+            "lng": 38.74,
+            "heading": 250
+      },
+      {
+            "name": "Lalibela road",
+            "place": "Ethiopia",
+            "lat": 12.0309,
+            "lng": 39.0476,
+            "heading": 110
+      },
+      {
+            "name": "George Town street",
+            "place": "Penang, Malaysia",
+            "lat": 5.4141,
+            "lng": 100.3288,
+            "heading": 210
+      },
+      {
+            "name": "Malacca old town",
+            "place": "Malaysia",
+            "lat": 2.1896,
+            "lng": 102.2501,
+            "heading": 120
+      },
+      {
+            "name": "Hoi An old town",
+            "place": "Vietnam",
+            "lat": 15.8801,
+            "lng": 108.338,
+            "heading": 80
+      },
+      {
+            "name": "Da Lat street",
+            "place": "Vietnam",
+            "lat": 11.9404,
+            "lng": 108.4583,
+            "heading": 230
+      },
+      {
+            "name": "Chiang Mai old city",
+            "place": "Thailand",
+            "lat": 18.7883,
+            "lng": 98.9853,
+            "heading": 160
+      },
+      {
+            "name": "Kanchanaburi road",
+            "place": "Thailand",
+            "lat": 14.0228,
+            "lng": 99.5328,
+            "heading": 70
+      },
+      {
+            "name": "Luang Prabang street",
+            "place": "Laos",
+            "lat": 19.8834,
+            "lng": 102.1347,
+            "heading": 30
+      },
+      {
+            "name": "Phnom Penh riverside",
+            "place": "Cambodia",
+            "lat": 11.5564,
+            "lng": 104.9282,
+            "heading": 240
+      },
+      {
+            "name": "Yogyakarta street",
+            "place": "Indonesia",
+            "lat": -7.7956,
+            "lng": 110.3695,
+            "heading": 130
+      },
+      {
+            "name": "Ubud village road",
+            "place": "Bali, Indonesia",
+            "lat": -8.5069,
+            "lng": 115.2625,
+            "heading": 60
+      },
+      {
+            "name": "Kuching waterfront",
+            "place": "Sarawak, Malaysia",
+            "lat": 1.5533,
+            "lng": 110.3592,
+            "heading": 270
+      },
+      {
+            "name": "Taipei side street",
+            "place": "Taiwan",
+            "lat": 25.033,
+            "lng": 121.5654,
+            "heading": 100
+      },
+      {
+            "name": "Tainan old street",
+            "place": "Taiwan",
+            "lat": 22.9997,
+            "lng": 120.227,
+            "heading": 20
+      },
+      {
+            "name": "Kanazawa street",
+            "place": "Japan",
+            "lat": 36.5613,
+            "lng": 136.6562,
+            "heading": 180
+      },
+      {
+            "name": "Takayama old town",
+            "place": "Japan",
+            "lat": 36.1461,
+            "lng": 137.2522,
+            "heading": 90
+      },
+      {
+            "name": "Nara street",
+            "place": "Japan",
+            "lat": 34.6851,
+            "lng": 135.8048,
+            "heading": 130
+      },
+      {
+            "name": "Matsumoto street",
+            "place": "Japan",
+            "lat": 36.238,
+            "lng": 137.972,
+            "heading": 250
+      },
+      {
+            "name": "Jeonju hanok village",
+            "place": "South Korea",
+            "lat": 35.814,
+            "lng": 127.153,
+            "heading": 60
+      },
+      {
+            "name": "Busan hillside road",
+            "place": "South Korea",
+            "lat": 35.1796,
+            "lng": 129.0756,
+            "heading": 190
+      },
+      {
+            "name": "Gyeongju street",
+            "place": "South Korea",
+            "lat": 35.8562,
+            "lng": 129.2247,
+            "heading": 120
+      },
+      {
+            "name": "Kandy street",
+            "place": "Sri Lanka",
+            "lat": 7.2906,
+            "lng": 80.6337,
+            "heading": 80
+      },
+      {
+            "name": "Galle Fort street",
+            "place": "Sri Lanka",
+            "lat": 6.0329,
+            "lng": 80.2168,
+            "heading": 210
+      },
+      {
+            "name": "Thimphu road",
+            "place": "Bhutan",
+            "lat": 27.4728,
+            "lng": 89.639,
+            "heading": 140
+      },
+      {
+            "name": "Pokhara lakeside",
+            "place": "Nepal",
+            "lat": 28.2096,
+            "lng": 83.9856,
+            "heading": 260
+      },
+      {
+            "name": "Tbilisi old street",
+            "place": "Georgia",
+            "lat": 41.7151,
+            "lng": 44.8271,
+            "heading": 80
+      },
+      {
+            "name": "Yerevan street",
+            "place": "Armenia",
+            "lat": 40.1792,
+            "lng": 44.4991,
+            "heading": 150
+      },
+      {
+            "name": "Baku old city",
+            "place": "Azerbaijan",
+            "lat": 40.3667,
+            "lng": 49.8352,
+            "heading": 210
+      },
+      {
+            "name": "Almaty avenue",
+            "place": "Kazakhstan",
+            "lat": 43.2389,
+            "lng": 76.8897,
+            "heading": 50
+      },
+      {
+            "name": "Samarkand street",
+            "place": "Uzbekistan",
+            "lat": 39.6542,
+            "lng": 66.9597,
+            "heading": 100
+      },
+      {
+            "name": "Bishkek city street",
+            "place": "Kyrgyzstan",
+            "lat": 42.8746,
+            "lng": 74.5698,
+            "heading": 240
+      },
+      {
+            "name": "Hobart waterfront",
+            "place": "Tasmania, Australia",
+            "lat": -42.8821,
+            "lng": 147.3272,
+            "heading": 120
+      },
+      {
+            "name": "Fremantle street",
+            "place": "Western Australia",
+            "lat": -32.0569,
+            "lng": 115.7439,
+            "heading": 230
+      },
+      {
+            "name": "Byron Bay road",
+            "place": "New South Wales, Australia",
+            "lat": -28.6474,
+            "lng": 153.602,
+            "heading": 30
+      },
+      {
+            "name": "Adelaide neighborhood",
+            "place": "South Australia",
+            "lat": -34.9285,
+            "lng": 138.6007,
+            "heading": 90
+      },
+      {
+            "name": "Queenstown lakefront",
+            "place": "New Zealand",
+            "lat": -45.0312,
+            "lng": 168.6626,
+            "heading": 260
+      },
+      {
+            "name": "Dunedin street",
+            "place": "New Zealand",
+            "lat": -45.8788,
+            "lng": 170.5028,
+            "heading": 140
+      },
+      {
+            "name": "Nelson town center",
+            "place": "New Zealand",
+            "lat": -41.2706,
+            "lng": 173.284,
+            "heading": 70
+      },
+      {
+            "name": "Rotorua street",
+            "place": "New Zealand",
+            "lat": -38.1368,
+            "lng": 176.2497,
+            "heading": 180
+      },
+      {
+            "name": "Apia waterfront",
+            "place": "Samoa",
+            "lat": -13.8507,
+            "lng": -171.7514,
+            "heading": 210
+      },
+      {
+            "name": "Suva city street",
+            "place": "Fiji",
+            "lat": -18.1248,
+            "lng": 178.4501,
+            "heading": 60
+      },
+      {
+            "name": "Times Square area",
+            "place": "New York City, USA",
+            "lat": 40.7589,
+            "lng": -73.9851,
+            "heading": 60
+      },
+      {
+            "name": "Shibuya area",
+            "place": "Tokyo, Japan",
+            "lat": 35.6595,
+            "lng": 139.7005,
+            "heading": 220
+      },
+      {
+            "name": "Eiffel Tower area",
+            "place": "Paris, France",
+            "lat": 48.8584,
+            "lng": 2.2945,
+            "heading": 90
+      },
+      {
+            "name": "Tower Bridge area",
+            "place": "London, England",
+            "lat": 51.5055,
+            "lng": -0.0754,
+            "heading": 110
+      },
+      {
+            "name": "Sydney Harbour area",
+            "place": "Sydney, Australia",
+            "lat": -33.8568,
+            "lng": 151.2153,
+            "heading": 250
+      }
+];
+    const COUNTRY_LABELS = [
+      ["Canada", 56.13, -106.35],["United States", 39.83, -98.58],["Mexico", 23.63, -102.55],
+      ["Brazil", -14.24, -51.93],["Argentina", -38.42, -63.62],["Chile", -30.0, -71.0],["Colombia", 4.57, -74.3],
+      ["United Kingdom", 54.0, -2.0],["Ireland", 53.4, -8.0],["France", 46.23, 2.21],["Spain", 40.46, -3.75],
+      ["Portugal", 39.4, -8.2],["Germany", 51.17, 10.45],["Italy", 42.8, 12.5],["Norway", 60.5, 8.5],
+      ["Sweden", 60.1, 18.6],["Finland", 61.9, 25.7],["Poland", 52.0, 19.1],["Ukraine", 49.0, 32.0],
+      ["Turkey", 39.0, 35.2],["Morocco", 31.8, -7.1],["Algeria", 28.0, 2.6],["Egypt", 26.8, 30.8],
+      ["South Africa", -30.6, 22.9],["Ethiopia", 9.1, 40.5],["Saudi Arabia", 23.9, 45.1],["Iran", 32.4, 53.7],
+      ["India", 20.6, 78.9],["China", 35.8, 104.2],["Mongolia", 46.8, 103.8],["Japan", 36.2, 138.2],
+      ["South Korea", 36.4, 128.0],["Thailand", 15.9, 101.0],["Vietnam", 16.1, 108.0],["Indonesia", -2.5, 118.0],
+      ["Australia", -25.3, 133.8],["New Zealand", -41.3, 174.8],["Russia", 61.5, 90.0],["Kazakhstan", 48.0, 67.0]
+    ];
+
+    const TOTAL_ROUNDS = 5;
+    const TILE_SIZE = 256;
+    const MIN_ZOOM = 2;
+    const MAX_ZOOM = 16;
+    const MAX_MERCATOR_LAT = 85.05112878;
+
+    let currentRound = 0;
+    let totalPoints = 0;
+    let currentLocation = null;
+    let roundLocations = [];
+    let guess = null;
+    let roundLocked = false;
+    let history = [];
+    let toastTimer = null;
+
+    const mapState = { centerLat: 20, centerLng: 0, zoom: 2, topLeftX: 0, topLeftY: 0 };
+    const dragState = { active: false, moved: false, startX: 0, startY: 0, startCenterX: 0, startCenterY: 0 };
+    let wheelAccumulator = 0;
+
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      streetFrame: $("streetFrame"),
+      roundText: $("roundText"), totalRoundsText: $("totalRoundsText"), totalPointsText: $("totalPointsText"),
+      packCount: $("packCount"), mapPanel: $("mapPanel"), mapHint: $("mapHint"), mapStyleChip: $("mapStyleChip"),
+      mapBody: $("mapBody"), tileLayer: $("tileLayer"), countryLabelLayer: $("countryLabelLayer"), mapSvg: $("mapSvg"),
+      guessPin: $("guessPin"), answerPin: $("answerPin"), guessLabel: $("guessLabel"), answerLabel: $("answerLabel"),
+      resetBtn: $("resetBtn"), guessBtn: $("guessBtn"), expandBtn: $("expandBtn"), zoomInBtn: $("zoomInBtn"), zoomOutBtn: $("zoomOutBtn"),
+      resultCard: $("resultCard"), resultTitle: $("resultTitle"), distanceChip: $("distanceChip"),
+      roundPointsValue: $("roundPointsValue"), resultTotalValue: $("resultTotalValue"), resultCopy: $("resultCopy"), scoreFill: $("scoreFill"),
+      nextBtn: $("nextBtn"), startScreen: $("startScreen"), finalScreen: $("finalScreen"), finalScore: $("finalScore"), roundList: $("roundList"),
+      startBtn: $("startBtn"), playAgainBtn: $("playAgainBtn"), toast: $("toast")
+    };
+
+    els.totalRoundsText.textContent = TOTAL_ROUNDS;
+    els.packCount.textContent = `${LOCATIONS.length} places`;
+
+    function streetViewUrl(location) {
+      const cbll = `${location.lat},${location.lng}`;
+      const cbp = `11,${location.heading || 0},0,${location.pitch || 0},${location.zoom || 1}`;
+      return `https://maps.google.com/maps?q=&layer=c&cbll=${cbll}&cbp=${cbp}&output=svembed`;
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      const seedBoost = Date.now() + Math.floor(Math.random() * 1000000);
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1 + (seedBoost % 7))) % (i + 1);
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function chooseRoundLocations() {
+      let recent = [];
+      try { recent = JSON.parse(localStorage.getItem("pinpointed_recent_locations") || "[]"); } catch(e) {}
+      const recentSet = new Set(recent);
+      const fresh = LOCATIONS.filter(p => !recentSet.has(p.name + "|" + p.place));
+      const source = fresh.length >= TOTAL_ROUNDS ? fresh : LOCATIONS;
+      const chosen = shuffle(source).slice(0, TOTAL_ROUNDS);
+      const updatedRecent = [...chosen.map(p => p.name + "|" + p.place), ...recent].slice(0, Math.min(80, LOCATIONS.length - TOTAL_ROUNDS));
+      try { localStorage.setItem("pinpointed_recent_locations", JSON.stringify(updatedRecent)); } catch(e) {}
+      return chosen;
+    }
+
+    function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+    function worldSize(zoom) { return TILE_SIZE * Math.pow(2, zoom); }
+
+    function project(lat, lng, zoom = mapState.zoom) {
+      const size = worldSize(zoom);
+      const clampedLat = clamp(lat, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
+      const sinLat = Math.sin(clampedLat * Math.PI / 180);
+      return {
+        x: (lng + 180) / 360 * size,
+        y: (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * size
+      };
+    }
+
+    function unproject(x, y, zoom = mapState.zoom) {
+      const size = worldSize(zoom);
+      const lng = x / size * 360 - 180;
+      const n = Math.PI - 2 * Math.PI * y / size;
+      const lat = 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+      return { lat, lng };
+    }
+
+    function getMapRect() { return els.mapBody.getBoundingClientRect(); }
+
+    function updateTopLeft() {
+      const rect = getMapRect();
+      const center = project(mapState.centerLat, mapState.centerLng);
+      mapState.topLeftX = center.x - rect.width / 2;
+      mapState.topLeftY = center.y - rect.height / 2;
+    }
+
+    function screenPointForLatLng(lat, lng) {
+      const p = project(lat, lng);
+      return { x: p.x - mapState.topLeftX, y: p.y - mapState.topLeftY };
+    }
+
+    function latLngForScreenPoint(x, y) { return unproject(mapState.topLeftX + x, mapState.topLeftY + y); }
+
+    function setCenterFromPixels(x, y) {
+      const latLng = unproject(x, y);
+      mapState.centerLat = clamp(latLng.lat, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
+      mapState.centerLng = ((latLng.lng + 540) % 360) - 180;
+    }
+
+    function tileUrl(z, x, y) {
+      const server = Math.abs(x + y) % 4;
+      return `https://mt${server}.google.com/vt/lyrs=m&x=${x}&y=${y}&z=${z}`;
+    }
+
+    function renderTiles() {
+      updateTopLeft();
+      const rect = getMapRect();
+      const z = mapState.zoom;
+      const scale = Math.pow(2, z);
+      const maxTile = scale - 1;
+
+      const startTileX = Math.floor(mapState.topLeftX / TILE_SIZE) - 1;
+      const endTileX = Math.floor((mapState.topLeftX + rect.width) / TILE_SIZE) + 1;
+      const startTileY = Math.floor(mapState.topLeftY / TILE_SIZE) - 1;
+      const endTileY = Math.floor((mapState.topLeftY + rect.height) / TILE_SIZE) + 1;
+      const needed = new Set();
+
+      for (let tx = startTileX; tx <= endTileX; tx++) {
+        const wrappedX = ((tx % scale) + scale) % scale;
+        for (let ty = startTileY; ty <= endTileY; ty++) {
+          if (ty < 0 || ty > maxTile) continue;
+          const key = `${z}-${wrappedX}-${ty}-${tx}`;
+          needed.add(key);
+          let img = els.tileLayer.querySelector(`[data-key="${key}"]`);
+          if (!img) {
+            img = document.createElement("img");
+            img.className = "map-tile";
+            img.dataset.key = key;
+            img.alt = "";
+            img.draggable = false;
+            img.referrerPolicy = "no-referrer-when-downgrade";
+            img.src = tileUrl(z, wrappedX, ty);
+            els.tileLayer.appendChild(img);
+          }
+          img.style.left = `${tx * TILE_SIZE - mapState.topLeftX}px`;
+          img.style.top = `${ty * TILE_SIZE - mapState.topLeftY}px`;
+        }
+      }
+
+      [...els.tileLayer.children].forEach(child => { if (!needed.has(child.dataset.key)) child.remove(); });
+      renderCountryLabels();
+      positionOverlayItems();
+      els.mapStyleChip.textContent = mapState.zoom <= 3 ? "Google world map" : "Google detailed map";
+    }
+
+    function renderCountryLabels() {
+      // Google roadmap tiles already include country, city, road, and place labels.
+      els.countryLabelLayer.innerHTML = "";
+    }
+
+    function positionOverlayItems() {
+      if (guess) {
+        const p = screenPointForLatLng(guess.lat, guess.lng);
+        setNodePx(els.guessPin, p.x, p.y);
+        setNodePx(els.guessLabel, p.x, p.y);
+      }
+      if (roundLocked && currentLocation) {
+        const a = screenPointForLatLng(currentLocation.lat, currentLocation.lng);
+        setNodePx(els.answerPin, a.x, a.y);
+        setNodePx(els.answerLabel, a.x, a.y);
+      }
+      drawRevealLine();
+    }
+
+    function setNodePx(node, x, y) { node.style.left = `${x}px`; node.style.top = `${y}px`; }
+    function clearReveal() { els.answerPin.style.display = "none"; els.answerLabel.style.display = "none"; els.mapSvg.innerHTML = ""; }
+
+    function drawRevealLine() {
+      if (!roundLocked || !guess || !currentLocation) { els.mapSvg.innerHTML = ""; return; }
+      const g = screenPointForLatLng(guess.lat, guess.lng);
+      const a = screenPointForLatLng(currentLocation.lat, currentLocation.lng);
+      els.mapSvg.innerHTML = `<line x1="${g.x}" y1="${g.y}" x2="${a.x}" y2="${a.y}"></line>`;
+    }
+
+    function showGuessPin() {
+      if (!guess) return;
+      const p = screenPointForLatLng(guess.lat, guess.lng);
+      setNodePx(els.guessPin, p.x, p.y);
+      setNodePx(els.guessLabel, p.x, p.y);
+      els.guessPin.style.display = "block";
+      els.guessLabel.style.display = "block";
+    }
+
+    function revealAnswer() {
+      const p = screenPointForLatLng(currentLocation.lat, currentLocation.lng);
+      setNodePx(els.answerPin, p.x, p.y);
+      setNodePx(els.answerLabel, p.x, p.y);
+      els.answerPin.style.display = "block";
+      els.answerLabel.style.display = "block";
+      drawRevealLine();
+    }
+
+    function zoomMap(delta, anchorX = null, anchorY = null) {
+      const oldZoom = mapState.zoom;
+      const newZoom = clamp(oldZoom + delta, MIN_ZOOM, MAX_ZOOM);
+      if (newZoom === oldZoom) return;
+
+      const rect = getMapRect();
+      const ax = anchorX === null ? rect.width / 2 : anchorX;
+      const ay = anchorY === null ? rect.height / 2 : anchorY;
+
+      const before = latLngForScreenPoint(ax, ay);
+      mapState.zoom = newZoom;
+
+      const projectedAfter = project(before.lat, before.lng, newZoom);
+      mapState.topLeftX = projectedAfter.x - ax;
+      mapState.topLeftY = projectedAfter.y - ay;
+
+      const newCenter = unproject(
+        mapState.topLeftX + rect.width / 2,
+        mapState.topLeftY + rect.height / 2,
+        newZoom
+      );
+
+      mapState.centerLat = clamp(newCenter.lat, -MAX_MERCATOR_LAT, MAX_MERCATOR_LAT);
+      mapState.centerLng = ((newCenter.lng + 540) % 360) - 180;
+
+      renderTiles();
+    }
+
+    function resetMapView() {
+      mapState.centerLat = 20;
+      mapState.centerLng = 0;
+      mapState.zoom = 2;
+      renderTiles();
+    }
+
+    function fitRevealBounds() {
+      if (!guess || !currentLocation) return;
+      const rect = getMapRect();
+      const padding = 140;
+      let chosenZoom = MIN_ZOOM;
+      let chosenCenter = project((guess.lat + currentLocation.lat) / 2, (guess.lng + currentLocation.lng) / 2, MIN_ZOOM);
+
+      for (let z = MAX_ZOOM; z >= MIN_ZOOM; z--) {
+        const gp = project(guess.lat, guess.lng, z);
+        const ap = project(currentLocation.lat, currentLocation.lng, z);
+        const dx = Math.abs(gp.x - ap.x);
+        const dy = Math.abs(gp.y - ap.y);
+        if (dx <= Math.max(150, rect.width - padding * 2) && dy <= Math.max(150, rect.height - padding * 2)) {
+          chosenZoom = z;
+          chosenCenter = { x: (gp.x + ap.x) / 2, y: (gp.y + ap.y) / 2 };
+          break;
+        }
+      }
+      mapState.zoom = chosenZoom;
+      setCenterFromPixels(chosenCenter.x, chosenCenter.y);
+      renderTiles();
+    }
+
+    function startGame() {
+      currentRound = 0;
+      totalPoints = 0;
+      history = [];
+      roundLocations = chooseRoundLocations();
+      els.totalPointsText.textContent = "0";
+      els.startScreen.style.display = "none";
+      els.finalScreen.style.display = "none";
+      loadRound();
+    }
+
+    function loadRound() {
+      clearRoundState();
+      currentLocation = roundLocations[currentRound];
+      els.roundText.textContent = String(currentRound + 1);
+      els.streetFrame.src = streetViewUrl(currentLocation);
+      els.mapHint.textContent = "Start with the Google labeled map. Scroll gently or use + / − to zoom.";
+      els.nextBtn.textContent = currentRound === TOTAL_ROUNDS - 1 ? "See final score" : "Next round";
+      resetMapView();
+      showToast(`New location loaded from a ${LOCATIONS.length}-place pack.`);
+    }
+
+    function clearRoundState() {
+      guess = null;
+      roundLocked = false;
+      els.mapPanel.classList.remove("expanded", "locked", "dragging");
+      els.expandBtn.textContent = "⤢";
+      els.guessBtn.disabled = true;
+      els.resultCard.classList.remove("show");
+      els.scoreFill.style.width = "0%";
+      els.guessPin.style.display = "none";
+      els.guessLabel.style.display = "none";
+      clearReveal();
+    }
+
+    function resetGuess() {
+      if (roundLocked) return;
+      guess = null;
+      els.guessPin.style.display = "none";
+      els.guessLabel.style.display = "none";
+      clearReveal();
+      els.guessBtn.disabled = true;
+      els.mapHint.textContent = "Start with the Google labeled map. Scroll gently or use + / − to zoom.";
+    }
+
+    function haversineKm(aLat, aLng, bLat, bLng) {
+      const R = 6371;
+      const toRad = deg => deg * Math.PI / 180;
+      const dLat = toRad(bLat - aLat);
+      const dLng = toRad(bLng - aLng);
+      const lat1 = toRad(aLat);
+      const lat2 = toRad(bLat);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+
+    function scoreFromDistance(distanceKm) { return Math.max(0, Math.round(5000 * Math.exp(-distanceKm / 1200))); }
+    function distanceText(km) {
+      if (km < 1) return `${Math.round(km * 1000)} m`;
+      if (km < 100) return `${km.toFixed(1)} km`;
+      return `${Math.round(km).toLocaleString()} km`;
+    }
+    function resultTitle(score) {
+      if (score >= 4900) return "Almost perfect.";
+      if (score >= 4300) return "Very close.";
+      if (score >= 3000) return "Solid guess.";
+      if (score >= 1500) return "Not bad.";
+      return "Way off.";
+    }
+
+    function playTone(frequency, start, duration, type="sine", volume=0.06) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        if (!window.gameAudioContext) window.gameAudioContext = new AudioContext();
+        const ctx = window.gameAudioContext;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, ctx.currentTime + start);
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(volume, ctx.currentTime + start + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + duration);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start); osc.stop(ctx.currentTime + start + duration + 0.03);
+      } catch (e) {}
+    }
+    function playPinSound() { playTone(460, 0, 0.07, "triangle", 0.04); }
+    function playResultSound(score) {
+      if (score >= 4000) {
+        playTone(523.25, 0, 0.1, "sine", 0.055); playTone(659.25, 0.1, 0.12, "sine", 0.055); playTone(783.99, 0.22, 0.17, "sine", 0.055);
+      } else if (score >= 1800) {
+        playTone(392, 0, 0.12, "triangle", 0.05); playTone(523.25, 0.13, 0.16, "triangle", 0.05);
+      } else {
+        playTone(220, 0, 0.14, "sine", 0.05); playTone(196, 0.14, 0.22, "sine", 0.05);
+      }
+    }
+
+    function makeGuess() {
+      if (!guess || roundLocked) return;
+      roundLocked = true;
+      els.mapPanel.classList.add("expanded", "locked");
+      els.expandBtn.textContent = "⤡";
+
+      const distanceKm = haversineKm(guess.lat, guess.lng, currentLocation.lat, currentLocation.lng);
+      const points = scoreFromDistance(distanceKm);
+      totalPoints += points;
+      els.totalPointsText.textContent = totalPoints.toLocaleString();
+
+      setTimeout(() => { fitRevealBounds(); revealAnswer(); }, 340);
+      playResultSound(points);
+
+      els.resultTitle.textContent = resultTitle(points);
+      els.distanceChip.textContent = `📏 ${distanceText(distanceKm)} away`;
+      els.roundPointsValue.textContent = points.toLocaleString();
+      els.resultTotalValue.textContent = totalPoints.toLocaleString();
+      els.resultCopy.innerHTML = `Actual location: <strong>${currentLocation.name}</strong>, ${currentLocation.place}.<br>Closer guesses are worth more points. Maximum round score: <strong>5,000</strong>.`;
+      els.scoreFill.style.width = `${Math.max(2, (points / 5000) * 100)}%`;
+      els.resultCard.classList.add("show");
+      els.mapHint.textContent = "Answer revealed. You can still pan and zoom around the map.";
+      history.push({ location: currentLocation, distanceKm, points });
+    }
+
+    function toggleExpand() {
+      if (roundLocked) return;
+      els.mapPanel.classList.toggle("expanded");
+      els.expandBtn.textContent = els.mapPanel.classList.contains("expanded") ? "⤡" : "⤢";
+      setTimeout(renderTiles, 330);
+    }
+
+    function nextRound() {
+      if (currentRound >= TOTAL_ROUNDS - 1) showFinal();
+      else { currentRound += 1; loadRound(); }
+    }
+
+    function showFinal() {
+      els.finalScore.textContent = `${totalPoints.toLocaleString()} / ${(TOTAL_ROUNDS * 5000).toLocaleString()}`;
+      els.roundList.innerHTML = history.map((item, index) => `
+        <div class="round-row">
+          <span><strong>Round ${index + 1}</strong> · ${item.location.place}</span>
+          <span><strong>${item.points.toLocaleString()}</strong> · ${distanceText(item.distanceKm)}</span>
+        </div>
+      `).join("");
+      els.finalScreen.style.display = "grid";
+    }
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2300);
+    }
+
+    function handlePointerDown(evt) {
+      const center = project(mapState.centerLat, mapState.centerLng);
+      dragState.active = true;
+      dragState.moved = false;
+      dragState.startX = evt.clientX;
+      dragState.startY = evt.clientY;
+      dragState.startCenterX = center.x;
+      dragState.startCenterY = center.y;
+      els.mapPanel.classList.add("dragging");
+      els.mapBody.setPointerCapture(evt.pointerId);
+    }
+
+    function handlePointerMove(evt) {
+      if (!dragState.active) return;
+      const dx = evt.clientX - dragState.startX;
+      const dy = evt.clientY - dragState.startY;
+      if (Math.abs(dx) + Math.abs(dy) > 4) dragState.moved = true;
+      if (dragState.moved) {
+        setCenterFromPixels(dragState.startCenterX - dx, dragState.startCenterY - dy);
+        renderTiles();
+      }
+    }
+
+    function handlePointerUp(evt) {
+      if (!dragState.active) return;
+      els.mapPanel.classList.remove("dragging");
+      const wasMoved = dragState.moved;
+      dragState.active = false;
+      try { els.mapBody.releasePointerCapture(evt.pointerId); } catch (e) {}
+
+      if (!wasMoved && !roundLocked) {
+        const rect = getMapRect();
+        const x = evt.clientX - rect.left;
+        const y = evt.clientY - rect.top;
+        guess = latLngForScreenPoint(x, y);
+        showGuessPin();
+        clearReveal();
+        els.guessBtn.disabled = false;
+        els.mapHint.textContent = "Pin placed. Click Guess to reveal the real location.";
+        playPinSound();
+      }
+    }
+
+    els.mapBody.addEventListener("pointerdown", handlePointerDown);
+    els.mapBody.addEventListener("pointermove", handlePointerMove);
+    els.mapBody.addEventListener("pointerup", handlePointerUp);
+    els.mapBody.addEventListener("pointercancel", () => { dragState.active = false; els.mapPanel.classList.remove("dragging"); });
+    els.mapBody.addEventListener("wheel", (evt) => {
+      evt.preventDefault();
+
+      const rect = getMapRect();
+      const anchorX = evt.clientX - rect.left;
+      const anchorY = evt.clientY - rect.top;
+
+      // Slower, controlled wheel zoom. Trackpads often fire a ton of wheel events,
+      // so this prevents one scroll from jumping several map levels.
+      const threshold = 260;
+      wheelAccumulator += evt.deltaY;
+
+      if (wheelAccumulator <= -threshold) {
+        zoomMap(1, anchorX, anchorY);
+        wheelAccumulator = 0;
+      } else if (wheelAccumulator >= threshold) {
+        zoomMap(-1, anchorX, anchorY);
+        wheelAccumulator = 0;
+      }
+    }, { passive:false });
+
+    els.zoomInBtn.addEventListener("click", (evt) => { evt.stopPropagation(); zoomMap(1); });
+    els.zoomOutBtn.addEventListener("click", (evt) => { evt.stopPropagation(); zoomMap(-1); });
+    els.resetBtn.addEventListener("click", resetGuess);
+    els.guessBtn.addEventListener("click", makeGuess);
+    els.expandBtn.addEventListener("click", toggleExpand);
+    els.nextBtn.addEventListener("click", nextRound);
+    els.startBtn.addEventListener("click", startGame);
+    els.playAgainBtn.addEventListener("click", startGame);
+    window.addEventListener("resize", renderTiles);
+
+    renderTiles();
+  </script>
+</body>
+</html>
