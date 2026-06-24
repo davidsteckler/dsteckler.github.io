@@ -336,8 +336,8 @@
 
     iframe {
       width: 100%;
-      height: min(76vh, 900px);
-      min-height: 650px;
+      height: min(88vh, 1200px);
+      min-height: 760px;
       border: 1px solid var(--line);
       border-radius: 16px;
       background: white;
@@ -389,7 +389,7 @@
     @media (max-width: 920px) {
       .app { grid-template-columns: 1fr; }
       aside.card { position: static; }
-      iframe { height: 72vh; }
+      iframe { height: 82vh; }
     }
 
     @media (max-width: 540px) {
@@ -409,7 +409,7 @@
     <div class="title-row">
       <div>
         <h1>Wikipedia Game</h1>
-        <p class="subtitle">Play inside embedded Wikipedia. Start on one real page, click real article links, and race to the target.</p>
+        <p class="subtitle">Play inside embedded Wikipedia. Start on one real page, click real article links, and race to the target. Random mode now avoids tiny stub pages.</p>
       </div>
       <button class="ghost" id="resetBtn" type="button">Reset</button>
     </div>
@@ -430,7 +430,7 @@
         </div>
         <div class="button-row">
           <button id="startBtn" class="green" type="button">Start game</button>
-          <button id="randomBtn" class="secondary" type="button">Random pair</button>
+          <button id="randomBtn" class="secondary" type="button">Long random pair</button>
         </div>
       </section>
 
@@ -474,7 +474,7 @@
 
       <section class="rules">
         <h2>Rules</h2>
-        <p>Click only normal article links inside Wikipedia. No search, categories, files, language switching, browser back shortcuts, or table-of-contents shortcuts unless your teacher allows them.</p>
+        <p>Click only normal article links inside Wikipedia. No search, categories, files, language switching, browser back shortcuts, or table-of-contents shortcuts unless your teacher allows them. Random mode tries to choose longer articles so the game has more possible paths.</p>
       </section>
     </aside>
 
@@ -630,17 +630,46 @@
     }
 
     async function getRandomPair() {
+      /*
+        Wikipedia's random endpoint often returns tiny stub articles.
+        For this game, tiny pages feel bad because there are fewer links and less room to explore.
+        So we pull a larger batch and keep only longer main-namespace articles.
+      */
       const data = await fetchJSON(params({
         action: "query",
         generator: "random",
         grnnamespace: "0",
-        grnlimit: "2",
+        grnlimit: "50",
         prop: "info"
       }));
 
       const pages = data.query && data.query.pages ? data.query.pages : [];
-      if (pages.length < 2) throw new Error("Could not get random pages. Try again.");
-      return [pages[0].title, pages[1].title];
+      const longPages = pages
+        .filter(page => page && !page.missing && page.ns === 0 && page.length >= 18000)
+        .sort((a, b) => b.length - a.length);
+
+      let choices = longPages;
+
+      // If Wikipedia gives an unusually stub-heavy batch, loosen the filter instead of failing.
+      if (choices.length < 2) {
+        choices = pages
+          .filter(page => page && !page.missing && page.ns === 0 && page.length >= 8000)
+          .sort((a, b) => b.length - a.length);
+      }
+
+      if (choices.length < 2) {
+        throw new Error("Could not find two long random pages. Try again.");
+      }
+
+      // Pick from the top group rather than always using the two absolute longest.
+      const pool = choices.slice(0, Math.min(12, choices.length));
+      const firstIndex = Math.floor(Math.random() * pool.length);
+      let secondIndex = Math.floor(Math.random() * pool.length);
+      while (secondIndex === firstIndex && pool.length > 1) {
+        secondIndex = Math.floor(Math.random() * pool.length);
+      }
+
+      return [pool[firstIndex].title, pool[secondIndex].title];
     }
 
     function startTimer() {
