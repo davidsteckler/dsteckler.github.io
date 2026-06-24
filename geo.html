@@ -1,0 +1,859 @@
+from pathlib import Path
+
+html = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoGuesser Mini</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQgyg0GIYoDXRxr8t2gtKyYbqZg6R3qg="
+    crossorigin=""
+  />
+
+  <style>
+    :root {
+      --bg: #0e1117;
+      --panel: rgba(19, 24, 34, 0.92);
+      --panel2: #151b27;
+      --text: #eef3ff;
+      --muted: #9aa7bd;
+      --accent: #61dafb;
+      --good: #62d26f;
+      --warn: #ffcb6b;
+      --bad: #ff6b6b;
+      --border: rgba(255,255,255,.12);
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #182235, var(--bg) 45%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 18px;
+      background: rgba(12, 16, 24, .78);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 230px;
+    }
+
+    .pin-logo {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #61dafb, #7c5cff);
+      box-shadow: 0 10px 30px rgba(97,218,251,.25);
+      font-size: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+
+    .subtitle {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .scorebar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .pill strong {
+      color: var(--text);
+      font-weight: 750;
+    }
+
+    main {
+      position: relative;
+      min-height: 0;
+    }
+
+    #streetFrame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #090b10;
+    }
+
+    .cover {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(rgba(7,10,15,.72), rgba(7,10,15,.72)),
+        url("https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1800&q=80");
+      background-size: cover;
+      background-position: center;
+      z-index: 30;
+      padding: 22px;
+    }
+
+    .start-card {
+      max-width: 620px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .start-card h2 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 5vw, 52px);
+      line-height: 1.02;
+    }
+
+    .start-card p {
+      margin: 0 auto 18px;
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.45;
+      font-size: 15px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      border-radius: 999px;
+      padding: 11px 16px;
+      color: #081018;
+      background: var(--accent);
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(97,218,251,.25);
+      transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+    }
+
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    button:active { transform: translateY(0); }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .5;
+      transform: none;
+      filter: none;
+      box-shadow: none;
+    }
+
+    .secondary {
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .map-panel {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: min(430px, calc(100vw - 36px));
+      height: min(360px, calc(100vh - 150px));
+      z-index: 10;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      transition: width .18s ease, height .18s ease;
+    }
+
+    .map-panel.big {
+      width: min(720px, calc(100vw - 36px));
+      height: min(520px, calc(100vh - 130px));
+    }
+
+    .map-top, .map-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(13, 17, 25, .92);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .map-actions {
+      border-bottom: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    #guessMap {
+      width: 100%;
+      height: 100%;
+      background: #151b27;
+    }
+
+    .result-panel {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      width: min(430px, calc(100vw - 36px));
+      z-index: 11;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: none;
+    }
+
+    .result-panel.show { display: block; }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 850;
+      margin-bottom: 4px;
+    }
+
+    .result-meta {
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .result-meta strong {
+      color: var(--text);
+    }
+
+    .progress {
+      height: 8px;
+      background: rgba(255,255,255,.09);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 13px 0 4px;
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--bad), var(--warn), var(--good));
+      border-radius: 999px;
+      transition: width .4s ease;
+    }
+
+    .toast {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 25;
+      background: rgba(8, 12, 18, .88);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      max-width: calc(100vw - 30px);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(2px);
+    }
+
+    .final-card {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      place-items: center;
+      background: rgba(4, 7, 12, .76);
+      backdrop-filter: blur(6px);
+      padding: 18px;
+    }
+
+    .final-card.show { display: grid; }
+
+    .final-card-inner {
+      width: min(560px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 28px;
+      padding: 26px;
+      text-align: center;
+    }
+
+    .final-score {
+      font-size: clamp(42px, 8vw, 80px);
+      font-weight: 900;
+      letter-spacing: -3px;
+      margin: 10px 0;
+    }
+
+    .round-list {
+      margin: 16px 0 20px;
+      text-align: left;
+      display: grid;
+      gap: 8px;
+    }
+
+    .round-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .round-row strong { color: var(--text); }
+
+    .leaflet-control-attribution {
+      font-size: 10px;
+    }
+
+    @media (max-width: 720px) {
+      body { overflow: auto; }
+      .app { min-height: 100vh; height: auto; grid-template-rows: auto 72vh; }
+      header { align-items: flex-start; flex-direction: column; }
+      .scorebar { justify-content: flex-start; }
+      .map-panel {
+        right: 10px;
+        bottom: 10px;
+        height: 300px;
+      }
+      .result-panel {
+        left: 10px;
+        bottom: 322px;
+      }
+      .pill { font-size: 12px; padding: 7px 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="pin-logo">🌍</div>
+        <div>
+          <h1>GeoGuesser Mini</h1>
+          <div class="subtitle">Look around. Drop a pin. See how close you got.</div>
+        </div>
+      </div>
+
+      <div class="scorebar">
+        <div class="pill">Round <strong id="roundText">0</strong>/<strong id="totalRoundsText">5</strong></div>
+        <div class="pill">Round score <strong id="roundScoreText">—</strong></div>
+        <div class="pill">Total <strong id="totalScoreText">0</strong></div>
+      </div>
+    </header>
+
+    <main>
+      <iframe
+        id="streetFrame"
+        title="Embedded Google Street View"
+        allowfullscreen
+        referrerpolicy="no-referrer-when-downgrade"
+        loading="eager">
+      </iframe>
+
+      <div class="toast" id="toast">Click the map to place your guess.</div>
+
+      <section class="map-panel" id="mapPanel">
+        <div class="map-top">
+          <div class="hint" id="mapHint">Click the map to place your guess.</div>
+          <button class="secondary" id="sizeBtn" type="button">Bigger map</button>
+        </div>
+
+        <div id="guessMap"></div>
+
+        <div class="map-actions">
+          <button class="secondary" id="resetGuessBtn" type="button">Reset pin</button>
+          <button id="guessBtn" type="button" disabled>Make guess</button>
+        </div>
+      </section>
+
+      <section class="result-panel" id="resultPanel">
+        <div class="result-title" id="resultTitle">Nice guess.</div>
+        <div class="result-meta" id="resultMeta"></div>
+        <div class="progress"><div id="scoreBar"></div></div>
+        <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+          <button id="nextBtn" type="button">Next round</button>
+        </div>
+      </section>
+
+      <section class="cover" id="cover">
+        <div class="start-card">
+          <h2>Guess the world.</h2>
+          <p>
+            You’ll get dropped into a real Google Street View location. Look around,
+            then click the map where you think you are. Five rounds. 5,000 points max each.
+          </p>
+          <button id="startBtn" type="button">Start game</button>
+        </div>
+      </section>
+
+      <section class="final-card" id="finalCard">
+        <div class="final-card-inner">
+          <h2 style="margin:0;">Game over</h2>
+          <div class="subtitle">Final score</div>
+          <div class="final-score" id="finalScore">0</div>
+          <div class="round-list" id="roundList"></div>
+          <button id="playAgainBtn" type="button">Play again</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
+
+  <script>
+    const LOCATIONS = [
+      {
+        name: "Times Square",
+        place: "New York City, USA",
+        lat: 40.758896,
+        lng: -73.985130,
+        heading: 60,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Shibuya Crossing",
+        place: "Tokyo, Japan",
+        lat: 35.659500,
+        lng: 139.700500,
+        heading: 220,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Tower Bridge",
+        place: "London, England",
+        lat: 51.505456,
+        lng: -0.075356,
+        heading: 110,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Sydney Opera House",
+        place: "Sydney, Australia",
+        lat: -33.856784,
+        lng: 151.215297,
+        heading: 250,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Eiffel Tower",
+        place: "Paris, France",
+        lat: 48.858370,
+        lng: 2.294481,
+        heading: 90,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Colosseum",
+        place: "Rome, Italy",
+        lat: 41.890210,
+        lng: 12.492231,
+        heading: 320,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Grand Place",
+        place: "Brussels, Belgium",
+        lat: 50.846733,
+        lng: 4.352467,
+        heading: 15,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Burj Khalifa",
+        place: "Dubai, UAE",
+        lat: 25.197197,
+        lng: 55.274376,
+        heading: 140,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Golden Gate Bridge",
+        place: "San Francisco, USA",
+        lat: 37.819929,
+        lng: -122.478255,
+        heading: 20,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Table Mountain",
+        place: "Cape Town, South Africa",
+        lat: -33.962823,
+        lng: 18.409844,
+        heading: 170,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Plaza Mayor",
+        place: "Madrid, Spain",
+        lat: 40.415363,
+        lng: -3.707398,
+        heading: 280,
+        pitch: 0,
+        zoom: 1
+      },
+      {
+        name: "Gamla Stan",
+        place: "Stockholm, Sweden",
+        lat: 59.325117,
+        lng: 18.071093,
+        heading: 40,
+        pitch: 0,
+        zoom: 1
+      }
+    ];
+
+    const TOTAL_ROUNDS = 5;
+    let map;
+    let currentRound = 0;
+    let totalScore = 0;
+    let roundLocations = [];
+    let currentLocation = null;
+    let guessMarker = null;
+    let answerMarker = null;
+    let line = null;
+    let hasGuessed = false;
+    let history = [];
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      streetFrame: $("streetFrame"),
+      cover: $("cover"),
+      startBtn: $("startBtn"),
+      roundText: $("roundText"),
+      totalRoundsText: $("totalRoundsText"),
+      roundScoreText: $("roundScoreText"),
+      totalScoreText: $("totalScoreText"),
+      mapHint: $("mapHint"),
+      guessBtn: $("guessBtn"),
+      resetGuessBtn: $("resetGuessBtn"),
+      resultPanel: $("resultPanel"),
+      resultTitle: $("resultTitle"),
+      resultMeta: $("resultMeta"),
+      scoreBar: $("scoreBar"),
+      nextBtn: $("nextBtn"),
+      sizeBtn: $("sizeBtn"),
+      mapPanel: $("mapPanel"),
+      toast: $("toast"),
+      finalCard: $("finalCard"),
+      finalScore: $("finalScore"),
+      playAgainBtn: $("playAgainBtn"),
+      roundList: $("roundList")
+    };
+
+    els.totalRoundsText.textContent = TOTAL_ROUNDS;
+
+    function streetViewUrl(location) {
+      // This old Google Maps embed format usually works without an API key.
+      // It asks Google to open Street View near the latitude/longitude.
+      const cbll = `${location.lat},${location.lng}`;
+      const cbp = `11,${location.heading || 0},0,${location.pitch || 0},${location.zoom || 1}`;
+      return `https://maps.google.com/maps?q=&layer=c&cbll=${cbll}&cbp=${cbp}&output=svembed`;
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function initMap() {
+      map = L.map("guessMap", {
+        worldCopyJump: true,
+        zoomControl: true,
+        minZoom: 2
+      }).setView([20, 0], 2);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(map);
+
+      map.on("click", (e) => {
+        if (hasGuessed) return;
+        setGuess(e.latlng.lat, e.latlng.lng);
+      });
+
+      setTimeout(() => map.invalidateSize(), 150);
+    }
+
+    function setGuess(lat, lng) {
+      const latlng = [lat, lng];
+
+      if (!guessMarker) {
+        guessMarker = L.marker(latlng, { draggable: true }).addTo(map);
+        guessMarker.on("dragend", () => {
+          const p = guessMarker.getLatLng();
+          els.mapHint.textContent = `Guess placed at ${p.lat.toFixed(2)}, ${p.lng.toFixed(2)}.`;
+        });
+      } else {
+        guessMarker.setLatLng(latlng);
+      }
+
+      els.guessBtn.disabled = false;
+      els.mapHint.textContent = `Guess placed at ${lat.toFixed(2)}, ${lng.toFixed(2)}.`;
+    }
+
+    function resetGuess() {
+      if (guessMarker) {
+        map.removeLayer(guessMarker);
+        guessMarker = null;
+      }
+      els.guessBtn.disabled = true;
+      els.mapHint.textContent = "Click the map to place your guess.";
+    }
+
+    function clearRoundLayers() {
+      [guessMarker, answerMarker, line].forEach(layer => {
+        if (layer) map.removeLayer(layer);
+      });
+      guessMarker = null;
+      answerMarker = null;
+      line = null;
+    }
+
+    function startGame() {
+      currentRound = 0;
+      totalScore = 0;
+      history = [];
+      roundLocations = shuffle(LOCATIONS).slice(0, TOTAL_ROUNDS);
+      els.cover.style.display = "none";
+      els.finalCard.classList.remove("show");
+      els.totalScoreText.textContent = "0";
+      nextRound();
+    }
+
+    function nextRound() {
+      clearRoundLayers();
+      hasGuessed = false;
+      els.resultPanel.classList.remove("show");
+      els.roundScoreText.textContent = "—";
+      els.scoreBar.style.width = "0%";
+      els.guessBtn.disabled = true;
+      els.nextBtn.textContent = currentRound === TOTAL_ROUNDS - 1 ? "See final score" : "Next round";
+      els.mapHint.textContent = "Click the map to place your guess.";
+      map.setView([20, 0], 2);
+
+      currentLocation = roundLocations[currentRound];
+      els.roundText.textContent = String(currentRound + 1);
+      els.streetFrame.src = streetViewUrl(currentLocation);
+      showToast("New round loaded. Look around, then place your guess.");
+    }
+
+    function haversineKm(aLat, aLng, bLat, bLng) {
+      const R = 6371;
+      const toRad = deg => deg * Math.PI / 180;
+      const dLat = toRad(bLat - aLat);
+      const dLng = toRad(bLng - aLng);
+      const lat1 = toRad(aLat);
+      const lat2 = toRad(bLat);
+
+      const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1) * Math.cos(lat2) *
+        Math.sin(dLng / 2) ** 2;
+
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+
+    function scoreFromDistance(distanceKm) {
+      // Classic GeoGuessr-ish feel: close guesses get rewarded heavily,
+      // while very far guesses still get a few points.
+      return Math.max(0, Math.round(5000 * Math.exp(-distanceKm / 1550)));
+    }
+
+    function distanceText(km) {
+      if (km < 1) return `${Math.round(km * 1000)} m`;
+      if (km < 100) return `${km.toFixed(1)} km`;
+      return `${Math.round(km).toLocaleString()} km`;
+    }
+
+    function makeGuess() {
+      if (!guessMarker || hasGuessed) return;
+
+      hasGuessed = true;
+      const guess = guessMarker.getLatLng();
+      const answer = L.latLng(currentLocation.lat, currentLocation.lng);
+      const distanceKm = haversineKm(guess.lat, guess.lng, answer.lat, answer.lng);
+      const score = scoreFromDistance(distanceKm);
+
+      totalScore += score;
+      els.totalScoreText.textContent = totalScore.toLocaleString();
+      els.roundScoreText.textContent = score.toLocaleString();
+
+      answerMarker = L.marker(answer, {
+        title: "Actual location"
+      }).addTo(map).bindPopup(`<strong>${currentLocation.name}</strong><br>${currentLocation.place}`);
+
+      guessMarker.bindPopup("<strong>Your guess</strong>");
+
+      line = L.polyline([guess, answer], {
+        weight: 4,
+        opacity: .8
+      }).addTo(map);
+
+      const bounds = L.latLngBounds([guess, answer]).pad(.35);
+      map.fitBounds(bounds, { animate: true });
+
+      els.resultTitle.textContent = getResultTitle(score);
+      els.resultMeta.innerHTML =
+        `Actual location: <strong>${currentLocation.name}</strong>, ${currentLocation.place}.<br>
+         You were <strong>${distanceText(distanceKm)}</strong> away and earned <strong>${score.toLocaleString()}</strong> points.`;
+
+      els.scoreBar.style.width = `${Math.max(2, (score / 5000) * 100)}%`;
+      els.resultPanel.classList.add("show");
+
+      history.push({
+        location: currentLocation,
+        distanceKm,
+        score
+      });
+    }
+
+    function getResultTitle(score) {
+      if (score >= 4800) return "Insane guess.";
+      if (score >= 4000) return "Very close.";
+      if (score >= 2500) return "Not bad at all.";
+      if (score >= 1000) return "You were in the neighborhood-ish.";
+      return "The world is large.";
+    }
+
+    function finishOrContinue() {
+      if (currentRound >= TOTAL_ROUNDS - 1) {
+        showFinal();
+      } else {
+        currentRound += 1;
+        nextRound();
+      }
+    }
+
+    function showFinal() {
+      els.finalScore.textContent = `${totalScore.toLocaleString()} / ${(TOTAL_ROUNDS * 5000).toLocaleString()}`;
+
+      els.roundList.innerHTML = history.map((item, index) => `
+        <div class="round-row">
+          <span><strong>Round ${index + 1}</strong> · ${item.location.place}</span>
+          <span><strong>${item.score.toLocaleString()}</strong> · ${distanceText(item.distanceKm)}</span>
+        </div>
+      `).join("");
+
+      els.finalCard.classList.add("show");
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    els.startBtn.addEventListener("click", startGame);
+    els.playAgainBtn.addEventListener("click", startGame);
+    els.guessBtn.addEventListener("click", makeGuess);
+    els.resetGuessBtn.addEventListener("click", resetGuess);
+    els.nextBtn.addEventListener("click", finishOrContinue);
+
+    els.sizeBtn.addEventListener("click", () => {
+      els.mapPanel.classList.toggle("big");
+      els.sizeBtn.textContent = els.mapPanel.classList.contains("big") ? "Smaller map" : "Bigger map";
+      setTimeout(() => map.invalidateSize(), 220);
+    });
+
+    window.addEventListener("resize", () => {
+      if (map) map.invalidateSize();
+    });
+
+    initMap();
+  </script>
+</body>
+</html>
+"""
+
+path = Path("/mnt/data/geoguesser_game.html")
+path.write_text(html, encoding="utf-8")
+print(f"Created {path} ({path.stat().st_size:,} bytes)") 
