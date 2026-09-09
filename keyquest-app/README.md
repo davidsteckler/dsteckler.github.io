@@ -2,30 +2,25 @@
 
 This is the portable version of KeyQuest. The 50 lessons, 42-minute routine, typing engine, accessibility supports, charts, CSV exports, and small Python interpreter run in the browser. Supabase provides Auth, PostgreSQL records, row-level authorization, and one teacher-only function for provisioning students.
 
-## Current status
+## Classroom setup
 
-- Static build: ready under `../keyquest/`.
-- Supabase project: **not yet connected**. No accounts or tables have been provisioned remotely.
-- When configuration is empty, the site offers practice mode and clearly states that it does not save online.
-- The existing website homepage and other activities are unchanged.
-- Existing ChatGPT-hosted records are not migrated automatically.
+The static site is configured for `https://dsteckler.com/keyquest/` and the dedicated KeyQuest Supabase project `jcitwqiqtahgntbsxgvx` in the davidsteckler organization. The project was created at a quoted $0/month. The source and static build are included in this repository.
 
-## Connect Supabase
+1. Open the private one-time teacher setup link supplied to the owner. Choose an email and a password of at least 12 characters, then sign in.
+2. Open Teacher and choose Add profile. Enter a student nickname.
+3. Copy the class code and the eight-digit student code from the sign-in card before closing it. Each student gets their own code.
+4. Students visit the same site and enter their codes. Use Sign out between learners on shared computers.
+5. View class progress in Teacher, or export CSV. Use New code for a lost student code.
 
-1. Create/select a dedicated Supabase project.
-2. Apply `supabase/migrations/202609090001_keyquest.sql` using its SQL editor or migration tooling.
-3. Deploy `supabase/functions/keyquest-admin/index.ts` as `keyquest-admin`. Disable legacy gateway JWT verification for this function (`verify_jwt = false`). The function explicitly verifies the bearer token with Auth `getUser` and checks the teacher table before using admin APIs.
-4. In Supabase Auth, disable public sign-ups. Create a teacher email/password account through the dashboard/admin API and confirm its email. Never commit the password. Add the teacher's Auth UUID and a unique six-character lowercase class code:
+The one-time invitation expires after 14 days. Only its SHA-256 hash is stored remotely. The setup fragment is removed from the address bar before the form is used. The invitation is consumed atomically; it cannot be reused. No invitation secret or teacher password belongs in git. A project administrator can issue a replacement invitation through the protected table if needed.
 
-   ```sql
-   insert into public.kq_teachers(user_id,name,class_code)
-   values ('REPLACE_WITH_AUTH_USER_UUID','Mr. Steckler','REPLACE_WITH_6_CHAR_CODE');
-   ```
+## Backend configuration
 
-5. Set `supabaseUrl` and `supabasePublishableKey` in `public/config.js`, then rebuild. Only a public publishable/legacy anon key belongs there. The service-role key remains in the Edge Function environment; it is never added to browser files.
-6. Set the Auth Site URL to `https://dsteckler.com/keyquest/`. Email recovery for teachers is managed through Supabase; student codes are reset from the teacher interface.
-7. Sign in as the teacher. Use Add profile to create a nickname. Record the returned student code before closing the sign-in card.
-8. Test two students and a teacher in separate browser sessions. Verify the checks below before classroom launch.
+Both migrations are applied, and `keyquest-admin` and `keyquest-setup` are deployed. Their gateway setting is `verify_jwt = false`: the admin function validates the Auth bearer token and verifies the teacher row; the setup function requires a valid unconsumed 256-bit invitation. Admin keys stay in the Supabase function environment. Only the public publishable key and project URL are in `public/config.js`.
+
+There is no public sign-up interface. An Auth account without a teacher or learner record has no classroom data access and cannot assign itself a role. Public Auth sign-up configuration has not been changed globally. Teacher password recovery is an administrator operation in this release; students recover access through teacher code resets.
+
+Existing ChatGPT-hosted records are not migrated automatically. Results save on finishing a session. Keep an unsuccessful save open and retry; refreshing or closing an unfinished session discards unsaved work.
 
 ## Student sign-in
 
@@ -42,12 +37,12 @@ Authentication tokens use browser session storage so closing the tab ends persis
 
 RLS and SQL grants enforce access even if someone changes browser code. The function accepts no client-supplied teacher identity. Measurement values remain student-generated practice data, not tamper-proof assessments.
 
-## Verify with a connected project
+## Verification checklist
 
 - A student cannot select another student's profile or results, or insert a result under another learner ID.
 - A student receives 403 from `keyquest-admin`.
 - An unauthenticated request cannot read the three tables.
-- Public self-signup is disabled and a self-created Auth user cannot grant itself teacher access.
+- An account cannot insert its own teacher role or access bootstrap invitation data.
 - The teacher can create a student, sign in using its codes, save a session, sign out, and retrieve it on another browser.
 - Creating/resetting a code produces a working new login; the old code no longer starts a new session.
 - Expired access tokens refresh; failed refresh returns a sign-in message while preserving an unsaved result on screen.
