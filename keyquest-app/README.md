@@ -37,6 +37,12 @@ Authentication tokens use browser session storage so closing the tab ends persis
 
 RLS and SQL grants enforce access even if someone changes browser code. The function accepts no client-supplied teacher identity. Measurement values remain student-generated practice data, not tamper-proof assessments.
 
+## Verification completed — September 9, 2026
+
+TypeScript, production build, and local tests pass. Live API tests used two temporary teachers and three temporary students: setup token rejection/reuse protection, provisioning, student sign-in, per-student and per-class reads, anonymous access denial, role escalation denial, student admin-function denial, duplicate-safe saves, cross-student write denial, retained results after new sign-in, token refresh, and code reset with old-code rejection all passed. The 1,001-record history case is covered by a mocked client test. No browser or school-network test was performed.
+
+The security advisor reports an intentional informational notice for the service-only invitation table (RLS enabled with no client policies), plus the default warning that breached-password protection is disabled. No client grants exist for invitations. Global Auth settings, including breached-password protection, were not changed.
+
 ## Verification checklist
 
 - A student cannot select another student's profile or results, or insert a result under another learner ID.
