@@ -1,6 +1,6 @@
 # KeyQuest: GitHub Pages + Supabase
 
-This is the portable version of KeyQuest. The 50 lessons, 42-minute routine, typing engine, accessibility supports, charts, CSV exports, and small Python interpreter run in the browser. Supabase provides Auth, PostgreSQL records, row-level authorization, and one teacher-only function for provisioning students.
+This is the portable version of KeyQuest. The 50 topics, 42-minute routine, typing engine, accessibility supports, charts, and CSV exports run in the browser. Supabase provides Auth, PostgreSQL records, row-level authorization, and one teacher-only function for provisioning students.
 
 ## Classroom setup
 
@@ -75,3 +75,11 @@ To change configuration without rebuilding, edit the generated `../keyquest/conf
 - https://supabase.com/docs/guides/auth/passwords
 - https://supabase.com/docs/guides/database/postgres/row-level-security
 - https://supabase.com/docs/reference/javascript/auth-admin-createuser
+
+## Copy-first quest update — September 10, 2026
+
+All student activities now provide exact text to copy. Unconstrained writing, reflection questions, and programming tasks have been removed from the student journey. Six playful themes rotate through short lowercase sentences and 50 simple computing facts. Word mode keeps the full sentence visible and includes the following space in each word chunk. Letter and full-sentence modes remain available.
+
+Five completed prompts earn a level and a theme badge. Level numbers continue indefinitely across repeated sessions; the finite sentence combinations repeat. No speed threshold, losing lives, or automatic difficulty increase is used. The existing same-passage two-minute check and 42-minute routine with two breaks remain. Finished prompt counts are stored as questRounds in the existing session payload, exported to CSV, and summed per learner; older records count as zero quest prompts. No account or database policy change is needed.
+
+The fact-copying activities provide exposure, not evidence of independent standards mastery. Student typing is assessed as supported copying.
