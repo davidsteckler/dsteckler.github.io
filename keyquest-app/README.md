@@ -93,3 +93,9 @@ Up to the last 100 race detail records per session are saved in the existing pay
 Teachers land on their workspace, which shows Add student, Create student login, and printable/downloadable login cards. A class-specific public URL prefills the class code for Schoology. Cards can be reopened during the current visit; raw codes are not persisted in browser storage or committed. Existing codes cannot be recovered from the database: the clearly labeled replacement flow explains that the old login will stop working and preserves the learner identity and records. No backend permissions or existing accounts were changed.
 
 Design references: the user-provided TypeRacer race and results screenshots; https://monkeytype.com/about for speed/accuracy reporting; https://www.typing.com/teachers for separate educator/student access and teacher-managed student onboarding.
+
+## Connected missions and clean spaces
+
+The car sprite is flipped to face the finish. Space labels and the next-key caption are removed; plain gaps keep the normal caret highlight and the optional keyboard guide. The score strip is more compact.
+
+Twelve authored five-scene stories replace unrelated generated practice sentences. Each completed story sentence reveals a short outcome, with a mission ending after scene five. All 60 targets are exact-copy lowercase text of at most 30 characters. Warm-ups and computer-fact rounds remain separate and do not consume story steps. The storySteps counter saves in the existing session payload, resumes across days, and repeats the story collection after 60 scenes. Existing records without it start at the first story. This changes the narrative progression without assuming it will hold every learner's attention.

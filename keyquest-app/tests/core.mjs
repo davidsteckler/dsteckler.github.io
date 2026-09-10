@@ -1,3 +1,4 @@
+import {stories,storyAt} from '../app/stories.ts';
 import {raceScore,wordRange} from '../app/race.ts';
 import {questPrompt,copyChunks,facts} from '../app/quest.ts';
 import assert from 'node:assert/strict';
@@ -55,3 +56,8 @@ assert.equal(raceScore('a',1,1,.2).wpm,0);
 assert.deepEqual(wordRange('a cat',3),{from:2,to:5});
 assert.deepEqual(wordRange('a cat',1),{from:0,to:1});
 console.log('Passed race speed, accuracy, transparent scoring, and stable-passage word highlights.');
+
+assert.equal(stories.length,12);
+for(const story of stories){assert.equal(story.lines.length,5);assert.equal(story.reveals.length,5);for(const line of story.lines){assert(/^[a-z ]+$/.test(line));assert(line.length<=30)}}
+assert.equal(storyAt(4).finished,true);assert.equal(storyAt(5).scene,0);assert.notEqual(storyAt(4).title,storyAt(5).title);assert.equal(storyAt(60).title,storyAt(0).title);
+console.log('Passed 60 short copy scenes, connected mission endings, and repeat-cycle checks.');
