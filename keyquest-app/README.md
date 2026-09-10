@@ -83,3 +83,13 @@ All student activities now provide exact text to copy. Unconstrained writing, re
 Five completed prompts earn a level and a theme badge. Level numbers continue indefinitely across repeated sessions; the finite sentence combinations repeat. No speed threshold, losing lives, or automatic difficulty increase is used. The existing same-passage two-minute check and 42-minute routine with two breaks remain. Finished prompt counts are stored as questRounds in the existing session payload, exported to CSV, and summed per learner; older records count as zero quest prompts. No account or database policy change is needed.
 
 The fact-copying activities provide exposure, not evidence of independent standards mastery. Student typing is assessed as supported copying.
+
+## Stable-passage races and teacher onboarding — September 10, 2026
+
+Practice now shows one stable full sentence. Support modes only change the highlight. Ordinary blank spaces replace the old visible-space glyph; the active gap is explicitly labeled SPACE. A solo race marker advances from correct character progress. Live WPM appears after three seconds; the race timer starts on the first character attempt and excludes pauses and score-screen time. Score screens show WPM, accuracy, time, and points and wait for Next race. Sub-second races omit WPM. Points are 10 per correct key, 50 for a finish, and up to 50 for accuracy, with no speed bonus. The routine timer continues during score review. Benchmark behavior is preserved.
+
+Up to the last 100 race detail records per session are saved in the existing payload along with the total points. My progress shows the last ten recorded races and practice bests (races of at least three seconds); these are not substituted for the comparable benchmark chart. Partial-race correct-key points are included when finishing early.
+
+Teachers land on their workspace, which shows Add student, Create student login, and printable/downloadable login cards. A class-specific public URL prefills the class code for Schoology. Cards can be reopened during the current visit; raw codes are not persisted in browser storage or committed. Existing codes cannot be recovered from the database: the clearly labeled replacement flow explains that the old login will stop working and preserves the learner identity and records. No backend permissions or existing accounts were changed.
+
+Design references: the user-provided TypeRacer race and results screenshots; https://monkeytype.com/about for speed/accuracy reporting; https://www.typing.com/teachers for separate educator/student access and teacher-managed student onboarding.

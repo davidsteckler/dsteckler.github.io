@@ -1,3 +1,4 @@
+import {raceScore,wordRange} from '../app/race.ts';
 import {questPrompt,copyChunks,facts} from '../app/quest.ts';
 import assert from 'node:assert/strict';
 import {lessons,phases} from '../app/curriculum.ts';
@@ -45,3 +46,12 @@ for(let i=0;i<2000;i++){
 }
 assert.equal(phases.some(p=>['create','check','reflect','read'].includes(p.kind)),false);
 console.log('Passed continuing levels, copy chunks including spaces, short controlled prompts, and copying-only activity checks.');
+
+const score=raceScore('a cat',5,6,15);
+assert.equal(score.wpm,4);
+assert.equal(score.accuracy,83);
+assert.equal(score.points,142);
+assert.equal(raceScore('a',1,1,.2).wpm,0);
+assert.deepEqual(wordRange('a cat',3),{from:2,to:5});
+assert.deepEqual(wordRange('a cat',1),{from:0,to:1});
+console.log('Passed race speed, accuracy, transparent scoring, and stable-passage word highlights.');
