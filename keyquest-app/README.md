@@ -99,3 +99,11 @@ Design references: the user-provided TypeRacer race and results screenshots; htt
 The car sprite is flipped to face the finish. Space labels and the next-key caption are removed; plain gaps keep the normal caret highlight and the optional keyboard guide. The score strip is more compact.
 
 Twelve authored five-scene stories replace unrelated generated practice sentences. Each completed story sentence reveals a short outcome, with a mission ending after scene five. All 60 targets are exact-copy lowercase text of at most 30 characters. Warm-ups and computer-fact rounds remain separate and do not consume story steps. The storySteps counter saves in the existing session payload, resumes across days, and repeats the story collection after 60 scenes. Existing records without it start at the first story. This changes the narrative progression without assuming it will hold every learner's attention.
+
+## Full passages, free section navigation, and student deletion
+
+Story practice now copies a complete five-sentence passage with punctuation, keeping all earlier sentences visible. Completing a passage advances the story counter by five. Computer-fact practice shows three sentences together. The warm-up uses short familiar word groups and is optional; it no longer repeats F/J.
+
+The ten sections total 42 suggested minutes. Any section can be started or selected directly, including before the session starts. Automatic section changes and scheduled screen breaks are removed. Pause remains available. Switching starts a fresh practice passage and retains aggregate typing measurements and points; the two-minute benchmark resumes its character position and timer. No forced time commitment applies to the warm-up.
+
+Teacher rosters and student management show Delete student. A confirmation identifies the selected nickname and explains that the login and all saved results are permanently removed. The server verifies teacher identity and learner ownership before calling the Auth admin deletion API; existing cascading foreign keys remove the learner and their sessions. No real student was deleted as part of implementation testing.

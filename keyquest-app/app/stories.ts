@@ -14,3 +14,5 @@ export const stories=[
  {title:'Monster movie night',icon:'🍿',lines:['the monster makes popcorn','the bowl starts to shake','a mouse jumps out','it has the remote','the mouse picks the movie'],reveals:['The room smells like popcorn.','There is someone in the bowl.','The smallest guest has arrived.','The monster gets a seat.','Movie night can finally start.']}
 ];
 export function storyAt(steps:number){const n=Math.max(0,Math.floor(steps));const story=stories[Math.floor(n/5)%stories.length];const scene=n%5;return {...story,scene,text:story.lines[scene],reveal:story.reveals[scene],finished:scene===4};}
+
+export function storyPassage(steps:number){const s=storyAt(steps);return {...s,text:s.lines.join('. ')+'.',scene:0};}

@@ -1,4 +1,4 @@
-import {stories,storyAt} from '../app/stories.ts';
+import {stories,storyAt,storyPassage} from '../app/stories.ts';
 import {raceScore,wordRange} from '../app/race.ts';
 import {questPrompt,copyChunks,facts} from '../app/quest.ts';
 import assert from 'node:assert/strict';
@@ -61,3 +61,8 @@ assert.equal(stories.length,12);
 for(const story of stories){assert.equal(story.lines.length,5);assert.equal(story.reveals.length,5);for(const line of story.lines){assert(/^[a-z ]+$/.test(line));assert(line.length<=30)}}
 assert.equal(storyAt(4).finished,true);assert.equal(storyAt(5).scene,0);assert.notEqual(storyAt(4).title,storyAt(5).title);assert.equal(storyAt(60).title,storyAt(0).title);
 console.log('Passed 60 short copy scenes, connected mission endings, and repeat-cycle checks.');
+
+for(let i=0;i<60;i++){const p=storyPassage(i);assert.equal(p.text,p.lines.join('. ')+'.');assert(p.text.length>60);assert.equal(p.text.split('.').length,6)}
+assert.equal(phases.some(p=>p.kind==='break'),false);
+assert(phases[1].name.includes('optional'));
+console.log('Passed full story passages and flexible no-break schedule.');
