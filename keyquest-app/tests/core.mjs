@@ -1,3 +1,4 @@
+import {questPrompt,copyChunks,facts} from '../app/quest.ts';
 import assert from 'node:assert/strict';
 import {lessons,phases} from '../app/curriculum.ts';
 import {runClassroomPython} from '../app/code-lab.ts';
@@ -30,3 +31,17 @@ const write=await cloud.progressRequest('/progress',{body:JSON.stringify({action
 const posted=calls.find(c=>c.opts.method==='POST'&&c.url.includes('/kq_sessions'));assert.equal(JSON.parse(posted.opts.body).learner,'learner-1');assert.equal(posted.opts.headers.Prefer,'resolution=ignore-duplicates,return=minimal');
 await cloud.signOut();assert.equal(cloud.hasSession(),false);assert.equal(saved.has('keyquest-auth'),false);
 console.log('Passed curriculum, interpreter, code normalization, student identity, 1,001-record pagination, idempotent save request, and sign-out checks. Supabase authorization still requires live verification.');
+
+assert.equal(facts.length,50);
+assert.equal(questPrompt(0,1).level,1);
+assert.equal(questPrompt(5,1).level,2);
+assert.equal(questPrompt(50000,1).level,10001);
+assert.notEqual(questPrompt(0,1).sentence,questPrompt(1,1).sentence);
+for(let i=0;i<2000;i++){
+ const q=questPrompt(i,(i%50)+1);
+ assert(/^[a-z ]+$/.test(q.sentence));
+ assert(q.sentence.length<=48);
+ for(const mode of ['letters','words','phrases'])assert.equal(copyChunks(q.sentence,mode).join(''),q.sentence);
+}
+assert.equal(phases.some(p=>['create','check','reflect','read'].includes(p.kind)),false);
+console.log('Passed continuing levels, copy chunks including spaces, short controlled prompts, and copying-only activity checks.');
