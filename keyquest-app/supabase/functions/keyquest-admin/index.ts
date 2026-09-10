@@ -12,9 +12,10 @@ Deno.serve(async(req:Request)=>{
  const {data:teacher,error:teacherError}=await admin.from('kq_teachers').select('user_id,class_code').eq('user_id',auth.user.id).maybeSingle();
  if(teacherError||!teacher)return reply({error:'Teacher access required.'},403);
  try{
- const b=await req.json();if(!['create','reset'].includes(b.action))return reply({error:'Unknown action'},400);
+ const b=await req.json();if(!['create','reset','delete'].includes(b.action))return reply({error:'Unknown action'},400);
  let learner:any=null;
- if(b.action==='reset'){const {data,error}=await admin.from('kq_learners').select('id,name,user_id').eq('id',b.learnerId).eq('owner',teacher.user_id).maybeSingle();if(error||!data)return reply({error:'Student not found'},404);learner=data;}
+ if(b.action==='reset'||b.action==='delete'){const {data,error}=await admin.from('kq_learners').select('id,name,user_id').eq('id',b.learnerId).eq('owner',teacher.user_id).maybeSingle();if(error||!data)return reply({error:'Student not found'},404);learner=data;}
+ if(b.action==='delete'){const {error}=await admin.auth.admin.deleteUser(learner.user_id);if(error)throw error;return reply({deleted:true,id:learner.id});}
  if(b.action==='create'&&(typeof b.name!=='string'||!b.name.trim()||b.name.trim().length>40))return reply({error:'Use a nickname of 1–40 characters.'},400);
  const bytes=crypto.getRandomValues(new Uint8Array(64));let studentCode='';for(const byte of bytes){if(byte<250)studentCode+=String(byte%10);if(studentCode.length===8)break;}if(studentCode.length!==8)throw Error('Code generation failed');
  const combined=teacher.class_code+':'+studentCode;
