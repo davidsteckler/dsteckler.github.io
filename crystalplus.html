@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#070912" />
+  <title>Crystal Caverns — Enhanced</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;background:#070912;overflow:hidden}
+    #game{display:block;width:100%;height:100%;border:0;background:#070912}
+    #boot{
+      position:fixed;inset:0;display:grid;place-items:center;z-index:10;pointer-events:none;
+      background:#070912;color:#bac4db;font:700 12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.1em;text-transform:uppercase;transition:opacity .18s ease;
+    }
+    #boot.hide{opacity:0}
+  </style>
+</head>
+<body>
+  <iframe id="game" src="crystal.html" title="Crystal Caverns"></iframe>
+  <div id="boot">Entering Crystal Caverns…</div>
+  <script>
+    (() => {
+      const frame = document.getElementById('game');
+      const boot = document.getElementById('boot');
+      const focusGame = () => { try { frame.contentWindow.focus(); } catch (_) {} };
+
+      frame.addEventListener('load', () => {
+        try {
+          const doc = frame.contentDocument;
+          const script = doc.createElement('script');
+          script.src = `crystalplus.js?v=23.0.0`;
+          script.onload = () => {
+            boot.classList.add('hide');
+            setTimeout(() => boot.remove(), 220);
+            focusGame();
+          };
+          script.onerror = () => {
+            boot.textContent = 'Crystal Caverns loaded';
+            setTimeout(() => boot.remove(), 700);
+            focusGame();
+          };
+          doc.head.appendChild(script);
+        } catch (_) {
+          boot.remove();
+        }
+      });
+
+      frame.addEventListener('pointerdown', focusGame);
+      window.addEventListener('keydown', focusGame, {capture:true});
+    })();
+  </script>
+</body>
+</html>
