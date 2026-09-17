@@ -2,10 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#f7f8fb" />
   <title>KeyQuest 1 — Typing Lab</title>
   <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .mobile-entry{margin-top:18px;width:100%;max-width:760px}
+    .mobile-entry[hidden]{display:none}
+    .mobile-entry textarea{box-sizing:border-box;width:100%;min-height:86px;border:2px solid #cfd7e6;border-radius:16px;padding:16px 18px;font:inherit;font-size:18px;line-height:1.45;background:#fff;color:#162033;resize:none;outline:none;-webkit-text-size-adjust:100%}
+    .mobile-entry textarea:focus{border-color:#3158d5;box-shadow:0 0 0 4px rgba(49,88,213,.12)}
+    .mobile-entry p{margin:8px 4px 0;color:#667085;font-size:14px}
+    @media (max-width:700px){
+      .mode-grid{grid-template-columns:1fr}
+      .session-topline{gap:12px;align-items:flex-start}
+      .stats{gap:12px;flex-wrap:wrap;justify-content:flex-end}
+      .typing-stage{padding:26px 18px}
+      .sentence{font-size:clamp(24px,7vw,38px);line-height:1.45}
+      .mobile-entry textarea{font-size:20px;min-height:96px;padding:18px}
+      .focus-note.mobile-only{display:block}
+    }
+  </style>
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -22,7 +38,7 @@
         <div class="hero-copy">
           <p class="eyebrow">TYPE MORE. LEARN WHILE YOU DO IT.</p>
           <h1 id="homeTitle">Pick what you want to practice.</h1>
-          <p class="hero-text">The typing stays simple. Thousands of computer-science prompts keep changing underneath it.</p>
+          <p class="hero-text">The typing stays simple. The sentences keep changing.</p>
         </div>
 
         <div class="mode-grid" aria-label="Typing modes">
@@ -30,7 +46,7 @@
             <span class="mode-icon" aria-hidden="true">⌘</span>
             <span class="mode-kicker">LEARN + TYPE</span>
             <strong>Computer science, one sentence at a time</strong>
-            <span>310 concepts across shortcuts, programming, Python, hardware, AI, networks, history and more — recombined into thousands of prompts.</span>
+            <span>Keyboard shortcuts, programming, hardware, AI, the internet, history and more.</span>
             <span class="mode-action">Start learning <b>→</b></span>
           </button>
 
@@ -38,7 +54,7 @@
             <span class="mode-icon" aria-hidden="true">↗</span>
             <span class="mode-kicker">SPEED</span>
             <strong>Build WPM with a clean typing flow</strong>
-            <span>Longer computer-focused passages assembled from a much larger rotating knowledge bank.</span>
+            <span>Longer passages, fewer interruptions, live pace against your best run.</span>
             <span class="mode-action">Start speed run <b>→</b></span>
           </button>
 
@@ -46,8 +62,16 @@
             <span class="mode-icon" aria-hidden="true">◎</span>
             <span class="mode-kicker">PRECISION</span>
             <strong>Work on the keys that slow you down</strong>
-            <span>Accuracy-first practice that searches the full knowledge bank for the letters and symbols you miss most.</span>
+            <span>Accuracy-first practice that adapts to mistakes as you type.</span>
             <span class="mode-action">Start precision <b>→</b></span>
+          </button>
+
+          <button class="mode-card" type="button" data-mode="mobile">
+            <span class="mode-icon" aria-hidden="true">▯</span>
+            <span class="mode-kicker">MOBILE iOS</span>
+            <strong>Learn by typing with your thumbs</strong>
+            <span>Built for the iPhone keyboard with large text, native input, and the same computer-science sentence bank.</span>
+            <span class="mode-action">Start mobile typing <b>→</b></span>
           </button>
         </div>
 
@@ -79,13 +103,17 @@
           <div id="conceptChip" class="concept-chip" hidden></div>
           <div id="sentence" class="sentence" aria-label="Sentence to type"></div>
           <div id="feedback" class="feedback" aria-live="assertive"></div>
+          <div id="mobileEntry" class="mobile-entry" hidden>
+            <textarea id="mobileInput" rows="3" autocapitalize="sentences" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Type the sentence here"></textarea>
+            <p>Type here using the iPhone keyboard. KeyQuest checks each character as you go.</p>
+          </div>
           <div id="speedTrail" class="speed-trail" hidden aria-hidden="true">
             <span class="trail-label">your pace</span>
             <div class="trail-line"><span id="paceDot" class="pace-dot"></span><span id="bestMarker" class="best-marker"></span></div>
             <span id="paceText" class="trail-value"></span>
           </div>
           <div id="precisionHint" class="precision-hint" hidden></div>
-          <p class="focus-note">Click here if typing stops. The session clock keeps running if you switch tabs.</p>
+          <p id="focusNote" class="focus-note">Click here if typing stops. The session clock keeps running if you switch tabs.</p>
         </div>
 
         <div class="session-footer">
