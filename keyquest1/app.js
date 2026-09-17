@@ -171,7 +171,7 @@
 
   function speedSentence(){
     state.currentKnowledge=null;conceptChip.hidden=true;$('topicLabel').textContent='Flow practice';
-    const count=3+Math.floor(Math.random()*2),selected=[],used=new Set();
+    const count=2,selected=[],used=new Set();
     for(let i=0;i<count;i++){
       let choice=chooseConcept(),guard=0;
       while(choice&&used.has(choice.index)&&guard++<10)choice=chooseConcept();
