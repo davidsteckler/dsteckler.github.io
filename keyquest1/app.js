@@ -22,45 +22,6 @@
     return map;
   },{});
 
-  const frames = [
-    k => `${k[2]}.`,
-    k => `${k[1]} matters because ${lower(k[3])}.`,
-    k => `${k[4]}.`,
-    k => `A useful thing to remember about ${k[1]} is that ${lower(k[2])}.`,
-    k => `In computer science, ${lowerFirst(k[2])}.`,
-    k => `${k[1]} connects to a bigger idea: ${lower(k[3])}.`,
-    k => `One practical example of ${k[1]} is this: ${lowerFirst(k[4])}.`,
-    k => `Think of ${k[1]} this way: ${lowerFirst(k[2])}.`,
-    k => `When you see ${k[1]}, remember that ${lower(k[2])}.`,
-    k => `The purpose behind ${k[1]} becomes clearer when you know that ${lower(k[3])}.`,
-    k => `A real example helps explain ${k[1]}: ${lowerFirst(k[4])}.`,
-    k => `${k[2]}. That matters because ${lower(k[3])}.`,
-    k => `${k[2]}. For example, ${lowerFirst(k[4])}.`,
-    k => `${k[1]} is worth knowing because ${lower(k[3])}.`,
-    k => `Here is the key idea about ${k[1]}: ${lowerFirst(k[2])}.`,
-    k => `If someone asks what ${k[1]} means, remember this: ${lowerFirst(k[2])}.`,
-    k => `One reason ${k[1]} exists is that ${lower(k[3])}.`,
-    k => `You can see ${k[1]} in practice when ${lower(k[4])}.`,
-    k => `The basic idea is simple: ${lowerFirst(k[2])}.`,
-    k => `${k[1]} becomes useful when you realize that ${lower(k[3])}.`,
-    k => `A good mental note for ${k[1]} is this: ${lowerFirst(k[2])}.`,
-    k => `The computer science idea called ${k[1]} works like this: ${lowerFirst(k[2])}.`,
-    k => `Remember the example for ${k[1]}: ${lowerFirst(k[4])}.`,
-    k => `Why learn ${k[1]}? Because ${lower(k[3])}.`,
-    k => `The important part of ${k[1]} is that ${lower(k[2])}.`,
-    k => `${k[1]} shows up in real computing because ${lower(k[3])}.`,
-    k => `A quick definition of ${k[1]} is this: ${lowerFirst(k[2])}.`,
-    k => `A practical way to recognize ${k[1]} is this: ${lowerFirst(k[4])}.`,
-    k => `The idea behind ${k[1]} is connected to this fact: ${lowerFirst(k[2])}.`,
-    k => `${k[1]} helps make more sense when you connect it to this example: ${lowerFirst(k[4])}.`,
-    k => `Computers rely on ideas like ${k[1]} because ${lower(k[3])}.`,
-    k => `Keep this fact about ${k[1]} in mind: ${lowerFirst(k[2])}.`,
-    k => `A useful connection for ${k[1]} is that ${lower(k[3])}.`,
-    k => `In everyday computer use, ${k[1]} can appear like this: ${lowerFirst(k[4])}.`,
-    k => `If you remember one thing about ${k[1]}, remember that ${lower(k[2])}.`,
-    k => `${k[1]} can be understood through a simple example: ${lowerFirst(k[4])}.`
-  ];
-
   const precisionCode = [
     'score = 10','lives = 3','name = "Pixie"','ready = True','level = 7',
     'if score > 5:','if lives == 0:','if ready and safe:','if not finished:','else:',
@@ -89,19 +50,24 @@
     completed: 0,
     seenConcepts: [],
     recentConcepts: [],
-    recentSignatures: [],
     errors: {},
     ticker: null,
     ended: false,
     errorIndex: -1,
     currentKnowledge: null,
     precisionKey: '',
-    mobileValue: ''
+    mobileValue: '',
+    lessonItem: null,
+    lessonIndex: -1,
+    lessonStep: 0,
+    lessonLines: []
   };
 
   function lower(text){return text.charAt(0).toLowerCase()+text.slice(1)}
   function lowerFirst(text){return text.charAt(0).toLowerCase()+text.slice(1)}
+  function upperFirst(text){return text.charAt(0).toUpperCase()+text.slice(1)}
   function cleanSentence(text){return text.replace(/\s+/g,' ').replace(/\.\./g,'.').replace(/([.!?])\./g,'$1').trim()}
+  function punctuate(text){const t=cleanSentence(text);return /[.!?]$/.test(t)?t:`${t}.`}
   function formatTime(seconds){seconds=Math.max(0,Math.ceil(seconds));return `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`}
   function wpm(){const elapsed=Math.max(1,(Date.now()-state.startedAt)/1000);return Math.round((state.correct/5)/(elapsed/60))}
   function accuracy(){return state.attempts?Math.round(state.correct/state.attempts*100):100}
@@ -112,56 +78,94 @@
   function countChar(text,char){const c=char.toLowerCase();return [...text.toLowerCase()].reduce((n,x)=>n+(x===c?1:0),0)}
   function markActive(){const now=Date.now();if(state.lastKeyAt&&now-state.lastKeyAt<5000)state.activeMs+=now-state.lastKeyAt;state.lastKeyAt=now}
 
-  function recentFromStorage(){try{return JSON.parse(localStorage.getItem('keyquest1-recent-concepts')||'[]').slice(-80)}catch{return []}}
-  function rememberConcept(name){const saved=recentFromStorage().filter(x=>x!==name);saved.push(name);localStorage.setItem('keyquest1-recent-concepts',JSON.stringify(saved.slice(-80)))}
+  function recentFromStorage(){try{return JSON.parse(localStorage.getItem('keyquest1-recent-concepts')||'[]').slice(-100)}catch{return []}}
+  function rememberConcept(name){const saved=recentFromStorage().filter(x=>x!==name);saved.push(name);localStorage.setItem('keyquest1-recent-concepts',JSON.stringify(saved.slice(-100)))}
 
   function chooseConcept(options={}){
     if(!knowledge.length)return null;
-    const avoidNames=new Set([...recentFromStorage().slice(-28),...state.recentConcepts.map(i=>knowledge[i]?.[1])]);
+    const avoidNames=new Set([...recentFromStorage().slice(-36),...state.recentConcepts.map(i=>knowledge[i]?.[1])]);
     let candidates=knowledge.map((_,i)=>i);
     if(options.topic&&topicGroups[options.topic])candidates=[...topicGroups[options.topic]];
     if(options.char){
       const ranked=candidates.map(i=>({i,hits:countChar(knowledge[i].slice(1).join(' '),options.char)})).filter(x=>x.hits>0).sort((a,b)=>b.hits-a.hits);
-      const strong=ranked.filter(x=>x.hits>=Math.max(2,ranked[0]?.hits*0.55)).slice(0,70);
+      const strong=ranked.filter(x=>x.hits>=Math.max(2,ranked[0]?.hits*0.55)).slice(0,80);
       if(strong.length)candidates=strong.map(x=>x.i);
     }
     const fresh=candidates.filter(i=>!avoidNames.has(knowledge[i][1]));
     if(fresh.length>8)candidates=fresh;
     const index=pick(candidates);
     state.recentConcepts.push(index);
-    if(state.recentConcepts.length>35)state.recentConcepts.shift();
+    if(state.recentConcepts.length>45)state.recentConcepts.shift();
     rememberConcept(knowledge[index][1]);
     return {index,item:knowledge[index]};
   }
 
-  function makeSingle(item,frameIndex=null){const fi=frameIndex===null?Math.floor(Math.random()*frames.length):frameIndex%frames.length;return {text:cleanSentence(frames[fi](item)),frame:fi}}
+  function buildMicroLesson(item){
+    const name=item[1];
+    const definition=punctuate(item[2]);
+    const reason=punctuate(item[3]);
+    const example=punctuate(item[4]);
+
+    const hooks=[
+      example,
+      `Start with a real example. ${example}`,
+      `The easiest way to see ${name} is in action. ${example}`,
+      `Before the definition, look at what happens in practice. ${example}`,
+      `Here is the concrete part first. ${example}`
+    ];
+
+    const explanations=[
+      definition,
+      `Now give that idea a name. ${definition}`,
+      `Here is what ${name} means. ${definition}`,
+      `The definition is simpler than the name sounds. ${definition}`,
+      `That example points to the main idea. ${definition}`
+    ];
+
+    const whys=[
+      `Why does this matter? ${reason}`,
+      `${reason} That is why ${name} matters.`,
+      `The reason ${name} is useful is simple. ${reason}`,
+      `The bigger idea is not the vocabulary word. ${reason}`,
+      `This exists for a reason. ${reason}`
+    ];
+
+    const takeaways=[
+      `Put it together: ${definition} ${reason}`,
+      `If you remember one thing about ${name}, remember this. ${definition}`,
+      `Do not just memorize the term ${name}. Remember what it helps explain. ${reason}`,
+      `The short version is this. ${definition}`,
+      `That is the whole idea behind ${name}. ${definition}`
+    ];
+
+    return [pick(hooks),pick(explanations),pick(whys),pick(takeaways)].map(cleanSentence);
+  }
+
+  function startNewMicroLesson(){
+    const chosen=chooseConcept();
+    if(!chosen){
+      state.lessonItem=['Programming','Program','A program is a set of instructions a computer can execute','software behavior comes from instructions combined with data','A game can read input, update positions, and draw a new frame'];
+      state.lessonIndex=-1;
+    }else{
+      state.lessonItem=chosen.item;
+      state.lessonIndex=chosen.index;
+    }
+    state.currentKnowledge=state.lessonItem;
+    state.lessonLines=buildMicroLesson(state.lessonItem);
+    state.lessonStep=0;
+    if(!state.seenConcepts.includes(state.lessonItem[1]))state.seenConcepts.push(state.lessonItem[1]);
+  }
 
   function learningSentence(){
-    const chosen=chooseConcept();
-    if(!chosen)return 'Computers follow instructions written as programs.';
-    const {index,item}=chosen;
-    state.currentKnowledge=item;
-    if(!state.seenConcepts.includes(item[1]))state.seenConcepts.push(item[1]);
-    $('topicLabel').textContent=item[0];conceptChip.textContent=item[1];conceptChip.hidden=false;
-    let text='',signature='';
-    const usePair=Math.random()<0.22&&(topicGroups[item[0]]||[]).length>2;
-    if(usePair){
-      const peers=(topicGroups[item[0]]||[]).filter(i=>i!==index&&!state.recentConcepts.slice(-8).includes(i));
-      const otherIndex=peers.length?pick(peers):pick((topicGroups[item[0]]||[]).filter(i=>i!==index));
-      const other=knowledge[otherIndex];
-      const forms=[
-        `Two ${item[0].toLowerCase()} ideas connect here. ${item[2]}. ${other[2]}.`,
-        `${item[1]} and ${other[1]} belong to the same bigger topic. ${item[4]}. ${other[4]}.`,
-        `Compare two ideas from ${item[0]}. ${item[1]}: ${lowerFirst(item[2])}. ${other[1]}: ${lowerFirst(other[2])}.`,
-        `One connection inside ${item[0]} is between ${item[1]} and ${other[1]}. ${item[3]}. ${other[3]}.`
-      ];
-      const pairForm=Math.floor(Math.random()*forms.length);text=cleanSentence(forms[pairForm]);signature=`p-${index}-${otherIndex}-${pairForm}`;
-    }else{
-      let made,tries=0;
-      do{made=makeSingle(item);signature=`s-${index}-${made.frame}`;tries++}while(state.recentSignatures.includes(signature)&&tries<12);
-      text=made.text;
-    }
-    state.recentSignatures.push(signature);if(state.recentSignatures.length>70)state.recentSignatures.shift();
+    if(!state.lessonItem||state.lessonStep>=state.lessonLines.length)startNewMicroLesson();
+    const item=state.lessonItem;
+    const step=state.lessonStep;
+    const labels=['SEE IT','WHAT IT MEANS','WHY IT MATTERS','REMEMBER THIS'];
+    $('topicLabel').textContent=`${item[0]} · ${labels[step]}`;
+    conceptChip.textContent=`${item[1]} · ${step+1}/${state.lessonLines.length}`;
+    conceptChip.hidden=false;
+    const text=state.lessonLines[step];
+    state.lessonStep++;
     return text;
   }
 
@@ -173,7 +177,14 @@
       while(choice&&used.has(choice.index)&&guard++<10)choice=chooseConcept();
       if(choice){used.add(choice.index);selected.push(choice.item)}
     }
-    const flowFrames=[k=>k[2]+'.',k=>`${k[4]}.`,k=>`${k[2]}. ${k[4]}.`,k=>`${k[1]} is useful to know because ${lower(k[3])}.`,k=>`A practical computing example is this: ${lowerFirst(k[4])}.`,k=>`One computer science fact worth remembering is that ${lower(k[2])}.`];
+    const flowFrames=[
+      k=>punctuate(k[2]),
+      k=>punctuate(k[4]),
+      k=>`${punctuate(k[2])} ${punctuate(k[4])}`,
+      k=>`One useful computing idea is ${k[1]}. ${punctuate(k[2])}`,
+      k=>`A practical example of ${k[1]} comes first. ${punctuate(k[4])}`,
+      k=>`${punctuate(k[3])} ${punctuate(k[2])}`
+    ];
     return selected.map(k=>cleanSentence(pick(flowFrames)(k))).join(' ');
   }
 
@@ -188,7 +199,7 @@
     const chosen=chooseConcept(key?{char:key}:{});if(!chosen)return pick(precisionCode);const item=chosen.item;
     $('topicLabel').textContent=key?`Focus key: ${key.toUpperCase()}`:'Accuracy + control';
     precisionHint.textContent=key?`Adapting toward ${key.toUpperCase()} because it is showing up in your mistakes.`:'Accuracy first. The target will adapt after it sees your mistakes.';
-    return cleanSentence(pick([`${item[1]}: ${item[2]}.`,`${item[4]}.`,`${item[1]} matters because ${lower(item[3])}.`,`${item[2]}.`]));
+    return cleanSentence(pick([punctuate(item[2]),punctuate(item[4]),`${upperFirst(item[3])}.`,`${item[1]}: ${lowerFirst(punctuate(item[2]))}`]));
   }
 
   function nextTarget(){if(state.mode==='learn'||state.mode==='mobile')return learningSentence();if(state.mode==='speed')return speedSentence();return precisionSentence()}
@@ -215,9 +226,15 @@
 
   function processCharacter(char){
     markActive();state.attempts++;const expected=state.target[state.position];
-    if(char===expected){state.correct++;state.errorIndex=-1;feedbackEl.textContent='';state.position++;if(state.position>=state.target.length){completeSentence();updateLiveStats();return true}}
-    else{state.errorIndex=state.position;state.errors[expected]=(state.errors[expected]||0)+1;feedbackEl.textContent=expected===' '?'Space':`Try ${expected}`;setTimeout(()=>{if(state.errorIndex===state.position){state.errorIndex=-1;updateChars()}},220);updateChars();updateLiveStats();return false}
-    updateChars();updateLiveStats();return true;
+    if(char===expected){
+      state.correct++;state.errorIndex=-1;feedbackEl.textContent='';state.position++;
+      if(state.position>=state.target.length){completeSentence();updateLiveStats();return 'complete'}
+    }else{
+      state.errorIndex=state.position;state.errors[expected]=(state.errors[expected]||0)+1;feedbackEl.textContent=expected===' '?'Space':`Try ${expected}`;
+      setTimeout(()=>{if(state.errorIndex===state.position){state.errorIndex=-1;updateChars()}},220);
+      updateChars();updateLiveStats();return 'error';
+    }
+    updateChars();updateLiveStats();return 'ok';
   }
 
   function handleKey(e){
@@ -230,13 +247,13 @@
 
   function handleMobileInput(){
     if(state.mode!=='mobile'||state.ended)return;
-    let value=mobileInput.value;
+    const value=mobileInput.value;
     if(value.length<state.mobileValue.length){mobileInput.value=state.mobileValue;return}
     const added=value.slice(state.mobileValue.length);
     for(const char of added){
-      const ok=processCharacter(char);
-      if(!ok){mobileInput.value=state.mobileValue;return}
-      if(state.position===0){return}
+      const result=processCharacter(char);
+      if(result==='error'){mobileInput.value=state.mobileValue;return}
+      if(result==='complete'){mobileInput.value='';state.mobileValue='';return}
       state.mobileValue+=char;
     }
     mobileInput.value=state.mobileValue;
@@ -256,7 +273,7 @@
   }
 
   function startSession(mode){
-    state.mode=mode;state.startedAt=Date.now();state.endAt=state.startedAt+state.minutes*60*1000;state.lastKeyAt=0;state.activeMs=0;state.correct=0;state.attempts=0;state.position=0;state.completed=0;state.seenConcepts=[];state.recentConcepts=[];state.recentSignatures=[];state.errors={};state.ended=false;state.currentKnowledge=null;state.precisionKey='';state.mobileValue='';
+    state.mode=mode;state.startedAt=Date.now();state.endAt=state.startedAt+state.minutes*60*1000;state.lastKeyAt=0;state.activeMs=0;state.correct=0;state.attempts=0;state.position=0;state.completed=0;state.seenConcepts=[];state.recentConcepts=[];state.errors={};state.ended=false;state.currentKnowledge=null;state.precisionKey='';state.mobileValue='';state.lessonItem=null;state.lessonIndex=-1;state.lessonStep=0;state.lessonLines=[];
     homeView.hidden=true;resultView.hidden=true;sessionView.hidden=false;homeButton.hidden=false;
     $('modeLabel').textContent={learn:'LEARN + TYPE',speed:'SPEED',precision:'PRECISION',mobile:'MOBILE iOS'}[mode];
     speedTrail.hidden=mode!=='speed';precisionHint.hidden=mode!=='precision';conceptChip.hidden=!(mode==='learn'||mode==='mobile');mobileEntry.hidden=mode!=='mobile';
@@ -279,6 +296,6 @@
   $('endButton').addEventListener('click',endSession);homeButton.addEventListener('click',showHome);$('modesButton').addEventListener('click',showHome);$('againButton').addEventListener('click',()=>startSession(state.mode));
   typingStage.addEventListener('click',()=>{if(state.mode==='mobile')mobileInput.focus({preventScroll:true});else typingStage.focus({preventScroll:true})});
   mobileInput.addEventListener('input',handleMobileInput);
-  mobileInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault()}});
+  mobileInput.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault()});
   document.addEventListener('keydown',handleKey);
 })();
