@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Programming Timeline · Chapter Test</title>
+  <meta name="robots" content="noindex">
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f6f4ed}
+    #timeline-frame{display:block;width:100%;height:100vh;border:0;background:#f6f4ed}
+    #loading{position:fixed;inset:0;display:grid;place-items:center;font:600 14px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#172e2b;background:#f6f4ed;z-index:3}
+  </style>
+</head>
+<body>
+  <div id="loading">Loading the timeline…</div>
+  <iframe id="timeline-frame" src="/timeline/" title="Programming language timeline"></iframe>
+
+<script>
+(() => {
+  const frame = document.getElementById('timeline-frame');
+  const loading = document.getElementById('loading');
+
+  const chapterMeta = [
+    {id:'origins',num:'01',short:'First ideas',question:'What could a computer be?'},
+    {id:'people',num:'02',short:'More people',question:'How do we make computers usable by more people?'},
+    {id:'systems',num:'03',short:'Building systems',question:'How do we keep bigger programs organized?'},
+    {id:'express',num:'04',short:'Human expression',question:'How can code become clearer to the person writing it?'},
+    {id:'web',num:'05',short:'The connected web',question:'What changes when programs have to travel and respond?'},
+    {id:'scale',num:'06',short:'Working at scale',question:'How do languages respond when software gets much bigger?'}
+  ];
+
+  frame.addEventListener('load', () => {
+    const win = frame.contentWindow;
+    const doc = frame.contentDocument;
+    if (!doc || !win) return;
+    loading.style.display = 'none';
+    doc.body.classList.add('timeline1-test');
+
+    const style = doc.createElement('style');
+    style.textContent = `
+      body.timeline1-test{--chapter-bg:#eef0e5;--chapter-border:#cdd5c7;--soft:#fbfaf4}
+      body.timeline1-test .layout{grid-template-columns:245px minmax(0,1fr);gap:48px;max-width:1460px}
+      body.timeline1-test .rail{top:94px}
+      body.timeline1-test .rail .rail-foot{margin-top:18px}
+
+      .timeline1-badge{display:inline-flex;align-items:center;gap:7px;margin-left:10px;padding:5px 8px;border:1px solid #c9d0c3;border-radius:999px;font:700 9px var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--muted);vertical-align:middle;background:#fffdf7}
+      .timeline1-badge i{width:6px;height:6px;border-radius:50%;background:var(--accent);display:block}
+
+      .story-map{max-width:1200px;margin:0 auto 92px;padding:0 35px}
+      .story-map-head{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:end;margin-bottom:26px}
+      .story-map-head .eyebrow{color:var(--accent);margin-bottom:12px}
+      .story-map-head h2{font-size:clamp(34px,4vw,52px);margin-bottom:0}
+      .story-map-head p{margin:0;color:var(--muted);font-size:15px;max-width:520px;justify-self:end}
+      .story-map-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#faf8f1}
+      .story-map-card{display:block;text-decoration:none;padding:24px 23px 22px;min-height:164px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transition:background .16s,transform .16s;position:relative}
+      .story-map-card:nth-child(3n){border-right:0}
+      .story-map-card:nth-child(n+4){border-bottom:0}
+      .story-map-card:hover{background:#e9eddf}
+      .story-map-card .map-num{font:700 10px var(--mono);letter-spacing:1.4px;color:var(--accent)}
+      .story-map-card strong{display:block;font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.12;margin:12px 0 10px}
+      .story-map-card span{display:block;color:var(--muted);font-size:12px;line-height:1.45;padding-right:14px}
+      .story-map-card .map-arrow{position:absolute;right:18px;bottom:16px;color:var(--green);font-size:18px}
+
+      body.timeline1-test .chapter{margin-bottom:105px}
+      body.timeline1-test .chapter-intro{background:var(--chapter-bg);border:1px solid var(--chapter-border);border-radius:15px;padding:36px 40px 28px;margin-bottom:18px;position:relative;overflow:hidden}
+      body.timeline1-test .chapter-intro:after{content:attr(data-chapter-number);position:absolute;right:25px;top:-20px;font:400 118px/.9 var(--serif);color:#17312c0b;pointer-events:none}
+      body.timeline1-test .chapter-intro .eyebrow{margin-bottom:12px;position:relative;z-index:1}
+      body.timeline1-test .chapter-intro h2{font-size:clamp(38px,4vw,54px);max-width:730px;margin-bottom:14px;position:relative;z-index:1}
+      body.timeline1-test .chapter-intro>p{font-size:15px;max-width:730px;margin-bottom:20px;position:relative;z-index:1}
+      .chapter-question{font:600 17px/1.45 var(--sans);max-width:760px;margin:7px 0 24px;padding-left:15px;border-left:3px solid var(--accent);position:relative;z-index:1}
+      .chapter-route-label{font:700 9px var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+      .chapter-route{display:flex;gap:7px;flex-wrap:wrap;position:relative;z-index:1}
+      .chapter-route a{text-decoration:none;border:1px solid #c5cec0;border-radius:999px;padding:6px 10px;background:#faf9f2;font-size:11px;line-height:1.2;color:#41534b}
+      .chapter-route a:hover{background:#fff}
+      .chapter-route a b{font:600 9px var(--mono);color:var(--accent);margin-right:5px}
+
+      body.timeline1-test .stop{padding:52px 0 46px}
+      body.timeline1-test .stop-head{margin-bottom:28px;padding-bottom:14px;border-bottom:1px solid #e0e2d9}
+      body.timeline1-test .year{background:#faf9f2;font-weight:700}
+      body.timeline1-test .language{font-size:15px;letter-spacing:.1px}
+      body.timeline1-test .stop-number{background:#f0efe7;border-radius:999px;padding:5px 9px}
+      body.timeline1-test .story p{font-size:16px;line-height:1.85}
+      body.timeline1-test .why{margin-top:26px;background:#faf8f1;border-left:3px solid var(--accent);padding:15px 17px;border-radius:0 9px 9px 0}
+      body.timeline1-test .memory{margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+      body.timeline1-test .deep-lab{margin-top:7px;box-shadow:0 8px 24px #18312c08}
+
+      .rail-current{margin-top:21px;padding-top:17px;border-top:1px solid var(--line)}
+      .rail-current-label{font:700 9px var(--mono);letter-spacing:1.25px;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+      .rail-current-title{font-family:var(--serif);font-size:18px;line-height:1.15;margin-bottom:9px}
+      .rail-language-list{display:grid;gap:1px}
+      .rail-language-list a{padding:7px 9px 7px 12px;border-left:2px solid transparent;background:transparent;font-size:11px;color:var(--muted)}
+      .rail-language-list a:hover{color:var(--ink);background:#f0f1e8}
+      .rail-language-list a.current-stop{color:var(--ink);border-left-color:var(--accent);background:#e9eddf;font-weight:700}
+      .rail-language-list a small{display:inline;font:9px var(--mono);margin-right:6px;color:#7a887f}
+
+      body.timeline1-test .inspect-strip{padding:19px 24px 22px}
+      body.timeline1-test .inspect-strip .trace-scrub,
+      body.timeline1-test .inspect-strip .inspect-jumps{display:none!important}
+      body.timeline1-test .inspect-heading{margin-bottom:12px}
+      body.timeline1-test .inspect-heading label{font-size:13px}
+      .test-stepper{display:grid;grid-template-columns:auto auto minmax(120px,1fr) auto auto;gap:8px;align-items:center}
+      .test-stepper button{font-size:11px;padding:8px 11px;white-space:nowrap;background:#faf9f3}
+      .test-stepper button.step-primary{background:var(--green);color:#fff;border-color:var(--green)}
+      .test-stepper button:disabled{opacity:.38}
+      .test-step-info{text-align:center;min-width:0}
+      .test-step-info strong{display:block;font-size:12px;line-height:1.25}
+      .test-step-info span{display:block;font:9px var(--mono);color:var(--muted);margin-top:3px}
+      .scenario-buttons{position:relative}
+      .scenario-buttons:before{content:'CHOOSE WHAT THE MACHINE SHOULD DO';display:block;width:100%;font:700 9px var(--mono);letter-spacing:1px;color:var(--muted);margin-bottom:7px}
+      [data-trace="turing"] .scenario-buttons button{min-height:44px;font-weight:700}
+      [data-trace="turing"] .scenario-buttons button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px #17312c33}
+      .scenario-hint{font-size:10px!important;color:var(--muted);margin:7px 0 0!important;line-height:1.4!important}
+
+      @media(max-width:1050px){
+        body.timeline1-test .layout{grid-template-columns:190px minmax(0,1fr);gap:30px}
+        .story-map-grid{grid-template-columns:repeat(2,1fr)}
+        .story-map-card:nth-child(3n){border-right:1px solid var(--line)}
+        .story-map-card:nth-child(2n){border-right:0}
+        .story-map-card:nth-child(n+4){border-bottom:1px solid var(--line)}
+        .story-map-card:nth-child(n+5){border-bottom:0}
+      }
+      @media(max-width:820px){
+        .story-map-head{grid-template-columns:1fr}.story-map-head p{justify-self:start}
+        .story-map-grid{grid-template-columns:1fr}.story-map-card{border-right:0!important;border-bottom:1px solid var(--line)!important}.story-map-card:last-child{border-bottom:0!important}
+        .test-stepper{grid-template-columns:1fr 1fr}.test-step-info{grid-column:1/-1;grid-row:1}.test-stepper button{width:100%}
+      }
+    `;
+    doc.head.appendChild(style);
+
+    const brand = doc.querySelector('.brand');
+    if (brand && !brand.querySelector('.timeline1-badge')) {
+      const badge = doc.createElement('span');
+      badge.className = 'timeline1-badge';
+      badge.innerHTML = '<i></i>timeline1 test';
+      brand.appendChild(badge);
+    }
+
+    const getStops = chapter => [...chapter.querySelectorAll('.stop')];
+    const getStopInfo = stop => ({
+      id: stop.id,
+      year: stop.querySelector('.year')?.textContent.trim() || '',
+      name: stop.querySelector('.language')?.textContent.trim() || stop.id
+    });
+
+    const overview = doc.querySelector('.overview');
+    if (overview && !doc.querySelector('.story-map')) {
+      const map = doc.createElement('section');
+      map.className = 'story-map';
+      map.setAttribute('aria-label','Story map');
+      map.innerHTML = `
+        <div class="story-map-head">
+          <div><span class="eyebrow">The whole story first</span><h2>Six chapters. Thirty-one moments.</h2></div>
+          <p>Every language stays in the lesson. This map gives the history a shape before you move through the details.</p>
+        </div>
+        <div class="story-map-grid">
+          ${chapterMeta.map(c => `<a class="story-map-card" href="#${c.id}"><span class="map-num">${c.num}</span><strong>${c.short}</strong><span>${c.question}</span><i class="map-arrow">↘</i></a>`).join('')}
+        </div>`;
+      overview.insertAdjacentElement('afterend', map);
+    }
+
+    chapterMeta.forEach(meta => {
+      const chapter = doc.getElementById(meta.id);
+      if (!chapter) return;
+      const intro = chapter.querySelector('.chapter-intro');
+      if (!intro) return;
+      intro.dataset.chapterNumber = meta.num;
+      if (!intro.querySelector('.chapter-question')) {
+        const q = doc.createElement('div');
+        q.className = 'chapter-question';
+        q.textContent = meta.question;
+        const introP = intro.querySelector('p');
+        if (introP) introP.insertAdjacentElement('afterend', q);
+
+        const routeLabel = doc.createElement('div');
+        routeLabel.className = 'chapter-route-label';
+        routeLabel.textContent = 'This chapter';
+        q.insertAdjacentElement('afterend', routeLabel);
+
+        const route = doc.createElement('div');
+        route.className = 'chapter-route';
+        getStops(chapter).forEach(stop => {
+          const s = getStopInfo(stop);
+          if (!s.id) return;
+          const a = doc.createElement('a');
+          a.href = '#' + s.id;
+          a.innerHTML = `<b>${s.year}</b>${s.name}`;
+          route.appendChild(a);
+        });
+        routeLabel.insertAdjacentElement('afterend', route);
+      }
+    });
+
+    const rail = doc.querySelector('.rail');
+    if (rail && !rail.querySelector('.rail-current')) {
+      const panel = doc.createElement('div');
+      panel.className = 'rail-current';
+      panel.innerHTML = '<div class="rail-current-label">In this chapter</div><div class="rail-current-title"></div><div class="rail-language-list"></div>';
+      const foot = rail.querySelector('.rail-foot');
+      if (foot) rail.insertBefore(panel, foot); else rail.appendChild(panel);
+    }
+
+    const railPanel = doc.querySelector('.rail-current');
+    let currentChapterId = '';
+    function renderRailChapter(id) {
+      if (!railPanel || id === currentChapterId) return;
+      currentChapterId = id;
+      const meta = chapterMeta.find(c => c.id === id);
+      const chapter = doc.getElementById(id);
+      if (!meta || !chapter) return;
+      railPanel.querySelector('.rail-current-title').textContent = meta.short;
+      const list = railPanel.querySelector('.rail-language-list');
+      list.innerHTML = '';
+      getStops(chapter).forEach(stop => {
+        const s = getStopInfo(stop);
+        if (!s.id) return;
+        const a = doc.createElement('a');
+        a.href = '#' + s.id;
+        a.dataset.stopTarget = s.id;
+        a.innerHTML = `<small>${s.year}</small>${s.name}`;
+        list.appendChild(a);
+      });
+    }
+
+    function updateRail() {
+      let activeChapter = chapterMeta[0].id;
+      for (const meta of chapterMeta) {
+        const el = doc.getElementById(meta.id);
+        if (el && el.getBoundingClientRect().top < win.innerHeight * .42) activeChapter = meta.id;
+      }
+      renderRailChapter(activeChapter);
+      const chapter = doc.getElementById(activeChapter);
+      if (!chapter || !railPanel) return;
+      let activeStop = getStops(chapter)[0]?.id || '';
+      getStops(chapter).forEach(stop => {
+        if (stop.getBoundingClientRect().top < win.innerHeight * .48) activeStop = stop.id;
+      });
+      railPanel.querySelectorAll('[data-stop-target]').forEach(a => a.classList.toggle('current-stop', a.dataset.stopTarget === activeStop));
+    }
+    win.addEventListener('scroll', updateRail, {passive:true});
+    updateRail();
+
+    function fireInput(range) {
+      range.dispatchEvent(new win.Event('input', {bubbles:true}));
+    }
+
+    function enhanceLab(host) {
+      if (host.dataset.timeline1Enhanced) return;
+      host.dataset.timeline1Enhanced = '1';
+      const strip = host.querySelector('.inspect-strip');
+      const range = host.querySelector('.trace-scrub');
+      if (!strip || !range) return;
+
+      const stepper = doc.createElement('div');
+      stepper.className = 'test-stepper';
+      stepper.innerHTML = `
+        <button type="button" data-t1="start">Start</button>
+        <button type="button" data-t1="prev">← Previous</button>
+        <div class="test-step-info"><strong></strong><span></span></div>
+        <button type="button" class="step-primary" data-t1="next">Next →</button>
+        <button type="button" data-t1="result">Result</button>`;
+      strip.appendChild(stepper);
+
+      const infoStrong = stepper.querySelector('.test-step-info strong');
+      const infoSmall = stepper.querySelector('.test-step-info span');
+      const prev = stepper.querySelector('[data-t1="prev"]');
+      const next = stepper.querySelector('[data-t1="next"]');
+      const start = stepper.querySelector('[data-t1="start"]');
+      const result = stepper.querySelector('[data-t1="result"]');
+
+      function sync() {
+        const value = Number(range.value);
+        const max = Number(range.max);
+        const title = host.querySelector('.direct-caption strong')?.textContent.trim() || '';
+        infoStrong.textContent = title;
+        infoSmall.textContent = `Step ${value + 1} of ${max + 1}`;
+        prev.disabled = value <= 0;
+        start.disabled = value <= 0;
+        next.disabled = value >= max;
+        result.disabled = value >= max;
+        next.textContent = value >= max ? 'Complete' : 'Next →';
+      }
+
+      stepper.addEventListener('click', e => {
+        const b = e.target.closest('[data-t1]');
+        if (!b) return;
+        const max = Number(range.max);
+        let value = Number(range.value);
+        if (b.dataset.t1 === 'start') value = 0;
+        if (b.dataset.t1 === 'prev') value = Math.max(0, value - 1);
+        if (b.dataset.t1 === 'next') value = Math.min(max, value + 1);
+        if (b.dataset.t1 === 'result') value = max;
+        range.value = value;
+        fireInput(range);
+        sync();
+      });
+
+      range.addEventListener('input', () => win.requestAnimationFrame(sync));
+      const caption = host.querySelector('.direct-caption');
+      if (caption) new win.MutationObserver(sync).observe(caption, {subtree:true,childList:true,characterData:true});
+
+      const scenarios = host.querySelector('.scenario-buttons');
+      if (scenarios && !scenarios.querySelector('.scenario-hint')) {
+        const hint = doc.createElement('p');
+        hint.className = 'scenario-hint';
+        hint.textContent = 'Choose an option to replay the example from the beginning.';
+        scenarios.insertAdjacentElement('afterend', hint);
+      }
+
+      range.value = 0;
+      fireInput(range);
+      sync();
+    }
+
+    doc.querySelectorAll('.deep-lab').forEach(enhanceLab);
+
+    function animateLab(host) {
+      const range = host?.querySelector('.trace-scrub');
+      if (!range) return;
+      if (host._timeline1Timer) win.clearInterval(host._timeline1Timer);
+      range.value = 0;
+      fireInput(range);
+      const max = Number(range.max);
+      if (max <= 0) return;
+      const delay = Math.max(85, Math.min(145, Math.floor(850 / max)));
+      let i = 0;
+      host._timeline1Timer = win.setInterval(() => {
+        i++;
+        range.value = Math.min(i, max);
+        fireInput(range);
+        if (i >= max) {
+          win.clearInterval(host._timeline1Timer);
+          host._timeline1Timer = null;
+        }
+      }, delay);
+    }
+
+    doc.addEventListener('click', e => {
+      const scenario = e.target.closest('[data-option]');
+      if (scenario) {
+        const host = scenario.closest('.deep-lab');
+        win.setTimeout(() => animateLab(host), 0);
+      }
+    });
+
+    const turing = doc.querySelector('[data-trace="turing"]');
+    if (turing) {
+      const buttons = [...turing.querySelectorAll('[data-option]')];
+      if (buttons[0]) buttons[0].textContent = 'Flip every bit';
+      if (buttons[1]) buttons[1].textContent = 'Erase every bit';
+    }
+  });
+})();
+</script>
+</body>
+</html>
