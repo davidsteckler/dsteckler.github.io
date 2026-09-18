@@ -13,6 +13,16 @@
   const mobileEntry = $('mobileEntry');
   const mobileInput = $('mobileInput');
   const focusNote = $('focusNote');
+  const funHud = $('funHud');
+  const funPointsEl = $('funPoints');
+  const funStreakEl = $('funStreak');
+  const funLevelEl = $('funLevel');
+  const pointBurstLayer = $('pointBurstLayer');
+  const funResult = $('funResult');
+  const funResultPoints = $('funResultPoints');
+  const funResultMessage = $('funResultMessage');
+
+  const funBank = window.KEYQUEST_FUN || [];
 
   const knowledge = (window.KEYQUEST_CONTENT && window.KEYQUEST_CONTENT.concepts) || [];
   const topicGroups = knowledge.reduce((map,item,index)=>{
@@ -60,7 +70,13 @@
     lessonItem: null,
     lessonIndex: -1,
     lessonStep: 0,
-    lessonLines: []
+    lessonLines: [],
+    funPoints: 0,
+    funStreak: 0,
+    funBestStreak: 0,
+    funSentenceMistakes: 0,
+    funCorrectRun: 0,
+    recentFun: []
   };
 
   function lower(text){return text.charAt(0).toLowerCase()+text.slice(1)}
@@ -169,6 +185,52 @@
     return text;
   }
 
+  function funSentence(){
+    state.currentKnowledge=null;
+    if(!funBank.length)return 'Code tells a computer what to do.';
+    let candidates=funBank.map((_,i)=>i).filter(i=>!state.recentFun.includes(i));
+    if(!candidates.length)candidates=funBank.map((_,i)=>i);
+    const index=pick(candidates);
+    state.recentFun.push(index);
+    if(state.recentFun.length>35)state.recentFun.shift();
+    const item=funBank[index];
+    $('topicLabel').textContent=`${item[0]} · Easy reading`;
+    conceptChip.textContent='FUN MODE';
+    conceptChip.hidden=false;
+    return item[1];
+  }
+
+  function updateFunHud(){
+    funPointsEl.textContent=state.funPoints.toLocaleString();
+    funStreakEl.textContent=String(state.funStreak);
+    funLevelEl.textContent=String(state.funLevel||1);
+  }
+
+  function showPointBurst(amount,label=''){
+    if(state.mode!=='fun')return;
+    const pop=document.createElement('div');
+    const colors=['pink','blue','green','orange','purple'];
+    pop.className=`point-pop ${pick(colors)}`;
+    pop.style.left=`${38+Math.random()*24}%`;
+    pop.style.top=`${22+Math.random()*34}%`;
+    pop.innerHTML=`<strong>+${amount}</strong>${label?`<span>${label}</span>`:''}`;
+    pointBurstLayer.appendChild(pop);
+    setTimeout(()=>pop.remove(),950);
+  }
+
+  function addFunPoints(amount,label='',showPop=false){
+    if(state.mode!=='fun')return;
+    const oldLevel=state.funLevel||1;
+    state.funPoints+=amount;
+    state.funLevel=Math.floor(state.funPoints/500)+1;
+    updateFunHud();
+    funPointsEl.parentElement.classList.remove('bump');
+    void funPointsEl.parentElement.offsetWidth;
+    funPointsEl.parentElement.classList.add('bump');
+    if(showPop)showPointBurst(amount,label);
+    if(state.funLevel>oldLevel)showPointBurst(100,`LEVEL ${state.funLevel}!`);
+  }
+
   function speedSentence(){
     state.currentKnowledge=null;conceptChip.hidden=true;$('topicLabel').textContent='Flow practice';
     const count=2,selected=[],used=new Set();
@@ -202,7 +264,7 @@
     return cleanSentence(pick([punctuate(item[2]),punctuate(item[4]),`${upperFirst(item[3])}.`,`${item[1]}: ${lowerFirst(punctuate(item[2]))}`]));
   }
 
-  function nextTarget(){if(state.mode==='learn'||state.mode==='mobile')return learningSentence();if(state.mode==='speed')return speedSentence();return precisionSentence()}
+  function nextTarget(){if(state.mode==='learn'||state.mode==='mobile')return learningSentence();if(state.mode==='fun')return funSentence();if(state.mode==='speed')return speedSentence();return precisionSentence()}
 
   function renderSentence(animate=true){
     state.position=0;state.errorIndex=-1;state.target=nextTarget();state.mobileValue='';
@@ -219,7 +281,18 @@
   }
 
   function completeSentence(){
-    state.completed++;$('sentenceCount').textContent=`${state.completed} ${state.completed===1?'sentence':'sentences'}`;sentenceEl.classList.add('complete');
+    state.completed++;
+    $('sentenceCount').textContent=`${state.completed} ${state.completed===1?'sentence':'sentences'}`;
+    sentenceEl.classList.add('complete');
+    if(state.mode==='fun'){
+      if(state.funSentenceMistakes===0)state.funStreak++;
+      else state.funStreak=0;
+      state.funBestStreak=Math.max(state.funBestStreak,state.funStreak);
+      const bonus=30+Math.min(state.funStreak,10)*10;
+      addFunPoints(bonus,state.funStreak>=2?`${state.funStreak} IN A ROW!`:'SENTENCE BONUS!',true);
+      state.funSentenceMistakes=0;
+      state.funCorrectRun=0;
+    }
     if(state.mode==='mobile'){mobileInput.value='';state.mobileValue=''}
     setTimeout(()=>renderSentence(true),180);
   }
@@ -228,9 +301,15 @@
     markActive();state.attempts++;const expected=state.target[state.position];
     if(char===expected){
       state.correct++;state.errorIndex=-1;feedbackEl.textContent='';state.position++;
+      if(state.mode==='fun'){
+        state.funCorrectRun++;
+        addFunPoints(3);
+        if(state.funCorrectRun%5===0)showPointBurst(15,'NICE!');
+      }
       if(state.position>=state.target.length){completeSentence();updateLiveStats();return 'complete'}
     }else{
-      state.errorIndex=state.position;state.errors[expected]=(state.errors[expected]||0)+1;feedbackEl.textContent=expected===' '?'Space':`Try ${expected}`;
+      if(state.mode==='fun')state.funSentenceMistakes++;
+      state.errorIndex=state.position;state.errors[expected]=(state.errors[expected]||0)+1;feedbackEl.textContent=state.mode==='fun'?'Try again — your points are safe!':(expected===' '?'Space':`Try ${expected}`);
       setTimeout(()=>{if(state.errorIndex===state.position){state.errorIndex=-1;updateChars()}},220);
       updateChars();updateLiveStats();return 'error';
     }
@@ -273,18 +352,24 @@
   }
 
   function startSession(mode){
-    state.mode=mode;state.startedAt=Date.now();state.endAt=state.startedAt+state.minutes*60*1000;state.lastKeyAt=0;state.activeMs=0;state.correct=0;state.attempts=0;state.position=0;state.completed=0;state.seenConcepts=[];state.recentConcepts=[];state.errors={};state.ended=false;state.currentKnowledge=null;state.precisionKey='';state.mobileValue='';state.lessonItem=null;state.lessonIndex=-1;state.lessonStep=0;state.lessonLines=[];
+    state.mode=mode;state.startedAt=Date.now();state.endAt=state.startedAt+state.minutes*60*1000;state.lastKeyAt=0;state.activeMs=0;state.correct=0;state.attempts=0;state.position=0;state.completed=0;state.seenConcepts=[];state.recentConcepts=[];state.errors={};state.ended=false;state.currentKnowledge=null;state.precisionKey='';state.mobileValue='';state.lessonItem=null;state.lessonIndex=-1;state.lessonStep=0;state.lessonLines=[];state.funPoints=0;state.funStreak=0;state.funBestStreak=0;state.funSentenceMistakes=0;state.funCorrectRun=0;state.recentFun=[];state.funLevel=1;
     homeView.hidden=true;resultView.hidden=true;sessionView.hidden=false;homeButton.hidden=false;
-    $('modeLabel').textContent={learn:'LEARN + TYPE',speed:'SPEED',precision:'PRECISION',mobile:'MOBILE iOS'}[mode];
-    speedTrail.hidden=mode!=='speed';precisionHint.hidden=mode!=='precision';conceptChip.hidden=!(mode==='learn'||mode==='mobile');mobileEntry.hidden=mode!=='mobile';
-    focusNote.textContent=mode==='mobile'?'Keep typing in the box. The session clock keeps running if you switch apps or tabs.':'Click here if typing stops. The session clock keeps running if you switch tabs.';
-    $('sentenceCount').textContent='0 sentences';$('wpmValue').textContent='0';$('accuracyValue').textContent='100';$('timeValue').textContent=formatTime(state.minutes*60);$('progressFill').style.width='0%';
+    $('modeLabel').textContent={learn:'LEARN + TYPE',speed:'SPEED',precision:'PRECISION',fun:'FUN MODE',mobile:'MOBILE iOS'}[mode];
+    speedTrail.hidden=mode!=='speed';precisionHint.hidden=mode!=='precision';conceptChip.hidden=!(mode==='learn'||mode==='mobile'||mode==='fun');mobileEntry.hidden=mode!=='mobile';funHud.hidden=mode!=='fun';
+    typingStage.classList.toggle('fun-stage',mode==='fun');
+    focusNote.textContent=mode==='mobile'?'Keep typing in the box. The session clock keeps running if you switch apps or tabs.':mode==='fun'?'Every correct key earns points. Mistakes never take points away. Keep going!':'Click here if typing stops. The session clock keeps running if you switch tabs.';
+    $('sentenceCount').textContent='0 sentences';$('wpmValue').textContent='0';$('accuracyValue').textContent='100';$('timeValue').textContent=formatTime(state.minutes*60);$('progressFill').style.width='0%';updateFunHud();
     renderSentence(false);clearInterval(state.ticker);state.ticker=setInterval(tick,250);tick();
   }
 
   function endSession(){
     if(state.ended)return;state.ended=true;clearInterval(state.ticker);mobileInput.blur();const finalWpm=wpm(),oldBest=getBest();setBest(finalWpm);const newBest=getBest();
-    sessionView.hidden=true;resultView.hidden=false;homeButton.hidden=true;$('resultWpm').textContent=String(finalWpm);$('resultAccuracy').textContent=`${accuracy()}%`;$('resultSentences').textContent=String(state.completed);$('resultActive').textContent=formatTime(state.activeMs/1000);$('resultBest').textContent=newBest?`${newBest} WPM`:'—';$('resultTitle').textContent=finalWpm>oldBest&&finalWpm>0?'New personal best.':'Nice run.';
+    sessionView.hidden=true;resultView.hidden=false;homeButton.hidden=true;$('resultWpm').textContent=String(finalWpm);$('resultAccuracy').textContent=`${accuracy()}%`;$('resultSentences').textContent=String(state.completed);$('resultActive').textContent=formatTime(state.activeMs/1000);$('resultBest').textContent=newBest?`${newBest} WPM`:'—';$('resultTitle').textContent=state.mode==='fun'?'Great typing!':(finalWpm>oldBest&&finalWpm>0?'New personal best.':'Nice run.');
+    funResult.hidden=state.mode!=='fun';
+    if(state.mode==='fun'){
+      funResultPoints.textContent=state.funPoints.toLocaleString();
+      funResultMessage.textContent=state.funBestStreak>=3?`Best streak: ${state.funBestStreak} sentences in a row!`:`You finished ${state.completed} sentences. Every point came from typing!`;
+    }
     const learned=$('resultLearned'),chips=$('learnedChips');chips.innerHTML='';
     if((state.mode==='learn'||state.mode==='mobile')&&state.seenConcepts.length){learned.hidden=false;state.seenConcepts.slice(-12).forEach(c=>{const span=document.createElement('span');span.textContent=c;chips.appendChild(span)})}else learned.hidden=true;
   }
