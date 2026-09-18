@@ -21,6 +21,8 @@
   const funResult = $('funResult');
   const funResultPoints = $('funResultPoints');
   const funResultMessage = $('funResultMessage');
+  const funPowerFill = $('funPowerFill');
+  const funPowerText = $('funPowerText');
 
   const funBank = window.KEYQUEST_FUN || [];
 
@@ -194,7 +196,7 @@
     state.recentFun.push(index);
     if(state.recentFun.length>35)state.recentFun.shift();
     const item=funBank[index];
-    $('topicLabel').textContent=`${item[0]} · Easy reading`;
+    $('topicLabel').textContent=`${item[0]} · LET'S GO!`;
     conceptChip.textContent='FUN MODE';
     conceptChip.hidden=false;
     return item[1];
@@ -204,18 +206,21 @@
     funPointsEl.textContent=state.funPoints.toLocaleString();
     funStreakEl.textContent=String(state.funStreak);
     funLevelEl.textContent=String(state.funLevel||1);
+    const inLevel=state.funPoints%500;
+    funPowerFill.style.width=`${Math.min(100,(inLevel/500)*100)}%`;
+    funPowerText.textContent=`${inLevel} / 500`;
   }
 
-  function showPointBurst(amount,label=''){
+  function showPointBurst(amount,label='',micro=false){
     if(state.mode!=='fun')return;
     const pop=document.createElement('div');
     const colors=['pink','blue','green','orange','purple'];
-    pop.className=`point-pop ${pick(colors)}`;
-    pop.style.left=`${38+Math.random()*24}%`;
-    pop.style.top=`${22+Math.random()*34}%`;
+    pop.className=`point-pop ${pick(colors)}${micro?' micro':''}`;
+    pop.style.left=`${24+Math.random()*52}%`;
+    pop.style.top=`${20+Math.random()*48}%`;
     pop.innerHTML=`<strong>+${amount}</strong>${label?`<span>${label}</span>`:''}`;
     pointBurstLayer.appendChild(pop);
-    setTimeout(()=>pop.remove(),950);
+    setTimeout(()=>pop.remove(),micro?650:1050);
   }
 
   function addFunPoints(amount,label='',showPop=false){
@@ -304,6 +309,7 @@
       if(state.mode==='fun'){
         state.funCorrectRun++;
         addFunPoints(3);
+        showPointBurst(3,'',true);
         if(state.funCorrectRun%5===0)showPointBurst(15,'NICE!');
       }
       if(state.position>=state.target.length){completeSentence();updateLiveStats();return 'complete'}
@@ -355,9 +361,14 @@
     state.mode=mode;state.startedAt=Date.now();state.endAt=state.startedAt+state.minutes*60*1000;state.lastKeyAt=0;state.activeMs=0;state.correct=0;state.attempts=0;state.position=0;state.completed=0;state.seenConcepts=[];state.recentConcepts=[];state.errors={};state.ended=false;state.currentKnowledge=null;state.precisionKey='';state.mobileValue='';state.lessonItem=null;state.lessonIndex=-1;state.lessonStep=0;state.lessonLines=[];state.funPoints=0;state.funStreak=0;state.funBestStreak=0;state.funSentenceMistakes=0;state.funCorrectRun=0;state.recentFun=[];state.funLevel=1;
     homeView.hidden=true;resultView.hidden=true;sessionView.hidden=false;homeButton.hidden=false;
     $('modeLabel').textContent={learn:'LEARN + TYPE',speed:'SPEED',precision:'PRECISION',fun:'FUN MODE',mobile:'MOBILE iOS'}[mode];
-    speedTrail.hidden=mode!=='speed';precisionHint.hidden=mode!=='precision';conceptChip.hidden=!(mode==='learn'||mode==='mobile'||mode==='fun');mobileEntry.hidden=mode!=='mobile';funHud.hidden=mode!=='fun';
+    speedTrail.hidden=mode!=='speed';
+    precisionHint.hidden=mode!=='precision';
+    conceptChip.hidden=!(mode==='learn'||mode==='mobile'||mode==='fun');
+    mobileEntry.hidden=mode!=='mobile';
+    funHud.hidden=mode!=='fun';
+    sessionView.dataset.mode=mode;
     typingStage.classList.toggle('fun-stage',mode==='fun');
-    focusNote.textContent=mode==='mobile'?'Keep typing in the box. The session clock keeps running if you switch apps or tabs.':mode==='fun'?'Every correct key earns points. Mistakes never take points away. Keep going!':'Click here if typing stops. The session clock keeps running if you switch tabs.';
+    focusNote.textContent=mode==='mobile'?'Keep typing in the box. The session clock keeps running if you switch apps or tabs.':mode==='fun'?'Type the line. Grab points. Build your streak. Oopsies cost zero points!':'Click here if typing stops. The session clock keeps running if you switch tabs.';
     $('sentenceCount').textContent='0 sentences';$('wpmValue').textContent='0';$('accuracyValue').textContent='100';$('timeValue').textContent=formatTime(state.minutes*60);$('progressFill').style.width='0%';updateFunHud();
     renderSentence(false);clearInterval(state.ticker);state.ticker=setInterval(tick,250);tick();
   }
