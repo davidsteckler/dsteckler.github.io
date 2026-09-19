@@ -175,53 +175,81 @@
       margin-top: 10px;
       display:flex;
       align-items:center;
-      flex-wrap: wrap;
-      gap: 10px;
-      opacity: 0.10;
-      transition: opacity 180ms ease, transform 180ms ease;
-      font-size: 13px;
+      flex-wrap:wrap;
+      gap:10px;
+      opacity:0.10;
+      transition:opacity 180ms ease, transform 180ms ease;
+      font-size:13px;
     }
 
     .gate:hover,
     .gate:focus-within{
-      opacity: 0.88;
-      transform: translateY(-1px);
+      opacity:0.92;
+      transform:translateY(-1px);
     }
 
     .gatePrompt{
-      color: rgba(134,243,198,0.75);
+      color:rgba(134,243,198,0.75);
+      align-self:flex-start;
+      padding-top:10px;
+    }
+
+    .gateBody{
+      flex:1 1 520px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
 
     .gateLabel{
-      color: rgba(245,248,255,0.58);
+      color:rgba(245,248,255,0.58);
     }
 
     .gateHint{
-      color: rgba(245,248,255,0.42);
-      font-size: 12px;
-      width: 100%;
-      padding-left: 22px;
+      color:rgba(245,248,255,0.42);
+      font-size:12px;
+      line-height:1.55;
     }
 
-    .gate input{
-      width: 145px;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
-      background: rgba(0,0,0,0.28);
-      color: rgba(245,248,255,0.92);
-      font-family: var(--mono);
-      padding: 8px 10px;
-      outline: none;
+    .gate textarea{
+      width:100%;
+      min-height:118px;
+      resize:vertical;
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:8px;
+      background:rgba(0,0,0,0.28);
+      color:rgba(245,248,255,0.92);
+      font-family:var(--mono);
+      padding:10px 11px;
+      outline:none;
+      line-height:1.5;
     }
 
-    .gate input:focus{
-      border-color: rgba(134,243,198,0.45);
-      box-shadow: 0 0 18px rgba(134,243,198,0.10);
+    .gate textarea:focus{
+      border-color:rgba(134,243,198,0.45);
+      box-shadow:0 0 18px rgba(134,243,198,0.10);
+    }
+
+    .gate button{
+      align-self:flex-start;
+      border:1px solid rgba(134,243,198,0.28);
+      border-radius:8px;
+      background:rgba(134,243,198,0.08);
+      color:rgba(245,248,255,0.86);
+      font-family:var(--mono);
+      padding:9px 12px;
+      cursor:pointer;
+    }
+
+    .gate button:hover{
+      background:rgba(134,243,198,0.13);
+      border-color:rgba(134,243,198,0.44);
     }
 
     #gateMsg{
-      color: rgba(255,208,122,0.72);
-      font-size: 12px;
+      color:rgba(255,208,122,0.72);
+      font-size:12px;
+      min-height:18px;
     }
 
     @media (max-width: 520px){
@@ -232,10 +260,6 @@
       .bus{ padding: 7px 9px; }
       .trace{ display:none; }
       .busRow{ justify-content:flex-start; }
-
-      .gate input{
-        width: 100%;
-      }
 
       .gateHint{
         padding-left: 0;
@@ -268,23 +292,21 @@
 
         <div class="binaryBox">
 <pre id="b" aria-label="binary message">
-01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010 01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100 01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000 01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100 01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111 01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111 01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010 01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111 01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101 01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000 01000010 01000101 00100000 01011001 01001111 01010101 01010011 00101100 00100000 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110 01000111 00101110 00001010 01001110 01001111 01010111 00100000 01000111 01001111 00100000 01000010 01010101 01001001 01001100 01000100 00101110 00001010
+01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010 01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100 01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000 01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100 01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111 01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111 01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010 01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111 01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101 01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000 01000010 01000101 00100000 01011001 01001111 01010101 01010010 01010011 00101100 00100000 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001110 01001111 01010100 01001001 01000011 01000101 00100000 01001001 01010100 00100000 01000001 01001110 01000100 00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110 01000111 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01001101 01000101 01010011 01010011 01000001 01000111 01000101 00100000 01001101 01000001 01011001 00100000 01001110 01001111 01010100 00100000 01000110 01010101 01001100 01001100 01011001 00100000 01001101 01000001 01001011 01000101 00100000 01010011 01000101 01001110 01010011 01000101 00100000 01011001 01000101 01010100 00101110 00001010 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01000011 01000001 01001110 00100000 01001101 01000001 01001011 01000101 00100000 01001001 01010100 00100000 01000110 01010101 01010010 01010100 01001000 01000101 01010010 00101100 00100000 01001001 01010100 00100000 01010111 01001001 01001100 01001100 00101110 00001010 01010111 01001000 01000001 01010100 00100000 01010111 01001001 01001100 01001100 00100000 01011001 01001111 01010101 00100000 01000010 01010101 01001001 01001100 01000100 00100000 01010111 01001001 01010100 01001000 00100000 01001001 01010100 00111111 00001010
 </pre>
         </div>
 
-        <div class="gate" title="The door opens when you prove what changed, and what comes next.">
+        <div class="gate" title="Paste the decoded transmission to prove you found it.">
           <span class="gatePrompt">&gt;</span>
 
-          <span class="gateLabel">electricity became:</span>
-          <input id="gateThought" placeholder="_____" autocomplete="off" />
-
-          <span class="gateLabel">now go:</span>
-          <input id="gateBuild" placeholder="_____" autocomplete="off" />
-
-          <span id="gateMsg"></span>
-
-          <div class="gateHint">
-            the door opens when you prove what changed, and what comes next
+          <div class="gateBody">
+            <span class="gateLabel">paste the full transmission:</span>
+            <textarea id="gateMessage" placeholder="paste the decoded message here" autocomplete="off" spellcheck="false"></textarea>
+            <button id="checkGateBtn" type="button">open the next door</button>
+            <span id="gateMsg"></span>
+            <div class="gateHint">
+              capitalization, punctuation, spaces, and line breaks do not have to be perfect
+            </div>
           </div>
         </div>
       </div>
@@ -388,35 +410,85 @@
       });
 
       // Hidden gate to Part 2
-      const gateThought = document.getElementById("gateThought");
-      const gateBuild = document.getElementById("gateBuild");
+      const gateMessage = document.getElementById("gateMessage");
+      const checkGateBtn = document.getElementById("checkGateBtn");
       const gateMsg = document.getElementById("gateMsg");
 
-      function cleanAnswer(value){
+      function normalizeMessage(value){
         return value
-          .trim()
           .toUpperCase()
           .replace(/[^A-Z0-9]/g, "");
       }
 
-      function checkGate(){
-        const thought = cleanAnswer(gateThought.value);
-        const build = cleanAnswer(gateBuild.value);
+      function decodedTransmission(){
+        return chunks
+          .map(bits => String.fromCharCode(parseInt(bits, 2)))
+          .join("");
+      }
 
-        if(thought === "THOUGHT" && build === "BUILD"){
-          gateMsg.textContent = "door opening...";
-          window.location.href = "https://dsteckler.com/blackbox1.html";
+      function editDistance(a, b){
+        if(a === b) return 0;
+        if(!a.length) return b.length;
+        if(!b.length) return a.length;
+
+        const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+        const current = new Array(b.length + 1);
+
+        for(let i = 1; i <= a.length; i++){
+          current[0] = i;
+
+          for(let j = 1; j <= b.length; j++){
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            current[j] = Math.min(
+              current[j - 1] + 1,
+              previous[j] + 1,
+              previous[j - 1] + cost
+            );
+          }
+
+          for(let j = 0; j <= b.length; j++){
+            previous[j] = current[j];
+          }
+        }
+
+        return previous[b.length];
+      }
+
+      function similarity(a, b){
+        const left = normalizeMessage(a);
+        const right = normalizeMessage(b);
+        const longest = Math.max(left.length, right.length);
+
+        if(longest === 0) return 1;
+        return 1 - (editDistance(left, right) / longest);
+      }
+
+      function checkGate(){
+        const student = gateMessage.value;
+        const expected = decodedTransmission();
+        const score = similarity(student, expected);
+
+        if(score >= 0.95){
+          gateMsg.textContent = "transmission accepted. opening...";
+          checkGateBtn.disabled = true;
+          gateMessage.disabled = true;
+
+          setTimeout(() => {
+            window.location.href = "https://dsteckler.com/blackbox1.html";
+          }, 650);
+        }else if(score >= 0.80){
+          gateMsg.textContent = "almost there. one part of the transmission is missing or changed.";
         }else{
-          gateMsg.textContent = "not yet.";
+          gateMsg.textContent = "that does not match the full transmission yet.";
         }
       }
 
-      gateThought.addEventListener("keydown", (e) => {
-        if(e.key === "Enter") checkGate();
-      });
+      checkGateBtn.addEventListener("click", checkGate);
 
-      gateBuild.addEventListener("keydown", (e) => {
-        if(e.key === "Enter") checkGate();
+      gateMessage.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){
+          checkGate();
+        }
       });
     })();
   </script>
@@ -431,8 +503,8 @@
     5) Console breadcrumb (DevTools)
     6) body[data-aux] ROT13 “view source” (ivrj fbhpr)
     7) Hidden gate:
-       electricity became: THOUGHT
-       now go: BUILD
+       paste the full decoded transmission
+       formatting is ignored; small transcription mistakes are tolerated
   -->
 </body>
 </html>
