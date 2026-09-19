@@ -296,8 +296,15 @@
   </div>
 
   <script>
-    const FIRST_PAGE_MESSAGE = `
-CONGRATS.
+    const FIRST_PAGE_MESSAGE = `CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOURS, IF YOU NOTICE IT AND KEEP GOING.
+THIS MESSAGE MAY NOT FULLY MAKE SENSE YET.
+IF YOU CAN MAKE IT FURTHER, IT WILL.
+WHAT WILL YOU BUILD WITH IT?
+`;
+    const LEGACY_FIRST_PAGE_MESSAGE = `CONGRATS.
 YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
 A LOT OF FUTURES START WITH ONE LUCKY BREAK.
 THIS CAN BE YOURS, IF YOU KEEP GOING.
@@ -315,17 +322,68 @@ NOW GO BUILD.
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "");
     }
+    
+        function normalizeMessage(value){
+          return value
+            .toUpperCase()
+            .replace(/[^A-Z0-9]/g, "");
+        }
+    
+        function editDistance(a, b){
+          if(a === b) return 0;
+          if(!a.length) return b.length;
+          if(!b.length) return a.length;
+    
+          const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+          const current = new Array(b.length + 1);
+    
+          for(let i = 1; i <= a.length; i++){
+            current[0] = i;
+    
+            for(let j = 1; j <= b.length; j++){
+              const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+              current[j] = Math.min(
+                current[j - 1] + 1,
+                previous[j] + 1,
+                previous[j - 1] + cost
+              );
+            }
+    
+            for(let j = 0; j <= b.length; j++){
+              previous[j] = current[j];
+            }
+          }
+    
+          return previous[b.length];
+        }
+    
+        function similarity(a, b){
+          const left = normalizeMessage(a);
+          const right = normalizeMessage(b);
+          const longest = Math.max(left.length, right.length);
+          if(longest === 0) return 1;
+          return 1 - (editDistance(left, right) / longest);
+        }
+    
+        function transmissionScore(value){
+          return Math.max(
+            similarity(value, FIRST_PAGE_MESSAGE),
+            similarity(value, LEGACY_FIRST_PAGE_MESSAGE)
+          );
+        }
+    
 
     function checkMessage(){
-      const student = clean(messageInput.value);
-      const correct = clean(FIRST_PAGE_MESSAGE);
+      const score = transmissionScore(messageInput.value);
 
-      if(student === correct){
+      if(score >= 0.95){
         msg.textContent = "message accepted.";
         reveal.classList.add("show");
         messageInput.disabled = true;
         checkBtn.disabled = true;
         window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      }else if(score >= 0.80){
+        msg.textContent = "almost there. one part of the transmission is missing or changed.";
       }else{
         msg.textContent = "not yet. paste the full decoded message from Part 1.";
       }
