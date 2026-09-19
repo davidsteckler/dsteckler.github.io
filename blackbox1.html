@@ -1,537 +1,543 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Black Box Scavenger Hunt: Part 2</title>
   <meta name="color-scheme" content="dark" />
   <style>
     :root{
       --bg0:#05060a;
       --bg1:#070a12;
-      --border: rgb
-      255,255,255,0.12);
-      --text: rgba(245,248,255,0.90);
-      --muted: rgba(245,248,255,0.58);
+      --border:rgba(255,255,255,0.12);
+      --text:rgba(245,248,255,0.92);
+      --muted:rgba(245,248,255,0.60);
       --blue:#7db6ff;
       --mint:#86f3c6;
       --warm:#ffd07a;
-      --yellow:#ffff35;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      --max: 980px;
-      --r: 18px;
-      --shadow: 0 22px 90px rgba(0,0,0,0.62);
+      --yellow:#ffff6a;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --max:980px;
+      --r:18px;
+      --shadow:0 22px 90px rgba(0,0,0,0.62);
     }
 
-```
-*{ box-sizing:border-box; }
+    *{box-sizing:border-box}
 
-body{
-  margin:0;
-  font-family: var(--mono);
-  color: var(--text);
-  overflow-x:hidden;
-  background:
-    radial-gradient(1200px 640px at 18% 18%, rgba(125,182,255,0.12), transparent 55%),
-    radial-gradient(900px 520px at 82% 22%, rgba(134,243,198,0.10), transparent 55%),
-    radial-gradient(800px 440px at 45% 92%, rgba(255,208,122,0.07), transparent 55%),
-    linear-gradient(180deg, var(--bg1), var(--bg0));
-}
+    body{
+      margin:0;
+      font-family:var(--mono);
+      color:var(--text);
+      overflow-x:hidden;
+      background:
+        radial-gradient(1200px 640px at 18% 18%,rgba(125,182,255,0.12),transparent 55%),
+        radial-gradient(900px 520px at 82% 22%,rgba(134,243,198,0.10),transparent 55%),
+        radial-gradient(800px 440px at 45% 92%,rgba(255,208,122,0.07),transparent 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg0));
+    }
 
-.wrap{
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 34px 16px 70px;
-}
+    .wrap{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:34px 16px 70px;
+    }
 
-.card{
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  position:relative;
-}
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
 
-.content{
-  position:relative;
-  padding: 18px;
-  display:flex;
-  flex-direction:column;
-  gap: 16px;
-}
+    .content{
+      position:relative;
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
 
-.busRow{
-  display:flex;
-  justify-content:flex-end;
-  align-items:center;
-  gap: 10px;
-  padding: 6px 2px 0;
-}
+    .busRow{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      padding:6px 2px 0;
+    }
 
-.trace{
-  height: 1px;
-  flex: 1;
-  background: linear-gradient(90deg, rgba(125,182,255,0.00), rgba(125,182,255,0.28), rgba(134,243,198,0.22), rgba(255,208,122,0.16), rgba(125,182,255,0.00));
-  opacity:0.40;
-  border-radius: 999px;
-}
+    .trace{
+      height:1px;
+      flex:1;
+      background:linear-gradient(90deg,rgba(125,182,255,0),rgba(125,182,255,0.28),rgba(134,243,198,0.22),rgba(255,208,122,0.16),rgba(125,182,255,0));
+      opacity:.40;
+      border-radius:999px;
+    }
 
-.bus{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.035);
-  opacity:0.78;
-}
+    .bus{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.035);
+      opacity:.78;
+    }
 
-.led{
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(134,243,198,0.26);
-  background: rgba(134,243,198,0.14);
-  box-shadow: 0 0 12px rgba(134,243,198,0.10);
-}
+    .led{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      border:1px solid rgba(134,243,198,0.26);
+      background:rgba(134,243,198,0.14);
+      box-shadow:0 0 12px rgba(134,243,198,0.10);
+    }
 
-.led:nth-child(2n){
-  border-color: rgba(125,182,255,0.24);
-  background: rgba(125,182,255,0.12);
-  box-shadow:none;
-}
+    .led:nth-child(2n){
+      border-color:rgba(125,182,255,0.24);
+      background:rgba(125,182,255,0.12);
+      box-shadow:none;
+    }
 
-h1{
-  margin:0;
-  font-size: clamp(38px, 7vw, 78px);
-  line-height:0.96;
-  letter-spacing:-0.07em;
-}
+    h1{
+      margin:0;
+      font-size:clamp(40px,7vw,78px);
+      line-height:.96;
+      letter-spacing:-.07em;
+    }
 
-h2{
-  margin:0;
-  font-size: 22px;
-  line-height:1.2;
-  letter-spacing:-0.035em;
-  color: rgba(255,208,122,0.94);
-}
+    h2{
+      margin:0;
+      font-size:22px;
+      line-height:1.2;
+      letter-spacing:-.035em;
+      color:rgba(255,208,122,0.94);
+    }
 
-p{
-  margin:0;
-  line-height:1.75;
-  color: rgba(245,248,255,0.72);
-  font-size:15px;
-}
+    p{
+      margin:0;
+      line-height:1.75;
+      color:rgba(245,248,255,0.74);
+      font-size:15px;
+    }
 
-.subtitle{
-  max-width: 840px;
-  color: var(--muted);
-  line-height:1.7;
-  font-size:16px;
-}
+    .subtitle{
+      max-width:840px;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:16px;
+    }
 
-.section{
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 14px;
-  background: rgba(0,0,0,0.24);
-  padding: 16px;
-  position:relative;
-}
+    .section{
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:14px;
+      background:rgba(0,0,0,0.24);
+      padding:18px;
+      position:relative;
+    }
 
-.section.mint{
-  border-color: rgba(134,243,198,0.18);
-  background: rgba(134,243,198,0.045);
-}
+    .section.mint{
+      border-color:rgba(134,243,198,0.18);
+      background:rgba(134,243,198,0.045);
+    }
 
-.section.warm{
-  border-color: rgba(255,208,122,0.18);
-  background: rgba(255,208,122,0.045);
-}
+    .section.warm{
+      border-color:rgba(255,208,122,0.18);
+      background:rgba(255,208,122,0.045);
+    }
 
-.sectionHead{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
+    .sectionHead{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
 
-.sectionHead .miniTrace{
-  height:1px;
-  flex:1;
-  background: linear-gradient(90deg, rgba(134,243,198,0.22), transparent);
-  opacity:0.55;
-}
+    .miniTrace{
+      height:1px;
+      flex:1;
+      background:linear-gradient(90deg,rgba(134,243,198,0.22),transparent);
+      opacity:.55;
+    }
 
-.story{
-  display:flex;
-  flex-direction:column;
-  gap: 14px;
-}
+    .transmission{
+      padding:18px;
+      border-radius:14px;
+      border:1px solid rgba(125,182,255,0.18);
+      background:rgba(125,182,255,0.05);
+    }
 
-.story p{
-  max-width: 850px;
-  font-size: 16px;
-  line-height:1.82;
-}
+    .transmission .label{
+      color:rgba(125,182,255,0.72);
+      font-size:12px;
+      letter-spacing:.12em;
+      margin-bottom:10px;
+    }
 
-.story .lead{
-  color: rgba(245,248,255,0.92);
-  font-size: 19px;
-}
+    .transmission .line{
+      color:rgba(245,248,255,0.96);
+      font-size:clamp(18px,3vw,28px);
+      line-height:1.35;
+      font-weight:700;
+      letter-spacing:-.03em;
+    }
 
-.story .turn{
-  color: rgba(255,255,53,0.90);
-  font-weight:700;
-}
+    .story{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
 
-.story .finish{
-  color: rgba(134,243,198,0.92);
-  font-weight:700;
-}
+    .story p{
+      max-width:850px;
+      font-size:16px;
+      line-height:1.82;
+    }
 
-.imageFrame{
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 14px;
-  background: rgba(0,0,0,0.30);
-  padding: 12px;
-  position:relative;
-}
+    .story .lead{
+      color:rgba(245,248,255,0.96);
+      font-size:20px;
+      line-height:1.6;
+    }
 
-.imageFrame img{
-  width:100%;
-  display:block;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 18px 70px rgba(0,0,0,0.42);
-}
+    .story .turn{
+      color:rgba(255,255,106,0.94);
+      font-weight:700;
+    }
 
-.storyPhoto img{
-  max-height: 520px;
-  object-fit: cover;
-  object-position: center;
-}
+    .story .key{
+      color:rgba(134,243,198,0.96);
+      font-size:21px;
+      font-weight:800;
+      line-height:1.55;
+    }
 
-textarea{
-  width:100%;
-  min-height:82px;
-  resize:vertical;
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  background: rgba(0,0,0,0.30);
-  color: rgba(245,248,255,0.92);
-  font-family: var(--mono);
-  padding: 12px;
-  outline:none;
-  line-height:1.55;
-  font-size:14px;
-  margin-top: 10px;
-}
+    .story .move{
+      font-size:clamp(30px,6vw,58px);
+      line-height:1;
+      letter-spacing:-.055em;
+      color:rgba(245,248,255,0.98);
+      font-weight:900;
+      margin:4px 0 2px;
+    }
 
-textarea:focus{
-  border-color: rgba(134,243,198,0.45);
-  box-shadow: 0 0 18px rgba(134,243,198,0.10);
-}
+    .imageFrame{
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:14px;
+      background:rgba(0,0,0,0.30);
+      padding:12px;
+      position:relative;
+    }
 
-.questionBlock{
-  margin-top: 14px;
-}
+    .imageFrame img{
+      width:100%;
+      display:block;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 18px 70px rgba(0,0,0,0.42);
+    }
 
-.questionBlock p{
-  color: rgba(245,248,255,0.78);
-}
+    .storyPhoto img{
+      max-height:520px;
+      object-fit:cover;
+      object-position:center;
+    }
 
-.gateRow{
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  flex-wrap:wrap;
-  margin-top: 14px;
-}
+    .caption{
+      margin-top:9px;
+      color:rgba(245,248,255,0.42);
+      font-size:12px;
+      line-height:1.5;
+    }
 
-button{
-  border:1px solid rgba(134,243,198,0.32);
-  background: rgba(134,243,198,0.10);
-  color: rgba(245,248,255,0.92);
-  font-family: var(--mono);
-  border-radius: 10px;
-  padding: 12px 15px;
-  cursor:pointer;
-  font-size:14px;
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-}
+    .quote{
+      border-left:3px solid rgba(134,243,198,0.45);
+      padding:4px 0 4px 14px;
+      color:rgba(245,248,255,0.88);
+      font-size:18px;
+      line-height:1.65;
+    }
 
-button:hover{
-  transform: translateY(-1px);
-  border-color: rgba(134,243,198,0.55);
-  background: rgba(134,243,198,0.15);
-}
+    .quoteSource{
+      color:rgba(245,248,255,0.42);
+      font-size:12px;
+      margin-top:6px;
+    }
 
-#gateMsg{
-  color: rgba(255,208,122,0.78);
-  font-size: 13px;
-  line-height:1.5;
-  min-height:20px;
-}
+    .bridge{
+      border:1px solid rgba(134,243,198,0.18);
+      background:rgba(134,243,198,0.04);
+      border-radius:14px;
+      padding:17px;
+      display:grid;
+      gap:8px;
+    }
 
-.tiny{
-  color: rgba(245,248,255,0.38);
-  font-size: 12px;
-  line-height:1.6;
-  margin-top: 8px;
-}
+    .bridgeRow{
+      display:grid;
+      grid-template-columns:145px 1fr;
+      gap:12px;
+      align-items:baseline;
+    }
 
-@media (max-width: 760px){
-  .wrap{ padding-top: 24px; }
-  .content{ padding: 14px; }
-  .section{ padding: 14px; }
-  .trace{ display:none; }
-  .busRow{ justify-content:flex-start; }
-  h1{ letter-spacing:-0.055em; }
-}
-```
+    .bridgeRow strong{
+      color:rgba(134,243,198,0.92);
+    }
 
+    .bridgeRow span{
+      color:rgba(245,248,255,0.76);
+      line-height:1.55;
+    }
+
+    textarea{
+      width:100%;
+      min-height:82px;
+      resize:vertical;
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:10px;
+      background:rgba(0,0,0,0.30);
+      color:rgba(245,248,255,0.92);
+      font-family:var(--mono);
+      padding:12px;
+      outline:none;
+      line-height:1.55;
+      font-size:14px;
+      margin-top:10px;
+    }
+
+    textarea:focus{
+      border-color:rgba(134,243,198,0.45);
+      box-shadow:0 0 18px rgba(134,243,198,0.10);
+    }
+
+    .questionBlock{
+      margin-top:14px;
+    }
+
+    .questionBlock p{
+      color:rgba(245,248,255,0.82);
+    }
+
+    .gateRow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    button{
+      border:1px solid rgba(134,243,198,0.32);
+      background:rgba(134,243,198,0.10);
+      color:rgba(245,248,255,0.92);
+      font-family:var(--mono);
+      border-radius:10px;
+      padding:12px 15px;
+      cursor:pointer;
+      font-size:14px;
+      transition:transform 160ms ease,border-color 160ms ease,background 160ms ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      border-color:rgba(134,243,198,0.55);
+      background:rgba(134,243,198,0.15);
+    }
+
+    #gateMsg{
+      color:rgba(255,208,122,0.80);
+      font-size:13px;
+      line-height:1.5;
+      min-height:20px;
+    }
+
+    .tiny{
+      color:rgba(245,248,255,0.40);
+      font-size:12px;
+      line-height:1.6;
+      margin-top:8px;
+    }
+
+    @media(max-width:760px){
+      .wrap{padding-top:24px}
+      .content{padding:14px}
+      .section{padding:14px}
+      .trace{display:none}
+      .busRow{justify-content:flex-start}
+      h1{letter-spacing:-.055em}
+      .bridgeRow{grid-template-columns:1fr;gap:2px}
+    }
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <main class="card">
       <div class="content">
+
         <div class="busRow">
           <div class="trace" aria-hidden="true"></div>
           <div class="bus" aria-hidden="true">
-            <span class="led"></span>
-            <span class="led"></span>
-            <span class="led"></span>
-            <span class="led"></span>
-            <span class="led"></span>
-            <span class="led"></span>
-            <span class="led"></span>
-            <span class="led"></span>
+            <span class="led"></span><span class="led"></span><span class="led"></span><span class="led"></span>
+            <span class="led"></span><span class="led"></span><span class="led"></span><span class="led"></span>
           </div>
         </div>
 
-    <h1>Part 2: Pay Attention</h1>
-
-    <p class="subtitle">
-      Some advantages are easy to miss because they feel normal while you have them.
-    </p>
-
-    <section class="section mint story">
-      <div class="sectionHead">
-        <h2>The Story</h2>
-        <div class="miniTrace" aria-hidden="true"></div>
-      </div>
-
-      <p class="lead">
-        Before you read this story, answer one question:
-      </p>
-
-      <p>
-        Do you have a hidden advantage?
-      </p>
-
-      <p>
-        Most people do not know how to answer that.
-      </p>
-
-      <p>
-        They think an advantage has to look obvious. A lot of money. A famous parent. A perfect school. A special talent. Something that makes life easy.
-      </p>
-
-      <p>
-        But some advantages do not feel special while you have them.
-      </p>
-
-      <p>
-        They just feel normal.
-      </p>
-
-      <p>
-        You are in school. You can read. You have teachers. You have access to the internet. You can use tools that let you write, build, search, code, record, edit, publish, and learn almost anything.
-      </p>
-
-      <p>
-        You probably did not wake up this morning wondering where clean water would come from. You probably did not spend the day trying to find electricity. You probably do not think of a computer as a rare machine that only a few kids in the world get to touch.
-      </p>
-
-      <p>
-        That does not mean your life is easy.
-      </p>
-
-      <p>
-        It does not mean everything is fair.
-      </p>
-
-      <p>
-        It means you may already have access to things that are more valuable than they feel right now.
-      </p>
-
-      <p>
-        That is what a hidden advantage is.
-      </p>
-
-      <p>
-        It is something that helps you before you understand how much it helps you.
-      </p>
-
-      <p>
-        Bill Gates had one.
-      </p>
-
-      <p>
-        In the late 1960s, Gates was a student at Lakeside School in Seattle. A few teachers there helped get students access to a computer terminal. That sounds ordinary now, but it was not ordinary then. Most kids had never touched a computer. Most adults had never touched one either.
-      </p>
-
-      <p>
-        The machine was a Teletype ASR-33. It did not have a screen. It did not have apps. It did not glow with possibility. It looked more like a typewriter attached to a stand.
-      </p>
-
-      <div class="imageFrame storyPhoto">
-        <img src="teletypeASR.png" alt="Teletype ASR-33 computer terminal">
-      </div>
-
-      <p>
-        The actual computer was somewhere else. The terminal at Lakeside connected over a phone line to a larger computer. You typed your program, fed in paper tape, and waited for the machine to answer.
-      </p>
-
-      <p>
-        The answer came back slowly, printed onto paper.
-      </p>
-
-      <p>
-        The terminal alone cost more than $1,000 a year to lease, which is about $9,600 in 2026 money. And that was before the school paid thousands more for actual computer time.
-      </p>
-
-      <p>
-        So the room had pressure in it.
-      </p>
-
-      <p>
-        If your program had a mistake, you were not just wrong. You were wasting time that cost money. Gates later remembered students crowding around while someone used the machine, calling out when they saw a typing mistake or when someone was taking too long.
-      </p>
-
-      <div class="imageFrame storyPhoto">
-        <img src="gates.png" alt="Bill Gates with early personal computers">
-      </div>
-
-      <p>
-        That detail makes the story feel different.
-      </p>
-
-      <p>
-        It was not Microsoft yet.
-      </p>
-
-      <p>
-        It was not a billionaire origin story yet.
-      </p>
-
-      <p>
-        It was a noisy machine, a phone line, paper tape, expensive minutes, and a few kids trying to make something happen before the time ran out.
-      </p>
-
-      <p>
-        That was Gates’s hidden advantage.
-      </p>
-
-      <p>
-        Not that success was guaranteed.
-      </p>
-
-      <p>
-        Not that the machine made his life easy.
-      </p>
-
-      <p>
-        The advantage was access.
-      </p>
-
-      <p>
-        He was near something rare before it was obvious how important it would become. Then he paid attention. He stayed with it. He learned what the machine accepted and what it rejected. He learned that the computer did not care what he meant. It only cared exactly what he typed.
-      </p>
-
-      <p>
-        That can feel annoying when you are learning.
-      </p>
-
-      <p>
-        It is also the beginning of thinking like a programmer.
-      </p>
-
-      <p>
-        Years later, Gates said that without Lakeside, there would have been no Microsoft.
-      </p>
-
-      <p>
-        A hidden advantage only matters if you notice it. Gates could have ignored the terminal. He could have decided it was too confusing. He could have treated it like some weird school machine and moved on.
-      </p>
-
-      <p>
-        But he did not.
-      </p>
-
-      <p>
-        He moved closer.
-      </p>
-
-      <p>
-        You may not know yet which thing around you will matter later. It might be a class. A tool. A project. A teacher. A question. A skill that feels useless right now. A strange assignment. A black box you do not know how to open yet.
-      </p>
-
-      <p>
-        You may not know your hidden advantages until years later.
-      </p>
-
-      <p class="finish">
-        But you definitely miss them if you are not paying attention.
-      </p>
-    </section>
-
-    <section class="section warm">
-      <div class="sectionHead">
-        <h2>Open the next door</h2>
-        <div class="miniTrace" aria-hidden="true"></div>
-      </div>
-
-      <p>
-        The next door opens only if you noticed two details: where the story happened, and the phrase that explains the idea.
-      </p>
-
-      <div class="questionBlock">
-        <p>
-          1. What school put the strange machine close enough for Gates to use?
+        <h1>Part 2: The Lucky Break</h1>
+        <p class="subtitle">
+          You decoded the message. Now figure out what one of its strangest lines actually means.
         </p>
-        <textarea id="answerPlace" placeholder="answer 1"></textarea>
+
+        <div class="transmission">
+          <div class="label">FROM THE TRANSMISSION</div>
+          <div class="line">A LOT OF FUTURES START WITH ONE LUCKY BREAK.</div>
+        </div>
+
+        <section class="section mint story">
+          <div class="sectionHead">
+            <h2>What does that mean?</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
+
+          <p class="lead">
+            In the late 1960s, almost no kid your age had ever touched a computer.
+          </p>
+
+          <p class="lead">
+            Bill Gates did.
+          </p>
+
+          <p>
+            Not because he invented one. Not because he was already famous. His school, Lakeside in Seattle, happened to put a computer terminal close enough for students to use.
+          </p>
+
+          <p class="turn">
+            That was the lucky break.
+          </p>
+
+          <div class="imageFrame storyPhoto">
+            <img src="teletypeASR.png" alt="Teletype ASR-33 computer terminal" />
+            <div class="caption">A Teletype ASR-33. No screen. Programs and answers came through paper.</div>
+          </div>
+
+          <p>
+            The terminal did not look like the computers you know. It looked more like a typewriter. The real computer was somewhere else, reached through a phone line.
+          </p>
+
+          <p>
+            Computer time was expensive. Students had limited access. Mistakes could waste minutes that cost real money.
+          </p>
+
+          <p>
+            So Gates and the other students watched closely. They learned the machine. They tried things. They found mistakes. They came back again.
+          </p>
+
+          <p class="key">
+            The advantage was access.
+          </p>
+
+          <p>
+            He was near something rare before it was obvious how important it would become.
+          </p>
+
+          <div class="imageFrame storyPhoto">
+            <img src="gates.png" alt="Bill Gates with early personal computers" />
+          </div>
+
+          <p>
+            Access did not guarantee Microsoft. The terminal did not magically make Gates successful.
+          </p>
+
+          <p>
+            He could have ignored it. He could have decided it was too confusing. He could have treated it like some strange school machine and moved on.
+          </p>
+
+          <p>But he did not.</p>
+
+          <div class="move">He moved closer.</div>
+
+          <p>
+            He kept using it. He kept learning what the computer accepted and what it rejected. He learned that the machine did not care what he meant. It cared what he actually typed.
+          </p>
+
+          <p>
+            Years later, Gates described Lakeside's access as so important that he said:
+          </p>
+
+          <div>
+            <div class="quote">“If there had been no Lakeside, there would have been no Microsoft.”</div>
+            <div class="quoteSource">Bill Gates, speaking at Lakeside School, 2005</div>
+          </div>
+
+          <p>
+            That is the part of the first message that matters.
+          </p>
+
+          <p>
+            A lucky break can put something valuable near you.
+          </p>
+
+          <p class="key">
+            It still matters whether you notice it.
+          </p>
+
+          <p>
+            Your version may not be a rare computer terminal. It could be a class, a teacher, a tool, a project, a question, a skill, or some strange assignment that does not seem important yet.
+          </p>
+
+          <p>
+            You may not know which opportunities matter until much later.
+          </p>
+
+          <p class="turn">
+            But it is hard to use an opportunity you never notice.
+          </p>
+        </section>
+
+        <div class="bridge" aria-label="connection from the first message to the story">
+          <div class="bridgeRow"><strong>LUCKY BREAK</strong><span>Something valuable appears within reach.</span></div>
+          <div class="bridgeRow"><strong>ACCESS</strong><span>You actually get the chance to use it.</span></div>
+          <div class="bridgeRow"><strong>NOTICE IT</strong><span>You realize it might matter.</span></div>
+          <div class="bridgeRow"><strong>MOVE CLOSER</strong><span>You spend time with it instead of walking away.</span></div>
+          <div class="bridgeRow"><strong>KEEP GOING</strong><span>You stay long enough for confusion to start turning into skill.</span></div>
+        </div>
+
+        <section class="section warm">
+          <div class="sectionHead">
+            <h2>Open the next door</h2>
+            <div class="miniTrace" aria-hidden="true"></div>
+          </div>
+
+          <p>
+            Do not hunt for trivia. Show that you understood why the lucky break mattered.
+          </p>
+
+          <div class="questionBlock">
+            <p>1. Gates's lucky break was not success. It was ______.</p>
+            <textarea id="answerAccess" placeholder="answer 1"></textarea>
+          </div>
+
+          <div class="questionBlock">
+            <p>2. What did Gates do that made the opportunity matter?</p>
+            <textarea id="answerAction" placeholder="answer 2"></textarea>
+          </div>
+
+          <div class="gateRow">
+            <button id="checkBtn" type="button">open the next door</button>
+            <div id="gateMsg">waiting for both answers.</div>
+          </div>
+
+          <div class="tiny">
+            Your second answer does not need to use the exact words from the story. It needs to show the idea.
+          </div>
+        </section>
+
+        <div class="tiny">
+          The light bulb comes after staying with the hard part.
+        </div>
       </div>
-
-      <div class="questionBlock">
-        <p>
-          2. What does the story call an advantage that feels normal before you understand it?
-        </p>
-        <textarea id="answerIdea" placeholder="answer 2"></textarea>
-      </div>
-
-      <div class="gateRow">
-        <button id="checkBtn">open black box 2</button>
-        <div id="gateMsg">waiting for both answers.</div>
-      </div>
-
-      <div class="tiny">
-        Hint: both answers appear in the story, but the story will not stop and announce them for you.
-      </div>
-    </section>
-
-    <div class="tiny">
-      The light bulb comes after staying with the hard part.
-    </div>
-  </div>
-</main>
-```
-
+    </main>
   </div>
 
   <script>
@@ -541,42 +547,80 @@ button:hover{
       return value
         .trim()
         .toUpperCase()
-        .replace(/[^A-Z0-9]/g, "");
+        .replace(/[^A-Z0-9]/g,"");
+    }
+
+    function actionIsCorrect(value){
+      const a = clean(value);
+
+      const acceptedPhrases = [
+        "MOVEDCLOSER",
+        "KEPTGOING",
+        "KEPTUSINGIT",
+        "KEPTUSINGTHECOMPUTER",
+        "KEPTTRYING",
+        "PAIDATTENTION",
+        "STAYEDWITHIT",
+        "PRACTICED",
+        "PRACTICEDIT",
+        "USEDTHEACCESS",
+        "USEDIT",
+        "TOOKADVANTAGEOFIT",
+        "LEARNEDIT",
+        "KEPTLEARNING"
+      ];
+
+      if(acceptedPhrases.some(phrase => a.includes(phrase))) return true;
+
+      const hasPersistence =
+        a.includes("KEEP") ||
+        a.includes("STAY") ||
+        a.includes("PRACTIC") ||
+        a.includes("TRY") ||
+        a.includes("LEARN") ||
+        a.includes("USE") ||
+        a.includes("ATTENTION") ||
+        a.includes("CLOSER");
+
+      const hasAction =
+        a.includes("COMPUTER") ||
+        a.includes("TERMINAL") ||
+        a.includes("ACCESS") ||
+        a.includes("IT") ||
+        a.includes("OPPORTUNIT");
+
+      return hasPersistence && hasAction;
     }
 
     function checkAnswer(){
-      const placeAnswer = clean(document.getElementById("answerPlace").value);
-      const ideaAnswer = clean(document.getElementById("answerIdea").value);
+      const accessAnswer = clean(document.getElementById("answerAccess").value);
+      const actionAnswer = document.getElementById("answerAction").value;
       const gateMsg = document.getElementById("gateMsg");
 
-      const placeCorrect =
-        placeAnswer.includes("LAKESIDE");
+      const accessCorrect = accessAnswer.includes("ACCESS");
+      const actionCorrect = actionIsCorrect(actionAnswer);
 
-      const ideaCorrect =
-        ideaAnswer.includes("HIDDENADVANTAGE");
-
-      if(placeCorrect && ideaCorrect){
-        gateMsg.textContent = "both answers accepted. opening black box 2...";
+      if(accessCorrect && actionCorrect){
+        gateMsg.textContent = "you found the point. opening the next door...";
         setTimeout(() => {
           window.location.href = NEXT_URL;
-        }, 650);
-      }else if(!placeCorrect && !ideaCorrect){
-        gateMsg.textContent = "not yet. both details need another look.";
-      }else if(!placeCorrect){
-        gateMsg.textContent = "the idea is right, but the place needs another look.";
+        },650);
+      }else if(!accessCorrect && !actionCorrect){
+        gateMsg.textContent = "not yet. think about what the lucky break gave him, then what he did with it.";
+      }else if(!accessCorrect){
+        gateMsg.textContent = "your second idea works. look again at what the lucky break actually gave him.";
       }else{
-        gateMsg.textContent = "the place is right, but the idea needs another look.";
+        gateMsg.textContent = "access is right. now explain what Gates did with that access.";
       }
     }
 
-    document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+    document.getElementById("checkBtn").addEventListener("click",checkAnswer);
 
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown",(e)=>{
       if(e.key === "Enter" && (e.ctrlKey || e.metaKey)){
         checkAnswer();
       }
     });
   </script>
-
 </body>
 </html>
