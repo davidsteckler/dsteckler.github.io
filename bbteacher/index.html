@@ -95,6 +95,21 @@ button:hover,a.btn:hover{background:rgba(134,243,198,.14);border-color:rgba(134,
     <p>Quick access to the full transmission and every stage of the scavenger hunt.</p>
 
     <section class="section">
+      <h2>Physical black box → SD card</h2>
+      <p>
+        Intended opening: students physically open the classroom black box, find the SD card, and discover one sparse file such as <strong>signal.txt</strong>. The file contains only the binary below. Decoding it leads to <strong>https://dsteckler.com/blackbox</strong>, where the larger transmission begins.
+      </p>
+      <textarea id="sdBinary" class="message" readonly>01101000 01110100 01110100 01110000 01110011 00111010 00101111 00101111 01100100 01110011 01110100 01100101 01100011 01101011 01101100 01100101 01110010 00101110 01100011 01101111 01101101 00101111 01100010 01101100 01100001 01100011 01101011 01100010 01101111 01111000</textarea>
+      <div class="row">
+        <button id="copySdBtn" type="button">Copy SD-card binary</button>
+      </div>
+      <div class="status" id="sdStatus"></div>
+      <div class="note">
+        Keep the SD card minimal: ideally one file, no README, and no explanation of binary. The physical box is the true beginning of the semester-long scavenger hunt.
+      </div>
+    </section>
+
+    <section class="section">
       <h2>Decoded transmission</h2>
       <textarea id="message" class="message" readonly>CONGRATS.
 
@@ -158,21 +173,31 @@ WHAT WILL YOU BUILD WITH IT?</textarea>
 <script>
 const message=document.getElementById("message");
 const status=document.getElementById("status");
+const sdBinary=document.getElementById("sdBinary");
+const sdStatus=document.getElementById("sdStatus");
+
+async function copyText(value, statusEl){
+  try{
+    await navigator.clipboard.writeText(value);
+    statusEl.textContent="Copied.";
+  }catch(e){
+    const temp=document.createElement("textarea");
+    temp.value=value;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+    statusEl.textContent="Copied.";
+  }
+  setTimeout(()=>statusEl.textContent="",1600);
+}
 
 async function copyMessage(){
-  try{
-    await navigator.clipboard.writeText(message.value);
-    status.textContent="Copied.";
-  }catch(e){
-    message.focus();
-    message.select();
-    document.execCommand("copy");
-    status.textContent="Copied.";
-  }
-  setTimeout(()=>status.textContent="",1600);
+  await copyText(message.value,status);
 }
 
 document.getElementById("copyBtn").addEventListener("click",copyMessage);
+document.getElementById("copySdBtn").addEventListener("click",()=>copyText(sdBinary.value,sdStatus));
 document.getElementById("selectBtn").addEventListener("click",()=>{
   message.focus();
   message.select();
