@@ -587,12 +587,19 @@
 
     const NEXT_URL = "https://dsteckler.com/blackbox1.html";
 
-    const CORRECT_MESSAGE = `
-CONGRATS.
+    const CORRECT_MESSAGE = `CONGRATS.
 YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
 A LOT OF FUTURES START WITH ONE LUCKY BREAK.
 THIS CAN BE YOURS, IF YOU KEEP GOING.
 NOW GO BUILD.
+`;
+    const NEW_CORRECT_MESSAGE = `CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOURS, IF YOU NOTICE IT AND KEEP GOING.
+THIS MESSAGE MAY NOT FULLY MAKE SENSE YET.
+IF YOU CAN MAKE IT FURTHER, IT WILL.
+WHAT WILL YOU BUILD WITH IT?
 `;
 
     function clean(value){
@@ -602,12 +609,18 @@ NOW GO BUILD.
         .replace(/[^A-Z0-9]/g, "");
     }
 
+    function introMatch(value){
+      const user = clean(value);
+      const oldMessage = clean(CORRECT_MESSAGE);
+      const newMessage = clean(NEW_CORRECT_MESSAGE);
+      return user === oldMessage || user === newMessage;
+    }
+
     function checkMessage(){
-      const userMessage = clean(document.getElementById("decodedMessage").value);
-      const correctMessage = clean(CORRECT_MESSAGE);
+      const userMessage = document.getElementById("decodedMessage").value;
       const gateMsg = document.getElementById("gateMsg");
 
-      if(userMessage === correctMessage){
+      if(introMatch(userMessage)){
         gateMsg.textContent = "message accepted. opening...";
         setTimeout(() => {
           window.location.href = NEXT_URL;
