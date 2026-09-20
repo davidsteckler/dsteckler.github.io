@@ -474,6 +474,591 @@
         }
     </style>
   <link rel="stylesheet" href="learning-path.css">
+
+  <style id="binary1-polish">
+    body.ds-learning-page.ds-binary-page{
+      line-height:1.6;
+    }
+
+    body.ds-learning-page.ds-binary-page .container{
+      max-width:1120px!important;
+      width:min(calc(100% - 32px),1120px)!important;
+      margin:20px auto 26px!important;
+      padding:28px!important;
+      text-align:left!important;
+    }
+
+    .binary1-hero{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:24px;
+      align-items:end;
+      padding-bottom:22px;
+      margin-bottom:22px;
+      border-bottom:1px solid var(--ds-rule);
+    }
+
+    .binary1-kicker{
+      margin-bottom:7px;
+      color:var(--ds-terra);
+      font-family:'JetBrains Mono',monospace;
+      font-size:.7rem;
+      letter-spacing:.04em;
+    }
+
+    .binary1-hero h1{
+      margin:0 0 9px!important;
+      color:var(--ds-ink)!important;
+      font-family:'Fraunces',Georgia,serif!important;
+      font-size:clamp(2rem,4vw,3.15rem)!important;
+      line-height:1!important;
+      letter-spacing:-.04em!important;
+    }
+
+    .binary1-lead{
+      max-width:66ch;
+      margin:0!important;
+      color:var(--ds-mid)!important;
+      font-size:1rem;
+      line-height:1.58;
+    }
+
+    .binary1-badge{
+      padding:9px 12px;
+      border:1px solid var(--ds-rule);
+      border-radius:999px;
+      background:rgba(255,255,255,.48);
+      color:var(--ds-soft);
+      font-family:'JetBrains Mono',monospace;
+      font-size:.67rem;
+      white-space:nowrap;
+    }
+
+    .binary1-shell{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 320px;
+      gap:18px;
+      align-items:start;
+    }
+
+    .binary1-stage,
+    .binary1-controls,
+    .challenge-container,
+    .binary-tree-tutorial,
+    .info-section{
+      border:1px solid var(--ds-rule)!important;
+      border-radius:18px!important;
+      background:rgba(255,255,255,.43)!important;
+      box-shadow:none!important;
+    }
+
+    .binary1-stage{
+      min-width:0;
+      padding:24px;
+    }
+
+    .binary1-controls{
+      padding:18px;
+      position:sticky;
+      top:106px;
+    }
+
+    .binary1-panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .binary1-panel-head h2,
+    .binary1-controls h2{
+      margin:0 0 5px!important;
+      color:var(--ds-ink)!important;
+      font-family:'Fraunces',Georgia,serif!important;
+      font-size:1.28rem!important;
+      line-height:1.15;
+    }
+
+    .binary1-panel-head p,
+    .binary1-control-copy{
+      margin:0!important;
+      color:var(--ds-soft)!important;
+      font-size:.88rem;
+      line-height:1.5;
+    }
+
+    .binary1-live{
+      flex:0 0 auto;
+      padding:6px 9px;
+      border-radius:999px;
+      background:var(--ds-teal-soft);
+      color:var(--ds-teal);
+      font-family:'JetBrains Mono',monospace;
+      font-size:.63rem;
+    }
+
+    #bulbs{
+      display:grid!important;
+      grid-template-columns:repeat(8,minmax(58px,1fr));
+      gap:12px!important;
+      align-items:end;
+      justify-items:stretch;
+      margin:8px 0 24px!important;
+    }
+
+    .bulb-container{
+      display:flex!important;
+      flex-direction:column;
+      align-items:center;
+      min-width:0;
+      width:100%;
+    }
+
+    .bulb-label{
+      position:static!important;
+      width:auto!important;
+      margin:0 0 8px!important;
+      color:var(--ds-mid)!important;
+      font-family:'Outfit',sans-serif;
+      font-size:.82rem!important;
+      line-height:1;
+      font-weight:800!important;
+    }
+
+    .bulb{
+      width:100%!important;
+      max-width:82px;
+      aspect-ratio:1/1;
+      height:auto!important;
+      min-height:66px;
+      margin:0 auto;
+      border:2px solid var(--ds-ink)!important;
+      border-radius:24px 24px 9px 9px!important;
+      background:#f3f1ed!important;
+      color:var(--ds-ink)!important;
+      font-family:'Outfit',sans-serif!important;
+      font-size:1.8rem!important;
+      line-height:1!important;
+      box-shadow:0 8px 20px rgba(28,27,24,.06)!important;
+      transition:transform .12s ease,box-shadow .15s ease,background .15s ease!important;
+    }
+
+    .bulb:hover{
+      transform:translateY(-2px);
+    }
+
+    .bulb.on{
+      background:#ffd51f!important;
+      box-shadow:0 8px 22px rgba(255,213,31,.28)!important;
+    }
+
+    .binary1-status{
+      display:grid;
+      grid-template-columns:1.45fr .72fr 1fr;
+      gap:10px;
+      margin-top:4px;
+    }
+
+    .binary1-stat{
+      min-width:0;
+      padding:13px 14px;
+      border:1px solid var(--ds-rule);
+      border-radius:14px;
+      background:rgba(250,247,240,.78);
+    }
+
+    .binary1-stat-label{
+      display:block;
+      margin-bottom:4px;
+      color:var(--ds-soft);
+      font-family:'Outfit',sans-serif;
+      font-size:.67rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    #placeValueSum,
+    #numberDisplay,
+    #binaryDisplay{
+      margin:0!important;
+      color:var(--ds-ink)!important;
+      font-family:'JetBrains Mono',monospace!important;
+      font-size:.9rem!important;
+      line-height:1.45!important;
+      text-align:left!important;
+      overflow-wrap:anywhere;
+    }
+
+    .binary-visualization{
+      justify-content:flex-start!important;
+      flex-wrap:wrap!important;
+      gap:6px!important;
+      margin:16px 0 0!important;
+      min-height:32px;
+    }
+
+    .binary-box{
+      width:34px!important;
+      height:34px!important;
+      margin:0!important;
+      border:1px solid var(--ds-rule-strong)!important;
+      border-radius:8px;
+      background:rgba(255,255,255,.5);
+      color:var(--ds-mid);
+      font-family:'JetBrains Mono',monospace;
+      font-size:.78rem;
+    }
+
+    .binary-box.active{
+      background:var(--ds-teal)!important;
+      color:white!important;
+      border-color:var(--ds-teal)!important;
+    }
+
+    .binary1-controls .controls{
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      gap:8px!important;
+      margin:16px 0!important;
+    }
+
+    .binary1-controls .toggle-container{
+      display:flex!important;
+      align-items:center!important;
+      justify-content:space-between!important;
+      width:100%!important;
+      padding:11px 12px;
+      border:1px solid var(--ds-rule);
+      border-radius:13px;
+      background:rgba(250,247,240,.76);
+    }
+
+    .binary1-controls .toggle-label{
+      margin:0!important;
+      color:var(--ds-mid);
+      font-family:'Outfit',sans-serif;
+      font-size:.85rem!important;
+      font-weight:700;
+    }
+
+    .binary1-controls .switch{
+      flex:0 0 auto;
+      width:50px!important;
+      height:28px!important;
+    }
+
+    .binary1-controls .slider{
+      border:1px solid var(--ds-rule)!important;
+      background:#d2d0ca!important;
+    }
+
+    .binary1-controls .slider:before{
+      width:20px!important;
+      height:20px!important;
+      left:3px!important;
+      bottom:3px!important;
+    }
+
+    .binary1-controls input:checked + .slider{
+      background:var(--ds-teal)!important;
+    }
+
+    .binary1-controls input:checked + .slider:before{
+      transform:translateX(21px)!important;
+    }
+
+    .binary1-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
+    .binary1-actions #tutorialBtn{
+      grid-column:1/-1;
+    }
+
+    .binary1-actions button,
+    .difficulty-buttons button{
+      width:100%!important;
+      min-height:42px;
+      margin:0!important;
+      padding:10px 12px!important;
+      border-radius:11px!important;
+      border:1px solid var(--ds-ink)!important;
+      background:var(--ds-ink)!important;
+      color:white!important;
+      font-family:'Outfit',sans-serif!important;
+      font-size:.78rem!important;
+      font-weight:800!important;
+    }
+
+    .difficulty-buttons{
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      gap:7px!important;
+      margin-top:14px!important;
+    }
+
+    .difficulty-buttons::before{
+      content:"Practice size";
+      display:block;
+      margin:0 0 1px;
+      color:var(--ds-soft);
+      font-family:'Outfit',sans-serif;
+      font-size:.68rem;
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
+
+    .difficulty-buttons button{
+      background:rgba(255,255,255,.5)!important;
+      color:var(--ds-mid)!important;
+      border-color:var(--ds-rule-strong)!important;
+      text-align:left;
+    }
+
+    .difficulty-buttons button:hover{
+      background:rgba(255,255,255,.78)!important;
+      color:var(--ds-ink)!important;
+    }
+
+    #alert{
+      margin-top:14px!important;
+      padding:12px!important;
+      border:1px solid rgba(192,98,42,.18)!important;
+      border-radius:13px!important;
+      background:var(--ds-terra-soft)!important;
+      color:var(--ds-mid)!important;
+      font-size:.84rem;
+    }
+
+    #newChallengeButton{
+      margin-top:8px!important;
+    }
+
+    .binary1-practice-grid{
+      display:grid;
+      grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+      gap:18px;
+      margin-top:18px;
+      align-items:start;
+    }
+
+    .challenge-container{
+      margin:0!important;
+      padding:20px!important;
+    }
+
+    .challenge-text{
+      margin-bottom:5px!important;
+      color:var(--ds-ink);
+      font-family:'Fraunces',Georgia,serif;
+      font-size:1.18rem!important;
+      line-height:1.2;
+    }
+
+    .challenge-help{
+      margin:0 0 14px;
+      color:var(--ds-soft);
+      font-size:.85rem;
+      line-height:1.5;
+    }
+
+    .challenge-row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .challenge-input{
+      flex:1 1 auto;
+      width:auto!important;
+      min-width:0;
+      margin:0!important;
+      padding:10px 11px!important;
+      border-radius:11px!important;
+    }
+
+    .challenge-button{
+      flex:0 0 auto;
+      margin:0!important;
+      min-height:42px;
+      padding:10px 15px!important;
+    }
+
+    .binary-tree{
+      min-height:0;
+      margin:0!important;
+      padding:20px;
+      border:1px solid var(--ds-rule);
+      border-radius:18px;
+      background:rgba(255,255,255,.43);
+    }
+
+    .binary-tree:empty{
+      display:none;
+    }
+
+    .binary-tree-tutorial{
+      margin-top:18px!important;
+      padding:20px!important;
+    }
+
+    .binary-tree-tutorial h3,
+    .info-section h2,
+    .info-section h3{
+      color:var(--ds-ink)!important;
+      font-family:'Fraunces',Georgia,serif!important;
+    }
+
+    .tutorial-controls{
+      gap:8px!important;
+    }
+
+    .tutorial-controls button{
+      margin:0!important;
+    }
+
+    .page-break{
+      display:none!important;
+    }
+
+    .info-section{
+      margin-top:18px!important;
+      padding:22px!important;
+    }
+
+    .info-section h2{
+      margin-top:0!important;
+      font-size:1.5rem!important;
+    }
+
+    .info-section h3{
+      margin-top:22px!important;
+      margin-bottom:7px!important;
+      font-size:1.08rem!important;
+    }
+
+    .info-section p,
+    .info-section li{
+      color:var(--ds-mid)!important;
+      font-size:.94rem!important;
+      line-height:1.62!important;
+    }
+
+    .modal-content{
+      max-width:560px!important;
+      margin:10vh auto!important;
+      padding:24px!important;
+      border:1px solid var(--ds-rule)!important;
+      border-radius:18px!important;
+      background:var(--ds-surface)!important;
+      color:var(--ds-ink)!important;
+      box-shadow:0 24px 70px rgba(28,27,24,.18)!important;
+    }
+
+    .modal-content h2{
+      font-family:'Fraunces',Georgia,serif!important;
+      color:var(--ds-ink)!important;
+    }
+
+    .modal-content li,
+    .modal-content p{
+      color:var(--ds-mid)!important;
+    }
+
+    @media(max-width:960px){
+      .binary1-shell{
+        grid-template-columns:1fr;
+      }
+
+      .binary1-controls{
+        position:static;
+      }
+
+      .binary1-controls .controls{
+        grid-template-columns:repeat(3,1fr)!important;
+      }
+
+      .binary1-controls .toggle-container{
+        flex-direction:column!important;
+        align-items:flex-start!important;
+        gap:10px;
+      }
+
+      .difficulty-buttons{
+        grid-template-columns:repeat(3,1fr)!important;
+      }
+
+      .difficulty-buttons::before{
+        grid-column:1/-1;
+      }
+    }
+
+    @media(max-width:720px){
+      .binary1-hero{
+        grid-template-columns:1fr;
+      }
+
+      .binary1-badge{
+        justify-self:start;
+      }
+
+      #bulbs{
+        grid-template-columns:repeat(4,minmax(52px,1fr));
+      }
+
+      .binary1-status{
+        grid-template-columns:1fr;
+      }
+
+      .binary1-practice-grid{
+        grid-template-columns:1fr;
+      }
+
+      .binary1-controls .controls,
+      .difficulty-buttons{
+        grid-template-columns:1fr!important;
+      }
+
+      .binary1-controls .toggle-container{
+        flex-direction:row!important;
+        align-items:center!important;
+      }
+    }
+
+    @media(max-width:480px){
+      body.ds-learning-page.ds-binary-page .container{
+        width:min(calc(100% - 20px),1120px)!important;
+        padding:16px!important;
+      }
+
+      .binary1-stage,
+      .binary1-controls,
+      .challenge-container,
+      .binary-tree-tutorial,
+      .info-section{
+        padding:16px!important;
+      }
+
+      #bulbs{
+        gap:8px!important;
+      }
+
+      .bulb{
+        min-height:56px;
+        border-radius:18px 18px 7px 7px!important;
+        font-size:1.45rem!important;
+      }
+
+      .bulb-label{
+        font-size:.72rem!important;
+      }
+    }
+  </style>
 </head>
 <body class="ds-learning-page ds-binary-page">
 <header class="ds-sitebar">
@@ -537,65 +1122,105 @@
     </header>
 
     <div class="container">
-        <h1>Binary Bulbs Game</h1>
-        
+        <div class="binary1-hero">
+            <div>
+                <div class="binary1-kicker">// binary 1 · numbers</div>
+                <h1>Binary Bulbs</h1>
+                <p class="binary1-lead">Turn bits on and off and watch the number change. The point here is to see how each place value contributes to the final decimal number.</p>
+            </div>
+            <div class="binary1-badge">0–255 · 8 bits</div>
+        </div>
+
         <div class="game-container">
-            <div id="bulbs"></div>
+            <div class="binary1-shell">
+                <section class="binary1-stage" aria-label="Binary bulb playground">
+                    <div class="binary1-panel-head">
+                        <div>
+                            <h2>Build a number</h2>
+                            <p>Click a bulb. A 1 means that place value is being used.</p>
+                        </div>
+                        <div class="binary1-live">LIVE</div>
+                    </div>
 
-            <div id="placeValueSum">Sum: 0 = 0</div>
-            <div id="numberDisplay">Decimal: 0</div>
-            <div id="binaryDisplay">Binary: 00000000</div>
+                    <div id="bulbs"></div>
 
-            <div class="controls">
-                <div class="toggle-container">
-                    <span class="toggle-label">Hard Mode:</span>
-                    <label class="switch">
-                        <input type="checkbox" id="difficultyToggle">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="binary1-status">
+                        <div class="binary1-stat">
+                            <span class="binary1-stat-label">Place values</span>
+                            <div id="placeValueSum">Sum: 0 = 0</div>
+                        </div>
+                        <div class="binary1-stat">
+                            <span class="binary1-stat-label">Decimal</span>
+                            <div id="numberDisplay">Decimal: 0</div>
+                        </div>
+                        <div class="binary1-stat">
+                            <span class="binary1-stat-label">Binary</span>
+                            <div id="binaryDisplay">Binary: 00000000</div>
+                        </div>
+                    </div>
+
+                    <div class="binary-visualization" id="binaryVisualization"></div>
+                </section>
+
+                <aside class="binary1-controls">
+                    <h2>Controls</h2>
+                    <p class="binary1-control-copy">Change what you can see, randomize the bits, or switch into a challenge.</p>
+
+                    <div class="controls">
+                        <div class="toggle-container">
+                            <span class="toggle-label">Hard Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="difficultyToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-container">
+                            <span class="toggle-label">Game Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="gameModeToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-container">
+                            <span class="toggle-label">Show Labels</span>
+                            <label class="switch">
+                                <input type="checkbox" id="labelsToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="binary1-actions">
+                        <button onclick="resetBits()">Reset</button>
+                        <button onclick="randomizeBits()">Randomize</button>
+                        <button id="tutorialBtn">How to Play</button>
+                    </div>
+
+                    <div class="difficulty-buttons">
+                        <button onclick="setDifficulty('easy')">Easy · 4 bits</button>
+                        <button onclick="setDifficulty('medium')">Medium · 6 bits</button>
+                        <button onclick="setDifficulty('hard')">Hard · 8 bits</button>
+                    </div>
+
+                    <div id="alert" style="display:none;">
+                        <span>Create the binary representation of: <strong id="target"></strong></span>
+                        <button id="newChallengeButton" style="display:none;" onclick="startNewGame()">New Challenge</button>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="binary1-practice-grid">
+                <div class="challenge-container">
+                    <div class="challenge-text">Can you convert it yourself?</div>
+                    <p class="challenge-help">Type a decimal number from 0 to 255, then check its binary form.</p>
+                    <div class="challenge-row">
+                        <input type="number" class="challenge-input" id="decimalInput" min="0" max="255" placeholder="Try 42">
+                        <button class="challenge-button" onclick="checkDecimalToBinary()">Check</button>
+                    </div>
                 </div>
-                <div class="toggle-container">
-                    <span class="toggle-label">Game Mode:</span>
-                    <label class="switch">
-                        <input type="checkbox" id="gameModeToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="toggle-container">
-                    <span class="toggle-label">Labels:</span>
-                    <label class="switch">
-                        <input type="checkbox" id="labelsToggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
+
+                <div class="binary-tree" id="binaryTree"></div>
             </div>
-
-            <div class="button-container">
-                <button onclick="resetBits()">Reset</button>
-                <button onclick="randomizeBits()">Randomize</button>
-                <button id="tutorialBtn">How to Play</button>
-            </div>
-
-            <div class="difficulty-buttons">
-                <button onclick="setDifficulty('easy')">Easy (4 bits)</button>
-                <button onclick="setDifficulty('medium')">Medium (6 bits)</button>
-                <button onclick="setDifficulty('hard')">Hard (8 bits)</button>
-            </div>
-
-            <div id="alert" style="display: none; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">
-                <span>Create the binary representation of: <span id="target"></span></span>
-                <button id="newChallengeButton" style="display: none;" onclick="startNewGame()">New Challenge</button>
-            </div>
-
-            <div class="binary-visualization" id="binaryVisualization"></div>
-
-            <div class="challenge-container">
-                <div class="challenge-text">Convert decimal to binary:</div>
-                <input type="number" class="challenge-input" id="decimalInput" min="0" max="255">
-                <button class="challenge-button" onclick="checkDecimalToBinary()">Check</button>
-            </div>
-
-            <div class="binary-tree" id="binaryTree"></div>
 
             <div class="binary-tree-tutorial">
                 <h3>Understanding the Binary Tree</h3>
