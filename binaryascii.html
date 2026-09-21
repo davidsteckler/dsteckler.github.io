@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII: How Computers Learned Text | David Steckler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learning-path.css">
+<style>
+:root{
+  --bg:#f2ede4;--paper:#f8f4ec;--ink:#24211d;--mid:#5f5951;--soft:#989086;
+  --line:rgba(36,33,29,.10);--line2:rgba(36,33,29,.16);
+  --teal:#2d6972;--teal-soft:rgba(45,105,114,.09);
+  --terra:#b86238;--terra-soft:rgba(184,98,56,.08);
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);background:var(--bg);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
+
+/* shared header */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(242,237,228,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;flex-direction:column;line-height:1.1}.brand strong{font-size:.9rem;letter-spacing:.08em;text-transform:uppercase}.brand span{margin-top:4px;font:400 .66rem 'JetBrains Mono',monospace;color:var(--soft)}
+nav{display:flex;gap:4px;align-items:center}nav a{padding:8px 11px;border-radius:999px;color:#716a61;font-size:.79rem;font-weight:600}nav a.active,nav a:hover{background:rgba(36,33,29,.06);color:var(--ink)}
+.menu{display:none;border:1px solid var(--line);background:transparent;border-radius:10px;width:40px;height:40px}
+
+.lesson-path{width:min(calc(100% - 32px),960px);margin:14px auto 0;display:flex;justify-content:center;gap:6px;overflow-x:auto;padding:0 0 8px}
+.lesson-path a{flex:0 0 auto;padding:6px 10px;border-radius:999px;color:#8b8379;font-size:.7rem;font-weight:600}
+.lesson-path a.current{background:var(--teal-soft);color:var(--teal)}
+
+main{padding:22px 0 34px}
+.hero{text-align:center;margin-bottom:28px}
+.hero h1{margin:0;font:600 clamp(2.5rem,5vw,4.2rem)/.98 'Fraunces',serif;letter-spacing:-.045em}
+.hero p{margin:8px auto 0;color:var(--soft);font-size:.93rem;max-width:54ch}
+
+/* story */
+.story{width:min(calc(100% - 32px),980px);margin:0 auto;padding:24px 0 0;border-top:1px solid var(--line)}
+.story h2,.games h2,.table-section h2,.patterns h2{margin:0;font:500 clamp(1.55rem,3vw,2.1rem)/1.1 'Fraunces',serif;letter-spacing:-.025em}
+.story-intro{margin:7px auto 20px;color:var(--soft);font-size:.84rem;max-width:65ch;text-align:center}
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.moment{min-height:176px;padding:18px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.24)}
+.year{font:600 .72rem 'JetBrains Mono',monospace;color:var(--terra);letter-spacing:.04em}
+.moment h3{margin:9px 0 7px;font:600 1.08rem 'Fraunces',serif}
+.moment p{margin:0;color:var(--mid);font-size:.79rem;line-height:1.5}
+.code-strip{margin:18px auto 0;display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;color:#766f66;font-size:.76rem}
+.code-pill{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.28);font:600 .76rem 'JetBrains Mono',monospace}
+.code-arrow{color:#b0a89e}
+
+/* game art */
+.games{width:min(calc(100% - 32px),980px);margin:52px auto 0}
+.games-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:16px}
+.games-head p{margin:0;color:var(--soft);font-size:.82rem;max-width:48ch}
+.game-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
+.terminal{border-radius:17px;overflow:hidden;background:#1d1d1b;color:#dedbd2;box-shadow:0 18px 42px rgba(36,33,29,.10)}
+.terminal-top{display:flex;align-items:center;gap:6px;padding:10px 13px;border-bottom:1px solid rgba(255,255,255,.08);font:500 .62rem 'JetBrains Mono',monospace;color:#8f8b83}
+.term-dot{width:7px;height:7px;border-radius:50%;background:#69655f}
+.screen{padding:20px 24px 22px;font:500 clamp(.8rem,1.5vw,1rem)/1.35 'JetBrains Mono',monospace;white-space:pre;overflow:auto}
+.screen .player{color:#f0c95a;font-weight:700}.screen .monster{color:#dc8f78;font-weight:700}.screen .treasure{color:#8bc7cf;font-weight:700}.screen .wall{color:#8f8b83}
+.legend-card{padding:20px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.24)}
+.legend-card .kicker{font:600 .66rem 'JetBrains Mono',monospace;color:var(--terra);letter-spacing:.04em}
+.legend-card h3{margin:7px 0 12px;font:600 1.35rem 'Fraunces',serif}
+.legend-list{display:grid;gap:8px}
+.legend-item{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(36,33,29,.07)}
+.legend-item:last-child{border-bottom:0}.legend-symbol{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:rgba(36,33,29,.05);font:700 1rem 'JetBrains Mono',monospace}
+.legend-item strong{display:block;font-size:.78rem}.legend-item span:last-child{color:var(--soft);font-size:.7rem;line-height:1.35}
+.game-note{margin:12px 0 0;color:var(--mid);font-size:.76rem;line-height:1.5}
+
+/* table */
+.table-section{width:min(calc(100% - 24px),1160px);margin:54px auto 0;padding-top:30px;border-top:1px solid var(--line)}
+.table-head{text-align:center}.table-head p{margin:7px auto 18px;color:var(--soft);font-size:.82rem;max-width:58ch}
+.lookup{display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start}
+.ascii-board{padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.22)}
+.board-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:4px}
+.ascii-cell{min-width:0;height:58px;padding:5px 3px;border:1px solid rgba(36,33,29,.07);border-radius:8px;background:rgba(255,255,255,.34);cursor:pointer;color:var(--ink);transition:transform .08s ease,background .08s ease}
+.ascii-cell:hover{transform:translateY(-1px);background:rgba(255,255,255,.68)}
+.ascii-cell.selected{outline:2px solid rgba(45,105,114,.30);background:var(--teal-soft)}
+.ascii-cell .dec{display:block;color:var(--soft);font:500 .54rem 'JetBrains Mono',monospace;text-align:left}
+.ascii-cell .char{display:block;margin-top:4px;font:600 .88rem 'JetBrains Mono',monospace;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ascii-cell.control .char{font-size:.57rem;color:#918980}.ascii-cell.number{background:rgba(73,124,168,.07)}.ascii-cell.upper{background:rgba(45,105,114,.07)}.ascii-cell.lower{background:rgba(83,131,93,.07)}.ascii-cell.symbol{background:rgba(184,98,56,.05)}
+.detail{position:sticky;top:86px;padding:20px;border:1px solid var(--line);border-radius:18px;background:rgba(248,244,236,.94)}
+.detail small{display:block;color:var(--soft);font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.detail-char{margin:4px 0 15px;font:600 4rem/1 'Fraunces',serif}
+.detail-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:.77rem}
+.detail-row code{font:600 .76rem 'JetBrains Mono',monospace;color:var(--teal)}
+.detail-hint{margin:13px 0 0;color:var(--soft);font-size:.68rem;line-height:1.45}
+.table-legend{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px;color:var(--soft);font-size:.66rem}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}.dot-number{background:rgba(73,124,168,.25)}.dot-upper{background:rgba(45,105,114,.25)}.dot-lower{background:rgba(83,131,93,.25)}.dot-symbol{background:rgba(184,98,56,.18)}
+
+/* patterns */
+.patterns{width:min(calc(100% - 32px),820px);margin:46px auto 0;text-align:center}
+.pattern-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}
+.pattern-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.22)}
+.pattern-card small{display:block;color:var(--soft);font-size:.62rem;text-transform:uppercase;letter-spacing:.07em}
+.pattern-card strong{display:block;margin-top:5px;font:600 1.2rem 'JetBrains Mono',monospace;color:var(--teal)}
+.pattern-note{margin:10px 0 0;color:var(--mid);font-size:.74rem}
+
+.sources{width:min(calc(100% - 32px),820px);margin:28px auto 0;color:var(--soft);font-size:.65rem;text-align:center}
+.sources a{color:#7b746b;text-decoration:underline;text-decoration-color:rgba(123,116,107,.35);text-underline-offset:2px}
+
+footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
+
+@media(max-width:900px){
+  .timeline{grid-template-columns:repeat(2,1fr)}
+  .game-grid,.lookup{grid-template-columns:1fr}
+  .detail{position:static}
+  .board-grid{grid-template-columns:repeat(8,1fr)}
+}
+@media(max-width:680px){
+  nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  nav.open{display:flex}.menu{display:block}.hero h1{font-size:2.6rem}
+  .timeline{grid-template-columns:1fr}
+  .games-head{align-items:start;flex-direction:column}
+  .board-grid{grid-template-columns:repeat(4,1fr)}
+  .ascii-cell{height:54px}
+  .pattern-row{grid-template-columns:1fr}
+  footer.site-footer{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap topbar">
+    <a class="brand" href="index.html"><strong>David Steckler</strong><span>// cs · robotics · thinking for yourself</span></a>
+    <button class="menu" id="menuButton" aria-label="Open navigation">☰</button>
+    <nav id="siteNav">
+      <a href="index.html">Home</a><a href="about.html">About</a><a class="active" href="course.html">Course</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="testimonials.html">Testimonials</a><a href="search.html">Search</a>
+    </nav>
+  </div>
+</header>
+
+<div class="lesson-path" aria-label="Binary lessons">
+  <a href="binary1.html">1 · Numbers</a>
+  <a href="binary2.html">2 · Text</a>
+  <a class="current" href="binaryascii.html">3 · ASCII</a>
+  <a href="binary3.html">4 · One byte</a>
+  <a href="binary4.html">5 · Images</a>
+  <a href="binaryaudio.html">6 · Audio</a>
+</div>
+
+<main>
+  <section class="hero">
+    <h1>ASCII</h1>
+    <p>Binary can store numbers. ASCII was an agreement about what some of those numbers should mean.</p>
+  </section>
+
+  <section class="story">
+    <div class="story-intro">Computers needed a shared code so different machines could exchange text and agree that the same number meant the same character.</div>
+    <div class="timeline">
+      <article class="moment">
+        <div class="year">BEFORE ASCII</div>
+        <h3>Different codebooks</h3>
+        <p>Computer makers used different character codes. Moving text between systems could mean translating from one code to another.</p>
+      </article>
+      <article class="moment">
+        <div class="year">1963</div>
+        <h3>A shared standard</h3>
+        <p>ASCII became ASA standard X3.4. It used 7 bits, giving 128 possible codes for letters, numbers, punctuation, and control instructions.</p>
+      </article>
+      <article class="moment">
+        <div class="year">1967–1968</div>
+        <h3>The familiar version</h3>
+        <p>Revisions refined the standard. ASCII became a common way for computers and communication equipment to exchange text.</p>
+      </article>
+      <article class="moment">
+        <div class="year">AROUND 1980</div>
+        <h3>Characters became graphics</h3>
+        <p>Games such as <em>Rogue</em> used characters on a terminal as the game world itself. Text doubled as art.</p>
+      </article>
+    </div>
+    <div class="code-strip" aria-label="ASCII example">
+      <span class="code-pill">A</span><span class="code-arrow">→</span><span class="code-pill">65</span><span class="code-arrow">→</span><span class="code-pill">01000001</span>
+    </div>
+  </section>
+
+  <section class="games">
+    <div class="games-head">
+      <div><h2>When text became video game art</h2></div>
+      <p>Early terminal games could build a whole world from the characters the computer already knew how to display.</p>
+    </div>
+    <div class="game-grid">
+      <div class="terminal" aria-label="Rogue-style ASCII dungeon">
+        <div class="terminal-top"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp;&nbsp;ROGUE-STYLE TERMINAL</div>
+        <div class="screen"><span class="wall">############################
+#............#.............#
+#..####......#....</span><span class="monster">D</span><span class="wall">........#
+#..#.......................#
+#..#....</span><span class="treasure">$</span><span class="wall">.................#
+#............</span><span class="player">@</span><span class="wall">...............#
+#....................+.....#
+############################</span></div>
+      </div>
+      <aside class="legend-card">
+        <div class="kicker">// one character can be an object</div>
+        <h3>Your brain fills in the graphics.</h3>
+        <div class="legend-list">
+          <div class="legend-item"><span class="legend-symbol">@</span><span><strong>Player</strong><span>Rogue helped popularize @ for “where you're at.”</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">D</span><span><strong>Monster</strong><span>Letters could stand for creatures; D could represent a dragon.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">$</span><span><strong>Treasure</strong><span>A familiar symbol could become an object in the world.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">#</span><span><strong>Walls</strong><span>Repeated characters create shapes, rooms, and boundaries.</span></span></div>
+        </div>
+        <p class="game-note">This is a Rogue-style example, not a screenshot of one exact level.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <div class="table-head">
+      <h2>The ASCII table</h2>
+      <p>Every box is one code from 0 to 127. Click one to see its decimal, binary, and hexadecimal forms.</p>
+    </div>
+    <div class="lookup">
+      <div class="ascii-board">
+        <div class="board-grid" id="asciiGrid"></div>
+        <div class="table-legend">
+          <span><i class="legend-dot dot-symbol"></i>symbols / controls</span>
+          <span><i class="legend-dot dot-number"></i>numbers</span>
+          <span><i class="legend-dot dot-upper"></i>uppercase</span>
+          <span><i class="legend-dot dot-lower"></i>lowercase</span>
+        </div>
+      </div>
+      <aside class="detail" id="asciiDetail">
+        <small>Selected character</small>
+        <div class="detail-char" id="detailChar">A</div>
+        <div class="detail-row"><span>Decimal</span><code id="detailDec">65</code></div>
+        <div class="detail-row"><span>Binary</span><code id="detailBin">01000001</code></div>
+        <div class="detail-row"><span>Hex</span><code id="detailHex">41</code></div>
+        <div class="detail-row"><span>Type</span><code id="detailType">uppercase</code></div>
+        <p class="detail-hint">The first 32 values are control codes, so they usually do not print a visible character.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="patterns">
+    <h2>The table has patterns</h2>
+    <div class="pattern-row">
+      <div class="pattern-card"><small>digits begin</small><strong>0 = 48</strong></div>
+      <div class="pattern-card"><small>uppercase begins</small><strong>A = 65</strong></div>
+      <div class="pattern-card"><small>lowercase begins</small><strong>a = 97</strong></div>
+    </div>
+    <p class="pattern-note">Uppercase and lowercase versions of the same English letter are 32 apart: A = 65, a = 97.</p>
+  </section>
+
+  <div class="sources">
+    History checked against <a href="https://www.computerhistory.org/timeline/1963/" target="_blank" rel="noopener">Computer History Museum</a> and <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/FIPS/fipspub1-2.pdf" target="_blank" rel="noopener">NIST</a>. The game example is based on the text-display tradition of <em>Rogue</em>.
+  </div>
+</main>
+
+<div class="ds-step-footer">
+  <a class="ds-next-card ds-prev" href="binary2.html"><small>← Previous</small><strong>Binary 2 · Text</strong><span>Watch characters turn into 8-bit values.</span></a>
+  <a class="ds-next-card ds-next" href="binary3.html"><small>Next →</small><strong>Binary 4 · One Byte, Many Meanings</strong><span>See the same byte become different kinds of information.</span></a>
+</div>
+
+<footer class="site-footer"><span>© 2026 David Steckler</span><span>binary · information · representation</span></footer>
+
+<script>
+const controlNames=[
+'NUL','SOH','STX','ETX','EOT','ENQ','ACK','BEL','BS','TAB','LF','VT','FF','CR','SO','SI',
+'DLE','DC1','DC2','DC3','DC4','NAK','SYN','ETB','CAN','EM','SUB','ESC','FS','GS','RS','US'
+];
+
+function typeFor(n){
+  if(n<=31 || n===127) return 'control';
+  if(n>=48 && n<=57) return 'number';
+  if(n>=65 && n<=90) return 'upper';
+  if(n>=97 && n<=122) return 'lower';
+  return 'symbol';
+}
+function labelFor(n){
+  if(n<=31) return controlNames[n];
+  if(n===32) return 'SPACE';
+  if(n===127) return 'DEL';
+  return String.fromCharCode(n);
+}
+function displayFor(n){
+  if(n===32) return '␠';
+  if(n<=31 || n===127) return labelFor(n);
+  return String.fromCharCode(n);
+}
+function binary8(n){return n.toString(2).padStart(8,'0')}
+function hex2(n){return n.toString(16).toUpperCase().padStart(2,'0')}
+
+const grid=document.getElementById('asciiGrid');
+function selectCode(n,button){
+  document.querySelectorAll('.ascii-cell.selected').forEach(el=>el.classList.remove('selected'));
+  if(button) button.classList.add('selected');
+  document.getElementById('detailChar').textContent=displayFor(n);
+  document.getElementById('detailDec').textContent=n;
+  document.getElementById('detailBin').textContent=binary8(n);
+  document.getElementById('detailHex').textContent=hex2(n);
+  document.getElementById('detailType').textContent=typeFor(n);
+}
+for(let n=0;n<128;n++){
+  const b=document.createElement('button');
+  b.className='ascii-cell '+typeFor(n)+(n===65?' selected':'');
+  b.type='button';
+  b.innerHTML='<span class="dec">'+n+'</span><span class="char">'+displayFor(n)+'</span>';
+  b.setAttribute('aria-label',labelFor(n)+' decimal '+n);
+  b.addEventListener('click',()=>selectCode(n,b));
+  grid.appendChild(b);
+}
+
+document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
+</script>
+</body>
+</html>
