@@ -55,7 +55,43 @@ main{padding:22px 0 34px}
   background:rgba(255,255,255,.24);
   text-align:center;
 }
-.codebook h2{margin:0 0 14px;font:500 1.35rem 'Fraunces',serif}
+.codebook h2{margin:0 0 6px;font:500 1.35rem 'Fraunces',serif}
+.codebook-intro{margin:0 auto 14px;color:var(--soft);font-size:.76rem}
+.char-try{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:0 auto 16px;
+}
+.char-input{
+  width:74px;
+  height:48px;
+  border:1px solid var(--line2);
+  border-radius:12px;
+  background:rgba(255,255,255,.62);
+  color:var(--ink);
+  text-align:center;
+  font:600 1.35rem 'JetBrains Mono',monospace;
+  outline:none;
+}
+.char-input:focus{border-color:rgba(45,105,114,.42);box-shadow:0 0 0 4px rgba(45,105,114,.07)}
+.try-label{color:var(--mid);font-size:.74rem;font-weight:600}
+.quick-chars{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.quick-char{
+  min-width:34px;
+  height:34px;
+  padding:0 8px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:rgba(255,255,255,.32);
+  color:var(--mid);
+  cursor:pointer;
+  font:600 .72rem 'JetBrains Mono',monospace;
+}
+.quick-char:hover{background:rgba(255,255,255,.65);color:var(--ink)}
+.char-feedback{min-height:18px;margin:-7px 0 10px;color:var(--terra);font-size:.68rem}
 .codebook-flow{
   display:grid;
   grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
@@ -79,6 +115,9 @@ main{padding:22px 0 34px}
 .codebook-box strong{
   font:600 1.02rem 'JetBrains Mono',monospace;
 }
+.codebook-box:first-child strong{font-size:1.5rem}
+.codebook-box.updated{animation:codePulse .18s ease}
+@keyframes codePulse{50%{background:rgba(45,105,114,.10)}}
 .codebook-arrow{color:#aaa198}
 .byte-note{
   margin:12px auto 0;
@@ -108,6 +147,36 @@ main{padding:22px 0 34px}
 /* table */
 .table-section{width:min(calc(100% - 24px),1160px);margin:54px auto 0;padding-top:30px;border-top:1px solid var(--line)}
 .table-head{text-align:center}.table-head p{margin:7px auto 18px;color:var(--soft);font-size:.82rem;max-width:58ch}
+.ascii-hunt{
+  width:min(100%,760px);
+  margin:0 auto 16px;
+  padding:13px 15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.28);
+}
+.hunt-copy{min-width:0}
+.hunt-kicker{color:var(--terra);font:600 .61rem 'JetBrains Mono',monospace;letter-spacing:.05em;text-transform:uppercase}
+.hunt-prompt{margin-top:3px;color:var(--ink);font-size:.86rem;font-weight:600}
+.hunt-status{margin-top:3px;min-height:16px;color:var(--soft);font-size:.67rem}
+.hunt-progress{
+  flex:0 0 auto;
+  min-width:62px;
+  padding:7px 9px;
+  border-radius:10px;
+  background:var(--teal-soft);
+  color:var(--teal);
+  text-align:center;
+  font:700 .68rem 'JetBrains Mono',monospace;
+}
+.ascii-cell.hunt-correct{outline:3px solid rgba(45,105,114,.38);background:rgba(45,105,114,.13)}
+.ascii-cell.range-dim{opacity:.24}
+.ascii-cell.range-hit{outline:2px solid rgba(45,105,114,.22);transform:translateY(-1px)}
+.range-note{min-height:18px;margin:10px 0 0;color:var(--teal);font-size:.69rem;font-weight:600}
 .lookup{display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start}
 .ascii-board{padding:12px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.22)}
 .board-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:4px}
@@ -129,7 +198,18 @@ main{padding:22px 0 34px}
 /* patterns */
 .patterns{width:min(calc(100% - 32px),820px);margin:46px auto 0;text-align:center}
 .pattern-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}
-.pattern-card{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.22)}
+.pattern-card{
+  width:100%;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.22);
+  color:var(--ink);
+  cursor:pointer;
+  text-align:center;
+}
+.pattern-card:hover,.pattern-card.active{background:var(--teal-soft);border-color:rgba(45,105,114,.18)}
+
 .pattern-card small{display:block;color:var(--soft);font-size:.62rem;text-transform:uppercase;letter-spacing:.07em}
 .pattern-card strong{display:block;margin-top:5px;font:600 1.2rem 'JetBrains Mono',monospace;color:var(--teal)}
 .pattern-note{margin:10px 0 0;color:var(--mid);font-size:.74rem}
@@ -151,6 +231,8 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
   .board-grid{grid-template-columns:repeat(4,1fr)}
   .ascii-cell{height:54px}
   .pattern-row{grid-template-columns:1fr}
+  .ascii-hunt{align-items:flex-start}
+  .hunt-progress{min-width:56px}
   footer.site-footer{flex-direction:column}
 }
 </style>
@@ -186,14 +268,29 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
 
   <section class="codebook">
     <h2>ASCII is a shared codebook.</h2>
-    <div class="codebook-flow" aria-label="A becomes decimal 65, seven-bit ASCII 1000001, and an eight-bit byte 01000001">
-      <div class="codebook-box"><small>Character</small><strong>A</strong></div>
+    <p class="codebook-intro">Try a character. Watch the number and bits change.</p>
+
+    <div class="char-try">
+      <label class="try-label" for="charInput">Character</label>
+      <input class="char-input" id="charInput" maxlength="1" value="A" autocomplete="off" spellcheck="false" aria-label="Type one ASCII character">
+      <div class="quick-chars" aria-label="Example characters">
+        <button class="quick-char" type="button" data-char="A">A</button>
+        <button class="quick-char" type="button" data-char="a">a</button>
+        <button class="quick-char" type="button" data-char="0">0</button>
+        <button class="quick-char" type="button" data-char="?">?</button>
+        <button class="quick-char" type="button" data-char=" ">SPACE</button>
+      </div>
+    </div>
+    <div class="char-feedback" id="charFeedback" aria-live="polite"></div>
+
+    <div class="codebook-flow" id="codebookFlow" aria-label="Character converted to its ASCII number and binary forms">
+      <div class="codebook-box"><small>Character</small><strong id="liveChar">A</strong></div>
       <div class="codebook-arrow">→</div>
-      <div class="codebook-box"><small>ASCII number</small><strong>65</strong></div>
+      <div class="codebook-box"><small>ASCII number</small><strong id="liveDecimal">65</strong></div>
       <div class="codebook-arrow">→</div>
-      <div class="codebook-box"><small>7-bit ASCII</small><strong>1000001</strong></div>
+      <div class="codebook-box"><small>7-bit ASCII</small><strong id="live7bit">1000001</strong></div>
       <div class="codebook-arrow">→</div>
-      <div class="codebook-box"><small>Shown in 1 byte</small><strong>01000001</strong></div>
+      <div class="codebook-box"><small>Shown in 1 byte</small><strong id="live8bit">01000001</strong></div>
     </div>
     <p class="byte-note">ASCII originally used 7 bits, which gives 128 possible codes. On these pages we show the value inside an 8-bit byte, so a leading 0 is added.</p>
   </section>
@@ -225,8 +322,18 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
   <section class="table-section">
     <div class="table-head">
       <h2>The ASCII table</h2>
-      <p>Every box is one code from 0 to 127. Click one to see its decimal, binary, and hexadecimal forms.</p>
+      <p>Every box is one code from 0 to 127. Click one to inspect it — or use the hunt to learn where things live.</p>
     </div>
+
+    <div class="ascii-hunt">
+      <div class="hunt-copy">
+        <div class="hunt-kicker">ASCII Hunt</div>
+        <div class="hunt-prompt" id="huntPrompt">Find the uppercase letter A.</div>
+        <div class="hunt-status" id="huntStatus">Click the matching box in the table.</div>
+      </div>
+      <div class="hunt-progress" id="huntProgress">0 / 5</div>
+    </div>
+
     <div class="lookup">
       <div class="ascii-board">
         <div class="board-grid" id="asciiGrid"></div>
@@ -241,8 +348,8 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
         <small>Selected character</small>
         <div class="detail-char" id="detailChar">A</div>
         <div class="detail-row"><span>Decimal</span><code id="detailDec">65</code></div>
-        <div class="detail-row"><span>Binary</span><code id="detailBin">01000001</code></div>
-        <div class="detail-row"><span>Hex</span><code id="detailHex">41</code></div>
+        <div class="detail-row"><span>7-bit ASCII</span><code id="detail7">1000001</code></div>
+        <div class="detail-row"><span>8-bit byte</span><code id="detailBin">01000001</code></div>
         <div class="detail-row"><span>Type</span><code id="detailType">uppercase</code></div>
         <p class="detail-hint">The first 32 values are control codes, so they usually do not print a visible character.</p>
       </aside>
@@ -252,11 +359,12 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
   <section class="patterns">
     <h2>The table has patterns</h2>
     <div class="pattern-row">
-      <div class="pattern-card"><small>digits begin</small><strong>0 = 48</strong></div>
-      <div class="pattern-card"><small>uppercase begins</small><strong>A = 65</strong></div>
-      <div class="pattern-card"><small>lowercase begins</small><strong>a = 97</strong></div>
+      <button class="pattern-card" type="button" data-range="number"><small>show digits</small><strong>0 = 48</strong></button>
+      <button class="pattern-card" type="button" data-range="upper"><small>show uppercase</small><strong>A = 65</strong></button>
+      <button class="pattern-card" type="button" data-range="lower"><small>show lowercase</small><strong>a = 97</strong></button>
     </div>
-    <p class="pattern-note">Uppercase and lowercase versions of the same English letter are 32 apart: A = 65, a = 97.</p>
+    <p class="pattern-note">Click a group to highlight it in the table. Uppercase and lowercase versions of the same English letter are 32 apart: A = 65, a = 97.</p>
+    <div class="range-note" id="rangeNote"></div>
   </section>
 </main>
 
@@ -291,28 +399,130 @@ function displayFor(n){
   if(n<=31 || n===127) return labelFor(n);
   return String.fromCharCode(n);
 }
+function binary7(n){return n.toString(2).padStart(7,'0')}
 function binary8(n){return n.toString(2).padStart(8,'0')}
-function hex2(n){return n.toString(16).toUpperCase().padStart(2,'0')}
+
+const charInput=document.getElementById('charInput');
+const charFeedback=document.getElementById('charFeedback');
+
+function updateCodebook(raw){
+  if(raw==='') return;
+  const ch=[...raw][0];
+  const n=ch.charCodeAt(0);
+
+  if(n>127){
+    charFeedback.textContent='Basic ASCII only goes from 0 to 127. Try an English letter, number, space, or punctuation mark.';
+    return;
+  }
+
+  charFeedback.textContent='';
+  document.getElementById('liveChar').textContent=ch===' ' ? '␠' : ch;
+  document.getElementById('liveDecimal').textContent=n;
+  document.getElementById('live7bit').textContent=binary7(n);
+  document.getElementById('live8bit').textContent=binary8(n);
+
+  document.querySelectorAll('.codebook-box').forEach(box=>{
+    box.classList.remove('updated');
+    void box.offsetWidth;
+    box.classList.add('updated');
+  });
+}
+
+charInput.addEventListener('input',()=>{
+  const chars=[...charInput.value];
+  if(chars.length>1) charInput.value=chars[0];
+  updateCodebook(charInput.value);
+});
+
+document.querySelectorAll('.quick-char').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    charInput.value=btn.dataset.char;
+    updateCodebook(btn.dataset.char);
+    charInput.focus();
+  });
+});
+
+const hunt=[
+  {prompt:'Find the uppercase letter A.',answer:65},
+  {prompt:'Find the character with decimal code 48.',answer:48},
+  {prompt:'Find SPACE.',answer:32},
+  {prompt:'Find the lowercase letter a.',answer:97},
+  {prompt:'Find the exclamation mark !',answer:33}
+];
+let huntIndex=0;
+let huntComplete=false;
 
 const grid=document.getElementById('asciiGrid');
+const huntPrompt=document.getElementById('huntPrompt');
+const huntStatus=document.getElementById('huntStatus');
+const huntProgress=document.getElementById('huntProgress');
+
 function selectCode(n,button){
   document.querySelectorAll('.ascii-cell.selected').forEach(el=>el.classList.remove('selected'));
   if(button) button.classList.add('selected');
+
   document.getElementById('detailChar').textContent=displayFor(n);
   document.getElementById('detailDec').textContent=n;
+  document.getElementById('detail7').textContent=binary7(n);
   document.getElementById('detailBin').textContent=binary8(n);
-  document.getElementById('detailHex').textContent=hex2(n);
   document.getElementById('detailType').textContent=typeFor(n);
+
+  if(!huntComplete){
+    if(n===hunt[huntIndex].answer){
+      button?.classList.add('hunt-correct');
+      huntIndex++;
+      huntProgress.textContent=huntIndex+' / '+hunt.length;
+
+      if(huntIndex===hunt.length){
+        huntComplete=true;
+        huntPrompt.textContent='Nice — you found all five.';
+        huntStatus.textContent='Now use the table however you want.';
+      }else{
+        huntStatus.textContent='Correct. Next one:';
+        setTimeout(()=>{
+          document.querySelectorAll('.ascii-cell.hunt-correct').forEach(el=>el.classList.remove('hunt-correct'));
+          huntPrompt.textContent=hunt[huntIndex].prompt;
+          huntStatus.textContent='Click the matching box in the table.';
+        },450);
+      }
+    }else{
+      huntStatus.textContent='Not that one. Look at the character and decimal number.';
+    }
+  }
 }
+
 for(let n=0;n<128;n++){
   const b=document.createElement('button');
   b.className='ascii-cell '+typeFor(n)+(n===65?' selected':'');
   b.type='button';
+  b.dataset.code=String(n);
   b.innerHTML='<span class="dec">'+n+'</span><span class="char">'+displayFor(n)+'</span>';
   b.setAttribute('aria-label',labelFor(n)+' decimal '+n);
   b.addEventListener('click',()=>selectCode(n,b));
   grid.appendChild(b);
 }
+
+const rangeMessages={
+  number:'Digits are together from 48–57.',
+  upper:'Uppercase letters are together from 65–90.',
+  lower:'Lowercase letters are together from 97–122.'
+};
+
+document.querySelectorAll('.pattern-card').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const range=btn.dataset.range;
+    document.querySelectorAll('.pattern-card').forEach(x=>x.classList.toggle('active',x===btn));
+    document.querySelectorAll('.ascii-cell').forEach(cell=>{
+      const hit=cell.classList.contains(range);
+      cell.classList.toggle('range-hit',hit);
+      cell.classList.toggle('range-dim',!hit);
+    });
+    document.getElementById('rangeNote').textContent=rangeMessages[range];
+    document.querySelector('.table-section').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+updateCodebook('A');
 
 
 
