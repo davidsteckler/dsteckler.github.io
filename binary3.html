@@ -410,7 +410,7 @@ function rgbForByte(v){
   return [0,0,v];
 }
 
-function renderMeanings(){
+function renderMeanings(animate=true){
   const b=binary8(value);
   binaryReadout.textContent=b;
   decimalReadout.textContent=value;
@@ -446,11 +446,13 @@ function renderMeanings(){
   const audioWhere=value===128?'at the center':value<128?'below center':'above center';
   document.getElementById('decoderAudioCaption').textContent='Sample value '+value+', '+audioWhere+'.';
 
-  document.querySelectorAll('.decoder-card').forEach(card=>{
-    card.classList.remove('pulse');
-    void card.offsetWidth;
-    card.classList.add('pulse');
-  });
+  if(animate){
+    document.querySelectorAll('.decoder-card').forEach(card=>{
+      card.classList.remove('pulse');
+      void card.offsetWidth;
+      card.classList.add('pulse');
+    });
+  }
 }
 
 function render(){
@@ -475,7 +477,7 @@ document.querySelectorAll('.rgb-channel').forEach(btn=>{
       x.classList.toggle('active',x===btn);
       x.setAttribute('aria-pressed',String(x===btn));
     });
-    renderMeanings();
+    renderMeanings(false);
   });
 });
 
