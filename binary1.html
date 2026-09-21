@@ -1487,6 +1487,181 @@
         gap:12px;
       }
     }
+
+    /* Professional simplification */
+    body.ds-learning-page .ds-pathbar{
+      margin-top:10px!important;
+      border:0!important;
+      background:transparent!important;
+      box-shadow:none!important;
+    }
+
+    body.ds-learning-page .ds-path-head{
+      display:none!important;
+    }
+
+    body.ds-learning-page .ds-steps{
+      justify-content:center;
+      padding:0!important;
+      gap:5px!important;
+    }
+
+    body.ds-learning-page .ds-step{
+      min-height:34px!important;
+      padding:5px 9px!important;
+      border-radius:999px!important;
+      background:rgba(255,255,255,.26)!important;
+      border-color:rgba(28,27,24,.07)!important;
+      color:#817a71!important;
+      font-size:.69rem!important;
+    }
+
+    body.ds-learning-page .ds-step.ds-current{
+      background:rgba(26,92,107,.08)!important;
+      border-color:rgba(26,92,107,.10)!important;
+      color:#315f68!important;
+    }
+
+    body.ds-learning-page .ds-step-num{
+      width:18px!important;
+      height:18px!important;
+      font-size:.56rem!important;
+    }
+
+    body.ds-learning-page.ds-binary-page .container{
+      margin-top:8px!important;
+      padding-top:24px!important;
+      border-radius:20px!important;
+    }
+
+    .binary1-hero{
+      margin-bottom:12px!important;
+    }
+
+    .binary1-main{
+      padding-top:18px!important;
+      border-top:0!important;
+      border-bottom:0!important;
+    }
+
+    #bulbs{
+      margin-bottom:10px!important;
+    }
+
+    .binary1-readouts{
+      min-height:124px!important;
+      margin-bottom:4px!important;
+    }
+
+    .binary1-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:10px 18px;
+      margin:6px auto 10px;
+      padding:10px 14px;
+      width:max-content;
+      max-width:100%;
+      border:1px solid rgba(28,27,24,.07);
+      border-radius:16px;
+      background:rgba(255,255,255,.22);
+    }
+
+    .view-control{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .control-label{
+      color:#746d64;
+      font-family:'Outfit',sans-serif;
+      font-size:.74rem;
+      font-weight:650;
+    }
+
+    .view-segment{
+      display:flex;
+      padding:3px;
+      gap:2px;
+      border:1px solid rgba(28,27,24,.08);
+      border-radius:999px;
+      background:rgba(255,255,255,.36);
+    }
+
+    .view-segment button{
+      min-height:28px!important;
+      margin:0!important;
+      padding:5px 10px!important;
+      border:0!important;
+      border-radius:999px!important;
+      background:transparent!important;
+      color:#8b847b!important;
+      font-family:'Outfit',sans-serif!important;
+      font-size:.68rem!important;
+      font-weight:650!important;
+      box-shadow:none!important;
+    }
+
+    .view-segment button.is-selected{
+      background:rgba(26,92,107,.10)!important;
+      color:#315f68!important;
+    }
+
+    .binary1-toolbar .toggle-container{
+      gap:7px!important;
+    }
+
+    .binary1-toolbar .difficulty-buttons{
+      margin:0!important;
+    }
+
+    .binary1-actions{
+      margin:2px 0 8px!important;
+    }
+
+    .binary1-actions button{
+      background:transparent!important;
+      border:0!important;
+      color:#817a71!important;
+      min-height:32px!important;
+      padding:6px 9px!important;
+    }
+
+    .binary1-actions button:hover{
+      background:rgba(255,255,255,.42)!important;
+      color:#4d4842!important;
+    }
+
+    .binary1-practice{
+      width:min(100%,560px)!important;
+      margin-top:36px!important;
+      padding:24px 0 0!important;
+      border:0!important;
+      border-top:1px solid rgba(28,27,24,.08)!important;
+      border-radius:0!important;
+      background:transparent!important;
+    }
+
+    .challenge-text{
+      margin-bottom:2px!important;
+    }
+
+    .challenge-help{
+      margin-bottom:10px!important;
+    }
+
+    @media(max-width:700px){
+      body.ds-learning-page .ds-steps{
+        justify-content:flex-start;
+      }
+
+      .binary1-toolbar{
+        width:100%;
+        border-radius:14px;
+      }
+    }
 </style>
 </head>
 <body class="ds-learning-page ds-binary-page">
@@ -1549,7 +1724,6 @@
 
     <div class="container">
         <div class="binary1-hero">
-            <div class="binary1-kicker">Binary 1 · Numbers</div>
             <h1>Binary Bulbs</h1>
             <p class="binary1-lead">Click the bulbs and build a number.</p>
         </div>
@@ -1569,19 +1743,13 @@
 
                 <div class="binary-visualization" id="binaryVisualization"></div>
 
-                <div class="binary1-actions">
-                    <button onclick="resetBits()">Reset</button>
-                    <button onclick="randomizeBits()">Randomize</button>
-                    <button id="tutorialBtn">How to Play</button>
-                </div>
-
-                <div class="binary1-options">
-                    <div class="toggle-container">
-                        <span class="toggle-label">Bulbs</span>
-                        <label class="switch">
-                            <input type="checkbox" id="bulbsToggle" checked>
-                            <span class="slider"></span>
-                        </label>
+                <div class="binary1-toolbar">
+                    <div class="view-control">
+                        <span class="control-label">View</span>
+                        <div class="view-segment" role="group" aria-label="Choose bulb or bit view">
+                            <button id="viewBulbs" class="is-selected" type="button">Bulbs</button>
+                            <button id="viewBits" type="button">Bits</button>
+                        </div>
                     </div>
 
                     <div class="toggle-container">
@@ -1600,19 +1768,17 @@
                         </label>
                     </div>
 
-                    <div class="toggle-container">
-                        <span class="toggle-label">Hard Mode</span>
-                        <label class="switch">
-                            <input type="checkbox" id="difficultyToggle">
-                            <span class="slider"></span>
-                        </label>
+                    <div class="difficulty-buttons" aria-label="Bit count">
+                        <button id="difficultyEasy" onclick="setDifficulty('easy')">4 bits</button>
+                        <button id="difficultyMedium" onclick="setDifficulty('medium')">6 bits</button>
+                        <button id="difficultyHard" onclick="setDifficulty('hard')">8 bits</button>
                     </div>
                 </div>
 
-                <div class="difficulty-buttons">
-                    <button id="difficultyEasy" onclick="setDifficulty('easy')">4 bits</button>
-                    <button id="difficultyMedium" onclick="setDifficulty('medium')">6 bits</button>
-                    <button id="difficultyHard" onclick="setDifficulty('hard')">8 bits</button>
+                <div class="binary1-actions">
+                    <button onclick="resetBits()">Reset</button>
+                    <button onclick="randomizeBits()">Randomize</button>
+                    <button id="tutorialBtn">How to Play</button>
                 </div>
 
                 <div id="alert" style="display:none;">
@@ -1724,11 +1890,8 @@
     <script>
         let bits = [0, 0, 0, 0, 0, 0, 0, 0];
         let target = 0;
-        let isHardMode = false;
         let currentDifficulty = 'hard';
 
-        const difficultyToggle = document.getElementById('difficultyToggle');
-        const bulbsToggle = document.getElementById('bulbsToggle');
         const gameModeToggle = document.getElementById('gameModeToggle');
         const labelsToggle = document.getElementById('labelsToggle');
         const alertElement = document.getElementById('alert');
@@ -1802,7 +1965,7 @@
 
             const number = getCurrentNumber();
             const numberDisplay = document.getElementById('numberDisplay');
-            numberDisplay.textContent = gameModeToggle.checked && isHardMode ? '?' : number;
+            numberDisplay.textContent = number;
 
             const up = document.getElementById('numberUp');
             const down = document.getElementById('numberDown');
@@ -1864,14 +2027,8 @@
             alertElement.style.display = 'block';
             alertElement.innerHTML = `<span>Create the binary representation of: <span id="target">${target}</span></span>`;
             newChallengeButton.style.display = 'none';
-            
-            if (isHardMode) {
-                setTimeout(() => {
-                    updateDisplay();
-                }, 5000);
-            } else {
-                updateDisplay();
-            }
+
+            updateDisplay();
         }
 
         function setDifficulty(level) {
@@ -1934,16 +2091,18 @@
         document.getElementById('numberUp').addEventListener('click', () => adjustNumber(1));
         document.getElementById('numberDown').addEventListener('click', () => adjustNumber(-1));
 
-        bulbsToggle.addEventListener('change', () => {
-            bulbsContainer.classList.toggle('bits-only', !bulbsToggle.checked);
-        });
+        const viewBulbs = document.getElementById('viewBulbs');
+        const viewBits = document.getElementById('viewBits');
 
-        difficultyToggle.addEventListener('change', () => {
-            isHardMode = difficultyToggle.checked;
-            if (gameModeToggle.checked) {
-                startNewGame();
-            }
-        });
+        function setView(mode) {
+            const bitsMode = mode === 'bits';
+            bulbsContainer.classList.toggle('bits-only', bitsMode);
+            viewBulbs.classList.toggle('is-selected', !bitsMode);
+            viewBits.classList.toggle('is-selected', bitsMode);
+        }
+
+        viewBulbs.addEventListener('click', () => setView('bulbs'));
+        viewBits.addEventListener('click', () => setView('bits'));
 
         gameModeToggle.addEventListener('change', () => {
             if (gameModeToggle.checked) {
@@ -1980,6 +2139,7 @@
 
         createBulbs();
         updateDisplay();
+        setView('bulbs');
 
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('nav').classList.toggle('active');
