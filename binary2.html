@@ -1,334 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Binary: The Hidden Language</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Text | David Steckler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learning-path.css">
+<style>
+:root{
+  --bg:#f2ede4;
+  --paper:#f8f4ec;
+  --ink:#24211d;
+  --mid:#5f5951;
+  --soft:#989086;
+  --line:rgba(36,33,29,.10);
+  --line2:rgba(36,33,29,.16);
+  --teal:#2d6972;
+  --teal-soft:rgba(45,105,114,.09);
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--bg);
+  font-family:'Outfit',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+.wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
 
-  <style>
-    :root{
-      --bg0:#0b0f17;
-      --bg1:#0f1626;
-      --card: rgba(255,255,255,0.06);
-      --card2: rgba(0,0,0,0.20);
-      --stroke: rgba(255,255,255,0.12);
-      --stroke2: rgba(255,255,255,0.18);
-      --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.70);
-      --muted2: rgba(255,255,255,0.55);
-      --radius: 18px;
-      --shadow: 0 22px 70px rgba(0,0,0,0.45);
-      --focus: 0 0 0 4px rgba(255,255,255,0.08);
-    }
+/* header */
+.site-header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(242,237,228,.92);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;flex-direction:column;line-height:1.1}
+.brand strong{font-size:.9rem;letter-spacing:.08em;text-transform:uppercase}
+.brand span{margin-top:4px;font:400 .66rem 'JetBrains Mono',monospace;color:var(--soft)}
+nav{display:flex;gap:4px;align-items:center}
+nav a{padding:8px 11px;border-radius:999px;color:#716a61;font-size:.79rem;font-weight:600}
+nav a.active,nav a:hover{background:rgba(36,33,29,.06);color:var(--ink)}
+.menu{display:none;border:1px solid var(--line);background:transparent;border-radius:10px;width:40px;height:40px}
 
-    *{ box-sizing:border-box; }
-    html, body{ height:100%; }
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1100px 700px at 20% -10%, rgba(120,160,255,0.28), transparent 55%),
-        radial-gradient(900px 650px at 90% 10%, rgba(255,170,120,0.20), transparent 55%),
-        radial-gradient(800px 700px at 50% 110%, rgba(140,255,210,0.14), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-    }
+/* path */
+.lesson-path{
+  width:min(calc(100% - 32px),900px);
+  margin:14px auto 0;
+  display:flex;justify-content:center;gap:6px;overflow-x:auto;padding:0 0 8px;
+}
+.lesson-path a{
+  flex:0 0 auto;padding:6px 10px;border-radius:999px;
+  color:#8b8379;font-size:.7rem;font-weight:600;
+}
+.lesson-path a.current{background:var(--teal-soft);color:var(--teal)}
 
-    .wrap{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 18px 14px 52px;
-    }
+main{padding:22px 0 30px}
+.hero{text-align:center;margin-bottom:20px}
+.hero h1{
+  margin:0;
+  font:600 clamp(2.5rem,5vw,4.2rem)/.98 'Fraunces',serif;
+  letter-spacing:-.045em;
+}
+.hero p{margin:8px 0 0;color:var(--soft);font-size:.93rem}
 
-    .hero{
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      padding: 16px;
-      overflow:hidden;
-    }
+/* main translator */
+.translator{
+  width:min(calc(100% - 24px),1120px);
+  margin:0 auto;
+  padding:22px 0 30px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.message-row{
+  width:min(100%,720px);
+  margin:0 auto 24px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.message-input{
+  flex:1;
+  min-width:0;
+  height:54px;
+  padding:0 17px;
+  border:1px solid var(--line2);
+  border-radius:14px;
+  background:rgba(255,255,255,.52);
+  color:var(--ink);
+  outline:none;
+  font-size:1.05rem;
+}
+.message-input:focus{
+  border-color:rgba(45,105,114,.38);
+  box-shadow:0 0 0 4px rgba(45,105,114,.07);
+}
+.example-button{
+  height:54px;
+  padding:0 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:transparent;
+  color:#81796f;
+  cursor:pointer;
+  font-size:.78rem;
+  font-weight:600;
+}
+.example-button:hover{background:rgba(255,255,255,.35);color:var(--ink)}
 
-    .heroTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
+.character-grid{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  min-height:158px;
+}
+.char-card{
+  width:126px;
+  min-height:150px;
+  padding:14px 10px 12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,255,255,.28);
+  text-align:center;
+}
+.char-glyph{
+  min-height:54px;
+  display:grid;
+  place-items:center;
+  font:600 2.5rem/1 'Fraunces',serif;
+}
+.char-decimal{
+  margin-top:2px;
+  color:var(--soft);
+  font:500 .68rem 'JetBrains Mono',monospace;
+}
+.byte-row{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:2px;
+}
+.byte-row span{
+  height:28px;
+  display:grid;
+  place-items:center;
+  border-radius:5px;
+  background:rgba(36,33,29,.045);
+  color:#aaa198;
+  font:600 .67rem 'JetBrains Mono',monospace;
+}
+.byte-row span.on{
+  background:var(--teal-soft);
+  color:var(--teal);
+}
+.char-card.unsupported{
+  border-style:dashed;
+  color:var(--soft);
+}
+.empty-state{
+  min-height:150px;
+  display:grid;
+  place-items:center;
+  color:#aaa198;
+  font-size:.85rem;
+}
+.ascii-warning{
+  min-height:22px;
+  margin:12px auto 0;
+  text-align:center;
+  color:#9a6f53;
+  font-size:.74rem;
+}
 
-    h1{
-      margin:0;
-      font-size: 22px;
-      letter-spacing: 0.2px;
-    }
-    .subtitle{
-      margin-top:6px;
-      color:var(--muted);
-      line-height:1.45;
-      max-width: 75ch;
-      font-size: 14px;
-    }
+.message-binary{
+  width:min(100%,900px);
+  margin:22px auto 0;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.message-binary-label{
+  margin-bottom:7px;
+  text-align:center;
+  color:var(--soft);
+  font-size:.63rem;
+  font-weight:700;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+.message-binary-code{
+  overflow-x:auto;
+  white-space:nowrap;
+  text-align:center;
+  color:#514b44;
+  font:500 .79rem/1.55 'JetBrains Mono',monospace;
+}
 
-    section{
-      margin-top: 14px;
-      scroll-margin-top: 12px;
-    }
+/* visual bridge from numbers to text */
+.bridge{
+  width:min(calc(100% - 32px),820px);
+  margin:42px auto 0;
+  text-align:center;
+}
+.bridge h2{
+  margin:0 0 6px;
+  font:500 1.55rem/1.2 'Fraunces',serif;
+}
+.bridge-copy{
+  margin:0 auto 20px;
+  color:var(--soft);
+  font-size:.82rem;
+}
+.bridge-flow{
+  display:grid;
+  grid-template-columns:.75fr auto .75fr auto 1.3fr;
+  align-items:center;
+  gap:10px;
+}
+.flow-box{
+  min-height:86px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.26);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.flow-box small{
+  color:var(--soft);
+  font-size:.61rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.flow-box strong{
+  margin-top:4px;
+  color:var(--ink);
+  font:600 1.7rem 'Fraunces',serif;
+}
+.flow-box.code strong{
+  font:600 1rem 'JetBrains Mono',monospace;
+}
+.flow-arrow{color:#b0a89e;font-size:1.2rem}
+.place-row{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:6px;
+}
+.place{
+  text-align:center;
+}
+.place small{
+  display:block;
+  margin-bottom:5px;
+  color:var(--soft);
+  font-size:.62rem;
+}
+.place span{
+  display:grid;
+  place-items:center;
+  min-height:42px;
+  border-radius:9px;
+  background:rgba(255,255,255,.30);
+  color:#aaa198;
+  font:600 .95rem 'JetBrains Mono',monospace;
+}
+.place span.on{
+  background:var(--teal-soft);
+  color:var(--teal);
+}
+.bridge-note{
+  margin:11px 0 0;
+  color:#716a61;
+  font-size:.76rem;
+}
 
-    .sectionCard{
-      background: var(--card);
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
+/* footer / nav */
+footer.site-footer{
+  width:min(calc(100% - 32px),var(--max));
+  margin:44px auto 28px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:14px;
+  color:#aaa198;
+  font:400 .64rem 'JetBrains Mono',monospace;
+}
 
-    .sectionHeader{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
-    }
-
-    h2{
-      margin:0;
-      font-size: 16px;
-      letter-spacing: 0.2px;
-    }
-    .tag{
-      color: var(--muted2);
-      font-size: 12px;
-    }
-
-    .explain{
-      margin-top: 10px;
-      background: var(--card2);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 12px;
-      color: rgba(255,255,255,0.82);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    @media (max-width: 920px){
-      .grid2{ grid-template-columns: 1fr; }
-    }
-
-    .card{
-      background: rgba(0,0,0,0.18);
-      border:1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 14px;
-      overflow:hidden;
-    }
-
-    .cardTitle{
-      font-weight: 750;
-      margin: 2px 0 6px;
-      letter-spacing: 0.2px;
-    }
-    .small{
-      color: var(--muted2);
-      font-size: 12px;
-    }
-
-    .row{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:10px;
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.22);
-      color: var(--text);
-      font-size: 13px;
-      max-width: 100%;
-    }
-
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.2px;
-      word-break: break-word;
-    }
-
-    .btnRow{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top: 12px;
-    }
-
-    button{
-      border:1px solid var(--stroke);
-      background: rgba(255,255,255,0.07);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 14px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
-      user-select:none;
-      white-space:nowrap;
-    }
-    button:hover{
-      background: rgba(255,255,255,0.10);
-      border-color: var(--stroke2);
-      transform: translateY(-1px);
-    }
-    button:active{ transform: translateY(0px); }
-    button:focus{ outline:none; box-shadow: var(--focus); }
-
-    textarea{
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.24);
-      color: var(--text);
-      outline: none;
-      font-size: 14px;
-      width: 100%;
-      resize: vertical;
-      min-height: 110px;
-      line-height: 1.4;
-    }
-    textarea:focus{ box-shadow: var(--focus); }
-
-    select, input[type="checkbox"]{
-      accent-color: rgba(255,255,255,0.85);
-    }
-
-    .line{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .result{
-      margin-top: 10px;
-      color: rgba(255,255,255,0.82);
-      font-size: 14px;
-    }
-
-    /* Switch */
-    .switchRow{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-    .switch{
-      position: relative;
-      display: inline-block;
-      width: 62px;
-      height: 36px;
-    }
-    .switch input{
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .switchTrack{
-      position: absolute;
-      inset: 0;
-      background-color: rgba(255,255,255,0.20);
-      transition: .2s;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.14);
-      cursor: pointer;
-    }
-    .switchTrack:before{
-      position: absolute;
-      content: "";
-      height: 28px;
-      width: 28px;
-      left: 4px;
-      bottom: 3px;
-      background-color: rgba(255,255,255,0.92);
-      transition: .2s;
-      border-radius: 999px;
-    }
-    .switch input:checked + .switchTrack{
-      background-color: rgba(120,160,255,0.45);
-      border-color: rgba(255,255,255,0.22);
-    }
-    .switch input:checked + .switchTrack:before{ transform: translateX(26px); }
-
-    .bulbBig{
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: rgba(0,0,0,0.22);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.30);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: rgba(255,255,255,0.88);
-    }
-    .bulbBig.on{
-      background: rgba(255,220,80,0.92);
-      color: rgba(0,0,0,0.75);
-      box-shadow: 0 0 30px rgba(255,220,80,0.35);
-    }
-
-    .srOnly{
-      position:absolute;
-      width:1px;
-      height:1px;
-      padding:0;
-      margin:-1px;
-      overflow:hidden;
-      clip:rect(0,0,0,0);
-      border:0;
-    }
-
-    .mutedBlock{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-      margin-top: 8px;
-    }
-  </style>
-  <link rel="stylesheet" href="learning-path.css">
+@media(max-width:900px){
+  .char-card{width:118px}
+}
+@media(max-width:680px){
+  nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  nav.open{display:flex}
+  .menu{display:block}
+  .hero h1{font-size:2.6rem}
+  .message-row{flex-direction:column}
+  .message-input,.example-button{width:100%}
+  .character-grid{gap:8px}
+  .char-card{width:calc(50% - 4px)}
+  .bridge-flow{grid-template-columns:1fr}
+  .flow-arrow{transform:rotate(90deg)}
+  .place-row{gap:3px}
+  footer.site-footer{flex-direction:column}
+}
+</style>
 </head>
+<body>
 
-<body class="ds-learning-page ds-binary-page">
-<header class="ds-sitebar">
-  <div class="ds-sitebar-inner">
-    <a class="ds-brand" href="index.html">
+<header class="site-header">
+  <div class="wrap topbar">
+    <a class="brand" href="index.html">
       <strong>David Steckler</strong>
       <span>// cs · robotics · thinking for yourself</span>
     </a>
-    <button class="ds-menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
-    <nav class="ds-site-nav" aria-label="Site navigation">
+    <button class="menu" id="menuButton" aria-label="Open navigation">☰</button>
+    <nav id="siteNav">
       <a href="index.html">Home</a>
       <a href="about.html">About</a>
-      <a href="course.html" class="ds-active">Course</a>
+      <a class="active" href="course.html">Course</a>
       <a href="blog.html">Blog</a>
       <a href="contact.html">Contact</a>
       <a href="testimonials.html">Testimonials</a>
@@ -336,341 +335,165 @@
     </nav>
   </div>
 </header>
-<div class="ds-pathbar">
-  <div class="ds-path-head">
-    <div>
-      <div class="ds-path-kicker">// binary & information</div>
-      <div class="ds-path-title">Binary 2 · Text</div>
-    </div>
-    <div class="ds-path-copy">Start with 0s and 1s, then see how the same idea can represent text, images, and sound.</div>
-  </div>
-  <div class="ds-steps" aria-label="Binary learning path"><a class="ds-step" href="binary1.html">
-    <span class="ds-step-num">1</span><span>Numbers</span>
-  </a>
-<a class="ds-step ds-current" href="binary2.html" aria-current="page">
-    <span class="ds-step-num">2</span><span>Text</span>
-  </a>
-<a class="ds-step" href="binary3.html">
-    <span class="ds-step-num">3</span><span>One byte</span>
-  </a>
-<a class="ds-step" href="binary4.html">
-    <span class="ds-step-num">4</span><span>Images</span>
-  </a>
-<a class="ds-step" href="binaryaudio.html">
-    <span class="ds-step-num">5</span><span>Audio</span>
-  </a></div>
+
+<div class="lesson-path" aria-label="Binary lessons">
+  <a href="binary1.html">1 · Numbers</a>
+  <a class="current" href="binary2.html">2 · Text</a>
+  <a href="binary3.html">3 · One byte</a>
+  <a href="binary4.html">4 · Images</a>
+  <a href="binaryaudio.html">5 · Audio</a>
 </div>
 
-  <div class="wrap">
-    <header class="hero">
-      <div class="heroTop">
-        <div>
-          <h1>Binary: The Hidden Language</h1>
-          <div class="subtitle">
-            Two states. One alphabet for machines. Type a message and watch it turn into bytes.
-          </div>
-        </div>
-        <div class="small">Standalone interactive page</div>
+<main>
+  <section class="hero">
+    <h1>Binary Text</h1>
+    <p>Type a message and watch each character become an 8-bit code.</p>
+  </section>
+
+  <section class="translator" aria-label="Text to binary activity">
+    <div class="message-row">
+      <input class="message-input" id="messageInput" maxlength="24" value="HELLO" aria-label="Message" autocomplete="off" spellcheck="false">
+      <button class="example-button" id="exampleButton">Try another</button>
+    </div>
+
+    <div class="character-grid" id="characterGrid"></div>
+    <div class="ascii-warning" id="asciiWarning"></div>
+
+    <div class="message-binary">
+      <div class="message-binary-label">Whole message in binary</div>
+      <div class="message-binary-code" id="messageBinary"></div>
+    </div>
+  </section>
+
+  <section class="bridge">
+    <h2>Same 8 bits. New meaning.</h2>
+    <p class="bridge-copy">For basic ASCII, a number is assigned to each character.</p>
+
+    <div class="bridge-flow">
+      <div class="flow-box">
+        <small>Character</small>
+        <strong>A</strong>
       </div>
-    </header>
-
-    <!-- BASICS -->
-    <section id="intro">
-      <div class="sectionCard">
-        <div class="sectionHeader">
-          <h2>The power of two choices</h2>
-          <div class="tag">0 / 1</div>
-        </div>
-
-        <div class="explain">
-          Hardware can reliably detect two distinct states. That becomes a bit. Stack bits and you get numbers. Use numbers as codes and suddenly you can store letters, images, anything.
-        </div>
-
-        <div class="grid2">
-          <div class="card">
-            <div class="small">Mini challenge</div>
-            <div class="cardTitle">Binary switch pattern</div>
-            <div class="small">Flip up to 8 times and watch your pattern build.</div>
-
-            <div class="switchRow">
-              <label class="switch" aria-label="Binary switch">
-                <input type="checkbox" id="patternSwitch" />
-                <span class="switchTrack"></span>
-              </label>
-              <div id="lightBulb" class="bulbBig">0</div>
-            </div>
-
-            <div class="row">
-              <span class="chip"><span class="small">State</span> <span id="switchState" class="mono">0</span></span>
-              <span class="chip"><span class="small">Flips</span> <span id="flipCount" class="mono">0</span><span class="small">/8</span></span>
-            </div>
-
-            <div class="row">
-              <span class="chip"><span class="small">Pattern</span> <span id="binaryPattern" class="mono"></span></span>
-            </div>
-
-            <div class="btnRow">
-              <button id="resetPattern" type="button">Reset</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="small">Quick check</div>
-            <div class="cardTitle">What rule is running it?</div>
-            <div class="btnRow" style="flex-direction:column; align-items:stretch;">
-              <button class="optionBtn" data-answer="random" type="button">It is random</button>
-              <button class="optionBtn" data-answer="alternating" type="button">Each flip toggles the state (predictable rule)</button>
-              <button class="optionBtn" data-answer="allZeros" type="button">All digits are 0</button>
-              <button class="optionBtn" data-answer="allOnes" type="button">All digits are 1</button>
-            </div>
-            <div id="questionResult" class="result"></div>
-          </div>
-        </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <small>Decimal</small>
+        <strong>65</strong>
       </div>
-    </section>
-
-    <!-- TEXT FOCUS -->
-    <section id="text">
-      <div class="sectionCard">
-        <div class="sectionHeader">
-          <h2>Text to binary</h2>
-          <div class="tag">Bytes you can copy</div>
-        </div>
-
-        <div class="explain">
-          One common rule is ASCII: each character becomes a number, then that number is written in 8-bit binary.
-          Type a whole message and you will get the full byte string.
-        </div>
-
-        <div class="grid2">
-          <div class="card">
-            <div class="small">Main tool</div>
-            <div class="cardTitle">Type multiple letters</div>
-
-            <div class="line">
-              <span class="small">Message</span>
-              <span class="small">letters, spaces, punctuation</span>
-            </div>
-
-            <label class="srOnly" for="messageInput">Message input</label>
-            <textarea id="messageInput" placeholder="Type a message, like: HELLO WORLD"></textarea>
-
-            <div class="btnRow">
-              <button id="copyBinaryString" type="button">Copy binary</button>
-              <button id="copyBytesCsv" type="button">Copy decimals</button>
-              <button id="clearMessage" type="button">Clear</button>
-              <button id="tryExample" type="button">Example</button>
-            </div>
-
-            <div class="row">
-              <span class="chip"><span class="small">Characters</span> <span id="charCount" class="mono">0</span></span>
-              <span class="chip"><span class="small">Bytes</span> <span id="byteCount" class="mono">0</span></span>
-            </div>
-
-            <div class="mutedBlock">
-              Tip: this uses 8-bit bytes (0–255). For basic English, ASCII matches nicely. For emoji or many non-English characters, a wider encoding like UTF-8 is used in real systems.
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="small">Output</div>
-            <div class="cardTitle">Binary string</div>
-
-            <div class="row" style="margin-top:0;">
-              <span class="chip"><span class="small">Format</span>
-                <span class="mono" id="formatLabel">8-bit groups separated by spaces</span>
-              </span>
-            </div>
-
-            <div class="explain" style="margin-top:12px;">
-              <div class="line">
-                <span class="small">Binary</span>
-                <span class="small">ready to copy</span>
-              </div>
-              <div id="binaryOut" class="mono" style="margin-top:10px; white-space:pre-wrap;"></div>
-            </div>
-
-            <div class="explain" style="margin-top:12px;">
-              <div class="line">
-                <span class="small">Decimal bytes</span>
-                <span class="small">same data, different base</span>
-              </div>
-              <div id="decimalOut" class="mono" style="margin-top:10px; white-space:pre-wrap;"></div>
-            </div>
-
-            <div class="explain" style="margin-top:12px;">
-              <div class="line">
-                <span class="small">Per-character breakdown</span>
-                <span class="small">what each byte means</span>
-              </div>
-              <div id="breakdownOut" class="mono" style="margin-top:10px; white-space:pre-wrap;"></div>
-            </div>
-          </div>
-        </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box code">
+        <small>8-bit binary</small>
+        <strong>01000001</strong>
       </div>
-    </section>
-  </div>
+    </div>
 
-  <script>
-    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-    const toBinary8 = (n) => clamp(Number(n), 0, 255).toString(2).padStart(8, "0");
+    <div class="place-row" aria-label="65 shown with binary place values">
+      <div class="place"><small>128</small><span>0</span></div>
+      <div class="place"><small>64</small><span class="on">1</span></div>
+      <div class="place"><small>32</small><span>0</span></div>
+      <div class="place"><small>16</small><span>0</span></div>
+      <div class="place"><small>8</small><span>0</span></div>
+      <div class="place"><small>4</small><span>0</span></div>
+      <div class="place"><small>2</small><span>0</span></div>
+      <div class="place"><small>1</small><span class="on">1</span></div>
+    </div>
 
-    async function copyText(text, btnEl){
-      try{
-        await navigator.clipboard.writeText(text);
-        if(btnEl){
-          const old = btnEl.textContent;
-          btnEl.textContent = "Copied";
-          setTimeout(() => btnEl.textContent = old, 900);
-        }
-      }catch(e){
-        alert("Copy failed. Your browser may block clipboard access.");
-      }
-    }
+    <p class="bridge-note">64 + 1 = 65. ASCII uses 65 as the code for A.</p>
+  </section>
+</main>
 
-    // -------------------------
-    // Basics: switch pattern
-    // -------------------------
-    let flipCount = 0;
-    const patternSwitch = document.getElementById("patternSwitch");
-    const switchState = document.getElementById("switchState");
-    const flipCountDisplay = document.getElementById("flipCount");
-    const binaryPattern = document.getElementById("binaryPattern");
-    const lightBulb = document.getElementById("lightBulb");
-    const questionResult = document.getElementById("questionResult");
-
-    function renderBigBulb(isOn){
-      lightBulb.classList.toggle("on", isOn);
-      lightBulb.textContent = isOn ? "1" : "0";
-    }
-    renderBigBulb(false);
-
-    patternSwitch.addEventListener("change", function(){
-      if(flipCount >= 8){
-        patternSwitch.checked = !patternSwitch.checked;
-        return;
-      }
-      flipCount++;
-      const state = this.checked ? "1" : "0";
-      switchState.textContent = state;
-      flipCountDisplay.textContent = flipCount;
-      binaryPattern.textContent += state;
-      renderBigBulb(this.checked);
-
-      if(flipCount === 8){
-        alert("8 flips complete. Your pattern: " + binaryPattern.textContent);
-      }
-    });
-
-    document.getElementById("resetPattern").addEventListener("click", function(){
-      flipCount = 0;
-      patternSwitch.checked = false;
-      switchState.textContent = "0";
-      flipCountDisplay.textContent = "0";
-      binaryPattern.textContent = "";
-      questionResult.textContent = "";
-      renderBigBulb(false);
-    });
-
-    document.querySelectorAll(".optionBtn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const answer = btn.dataset.answer;
-        questionResult.textContent = (answer === "alternating")
-          ? "Correct. Each flip toggles the state, so the sequence follows a rule instead of being random."
-          : "Not quite. Watch what happens every time you flip. The switch always toggles between two states.";
-      });
-    });
-
-    // -------------------------
-    // Text to binary (multi-letter)
-    // -------------------------
-    const messageInput = document.getElementById("messageInput");
-    const binaryOut = document.getElementById("binaryOut");
-    const decimalOut = document.getElementById("decimalOut");
-    const breakdownOut = document.getElementById("breakdownOut");
-    const charCount = document.getElementById("charCount");
-    const byteCount = document.getElementById("byteCount");
-
-    function asPrintable(ch){
-      if(ch === " ") return "␠";
-      if(ch === "\n") return "\\n";
-      if(ch === "\t") return "\\t";
-      return ch;
-    }
-
-    function renderMessage(){
-      const text = messageInput.value || "";
-      charCount.textContent = String(text.length);
-
-      const bytes = [];
-      const bins = [];
-      const lines = [];
-
-      for(let i = 0; i < text.length; i++){
-        const ch = text[i];
-        const code = text.charCodeAt(i);
-
-        // Keeping it simple and consistent with "8-bit bytes"
-        // If code > 255 (emoji etc), we still show the code but clamp for binary.
-        // This keeps the UI simple for your lesson.
-        const byte = clamp(code, 0, 255);
-        bytes.push(byte);
-        const bin = toBinary8(byte);
-        bins.push(bin);
-
-        const shown = asPrintable(ch);
-        lines.push(`${shown}  →  ${byte.toString().padStart(3," ")}  →  ${bin}`);
-      }
-
-      byteCount.textContent = String(bytes.length);
-
-      binaryOut.textContent = bins.join(" ");
-      decimalOut.textContent = bytes.join(", ");
-      breakdownOut.textContent = lines.join("\n");
-
-      if(text.length === 0){
-        binaryOut.textContent = "";
-        decimalOut.textContent = "";
-        breakdownOut.textContent = "";
-      }
-    }
-
-    messageInput.addEventListener("input", renderMessage);
-
-    document.getElementById("copyBinaryString").addEventListener("click", (e) => {
-      const text = binaryOut.textContent || "";
-      if(text) copyText(text, e.currentTarget);
-    });
-
-    document.getElementById("copyBytesCsv").addEventListener("click", (e) => {
-      const text = decimalOut.textContent || "";
-      if(text) copyText(text, e.currentTarget);
-    });
-
-    document.getElementById("clearMessage").addEventListener("click", () => {
-      messageInput.value = "";
-      renderMessage();
-      messageInput.focus();
-    });
-
-    document.getElementById("tryExample").addEventListener("click", () => {
-      messageInput.value = "HELLO WORLD";
-      renderMessage();
-      messageInput.focus();
-    });
-
-    renderMessage();
-  </script>
 <div class="ds-step-footer">
-    <a class="ds-next-card ds-prev" href="binary1.html"><small>← Previous</small><strong>Binary 1 · Numbers</strong><span>Build decimal numbers by turning bits on and off.</span></a>
-    <a class="ds-next-card ds-next" href="binary3.html"><small>Next →</small><strong>Binary 3 · One Byte, Many Meanings</strong><span>See one 0–255 value become a pixel, color, character, or sound value.</span></a>
-  </div>
+  <a class="ds-next-card ds-prev" href="binary1.html">
+    <small>← Previous</small>
+    <strong>Binary 1 · Numbers</strong>
+    <span>Build decimal numbers by turning bits on and off.</span>
+  </a>
+  <a class="ds-next-card ds-next" href="binary3.html">
+    <small>Next →</small>
+    <strong>Binary 3 · One Byte, Many Meanings</strong>
+    <span>See how the same byte can represent different kinds of information.</span>
+  </a>
+</div>
+
+<footer class="site-footer">
+  <span>© 2026 David Steckler</span>
+  <span>binary · information · representation</span>
+</footer>
+
 <script>
-(function(){
-  const b=document.querySelector('.ds-menu-toggle');
-  const n=document.querySelector('.ds-site-nav');
-  if(b&&n){b.addEventListener('click',function(){const open=n.classList.toggle('ds-open');b.setAttribute('aria-expanded',String(open));});}
-})();
+const input=document.getElementById('messageInput');
+const grid=document.getElementById('characterGrid');
+const messageBinary=document.getElementById('messageBinary');
+const warning=document.getElementById('asciiWarning');
+
+function shownChar(ch){
+  if(ch===' ') return '␠';
+  if(ch==='\n') return '↵';
+  if(ch==='\t') return '⇥';
+  return ch;
+}
+function binary8(n){
+  return n.toString(2).padStart(8,'0');
+}
+function makeCard(ch){
+  const code=ch.charCodeAt(0);
+  const card=document.createElement('div');
+  card.className='char-card';
+
+  if(code>127){
+    card.classList.add('unsupported');
+    card.innerHTML='<div class="char-glyph">'+shownChar(ch)+'</div><div class="char-decimal">not basic ASCII</div>';
+    return {card,binary:null};
+  }
+
+  const bin=binary8(code);
+  const bits=bin.split('').map(bit=>'<span class="'+(bit==='1'?'on':'')+'">'+bit+'</span>').join('');
+  card.innerHTML=
+    '<div class="char-glyph">'+shownChar(ch)+'</div>'+
+    '<div class="char-decimal">'+code+'</div>'+
+    '<div class="byte-row">'+bits+'</div>';
+
+  return {card,binary:bin};
+}
+function render(){
+  grid.innerHTML='';
+  warning.textContent='';
+
+  const text=input.value;
+  const binaries=[];
+  let unsupported=false;
+
+  if(!text){
+    const empty=document.createElement('div');
+    empty.className='empty-state';
+    empty.textContent='Type something above.';
+    grid.appendChild(empty);
+  }else{
+    [...text].forEach(ch=>{
+      const result=makeCard(ch);
+      grid.appendChild(result.card);
+      if(result.binary) binaries.push(result.binary);
+      else unsupported=true;
+    });
+  }
+
+  messageBinary.textContent=binaries.join(' ');
+  if(unsupported){
+    warning.textContent='This page is using basic ASCII. Try English letters, numbers, spaces, or punctuation.';
+  }
+}
+
+const examples=['HELLO','BINARY','CODE','HI!','CS50'];
+let exampleIndex=0;
+document.getElementById('exampleButton').onclick=()=>{
+  exampleIndex=(exampleIndex+1)%examples.length;
+  input.value=examples[exampleIndex];
+  render();
+  input.focus();
+};
+input.addEventListener('input',render);
+document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
+
+render();
 </script>
 </body>
 </html>
