@@ -90,6 +90,76 @@ main{padding:22px 0 34px}
 }
 .preset:hover{background:rgba(255,255,255,.6);color:var(--ink)}
 
+.live-decoder{
+  margin:24px -4px 0;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.live-decoder-head{text-align:center;margin-bottom:12px}
+.live-decoder-head strong{display:block;font:600 1.18rem 'Fraunces',serif}
+.live-decoder-head span{display:block;margin-top:3px;color:var(--soft);font-size:.7rem}
+.decoder-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.decoder-card{
+  min-width:0;
+  min-height:150px;
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.34);
+  text-align:center;
+}
+.decoder-card.pulse{animation:decoderPulse .18s ease}
+@keyframes decoderPulse{50%{background:rgba(45,105,114,.10)}}
+.decoder-card small{
+  display:block;
+  color:var(--terra);
+  font:600 .56rem 'JetBrains Mono',monospace;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.decoder-card h3{margin:5px 0 8px;font:600 .92rem 'Fraunces',serif}
+.decoder-result{
+  min-height:72px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 7px;
+}
+.decoder-value{
+  font:600 2.2rem 'JetBrains Mono',monospace;
+  color:var(--teal);
+  line-height:1;
+  word-break:break-word;
+}
+.decoder-caption{color:var(--mid);font-size:.66rem;line-height:1.35}
+.decoder-pixel{
+  width:72px;height:72px;border-radius:11px;border:1px solid var(--line2);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.decoder-green{
+  width:72px;height:72px;border-radius:11px;border:1px solid var(--line2);
+}
+.decoder-audio{
+  width:100%;height:72px;position:relative;border-radius:10px;
+  background:rgba(36,33,29,.04);overflow:hidden
+}
+.decoder-audio:before{
+  content:"";position:absolute;left:8px;right:8px;top:50%;border-top:1px solid var(--line2)
+}
+.decoder-audio-line{
+  position:absolute;left:10%;right:10%;height:3px;top:50%;
+  background:var(--teal);transform-origin:center left
+}
+.decoder-audio-dot{
+  position:absolute;width:11px;height:11px;border-radius:50%;
+  background:var(--terra);right:9%;top:calc(50% - 5.5px)
+}
+.decoder-arrow{
+  text-align:center;
+  margin:7px 0 0;
+  color:var(--soft);
+  font:500 .64rem 'JetBrains Mono',monospace;
+}
+
 .same-title{width:min(calc(100% - 32px),980px);margin:48px auto 14px;text-align:center}
 .same-title h2{margin:0;font:500 clamp(1.55rem,3vw,2.15rem)/1.05 'Fraunces',serif;letter-spacing:-.025em}
 .same-title p{margin:7px auto 0;color:var(--soft);font-size:.82rem;max-width:56ch}
@@ -172,14 +242,14 @@ main{padding:22px 0 34px}
 
 footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
 
-@media(max-width:850px){.meanings{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:850px){.meanings,.decoder-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){
   nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
   nav.open{display:flex}.menu{display:block}.hero h1{font-size:2.6rem}
   .lab{padding:17px 10px}
   .bits{gap:4px}.bit{padding:8px 1px}.bit .place{font-size:.48rem}.bit .digit{font-size:1.15rem}
   .binary-readout{font-size:clamp(1.6rem,9vw,2.7rem);letter-spacing:.035em}
-  .meanings{grid-template-columns:1fr}
+  .meanings,.decoder-grid{grid-template-columns:1fr}
   footer.site-footer{flex-direction:column}
 }
 </style>
@@ -233,11 +303,54 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
       <button class="preset" type="button" data-value="255">255</button>
       <button class="preset" type="button" id="randomByte">Random</button>
     </div>
+
+    <div class="live-decoder" aria-live="polite">
+      <div class="live-decoder-head">
+        <strong>Now watch what those exact 8 bits can become.</strong>
+        <span id="decoderByteLabel">01000001 → decimal 65</span>
+      </div>
+
+      <div class="decoder-grid">
+        <div class="decoder-card" id="decoderTextCard">
+          <small>Interpret as text</small>
+          <h3>ASCII character</h3>
+          <div class="decoder-result"><div class="decoder-value" id="decoderText">A</div></div>
+          <div class="decoder-caption" id="decoderTextCaption">65 means the character A.</div>
+        </div>
+
+        <div class="decoder-card" id="decoderPixelCard">
+          <small>Interpret as image data</small>
+          <h3>Grayscale pixel</h3>
+          <div class="decoder-result"><div class="decoder-pixel" id="decoderPixel"></div></div>
+          <div class="decoder-caption" id="decoderPixelCaption">Brightness 65 / 255</div>
+        </div>
+
+        <div class="decoder-card" id="decoderGreenCard">
+          <small>Interpret as color data</small>
+          <h3>Green channel</h3>
+          <div class="decoder-result"><div class="decoder-green" id="decoderGreen"></div></div>
+          <div class="decoder-caption" id="decoderGreenCaption">RGB(0, 65, 0)</div>
+        </div>
+
+        <div class="decoder-card" id="decoderAudioCard">
+          <small>Interpret as sound data</small>
+          <h3>8-bit sample</h3>
+          <div class="decoder-result">
+            <div class="decoder-audio">
+              <span class="decoder-audio-line" id="decoderAudioLine"></span>
+              <span class="decoder-audio-dot" id="decoderAudioDot"></span>
+            </div>
+          </div>
+          <div class="decoder-caption" id="decoderAudioCaption">Sample value 65, below center.</div>
+        </div>
+      </div>
+      <div class="decoder-arrow">same bits → different result because the program reads them differently</div>
+    </div>
   </section>
 
   <section class="same-title">
-    <h2>Same 8 bits. Four different interpretations.</h2>
-    <p>Change the byte above. Every example below updates at the same time because the underlying number never changed.</p>
+    <h2>Why can the same byte mean different things?</h2>
+    <p>The byte itself is only a value. Click each interpretation below to see what the program is assuming about that value.</p>
   </section>
 
   <section class="meanings">
@@ -358,6 +471,36 @@ function renderMeanings(){
   const dotTop=50-(normalized*34);
   document.getElementById('sampleLine').style.transform='rotate('+(-angle)+'deg)';
   document.getElementById('sampleDot').style.top='calc('+dotTop+'% - 5px)';
+
+  // Big, immediate "what does this byte become?" preview.
+  document.getElementById('decoderByteLabel').textContent=b+' → decimal '+value;
+
+  const decoderText=document.getElementById('decoderText');
+  const decoderTextCaption=document.getElementById('decoderTextCaption');
+  if(value<=127){
+    decoderText.textContent=text;
+    decoderTextCaption.textContent=value+' means '+(text==='SPACE'?'a space':'the character '+text)+'.';
+  }else{
+    decoderText.textContent='—';
+    decoderTextCaption.textContent='Basic ASCII stops at 127.';
+  }
+
+  document.getElementById('decoderPixel').style.background='rgb('+value+','+value+','+value+')';
+  document.getElementById('decoderPixelCaption').textContent='Brightness '+value+' / 255';
+
+  document.getElementById('decoderGreen').style.background='rgb(0,'+value+',0)';
+  document.getElementById('decoderGreenCaption').textContent='RGB(0, '+value+', 0)';
+
+  document.getElementById('decoderAudioLine').style.transform='rotate('+(-angle)+'deg)';
+  document.getElementById('decoderAudioDot').style.top='calc('+dotTop+'% - 5.5px)';
+  const audioWhere=value===128?'at the center':value<128?'below center':'above center';
+  document.getElementById('decoderAudioCaption').textContent='Sample value '+value+', '+audioWhere+'.';
+
+  document.querySelectorAll('.decoder-card').forEach(card=>{
+    card.classList.remove('pulse');
+    void card.offsetWidth;
+    card.classList.add('pulse');
+  });
 }
 
 function render(){
