@@ -329,9 +329,9 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
               <div class="decoder-result"><div class="decoder-green" id="decoderColor"></div></div>
               <div class="decoder-caption" id="decoderColorCaption">Red channel = 65 → RGB(65, 0, 0)</div>
               <div class="channel-toggle" aria-label="Choose which RGB channel this byte controls">
-                <button type="button" class="rgb-channel active" data-channel="r">R</button>
-                <button type="button" class="rgb-channel" data-channel="g">G</button>
-                <button type="button" class="rgb-channel" data-channel="b">B</button>
+                <button type="button" class="rgb-channel active" data-channel="r" aria-pressed="true">R</button>
+                <button type="button" class="rgb-channel" data-channel="g" aria-pressed="false">G</button>
+                <button type="button" class="rgb-channel" data-channel="b" aria-pressed="false">B</button>
               </div>
             </div>
 
@@ -466,6 +466,17 @@ document.querySelectorAll('.preset[data-value]').forEach(btn=>{
 document.getElementById('randomByte').addEventListener('click',()=>{
   value=Math.floor(Math.random()*256);
   render();
+});
+
+document.querySelectorAll('.rgb-channel').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    rgbChannel=btn.dataset.channel;
+    document.querySelectorAll('.rgb-channel').forEach(x=>{
+      x.classList.toggle('active',x===btn);
+      x.setAttribute('aria-pressed',String(x===btn));
+    });
+    renderMeanings();
+  });
 });
 
 const challenges=[
