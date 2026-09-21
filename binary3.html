@@ -173,20 +173,41 @@ main{padding:14px 0 24px}
   width:72px;height:72px;border-radius:11px;border:1px solid var(--line2);
 }
 .decoder-audio{
-  width:100%;height:58px;position:relative;border-radius:10px;
-  background:rgba(36,33,29,.04);overflow:hidden
+  width:100%;
+  height:76px;
+  padding:5px 6px 2px;
+  border-radius:10px;
+  background:rgba(36,33,29,.04);
 }
-.decoder-audio:before{
-  content:"";position:absolute;left:8px;right:8px;top:50%;border-top:1px solid var(--line2)
+.decoder-audio svg{display:block;width:100%;height:50px;overflow:visible}
+.audio-midline{stroke:rgba(36,33,29,.14);stroke-width:1}
+.audio-wave{fill:none;stroke:var(--teal);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.audio-point{fill:var(--teal)}
+.audio-point.current{fill:var(--terra);stroke:var(--paper);stroke-width:2}
+.sample-values{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:1px;
+  margin-top:1px;
+  color:var(--soft);
+  font:500 .46rem 'JetBrains Mono',monospace;
+  text-align:center;
 }
-.decoder-audio-line{
-  position:absolute;left:10%;right:10%;height:3px;top:50%;
-  background:var(--teal);transform-origin:center left
+.sample-values span.current{color:var(--terra);font-weight:700}
+.audio-actions{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:6px;flex-wrap:wrap}
+.play-samples{
+  min-height:28px;
+  padding:0 8px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:rgba(255,255,255,.34);
+  color:var(--mid);
+  cursor:pointer;
+  font-size:.61rem;
+  font-weight:700;
 }
-.decoder-audio-dot{
-  position:absolute;width:11px;height:11px;border-radius:50%;
-  background:var(--terra);right:9%;top:calc(50% - 5.5px)
-}
+.play-samples:hover{background:rgba(255,255,255,.65);color:var(--ink)}
+.audio-status{color:var(--soft);font-size:.55rem}
 .decoder-arrow{
   text-align:center;
   margin:7px 0 0;
@@ -337,14 +358,22 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
 
             <div class="decoder-card" id="decoderAudioCard">
               <small>Sound data</small>
-              <h3>8-bit sample</h3>
+              <h3>One sample in a waveform</h3>
               <div class="decoder-result">
                 <div class="decoder-audio">
-                  <span class="decoder-audio-line" id="decoderAudioLine"></span>
-                  <span class="decoder-audio-dot" id="decoderAudioDot"></span>
+                  <svg id="audioWaveform" viewBox="0 0 210 50" role="img" aria-label="Seven audio sample values connected as a waveform; the middle sample is the current byte">
+                    <line class="audio-midline" x1="5" y1="25" x2="205" y2="25"></line>
+                    <polyline class="audio-wave" id="audioWaveLine" points=""></polyline>
+                    <g id="audioWavePoints"></g>
+                  </svg>
+                  <div class="sample-values" id="audioSampleValues" aria-hidden="true"></div>
                 </div>
               </div>
-              <div class="decoder-caption" id="decoderAudioCaption">Sample value 65, below center.</div>
+              <div class="decoder-caption" id="decoderAudioCaption">The orange middle point is your byte: 65.</div>
+              <div class="audio-actions">
+                <button type="button" class="play-samples" id="playSamples">▶ Play these samples</button>
+                <span class="audio-status" id="audioStatus">looped briefly so you can hear them</span>
+              </div>
             </div>
           </div>
           <div class="decoder-arrow">same byte → different meaning because the program interprets it differently</div>
@@ -410,6 +439,73 @@ function rgbForByte(v){
   return [0,0,v];
 }
 
+const baseAudioSamples=[128,180,230,65,26,76,128];
+let audioCtx=null;
+
+function renderAudioWaveform(){
+  const samples=[baseAudioSamples[0],baseAudioSamples[1],baseAudioSamples[2],value,baseAudioSamples[4],baseAudioSamples[5],baseAudioSamples[6]];
+  const width=210;
+  const height=50;
+  const padX=7;
+  const padY=5;
+  const usableW=width-(padX*2);
+  const usableH=height-(padY*2);
+
+  const pts=samples.map((sample,i)=>{
+    const x=padX+(i/(samples.length-1))*usableW;
+    const y=padY+((255-sample)/255)*usableH;
+    return {x,y,sample,i};
+  });
+
+  document.getElementById('audioWaveLine').setAttribute('points',pts.map(p=>p.x+','+p.y).join(' '));
+
+  const group=document.getElementById('audioWavePoints');
+  group.innerHTML='';
+  pts.forEach(p=>{
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',p.x);
+    circle.setAttribute('cy',p.y);
+    circle.setAttribute('r',p.i===3?'5':'3.2');
+    circle.setAttribute('class','audio-point'+(p.i===3?' current':''));
+    group.appendChild(circle);
+  });
+
+  const values=document.getElementById('audioSampleValues');
+  values.innerHTML=samples.map((n,i)=>'<span class="'+(i===3?'current':'')+'">'+n+'</span>').join('');
+
+  const audioWhere=value===128?'on the center line':value<128?'below the center line':'above the center line';
+  document.getElementById('decoderAudioCaption').textContent='The orange middle point is your byte: '+value+', '+audioWhere+'.';
+}
+
+async function playSamplePattern(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  await audioCtx.resume();
+
+  const pattern=[128,180,230,value,26,76,128];
+  const repeatsPerSample=4;
+  const sampleRate=8000;
+  const duration=.42;
+  const length=Math.floor(sampleRate*duration);
+  const buffer=audioCtx.createBuffer(1,length,sampleRate);
+  const data=buffer.getChannelData(0);
+
+  for(let i=0;i<length;i++){
+    const patternIndex=Math.floor(i/repeatsPerSample)%pattern.length;
+    let amp=(pattern[patternIndex]-128)/127;
+    const edge=Math.min(1,i/120,(length-1-i)/120);
+    data[i]=amp*.22*edge;
+  }
+
+  const source=audioCtx.createBufferSource();
+  source.buffer=buffer;
+  source.connect(audioCtx.destination);
+  source.start();
+
+  const status=document.getElementById('audioStatus');
+  status.textContent='playing a short loop of the 7 samples…';
+  source.addEventListener('ended',()=>{status.textContent='looped briefly so you can hear them';},{once:true});
+}
+
 function renderMeanings(animate=true){
   const b=binary8(value);
   binaryReadout.textContent=b;
@@ -441,10 +537,7 @@ function renderMeanings(animate=true){
   const channelName=rgbChannel==='r'?'Red':rgbChannel==='g'?'Green':'Blue';
   document.getElementById('decoderColorCaption').textContent=channelName+' channel = '+value+' → RGB('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';
 
-  document.getElementById('decoderAudioLine').style.transform='rotate('+(-angle)+'deg)';
-  document.getElementById('decoderAudioDot').style.top='calc('+dotTop+'% - 5.5px)';
-  const audioWhere=value===128?'at the center':value<128?'below center':'above center';
-  document.getElementById('decoderAudioCaption').textContent='Sample value '+value+', '+audioWhere+'.';
+  renderAudioWaveform();
 
   if(animate){
     document.querySelectorAll('.decoder-card').forEach(card=>{
@@ -480,6 +573,8 @@ document.querySelectorAll('.rgb-channel').forEach(btn=>{
     renderMeanings(false);
   });
 });
+
+document.getElementById('playSamples').addEventListener('click',playSamplePattern);
 
 const challenges=[
   {prompt:'Make the byte that represents uppercase A in ASCII.',hint:'You saw this one on the last page.',target:65},
