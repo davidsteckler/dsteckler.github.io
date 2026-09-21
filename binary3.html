@@ -131,6 +131,28 @@ main{padding:22px 0 34px}
   word-break:break-word;
 }
 .decoder-caption{color:var(--mid);font-size:.66rem;line-height:1.35}
+.channel-toggle{
+  display:flex;
+  justify-content:center;
+  gap:5px;
+  margin-top:8px;
+}
+.channel-toggle button{
+  min-width:34px;
+  height:30px;
+  padding:0 8px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:rgba(255,255,255,.34);
+  color:var(--mid);
+  cursor:pointer;
+  font:700 .65rem 'JetBrains Mono',monospace;
+}
+.channel-toggle button.active{
+  background:var(--teal-soft);
+  border-color:rgba(45,105,114,.25);
+  color:var(--teal);
+}
 .decoder-pixel{
   width:72px;height:72px;border-radius:11px;border:1px solid var(--line2);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
@@ -325,11 +347,16 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
           <div class="decoder-caption" id="decoderPixelCaption">Brightness 65 / 255</div>
         </div>
 
-        <div class="decoder-card" id="decoderGreenCard">
+        <div class="decoder-card" id="decoderColorCard">
           <small>Interpret as color data</small>
-          <h3>Green channel</h3>
-          <div class="decoder-result"><div class="decoder-green" id="decoderGreen"></div></div>
-          <div class="decoder-caption" id="decoderGreenCaption">RGB(0, 65, 0)</div>
+          <h3>One RGB channel</h3>
+          <div class="decoder-result"><div class="decoder-green" id="decoderColor"></div></div>
+          <div class="decoder-caption" id="decoderColorCaption">Red channel = 65 → RGB(65, 0, 0)</div>
+          <div class="channel-toggle" aria-label="Choose which RGB channel this byte controls">
+            <button type="button" class="rgb-channel active" data-channel="r">R</button>
+            <button type="button" class="rgb-channel" data-channel="g">G</button>
+            <button type="button" class="rgb-channel" data-channel="b">B</button>
+          </div>
         </div>
 
         <div class="decoder-card" id="decoderAudioCard">
@@ -370,9 +397,9 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
 
     <button class="meaning" type="button" data-kind="color">
       <small>Context 3</small>
-      <h3>Green channel</h3>
+      <h3>One RGB channel</h3>
       <div class="big"><span class="channel-box" id="colorMeaning"></span></div>
-      <p>Read the byte as one 0–255 RGB color channel.</p>
+      <p>Use the byte as red, green, or blue intensity. A full RGB pixel needs three bytes.</p>
     </button>
 
     <button class="meaning" type="button" data-kind="audio">
@@ -454,6 +481,14 @@ function renderBits(){
   });
 }
 
+let rgbChannel='r';
+
+function rgbForByte(v){
+  if(rgbChannel==='r') return [v,0,0];
+  if(rgbChannel==='g') return [0,v,0];
+  return [0,0,v];
+}
+
 function renderMeanings(){
   const b=binary8(value);
   binaryReadout.textContent=b;
@@ -464,7 +499,8 @@ function renderMeanings(){
   document.getElementById('textMeaning').textContent=text;
 
   document.getElementById('pixelMeaning').style.background='rgb('+value+','+value+','+value+')';
-  document.getElementById('colorMeaning').style.background='rgb(0,'+value+',0)';
+  const rgb=rgbForByte(value);
+  document.getElementById('colorMeaning').style.background='rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
 
   const normalized=(value-128)/127;
   const angle=normalized*28;
@@ -488,8 +524,9 @@ function renderMeanings(){
   document.getElementById('decoderPixel').style.background='rgb('+value+','+value+','+value+')';
   document.getElementById('decoderPixelCaption').textContent='Brightness '+value+' / 255';
 
-  document.getElementById('decoderGreen').style.background='rgb(0,'+value+',0)';
-  document.getElementById('decoderGreenCaption').textContent='RGB(0, '+value+', 0)';
+  document.getElementById('decoderColor').style.background='rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
+  const channelName=rgbChannel==='r'?'Red':rgbChannel==='g'?'Green':'Blue';
+  document.getElementById('decoderColorCaption').textContent=channelName+' channel = '+value+' → RGB('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';
 
   document.getElementById('decoderAudioLine').style.transform='rotate('+(-angle)+'deg)';
   document.getElementById('decoderAudioDot').style.top='calc('+dotTop+'% - 5.5px)';
@@ -528,7 +565,7 @@ const detailCopy={
     return ['Text interpretation','Basic ASCII only defines codes 0–127. Decimal '+value+' would need another text encoding or character set to decide its meaning.'];
   },
   pixel:()=>['Grayscale pixel','Decimal '+value+' becomes brightness '+value+' out of 255. The bits are unchanged; an image decoder treats the number as lightness.'],
-  color:()=>['Green channel','Decimal '+value+' becomes green intensity '+value+' out of 255. A full RGB pixel normally uses three channel values: red, green, and blue.'],
+  color:()=>['One RGB channel','Decimal '+value+' can be used as the red, green, or blue intensity. A full RGB pixel normally uses three bytes: one for red, one for green, and one for blue.'],
   audio:()=>{
     const direction=value===128?'near the center':value<128?'below the center':'above the center';
     return ['8-bit audio sample','If an audio format uses unsigned 8-bit samples, '+value+' is '+direction+' of the waveform. One byte can store one momentary amplitude sample.'];
@@ -543,6 +580,14 @@ function updateSelectedDetail(){
   el.querySelector('p').textContent=data[1];
 }
 
+document.querySelectorAll('.rgb-channel').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    rgbChannel=btn.dataset.channel;
+    document.querySelectorAll('.rgb-channel').forEach(x=>x.classList.toggle('active',x===btn));
+    renderMeanings();
+  });
+});
+
 document.querySelectorAll('.meaning').forEach(btn=>{
   btn.addEventListener('click',()=>{
     selectedKind=btn.dataset.kind;
@@ -554,7 +599,7 @@ document.querySelectorAll('.meaning').forEach(btn=>{
 const challenges=[
   {prompt:'Make the byte that represents uppercase A in ASCII.',hint:'You saw this one on the last page.',target:65},
   {prompt:'Make a half-bright grayscale pixel.',hint:'Use 128 as the midpoint of 0–255.',target:128},
-  {prompt:'Make the green channel as bright as possible.',hint:'Maximum intensity uses the largest byte value.',target:255},
+  {prompt:'Make one RGB color channel as bright as possible.',hint:'Maximum intensity uses the largest byte value.',target:255},
   {prompt:'Make the byte for lowercase a in ASCII.',hint:'Lowercase a begins at decimal 97.',target:97},
   {prompt:'Make a completely black grayscale pixel.',hint:'No brightness means no value.',target:0}
 ];
