@@ -98,11 +98,16 @@ main{padding:22px 0 34px}
 .mini-game-status strong{color:#f1d06e}
 .screen{
   margin:0;
-  padding:16px 20px 18px;
-  font:600 clamp(.86rem,1.7vw,1.12rem)/1.34 'JetBrains Mono',monospace;
+  min-height:270px;
+  padding:24px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font:600 clamp(1rem,1.9vw,1.3rem)/1.35 'JetBrains Mono',monospace;
   white-space:pre;
   overflow:auto;
   color:#9f9a91;
+  background:#171715;
   outline:none;
 }
 .game-screen:focus{box-shadow:inset 0 0 0 2px rgba(139,199,207,.30)}
@@ -435,70 +440,74 @@ const gameState={row:1,col:1,moves:0,won:false};
 const gameEl=document.getElementById('asciiGame');
 const gameResult=document.getElementById('gameResult');
 
-function tileAt(r,c){
-  if(r===gameState.row && c===gameState.col) return '@';
-  return dungeon[r][c];
-}
 function renderDungeon(){
   let html='';
   for(let r=0;r<dungeon.length;r++){
     for(let col=0;col<dungeon[r].length;col++){
-      const ch=tileAt(r,col);
-      let cls='';
-      if(ch==='@') cls='player';
-      else if(ch==='
-</script>
-</body>
-</html>) cls='treasure';
-      else if(ch==='D') cls='monster';
-      else if(ch==='.') cls='floor';
-      html += cls ? '<span class="'+cls+'">'+ch+'</span>' : ch;
+      let ch=dungeon[r][col];
+      if(r===gameState.row && col===gameState.col) ch='@';
+
+      if(ch==='@') html+='<span class="player">@</span>';
+      else if(ch==='$') html+='<span class="treasure">$</span>';
+      else if(ch==='D') html+='<span class="monster">D</span>';
+      else if(ch==='.') html+='<span class="floor">.</span>';
+      else html+=ch;
     }
     if(r<dungeon.length-1) html+='\n';
   }
-  gameEl.innerHTML=html;
-  document.getElementById('moveCount').textContent=gameState.moves+' move'+(gameState.moves===1?'':'s');
 
-  const code='@'.charCodeAt(0);
+  gameEl.innerHTML=html;
+  document.getElementById('moveCount').textContent=
+    gameState.moves+' move'+(gameState.moves===1?'':'s');
+
   document.getElementById('tileCharacter').textContent='@';
-  document.getElementById('tileDecimal').textContent=code;
-  document.getElementById('tileBinary').textContent=code.toString(2).padStart(8,'0');
+  document.getElementById('tileDecimal').textContent='64';
+  document.getElementById('tileBinary').textContent='01000000';
 }
+
 function tryMove(dr,dc){
   if(gameState.won) return;
+
   const nr=gameState.row+dr;
   const nc=gameState.col+dc;
   const next=dungeon[nr]?.[nc];
+
   if(!next || next==='#'){
     gameResult.textContent='That # is a wall.';
     return;
   }
+
   if(next==='D'){
-    gameResult.textContent='A D is blocking the way. Try another path.';
+    gameResult.textContent='The D is a dragon. Try another path.';
     return;
   }
+
   gameState.row=nr;
   gameState.col=nc;
   gameState.moves++;
-  if(next==='
-</script>
-</body>
-</html>){
+
+  if(next==='$'){
     gameState.won=true;
-    gameResult.textContent='You found the $. The whole “game screen” was just characters on a grid.';
+    gameResult.textContent='You found the $. The whole game screen is just characters on a grid.';
     gameResult.classList.add('won');
   }else{
-    gameResult.textContent='You moved the @ one character on the grid.';
+    gameResult.textContent='You moved @ one character on the grid.';
     gameResult.classList.remove('won');
   }
+
   renderDungeon();
 }
+
 function resetDungeon(){
-  gameState.row=1;gameState.col=1;gameState.moves=0;gameState.won=false;
+  gameState.row=1;
+  gameState.col=1;
+  gameState.moves=0;
+  gameState.won=false;
   gameResult.textContent='Arrow keys or WASD work too.';
   gameResult.classList.remove('won');
   renderDungeon();
 }
+
 document.querySelectorAll('[data-move]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const dir=btn.dataset.move;
@@ -509,23 +518,31 @@ document.querySelectorAll('[data-move]').forEach(btn=>{
     gameEl.focus();
   });
 });
+
 document.getElementById('resetAsciiGame').addEventListener('click',()=>{
   resetDungeon();
   gameEl.focus();
 });
+
 gameEl.addEventListener('keydown',e=>{
   const key=e.key.toLowerCase();
   const dirs={
-    'arrowup':[-1,0],'w':[-1,0],
-    'arrowdown':[1,0],'s':[1,0],
-    'arrowleft':[0,-1],'a':[0,-1],
-    'arrowright':[0,1],'d':[0,1]
+    'arrowup':[-1,0],
+    'w':[-1,0],
+    'arrowdown':[1,0],
+    's':[1,0],
+    'arrowleft':[0,-1],
+    'a':[0,-1],
+    'arrowright':[0,1],
+    'd':[0,1]
   };
+
   if(dirs[key]){
     e.preventDefault();
     tryMove(...dirs[key]);
   }
 });
+
 renderDungeon();
 
 document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
