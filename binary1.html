@@ -90,14 +90,21 @@ main{padding:22px 0 70px}
 
 #bulbs{
   display:grid;
-  grid-template-columns:repeat(8,92px);
-  gap:8px;
-  align-items:end;
+  grid-template-columns:repeat(8,90px);
+  gap:4px;
+  align-items:start;
   justify-content:center;
   max-width:100%;
+  min-height:154px;
   margin:0 auto;
 }
-.bit{display:flex;flex-direction:column;align-items:center;min-width:0}
+.bit{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width:0;
+  height:154px;
+}
 .bit-label{
   margin-bottom:8px;
   color:#5e5850;
@@ -105,8 +112,13 @@ main{padding:22px 0 70px}
   font-weight:600;
 }
 .bit-button{
-  width:92px;height:126px;
-  padding:0;border:0;background:transparent;cursor:pointer;
+  width:90px;
+  height:126px;
+  flex:0 0 126px;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:pointer;
   transition:transform .12s ease;
 }
 .bit-button:hover{transform:translateY(-2px)}
@@ -134,35 +146,18 @@ main{padding:22px 0 70px}
   display:none;
   width:100%;height:100%;
   align-items:center;justify-content:center;
-  font:500 4.6rem/1 'Outfit',sans-serif;
+  font:500 5.1rem/1 'Outfit',sans-serif;
   letter-spacing:-.06em;
   color:#aaa298;
 }
-#bulbs.bits-view .bit-button{height:104px}
+#bulbs.bits-view .bit-button{
+  width:90px;
+  height:126px;
+  flex-basis:126px;
+}
 #bulbs.bits-view .bulb-svg{display:none}
 #bulbs.bits-view .raw-bit{display:flex}
 #bulbs.bits-view .bit-button.on .raw-bit{color:#2e2a26}
-
-.view-switch-row{
-  display:flex;
-  justify-content:center;
-  margin:8px 0 2px;
-}
-.view-switch{
-  border:0;
-  background:transparent;
-  color:#8a8278;
-  padding:5px 8px;
-  cursor:pointer;
-  font-size:.7rem;
-  font-weight:600;
-}
-.view-switch:hover{color:var(--teal)}
-.view-switch::before{
-  content:"↔";
-  margin-right:6px;
-  color:#b0a89e;
-}
 
 /* decimal */
 .number-control{
@@ -199,18 +194,31 @@ main{padding:22px 0 70px}
 
 /* controls */
 .toolbar{
-  margin:18px auto 0;
-  width:max-content;max-width:100%;
-  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
-  gap:12px 22px;
-  padding:0;
-  border:0;
-  background:transparent;
+  width:min(100%,760px);
+  margin:34px auto 0;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  align-items:start;
+  gap:18px;
 }
-.control{display:flex;align-items:center;gap:7px}
-.control-name{font-size:.7rem;font-weight:600;color:#746d64}
+.control{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.control-name{
+  font-size:.78rem;
+  font-weight:500;
+  color:#5f5951;
+}
 .segment{
-  display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.35)
+  display:flex;
+  gap:2px;
+  padding:2px;
+  border:0;
+  border-radius:999px;
+  background:rgba(36,33,29,.045)
 }
 .segment button{
   border:0;background:transparent;color:#8f877e;
@@ -228,7 +236,15 @@ main{padding:22px 0 70px}
 }
 .toggle.on{background:#6f9ca3}
 .toggle.on::after{transform:translateX(17px)}
-.actions{display:flex;justify-content:center;gap:4px;margin-top:8px}
+.secondary-controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+.actions{display:flex;justify-content:center;gap:4px;margin-top:0}
 .actions button{
   border:0;background:transparent;color:#8a8278;
   padding:6px 9px;border-radius:8px;cursor:pointer;
@@ -316,12 +332,26 @@ footer{
   nav.open{display:flex}
   .menu{display:block}
   .hero h1{font-size:2.6rem}
-  #bulbs{grid-template-columns:repeat(4,72px);gap:8px}
-  .bit-button{width:72px;height:100px}
-  #bulbs.bits-view .bit-button{height:72px}
-  .raw-bit{font-size:3rem}
+  #bulbs{
+    grid-template-columns:repeat(4,72px);
+    gap:8px;
+    min-height:254px;
+    row-gap:20px;
+  }
+  .bit{height:117px}
+  .bit-button,
+  #bulbs.bits-view .bit-button{
+    width:72px;
+    height:96px;
+    flex-basis:96px;
+  }
+  .raw-bit{font-size:3.4rem}
   .bit-label{font-size:.75rem}
-  .toolbar{width:100%;gap:10px 14px}
+  .toolbar{
+    width:100%;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
   .practice-row{flex-direction:column}
   .practice input,.practice button{width:100%}
   footer{flex-direction:column}
@@ -373,13 +403,14 @@ footer{
       <div class="target" id="targetText"></div>
     </div>
 
-    <div class="view-switch-row">
-      <button class="view-switch" id="viewSwitch">Show as 0s &amp; 1s</button>
-    </div>
-
     <div class="toolbar">
       <div class="control">
-        <span class="control-name">Game</span>
+        <span class="control-name">Bulbs</span>
+        <button class="toggle on" id="bulbsToggle" aria-pressed="true" aria-label="Toggle bulb view"></button>
+      </div>
+
+      <div class="control">
+        <span class="control-name">Game Mode</span>
         <button class="toggle" id="gameToggle" aria-pressed="false" aria-label="Toggle game mode"></button>
       </div>
 
@@ -387,21 +418,19 @@ footer{
         <span class="control-name">Labels</span>
         <button class="toggle on" id="labelsToggle" aria-pressed="true" aria-label="Toggle labels"></button>
       </div>
-
-      <div class="control">
-        <span class="control-name">Bits</span>
-        <div class="segment" id="bitCount">
-          <button data-bits="4">4</button>
-          <button data-bits="6">6</button>
-          <button data-bits="8" class="selected">8</button>
-        </div>
-      </div>
     </div>
 
-    <div class="actions">
-      <button id="resetButton">Reset</button>
-      <button id="randomButton">Randomize</button>
-      <button id="helpButton">How to Play</button>
+    <div class="secondary-controls">
+      <div class="segment" id="bitCount" aria-label="Bit count">
+        <button data-bits="4">4 bits</button>
+        <button data-bits="6">6 bits</button>
+        <button data-bits="8" class="selected">8 bits</button>
+      </div>
+      <div class="actions">
+        <button id="resetButton">Reset</button>
+        <button id="randomButton">Randomize</button>
+        <button id="helpButton">How to Play</button>
+      </div>
     </div>
 
     <div class="game-message" id="gameMessage"></div>
@@ -511,7 +540,9 @@ function render(){
   document.querySelectorAll('#bitCount button').forEach(b=>{
     b.classList.toggle('selected',Number(b.dataset.bits)===bits.length);
   });
-  document.getElementById('viewSwitch').textContent = view==='bulbs' ? 'Show as 0s & 1s' : 'Show as bulbs';
+  const bulbsToggle=document.getElementById('bulbsToggle');
+  bulbsToggle.classList.toggle('on',view==='bulbs');
+  bulbsToggle.setAttribute('aria-pressed',String(view==='bulbs'));
 
   if(gameOn && target!==null){
     targetText.textContent='Target: '+target;
@@ -549,7 +580,7 @@ function setLabels(on){
   render();
 }
 
-document.getElementById('viewSwitch').onclick=()=>{
+document.getElementById('bulbsToggle').onclick=()=>{
   view = view==='bulbs' ? 'bits' : 'bulbs';
   render();
 };
