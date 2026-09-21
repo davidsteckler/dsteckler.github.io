@@ -709,31 +709,68 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:3px;
-      min-height:82px;
-      margin:6px auto 14px;
+      justify-content:center;
+      gap:2px;
+      min-height:150px;
+      margin:0 auto 12px;
     }
 
-    #placeValueSum,
-    #numberDisplay,
-    #binaryDisplay{
-      margin:0!important;
-      color:var(--ds-mid)!important;
-      font-family:'Fraunces',Georgia,serif!important;
-      font-size:1.05rem!important;
-      line-height:1.45!important;
-      text-align:center!important;
+    .decimal-readout{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-width:150px;
+    }
+
+    .decimal-readout span{
+      color:var(--ds-soft);
+      font-family:'Outfit',sans-serif;
+      font-size:.67rem;
+      font-weight:750;
+      letter-spacing:.08em;
+      text-transform:uppercase;
     }
 
     #numberDisplay{
+      margin:0!important;
       color:var(--ds-ink)!important;
-      font-size:1.55rem!important;
-      font-weight:600!important;
+      font-family:'Outfit',sans-serif!important;
+      font-size:4.2rem!important;
+      font-weight:500!important;
+      line-height:.98!important;
+      letter-spacing:-.06em!important;
+      text-align:center!important;
     }
 
-    #binaryDisplay{
-      font-family:'JetBrains Mono',monospace!important;
-      font-size:.88rem!important;
+    .decimal-arrow{
+      width:54px!important;
+      height:34px!important;
+      min-height:0!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:8px!important;
+      background:transparent!important;
+      color:var(--ds-ink)!important;
+      font-family:Arial,sans-serif!important;
+      font-size:2rem!important;
+      font-weight:400!important;
+      line-height:1!important;
+      box-shadow:none!important;
+      cursor:pointer;
+      transition:transform .1s ease,color .1s ease,opacity .1s ease;
+    }
+
+    .decimal-arrow:hover{
+      color:var(--ds-teal)!important;
+      transform:scale(1.08);
+      background:transparent!important;
+    }
+
+    .decimal-arrow:disabled{
+      opacity:.22;
+      cursor:default;
+      transform:none!important;
     }
 
     .binary-visualization{
@@ -1195,6 +1232,14 @@
         font-size:.8rem!important;
       }
 
+      #numberDisplay{
+        font-size:3.5rem!important;
+      }
+
+      .binary1-readouts{
+        min-height:132px;
+      }
+
       .binary1-options{
         gap:14px;
       }
@@ -1280,9 +1325,12 @@
                 <div id="bulbs"></div>
 
                 <div class="binary1-readouts">
-                    <div id="placeValueSum">Sum: 0 = 0</div>
-                    <div id="numberDisplay">Decimal: 0</div>
-                    <div id="binaryDisplay">Binary: 00000000</div>
+                    <button class="decimal-arrow" id="numberUp" type="button" aria-label="Increase decimal number by 1">△</button>
+                    <div class="decimal-readout">
+                        <span>Decimal</span>
+                        <strong id="numberDisplay">0</strong>
+                    </div>
+                    <button class="decimal-arrow" id="numberDown" type="button" aria-label="Decrease decimal number by 1">▽</button>
                 </div>
 
                 <div class="binary-visualization" id="binaryVisualization"></div>
@@ -1353,7 +1401,7 @@
             <section class="binary1-visual-guide" aria-labelledby="binary-explainer-title">
                 <div class="visual-guide-head">
                     <div class="binary1-kicker">See the pattern</div>
-                    <h2 id="binary-explainer-title">A 1 means “use this value.”</h2>
+                    <h2 id="binary-explainer-title">Why those place values matter.</h2>
                 </div>
 
                 <div class="place-value-demo" aria-label="Example binary number 00101101 equals decimal 45">
@@ -1427,7 +1475,7 @@
                 <li>Each bulb represents a binary digit: off (0) or on (1).</li>
                 <li>Click a bulb to switch it on or off.</li>
                 <li>The rightmost bulb is worth 1, the next 2, then 4, 8, and so on.</li>
-                <li>The sum of the "on" bulbs' values is your current number.</li>
+                <li>The bulbs that are on combine to make the decimal number shown below.</li>
                 <li>In Game Mode, try to match the target number by turning on the right bulbs!</li>
                 <li>Choose difficulty levels to practice with different numbers of bits.</li>
             </ol>
@@ -1452,7 +1500,6 @@
         const alertElement = document.getElementById('alert');
         const targetElement = document.getElementById('target');
         const newChallengeButton = document.getElementById('newChallengeButton');
-        const placeValueSumElement = document.getElementById('placeValueSum');
         const bulbsContainer = document.getElementById('bulbs');
         const binaryVisualization = document.getElementById('binaryVisualization');
 
@@ -1494,6 +1541,21 @@
             updateDisplay();
         }
 
+        function getCurrentNumber() {
+            return bits.reduce((acc, bit, index) => acc + bit * Math.pow(2, bits.length - 1 - index), 0);
+        }
+
+        function setNumber(value) {
+            const max = Math.pow(2, bits.length) - 1;
+            const next = Math.max(0, Math.min(max, value));
+            bits = next.toString(2).padStart(bits.length, '0').split('').map(Number);
+            updateDisplay();
+        }
+
+        function adjustNumber(amount) {
+            setNumber(getCurrentNumber() + amount);
+        }
+
         function updateDisplay() {
             const bulbElements = document.querySelectorAll('.bulb');
             bulbElements.forEach((element, index) => {
@@ -1504,26 +1566,17 @@
                 if (bitOnly) bitOnly.textContent = bits[index];
             });
 
-            let number = bits.reduce((acc, bit, index) => acc + bit * Math.pow(2, bits.length - 1 - index), 0);
-            let binary = bits.join('');
+            const number = getCurrentNumber();
+            const numberDisplay = document.getElementById('numberDisplay');
+            numberDisplay.textContent = gameModeToggle.checked && isHardMode ? '?' : number;
 
-            if (gameModeToggle.checked && isHardMode) {
-                document.getElementById('numberDisplay').textContent = `Target: ${target}`;
-                document.getElementById('binaryDisplay').textContent = 'Binary: ' + '?'.repeat(bits.length);
-                placeValueSumElement.textContent = 'Sum: Hidden in Hard Mode';
-            } else {
-                document.getElementById('numberDisplay').textContent = `Decimal: ${number}`;
-                document.getElementById('binaryDisplay').textContent = `Binary: ${binary}`;
-                
-                let placeValueSum = bits.reduce((sum, bit, index) => {
-                    let placeValue = Math.pow(2, bits.length - 1 - index);
-                    return sum + (bit === 1 ? `${placeValue} + ` : '');
-                }, '').slice(0, -3) || '0';
-                placeValueSumElement.textContent = `Sum: ${placeValueSum} = ${number}`;
-            }
+            const up = document.getElementById('numberUp');
+            const down = document.getElementById('numberDown');
+            const max = Math.pow(2, bits.length) - 1;
+            if (up) up.disabled = number >= max;
+            if (down) down.disabled = number <= 0;
 
             if (gameModeToggle.checked) {
-                document.getElementById('numberDisplay').textContent += ` | Target: ${target}`;
                 if (number === target) {
                     celebrateWin();
                 } else {
@@ -1634,6 +1687,9 @@
                 alert(`Not quite. The correct binary representation of ${decimal} is ${binary}. Try again!`);
             }
         }
+
+        document.getElementById('numberUp').addEventListener('click', () => adjustNumber(1));
+        document.getElementById('numberDown').addEventListener('click', () => adjustNumber(-1));
 
         bulbsToggle.addEventListener('change', () => {
             bulbsContainer.classList.toggle('bits-only', !bulbsToggle.checked);
