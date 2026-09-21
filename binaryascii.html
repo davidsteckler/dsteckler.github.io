@@ -98,20 +98,35 @@ main{padding:22px 0 34px}
 .mini-game-status strong{color:#f1d06e}
 .screen{
   margin:0;
-  min-height:270px;
-  padding:24px 28px;
-  display:flex;
-  align-items:center;
+  min-height:330px;
+  padding:24px 16px;
+  display:grid;
+  grid-template-columns:repeat(29,1.05em);
+  grid-auto-rows:1.18em;
+  align-content:center;
   justify-content:center;
-  font:600 clamp(1rem,1.9vw,1.3rem)/1.35 'JetBrains Mono',monospace;
-  white-space:pre;
-  overflow:auto;
-  color:#9f9a91;
+  overflow:hidden;
+  color:#aaa49b;
   background:#171715;
+  font:600 clamp(.72rem,1.25vw,1rem)/1 'JetBrains Mono',monospace;
   outline:none;
 }
 .game-screen:focus{box-shadow:inset 0 0 0 2px rgba(139,199,207,.30)}
-.game-screen .player{color:#f0c95a}.game-screen .treasure{color:#8bc7cf}.game-screen .monster{color:#dc8f78}.game-screen .floor{color:#6e6a64}
+.game-cell{
+  width:1.05em;
+  height:1.18em;
+  display:grid;
+  place-items:center;
+  line-height:1;
+}
+.game-cell.player{color:#f0c95a;font-weight:800}
+.game-cell.treasure{color:#8bc7cf;font-weight:800}
+.game-cell.monster{color:#dc8f78;font-weight:800}
+.game-cell.floor{color:#67635d}
+.game-cell.corridor{color:#918b82}
+.game-cell.door{color:#c2b49e}
+.game-cell.wall{color:#aaa49b}
+.game-cell.void{color:transparent}
 .game-controls{
   display:grid;
   grid-template-columns:repeat(5,44px);
@@ -209,6 +224,14 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
   .board-grid{grid-template-columns:repeat(4,1fr)}
   .ascii-cell{height:54px}
   .pattern-row{grid-template-columns:1fr}
+  .screen{
+    grid-template-columns:repeat(29,.78em);
+    grid-auto-rows:.95em;
+    min-height:285px;
+    font-size:.72rem;
+    padding:18px 6px;
+  }
+  .game-cell{width:.78em;height:.95em}
   footer.site-footer{flex-direction:column}
 }
 </style>
@@ -296,7 +319,7 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
           <span>Move <strong>@</strong> to <strong>$</strong>.</span>
           <span id="moveCount">0 moves</span>
         </div>
-        <pre class="screen game-screen" id="asciiGame" tabindex="0" aria-label="Interactive ASCII dungeon. Use arrow keys or WASD to move."></pre>
+        <div class="screen game-screen" id="asciiGame" tabindex="0" role="grid" aria-label="Interactive ASCII dungeon. Use arrow keys or WASD to move."></div>
         <div class="game-controls" aria-label="Movement controls">
           <button type="button" class="move up" data-move="up" aria-label="Move up">↑</button>
           <button type="button" class="move left" data-move="left" aria-label="Move left">←</button>
@@ -314,8 +337,8 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
         <div class="legend-list">
           <div class="legend-item"><span class="legend-symbol">@</span><span><strong>You</strong><span>The player is one character.</span></span></div>
           <div class="legend-item"><span class="legend-symbol">$</span><span><strong>Treasure</strong><span>A dollar sign can become an object.</span></span></div>
-          <div class="legend-item"><span class="legend-symbol">#</span><span><strong>Wall</strong><span>Repeat a character and it becomes a shape.</span></span></div>
-          <div class="legend-item"><span class="legend-symbol">D</span><span><strong>Dragon</strong><span>A letter can stand for a creature.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">#</span><span><strong>Corridor</strong><span>Repeated # characters connect rooms.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">D</span><span><strong>Dragon</strong><span>Letters can stand for monsters.</span></span></div>
         </div>
 
         <div class="tile-readout">
@@ -326,6 +349,7 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
         </div>
 
         <p class="game-note">The game world looks like a picture, but it is still a grid of text characters.</p>
+        <p class="game-note"><a href="https://tung.github.io/ruggrogue/" target="_blank" rel="noopener" style="color:var(--teal);font-weight:700">Play a full browser ASCII roguelike ↗</a> &nbsp;·&nbsp; <a href="https://github.com/Davidslv/rogue" target="_blank" rel="noopener" style="color:var(--teal);font-weight:700">See preserved Rogue source ↗</a></p>
       </aside>
     </div>
   </section>
@@ -423,40 +447,70 @@ for(let n=0;n<128;n++){
 }
 
 
-const dungeon=[
-  "###############",
-  "#.....#.......#",
-  "#.###.#.###...#",
-  "#...#.....#...#",
-  "###.#####.#.#.#",
-  "#...#.....#.#$#",
-  "#.#.#.###.#.#.#",
-  "#.#.....#...#.#",
-  "#.....D.......#",
-  "###############"
+const originalDungeon=[
+  "-----------------------------",
+  "|.......|       |...........|",
+  "|.......+#######+...........|",
+  "|..@....|       |.....D.....|",
+  "|.......|       |...........|",
+  "----+----       -----+-------",
+  "    #               #        ",
+  "    ###########     #        ",
+  "              #     #        ",
+  "              #  ---+---     ",
+  "              ####|.....|    ",
+  "                  |..$..|    ",
+  "                  -------    "
 ];
 
-const gameState={row:1,col:1,moves:0,won:false};
+let dungeon=[];
+const gameState={row:0,col:0,moves:0,won:false};
 const gameEl=document.getElementById('asciiGame');
 const gameResult=document.getElementById('gameResult');
 
-function renderDungeon(){
-  let html='';
+function resetDungeonData(){
+  dungeon=originalDungeon.map(row=>row.split(''));
   for(let r=0;r<dungeon.length;r++){
     for(let col=0;col<dungeon[r].length;col++){
-      let ch=dungeon[r][col];
-      if(r===gameState.row && col===gameState.col) ch='@';
-
-      if(ch==='@') html+='<span class="player">@</span>';
-      else if(ch==='$') html+='<span class="treasure">$</span>';
-      else if(ch==='D') html+='<span class="monster">D</span>';
-      else if(ch==='.') html+='<span class="floor">.</span>';
-      else html+=ch;
+      if(dungeon[r][col]==='@'){
+        gameState.row=r;
+        gameState.col=col;
+        dungeon[r][col]='.';
+      }
     }
-    if(r<dungeon.length-1) html+='\n';
+  }
+  gameState.moves=0;
+  gameState.won=false;
+}
+
+function classForGameChar(ch,isPlayer){
+  if(isPlayer) return 'player';
+  if(ch==='$') return 'treasure';
+  if(ch==='D') return 'monster';
+  if(ch==='.') return 'floor';
+  if(ch==='#') return 'corridor';
+  if(ch==='+') return 'door';
+  if(ch==='-' || ch==='|') return 'wall';
+  return 'void';
+}
+
+function renderDungeon(){
+  gameEl.innerHTML='';
+  const frag=document.createDocumentFragment();
+
+  for(let r=0;r<dungeon.length;r++){
+    for(let col=0;col<dungeon[r].length;col++){
+      const isPlayer=r===gameState.row && col===gameState.col;
+      const ch=isPlayer ? '@' : dungeon[r][col];
+      const cell=document.createElement('span');
+      cell.className='game-cell '+classForGameChar(ch,isPlayer);
+      cell.textContent=ch===' ' ? '·' : ch;
+      cell.setAttribute('role','gridcell');
+      frag.appendChild(cell);
+    }
   }
 
-  gameEl.innerHTML=html;
+  gameEl.appendChild(frag);
   document.getElementById('moveCount').textContent=
     gameState.moves+' move'+(gameState.moves===1?'':'s');
 
@@ -472,24 +526,36 @@ function tryMove(dr,dc){
   const nc=gameState.col+dc;
   const next=dungeon[nr]?.[nc];
 
-  if(!next || next==='#'){
-    gameResult.textContent='That # is a wall.';
+  if(next===undefined || next===' ' || next==='-' || next==='|'){
+    gameResult.textContent='That character is a wall or empty space.';
     return;
   }
 
+  gameState.moves++;
+
   if(next==='D'){
-    gameResult.textContent='The D is a dragon. Try another path.';
+    dungeon[nr][nc]='.';
+    gameState.row=nr;
+    gameState.col=nc;
+    gameResult.textContent='You moved into D, so you attacked the dragon. That is how Rogue-style combat works.';
+    renderDungeon();
     return;
   }
 
   gameState.row=nr;
   gameState.col=nc;
-  gameState.moves++;
 
   if(next==='$'){
+    dungeon[nr][nc]='.';
     gameState.won=true;
-    gameResult.textContent='You found the $. The whole game screen is just characters on a grid.';
+    gameResult.textContent='You found the $. Every wall, hallway, door, monster, and treasure here is just a character.';
     gameResult.classList.add('won');
+  }else if(next==='#'){
+    gameResult.textContent='You moved through a # corridor.';
+    gameResult.classList.remove('won');
+  }else if(next==='+'){
+    gameResult.textContent='You passed through a + doorway.';
+    gameResult.classList.remove('won');
   }else{
     gameResult.textContent='You moved @ one character on the grid.';
     gameResult.classList.remove('won');
@@ -499,11 +565,8 @@ function tryMove(dr,dc){
 }
 
 function resetDungeon(){
-  gameState.row=1;
-  gameState.col=1;
-  gameState.moves=0;
-  gameState.won=false;
-  gameResult.textContent='Arrow keys or WASD work too.';
+  resetDungeonData();
+  gameResult.textContent='Use the arrow buttons or WASD. Reach the $.';
   gameResult.classList.remove('won');
   renderDungeon();
 }
@@ -527,23 +590,18 @@ document.getElementById('resetAsciiGame').addEventListener('click',()=>{
 gameEl.addEventListener('keydown',e=>{
   const key=e.key.toLowerCase();
   const dirs={
-    'arrowup':[-1,0],
-    'w':[-1,0],
-    'arrowdown':[1,0],
-    's':[1,0],
-    'arrowleft':[0,-1],
-    'a':[0,-1],
-    'arrowright':[0,1],
-    'd':[0,1]
+    'arrowup':[-1,0],'w':[-1,0],
+    'arrowdown':[1,0],'s':[1,0],
+    'arrowleft':[0,-1],'a':[0,-1],
+    'arrowright':[0,1],'d':[0,1]
   };
-
   if(dirs[key]){
     e.preventDefault();
     tryMove(...dirs[key]);
   }
 });
 
-renderDungeon();
+resetDungeon();
 
 document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
 </script>
