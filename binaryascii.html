@@ -55,20 +55,107 @@ main{padding:22px 0 34px}
 /* game art */
 .games{width:min(calc(100% - 32px),980px);margin:52px auto 0}
 .games-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:16px}
-.games-head p{margin:0;color:var(--soft);font-size:.82rem;max-width:48ch}
+.games-head p{margin:0;color:var(--soft);font-size:.82rem;max-width:52ch;line-height:1.5}
+
+.rogue-shot{
+  margin:0 0 16px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.24);
+}
+.rogue-shot img{
+  display:block;
+  width:100%;
+  max-height:430px;
+  object-fit:contain;
+  border-radius:11px;
+  background:#fff;
+  image-rendering:pixelated;
+}
+.rogue-shot figcaption{
+  margin-top:9px;
+  color:var(--soft);
+  font-size:.64rem;
+  text-align:center;
+}
+.rogue-shot figcaption a{
+  margin-left:4px;
+  color:#777067;
+  text-decoration:underline;
+  text-decoration-color:rgba(119,112,103,.28);
+  text-underline-offset:2px;
+}
+
 .game-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
 .terminal{border-radius:17px;overflow:hidden;background:#1d1d1b;color:#dedbd2;box-shadow:0 18px 42px rgba(36,33,29,.10)}
 .terminal-top{display:flex;align-items:center;gap:6px;padding:10px 13px;border-bottom:1px solid rgba(255,255,255,.08);font:500 .62rem 'JetBrains Mono',monospace;color:#8f8b83}
 .term-dot{width:7px;height:7px;border-radius:50%;background:#69655f}
-.screen{padding:20px 24px 22px;font:500 clamp(.8rem,1.5vw,1rem)/1.35 'JetBrains Mono',monospace;white-space:pre;overflow:auto}
-.screen .player{color:#f0c95a;font-weight:700}.screen .monster{color:#dc8f78;font-weight:700}.screen .treasure{color:#8bc7cf;font-weight:700}.screen .wall{color:#8f8b83}
+.mini-game-status{
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:11px 14px 0;color:#a8a39b;font-size:.68rem
+}
+.mini-game-status strong{color:#f1d06e}
+.screen{
+  margin:0;
+  padding:16px 20px 18px;
+  font:600 clamp(.86rem,1.7vw,1.12rem)/1.34 'JetBrains Mono',monospace;
+  white-space:pre;
+  overflow:auto;
+  color:#9f9a91;
+  outline:none;
+}
+.game-screen:focus{box-shadow:inset 0 0 0 2px rgba(139,199,207,.30)}
+.game-screen .player{color:#f0c95a}.game-screen .treasure{color:#8bc7cf}.game-screen .monster{color:#dc8f78}.game-screen .floor{color:#6e6a64}
+.game-controls{
+  display:grid;
+  grid-template-columns:repeat(5,44px);
+  justify-content:center;
+  gap:6px;
+  padding:0 14px 13px;
+}
+.game-controls button{
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:9px;
+  background:rgba(255,255,255,.06);
+  color:#dedbd2;
+  cursor:pointer;
+  font-weight:700;
+}
+.game-controls button:hover{background:rgba(255,255,255,.11)}
+.game-controls .reset-game{
+  grid-column:auto / span 1;
+  width:auto;
+  padding:0 10px;
+  font-size:.66rem;
+  color:#aaa59d;
+}
+.game-result{
+  min-height:32px;
+  padding:0 14px 13px;
+  color:#8f8b83;
+  text-align:center;
+  font-size:.68rem;
+}
+.game-result.won{color:#8bc7cf;font-weight:700}
+
 .legend-card{padding:20px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.24)}
 .legend-card .kicker{font:600 .66rem 'JetBrains Mono',monospace;color:var(--terra);letter-spacing:.04em}
 .legend-card h3{margin:7px 0 12px;font:600 1.35rem 'Fraunces',serif}
 .legend-list{display:grid;gap:8px}
 .legend-item{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(36,33,29,.07)}
-.legend-item:last-child{border-bottom:0}.legend-symbol{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:rgba(36,33,29,.05);font:700 1rem 'JetBrains Mono',monospace}
-.legend-item strong{display:block;font-size:.78rem}.legend-item span:last-child{color:var(--soft);font-size:.7rem;line-height:1.35}
+.legend-item:last-child{border-bottom:0}
+.legend-symbol{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:rgba(36,33,29,.05);font:700 1rem 'JetBrains Mono',monospace}
+.legend-item strong{display:block;font-size:.78rem}
+.legend-item span:last-child{color:var(--soft);font-size:.7rem;line-height:1.35}
+.tile-readout{
+  margin-top:14px;padding:13px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.tile-readout small{display:block;color:var(--soft);font-size:.61rem;text-transform:uppercase;letter-spacing:.07em}
+.tile-readout>strong{display:block;margin:5px 0 10px;font:600 2.2rem 'Fraunces',serif}
+.tile-readout div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;color:var(--mid);font-size:.69rem}
+.tile-readout code{font:600 .69rem 'JetBrains Mono',monospace;color:var(--teal)}
 .game-note{margin:12px 0 0;color:var(--mid);font-size:.76rem;line-height:1.5}
 
 /* table */
@@ -100,8 +187,6 @@ main{padding:22px 0 34px}
 .pattern-card strong{display:block;margin-top:5px;font:600 1.2rem 'JetBrains Mono',monospace;color:var(--teal)}
 .pattern-note{margin:10px 0 0;color:var(--mid);font-size:.74rem}
 
-.sources{width:min(calc(100% - 32px),820px);margin:28px auto 0;color:var(--soft);font-size:.65rem;text-align:center}
-.sources a{color:#7b746b;text-decoration:underline;text-decoration-color:rgba(123,116,107,.35);text-underline-offset:2px}
 
 footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
 
@@ -182,30 +267,60 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
   <section class="games">
     <div class="games-head">
       <div><h2>When text became video game art</h2></div>
-      <p>Early terminal games could build a whole world from the characters the computer already knew how to display.</p>
+      <p>Rogue was built for text terminals. Instead of drawing a character sprite, the game could use one character on the screen to stand for the player, a monster, treasure, a wall, or a doorway.</p>
     </div>
-    <div class="game-grid">
-      <div class="terminal" aria-label="Rogue-style ASCII dungeon">
-        <div class="terminal-top"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp;&nbsp;ROGUE-STYLE TERMINAL</div>
-        <div class="screen"><span class="wall">############################
-#............#.............#
-#..####......#....</span><span class="monster">D</span><span class="wall">........#
-#..#.......................#
-#..#....</span><span class="treasure">$</span><span class="wall">.................#
-#............</span><span class="player">@</span><span class="wall">...............#
-#....................+.....#
-############################</span></div>
-      </div>
-      <aside class="legend-card">
-        <div class="kicker">// one character can be an object</div>
-        <h3>Your brain fills in the graphics.</h3>
-        <div class="legend-list">
-          <div class="legend-item"><span class="legend-symbol">@</span><span><strong>Player</strong><span>Rogue helped popularize @ for “where you're at.”</span></span></div>
-          <div class="legend-item"><span class="legend-symbol">D</span><span><strong>Monster</strong><span>Letters could stand for creatures; D could represent a dragon.</span></span></div>
-          <div class="legend-item"><span class="legend-symbol">$</span><span><strong>Treasure</strong><span>A familiar symbol could become an object in the world.</span></span></div>
-          <div class="legend-item"><span class="legend-symbol">#</span><span><strong>Walls</strong><span>Repeated characters create shapes, rooms, and boundaries.</span></span></div>
+
+    <figure class="rogue-shot">
+      <img
+        src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Rogue_Screenshot.png"
+        alt="Screenshot of the BSD version of Rogue showing an ASCII dungeon made from text characters"
+        loading="lazy">
+      <figcaption>
+        Rogue, BSD version. Screenshot by Thedarkb, licensed CC BY-SA 4.0.
+        <a href="https://commons.wikimedia.org/wiki/File:Rogue_Screenshot.png" target="_blank" rel="noopener">View original</a>
+      </figcaption>
+    </figure>
+
+    <div class="game-grid interactive-grid">
+      <div class="terminal play-terminal" aria-label="Playable ASCII dungeon">
+        <div class="terminal-top">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          &nbsp;&nbsp;TRY IT
         </div>
-        <p class="game-note">This is a Rogue-style example, not a screenshot of one exact level.</p>
+        <div class="mini-game-status">
+          <span>Move <strong>@</strong> to <strong>$</strong>.</span>
+          <span id="moveCount">0 moves</span>
+        </div>
+        <pre class="screen game-screen" id="asciiGame" tabindex="0" aria-label="Interactive ASCII dungeon. Use arrow keys or WASD to move."></pre>
+        <div class="game-controls" aria-label="Movement controls">
+          <button type="button" class="move up" data-move="up" aria-label="Move up">↑</button>
+          <button type="button" class="move left" data-move="left" aria-label="Move left">←</button>
+          <button type="button" class="move down" data-move="down" aria-label="Move down">↓</button>
+          <button type="button" class="move right" data-move="right" aria-label="Move right">→</button>
+          <button type="button" class="reset-game" id="resetAsciiGame">Reset</button>
+        </div>
+        <div class="game-result" id="gameResult" aria-live="polite">Arrow keys or WASD work too.</div>
+      </div>
+
+      <aside class="legend-card live-inspector">
+        <div class="kicker">// what is actually on the screen?</div>
+        <h3>Every “graphic” is a character.</h3>
+
+        <div class="legend-list">
+          <div class="legend-item"><span class="legend-symbol">@</span><span><strong>You</strong><span>The player is one character.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">$</span><span><strong>Treasure</strong><span>A dollar sign can become an object.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">#</span><span><strong>Wall</strong><span>Repeat a character and it becomes a shape.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">D</span><span><strong>Dragon</strong><span>A letter can stand for a creature.</span></span></div>
+        </div>
+
+        <div class="tile-readout">
+          <small>Character under the player</small>
+          <strong id="tileCharacter">@</strong>
+          <div><span>ASCII decimal</span><code id="tileDecimal">64</code></div>
+          <div><span>8-bit binary</span><code id="tileBinary">01000000</code></div>
+        </div>
+
+        <p class="game-note">The game world looks like a picture, but it is still a grid of text characters.</p>
       </aside>
     </div>
   </section>
@@ -246,10 +361,6 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
     </div>
     <p class="pattern-note">Uppercase and lowercase versions of the same English letter are 32 apart: A = 65, a = 97.</p>
   </section>
-
-  <div class="sources">
-    History checked against <a href="https://www.computerhistory.org/timeline/1963/" target="_blank" rel="noopener">Computer History Museum</a> and <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/FIPS/fipspub1-2.pdf" target="_blank" rel="noopener">NIST</a>. The game example is based on the text-display tradition of <em>Rogue</em>.
-  </div>
 </main>
 
 <div class="ds-step-footer">
@@ -305,6 +416,117 @@ for(let n=0;n<128;n++){
   b.addEventListener('click',()=>selectCode(n,b));
   grid.appendChild(b);
 }
+
+
+const dungeon=[
+  "###############",
+  "#.....#.......#",
+  "#.###.#.###...#",
+  "#...#.....#...#",
+  "###.#####.#.#.#",
+  "#...#.....#.#$#",
+  "#.#.#.###.#.#.#",
+  "#.#.....#...#.#",
+  "#.....D.......#",
+  "###############"
+];
+
+const gameState={row:1,col:1,moves:0,won:false};
+const gameEl=document.getElementById('asciiGame');
+const gameResult=document.getElementById('gameResult');
+
+function tileAt(r,c){
+  if(r===gameState.row && c===gameState.col) return '@';
+  return dungeon[r][c];
+}
+function renderDungeon(){
+  let html='';
+  for(let r=0;r<dungeon.length;r++){
+    for(let col=0;col<dungeon[r].length;col++){
+      const ch=tileAt(r,col);
+      let cls='';
+      if(ch==='@') cls='player';
+      else if(ch==='
+</script>
+</body>
+</html>) cls='treasure';
+      else if(ch==='D') cls='monster';
+      else if(ch==='.') cls='floor';
+      html += cls ? '<span class="'+cls+'">'+ch+'</span>' : ch;
+    }
+    if(r<dungeon.length-1) html+='\n';
+  }
+  gameEl.innerHTML=html;
+  document.getElementById('moveCount').textContent=gameState.moves+' move'+(gameState.moves===1?'':'s');
+
+  const code='@'.charCodeAt(0);
+  document.getElementById('tileCharacter').textContent='@';
+  document.getElementById('tileDecimal').textContent=code;
+  document.getElementById('tileBinary').textContent=code.toString(2).padStart(8,'0');
+}
+function tryMove(dr,dc){
+  if(gameState.won) return;
+  const nr=gameState.row+dr;
+  const nc=gameState.col+dc;
+  const next=dungeon[nr]?.[nc];
+  if(!next || next==='#'){
+    gameResult.textContent='That # is a wall.';
+    return;
+  }
+  if(next==='D'){
+    gameResult.textContent='A D is blocking the way. Try another path.';
+    return;
+  }
+  gameState.row=nr;
+  gameState.col=nc;
+  gameState.moves++;
+  if(next==='
+</script>
+</body>
+</html>){
+    gameState.won=true;
+    gameResult.textContent='You found the $. The whole “game screen” was just characters on a grid.';
+    gameResult.classList.add('won');
+  }else{
+    gameResult.textContent='You moved the @ one character on the grid.';
+    gameResult.classList.remove('won');
+  }
+  renderDungeon();
+}
+function resetDungeon(){
+  gameState.row=1;gameState.col=1;gameState.moves=0;gameState.won=false;
+  gameResult.textContent='Arrow keys or WASD work too.';
+  gameResult.classList.remove('won');
+  renderDungeon();
+}
+document.querySelectorAll('[data-move]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const dir=btn.dataset.move;
+    if(dir==='up') tryMove(-1,0);
+    if(dir==='down') tryMove(1,0);
+    if(dir==='left') tryMove(0,-1);
+    if(dir==='right') tryMove(0,1);
+    gameEl.focus();
+  });
+});
+document.getElementById('resetAsciiGame').addEventListener('click',()=>{
+  resetDungeon();
+  gameEl.focus();
+});
+gameEl.addEventListener('keydown',e=>{
+  const key=e.key.toLowerCase();
+  const dirs={
+    'arrowup':[-1,0],'w':[-1,0],
+    'arrowdown':[1,0],'s':[1,0],
+    'arrowleft':[0,-1],'a':[0,-1],
+    'arrowright':[0,1],'d':[0,1]
+  };
+  if(dirs[key]){
+    e.preventDefault();
+    tryMove(...dirs[key]);
+  }
+});
+renderDungeon();
 
 document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
 </script>
