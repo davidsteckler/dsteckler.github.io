@@ -559,68 +559,79 @@
     }
 
     .bulb{
-      position:relative;
-      width:96px!important;
-      height:96px!important;
+      width:108px!important;
+      height:144px!important;
       min-height:0!important;
-      margin:0 auto 38px;
-      border:3px solid var(--ds-ink)!important;
-      border-radius:50%!important;
-      background:
-        radial-gradient(circle at 35% 27%,rgba(255,255,255,.78),rgba(255,255,255,.18) 30%,rgba(255,255,255,.04) 68%),
-        rgba(255,255,255,.22)!important;
+      margin:0 auto 2px;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:transparent!important;
       color:var(--ds-ink)!important;
-      font-family:'Outfit',sans-serif!important;
-      font-size:1.85rem!important;
-      font-weight:700!important;
-      line-height:1!important;
       box-shadow:none!important;
-      transition:transform .12s ease,background .14s ease,box-shadow .14s ease!important;
       cursor:pointer;
+      display:block!important;
+      transition:transform .12s ease,filter .16s ease!important;
       overflow:visible;
     }
 
-    .bulb::before{
-      content:"";
-      position:absolute;
-      z-index:-1;
-      left:25px;
-      width:40px;
-      height:34px;
-      bottom:-29px;
-      border:3px solid var(--ds-ink);
-      border-top:0;
-      border-radius:0 0 9px 9px;
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          #f5f0e7 0 7px,
-          var(--ds-ink) 7px 10px
-        );
-    }
-
-    .bulb::after{
-      content:"";
-      position:absolute;
-      left:36px;
-      width:18px;
-      height:5px;
-      bottom:-37px;
-      border-radius:0 0 8px 8px;
-      background:var(--ds-ink);
-    }
-
     .bulb:hover{
-      transform:translateY(-2px);
+      transform:translateY(-3px);
     }
 
-    .bulb.on{
-      background:
-        radial-gradient(circle at 35% 27%,#fff8bf 0 11%,#ffe56f 34%,#ffd633 76%)!important;
-      box-shadow:
-        0 0 0 8px rgba(255,214,51,.08),
-        0 0 30px rgba(255,194,0,.26),
-        0 12px 30px rgba(255,194,0,.12)!important;
+    .bulb:focus-visible{
+      outline:3px solid rgba(26,92,107,.24);
+      outline-offset:5px;
+      border-radius:20px;
+    }
+
+    .bulb-svg{
+      display:block;
+      width:100%;
+      height:100%;
+      overflow:visible;
+    }
+
+    .bulb-glass{
+      fill:rgba(255,255,255,.18);
+      stroke:var(--ds-ink);
+      stroke-width:3.4;
+      stroke-linejoin:round;
+      transition:fill .16s ease,filter .16s ease;
+    }
+
+    .bulb-neck{
+      fill:var(--ds-bg);
+      stroke:var(--ds-ink);
+      stroke-width:3.4;
+      stroke-linejoin:round;
+    }
+
+    .bulb-thread,
+    .bulb-contact{
+      fill:none;
+      stroke:var(--ds-ink);
+      stroke-width:3.4;
+      stroke-linecap:round;
+    }
+
+    .bulb-bit{
+      fill:var(--ds-ink);
+      font-family:'Outfit',sans-serif;
+      font-size:24px;
+      font-weight:800;
+      text-anchor:middle;
+      dominant-baseline:middle;
+      pointer-events:none;
+    }
+
+    .bulb.on .bulb-glass{
+      fill:#ffd83d;
+      filter:drop-shadow(0 0 7px rgba(255,194,0,.32));
+    }
+
+    .bulb.on .bulb-neck{
+      fill:#f2df9a;
     }
 
     .binary1-readouts{
@@ -1091,33 +1102,8 @@
       }
 
       .bulb{
-        width:68px!important;
-        height:68px!important;
-        margin-bottom:30px;
-        border-width:2px!important;
-        font-size:1.35rem!important;
-      }
-
-      .bulb::before{
-        left:18px;
-        width:28px;
-        height:25px;
-        bottom:-22px;
-        border-width:2px;
-        border-top:0;
-        background:
-          repeating-linear-gradient(
-            to bottom,
-            #f5f0e7 0 5px,
-            var(--ds-ink) 5px 7px
-          );
-      }
-
-      .bulb::after{
-        left:26px;
-        width:14px;
-        height:4px;
-        bottom:-28px;
+        width:78px!important;
+        height:104px!important;
       }
 
       .bulb-label{
@@ -1387,9 +1373,18 @@
                 label.className = 'bulb-label';
                 label.textContent = value;
                 
-                const bulb = document.createElement('div');
+                const bulb = document.createElement('button');
                 bulb.className = 'bulb';
-                bulb.textContent = '0';
+                bulb.type = 'button';
+                bulb.setAttribute('aria-label', `Toggle bit worth ${value}`);
+                bulb.innerHTML = `
+                    <svg class="bulb-svg" viewBox="0 0 100 140" aria-hidden="true">
+                        <path class="bulb-glass" d="M50 5C25 5 10 23 10 45c0 16 7 28 19 38 6 5 9 11 9 18v2h24v-2c0-7 3-13 9-18 12-10 19-22 19-38C90 23 75 5 50 5Z"></path>
+                        <path class="bulb-neck" d="M37 102H63V122C63 126 60 129 56 129H44C40 129 37 126 37 122Z"></path>
+                        <path class="bulb-thread" d="M38 108H62 M38 115H62 M39 122H61"></path>
+                        <path class="bulb-contact" d="M45 133H55"></path>
+                        <text class="bulb-bit" x="50" y="54">0</text>
+                    </svg>`;
                 
                 bulb.addEventListener('click', () => toggleBit(index));
                 
@@ -1408,7 +1403,8 @@
             const bulbElements = document.querySelectorAll('.bulb');
             bulbElements.forEach((element, index) => {
                 element.classList.toggle('on', bits[index] === 1);
-                element.textContent = bits[index];
+                const bitText = element.querySelector('.bulb-bit');
+                if (bitText) bitText.textContent = bits[index];
             });
 
             let number = bits.reduce((acc, bit, index) => acc + bit * Math.pow(2, bits.length - 1 - index), 0);
@@ -1450,7 +1446,8 @@
             const danceInterval = setInterval(() => {
                 bulbElements.forEach(bulb => {
                     bulb.classList.toggle('on', Math.random() < 0.5);
-                    bulb.textContent = bulb.classList.contains('on') ? '1' : '0';
+                    const bitText = bulb.querySelector('.bulb-bit');
+                    if (bitText) bitText.textContent = bulb.classList.contains('on') ? '1' : '0';
                 });
                 danceCount++;
                 if (danceCount >= 10) {
