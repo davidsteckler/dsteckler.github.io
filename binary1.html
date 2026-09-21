@@ -634,6 +634,45 @@
       fill:#f2df9a;
     }
 
+    .bit-only{
+      display:none;
+      width:100%;
+      height:100%;
+      align-items:center;
+      justify-content:center;
+      color:var(--ds-ink);
+      font-family:'JetBrains Mono',monospace;
+      font-size:1.8rem;
+      font-weight:800;
+    }
+
+    #bulbs.bits-only .bulb{
+      width:68px!important;
+      height:68px!important;
+      margin:18px auto 20px;
+      border:2px solid var(--ds-rule-strong)!important;
+      border-radius:12px!important;
+      background:rgba(255,255,255,.52)!important;
+      box-shadow:none!important;
+    }
+
+    #bulbs.bits-only .bulb-svg{
+      display:none;
+    }
+
+    #bulbs.bits-only .bit-only{
+      display:flex;
+    }
+
+    #bulbs.bits-only .bulb.on{
+      border-color:var(--ds-teal)!important;
+      background:var(--ds-teal)!important;
+    }
+
+    #bulbs.bits-only .bulb.on .bit-only{
+      color:white;
+    }
+
     .binary1-readouts{
       display:flex;
       flex-direction:column;
@@ -1210,6 +1249,14 @@
 
                 <div class="binary1-options">
                     <div class="toggle-container">
+                        <span class="toggle-label">Bulbs</span>
+                        <label class="switch">
+                            <input type="checkbox" id="bulbsToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
                         <span class="toggle-label">Game Mode</span>
                         <label class="switch">
                             <input type="checkbox" id="gameModeToggle">
@@ -1353,6 +1400,7 @@
         let currentDifficulty = 'hard';
 
         const difficultyToggle = document.getElementById('difficultyToggle');
+        const bulbsToggle = document.getElementById('bulbsToggle');
         const gameModeToggle = document.getElementById('gameModeToggle');
         const labelsToggle = document.getElementById('labelsToggle');
         const alertElement = document.getElementById('alert');
@@ -1384,7 +1432,8 @@
                         <path class="bulb-thread" d="M38 108H62 M38 115H62 M39 122H61"></path>
                         <path class="bulb-contact" d="M45 133H55"></path>
                         <text class="bulb-bit" x="50" y="54">0</text>
-                    </svg>`;
+                    </svg>
+                    <span class="bit-only" aria-hidden="true">0</span>`;
                 
                 bulb.addEventListener('click', () => toggleBit(index));
                 
@@ -1404,7 +1453,9 @@
             bulbElements.forEach((element, index) => {
                 element.classList.toggle('on', bits[index] === 1);
                 const bitText = element.querySelector('.bulb-bit');
+                const bitOnly = element.querySelector('.bit-only');
                 if (bitText) bitText.textContent = bits[index];
+                if (bitOnly) bitOnly.textContent = bits[index];
             });
 
             let number = bits.reduce((acc, bit, index) => acc + bit * Math.pow(2, bits.length - 1 - index), 0);
@@ -1447,7 +1498,10 @@
                 bulbElements.forEach(bulb => {
                     bulb.classList.toggle('on', Math.random() < 0.5);
                     const bitText = bulb.querySelector('.bulb-bit');
-                    if (bitText) bitText.textContent = bulb.classList.contains('on') ? '1' : '0';
+                    const bitOnly = bulb.querySelector('.bit-only');
+                    const value = bulb.classList.contains('on') ? '1' : '0';
+                    if (bitText) bitText.textContent = value;
+                    if (bitOnly) bitOnly.textContent = value;
                 });
                 danceCount++;
                 if (danceCount >= 10) {
@@ -1534,6 +1588,10 @@
                 alert(`Not quite. The correct binary representation of ${decimal} is ${binary}. Try again!`);
             }
         }
+
+        bulbsToggle.addEventListener('change', () => {
+            bulbsContainer.classList.toggle('bits-only', !bulbsToggle.checked);
+        });
 
         difficultyToggle.addEventListener('change', () => {
             isHardMode = difficultyToggle.checked;
