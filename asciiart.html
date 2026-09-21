@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII Art & Games | David Steckler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learning-path.css">
+<style>
+:root{
+  --bg:#f2ede4;--paper:#f8f4ec;--ink:#24211d;--mid:#5f5951;--soft:#989086;
+  --line:rgba(36,33,29,.10);--line2:rgba(36,33,29,.16);
+  --teal:#2d6972;--teal-soft:rgba(45,105,114,.09);
+  --terra:#b86238;--terra-soft:rgba(184,98,56,.08);
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);background:var(--bg);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
+
+/* shared header */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(242,237,228,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;flex-direction:column;line-height:1.1}.brand strong{font-size:.9rem;letter-spacing:.08em;text-transform:uppercase}.brand span{margin-top:4px;font:400 .66rem 'JetBrains Mono',monospace;color:var(--soft)}
+nav{display:flex;gap:4px;align-items:center}nav a{padding:8px 11px;border-radius:999px;color:#716a61;font-size:.79rem;font-weight:600}nav a.active,nav a:hover{background:rgba(36,33,29,.06);color:var(--ink)}
+.menu{display:none;border:1px solid var(--line);background:transparent;border-radius:10px;width:40px;height:40px}
+
+.lesson-path{width:min(calc(100% - 32px),960px);margin:14px auto 0;display:flex;justify-content:center;gap:6px;overflow-x:auto;padding:0 0 8px}
+.lesson-path a{flex:0 0 auto;padding:6px 10px;border-radius:999px;color:#8b8379;font-size:.7rem;font-weight:600}
+.lesson-path a.current{background:var(--teal-soft);color:var(--teal)}
+
+main{padding:22px 0 34px}
+.hero{text-align:center;margin-bottom:28px}
+.hero h1{margin:0;font:600 clamp(2.5rem,5vw,4.2rem)/.98 'Fraunces',serif;letter-spacing:-.045em}
+.hero p{margin:8px auto 0;color:var(--soft);font-size:.93rem;max-width:54ch}
+.ascii-name{
+  margin-top:9px!important;
+  color:var(--teal)!important;
+  font-size:.8rem!important;
+  letter-spacing:.015em;
+}
+
+/* game art */
+.games{width:min(calc(100% - 32px),980px);margin:52px auto 0}
+.games-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:16px}
+.games-head p{margin:0;color:var(--soft);font-size:.82rem;max-width:52ch;line-height:1.5}
+
+.rogue-shot{
+  margin:0 0 16px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.24);
+}
+.rogue-shot img{
+  display:block;
+  width:100%;
+  max-height:430px;
+  object-fit:contain;
+  border-radius:11px;
+  background:#fff;
+  image-rendering:pixelated;
+}
+.rogue-shot figcaption{
+  margin-top:9px;
+  color:var(--soft);
+  font-size:.64rem;
+  text-align:center;
+}
+.rogue-shot figcaption a{
+  margin-left:4px;
+  color:#777067;
+  text-decoration:underline;
+  text-decoration-color:rgba(119,112,103,.28);
+  text-underline-offset:2px;
+}
+
+.game-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}
+.terminal{border-radius:17px;overflow:hidden;background:#1d1d1b;color:#dedbd2;box-shadow:0 18px 42px rgba(36,33,29,.10)}
+.terminal-top{display:flex;align-items:center;gap:6px;padding:10px 13px;border-bottom:1px solid rgba(255,255,255,.08);font:500 .62rem 'JetBrains Mono',monospace;color:#8f8b83}
+.term-dot{width:7px;height:7px;border-radius:50%;background:#69655f}
+.mini-game-status{
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:11px 14px 0;color:#a8a39b;font-size:.68rem
+}
+.mini-game-status strong{color:#f1d06e}
+.screen{
+  margin:0;
+  min-height:330px;
+  padding:24px 16px;
+  display:grid;
+  grid-template-columns:repeat(29,1.05em);
+  grid-auto-rows:1.18em;
+  align-content:center;
+  justify-content:center;
+  overflow:hidden;
+  color:#aaa49b;
+  background:#171715;
+  font:600 clamp(.72rem,1.25vw,1rem)/1 'JetBrains Mono',monospace;
+  outline:none;
+}
+.game-screen:focus{box-shadow:inset 0 0 0 2px rgba(139,199,207,.30)}
+.game-cell{
+  width:1.05em;
+  height:1.18em;
+  display:grid;
+  place-items:center;
+  line-height:1;
+}
+.game-cell.player{color:#f0c95a;font-weight:800}
+.game-cell.treasure{color:#8bc7cf;font-weight:800}
+.game-cell.monster{color:#dc8f78;font-weight:800}
+.game-cell.floor{color:#67635d}
+.game-cell.corridor{color:#918b82}
+.game-cell.door{color:#c2b49e}
+.game-cell.wall{color:#aaa49b}
+.game-cell.void{color:transparent}
+.game-controls{
+  display:grid;
+  grid-template-columns:repeat(5,44px);
+  justify-content:center;
+  gap:6px;
+  padding:0 14px 13px;
+}
+.game-controls button{
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:9px;
+  background:rgba(255,255,255,.06);
+  color:#dedbd2;
+  cursor:pointer;
+  font-weight:700;
+}
+.game-controls button:hover{background:rgba(255,255,255,.11)}
+.game-controls .reset-game{
+  grid-column:auto / span 1;
+  width:auto;
+  padding:0 10px;
+  font-size:.66rem;
+  color:#aaa59d;
+}
+.game-result{
+  min-height:32px;
+  padding:0 14px 13px;
+  color:#8f8b83;
+  text-align:center;
+  font-size:.68rem;
+}
+.game-result.won{color:#8bc7cf;font-weight:700}
+
+.legend-card{padding:20px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.24)}
+.legend-card .kicker{font:600 .66rem 'JetBrains Mono',monospace;color:var(--terra);letter-spacing:.04em}
+.legend-card h3{margin:7px 0 12px;font:600 1.35rem 'Fraunces',serif}
+.legend-list{display:grid;gap:8px}
+.legend-item{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(36,33,29,.07)}
+.legend-item:last-child{border-bottom:0}
+.legend-symbol{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:rgba(36,33,29,.05);font:700 1rem 'JetBrains Mono',monospace}
+.legend-item strong{display:block;font-size:.78rem}
+.legend-item span:last-child{color:var(--soft);font-size:.7rem;line-height:1.35}
+.tile-readout{
+  margin-top:14px;padding:13px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.tile-readout small{display:block;color:var(--soft);font-size:.61rem;text-transform:uppercase;letter-spacing:.07em}
+.tile-readout>strong{display:block;margin:5px 0 10px;font:600 2.2rem 'Fraunces',serif}
+.tile-readout div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;color:var(--mid);font-size:.69rem}
+.tile-readout code{font:600 .69rem 'JetBrains Mono',monospace;color:var(--teal)}
+.game-note{margin:12px 0 0;color:var(--mid);font-size:.76rem;line-height:1.5}
+
+.guide-history{
+  width:min(calc(100% - 32px),980px);
+  margin:54px auto 0;
+  padding-top:32px;
+  border-top:1px solid var(--line);
+}
+.guide-history-head{text-align:center;margin-bottom:18px}
+.guide-history-head h2{margin:0;font:500 clamp(1.55rem,3vw,2.1rem)/1.1 'Fraunces',serif;letter-spacing:-.025em}
+.guide-history-head p{margin:7px auto 0;max-width:66ch;color:var(--soft);font-size:.82rem;line-height:1.5}
+.guide-examples{display:grid;grid-template-columns:1fr;gap:14px}
+.guide-example{
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:rgba(255,255,255,.22);
+  overflow:hidden;
+}
+.guide-example-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:13px 15px;
+  border-bottom:1px solid var(--line);
+}
+.guide-example-head strong{font-size:.79rem}
+.guide-example-head span{color:var(--soft);font:500 .61rem 'JetBrains Mono',monospace}
+.guide-example pre{
+  margin:0;
+  min-height:0;
+  padding:22px 26px;
+  overflow-x:auto;
+  background:#1d1d1b;
+  color:#d8d4cb;
+  font:500 .74rem/1.2 'JetBrains Mono',monospace;
+  white-space:pre;
+}
+.guide-example p{margin:0;padding:12px 15px 6px;color:var(--mid);font-size:.73rem;line-height:1.45}
+.guide-example a{
+  display:inline-block;
+  margin:0 15px 14px;
+  color:var(--teal);
+  font-size:.68rem;
+  font-weight:700;
+}
+.guide-example .accent{color:#8bc7cf}
+.guide-example .gold{color:#f0c95a}
+.guide-example .terra{color:#dc8f78}
+.guide-note{
+  margin:13px auto 0;
+  max-width:72ch;
+  color:var(--soft);
+  font-size:.68rem;
+  line-height:1.5;
+  text-align:center;
+}
+@media(max-width:760px){
+  .guide-examples{grid-template-columns:1fr}
+  .guide-example pre{font-size:.65rem;min-height:170px}
+}
+
+footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
+
+@media(max-width:900px){
+  .timeline{grid-template-columns:repeat(2,1fr)}
+  .game-grid,.lookup{grid-template-columns:1fr}
+  .detail{position:static}
+  .board-grid{grid-template-columns:repeat(8,1fr)}
+}
+@media(max-width:680px){
+  nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  nav.open{display:flex}.menu{display:block}.hero h1{font-size:2.6rem}
+  .timeline{grid-template-columns:1fr}
+  .games-head{align-items:start;flex-direction:column}
+  .board-grid{grid-template-columns:repeat(4,1fr)}
+  .ascii-cell{height:54px}
+  .pattern-row{grid-template-columns:1fr}
+  .screen{
+    grid-template-columns:repeat(29,.78em);
+    grid-auto-rows:.95em;
+    min-height:285px;
+    font-size:.72rem;
+    padding:18px 6px;
+  }
+  .game-cell{width:.78em;height:.95em}
+  footer.site-footer{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap topbar">
+    <a class="brand" href="index.html"><strong>David Steckler</strong><span>// cs · robotics · thinking for yourself</span></a>
+    <button class="menu" id="menuButton" aria-label="Open navigation">☰</button>
+    <nav id="siteNav">
+      <a href="index.html">Home</a><a href="about.html">About</a><a class="active" href="course.html">Course</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="testimonials.html">Testimonials</a><a href="search.html">Search</a>
+    </nav>
+  </div>
+</header>
+
+<div class="lesson-path" aria-label="Binary lessons">
+  <a href="binary1.html">1 · Numbers</a>
+  <a href="binary2.html">2 · Text</a>
+  <a href="binaryascii.html">3 · ASCII</a>
+  <a class="current" href="asciiart.html">4 · ASCII Art</a>
+  <a href="binary3.html">5 · One byte</a>
+  <a href="binary4.html">6 · Images</a>
+  <a href="binaryaudio.html">7 · Audio</a>
+</div>
+
+<main>
+  <section class="hero">
+    <h1>ASCII Art & Games</h1>
+    <p>ASCII gives characters codes. People realized those same characters could also become pictures, maps, interfaces, and entire game worlds.</p>
+  </section>
+
+  <section class="games">
+    <div class="games-head">
+      <div><h2>When characters became graphics</h2></div>
+      <p>ASCII tells the computer what a character means. ASCII art uses those characters as visual building blocks. Rogue took that idea and made the text itself the game world.</p>
+    </div>
+
+    <figure class="rogue-shot">
+      <img
+        src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Rogue_Screenshot.png"
+        alt="Screenshot of the BSD version of Rogue showing an ASCII dungeon made from text characters"
+        loading="lazy">
+      <figcaption>
+        Rogue, BSD version. Screenshot by Thedarkb, licensed CC BY-SA 4.0.
+        <a href="https://commons.wikimedia.org/wiki/File:Rogue_Screenshot.png" target="_blank" rel="noopener">View original</a>
+      </figcaption>
+    </figure>
+
+    <div class="game-grid interactive-grid">
+      <div class="terminal play-terminal" aria-label="Playable ASCII dungeon">
+        <div class="terminal-top">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          &nbsp;&nbsp;TRY IT
+        </div>
+        <div class="mini-game-status">
+          <span>Move <strong>@</strong> to <strong>$</strong>.</span>
+          <span id="moveCount">0 moves</span>
+        </div>
+        <div class="screen game-screen" id="asciiGame" tabindex="0" role="grid" aria-label="Interactive ASCII dungeon. Use arrow keys or WASD to move."></div>
+        <div class="game-controls" aria-label="Movement controls">
+          <button type="button" class="move up" data-move="up" aria-label="Move up">↑</button>
+          <button type="button" class="move left" data-move="left" aria-label="Move left">←</button>
+          <button type="button" class="move down" data-move="down" aria-label="Move down">↓</button>
+          <button type="button" class="move right" data-move="right" aria-label="Move right">→</button>
+          <button type="button" class="reset-game" id="resetAsciiGame">Reset</button>
+        </div>
+        <div class="game-result" id="gameResult" aria-live="polite">Arrow keys or WASD work too.</div>
+      </div>
+
+      <aside class="legend-card live-inspector">
+        <div class="kicker">// what is actually on the screen?</div>
+        <h3>Every “graphic” is a character.</h3>
+
+        <div class="legend-list">
+          <div class="legend-item"><span class="legend-symbol">@</span><span><strong>You</strong><span>The player is one character.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">$</span><span><strong>Treasure</strong><span>A dollar sign can become an object.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">#</span><span><strong>Corridor</strong><span>Repeated # characters connect rooms.</span></span></div>
+          <div class="legend-item"><span class="legend-symbol">D</span><span><strong>Dragon</strong><span>Letters can stand for monsters.</span></span></div>
+        </div>
+
+        <div class="tile-readout">
+          <small>Character under the player</small>
+          <strong id="tileCharacter">@</strong>
+          <div><span>ASCII decimal</span><code id="tileDecimal">64</code></div>
+          <div><span>8-bit binary</span><code id="tileBinary">01000000</code></div>
+        </div>
+
+        <p class="game-note">The game world looks like a picture, but it is still a grid of text characters.</p>
+        <p class="game-note"><a href="https://tung.github.io/ruggrogue/" target="_blank" rel="noopener" style="color:var(--teal);font-weight:700">Play a full browser ASCII roguelike ↗</a> &nbsp;·&nbsp; <a href="https://github.com/Davidslv/rogue" target="_blank" rel="noopener" style="color:var(--teal);font-weight:700">See preserved Rogue source ↗</a></p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="guide-history">
+    <div class="guide-history-head">
+      <h2>Real ASCII art from real game guides</h2>
+      <p>These are short excerpts copied directly from the linked walkthroughs. The point is to see what people actually made with plain text.</p>
+    </div>
+
+    <div class="guide-examples">
+      <article class="guide-example">
+        <div class="guide-example-head">
+          <strong>Super Mario 64</strong>
+          <span>CWALL · GAMEFAQS · 2005</span>
+        </div>
+        <pre>                  ___  _
+                 /   \| |  _ ____ ____  ____    ____     ___
+                /  /\/| | | |  _ \  __||    \  / ___|   /   |
+                \  \_ | |_| | |_|| |_  | |\ | | |____  / /| |
+                 \   \|     |  __/  _| | |/ | |  __  \/ /_| |_
+               __/   / \___/| |  | |___|    / | |__| |____   _|
+               \____/       |_|  |_____| |\ \ \______/    |_|
+                 __    __    _    ____ |_|_\/
+                /  \  |  \  / \  |    \|   |  ____
+                |   \/   | / _ \ | |\  |   | /    \_
+               /          \ /_\ \| |/  |   |/       \
+               |  |\  /\   \     |    /|   |  /\_    |
+               |  | \/  \   |__  | |\ \|   |  \_/    |
+               |__|      |/           \|___| \_____/</pre>
+        <p>This is the actual opening logo from Christian Wall’s Super Mario 64 walkthrough.</p>
+        <a href="https://gamefaqs.gamespot.com/n64/198848-super-mario-64/faqs/22000" target="_blank" rel="noopener">Open the original guide ↗</a>
+      </article>
+
+      <article class="guide-example">
+        <div class="guide-example-head">
+          <strong>Halo: Combat Evolved</strong>
+          <span>THUYKER · GAMEFAQS · 2003</span>
+        </div>
+        <pre>,o##o      ."";.         .'@%;          .,"##@O'.           .;'"Oo""oOOO%";.
+ '##o      .###"        .""O##%;          '###O            'o;.        .;O#@"
+ '###@oooooO###"      ,;"ooo@###O,        '###O          .oO.    ,@@O;.  ,###';
+ '###O     .###"    ,o##%,    "@##o,      '###O        ,.      .      .;"@#@o
+,"@##@",   ."@@o  'o@#@O;      ,%@##";, .;"@##@OOOOOOOO%,     ;oOoOO%@#@%o'.</pre>
+        <p>The guide credits this opening Halo ASCII logo to Dark Phenomenon.</p>
+        <a href="https://gamefaqs.gamespot.com/pc/291594-halo-combat-evolved/faqs/23645" target="_blank" rel="noopener">Open the original guide ↗</a>
+      </article>
+
+      <article class="guide-example">
+        <div class="guide-example-head">
+          <strong>Grand Theft Auto: San Andreas</strong>
+          <span>ROBERT_CARR · GAMEFAQS · 2004–2006</span>
+        </div>
+        <pre>           ____                   _              _
+          / ___|  __ _ _ __      / \   _ __   __| |_ __ ___  __ _ ___
+          \___ \ / _` | '_ \    / _ \ | '_ \ / _` | '__/ _ \/ _` / __|
+           ___) | (_| | | | |  / ___ \| | | | (_| | | |  __/ (_| \__ \
+          |____/ \__,_|_| |_| /_/   \_\_| |_|\__,_|_|  \___|\__,_|___/</pre>
+        <p>This title art appears at the top of Robert Carr’s San Andreas walkthrough.</p>
+        <a href="https://gamefaqs.gamespot.com/pc/924362-grand-theft-auto-san-andreas/faqs/33442" target="_blank" rel="noopener">Open the original guide ↗</a>
+      </article>
+
+      <article class="guide-example">
+        <div class="guide-example-head">
+          <strong>Pokémon Emerald</strong>
+          <span>SHINIGAMIMIROKU · GAMEFAQS · 2005</span>
+        </div>
+        <pre>                               ____
+                              /    \
+                             /      \
+                            |---()---|
+                             \      /
+                              \____/</pre>
+        <p>The author used a simple Poké Ball made entirely from text characters.</p>
+        <a href="https://gamefaqs.gamespot.com/gba/921905-pokemon-emerald-version/faqs/37740" target="_blank" rel="noopener">Open the original guide ↗</a>
+      </article>
+    </div>
+
+    <p class="guide-note">Each excerpt above comes from the linked guide itself. No substitute drawings or “inspired by” versions are used here.</p>
+  </section>
+</main>
+
+<div class="ds-step-footer">
+  <a class="ds-next-card ds-prev" href="binaryascii.html"><small>← Previous</small><strong>Binary 3 · ASCII</strong><span>Learn the character code, its history, and the ASCII table.</span></a>
+  <a class="ds-next-card ds-next" href="binary3.html"><small>Next →</small><strong>Binary 5 · One Byte, Many Meanings</strong><span>See the same 8 bits represent different kinds of information.</span></a>
+</div>
+
+<footer class="site-footer"><span>© 2026 David Steckler</span><span>binary · information · representation</span></footer>
+
+<script>
+const originalDungeon=[
+  "-----------------------------",
+  "|.......|       |...........|",
+  "|.......+#######+...........|",
+  "|..@....|       |.....D.....|",
+  "|.......|       |...........|",
+  "----+----       -----+-------",
+  "    #               #        ",
+  "    ###########     #        ",
+  "              #     #        ",
+  "              #  ---+---     ",
+  "              ####|.....|    ",
+  "                  |..$..|    ",
+  "                  -------    "
+];
+
+let dungeon=[];
+const gameState={row:0,col:0,moves:0,won:false};
+const gameEl=document.getElementById('asciiGame');
+const gameResult=document.getElementById('gameResult');
+
+function resetDungeonData(){
+  dungeon=originalDungeon.map(row=>row.split(''));
+  for(let r=0;r<dungeon.length;r++){
+    for(let col=0;col<dungeon[r].length;col++){
+      if(dungeon[r][col]==='@'){
+        gameState.row=r;
+        gameState.col=col;
+        dungeon[r][col]='.';
+      }
+    }
+  }
+  gameState.moves=0;
+  gameState.won=false;
+}
+
+function classForGameChar(ch,isPlayer){
+  if(isPlayer) return 'player';
+  if(ch==='$') return 'treasure';
+  if(ch==='D') return 'monster';
+  if(ch==='.') return 'floor';
+  if(ch==='#') return 'corridor';
+  if(ch==='+') return 'door';
+  if(ch==='-' || ch==='|') return 'wall';
+  return 'void';
+}
+
+function renderDungeon(){
+  gameEl.innerHTML='';
+  const frag=document.createDocumentFragment();
+
+  for(let r=0;r<dungeon.length;r++){
+    for(let col=0;col<dungeon[r].length;col++){
+      const isPlayer=r===gameState.row && col===gameState.col;
+      const ch=isPlayer ? '@' : dungeon[r][col];
+      const cell=document.createElement('span');
+      cell.className='game-cell '+classForGameChar(ch,isPlayer);
+      cell.textContent=ch===' ' ? '·' : ch;
+      cell.setAttribute('role','gridcell');
+      frag.appendChild(cell);
+    }
+  }
+
+  gameEl.appendChild(frag);
+  document.getElementById('moveCount').textContent=
+    gameState.moves+' move'+(gameState.moves===1?'':'s');
+
+  document.getElementById('tileCharacter').textContent='@';
+  document.getElementById('tileDecimal').textContent='64';
+  document.getElementById('tileBinary').textContent='01000000';
+}
+
+function tryMove(dr,dc){
+  if(gameState.won) return;
+
+  const nr=gameState.row+dr;
+  const nc=gameState.col+dc;
+  const next=dungeon[nr]?.[nc];
+
+  if(next===undefined || next===' ' || next==='-' || next==='|'){
+    gameResult.textContent='That character is a wall or empty space.';
+    return;
+  }
+
+  gameState.moves++;
+
+  if(next==='D'){
+    dungeon[nr][nc]='.';
+    gameState.row=nr;
+    gameState.col=nc;
+    gameResult.textContent='You moved into D, so you attacked the dragon. That is how Rogue-style combat works.';
+    renderDungeon();
+    return;
+  }
+
+  gameState.row=nr;
+  gameState.col=nc;
+
+  if(next==='$'){
+    dungeon[nr][nc]='.';
+    gameState.won=true;
+    gameResult.textContent='You found the $. Every wall, hallway, door, monster, and treasure here is just a character.';
+    gameResult.classList.add('won');
+  }else if(next==='#'){
+    gameResult.textContent='You moved through a # corridor.';
+    gameResult.classList.remove('won');
+  }else if(next==='+'){
+    gameResult.textContent='You passed through a + doorway.';
+    gameResult.classList.remove('won');
+  }else{
+    gameResult.textContent='You moved @ one character on the grid.';
+    gameResult.classList.remove('won');
+  }
+
+  renderDungeon();
+}
+
+function resetDungeon(){
+  resetDungeonData();
+  gameResult.textContent='Use the arrow buttons or WASD. Reach the $.';
+  gameResult.classList.remove('won');
+  renderDungeon();
+}
+
+document.querySelectorAll('[data-move]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const dir=btn.dataset.move;
+    if(dir==='up') tryMove(-1,0);
+    if(dir==='down') tryMove(1,0);
+    if(dir==='left') tryMove(0,-1);
+    if(dir==='right') tryMove(0,1);
+    gameEl.focus();
+  });
+});
+
+document.getElementById('resetAsciiGame').addEventListener('click',()=>{
+  resetDungeon();
+  gameEl.focus();
+});
+
+gameEl.addEventListener('keydown',e=>{
+  const key=e.key.toLowerCase();
+  const dirs={
+    'arrowup':[-1,0],'w':[-1,0],
+    'arrowdown':[1,0],'s':[1,0],
+    'arrowleft':[0,-1],'a':[0,-1],
+    'arrowright':[0,1],'d':[0,1]
+  };
+  if(dirs[key]){
+    e.preventDefault();
+    tryMove(...dirs[key]);
+  }
+});
+
+resetDungeon();
+
+document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
+</script>
+</body>
+</html>
