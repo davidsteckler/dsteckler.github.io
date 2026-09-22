@@ -137,8 +137,9 @@
       min-height:0;
       padding:14px;
       display:grid;
-      grid-template-columns:minmax(380px,1.08fr) minmax(420px,.92fr);
+      grid-template-columns:minmax(360px,1.08fr) minmax(410px,.92fr) 292px;
       gap:14px;
+      align-items:stretch;
     }
     .panel{
       min-height:0;
@@ -325,24 +326,110 @@
     }
     .toggle input{accent-color:var(--teal)}
 
-    .helpbar{
-      grid-column:1/-1;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      padding:0 2px 2px;
-      color:var(--soft);
-      font-size:.72rem;
+    .command-library{
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+      background:var(--surface);
     }
-    .chip{
+    .command-library .panel-head{padding-right:8px}
+    .commands-count{
+      font:700 .65rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--ghost);
+    }
+    .command-search-wrap{
+      padding:10px;
+      border-bottom:1px solid var(--rule);
+      background:#fbf8f2;
+    }
+    .command-search{
+      width:100%;
+      height:36px;
       border:1px solid var(--rule);
-      background:rgba(255,255,255,.45);
-      border-radius:999px;
-      padding:6px 9px;
-      font:650 .69rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-      color:var(--mid);
+      border-radius:10px;
+      background:white;
+      color:var(--ink);
+      padding:0 10px;
+      outline:none;
+      font-size:.78rem;
     }
+    .command-search:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,107,115,.08)}
+    .command-scroll{
+      min-height:0;
+      overflow:auto;
+      padding:6px 10px 16px;
+    }
+    .command-tip{
+      margin:6px 0 12px;
+      color:var(--soft);
+      font-size:.7rem;
+      line-height:1.4;
+    }
+    .command-category{margin:14px 0 5px}
+    .command-category:first-of-type{margin-top:6px}
+    .command-category-title{
+      font:800 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--teal);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      padding:0 2px 6px;
+    }
+    .command-item{
+      width:100%;
+      display:block;
+      text-align:left;
+      border:1px solid transparent;
+      border-top-color:var(--rule);
+      background:transparent;
+      padding:9px 7px;
+      color:var(--ink);
+      border-radius:8px;
+    }
+    .command-item:hover,
+    .command-item:focus{
+      background:var(--teal-light);
+      border-color:#c6dedb;
+      outline:none;
+    }
+    .command-syntax{
+      display:block;
+      font:700 .73rem/1.35 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+      color:var(--ink);
+      overflow-wrap:anywhere;
+    }
+    .command-desc{
+      display:block;
+      margin-top:4px;
+      color:var(--soft);
+      font-size:.68rem;
+      line-height:1.38;
+    }
+    .command-alias{
+      display:block;
+      margin-top:4px;
+      color:var(--ghost);
+      font:600 .61rem/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .command-empty{
+      display:none;
+      padding:24px 8px;
+      text-align:center;
+      color:var(--soft);
+      font-size:.75rem;
+    }
+    .command-close{
+      display:none;
+      border:0;
+      background:transparent;
+      color:var(--soft);
+      font-size:1.1rem;
+      line-height:1;
+      padding:5px 7px;
+      border-radius:7px;
+    }
+    .command-close:hover{background:rgba(0,0,0,.05)}
+    .commands-toggle{display:none}
+    .commands-overlay{display:none}
 
     .example-select{
       height:36px;
@@ -365,11 +452,35 @@
     }
     .loading.show{display:grid}
 
+    @media(max-width:1280px){
+      .workspace{grid-template-columns:minmax(340px,1fr) minmax(400px,1fr)}
+      .command-library{
+        position:fixed;
+        z-index:40;
+        top:0;
+        right:0;
+        bottom:0;
+        width:min(340px,88vw);
+        border-radius:0;
+        transform:translateX(105%);
+        transition:transform .2s ease;
+        box-shadow:-18px 0 42px rgba(32,37,37,.18);
+      }
+      body.commands-open .command-library{transform:translateX(0)}
+      .commands-toggle{display:inline-flex}
+      .command-close{display:block}
+      .commands-overlay{
+        position:fixed;
+        inset:0;
+        z-index:39;
+        background:rgba(24,28,28,.35);
+      }
+      body.commands-open .commands-overlay{display:block}
+    }
     @media(max-width:980px){
       .workspace{grid-template-columns:1fr;overflow:auto}
       .code-panel{min-height:600px}
       .world-panel{min-height:600px}
-      .helpbar{grid-column:auto}
     }
     @media(max-width:620px){
       .sitebar{padding:9px 12px}.brand-sub{display:none}.site-actions{display:none}
@@ -381,8 +492,8 @@
       .world-panel{grid-template-rows:43px auto auto;min-height:0}
       .world-stage{padding:8px;justify-content:start}
       .world-wrap{transform-origin:top left}
-      .helpbar{display:none}
       .shortcut{display:none}
+      .command-library{width:min(360px,94vw)}
     }
   </style>
 </head>
@@ -423,6 +534,7 @@
       <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
       <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
       <button class="btn" id="resetBtn" type="button">↻ Reset World</button>
+      <button class="btn commands-toggle" id="commandsToggle" type="button">☰ Commands</button>
     </div>
   </section>
 
@@ -479,19 +591,76 @@ for i in range(4):
       </div>
     </section>
 
-    <div class="helpbar" aria-label="Common turtle commands">
-      <span>Common commands:</span>
-      <span class="chip">forward(100)</span>
-      <span class="chip">backward(50)</span>
-      <span class="chip">left(90)</span>
-      <span class="chip">right(90)</span>
-      <span class="chip">goto(x, y)</span>
-      <span class="chip">penup()</span>
-      <span class="chip">pendown()</span>
-      <span class="chip">color("blue")</span>
-      <span class="chip">pensize(4)</span>
-      <span class="chip">circle(50)</span><span class="chip">speed(0) = fastest</span>
-    </div>
+    <aside class="panel command-library" id="commandLibrary" aria-label="Turtle command library">
+      <div class="panel-head">
+        <div class="panel-label">Turtle Commands</div>
+        <div style="display:flex;align-items:center;gap:3px">
+          <span class="commands-count" id="commandsCount">32 commands</span>
+          <button class="command-close" id="commandsClose" type="button" aria-label="Close command library">×</button>
+        </div>
+      </div>
+      <div class="command-search-wrap">
+        <input class="command-search" id="commandSearch" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="command-scroll" id="commandScroll">
+        <div class="command-tip">Click any command to insert it at your cursor.</div>
+
+        <div class="command-category" data-category="Movement">
+          <div class="command-category-title">Movement</div>
+          <button class="command-item" data-search="forward fd move distance" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Tracy forward 100 pixels.</span><span class="command-alias">alias: fd()</span></button>
+          <button class="command-item" data-search="backward back bk move distance" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Tracy backward 100 pixels.</span><span class="command-alias">aliases: back(), bk()</span></button>
+          <button class="command-item" data-search="left lt turn angle" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn left by 90 degrees.</span><span class="command-alias">alias: lt()</span></button>
+          <button class="command-item" data-search="right rt turn angle" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn right by 90 degrees.</span><span class="command-alias">alias: rt()</span></button>
+          <button class="command-item" data-search="goto coordinates x y setpos setposition move" data-insert="goto(100, 50)"><span class="command-syntax">goto(100, 50)</span><span class="command-desc">Move directly to an (x, y) coordinate.</span><span class="command-alias">aliases: setpos(), setposition()</span></button>
+          <button class="command-item" data-search="setx x coordinate" data-insert="setx(100)"><span class="command-syntax">setx(100)</span><span class="command-desc">Change only Tracy’s x-coordinate.</span></button>
+          <button class="command-item" data-search="sety y coordinate" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only Tracy’s y-coordinate.</span></button>
+          <button class="command-item" data-search="home origin center reset position" data-insert="home()"><span class="command-syntax">home()</span><span class="command-desc">Return to (0, 0) and face right.</span></button>
+        </div>
+
+        <div class="command-category" data-category="Pen">
+          <div class="command-category-title">Pen</div>
+          <button class="command-item" data-search="penup up pu lift no draw" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Lift the pen so movement does not draw.</span><span class="command-alias">aliases: up(), pu()</span></button>
+          <button class="command-item" data-search="pendown down pd draw pen" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down so movement draws.</span><span class="command-alias">aliases: down(), pd()</span></button>
+          <button class="command-item" data-search="isdown pen status boolean" data-insert="isdown()"><span class="command-syntax">isdown()</span><span class="command-desc">Returns True if the pen is down.</span></button>
+          <button class="command-item" data-search="pensize width thickness line" data-insert="pensize(4)"><span class="command-syntax">pensize(4)</span><span class="command-desc">Set the line thickness.</span><span class="command-alias">alias: width()</span></button>
+          <button class="command-item" data-search="pencolor pen color colour line" data-insert='pencolor("blue")'><span class="command-syntax">pencolor("blue")</span><span class="command-desc">Change the line color.</span></button>
+          <button class="command-item" data-search="fillcolor fill color colour" data-insert='fillcolor("gold")'><span class="command-syntax">fillcolor("gold")</span><span class="command-desc">Choose the color used by fill.</span></button>
+          <button class="command-item" data-search="color pen fill color colour both" data-insert='color("purple")'><span class="command-syntax">color("purple")</span><span class="command-desc">Set both pen and fill color.</span></button>
+        </div>
+
+        <div class="command-category" data-category="Drawing">
+          <div class="command-category-title">Drawing</div>
+          <button class="command-item" data-search="circle radius draw" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a circle with radius 50.</span></button>
+          <button class="command-item" data-search="dot point circle draw" data-insert="dot(10)"><span class="command-syntax">dot(10)</span><span class="command-desc">Draw a filled dot at Tracy’s position.</span></button>
+          <button class="command-item" data-search="begin_fill fill shape start" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
+          <button class="command-item" data-search="end_fill fill shape finish" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape started with begin_fill().</span></button>
+          <button class="command-item" data-search="stamp turtle copy imprint" data-insert="stamp()"><span class="command-syntax">stamp()</span><span class="command-desc">Stamp a copy of the turtle onto the drawing.</span></button>
+          <button class="command-item" data-search="write text words label" data-insert='write("Hello")'><span class="command-syntax">write("Hello")</span><span class="command-desc">Write text at Tracy’s current position.</span></button>
+          <button class="command-item" data-search="clear drawing erase keep position" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase the drawing without moving Tracy.</span></button>
+          <button class="command-item" data-search="reset erase start over turtle" data-insert="reset()"><span class="command-syntax">reset()</span><span class="command-desc">Erase everything and return Tracy to the start.</span></button>
+        </div>
+
+        <div class="command-category" data-category="Position">
+          <div class="command-category-title">Position & Heading</div>
+          <button class="command-item" data-search="xcor x coordinate get position" data-insert="xcor()"><span class="command-syntax">xcor()</span><span class="command-desc">Get Tracy’s current x-coordinate.</span></button>
+          <button class="command-item" data-search="ycor y coordinate get position" data-insert="ycor()"><span class="command-syntax">ycor()</span><span class="command-desc">Get Tracy’s current y-coordinate.</span></button>
+          <button class="command-item" data-search="position pos coordinates get tuple" data-insert="position()"><span class="command-syntax">position()</span><span class="command-desc">Get the current (x, y) coordinates.</span><span class="command-alias">alias: pos()</span></button>
+          <button class="command-item" data-search="heading direction angle get" data-insert="heading()"><span class="command-syntax">heading()</span><span class="command-desc">Get the direction Tracy is facing.</span></button>
+          <button class="command-item" data-search="setheading seth direction angle face" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Point Tracy at an exact angle.</span><span class="command-alias">alias: seth()</span></button>
+        </div>
+
+        <div class="command-category" data-category="Turtle">
+          <div class="command-category-title">Turtle & World</div>
+          <button class="command-item" data-search="hideturtle ht hide cursor arrow" data-insert="hideturtle()"><span class="command-syntax">hideturtle()</span><span class="command-desc">Hide the turtle arrow.</span><span class="command-alias">alias: ht()</span></button>
+          <button class="command-item" data-search="showturtle st show cursor arrow" data-insert="showturtle()"><span class="command-syntax">showturtle()</span><span class="command-desc">Show the turtle arrow.</span><span class="command-alias">alias: st()</span></button>
+          <button class="command-item" data-search="speed animation fastest" data-insert="speed(0)"><span class="command-syntax">speed(0)</span><span class="command-desc">Set Turtle speed. In this sandbox, 0 means fastest.</span></button>
+          <button class="command-item" data-search="bgcolor background world color" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the Turtle world background color.</span></button>
+        </div>
+
+        <div class="command-empty" id="commandEmpty">No commands match that search.</div>
+      </div>
+    </aside>
+    <div class="commands-overlay" id="commandsOverlay"></div>
   </main>
 </div>
 
@@ -561,6 +730,12 @@ for i in range(4):
   var loading = document.getElementById("loading");
   var worldStage = document.getElementById("worldStage");
   var worldWrap = document.getElementById("worldWrap");
+  var commandsToggle = document.getElementById("commandsToggle");
+  var commandsClose = document.getElementById("commandsClose");
+  var commandsOverlay = document.getElementById("commandsOverlay");
+  var commandSearch = document.getElementById("commandSearch");
+  var commandEmpty = document.getElementById("commandEmpty");
+  var commandsCount = document.getElementById("commandsCount");
 
   var editor = CodeMirror.fromTextArea(source, {
     mode: "python",
@@ -1007,6 +1182,64 @@ for i in range(4):
     editor.focus();
     this.value = "";
   });
+
+  function openCommands(){
+    document.body.classList.add("commands-open");
+    if(commandSearch && window.innerWidth <= 1280){
+      setTimeout(function(){ commandSearch.focus(); }, 180);
+    }
+  }
+
+  function closeCommands(){
+    document.body.classList.remove("commands-open");
+  }
+
+  if(commandsToggle) commandsToggle.addEventListener("click", openCommands);
+  if(commandsClose) commandsClose.addEventListener("click", closeCommands);
+  if(commandsOverlay) commandsOverlay.addEventListener("click", closeCommands);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeCommands();
+  });
+
+  var commandItems = Array.prototype.slice.call(document.querySelectorAll(".command-item"));
+
+  commandItems.forEach(function(item){
+    item.addEventListener("click", function(){
+      var snippet = item.getAttribute("data-insert") || "";
+      var doc = editor.getDoc();
+      var cursor = doc.getCursor();
+      doc.replaceRange(snippet, cursor);
+      doc.setCursor({line:cursor.line, ch:cursor.ch + snippet.length});
+      editor.focus();
+      if(window.innerWidth <= 1280) closeCommands();
+    });
+  });
+
+  function filterCommands(){
+    var query = (commandSearch.value || "").trim().toLowerCase();
+    var visibleCount = 0;
+
+    document.querySelectorAll(".command-category").forEach(function(category){
+      var categoryVisible = 0;
+      category.querySelectorAll(".command-item").forEach(function(item){
+        var haystack = (
+          (item.getAttribute("data-search") || "") + " " +
+          item.textContent
+        ).toLowerCase();
+        var show = !query || haystack.indexOf(query) !== -1;
+        item.style.display = show ? "" : "none";
+        if(show){ categoryVisible += 1; visibleCount += 1; }
+      });
+      category.style.display = categoryVisible ? "" : "none";
+    });
+
+    commandEmpty.style.display = visibleCount ? "none" : "block";
+    commandsCount.textContent = visibleCount + (visibleCount === 1 ? " command" : " commands");
+  }
+
+  if(commandSearch) commandSearch.addEventListener("input", filterCommands);
+  filterCommands();
 
   gridToggle.addEventListener("change", function(){
     var show = this.checked;
