@@ -501,41 +501,41 @@ for i in range(4):
     "for i in range(4):",
     "    forward(100)",
     "    left(90)"
-  ].join("\\n");
+  ].join("\n");
 
   var examples = {
     square: [
       "for i in range(4):",
       "    forward(100)",
       "    left(90)"
-    ].join("\\n"),
+    ].join("\n"),
     star: [
-      "color(\\"purple\\")",
+      "color(\"purple\")",
       "pensize(3)",
       "",
       "for i in range(5):",
       "    forward(150)",
       "    right(144)"
-    ].join("\\n"),
+    ].join("\n"),
     spiral: [
       "speed(0)",
       "",
       "for i in range(55):",
       "    forward(i * 3)",
       "    right(91)"
-    ].join("\\n"),
+    ].join("\n"),
     colors: [
       "speed(0)",
       "pensize(3)",
       "",
-      "colors = [\\"red\\", \\"orange\\", \\"gold\\", \\"green\\", \\"blue\\", \\"purple\\"]",
+      "colors = [\"red\", \"orange\", \"gold\", \"green\", \"blue\", \"purple\"]",
       "",
       "for i in range(72):",
       "    color(colors[i % len(colors)])",
       "    forward(120)",
       "    backward(120)",
       "    right(5)"
-    ].join("\\n")
+    ].join("\n")
   };
 
   var source = document.getElementById("editor-source");
@@ -663,7 +663,7 @@ for i in range(4):
       animate: true
     };
 
-    var prelude = "from turtle import *\\n";
+    var prelude = "from turtle import *\n";
     var program = prelude + userCode;
 
     try {
@@ -673,15 +673,15 @@ for i in range(4):
 
       if(myToken !== runToken) return;
       if(!output.textContent.trim()){
-        appendOutput("Program finished.\\n", "success");
+        appendOutput("Program finished.\n", "success");
       } else {
-        appendOutput("\\nProgram finished.\\n", "success");
+        appendOutput("\nProgram finished.\n", "success");
       }
       setStatus("good");
     } catch(err) {
       if(myToken !== runToken) return;
       var message = formatError(err);
-      appendOutput(message + "\\n", "error");
+      appendOutput(message + "\n", "error");
       setStatus("bad");
     } finally {
       if(myToken === runToken){
@@ -707,7 +707,7 @@ for i in range(4):
     }
 
     if(line){
-      return name + " on line " + line + ": " + text.replace(/^.*?:\\s*/, "");
+      return name + " on line " + line + ": " + text.replace(/^.*?:\s*/, "");
     }
     return text;
   }
@@ -722,7 +722,7 @@ for i in range(4):
     runBtn.disabled = false;
     stopBtn.disabled = true;
     setStatus("");
-    appendOutput("\\nStopped.\\n", "muted");
+    appendOutput("\nStopped.\n", "muted");
   }
 
   function resetWorld(){
