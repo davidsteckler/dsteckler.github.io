@@ -156,8 +156,40 @@ main{width:min(calc(100% - 32px),var(--max));margin:0 auto;padding:24px 0 32px}
 
 
 .context-lab{
-  display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:stretch
+  display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px;align-items:start
 }
+.context-sidebar{
+  position:sticky;top:78px;display:grid;gap:10px;align-self:start
+}
+.live-byte{
+  padding:13px;border:1px solid rgba(45,105,114,.16);border-radius:14px;
+  background:rgba(45,105,114,.07)
+}
+.live-byte-label{
+  color:var(--teal);font:700 .56rem 'JetBrains Mono',monospace;
+  text-transform:uppercase;letter-spacing:.07em
+}
+.live-byte-binary{
+  margin-top:5px;font:700 1.02rem 'JetBrains Mono',monospace;
+  letter-spacing:.035em;color:var(--ink);white-space:nowrap
+}
+.live-byte-number{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px
+}
+.live-byte-number span{color:var(--soft);font-size:.67rem}
+.live-byte-number input{
+  width:72px;padding:6px 7px;border:1px solid var(--line2);border-radius:8px;
+  background:var(--paper);color:var(--ink);font:700 .72rem 'JetBrains Mono',monospace;text-align:center
+}
+#contextSlider{width:100%;margin-top:9px;accent-color:var(--teal)}
+.live-byte-scale{display:flex;justify-content:space-between;margin-top:1px;color:var(--soft);font:500 .5rem 'JetBrains Mono',monospace}
+.live-byte-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
+.live-byte-presets button{
+  min-width:0;padding:6px 2px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.55);
+  color:var(--mid);cursor:pointer;font:700 .56rem 'JetBrains Mono',monospace
+}
+.live-byte-presets button:hover{background:#fff;color:var(--ink)}
+.live-byte-tip{margin-top:7px;color:var(--soft);font-size:.6rem;line-height:1.35}
 .context-tabs{display:grid;gap:7px;align-content:start}
 .context-tab{
   width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;
@@ -235,6 +267,8 @@ main{width:min(calc(100% - 32px),var(--max));margin:0 auto;padding:24px 0 32px}
 .context-arrow strong{color:var(--teal)}
 @media(max-width:760px){
   .context-lab{grid-template-columns:1fr}
+  .context-sidebar{position:static;display:grid;gap:10px}
+  .live-byte{position:sticky;top:68px;z-index:20;box-shadow:0 8px 24px rgba(36,33,29,.08);backdrop-filter:blur(12px)}
   .context-tabs{grid-template-columns:repeat(5,minmax(120px,1fr));overflow-x:auto;padding-bottom:4px}
   .context-tab{min-width:120px}
   .context-screen{min-height:360px}
@@ -399,12 +433,32 @@ footer.site-footer{width:min(calc(100% - 32px),1180px);margin:44px auto 28px;pad
     </div>
 
     <div class="context-lab">
-      <div class="context-tabs" role="tablist" aria-label="Choose a context">
-        <button class="context-tab active" type="button" data-context="number"><small>Python game</small><strong>Player health</strong></button>
-        <button class="context-tab" type="button" data-context="text"><small>Notepad / VS Code</small><strong>message.txt</strong></button>
-        <button class="context-tab" type="button" data-context="gray"><small>Image editor</small><strong>8-bit grayscale</strong></button>
-        <button class="context-tab" type="button" data-context="rgb"><small>Image editor</small><strong>RGB pixel</strong></button>
-        <button class="context-tab" type="button" data-context="audio"><small>Audio player</small><strong>WAV waveform</strong></button>
+      <div class="context-sidebar">
+        <div class="live-byte" aria-label="Live byte controls">
+          <div class="live-byte-label">Change the byte while you watch</div>
+          <div class="live-byte-binary" id="contextBinary">01000001</div>
+          <div class="live-byte-number">
+            <span>decimal</span>
+            <input id="contextNumber" type="number" min="0" max="255" value="65" aria-label="Byte decimal value">
+          </div>
+          <input id="contextSlider" type="range" min="0" max="255" value="65" aria-label="Change byte value while viewing examples">
+          <div class="live-byte-scale"><span>0</span><span>255</span></div>
+          <div class="live-byte-presets">
+            <button type="button" data-live-value="0">0</button>
+            <button type="button" data-live-value="65">65/A</button>
+            <button type="button" data-live-value="128">128</button>
+            <button type="button" data-live-value="255">255</button>
+          </div>
+          <div class="live-byte-tip">Keep this control here. The example on the right updates immediately.</div>
+        </div>
+
+        <div class="context-tabs" role="tablist" aria-label="Choose a context">
+          <button class="context-tab active" type="button" data-context="number"><small>Python game</small><strong>Player health</strong></button>
+          <button class="context-tab" type="button" data-context="text"><small>Notepad / VS Code</small><strong>message.txt</strong></button>
+          <button class="context-tab" type="button" data-context="gray"><small>Image editor</small><strong>8-bit grayscale</strong></button>
+          <button class="context-tab" type="button" data-context="rgb"><small>Image editor</small><strong>RGB pixel</strong></button>
+          <button class="context-tab" type="button" data-context="audio"><small>Audio player</small><strong>WAV waveform</strong></button>
+        </div>
       </div>
 
       <div class="context-screen">
@@ -475,6 +529,9 @@ let audioCtx=null;
 
 const bitsEl=document.getElementById('bits');
 const slider=document.getElementById('byteSlider');
+const contextSlider=document.getElementById('contextSlider');
+const contextNumber=document.getElementById('contextNumber');
+const contextBinary=document.getElementById('contextBinary');
 
 function binary8(n){return n.toString(2).padStart(8,'0')}
 function hex2(n){return n.toString(16).toUpperCase().padStart(2,'0')}
@@ -666,11 +723,26 @@ function render(){
   document.querySelectorAll('.sameByteText').forEach(el=>el.textContent=b);
 
   slider.value=value;
+  contextSlider.value=value;
+  contextNumber.value=value;
+  contextBinary.textContent=b;
   renderBits();
   renderContext();
 }
 
 slider.addEventListener('input',()=>{value=Number(slider.value);render()});
+contextSlider.addEventListener('input',()=>{value=Number(contextSlider.value);render()});
+contextNumber.addEventListener('input',()=>{
+  if(contextNumber.value==='') return;
+  value=Number(contextNumber.value);
+  render();
+});
+contextNumber.addEventListener('change',()=>{
+  if(contextNumber.value==='') contextNumber.value=value;
+});
+document.querySelectorAll('[data-live-value]').forEach(btn=>{
+  btn.addEventListener('click',()=>{value=Number(btn.dataset.liveValue);render()});
+});
 
 document.querySelectorAll('.preset[data-value]').forEach(btn=>{
   btn.addEventListener('click',()=>{value=Number(btn.dataset.value);render()});
