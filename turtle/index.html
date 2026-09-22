@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A simple Tracy-style Python Turtle sandbox for learning Python in the browser.">
+  <title>Python Turtle Sandbox | David Steckler</title>
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+
+  <style>
+    :root{
+      --bg:#f0ebe1;
+      --paper:#faf7f0;
+      --surface:#fffdf8;
+      --ink:#202525;
+      --mid:#4f5858;
+      --soft:#737b79;
+      --ghost:#9da3a0;
+      --rule:#d8d2c6;
+      --rule-strong:#bdb5a7;
+      --teal:#176b73;
+      --teal-dark:#0f5057;
+      --teal-light:#e1efed;
+      --terra:#b85d3f;
+      --terra-light:#f5e6df;
+      --green:#2c7a58;
+      --editor:#202526;
+      --editor-2:#292f30;
+      --editor-rule:#3a4142;
+      --editor-text:#e7eceb;
+      --shadow:0 12px 35px rgba(37,43,42,.09);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
+    body{
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      overflow-x:hidden;
+    }
+    button,select,input{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+    }
+
+    .sitebar{
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      padding:10px 20px;
+      border-bottom:1px solid var(--rule);
+      background:rgba(250,247,240,.92);
+      backdrop-filter:blur(12px);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      min-width:0;
+    }
+    .brand-mark{
+      width:34px;height:34px;border-radius:10px;
+      display:grid;place-items:center;
+      color:white;background:var(--teal);
+      font:800 15px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .brand-copy{min-width:0}
+    .brand-title{font-weight:800;font-size:.93rem;letter-spacing:-.01em}
+    .brand-sub{font:500 .68rem/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--soft);margin-top:2px}
+    .site-actions{display:flex;align-items:center;gap:8px}
+    .site-link{
+      text-decoration:none;
+      color:var(--mid);
+      font-size:.78rem;
+      font-weight:700;
+      padding:8px 10px;
+      border-radius:9px;
+    }
+    .site-link:hover{background:rgba(255,255,255,.6);color:var(--ink)}
+
+    .toolhead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      padding:13px 18px;
+      background:var(--surface);
+      border-bottom:1px solid var(--rule);
+    }
+    .title-wrap{display:flex;align-items:center;gap:12px;min-width:0}
+    .turtle-badge{
+      width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;
+      border:1px solid #b8d8d4;
+      background:var(--teal-light);
+      color:var(--teal);
+      font-size:21px;
+      flex:0 0 auto;
+    }
+    .tool-title{font-weight:850;font-size:1.05rem;letter-spacing:-.02em}
+    .tool-note{color:var(--soft);font-size:.76rem;margin-top:2px}
+    .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{
+      height:36px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      border:1px solid var(--rule);
+      background:white;
+      color:var(--ink);
+      border-radius:10px;
+      padding:0 13px;
+      font-weight:800;
+      font-size:.79rem;
+      box-shadow:0 1px 1px rgba(0,0,0,.02);
+    }
+    .btn:hover{border-color:var(--rule-strong);background:#fff}
+    .btn.primary{background:var(--teal);border-color:var(--teal);color:white}
+    .btn.primary:hover{background:var(--teal-dark)}
+    .btn.danger{color:#8c422d}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .shortcut{opacity:.72;font:600 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+
+    .workspace{
+      min-height:0;
+      padding:14px;
+      display:grid;
+      grid-template-columns:minmax(380px,1.08fr) minmax(420px,.92fr);
+      gap:14px;
+    }
+    .panel{
+      min-height:0;
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:var(--surface);
+      box-shadow:var(--shadow);
+    }
+    .panel-head{
+      height:43px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 13px;
+      border-bottom:1px solid var(--rule);
+      background:#f8f4ec;
+    }
+    .panel-label{
+      display:flex;align-items:center;gap:8px;
+      font:800 .72rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--mid);
+    }
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--ghost)}
+    .status-dot.running{background:#d89e38;box-shadow:0 0 0 4px rgba(216,158,56,.12)}
+    .status-dot.good{background:var(--green);box-shadow:0 0 0 4px rgba(44,122,88,.10)}
+    .status-dot.bad{background:var(--terra);box-shadow:0 0 0 4px rgba(184,93,63,.10)}
+    .panel-mini{color:var(--ghost);font-size:.68rem;font-weight:700}
+
+    .code-panel{
+      display:grid;
+      grid-template-rows:43px minmax(260px,1fr) 145px;
+      background:var(--editor);
+      border-color:#343a3b;
+    }
+    .code-panel .panel-head{
+      border-color:var(--editor-rule);
+      background:var(--editor-2);
+    }
+    .code-panel .panel-label{color:#bac2c1}
+    .code-panel .panel-mini{color:#818a89}
+
+    #editor-source{display:none}
+    .CodeMirror{
+      height:100%;
+      font:500 15px/1.62 "JetBrains Mono","SFMono-Regular",Consolas,Monaco,monospace;
+      background:var(--editor);
+      color:var(--editor-text);
+    }
+    .CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}
+    .CodeMirror-linenumber{color:#697271}
+    .CodeMirror-cursor{border-left:2px solid #e4bd66}
+    .CodeMirror-selected{background:#374243 !important}
+    .cm-s-default .cm-keyword{color:#d7a7df}
+    .cm-s-default .cm-def{color:#87c8dc}
+    .cm-s-default .cm-variable{color:#e7eceb}
+    .cm-s-default .cm-variable-2{color:#a9d0e0}
+    .cm-s-default .cm-variable-3{color:#dfb48b}
+    .cm-s-default .cm-number{color:#e4bd66}
+    .cm-s-default .cm-string{color:#a9ce94}
+    .cm-s-default .cm-comment{color:#7f9187;font-style:italic}
+    .cm-s-default .cm-builtin{color:#85c7c0}
+    .cm-s-default .cm-operator{color:#cfd6d5}
+
+    .console{
+      border-top:1px solid var(--editor-rule);
+      display:grid;
+      grid-template-rows:34px 1fr;
+      min-height:0;
+      background:#181c1d;
+    }
+    .console-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;
+      color:#9da6a5;
+      font:700 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .console-clear{
+      border:0;background:transparent;color:#818a89;
+      font-size:.67rem;font-weight:700;padding:5px 7px;border-radius:6px;
+    }
+    .console-clear:hover{background:#262c2d;color:#c9cecd}
+    #output{
+      margin:0;
+      padding:2px 13px 12px;
+      overflow:auto;
+      color:#cfd6d5;
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
+      font:500 12.5px/1.5 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+    }
+    #output .error{color:#f0a48c}
+    #output .success{color:#9fd0b4}
+    #output .muted{color:#7c8584}
+
+    .world-panel{
+      display:grid;
+      grid-template-rows:43px minmax(460px,1fr) auto;
+      min-height:0;
+    }
+    .world-stage{
+      min-height:0;
+      display:grid;
+      place-items:center;
+      padding:20px;
+      background:
+        radial-gradient(circle at 50% 40%,rgba(23,107,115,.05),transparent 52%),
+        var(--surface);
+      overflow:auto;
+    }
+    .world-wrap{
+      width:404px;height:404px;
+      position:relative;
+      flex:0 0 auto;
+      border:2px solid #b8b4aa;
+      background:white;
+      box-shadow:0 8px 24px rgba(36,42,41,.08);
+      overflow:hidden;
+    }
+    .grid{
+      position:absolute;inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(to right,rgba(32,37,37,.075) 1px,transparent 1px),
+        linear-gradient(to bottom,rgba(32,37,37,.075) 1px,transparent 1px);
+      background-size:20px 20px;
+      z-index:0;
+    }
+    .axis-x,.axis-y{position:absolute;background:rgba(32,37,37,.28);pointer-events:none;z-index:1}
+    .axis-x{left:0;right:0;top:199px;height:1px}
+    .axis-y{top:0;bottom:0;left:199px;width:1px}
+    .axis-label{
+      position:absolute;z-index:1;pointer-events:none;
+      font:600 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:rgba(32,37,37,.48);
+      background:rgba(255,255,255,.78);
+      padding:2px 3px;
+      border-radius:3px;
+    }
+    .axis-label.xneg{left:4px;top:204px}
+    .axis-label.xpos{right:4px;top:204px}
+    .axis-label.ypos{left:204px;top:4px}
+    .axis-label.yneg{left:204px;bottom:4px}
+    .origin{
+      position:absolute;left:196px;top:196px;width:8px;height:8px;border-radius:50%;
+      background:rgba(23,107,115,.55);z-index:1;pointer-events:none;
+    }
+    #turtle-canvas{
+      position:absolute;inset:0;
+      width:400px;height:400px;
+      z-index:2;
+    }
+    #turtle-canvas canvas,
+    #turtle-canvas svg{position:absolute!important;inset:0!important;background:transparent!important}
+
+    .world-info{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-top:1px solid var(--rule);
+      background:#f8f4ec;
+    }
+    .world-copy{font-size:.77rem;color:var(--mid);line-height:1.4}
+    .world-copy strong{color:var(--ink)}
+    .toggle{
+      display:flex;align-items:center;gap:7px;
+      color:var(--soft);font-size:.72rem;font-weight:700;
+      white-space:nowrap;
+    }
+    .toggle input{accent-color:var(--teal)}
+
+    .helpbar{
+      grid-column:1/-1;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      padding:0 2px 2px;
+      color:var(--soft);
+      font-size:.72rem;
+    }
+    .chip{
+      border:1px solid var(--rule);
+      background:rgba(255,255,255,.45);
+      border-radius:999px;
+      padding:6px 9px;
+      font:650 .69rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--mid);
+    }
+
+    .example-select{
+      height:36px;
+      border:1px solid var(--rule);
+      background:white;
+      color:var(--mid);
+      border-radius:10px;
+      padding:0 30px 0 10px;
+      font-size:.76rem;
+      font-weight:750;
+      outline:none;
+    }
+
+    .loading{
+      position:absolute;inset:0;z-index:8;
+      display:none;place-items:center;
+      background:rgba(255,253,248,.9);
+      color:var(--mid);
+      font-size:.78rem;font-weight:800;
+    }
+    .loading.show{display:grid}
+
+    @media(max-width:980px){
+      .workspace{grid-template-columns:1fr;overflow:auto}
+      .code-panel{min-height:600px}
+      .world-panel{min-height:600px}
+      .helpbar{grid-column:auto}
+    }
+    @media(max-width:620px){
+      .sitebar{padding:9px 12px}.brand-sub{display:none}.site-actions{display:none}
+      .toolhead{align-items:flex-start;flex-direction:column;padding:12px}
+      .toolbar{width:100%;justify-content:flex-start}
+      .workspace{padding:8px;gap:8px}
+      .panel{border-radius:13px}
+      .code-panel{grid-template-rows:43px 58vh 130px;min-height:0}
+      .world-panel{grid-template-rows:43px auto auto;min-height:0}
+      .world-stage{padding:8px;justify-content:start}
+      .world-wrap{transform-origin:top left}
+      .helpbar{display:none}
+      .shortcut{display:none}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <header class="sitebar">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">&gt;_</span>
+      <span class="brand-copy">
+        <div class="brand-title">David Steckler</div>
+        <div class="brand-sub">// computer science · build things · figure it out</div>
+      </span>
+    </a>
+    <div class="site-actions">
+      <a class="site-link" href="../course.html">Course</a>
+      <a class="site-link" href="../index.html">Home</a>
+    </div>
+  </header>
+
+  <section class="toolhead">
+    <div class="title-wrap">
+      <div class="turtle-badge" aria-hidden="true">▲</div>
+      <div>
+        <div class="tool-title">Python Turtle Sandbox</div>
+        <div class="tool-note">Tracy-style Python. No setup. Run it here.</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <select class="example-select" id="examples" aria-label="Load an example">
+        <option value="">Examples</option>
+        <option value="square">Square</option>
+        <option value="star">Star</option>
+        <option value="spiral">Spiral</option>
+        <option value="colors">Color Wheel</option>
+      </select>
+      <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
+      <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
+      <button class="btn" id="resetBtn" type="button">↻ Reset World</button>
+    </div>
+  </section>
+
+  <main class="workspace">
+    <section class="panel code-panel">
+      <div class="panel-head">
+        <div class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</div>
+        <div class="panel-mini" id="saveStatus">saved locally</div>
+      </div>
+
+      <textarea id="editor-source" spellcheck="false"># Tracy starts at (0, 0), facing right.
+# Try changing the distance or the number of repeats.
+
+for i in range(4):
+    forward(100)
+    left(90)</textarea>
+
+      <div class="console">
+        <div class="console-head">
+          <span>Console</span>
+          <button class="console-clear" id="clearConsole" type="button">clear</button>
+        </div>
+        <pre id="output"><span class="muted">Press Run to start.</span></pre>
+      </div>
+    </section>
+
+    <section class="panel world-panel">
+      <div class="panel-head">
+        <div class="panel-label">Tracy's World</div>
+        <div class="panel-mini">400 × 400 · center = (0, 0)</div>
+      </div>
+
+      <div class="world-stage" id="worldStage">
+        <div class="world-wrap" id="worldWrap">
+          <div class="grid" id="grid"></div>
+          <div class="axis-x" id="axisX"></div>
+          <div class="axis-y" id="axisY"></div>
+          <span class="axis-label xneg">−200</span>
+          <span class="axis-label xpos">200</span>
+          <span class="axis-label ypos">200</span>
+          <span class="axis-label yneg">−200</span>
+          <span class="origin"></span>
+          <div id="turtle-canvas" aria-label="Turtle drawing canvas"></div>
+          <div class="loading" id="loading">Loading Python…</div>
+        </div>
+      </div>
+
+      <div class="world-info">
+        <div class="world-copy"><strong>Same idea as Tracy:</strong> write commands like <code>forward(100)</code>, <code>left(90)</code>, or <code>goto(50, -80)</code>. You do not need to create a turtle object.</div>
+        <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+      </div>
+    </section>
+
+    <div class="helpbar" aria-label="Common turtle commands">
+      <span>Common commands:</span>
+      <span class="chip">forward(100)</span>
+      <span class="chip">backward(50)</span>
+      <span class="chip">left(90)</span>
+      <span class="chip">right(90)</span>
+      <span class="chip">goto(x, y)</span>
+      <span class="chip">penup()</span>
+      <span class="chip">pendown()</span>
+      <span class="chip">color("blue")</span>
+      <span class="chip">pensize(4)</span>
+      <span class="chip">circle(50)</span>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "dsteckler-turtle-code-v1";
+  var DEFAULT_CODE = [
+    "# Tracy starts at (0, 0), facing right.",
+    "# Try changing the distance or the number of repeats.",
+    "",
+    "for i in range(4):",
+    "    forward(100)",
+    "    left(90)"
+  ].join("\\n");
+
+  var examples = {
+    square: [
+      "for i in range(4):",
+      "    forward(100)",
+      "    left(90)"
+    ].join("\\n"),
+    star: [
+      "color(\\"purple\\")",
+      "pensize(3)",
+      "",
+      "for i in range(5):",
+      "    forward(150)",
+      "    right(144)"
+    ].join("\\n"),
+    spiral: [
+      "speed(0)",
+      "",
+      "for i in range(55):",
+      "    forward(i * 3)",
+      "    right(91)"
+    ].join("\\n"),
+    colors: [
+      "speed(0)",
+      "pensize(3)",
+      "",
+      "colors = [\\"red\\", \\"orange\\", \\"gold\\", \\"green\\", \\"blue\\", \\"purple\\"]",
+      "",
+      "for i in range(72):",
+      "    color(colors[i % len(colors)])",
+      "    forward(120)",
+      "    backward(120)",
+      "    right(5)"
+    ].join("\\n")
+  };
+
+  var source = document.getElementById("editor-source");
+  var output = document.getElementById("output");
+  var runBtn = document.getElementById("runBtn");
+  var stopBtn = document.getElementById("stopBtn");
+  var resetBtn = document.getElementById("resetBtn");
+  var codeStatus = document.getElementById("codeStatus");
+  var saveStatus = document.getElementById("saveStatus");
+  var examplesSelect = document.getElementById("examples");
+  var gridToggle = document.getElementById("gridToggle");
+  var loading = document.getElementById("loading");
+  var worldStage = document.getElementById("worldStage");
+  var worldWrap = document.getElementById("worldWrap");
+
+  var editor = CodeMirror.fromTextArea(source, {
+    mode: "python",
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    lineWrapping: false,
+    autofocus: true,
+    extraKeys: {
+      "Tab": function(cm){
+        if(cm.somethingSelected()){
+          cm.indentSelection("add");
+        } else {
+          cm.replaceSelection("    ", "end");
+        }
+      },
+      "Shift-Tab": function(cm){ cm.indentSelection("subtract"); },
+      "Ctrl-Enter": function(){ runCode(); },
+      "Cmd-Enter": function(){ runCode(); }
+    }
+  });
+
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if(saved !== null) editor.setValue(saved);
+  } catch(e) {}
+
+  var saveTimer = null;
+  editor.on("change", function(){
+    saveStatus.textContent = "saving…";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try {
+        localStorage.setItem(STORAGE_KEY, editor.getValue());
+        saveStatus.textContent = "saved locally";
+      } catch(e) {
+        saveStatus.textContent = "not saved";
+      }
+    }, 250);
+  });
+
+  function setStatus(type){
+    codeStatus.className = "status-dot" + (type ? " " + type : "");
+  }
+
+  function setOutput(html){
+    output.innerHTML = html;
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function appendOutput(text, className){
+    var span = document.createElement("span");
+    if(className) span.className = className;
+    span.textContent = text;
+    output.appendChild(span);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function outf(text){
+    if(output.querySelector(".muted")) output.textContent = "";
+    appendOutput(text);
+  }
+
+  function builtinRead(x){
+    if(typeof Sk === "undefined" || Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined){
+      throw new Error("File not found: " + x);
+    }
+    return Sk.builtinFiles.files[x];
+  }
+
+  function clearWorld(){
+    var target = document.getElementById("turtle-canvas");
+    target.innerHTML = "";
+  }
+
+  var runToken = 0;
+
+  async function runCode(){
+    if(typeof Sk === "undefined"){
+      setStatus("bad");
+      setOutput('<span class="error">Python did not load. Check the internet connection and refresh the page.</span>');
+      return;
+    }
+
+    runToken += 1;
+    var myToken = runToken;
+    var userCode = editor.getValue();
+    clearWorld();
+    setOutput("");
+    setStatus("running");
+    runBtn.disabled = true;
+    stopBtn.disabled = false;
+
+    Sk.configure({
+      output: outf,
+      read: builtinRead,
+      __future__: Sk.python3,
+      execLimit: 8000,
+      inputfun: function(promptText){
+        var value = window.prompt(promptText || "");
+        return Promise.resolve(value === null ? "" : value);
+      },
+      inputfunTakesPrompt: true
+    });
+
+    Sk.TurtleGraphics = {
+      target: "turtle-canvas",
+      width: 400,
+      height: 400,
+      animate: true
+    };
+
+    var prelude = "from turtle import *\\n";
+    var program = prelude + userCode;
+
+    try {
+      await Sk.misceval.asyncToPromise(function(){
+        return Sk.importMainWithBody("<stdin>", false, program, true);
+      });
+
+      if(myToken !== runToken) return;
+      if(!output.textContent.trim()){
+        appendOutput("Program finished.\\n", "success");
+      } else {
+        appendOutput("\\nProgram finished.\\n", "success");
+      }
+      setStatus("good");
+    } catch(err) {
+      if(myToken !== runToken) return;
+      var message = formatError(err);
+      appendOutput(message + "\\n", "error");
+      setStatus("bad");
+    } finally {
+      if(myToken === runToken){
+        runBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }
+  }
+
+  function formatError(err){
+    var name = (err && (err.tp$name || err.name)) || "Error";
+    var text = "";
+    try {
+      text = err.toString();
+    } catch(e) {
+      text = String(err);
+    }
+
+    var line = null;
+    if(err && err.traceback && err.traceback.length){
+      var last = err.traceback[err.traceback.length - 1];
+      if(last && last.lineno) line = Math.max(1, last.lineno - 1);
+    }
+
+    if(line){
+      return name + " on line " + line + ": " + text.replace(/^.*?:\\s*/, "");
+    }
+    return text;
+  }
+
+  function stopCode(){
+    runToken += 1;
+    try {
+      if(Sk && Sk.TurtleGraphics && typeof Sk.TurtleGraphics.stop === "function"){
+        Sk.TurtleGraphics.stop();
+      }
+    } catch(e) {}
+    runBtn.disabled = false;
+    stopBtn.disabled = true;
+    setStatus("");
+    appendOutput("\\nStopped.\\n", "muted");
+  }
+
+  function resetWorld(){
+    stopCode();
+    clearWorld();
+    setOutput('<span class="muted">World reset. Your code is still here.</span>');
+  }
+
+  runBtn.addEventListener("click", runCode);
+  stopBtn.addEventListener("click", stopCode);
+  resetBtn.addEventListener("click", resetWorld);
+
+  document.getElementById("clearConsole").addEventListener("click", function(){
+    setOutput('<span class="muted">Console cleared.</span>');
+  });
+
+  examplesSelect.addEventListener("change", function(){
+    if(!this.value || !examples[this.value]) return;
+    editor.setValue(examples[this.value]);
+    editor.focus();
+    this.value = "";
+  });
+
+  gridToggle.addEventListener("change", function(){
+    var show = this.checked;
+    ["grid","axisX","axisY"].forEach(function(id){
+      document.getElementById(id).style.display = show ? "" : "none";
+    });
+    document.querySelectorAll(".axis-label,.origin").forEach(function(el){
+      el.style.display = show ? "" : "none";
+    });
+  });
+
+  function fitWorld(){
+    if(window.innerWidth > 620){
+      worldWrap.style.transform = "";
+      worldStage.style.height = "";
+      return;
+    }
+    var available = Math.max(260, worldStage.clientWidth - 16);
+    var scale = Math.min(1, available / 404);
+    worldWrap.style.transform = "scale(" + scale + ")";
+    worldStage.style.height = Math.ceil(404 * scale + 16) + "px";
+  }
+  window.addEventListener("resize", fitWorld);
+  fitWorld();
+
+  if(typeof Sk === "undefined"){
+    loading.classList.add("show");
+    setTimeout(function(){
+      if(typeof Sk === "undefined"){
+        loading.textContent = "Python could not load";
+      } else {
+        loading.classList.remove("show");
+      }
+    }, 1200);
+  }
+
+  editor.focus();
+})();
+</script>
+</body>
+</html>
