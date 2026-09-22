@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graphics & Animation | David Steckler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learning-path.css">
+<style>
+:root{--bg:#f2ede4;--paper:#f8f4ec;--ink:#24211d;--mid:#5f5951;--soft:#989086;--line:rgba(36,33,29,.10);--line2:rgba(36,33,29,.16);--teal:#2d6972;--teal-soft:rgba(45,105,114,.09);--terra:#b86238;--terra-soft:rgba(184,98,56,.08);--max:1180px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,input{font:inherit}.wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(242,237,228,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;flex-direction:column;line-height:1.1}.brand strong{font-size:.9rem;letter-spacing:.08em;text-transform:uppercase}.brand span{margin-top:4px;font:400 .66rem 'JetBrains Mono',monospace;color:var(--soft)}nav{display:flex;gap:4px;align-items:center}nav a{padding:8px 11px;border-radius:999px;color:#716a61;font-size:.79rem;font-weight:600}nav a.active,nav a:hover{background:rgba(36,33,29,.06);color:var(--ink)}.menu{display:none;border:1px solid var(--line);background:transparent;border-radius:10px;width:40px;height:40px}
+.lesson-path{width:min(calc(100% - 32px),1120px);margin:14px auto 0;display:flex;justify-content:center;gap:5px;overflow-x:auto;padding:0 0 8px}.lesson-path a{flex:0 0 auto;padding:6px 9px;border-radius:999px;color:#8b8379;font-size:.68rem;font-weight:600}.lesson-path a.current{background:var(--teal-soft);color:var(--teal)}
+main{padding:20px 0 34px}.hero{text-align:center;margin-bottom:20px}.hero h1{margin:0;font:600 clamp(2.5rem,5vw,4rem)/.98 'Fraunces',serif;letter-spacing:-.045em}.hero p{margin:8px auto 0;color:var(--soft);font-size:.9rem;max-width:62ch}.hero strong{color:var(--teal)}
+.stage{width:min(calc(100% - 32px),1000px);margin:0 auto;padding:18px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.24)}.tabs{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}.tabs button{padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--mid);cursor:pointer;font-size:.72rem;font-weight:700}.tabs button.active{background:var(--teal-soft);color:var(--teal);border-color:rgba(45,105,114,.2)}
+.mode{display:none}.mode.active{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:center}.visual{min-height:300px;display:grid;place-items:center;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.26);overflow:hidden}.copy h2{margin:0;font:600 1.6rem 'Fraunces',serif}.copy p{margin:7px 0 0;color:var(--mid);font-size:.79rem;line-height:1.55}.fact{margin-top:12px;padding:10px 12px;border-left:3px solid rgba(45,105,114,.32);background:var(--teal-soft);font-size:.72rem;color:var(--mid)}
+.pixel-grid{display:grid;grid-template-columns:repeat(10,18px);grid-template-rows:repeat(10,18px);gap:1px;transform:scale(1.15)}.px{width:18px;height:18px;background:#e7e0d6}.px.on{background:var(--teal)}.zoom-control,.fps-control{margin-top:13px}.zoom-control label,.fps-control label{display:flex;justify-content:space-between;color:var(--soft);font-size:.66rem}.zoom-control input,.fps-control input{width:100%;accent-color:var(--teal)}
+.vector-wrap{width:210px;height:210px;display:grid;place-items:center}.vector-wrap svg{width:var(--vector-size,120px);height:var(--vector-size,120px);transition:width .15s,height .15s}.vector-wrap .vfill{fill:var(--teal-soft);stroke:var(--teal);stroke-width:4}.vector-wrap .vline{stroke:var(--terra);stroke-width:6;stroke-linecap:round}
+.frame-area{width:90%;max-width:360px}.frame-box{height:180px;position:relative;border:1px solid var(--line2);border-radius:14px;background:linear-gradient(to bottom,rgba(45,105,114,.05),rgba(255,255,255,.12));overflow:hidden}.ground{position:absolute;left:0;right:0;bottom:28px;border-top:2px solid rgba(36,33,29,.18)}.ball{position:absolute;width:30px;height:30px;border-radius:50%;background:var(--terra);bottom:30px;left:20px;transition:left .06s linear,bottom .06s linear}.frame-label{margin-top:7px;text-align:center;color:var(--soft);font:500 .62rem 'JetBrains Mono',monospace}.anim-controls{display:flex;justify-content:center;gap:6px;margin-top:8px}.anim-controls button{min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.35);cursor:pointer;font-size:.7rem;font-weight:700}
+.compare{width:min(calc(100% - 32px),900px);margin:34px auto 0;text-align:center}.compare h2{margin:0;font:500 1.8rem 'Fraunces',serif}.compare p{margin:7px auto 14px;color:var(--soft);font-size:.78rem}.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.compare-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.22)}.compare-card small{color:var(--terra);font:600 .57rem 'JetBrains Mono',monospace;text-transform:uppercase}.compare-card strong{display:block;margin-top:5px;font:600 1rem 'Fraunces',serif}.compare-card span{display:block;margin-top:4px;color:var(--mid);font-size:.69rem}
+.takeaway{width:min(calc(100% - 32px),820px);margin:30px auto 0;text-align:center;padding:15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.2)}.takeaway strong{display:block;font:600 1.12rem 'Fraunces',serif}.takeaway span{display:block;margin-top:4px;color:var(--mid);font-size:.73rem}
+footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
+@media(max-width:800px){.mode.active{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}@media(max-width:680px){nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}nav.open{display:flex}.menu{display:block}footer.site-footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="wrap topbar"><a class="brand" href="index.html"><strong>David Steckler</strong><span>// cs · robotics · thinking for yourself</span></a><button class="menu" id="menuButton" aria-label="Open navigation">☰</button><nav id="siteNav"><a href="index.html">Home</a><a href="about.html">About</a><a class="active" href="course.html">Course</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="testimonials.html">Testimonials</a><a href="search.html">Search</a></nav></div></header>
+<div class="lesson-path" aria-label="Binary lessons">
+  <a href="binary1.html">1 · Numbers</a>
+  <a href="binarybitsbytes.html">2 · Bits & Bytes</a>
+  <a href="binary2.html">3 · Text</a>
+  <a href="binaryascii.html">4 · ASCII</a>
+  <a href="binaryunicode.html">5 · Unicode</a>
+  <a href="asciiart.html">6 · ASCII Art</a>
+  <a href="binary3.html">7 · One byte</a>
+  <a href="binary4.html">8 · Images</a>
+  <a class="current" href="binarygraphics.html">9 · Graphics</a>
+  <a href="binaryaudio.html">10 · Audio</a>
+</div>
+<main>
+<section class="hero"><h1>Graphics & Animation</h1><p>Computers can show pictures in different ways. <strong>Raster images store pixels, vector graphics store drawing instructions, and animation changes pictures over time.</strong></p></section>
+<section class="stage">
+  <div class="tabs">
+    <button type="button" class="tab active" data-mode="raster">Raster image</button>
+    <button type="button" class="tab" data-mode="vector">Vector graphic</button>
+    <button type="button" class="tab" data-mode="animation">Animation</button>
+  </div>
+
+  <section class="mode active" id="raster">
+    <div class="visual"><div class="pixel-grid" id="pixelGrid"></div></div>
+    <div class="copy"><h2>Raster = a grid of pixels.</h2><p>A raster image remembers the color of each pixel. Zoom in far enough and you eventually see the individual squares.</p><div class="zoom-control"><label><span>Zoom the pixels</span><strong id="zoomLabel">115%</strong></label><input id="pixelZoom" type="range" min="70" max="220" value="115"></div><div class="fact">Photos and screenshots are usually raster images. More pixels usually means more detail — and more data to store.</div></div>
+  </section>
+
+  <section class="mode" id="vector">
+    <div class="visual"><div class="vector-wrap"><svg id="vectorShape" viewBox="0 0 120 120" aria-label="Vector rocket graphic"><path class="vfill" d="M60 8 C82 24 91 49 82 79 L70 91 L50 91 L38 79 C29 49 38 24 60 8Z"></path><circle cx="60" cy="48" r="12" fill="#f2ede4" stroke="#2d6972" stroke-width="4"></circle><path class="vline" d="M48 90 L40 110 M72 90 L80 110"></path></svg></div></div>
+    <div class="copy"><h2>Vector = drawing instructions.</h2><p>Instead of storing every pixel, vector graphics describe shapes: lines, curves, circles, fills, and positions.</p><div class="zoom-control"><label><span>Resize the same instructions</span><strong id="vectorLabel">120 px</strong></label><input id="vectorZoom" type="range" min="60" max="210" value="120"></div><div class="fact">Logos and icons are often vectors because the same instructions can be redrawn at many sizes without becoming blocky.</div></div>
+  </section>
+
+  <section class="mode" id="animation">
+    <div class="visual"><div class="frame-area"><div class="frame-box"><div class="ground"></div><div class="ball" id="ball"></div></div><div class="frame-label" id="frameLabel">frame 1 of 12</div><div class="anim-controls"><button type="button" id="playAnim">▶ Play</button><button type="button" id="stepAnim">Step one frame</button></div></div></div>
+    <div class="copy"><h2>Animation = frames changing over time.</h2><p>Each frame is one image. Show different frames quickly enough and your brain sees motion instead of separate pictures.</p><div class="fps-control"><label><span>Frames per second</span><strong id="fpsLabel">6 fps</strong></label><input id="fps" type="range" min="1" max="24" value="6"></div><div class="fact">The computer still stores data for each frame or instructions for how things move. Animation adds <strong>time</strong> to visual representation.</div></div>
+  </section>
+</section>
+
+<section class="compare"><h2>Three different ways to represent visuals.</h2><p>The screen may look similar, but the data underneath can be very different.</p><div class="compare-grid"><div class="compare-card"><small>raster</small><strong>Store pixel colors</strong><span>Great for photos and detailed images.</span></div><div class="compare-card"><small>vector</small><strong>Store shapes and paths</strong><span>Great for logos, diagrams, and scalable art.</span></div><div class="compare-card"><small>animation</small><strong>Store change over time</strong><span>Frames or movement instructions create motion.</span></div></div></section>
+<section class="takeaway"><strong>Graphics are data plus rules for drawing it.</strong><span>A computer can store individual pixels, instructions for shapes, or a sequence of changing frames.</span></section>
+</main>
+<div class="ds-step-footer"><a class="ds-next-card ds-prev" href="binary4.html"><small>← Previous</small><strong>Binary 8 · Images</strong><span>Build pictures from pixels and color values.</span></a><a class="ds-next-card ds-next" href="binaryaudio.html"><small>Next →</small><strong>Binary 10 · Audio</strong><span>See how samples become digital sound.</span></a></div>
+<footer class="site-footer"><span>© 2026 David Steckler</span><span>binary · information · representation</span></footer>
+<script>
+const art=[
+'0001100000','0011110000','0111111000','1111111100','1111111100','0111111000','0011110000','0001100000','0000000000','0000000000'
+];
+const grid=document.getElementById('pixelGrid');
+art.join('').split('').forEach(v=>{const p=document.createElement('span');p.className='px'+(v==='1'?' on':'');grid.appendChild(p)});
+document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));
+  document.querySelectorAll('.mode').forEach(m=>m.classList.toggle('active',m.id===btn.dataset.mode));
+});
+document.getElementById('pixelZoom').oninput=e=>{const v=Number(e.target.value);grid.style.transform='scale('+(v/100)+')';document.getElementById('zoomLabel').textContent=v+'%'};
+document.getElementById('vectorZoom').oninput=e=>{const v=Number(e.target.value);document.getElementById('vectorShape').style.width=v+'px';document.getElementById('vectorShape').style.height=v+'px';document.getElementById('vectorLabel').textContent=v+' px'};
+let frame=0,playing=false,timer=null;const total=12;
+function drawFrame(){const t=frame/(total-1);document.getElementById('ball').style.left=(20+t*280)+'px';document.getElementById('ball').style.bottom=(30+Math.sin(t*Math.PI)*95)+'px';document.getElementById('frameLabel').textContent='frame '+(frame+1)+' of '+total}
+function step(){frame=(frame+1)%total;drawFrame()}
+function restartTimer(){if(timer)clearInterval(timer);if(!playing)return;const fps=Number(document.getElementById('fps').value);timer=setInterval(step,1000/fps)}
+document.getElementById('playAnim').onclick=()=>{playing=!playing;document.getElementById('playAnim').textContent=playing?'❚❚ Pause':'▶ Play';restartTimer()};
+document.getElementById('stepAnim').onclick=()=>{playing=false;document.getElementById('playAnim').textContent='▶ Play';if(timer)clearInterval(timer);step()};
+document.getElementById('fps').oninput=e=>{document.getElementById('fpsLabel').textContent=e.target.value+' fps';restartTimer()};
+document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
+drawFrame();
+</script>
+</body>
+</html>
