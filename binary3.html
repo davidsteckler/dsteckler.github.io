@@ -6,22 +6,21 @@
 <title>One Byte, Many Meanings | David Steckler</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="learning-path.css">
 <style>
 :root{
-  --bg:#f2ede4;--paper:#f8f4ec;--ink:#24211d;--mid:#5f5951;--soft:#989086;
-  --line:rgba(36,33,29,.10);--line2:rgba(36,33,29,.16);
-  --teal:#2d6972;--teal-soft:rgba(45,105,114,.09);
-  --terra:#b86238;--terra-soft:rgba(184,98,56,.08);
-  --max:1180px;
+  --bg:#f2ede4;--paper:#faf7f0;--ink:#24211d;--mid:#5f5951;--soft:#948c82;
+  --line:rgba(36,33,29,.10);--line2:rgba(36,33,29,.17);
+  --teal:#2d6972;--teal-soft:rgba(45,105,114,.085);
+  --terra:#b86238;--terra-soft:rgba(184,98,56,.08);--max:1100px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;color:var(--ink);background:var(--bg);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 button,input{font:inherit}
-.wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
+.wrap{width:min(calc(100% - 32px),1180px);margin:0 auto}
 
 .site-header{position:sticky;top:0;z-index:100;background:rgba(242,237,228,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}
@@ -33,227 +32,144 @@ nav{display:flex;gap:4px;align-items:center}nav a{padding:8px 11px;border-radius
 .lesson-path a{flex:0 0 auto;padding:6px 10px;border-radius:999px;color:#8b8379;font-size:.7rem;font-weight:600}
 .lesson-path a.current{background:var(--teal-soft);color:var(--teal)}
 
-main{padding:14px 0 24px}
-.hero{text-align:center;margin-bottom:16px}
-.hero h1{margin:0;font:600 clamp(2.1rem,4vw,3.35rem)/.98 'Fraunces',serif;letter-spacing:-.045em}
-.hero p{margin:7px auto 0;color:var(--soft);font-size:.86rem;max-width:58ch}
-.hero strong{color:var(--teal)}
+main{width:min(calc(100% - 32px),var(--max));margin:0 auto;padding:24px 0 32px}
+.hero{text-align:center;padding:14px 0 30px}
+.eyebrow{font:600 .64rem 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--terra);margin-bottom:10px}
+.hero h1{margin:0;font:700 clamp(2.25rem,5vw,4.2rem)/.98 'Outfit',sans-serif;letter-spacing:-.055em}
+.hero p{margin:12px auto 0;color:var(--mid);font:400 clamp(.98rem,1.7vw,1.12rem)/1.6 'Fraunces',serif;max-width:650px}
+.hero p strong{color:var(--ink);font-weight:600}
 
-.lab{
-  width:min(calc(100% - 32px),1120px);
-  margin:0 auto;
-  padding:16px;
-  border:1px solid var(--line);
-  border-radius:20px;
-  background:rgba(255,255,255,.24);
+.step{
+  margin-top:14px;padding:26px;border:1px solid var(--line);border-radius:22px;
+  background:rgba(255,255,255,.30);
 }
-.lab-layout{
-  display:grid;
-  grid-template-columns:minmax(0,1.02fr) minmax(410px,.98fr);
-  gap:18px;
-  align-items:start;
+.step-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px}
+.step-num{
+  flex:0 0 auto;width:31px;height:31px;border-radius:50%;display:grid;place-items:center;
+  background:var(--ink);color:var(--paper);font:600 .68rem 'JetBrains Mono',monospace
 }
-.builder-pane,.decoder-pane{min-width:0}
-.builder-pane{padding:2px 4px}
-.decoder-pane{
-  padding:14px;
-  border-left:1px solid var(--line);
-}
-.lab-kicker{text-align:center;color:var(--terra);font:600 .65rem 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em}
+.step-head h2{margin:0;font-size:1.25rem;line-height:1.15}
+.step-head p{margin:5px 0 0;color:var(--soft);font-size:.84rem;line-height:1.45;max-width:650px}
+
+.byte-stage{text-align:center;padding:4px 0 2px}
 .binary-readout{
-  margin:5px 0 1px;
-  text-align:center;
-  font:600 clamp(1.9rem,4vw,3.35rem)/1 'JetBrains Mono',monospace;
-  letter-spacing:.06em;
+  font:600 clamp(2rem,6vw,4.6rem)/1 'JetBrains Mono',monospace;
+  letter-spacing:.055em;color:var(--ink)
 }
-.decimal-readout{text-align:center;color:var(--mid);font-size:.82rem}
-.decimal-readout strong{color:var(--teal);font:600 1.05rem 'JetBrains Mono',monospace}
+.byte-meta{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.byte-pill{
+  padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.42);
+  color:var(--soft);font-size:.73rem
+}
+.byte-pill strong{color:var(--teal);font:600 .78rem 'JetBrains Mono',monospace}
 
-.bits{
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  gap:8px;
-  margin:14px auto 10px;
-  max-width:760px;
-}
+.bits{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;max-width:760px;margin:22px auto 12px}
 .bit{
-  min-width:0;
-  padding:8px 3px 7px;
-  border:1px solid var(--line2);
-  border-radius:13px;
-  background:rgba(255,255,255,.38);
-  color:var(--ink);
-  cursor:pointer;
-  text-align:center;
+  min-width:0;padding:9px 3px 8px;border:1px solid var(--line2);border-radius:13px;
+  background:rgba(255,255,255,.42);cursor:pointer;text-align:center;color:var(--ink)
 }
-.bit:hover{background:rgba(255,255,255,.65)}
-.bit.on{background:var(--teal-soft);border-color:rgba(45,105,114,.26)}
-.bit .place{display:block;color:var(--soft);font:500 .57rem 'JetBrains Mono',monospace}
-.bit .digit{display:block;margin-top:4px;font:600 1.4rem 'JetBrains Mono',monospace;color:#837b72}
+.bit:hover{background:rgba(255,255,255,.72)}
+.bit.on{background:var(--teal-soft);border-color:rgba(45,105,114,.28)}
+.bit .place{display:block;color:var(--soft);font:500 .56rem 'JetBrains Mono',monospace}
+.bit .digit{display:block;margin-top:3px;color:#877f75;font:600 1.35rem 'JetBrains Mono',monospace}
 .bit.on .digit{color:var(--teal)}
 
-.slider-row{width:min(100%,760px);margin:8px auto 0}
-.slider-label{display:flex;justify-content:space-between;color:var(--soft);font-size:.65rem;margin-bottom:5px}
+.controls{max-width:760px;margin:0 auto}
+.slider-label{display:flex;justify-content:space-between;color:var(--soft);font-size:.62rem;margin-bottom:5px}
 #byteSlider{width:100%;accent-color:var(--teal)}
-.presets{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:9px}
+.presets{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:11px}
 .preset{
-  min-height:32px;padding:0 9px;border:1px solid var(--line);border-radius:10px;
-  background:rgba(255,255,255,.28);color:var(--mid);cursor:pointer;font-size:.72rem;font-weight:600
+  min-height:33px;padding:0 10px;border:1px solid var(--line);border-radius:10px;
+  background:rgba(255,255,255,.34);color:var(--mid);cursor:pointer;font-size:.72rem;font-weight:700
 }
-.preset:hover{background:rgba(255,255,255,.6);color:var(--ink)}
+.preset:hover{background:#fff;color:var(--ink)}
 
-.live-decoder{
-  margin:0;
-  padding:0;
-  border:0;
+.bridge{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;
+  margin:22px 0;padding:16px 18px;border-radius:15px;background:var(--teal-soft);
+  border:1px solid rgba(45,105,114,.12)
 }
-.live-decoder-head{text-align:left;margin-bottom:10px}
-.live-decoder-head strong{display:block;font:600 1.08rem 'Fraunces',serif}
-.live-decoder-head span{display:block;margin-top:3px;color:var(--soft);font-size:.7rem}
-.decoder-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.decoder-card{
-  min-width:0;
-  min-height:132px;
-  padding:10px;
-  border:1px solid var(--line);
-  border-radius:14px;
-  background:rgba(255,255,255,.34);
-  text-align:center;
+.bridge-line{height:1px;background:rgba(45,105,114,.18)}
+.bridge strong{text-align:center;color:var(--teal);font-size:.86rem}
+.bridge span{display:block;margin-top:3px;color:var(--mid);font:400 .72rem 'JetBrains Mono',monospace}
+
+.meaning-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.meaning-card{
+  min-width:0;padding:18px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.4)
 }
-.decoder-card.pulse{animation:decoderPulse .18s ease}
-@keyframes decoderPulse{50%{background:rgba(45,105,114,.10)}}
-.decoder-card small{
-  display:block;
-  color:var(--terra);
-  font:600 .56rem 'JetBrains Mono',monospace;
-  letter-spacing:.05em;
-  text-transform:uppercase;
+.meaning-card.wide{grid-column:span 2}
+.meaning-label{color:var(--terra);font:600 .58rem 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em}
+.meaning-card h3{margin:6px 0 13px;font-size:1.02rem}
+.same-byte{
+  display:inline-flex;padding:5px 8px;border-radius:8px;background:rgba(36,33,29,.045);
+  color:var(--soft);font:500 .64rem 'JetBrains Mono',monospace
 }
-.decoder-card h3{margin:5px 0 8px;font:600 .92rem 'Fraunces',serif}
-.decoder-result{
-  min-height:58px;
-  display:grid;
-  place-items:center;
-  margin:0 auto 7px;
+.same-byte strong{color:var(--ink);font-weight:600}
+.result-row{
+  min-height:92px;display:flex;align-items:center;justify-content:center;gap:13px;margin:8px 0 6px
 }
-.decoder-value{
-  font:600 2.2rem 'JetBrains Mono',monospace;
-  color:var(--teal);
-  line-height:1;
-  word-break:break-word;
-}
-.decoder-caption{color:var(--mid);font-size:.66rem;line-height:1.35}
-.channel-toggle{
-  display:flex;
-  justify-content:center;
-  gap:5px;
-  margin-top:8px;
-}
+.big-result{font:700 clamp(2.1rem,4vw,3.2rem)/1 'Outfit',sans-serif;color:var(--teal)}
+.result-copy{color:var(--mid);font-size:.76rem;line-height:1.42}
+.result-copy strong{color:var(--ink)}
+.pixel{width:74px;height:74px;border-radius:14px;border:1px solid var(--line2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
+.channel-box{width:74px;height:74px;border-radius:14px;border:1px solid var(--line2)}
+.channel-toggle{display:flex;gap:5px;justify-content:center;margin-top:7px}
 .channel-toggle button{
-  min-width:34px;
-  height:30px;
-  padding:0 8px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:rgba(255,255,255,.34);
-  color:var(--mid);
-  cursor:pointer;
-  font:700 .65rem 'JetBrains Mono',monospace;
+  min-width:34px;height:29px;border:1px solid var(--line);border-radius:8px;
+  background:rgba(255,255,255,.45);color:var(--soft);cursor:pointer;font:700 .64rem 'JetBrains Mono',monospace
 }
-.channel-toggle button.active{
-  background:var(--teal-soft);
-  border-color:rgba(45,105,114,.25);
-  color:var(--teal);
-}
-.decoder-pixel{
-  width:58px;height:58px;border-radius:11px;border:1px solid var(--line2);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
-}
-.decoder-green{
-  width:72px;height:72px;border-radius:11px;border:1px solid var(--line2);
-}
-.decoder-audio{
-  width:100%;
-  height:76px;
-  padding:5px 6px 2px;
-  border-radius:10px;
-  background:rgba(36,33,29,.04);
-}
-.decoder-audio svg{display:block;width:100%;height:50px;overflow:visible}
-.audio-midline{stroke:rgba(36,33,29,.14);stroke-width:1}
+.channel-toggle button.active{background:var(--teal-soft);border-color:rgba(45,105,114,.25);color:var(--teal)}
+
+.audio-wrap{width:100%;padding:8px;border-radius:12px;background:rgba(36,33,29,.04)}
+.audio-wrap svg{display:block;width:100%;height:65px}
+.audio-midline{stroke:rgba(36,33,29,.13);stroke-width:1}
 .audio-wave{fill:none;stroke:var(--teal);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.audio-point{fill:var(--teal)}
-.audio-point.current{fill:var(--terra);stroke:var(--paper);stroke-width:2}
-.sample-values{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:1px;
-  margin-top:1px;
-  color:var(--soft);
-  font:500 .46rem 'JetBrains Mono',monospace;
-  text-align:center;
-}
+.audio-point{fill:var(--teal)}.audio-point.current{fill:var(--terra);stroke:var(--paper);stroke-width:2}
+.sample-values{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;color:var(--soft);font:500 .5rem 'JetBrains Mono',monospace;text-align:center}
 .sample-values span.current{color:var(--terra);font-weight:700}
-.audio-actions{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:6px;flex-wrap:wrap}
 .play-samples{
-  min-height:28px;
-  padding:0 8px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:rgba(255,255,255,.34);
-  color:var(--mid);
-  cursor:pointer;
-  font-size:.61rem;
-  font-weight:700;
-}
-.play-samples:hover{background:rgba(255,255,255,.65);color:var(--ink)}
-.audio-status{color:var(--soft);font-size:.55rem}
-.decoder-arrow{
-  text-align:center;
-  margin:7px 0 0;
-  color:var(--soft);
-  font:500 .64rem 'JetBrains Mono',monospace;
+  margin-top:7px;min-height:31px;padding:0 10px;border:1px solid var(--line);border-radius:9px;
+  background:rgba(255,255,255,.45);color:var(--mid);cursor:pointer;font-size:.68rem;font-weight:700
 }
 
-.inline-challenge{
-  margin-top:12px;
-  padding:11px 12px;
-  border-top:1px solid var(--line);
-  background:rgba(255,255,255,.16);
-  border-radius:12px;
+.lesson-rule{
+  margin-top:20px;padding:22px;text-align:center;border:1px solid rgba(184,98,56,.14);
+  border-radius:18px;background:var(--terra-soft)
 }
-.inline-challenge .challenge-label{
-  color:var(--terra);
-  font:600 .59rem 'JetBrains Mono',monospace;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-}
-.inline-challenge .challenge-prompt{margin-top:4px;font-weight:600;font-size:.8rem}
-.inline-challenge .challenge-hint{margin-top:2px;color:var(--soft);font-size:.64rem}
-.inline-challenge .challenge-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
-.inline-challenge .challenge-result{flex:1;min-width:120px;min-height:18px;margin:0;text-align:left}
-.takeaway{
-  width:min(calc(100% - 32px),900px);
-  margin:16px auto 0;
-  text-align:center;
-  color:var(--mid);
-  font-size:.72rem;
-}
-.takeaway strong{color:var(--ink)}
-footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
+.lesson-rule strong{display:block;font-size:1.32rem}
+.lesson-rule span{display:block;margin-top:6px;color:var(--mid);font-family:'Fraunces',serif;font-size:.95rem}
 
-@media(max-width:900px){
-  .lab-layout{grid-template-columns:1fr}
-  .decoder-pane{border-left:0;border-top:1px solid var(--line);padding:14px 2px 0}
-  .decoder-grid{grid-template-columns:repeat(2,1fr)}
+.challenge{
+  margin-top:18px;padding:22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.28)
+}
+.challenge-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.challenge-label{color:var(--terra);font:600 .59rem 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em}
+.challenge-prompt{margin-top:7px;font-size:1rem;font-weight:700}
+.challenge-hint{margin-top:4px;color:var(--soft);font-size:.76rem}
+.challenge-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.challenge-actions button{
+  min-height:34px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.55);cursor:pointer;font-size:.72rem;font-weight:700
+}
+.challenge-actions .check{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.challenge-result{min-height:20px;color:var(--mid);font-size:.75rem}
+.challenge-result.good{color:var(--teal);font-weight:700}.challenge-result.bad{color:var(--terra);font-weight:700}
+
+footer.site-footer{width:min(calc(100% - 32px),1180px);margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
+
+@media(max-width:860px){
+  .meaning-grid{grid-template-columns:repeat(2,1fr)}
+  .meaning-card.wide{grid-column:span 2}
 }
 @media(max-width:680px){
   nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
-  nav.open{display:flex}.menu{display:block}.hero h1{font-size:2.6rem}
-  .lab{padding:17px 10px}
-  .bits{gap:4px}.bit{padding:8px 1px}.bit .place{font-size:.48rem}.bit .digit{font-size:1.15rem}
-  .binary-readout{font-size:clamp(1.6rem,9vw,2.7rem);letter-spacing:.035em}
-  .decoder-grid{grid-template-columns:1fr}
+  nav.open{display:flex}.menu{display:block}
+  main{width:min(calc(100% - 22px),var(--max));padding-top:14px}
+  .hero{padding-bottom:20px}.hero h1{font-size:2.45rem}
+  .step{padding:19px 12px}
+  .bits{gap:4px}.bit{padding:8px 1px}.bit .place{font-size:.47rem}.bit .digit{font-size:1.12rem}
+  .meaning-grid{grid-template-columns:1fr}.meaning-card.wide{grid-column:auto}
+  .bridge{grid-template-columns:1fr}.bridge-line{display:none}
+  .challenge-top{align-items:flex-start;flex-direction:column}
   footer.site-footer{flex-direction:column}
 }
 </style>
@@ -285,108 +201,145 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
 
 <main>
   <section class="hero">
+    <div class="eyebrow">// the idea</div>
     <h1>One Byte, Many Meanings</h1>
-    <p>The bits do not contain a label saying what they are. <strong>The context decides what the byte means.</strong></p>
+    <p>A byte is only eight bits. <strong>Those bits do not say what they mean.</strong> The program reading them decides how to interpret the value.</p>
   </section>
 
-  <section class="lab" aria-label="Interactive one byte lab">
-    <div class="lab-layout">
-      <div class="builder-pane">
-        <div class="lab-kicker">// one byte · eight bits · 0–255</div>
-        <div class="binary-readout" id="binaryReadout">01000001</div>
-        <div class="decimal-readout">Decimal value: <strong id="decimalReadout">65</strong></div>
+  <section class="step" aria-label="Choose one byte">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div>
+        <h2>Choose one byte.</h2>
+        <p>Change any bit, drag the slider, or use a preset. Everything on the next step uses this exact same byte.</p>
+      </div>
+    </div>
 
-        <div class="bits" id="bits" aria-label="Eight clickable bits"></div>
+    <div class="byte-stage">
+      <div class="binary-readout" id="binaryReadout">01000001</div>
+      <div class="byte-meta">
+        <span class="byte-pill">decimal <strong id="decimalReadout">65</strong></span>
+        <span class="byte-pill">hex <strong id="hexReadout">41</strong></span>
+        <span class="byte-pill">8 bits = <strong>1 byte</strong></span>
+      </div>
 
-        <div class="slider-row">
-          <div class="slider-label"><span>0</span><span>drag the same byte</span><span>255</span></div>
-          <input id="byteSlider" type="range" min="0" max="255" value="65" aria-label="Byte value from 0 to 255">
-        </div>
+      <div class="bits" id="bits" aria-label="Eight clickable bits"></div>
 
+      <div class="controls">
+        <div class="slider-label"><span>0</span><span>drag the byte value</span><span>255</span></div>
+        <input id="byteSlider" type="range" min="0" max="255" value="65" aria-label="Byte value from 0 to 255">
         <div class="presets">
           <button class="preset" type="button" data-value="0">0</button>
-          <button class="preset" type="button" data-value="32">32</button>
-          <button class="preset" type="button" data-value="65">65 / A</button>
-          <button class="preset" type="button" data-value="97">97 / a</button>
+          <button class="preset" type="button" data-value="32">32 · space</button>
+          <button class="preset" type="button" data-value="65">65 · A</button>
+          <button class="preset" type="button" data-value="97">97 · a</button>
           <button class="preset" type="button" data-value="128">128</button>
           <button class="preset" type="button" data-value="255">255</button>
           <button class="preset" type="button" id="randomByte">Random</button>
-        </div>
-
-        <div class="inline-challenge">
-          <div class="challenge-label">Quick challenge</div>
-          <div class="challenge-prompt" id="challengePrompt">Make the byte that represents uppercase A in ASCII.</div>
-          <div class="challenge-hint" id="challengeHint">You saw this one on the last page.</div>
-          <div class="challenge-actions">
-            <button class="check" id="checkChallenge" type="button">Check</button>
-            <button class="next-challenge" id="nextChallenge" type="button">Different challenge</button>
-            <div class="challenge-result" id="challengeResult" aria-live="polite"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="decoder-pane">
-        <div class="live-decoder" aria-live="polite">
-          <div class="live-decoder-head">
-            <strong>Same 8 bits. Different results.</strong>
-            <span id="decoderByteLabel">01000001 → decimal 65</span>
-          </div>
-
-          <div class="decoder-grid">
-            <div class="decoder-card" id="decoderTextCard">
-              <small>Text</small>
-              <h3>ASCII character</h3>
-              <div class="decoder-result"><div class="decoder-value" id="decoderText">A</div></div>
-              <div class="decoder-caption" id="decoderTextCaption">65 means the character A.</div>
-            </div>
-
-            <div class="decoder-card" id="decoderPixelCard">
-              <small>Image data</small>
-              <h3>Grayscale pixel</h3>
-              <div class="decoder-result"><div class="decoder-pixel" id="decoderPixel"></div></div>
-              <div class="decoder-caption" id="decoderPixelCaption">Brightness 65 / 255</div>
-            </div>
-
-            <div class="decoder-card" id="decoderColorCard">
-              <small>Color data</small>
-              <h3>One RGB channel</h3>
-              <div class="decoder-result"><div class="decoder-green" id="decoderColor"></div></div>
-              <div class="decoder-caption" id="decoderColorCaption">Red channel = 65 → RGB(65, 0, 0)</div>
-              <div class="channel-toggle" aria-label="Choose which RGB channel this byte controls">
-                <button type="button" class="rgb-channel active" data-channel="r" aria-pressed="true">R</button>
-                <button type="button" class="rgb-channel" data-channel="g" aria-pressed="false">G</button>
-                <button type="button" class="rgb-channel" data-channel="b" aria-pressed="false">B</button>
-              </div>
-            </div>
-
-            <div class="decoder-card" id="decoderAudioCard">
-              <small>Sound data</small>
-              <h3>One sample in a waveform</h3>
-              <div class="decoder-result">
-                <div class="decoder-audio">
-                  <svg id="audioWaveform" viewBox="0 0 210 50" role="img" aria-label="Seven audio sample values connected as a waveform; the middle sample is the current byte">
-                    <line class="audio-midline" x1="5" y1="25" x2="205" y2="25"></line>
-                    <polyline class="audio-wave" id="audioWaveLine" points=""></polyline>
-                    <g id="audioWavePoints"></g>
-                  </svg>
-                  <div class="sample-values" id="audioSampleValues" aria-hidden="true"></div>
-                </div>
-              </div>
-              <div class="decoder-caption" id="decoderAudioCaption">The orange middle point is your byte: 65.</div>
-              <div class="audio-actions">
-                <button type="button" class="play-samples" id="playSamples">▶ Play these samples</button>
-                <span class="audio-status" id="audioStatus">looped briefly so you can hear them</span>
-              </div>
-            </div>
-          </div>
-          <div class="decoder-arrow">same byte → different meaning because the program interprets it differently</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="takeaway">
-    <strong>Bits are just values until something interprets them.</strong> The file format or program supplies the meaning.
+  <div class="bridge" aria-hidden="true">
+    <div class="bridge-line"></div>
+    <strong>The byte stays the same.<span>Only the interpretation changes.</span></strong>
+    <div class="bridge-line"></div>
+  </div>
+
+  <section class="step" aria-label="Interpret the same byte in different ways">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <div>
+        <h2>Read the same byte five different ways.</h2>
+        <p>Every card below receives the exact same eight bits. The result changes because each card follows a different rule.</p>
+      </div>
+    </div>
+
+    <div class="meaning-grid">
+      <article class="meaning-card">
+        <div class="meaning-label">Interpretation 1</div>
+        <h3>As a number</h3>
+        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
+        <div class="result-row">
+          <div class="big-result" id="numberResult">65</div>
+        </div>
+        <div class="result-copy">Read as an unsigned binary number, this byte equals <strong id="numberCaption">65</strong>.</div>
+      </article>
+
+      <article class="meaning-card">
+        <div class="meaning-label">Interpretation 2</div>
+        <h3>As text</h3>
+        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
+        <div class="result-row">
+          <div class="big-result" id="textResult">A</div>
+        </div>
+        <div class="result-copy" id="textCaption">ASCII says decimal 65 represents the character <strong>A</strong>.</div>
+      </article>
+
+      <article class="meaning-card">
+        <div class="meaning-label">Interpretation 3</div>
+        <h3>As a grayscale pixel</h3>
+        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
+        <div class="result-row">
+          <div class="pixel" id="pixelResult"></div>
+        </div>
+        <div class="result-copy">As 8-bit grayscale, <strong id="pixelCaption">65 / 255</strong> controls brightness.</div>
+      </article>
+
+      <article class="meaning-card">
+        <div class="meaning-label">Interpretation 4</div>
+        <h3>As one RGB color channel</h3>
+        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
+        <div class="result-row">
+          <div class="channel-box" id="colorResult"></div>
+        </div>
+        <div class="result-copy" id="colorCaption">This byte can be the red value in RGB(65, 0, 0).</div>
+        <div class="channel-toggle" aria-label="Choose which RGB channel this byte controls">
+          <button type="button" class="rgb-channel active" data-channel="r" aria-pressed="true">R</button>
+          <button type="button" class="rgb-channel" data-channel="g" aria-pressed="false">G</button>
+          <button type="button" class="rgb-channel" data-channel="b" aria-pressed="false">B</button>
+        </div>
+      </article>
+
+      <article class="meaning-card wide">
+        <div class="meaning-label">Interpretation 5</div>
+        <h3>As one audio sample</h3>
+        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
+        <div class="result-row">
+          <div class="audio-wrap">
+            <svg id="audioWaveform" viewBox="0 0 360 65" role="img" aria-label="Seven audio sample values connected as a waveform; the middle sample is the current byte">
+              <line class="audio-midline" x1="8" y1="32.5" x2="352" y2="32.5"></line>
+              <polyline class="audio-wave" id="audioWaveLine" points=""></polyline>
+              <g id="audioWavePoints"></g>
+            </svg>
+            <div class="sample-values" id="audioSampleValues" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="result-copy" id="audioCaption">Here, the byte becomes the height of one sample in a waveform.</div>
+        <button type="button" class="play-samples" id="playSamples">▶ Hear the sample pattern</button>
+      </article>
+    </div>
+
+    <div class="lesson-rule">
+      <strong>Same bits. Different meaning.</strong>
+      <span>The meaning comes from the format, program, or rule used to read the byte.</span>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <div class="challenge-top">
+      <div>
+        <div class="challenge-label">// quick challenge</div>
+        <div class="challenge-prompt" id="challengePrompt">Make the byte that represents uppercase A in ASCII.</div>
+        <div class="challenge-hint" id="challengeHint">You saw this one on the last page.</div>
+      </div>
+      <div class="challenge-result" id="challengeResult" aria-live="polite"></div>
+    </div>
+    <div class="challenge-actions">
+      <button class="check" id="checkChallenge" type="button">Check my byte</button>
+      <button id="nextChallenge" type="button">Different challenge</button>
+    </div>
   </section>
 </main>
 
@@ -400,19 +353,20 @@ footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px
 <script>
 const places=[128,64,32,16,8,4,2,1];
 let value=65;
+let rgbChannel='r';
+let audioCtx=null;
 
 const bitsEl=document.getElementById('bits');
 const slider=document.getElementById('byteSlider');
-const binaryReadout=document.getElementById('binaryReadout');
-const decimalReadout=document.getElementById('decimalReadout');
 
 function binary8(n){return n.toString(2).padStart(8,'0')}
+function hex2(n){return n.toString(16).toUpperCase().padStart(2,'0')}
 
-function printableASCII(n){
-  if(n===32) return 'SPACE';
-  if(n>=33 && n<=126) return String.fromCharCode(n);
-  if(n<=31 || n===127) return 'control';
-  return 'not basic ASCII';
+function asciiDisplay(n){
+  if(n===32) return {value:'SPACE',caption:'ASCII says decimal 32 represents a space.'};
+  if(n>=33 && n<=126) return {value:String.fromCharCode(n),caption:'ASCII says decimal '+n+' represents the character '+String.fromCharCode(n)+'.'};
+  if(n<=31 || n===127) return {value:'CTRL',caption:'ASCII uses decimal '+n+' as a control code, not a visible character.'};
+  return {value:'—',caption:'Basic ASCII only defines values 0 through 127.'};
 }
 
 function renderBits(){
@@ -434,31 +388,21 @@ function renderBits(){
   });
 }
 
-let rgbChannel='r';
-
 function rgbForByte(v){
   if(rgbChannel==='r') return [v,0,0];
   if(rgbChannel==='g') return [0,v,0];
   return [0,0,v];
 }
 
-const baseAudioSamples=[128,180,230,65,26,76,128];
-let audioCtx=null;
-
-function renderAudioWaveform(){
-  const samples=[baseAudioSamples[0],baseAudioSamples[1],baseAudioSamples[2],value,baseAudioSamples[4],baseAudioSamples[5],baseAudioSamples[6]];
-  const width=210;
-  const height=50;
-  const padX=7;
-  const padY=5;
-  const usableW=width-(padX*2);
-  const usableH=height-(padY*2);
-
-  const pts=samples.map((sample,i)=>{
-    const x=padX+(i/(samples.length-1))*usableW;
-    const y=padY+((255-sample)/255)*usableH;
-    return {x,y,sample,i};
-  });
+function renderAudio(){
+  const samples=[128,180,230,value,26,76,128];
+  const width=360,height=65,padX=9,padY=7;
+  const usableW=width-padX*2,usableH=height-padY*2;
+  const pts=samples.map((sample,i)=>({
+    x:padX+(i/(samples.length-1))*usableW,
+    y:padY+((255-sample)/255)*usableH,
+    sample,i
+  }));
 
   document.getElementById('audioWaveLine').setAttribute('points',pts.map(p=>p.x+','+p.y).join(' '));
 
@@ -468,33 +412,32 @@ function renderAudioWaveform(){
     const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
     circle.setAttribute('cx',p.x);
     circle.setAttribute('cy',p.y);
-    circle.setAttribute('r',p.i===3?'5':'3.2');
+    circle.setAttribute('r',p.i===3?'5':'3.3');
     circle.setAttribute('class','audio-point'+(p.i===3?' current':''));
     group.appendChild(circle);
   });
 
-  const values=document.getElementById('audioSampleValues');
-  values.innerHTML=samples.map((n,i)=>'<span class="'+(i===3?'current':'')+'">'+n+'</span>').join('');
+  document.getElementById('audioSampleValues').innerHTML=
+    samples.map((n,i)=>'<span class="'+(i===3?'current':'')+'">'+n+'</span>').join('');
 
-  const audioWhere=value===128?'on the center line':value<128?'below the center line':'above the center line';
-  document.getElementById('decoderAudioCaption').textContent='The orange middle point is your byte: '+value+', '+audioWhere+'.';
+  const direction=value===128?'at the midpoint':value<128?'below the midpoint':'above the midpoint';
+  document.getElementById('audioCaption').textContent=
+    'The orange point is this byte: '+value+'. As a sample value, it sits '+direction+' of the waveform.';
 }
 
-async function playSamplePattern(){
+async function playSamples(){
   if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   await audioCtx.resume();
 
   const pattern=[128,180,230,value,26,76,128];
-  const repeatsPerSample=4;
-  const sampleRate=8000;
-  const duration=.42;
+  const repeatsPerSample=4,sampleRate=8000,duration=.42;
   const length=Math.floor(sampleRate*duration);
   const buffer=audioCtx.createBuffer(1,length,sampleRate);
   const data=buffer.getChannelData(0);
 
   for(let i=0;i<length;i++){
     const patternIndex=Math.floor(i/repeatsPerSample)%pattern.length;
-    let amp=(pattern[patternIndex]-128)/127;
+    const amp=(pattern[patternIndex]-128)/127;
     const edge=Math.min(1,i/120,(length-1-i)/120);
     data[i]=amp*.22*edge;
   }
@@ -503,64 +446,43 @@ async function playSamplePattern(){
   source.buffer=buffer;
   source.connect(audioCtx.destination);
   source.start();
-
-  const status=document.getElementById('audioStatus');
-  status.textContent='playing a short loop of the 7 samples…';
-  source.addEventListener('ended',()=>{status.textContent='looped briefly so you can hear them';},{once:true});
-}
-
-function renderMeanings(animate=true){
-  const b=binary8(value);
-  binaryReadout.textContent=b;
-  decimalReadout.textContent=value;
-  slider.value=value;
-
-  const text=printableASCII(value);
-  const rgb=rgbForByte(value);
-  const normalized=(value-128)/127;
-  const angle=normalized*28;
-  const dotTop=50-(normalized*34);
-  // Big, immediate "what does this byte become?" preview.
-  document.getElementById('decoderByteLabel').textContent=b+' → decimal '+value;
-
-  const decoderText=document.getElementById('decoderText');
-  const decoderTextCaption=document.getElementById('decoderTextCaption');
-  if(value<=127){
-    decoderText.textContent=text;
-    decoderTextCaption.textContent=value+' means '+(text==='SPACE'?'a space':'the character '+text)+'.';
-  }else{
-    decoderText.textContent='—';
-    decoderTextCaption.textContent='Basic ASCII stops at 127.';
-  }
-
-  document.getElementById('decoderPixel').style.background='rgb('+value+','+value+','+value+')';
-  document.getElementById('decoderPixelCaption').textContent='Brightness '+value+' / 255';
-
-  document.getElementById('decoderColor').style.background='rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
-  const channelName=rgbChannel==='r'?'Red':rgbChannel==='g'?'Green':'Blue';
-  document.getElementById('decoderColorCaption').textContent=channelName+' channel = '+value+' → RGB('+rgb[0]+', '+rgb[1]+', '+rgb[2]+')';
-
-  renderAudioWaveform();
-
-  if(animate){
-    document.querySelectorAll('.decoder-card').forEach(card=>{
-      card.classList.remove('pulse');
-      void card.offsetWidth;
-      card.classList.add('pulse');
-    });
-  }
 }
 
 function render(){
   value=Math.max(0,Math.min(255,Math.round(value)));
+  const b=binary8(value);
+  const ascii=asciiDisplay(value);
+  const rgb=rgbForByte(value);
+
+  document.getElementById('binaryReadout').textContent=b;
+  document.getElementById('decimalReadout').textContent=value;
+  document.getElementById('hexReadout').textContent=hex2(value);
+  document.getElementById('numberResult').textContent=value;
+  document.getElementById('numberCaption').textContent=value;
+  document.querySelectorAll('.sameByteText').forEach(el=>el.textContent=b);
+
+  document.getElementById('textResult').textContent=ascii.value;
+  document.getElementById('textCaption').textContent=ascii.caption;
+
+  document.getElementById('pixelResult').style.background='rgb('+value+','+value+','+value+')';
+  document.getElementById('pixelCaption').textContent=value+' / 255';
+
+  document.getElementById('colorResult').style.background='rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
+  const channelName=rgbChannel==='r'?'red':rgbChannel==='g'?'green':'blue';
+  document.getElementById('colorCaption').textContent=
+    'This byte can be the '+channelName+' value in RGB('+rgb[0]+', '+rgb[1]+', '+rgb[2]+'). A full RGB pixel normally uses three bytes — one per channel.';
+
+  slider.value=value;
   renderBits();
-  renderMeanings();
+  renderAudio();
 }
 
 slider.addEventListener('input',()=>{value=Number(slider.value);render()});
+
 document.querySelectorAll('.preset[data-value]').forEach(btn=>{
   btn.addEventListener('click',()=>{value=Number(btn.dataset.value);render()});
 });
+
 document.getElementById('randomByte').addEventListener('click',()=>{
   value=Math.floor(Math.random()*256);
   render();
@@ -573,18 +495,18 @@ document.querySelectorAll('.rgb-channel').forEach(btn=>{
       x.classList.toggle('active',x===btn);
       x.setAttribute('aria-pressed',String(x===btn));
     });
-    renderMeanings(false);
+    render();
   });
 });
 
-document.getElementById('playSamples').addEventListener('click',playSamplePattern);
+document.getElementById('playSamples').addEventListener('click',playSamples);
 
 const challenges=[
-  {prompt:'Make the byte that represents uppercase A in ASCII.',hint:'You saw this one on the last page.',target:65},
-  {prompt:'Make a half-bright grayscale pixel.',hint:'Use 128 as the midpoint of 0–255.',target:128},
-  {prompt:'Make one RGB color channel as bright as possible.',hint:'Maximum intensity uses the largest byte value.',target:255},
+  {prompt:'Make the byte that represents uppercase A in ASCII.',hint:'ASCII uppercase A is decimal 65.',target:65},
+  {prompt:'Make a half-bright grayscale pixel.',hint:'Use the midpoint of the 0–255 range.',target:128},
+  {prompt:'Make one RGB channel as bright as possible.',hint:'Maximum channel intensity uses the largest byte value.',target:255},
   {prompt:'Make the byte for lowercase a in ASCII.',hint:'Lowercase a begins at decimal 97.',target:97},
-  {prompt:'Make a completely black grayscale pixel.',hint:'No brightness means no value.',target:0}
+  {prompt:'Make a completely black grayscale pixel.',hint:'Black means zero brightness.',target:0}
 ];
 let challengeIndex=0;
 
@@ -604,7 +526,7 @@ document.getElementById('checkChallenge').addEventListener('click',()=>{
     result.textContent='Correct — '+binary8(value)+' = '+value+'.';
     result.className='challenge-result good';
   }else{
-    result.textContent='Not yet. Your byte is '+value+'. Change it and try again.';
+    result.textContent='Your byte is '+value+'. Change it and try again.';
     result.className='challenge-result bad';
   }
 });
