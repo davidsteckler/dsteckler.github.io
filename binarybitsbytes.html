@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bits & Bytes | David Steckler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="learning-path.css">
+<style>
+:root{--bg:#f2ede4;--paper:#f8f4ec;--ink:#24211d;--mid:#5f5951;--soft:#989086;--line:rgba(36,33,29,.10);--line2:rgba(36,33,29,.16);--teal:#2d6972;--teal-soft:rgba(45,105,114,.09);--terra:#b86238;--terra-soft:rgba(184,98,56,.08);--max:1180px}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}.wrap{width:min(calc(100% - 32px),var(--max));margin:0 auto}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(242,237,228,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.topbar{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;flex-direction:column;line-height:1.1}.brand strong{font-size:.9rem;letter-spacing:.08em;text-transform:uppercase}.brand span{margin-top:4px;font:400 .66rem 'JetBrains Mono',monospace;color:var(--soft)}nav{display:flex;gap:4px;align-items:center}nav a{padding:8px 11px;border-radius:999px;color:#716a61;font-size:.79rem;font-weight:600}nav a.active,nav a:hover{background:rgba(36,33,29,.06);color:var(--ink)}.menu{display:none;border:1px solid var(--line);background:transparent;border-radius:10px;width:40px;height:40px}
+.lesson-path{width:min(calc(100% - 32px),1120px);margin:14px auto 0;display:flex;justify-content:center;gap:5px;overflow-x:auto;padding:0 0 8px}.lesson-path a{flex:0 0 auto;padding:6px 9px;border-radius:999px;color:#8b8379;font-size:.68rem;font-weight:600}.lesson-path a.current{background:var(--teal-soft);color:var(--teal)}
+main{padding:20px 0 34px}.hero{text-align:center;margin-bottom:22px}.hero h1{margin:0;font:600 clamp(2.5rem,5vw,4rem)/.98 'Fraunces',serif;letter-spacing:-.045em}.hero p{margin:8px auto 0;color:var(--soft);font-size:.92rem;max-width:58ch}.hero strong{color:var(--teal)}
+.builder{width:min(calc(100% - 32px),960px);margin:0 auto;padding:20px;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.24)}.builder-head{text-align:center}.builder-head small{color:var(--terra);font:600 .62rem 'JetBrains Mono',monospace;letter-spacing:.07em;text-transform:uppercase}.builder-head h2{margin:4px 0 5px;font:600 1.5rem 'Fraunces',serif}.builder-head p{margin:0;color:var(--soft);font-size:.75rem}
+.bit-row{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;max-width:760px;margin:18px auto 10px}.bit{height:86px;border:1px solid var(--line2);border-radius:14px;background:rgba(255,255,255,.35);cursor:pointer;color:var(--ink)}.bit.on{background:var(--teal-soft);border-color:rgba(45,105,114,.27)}.bit .place{display:block;color:var(--soft);font:500 .56rem 'JetBrains Mono',monospace}.bit .digit{display:block;margin-top:5px;font:600 1.8rem 'JetBrains Mono',monospace;color:#888077}.bit.on .digit{color:var(--teal)}
+.readout{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:10px}.readout div{padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.34);font-size:.72rem;color:var(--mid)}.readout strong{margin-left:6px;color:var(--teal);font:600 .82rem 'JetBrains Mono',monospace}
+.definition{width:min(calc(100% - 32px),900px);margin:36px auto 0;text-align:center}.definition h2,.challenge h2{margin:0;font:500 clamp(1.55rem,3vw,2.05rem)/1.1 'Fraunces',serif}.definition>p,.challenge>p{margin:7px auto 15px;color:var(--soft);font-size:.8rem;max-width:60ch}
+.scale{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.scale button{padding:15px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.22);cursor:pointer;color:var(--ink)}.scale button.active{background:var(--teal-soft);border-color:rgba(45,105,114,.24)}.scale small{display:block;color:var(--terra);font:600 .58rem 'JetBrains Mono',monospace;text-transform:uppercase}.scale strong{display:block;margin-top:5px;font:600 1.15rem 'Fraunces',serif}.scale span{display:block;margin-top:4px;color:var(--soft);font-size:.67rem}
+.group-viz{margin:14px auto 0;min-height:96px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.2);display:flex;gap:5px;justify-content:center;align-items:center;flex-wrap:wrap}.mini-bit{width:28px;height:34px;border-radius:7px;background:rgba(45,105,114,.08);display:grid;place-items:center;font:600 .7rem 'JetBrains Mono',monospace;color:var(--teal)}.byte-break{width:8px;height:46px;border-left:2px solid rgba(184,98,56,.38);margin-left:4px}.group-note{margin-top:8px;color:var(--mid);font-size:.72rem}
+.challenge{width:min(calc(100% - 32px),720px);margin:36px auto 0;padding-top:24px;border-top:1px solid var(--line);text-align:center}.qcard{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.22)}.qprompt{font-weight:600}.qactions{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:11px}.qactions button{min-height:37px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.36);cursor:pointer;font-size:.72rem;font-weight:700}.qactions button:hover{background:var(--teal-soft)}.qresult{min-height:20px;margin-top:8px;font-size:.72rem;font-weight:600}.qscore{color:var(--soft);font:500 .62rem 'JetBrains Mono',monospace}
+.takeaway{width:min(calc(100% - 32px),820px);margin:30px auto 0;padding:15px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.2);text-align:center}.takeaway strong{display:block;font:600 1.12rem 'Fraunces',serif}.takeaway span{display:block;margin-top:4px;color:var(--mid);font-size:.73rem}
+footer.site-footer{width:min(calc(100% - 32px),var(--max));margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
+@media(max-width:760px){nav{display:none;position:absolute;top:64px;left:12px;right:12px;flex-direction:column;align-items:stretch;padding:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px}nav.open{display:flex}.menu{display:block}.bit-row{gap:4px}.bit{height:70px}.scale{grid-template-columns:repeat(2,1fr)}footer.site-footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="wrap topbar"><a class="brand" href="index.html"><strong>David Steckler</strong><span>// cs · robotics · thinking for yourself</span></a><button class="menu" id="menuButton" aria-label="Open navigation">☰</button><nav id="siteNav"><a href="index.html">Home</a><a href="about.html">About</a><a class="active" href="course.html">Course</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="testimonials.html">Testimonials</a><a href="search.html">Search</a></nav></div></header>
+<div class="lesson-path" aria-label="Binary lessons">
+  <a href="binary1.html">1 · Numbers</a>
+  <a class="current" href="binarybitsbytes.html">2 · Bits & Bytes</a>
+  <a href="binary2.html">3 · Text</a>
+  <a href="binaryascii.html">4 · ASCII</a>
+  <a href="binaryunicode.html">5 · Unicode</a>
+  <a href="asciiart.html">6 · ASCII Art</a>
+  <a href="binary3.html">7 · One byte</a>
+  <a href="binary4.html">8 · Images</a>
+  <a href="binarygraphics.html">9 · Graphics</a>
+  <a href="binaryaudio.html">10 · Audio</a>
+</div>
+<main>
+<section class="hero"><h1>Bits & Bytes</h1><p>A <strong>bit</strong> is one binary digit: 0 or 1. Computers usually group bits together. <strong>Eight bits make one byte.</strong></p></section>
+<section class="builder">
+  <div class="builder-head"><small>// build one byte</small><h2>Click the bits.</h2><p>Every possible 8-bit pattern is one byte, with a value from 0 to 255.</p></div>
+  <div class="bit-row" id="bitRow"></div>
+  <div class="readout"><div>Binary <strong id="binaryOut">00000000</strong></div><div>Decimal <strong id="decimalOut">0</strong></div><div>Bits <strong>8</strong></div><div>Bytes <strong>1</strong></div></div>
+</section>
+
+<section class="definition">
+  <h2>More bits = more possible patterns.</h2>
+  <p>Choose a group size. The computer does not get new symbols — it gets more combinations of the same two symbols.</p>
+  <div class="scale">
+    <button type="button" data-bits="1"><small>one bit</small><strong>2 patterns</strong><span>0 or 1</span></button>
+    <button type="button" data-bits="4"><small>four bits</small><strong>16 patterns</strong><span>sometimes called a nibble</span></button>
+    <button type="button" class="active" data-bits="8"><small>eight bits</small><strong>256 patterns</strong><span>1 byte · values 0–255</span></button>
+    <button type="button" data-bits="16"><small>sixteen bits</small><strong>65,536 patterns</strong><span>2 bytes</span></button>
+  </div>
+  <div class="group-viz" id="groupViz"></div>
+  <div class="group-note" id="groupNote">8 bits grouped together = 1 byte.</div>
+</section>
+
+<section class="challenge">
+  <h2>Bit or byte?</h2><p>Quick check before you move on.</p>
+  <div class="qcard">
+    <div class="qprompt" id="qPrompt">How many bits are in one byte?</div>
+    <div class="qactions" id="qActions"></div>
+    <div class="qresult" id="qResult" aria-live="polite"></div>
+    <div class="qscore" id="qScore">0 correct · 0 answered</div>
+  </div>
+</section>
+
+<section class="takeaway"><strong>A bit is one choice. A byte is a group of eight bits.</strong><span>That one byte can hold any of 256 different patterns — and later pages will show how programs decide what those patterns mean.</span></section>
+</main>
+<div class="ds-step-footer">
+  <a class="ds-next-card ds-prev" href="binary1.html"><small>← Previous</small><strong>Binary 1 · Numbers</strong><span>Build numbers from individual binary place values.</span></a>
+  <a class="ds-next-card ds-next" href="binary2.html"><small>Next →</small><strong>Binary 3 · Text</strong><span>See how groups of bits can represent characters.</span></a>
+</div>
+<footer class="site-footer"><span>© 2026 David Steckler</span><span>binary · information · representation</span></footer>
+<script>
+const places=[128,64,32,16,8,4,2,1];let bits=Array(8).fill(0);
+function renderByte(){
+  const row=document.getElementById('bitRow');row.innerHTML='';
+  bits.forEach((bit,i)=>{
+    const b=document.createElement('button');b.type='button';b.className='bit'+(bit?' on':'');
+    b.innerHTML='<span class="place">'+places[i]+'</span><span class="digit">'+bit+'</span>';
+    b.setAttribute('aria-label','Toggle bit worth '+places[i]);
+    b.onclick=()=>{bits[i]=1-bits[i];renderByte()};row.appendChild(b);
+  });
+  const bin=bits.join('');document.getElementById('binaryOut').textContent=bin;
+  document.getElementById('decimalOut').textContent=parseInt(bin,2);
+}
+function renderGroup(n){
+  const viz=document.getElementById('groupViz');viz.innerHTML='';
+  for(let i=0;i<n;i++){
+    if(i>0&&i%8===0){const br=document.createElement('span');br.className='byte-break';viz.appendChild(br)}
+    const el=document.createElement('span');el.className='mini-bit';el.textContent=i%2;viz.appendChild(el);
+  }
+  const patterns=Math.pow(2,n).toLocaleString();
+  const bytes=n/8;
+  document.getElementById('groupNote').textContent=n+' bit'+(n===1?'':'s')+' → '+patterns+' possible patterns'+(n%8===0?' → '+bytes+' byte'+(bytes===1?'':'s'):'')+'.';
+}
+document.querySelectorAll('.scale button').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('.scale button').forEach(x=>x.classList.toggle('active',x===btn));renderGroup(Number(btn.dataset.bits));
+});
+const qs=[
+  {p:'How many bits are in one byte?',a:'8',choices:['4','8','16']},
+  {p:'How many different patterns can 8 bits make?',a:'256',choices:['8','128','256']},
+  {p:'Which is a single binary digit?',a:'bit',choices:['bit','byte','pixel']},
+  {p:'What is the largest unsigned value one byte can hold?',a:'255',choices:['127','255','256']}
+];let qi=0,correct=0,answered=0;
+function showQ(){const q=qs[qi];document.getElementById('qPrompt').textContent=q.p;const a=document.getElementById('qActions');a.innerHTML='';q.choices.forEach(x=>{const b=document.createElement('button');b.type='button';b.textContent=x;b.onclick=()=>answer(x);a.appendChild(b)});document.getElementById('qResult').textContent=''}
+function answer(x){const q=qs[qi];answered++;const ok=x===q.a;if(ok)correct++;const r=document.getElementById('qResult');r.textContent=ok?'Correct.':'Not quite — the answer is '+q.a+'.';r.style.color=ok?'var(--teal)':'var(--terra)';document.getElementById('qScore').textContent=correct+' correct · '+answered+' answered';setTimeout(()=>{qi=(qi+1)%qs.length;showQ()},650)}
+document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
+renderByte();renderGroup(8);showQ();
+</script>
+</body>
+</html>
