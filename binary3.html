@@ -469,7 +469,7 @@ function contextAudioMarkup(){
     sample,i
   }));
   const circles=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(p.i===3?5:3.2)+'" class="audio-point'+(p.i===3?' current':'')+'"></circle>').join('');
-  return '<div class="audio-context"><div class="audio-file-meta"><span>WAV</span><span>PCM</span><span>8-bit</span><span>mono</span></div><div class="audio-wrap"><svg viewBox="0 0 420 78" aria-label="Audio samples"><line class="audio-midline" x1="8" y1="39" x2="412" y2="39"></line><polyline class="audio-wave" points="'+pts.map(p=>p.x+','+p.y).join(' ')+'"></polyline>'+circles+'</svg><div class="sample-values">'+samples.map((n,i)=>'<span class="'+(i===3?'current':'')+'">'+n+'</span>').join('')+'</div></div></div>';
+  return '<div class="audio-context"><div class="audio-file-meta"><span>WAV</span><span>PCM</span><span>8-bit</span><span>mono</span></div><div class="audio-wrap"><svg viewBox="0 0 420 78" aria-label="Audio samples"><line class="audio-midline" x1="8" y1="39" x2="412" y2="39"></line><polyline class="audio-wave" points="'+pts.map(p=>p.x+','+p.y).join(' ')+'"></polyline>'+circles+'</svg><div class="sample-values">'+samples.map((n,i)=>'<span class="'+(i===3?'current':'')+'">'+n+'</span>').join('')+'</div></div><button type="button" class="play-samples" data-action="play-context">▶ Hear these samples</button></div>';
 }
 
 function renderContext(){
@@ -603,30 +603,14 @@ async function playSamples(){
 function render(){
   value=Math.max(0,Math.min(255,Math.round(value)));
   const b=binary8(value);
-  const ascii=asciiDisplay(value);
-  const rgb=rgbForByte(value);
 
   document.getElementById('binaryReadout').textContent=b;
   document.getElementById('decimalReadout').textContent=value;
   document.getElementById('hexReadout').textContent=hex2(value);
-  document.getElementById('numberResult').textContent=value;
-  document.getElementById('numberCaption').textContent=value;
   document.querySelectorAll('.sameByteText').forEach(el=>el.textContent=b);
-
-  document.getElementById('textResult').textContent=ascii.value;
-  document.getElementById('textCaption').textContent=ascii.caption;
-
-  document.getElementById('pixelResult').style.background='rgb('+value+','+value+','+value+')';
-  document.getElementById('pixelCaption').textContent=value+' / 255';
-
-  document.getElementById('colorResult').style.background='rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
-  const channelName=rgbChannel==='r'?'red':rgbChannel==='g'?'green':'blue';
-  document.getElementById('colorCaption').textContent=
-    'This byte can be the '+channelName+' value in RGB('+rgb[0]+', '+rgb[1]+', '+rgb[2]+'). A full RGB pixel normally uses three bytes — one per channel.';
 
   slider.value=value;
   renderBits();
-  renderAudio();
   renderContext();
 }
 
@@ -659,7 +643,10 @@ document.querySelectorAll('.rgb-channel').forEach(btn=>{
   });
 });
 
-document.getElementById('playSamples').addEventListener('click',playSamples);
+document.getElementById('contextVisual').addEventListener('click',event=>{
+  const button=event.target.closest('[data-action="play-context"]');
+  if(button) playSamples();
+});
 
 const challenges=[
   {prompt:'Make the byte that represents uppercase A in ASCII.',hint:'ASCII uppercase A is decimal 65.',target:65},
