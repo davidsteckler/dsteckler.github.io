@@ -154,6 +154,96 @@ main{width:min(calc(100% - 32px),var(--max));margin:0 auto;padding:24px 0 32px}
 .challenge-result{min-height:20px;color:var(--mid);font-size:.75rem}
 .challenge-result.good{color:var(--teal);font-weight:700}.challenge-result.bad{color:var(--terra);font-weight:700}
 
+
+.context-lab{
+  display:grid;grid-template-columns:210px minmax(0,1fr);gap:14px;align-items:stretch
+}
+.context-tabs{display:grid;gap:7px;align-content:start}
+.context-tab{
+  width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;
+  background:rgba(255,255,255,.28);text-align:left;color:var(--mid);cursor:pointer
+}
+.context-tab:hover{background:rgba(255,255,255,.55)}
+.context-tab.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.context-tab small{display:block;font:600 .55rem 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;opacity:.62}
+.context-tab strong{display:block;margin-top:3px;font-size:.82rem}
+.context-screen{
+  min-height:335px;border:1px solid var(--line);border-radius:18px;background:var(--paper);overflow:hidden;
+  box-shadow:0 10px 30px rgba(36,33,29,.035)
+}
+.context-windowbar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;
+  border-bottom:1px solid var(--line);background:rgba(36,33,29,.025)
+}
+.window-dots{display:flex;gap:5px}.window-dots i{width:7px;height:7px;border-radius:50%;background:rgba(36,33,29,.18)}
+.context-file{font:500 .62rem 'JetBrains Mono',monospace;color:var(--soft)}
+.context-body{padding:20px}
+.context-rule{
+  display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--teal-soft);
+  border:1px solid rgba(45,105,114,.11);margin-bottom:17px
+}
+.context-rule .rule-icon{font-size:1.15rem}
+.context-rule strong{display:block;font-size:.82rem}
+.context-rule span{display:block;margin-top:2px;color:var(--mid);font-size:.7rem;line-height:1.35}
+.context-visual{min-height:185px;display:grid;place-items:center}
+.context-explain{margin-top:14px;text-align:center;color:var(--mid);font-size:.78rem;line-height:1.5}
+.context-explain strong{color:var(--ink)}
+.byte-stream{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+.stream-byte{
+  padding:8px 9px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.55);
+  font:600 .68rem 'JetBrains Mono',monospace;color:var(--soft)
+}
+.stream-byte.current{background:var(--terra-soft);border-color:rgba(184,98,56,.24);color:var(--terra)}
+.text-preview{
+  margin-top:15px;padding:14px 18px;border-radius:12px;background:#fff;border:1px solid var(--line);
+  font:600 1.6rem 'JetBrains Mono',monospace;letter-spacing:.04em
+}
+.text-preview mark{background:var(--terra-soft);color:var(--terra);padding:2px 4px;border-radius:5px}
+.gray-demo{display:grid;grid-template-columns:repeat(3,58px);gap:5px}
+.gray-cell{
+  width:58px;height:58px;border-radius:8px;border:1px solid rgba(36,33,29,.12);
+  position:relative
+}
+.gray-cell.current{outline:3px solid var(--terra);outline-offset:2px}
+.gray-cell.current::after{
+  content:"your byte";position:absolute;left:50%;bottom:-21px;transform:translateX(-50%);
+  white-space:nowrap;color:var(--terra);font:600 .52rem 'JetBrains Mono',monospace
+}
+.rgb-demo{display:grid;gap:14px;justify-items:center}
+.rgb-bytes{display:flex;gap:7px}
+.rgb-byte{
+  width:92px;padding:10px 8px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.55);
+  text-align:center
+}
+.rgb-byte small{display:block;color:var(--soft);font:600 .55rem 'JetBrains Mono',monospace}
+.rgb-byte strong{display:block;margin-top:5px;font:700 .82rem 'JetBrains Mono',monospace}
+.rgb-byte.current{outline:2px solid var(--terra);outline-offset:2px}
+.rgb-preview{width:90px;height:90px;border-radius:15px;border:1px solid var(--line2)}
+.number-demo{text-align:center}
+.number-type{
+  display:inline-block;padding:7px 10px;border-radius:8px;background:rgba(36,33,29,.05);
+  color:var(--soft);font:600 .62rem 'JetBrains Mono',monospace
+}
+.number-demo .number-big{margin-top:12px;font:800 4.2rem/1 'Outfit',sans-serif;color:var(--teal)}
+.audio-context{width:min(100%,560px)}
+.audio-file-meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.audio-file-meta span{padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--soft);font:500 .58rem 'JetBrains Mono',monospace}
+.context-arrow{
+  display:flex;align-items:center;justify-content:center;gap:8px;margin:15px 0 0;color:var(--soft);
+  font:500 .63rem 'JetBrains Mono',monospace
+}
+.context-arrow strong{color:var(--teal)}
+@media(max-width:760px){
+  .context-lab{grid-template-columns:1fr}
+  .context-tabs{grid-template-columns:repeat(5,minmax(120px,1fr));overflow-x:auto;padding-bottom:4px}
+  .context-tab{min-width:120px}
+  .context-screen{min-height:360px}
+}
+@media(max-width:520px){
+  .gray-demo{grid-template-columns:repeat(3,48px)}.gray-cell{width:48px;height:48px}
+  .rgb-byte{width:78px}
+}
+
 footer.site-footer{width:min(calc(100% - 32px),1180px);margin:44px auto 28px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;color:#aaa198;font:400 .64rem 'JetBrains Mono',monospace}
 
 @media(max-width:860px){
@@ -247,83 +337,58 @@ footer.site-footer{width:min(calc(100% - 32px),1180px);margin:44px auto 28px;pad
     <div class="bridge-line"></div>
   </div>
 
-  <section class="step" aria-label="Interpret the same byte in different ways">
+  <section class="step" aria-label="What tells the computer how to interpret a byte">
     <div class="step-head">
       <div class="step-num">2</div>
       <div>
-        <h2>Read the same byte five different ways.</h2>
-        <p>Every card below receives the exact same eight bits. The result changes because each card follows a different rule.</p>
+        <h2>So why would the computer read it differently?</h2>
+        <p>It does not guess. The file format, program, and location of the byte tell the computer what rule to use.</p>
       </div>
     </div>
 
-    <div class="meaning-grid">
-      <article class="meaning-card">
-        <div class="meaning-label">Interpretation 1</div>
-        <h3>As a number</h3>
-        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
-        <div class="result-row">
-          <div class="big-result" id="numberResult">65</div>
-        </div>
-        <div class="result-copy">Read as an unsigned binary number, this byte equals <strong id="numberCaption">65</strong>.</div>
-      </article>
+    <div class="context-lab">
+      <div class="context-tabs" role="tablist" aria-label="Choose a context">
+        <button class="context-tab active" type="button" data-context="number"><small>Program expects</small><strong>A number</strong></button>
+        <button class="context-tab" type="button" data-context="text"><small>Text editor opens</small><strong>A text file</strong></button>
+        <button class="context-tab" type="button" data-context="gray"><small>Image viewer opens</small><strong>A grayscale image</strong></button>
+        <button class="context-tab" type="button" data-context="rgb"><small>Image program reads</small><strong>RGB pixel data</strong></button>
+        <button class="context-tab" type="button" data-context="audio"><small>Audio player opens</small><strong>8-bit PCM audio</strong></button>
+      </div>
 
-      <article class="meaning-card">
-        <div class="meaning-label">Interpretation 2</div>
-        <h3>As text</h3>
-        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
-        <div class="result-row">
-          <div class="big-result" id="textResult">A</div>
+      <div class="context-screen">
+        <div class="context-windowbar">
+          <div class="window-dots"><i></i><i></i><i></i></div>
+          <div class="context-file" id="contextFile">score.bin · program variable</div>
         </div>
-        <div class="result-copy" id="textCaption">ASCII says decimal 65 represents the character <strong>A</strong>.</div>
-      </article>
-
-      <article class="meaning-card">
-        <div class="meaning-label">Interpretation 3</div>
-        <h3>As a grayscale pixel</h3>
-        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
-        <div class="result-row">
-          <div class="pixel" id="pixelResult"></div>
-        </div>
-        <div class="result-copy">As 8-bit grayscale, <strong id="pixelCaption">65 / 255</strong> controls brightness.</div>
-      </article>
-
-      <article class="meaning-card">
-        <div class="meaning-label">Interpretation 4</div>
-        <h3>As one RGB color channel</h3>
-        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
-        <div class="result-row">
-          <div class="channel-box" id="colorResult"></div>
-        </div>
-        <div class="result-copy" id="colorCaption">This byte can be the red value in RGB(65, 0, 0).</div>
-        <div class="channel-toggle" aria-label="Choose which RGB channel this byte controls">
-          <button type="button" class="rgb-channel active" data-channel="r" aria-pressed="true">R</button>
-          <button type="button" class="rgb-channel" data-channel="g" aria-pressed="false">G</button>
-          <button type="button" class="rgb-channel" data-channel="b" aria-pressed="false">B</button>
-        </div>
-      </article>
-
-      <article class="meaning-card wide">
-        <div class="meaning-label">Interpretation 5</div>
-        <h3>As one audio sample</h3>
-        <div class="same-byte">same byte&nbsp; <strong class="sameByteText">01000001</strong></div>
-        <div class="result-row">
-          <div class="audio-wrap">
-            <svg id="audioWaveform" viewBox="0 0 360 65" role="img" aria-label="Seven audio sample values connected as a waveform; the middle sample is the current byte">
-              <line class="audio-midline" x1="8" y1="32.5" x2="352" y2="32.5"></line>
-              <polyline class="audio-wave" id="audioWaveLine" points=""></polyline>
-              <g id="audioWavePoints"></g>
-            </svg>
-            <div class="sample-values" id="audioSampleValues" aria-hidden="true"></div>
+        <div class="context-body">
+          <div class="context-rule">
+            <div class="rule-icon" id="contextIcon">#</div>
+            <div>
+              <strong id="contextRuleTitle">The program says: treat this byte as an unsigned 8-bit number.</strong>
+              <span id="contextRuleText">The same 8 bits are decoded using the numeric rule for values 0–255.</span>
+            </div>
           </div>
+
+          <div class="context-visual" id="contextVisual"></div>
+          <div class="context-arrow"><span class="sameByteText">01000001</span><span>+</span><strong id="contextRuleShort">numeric rule</strong><span>→</span><strong id="contextOutcome">65</strong></div>
+          <div class="context-explain" id="contextExplain"></div>
         </div>
-        <div class="result-copy" id="audioCaption">Here, the byte becomes the height of one sample in a waveform.</div>
-        <button type="button" class="play-samples" id="playSamples">▶ Hear the sample pattern</button>
-      </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" aria-label="Interpret the same byte in different ways">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <div>
+        <h2>The byte did not change. The rule did.</h2>
+        <p>Switch the context above and watch the same byte become a number, character, pixel value, color channel, or audio sample.</p>
+      </div>
     </div>
 
     <div class="lesson-rule">
       <strong>Same bits. Different meaning.</strong>
-      <span>The meaning comes from the format, program, or rule used to read the byte.</span>
+      <span>A computer knows how to read the byte because the software or file format tells it what kind of data it is looking at.</span>
     </div>
   </section>
 
@@ -392,6 +457,93 @@ function rgbForByte(v){
   if(rgbChannel==='r') return [v,0,0];
   if(rgbChannel==='g') return [0,v,0];
   return [0,0,v];
+}
+
+function contextAudioMarkup(){
+  const samples=[128,180,230,value,26,76,128];
+  const width=420,height=78,padX=10,padY=8;
+  const usableW=width-padX*2,usableH=height-padY*2;
+  const pts=samples.map((sample,i)=>({
+    x:padX+(i/(samples.length-1))*usableW,
+    y:padY+((255-sample)/255)*usableH,
+    sample,i
+  }));
+  const circles=pts.map(p=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(p.i===3?5:3.2)+'" class="audio-point'+(p.i===3?' current':'')+'"></circle>').join('');
+  return '<div class="audio-context"><div class="audio-file-meta"><span>WAV</span><span>PCM</span><span>8-bit</span><span>mono</span></div><div class="audio-wrap"><svg viewBox="0 0 420 78" aria-label="Audio samples"><line class="audio-midline" x1="8" y1="39" x2="412" y2="39"></line><polyline class="audio-wave" points="'+pts.map(p=>p.x+','+p.y).join(' ')+'"></polyline>'+circles+'</svg><div class="sample-values">'+samples.map((n,i)=>'<span class="'+(i===3?'current':'')+'">'+n+'</span>').join('')+'</div></div></div>';
+}
+
+function renderContext(){
+  const active=document.querySelector('.context-tab.active');
+  const context=active ? active.dataset.context : 'number';
+  const b=binary8(value);
+  const ascii=asciiDisplay(value);
+  const rgb=rgbForByte(value);
+  const visual=document.getElementById('contextVisual');
+  let file='',icon='',title='',text='',shortRule='',outcome='',explain='',markup='';
+
+  if(context==='number'){
+    file='score.bin · program variable';
+    icon='#';
+    title='The program says: treat this byte as an unsigned 8-bit number.';
+    text='The software expects a value from 0 to 255 in this spot.';
+    shortRule='numeric rule';
+    outcome=String(value);
+    markup='<div class="number-demo"><div class="number-type">uint8 · unsigned 8-bit integer</div><div class="number-big">'+value+'</div></div>';
+    explain='Example: a game could store a player\'s <strong>health, score, or item count</strong> as an 8-bit number.';
+  }else if(context==='text'){
+    file='message.txt · opened in a text editor';
+    icon='A';
+    title='The text editor says: decode these bytes as character codes.';
+    text='For basic ASCII, each byte value maps to a character.';
+    shortRule='ASCII rule';
+    outcome=ascii.value;
+    const chars=[72,73,32,value,33];
+    const shown=chars.map((n,i)=>'<span class="stream-byte'+(i===3?' current':'')+'">'+binary8(n)+'</span>').join('');
+    const charsText=['H','I',' ',ascii.value==='SPACE'?' ':ascii.value,'!'];
+    markup='<div><div class="byte-stream">'+shown+'</div><div class="text-preview">HI <mark>'+escapeHtml(charsText[3])+'</mark>!</div></div>';
+    explain='Because the file is being opened as <strong>text</strong>, the byte at this position is looked up using the text encoding.';
+  }else if(context==='gray'){
+    file='photo.raw · 3 × 3 grayscale · 8 bits/pixel';
+    icon='▦';
+    title='The image description says: one byte = brightness of one pixel.';
+    text='The viewer walks through the pixel data one byte at a time and paints each pixel from 0 (black) to 255 (white).';
+    shortRule='grayscale pixel rule';
+    outcome='brightness '+value;
+    const vals=[35,90,150,210,value,115,15,190,245];
+    markup='<div class="gray-demo">'+vals.map((n,i)=>'<div class="gray-cell'+(i===4?' current':'')+'" style="background:rgb('+n+','+n+','+n+')"></div>').join('')+'</div>';
+    explain='Because the image format says <strong>8-bit grayscale</strong>, this byte becomes the brightness of the highlighted pixel.';
+  }else if(context==='rgb'){
+    file='pixel buffer · RGB · 8 bits/channel';
+    icon='●';
+    title='The image program says: pixels arrive as red, green, then blue channel bytes.';
+    text='Position matters. The first byte in this 3-byte group is red, the next is green, and the third is blue.';
+    shortRule='RGB channel rule';
+    outcome='RGB('+rgb[0]+','+rgb[1]+','+rgb[2]+')';
+    markup='<div class="rgb-demo"><div class="rgb-bytes"><div class="rgb-byte'+(rgbChannel==='r'?' current':'')+'"><small>RED</small><strong>'+ (rgbChannel==='r'?value:0) +'</strong></div><div class="rgb-byte'+(rgbChannel==='g'?' current':'')+'"><small>GREEN</small><strong>'+ (rgbChannel==='g'?value:0) +'</strong></div><div class="rgb-byte'+(rgbChannel==='b'?' current':'')+'"><small>BLUE</small><strong>'+ (rgbChannel==='b'?value:0) +'</strong></div></div><div class="rgb-preview" style="background:rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')"></div></div>';
+    explain='A full RGB pixel normally uses <strong>three bytes</strong>. The image program knows which channel this byte belongs to from its position in the pixel data.';
+  }else{
+    file='sound.wav · PCM · 8-bit mono';
+    icon='♪';
+    title='The WAV header says: the sound uses 8-bit PCM samples.';
+    text='The audio player reads the data section as a sequence of amplitude samples over time.';
+    shortRule='8-bit PCM sample rule';
+    outcome='sample '+value;
+    markup=contextAudioMarkup();
+    explain='Because the WAV file says <strong>8-bit PCM audio</strong>, this byte becomes one instant in the waveform instead of a letter or pixel.';
+  }
+
+  document.getElementById('contextFile').textContent=file;
+  document.getElementById('contextIcon').textContent=icon;
+  document.getElementById('contextRuleTitle').textContent=title;
+  document.getElementById('contextRuleText').textContent=text;
+  document.getElementById('contextRuleShort').textContent=shortRule;
+  document.getElementById('contextOutcome').textContent=outcome;
+  document.getElementById('contextExplain').innerHTML=explain;
+  visual.innerHTML=markup;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
 }
 
 function renderAudio(){
@@ -475,6 +627,7 @@ function render(){
   slider.value=value;
   renderBits();
   renderAudio();
+  renderContext();
 }
 
 slider.addEventListener('input',()=>{value=Number(slider.value);render()});
@@ -486,6 +639,13 @@ document.querySelectorAll('.preset[data-value]').forEach(btn=>{
 document.getElementById('randomByte').addEventListener('click',()=>{
   value=Math.floor(Math.random()*256);
   render();
+});
+
+document.querySelectorAll('.context-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.context-tab').forEach(x=>x.classList.toggle('active',x===btn));
+    renderContext();
+  });
 });
 
 document.querySelectorAll('.rgb-channel').forEach(btn=>{
