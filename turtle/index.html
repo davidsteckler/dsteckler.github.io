@@ -295,7 +295,17 @@
       position:absolute;inset:0;
       width:400px;height:400px;
       z-index:2;
+      pointer-events:none;
     }
+    #tracy-drawing,#tracy-sprite{
+      position:absolute;
+      inset:0;
+      width:400px;
+      height:400px;
+      display:block;
+    }
+    #tracy-drawing{z-index:2}
+    #tracy-sprite{z-index:3}
 
     .world-info{
       display:grid;
@@ -455,7 +465,10 @@ for i in range(4):
           <span class="axis-label ypos">200</span>
           <span class="axis-label yneg">−200</span>
           <span class="origin"></span>
-          <div id="turtle-canvas" aria-label="Turtle drawing canvas"></div>
+          <div id="turtle-canvas" aria-label="Turtle drawing canvas">
+            <canvas id="tracy-drawing" width="400" height="400"></canvas>
+            <canvas id="tracy-sprite" width="400" height="400"></canvas>
+          </div>
           <div class="loading" id="loading">Loading Python…</div>
         </div>
       </div>
@@ -619,9 +632,264 @@ for i in range(4):
     return Sk.builtinFiles.files[x];
   }
 
+  var TracyRuntime = (function(){
+    var drawCanvas = document.getElementById("tracy-drawing");
+    var spriteCanvas = document.getElementById("tracy-sprite");
+    var ctx = drawCanvas.getContext("2d");
+    var sctx = spriteCanvas.getContext("2d");
+    var world = document.getElementById("worldWrap");
+
+    var state = {
+      x:0, y:0, heading:0,
+      penDown:true,
+      color:"#000000",
+      fillColor:"#000000",
+      size:1,
+      visible:true,
+      speed:6,
+      filling:false,
+      fillPoints:[]
+    };
+
+    function px(x){ return 200 + x; }
+    function py(y){ return 200 - y; }
+    function rad(deg){ return deg * Math.PI / 180; }
+    function none(){ return Sk.builtin.none.none$; }
+    function js(v){ return Sk.ffi.remapToJs(v); }
+    function pyNum(v){ return Sk.ffi.remapToPy(v); }
+
+    function configureLine(){
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = Math.max(.5, Number(state.size) || 1);
+      ctx.strokeStyle = state.color;
+    }
+
+    function drawSegment(x1,y1,x2,y2){
+      if(!state.penDown) return;
+      configureLine();
+      ctx.beginPath();
+      ctx.moveTo(px(x1),py(y1));
+      ctx.lineTo(px(x2),py(y2));
+      ctx.stroke();
+    }
+
+    function recordFillPoint(){
+      if(state.filling) state.fillPoints.push([state.x,state.y]);
+    }
+
+    function drawSpriteOn(target, permanent){
+      if(!state.visible && !permanent) return;
+      target.save();
+      target.translate(px(state.x),py(state.y));
+      target.rotate(-rad(state.heading));
+      target.beginPath();
+      target.moveTo(9,0);
+      target.lineTo(-7,-5.5);
+      target.lineTo(-5,0);
+      target.lineTo(-7,5.5);
+      target.closePath();
+      target.fillStyle = state.color || "#000";
+      target.fill();
+      target.restore();
+    }
+
+    function refreshSprite(){
+      sctx.clearRect(0,0,400,400);
+      drawSpriteOn(sctx,false);
+    }
+
+    function moveTo(x,y){
+      x = Number(x); y = Number(y);
+      if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+      var ox=state.x, oy=state.y;
+      drawSegment(ox,oy,x,y);
+      state.x=x; state.y=y;
+      recordFillPoint();
+      refreshSprite();
+    }
+
+    function forward(distance){
+      distance=Number(distance)||0;
+      var a=rad(state.heading);
+      moveTo(state.x + Math.cos(a)*distance, state.y + Math.sin(a)*distance);
+    }
+
+    function circle(radius,extent){
+      radius=Number(radius)||0;
+      extent=(extent===undefined)?360:Number(extent);
+      if(!radius || !extent){ refreshSprite(); return; }
+
+      var startHeading=rad(state.heading);
+      var cx=state.x - radius*Math.sin(startHeading);
+      var cy=state.y + radius*Math.cos(startHeading);
+      var startAngle=Math.atan2(state.y-cy,state.x-cx);
+      var signedExtent=rad(extent) * (radius>=0 ? 1 : -1);
+      var steps=Math.max(8,Math.ceil(Math.abs(extent)/6));
+      var rr=Math.abs(radius);
+
+      for(var i=1;i<=steps;i++){
+        var a=startAngle + signedExtent*(i/steps);
+        moveTo(cx + rr*Math.cos(a), cy + rr*Math.sin(a));
+      }
+      state.heading=(state.heading + extent*(radius>=0?1:-1))%360;
+      refreshSprite();
+    }
+
+    function reset(){
+      ctx.clearRect(0,0,400,400);
+      sctx.clearRect(0,0,400,400);
+      state.x=0; state.y=0; state.heading=0;
+      state.penDown=true;
+      state.color="#000000";
+      state.fillColor="#000000";
+      state.size=1;
+      state.visible=true;
+      state.speed=6;
+      state.filling=false;
+      state.fillPoints=[];
+      world.style.backgroundColor="#ffffff";
+      refreshSprite();
+    }
+
+    function clear(){
+      ctx.clearRect(0,0,400,400);
+      state.filling=false;
+      state.fillPoints=[];
+      refreshSprite();
+    }
+
+    function beginFill(){
+      state.filling=true;
+      state.fillPoints=[[state.x,state.y]];
+    }
+
+    function endFill(){
+      if(state.filling && state.fillPoints.length>2){
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(px(state.fillPoints[0][0]),py(state.fillPoints[0][1]));
+        for(var i=1;i<state.fillPoints.length;i++){
+          ctx.lineTo(px(state.fillPoints[i][0]),py(state.fillPoints[i][1]));
+        }
+        ctx.closePath();
+        ctx.globalCompositeOperation="destination-over";
+        ctx.fillStyle=state.fillColor;
+        ctx.fill();
+        ctx.restore();
+      }
+      state.filling=false;
+      state.fillPoints=[];
+      refreshSprite();
+    }
+
+    function setColor(value){
+      if(value===undefined || value===null) return;
+      state.color=String(value);
+      refreshSprite();
+    }
+
+    function setFillColor(value){
+      if(value===undefined || value===null) return;
+      state.fillColor=String(value);
+    }
+
+    function dot(size,color){
+      size=Number(size)||6;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px(state.x),py(state.y),Math.abs(size)/2,0,Math.PI*2);
+      ctx.fillStyle=color ? String(color) : state.color;
+      ctx.fill();
+      ctx.restore();
+      refreshSprite();
+    }
+
+    function writeText(message){
+      ctx.save();
+      ctx.fillStyle=state.color;
+      ctx.font="16px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textBaseline="middle";
+      ctx.fillText(String(message),px(state.x),py(state.y));
+      ctx.restore();
+    }
+
+    function installBuiltins(){
+      function fn0(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(){ cb(); return none(); });
+      }
+      function fn1(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a){ return cb(js(a)); });
+      }
+      function fn2(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){ return cb(js(a),js(b)); });
+      }
+
+      fn1("forward",function(d){ forward(d); return none(); });
+      Sk.builtins.fd=Sk.builtins.forward;
+      fn1("backward",function(d){ forward(-Number(d||0)); return none(); });
+      Sk.builtins.back=Sk.builtins.backward; Sk.builtins.bk=Sk.builtins.backward;
+
+      fn1("left",function(a){ state.heading=(state.heading+Number(a||0))%360; refreshSprite(); return none(); });
+      Sk.builtins.lt=Sk.builtins.left;
+      fn1("right",function(a){ state.heading=(state.heading-Number(a||0))%360; refreshSprite(); return none(); });
+      Sk.builtins.rt=Sk.builtins.right;
+
+      fn2("goto",function(x,y){ moveTo(x,y); return none(); });
+      Sk.builtins.setpos=Sk.builtins.goto; Sk.builtins.setposition=Sk.builtins.goto;
+      fn1("setx",function(x){ moveTo(x,state.y); return none(); });
+      fn1("sety",function(y){ moveTo(state.x,y); return none(); });
+
+      fn0("home",function(){ moveTo(0,0); state.heading=0; refreshSprite(); });
+      fn0("penup",function(){ state.penDown=false; });
+      Sk.builtins.up=Sk.builtins.penup; Sk.builtins.pu=Sk.builtins.penup;
+      fn0("pendown",function(){ state.penDown=true; });
+      Sk.builtins.down=Sk.builtins.pendown; Sk.builtins.pd=Sk.builtins.pendown;
+
+      Sk.builtins.isdown=new Sk.builtin.func(function(){ return Sk.ffi.remapToPy(state.penDown); });
+      fn1("speed",function(v){ state.speed=Number(v)||0; return none(); });
+      fn1("circle",function(r){ circle(r,360); return none(); });
+
+      fn1("color",function(c){ setColor(c); state.fillColor=String(c); return none(); });
+      fn1("pencolor",function(c){ setColor(c); return none(); });
+      fn1("fillcolor",function(c){ setFillColor(c); return none(); });
+      fn1("pensize",function(v){ state.size=Math.max(.5,Number(v)||1); return none(); });
+      Sk.builtins.width=Sk.builtins.pensize;
+
+      fn0("begin_fill",beginFill);
+      fn0("end_fill",endFill);
+      fn0("clear",clear);
+      fn0("reset",reset);
+      fn1("dot",function(v){ dot(v); return none(); });
+      fn0("stamp",function(){ drawSpriteOn(ctx,true); });
+      fn0("hideturtle",function(){ state.visible=false; refreshSprite(); });
+      Sk.builtins.ht=Sk.builtins.hideturtle;
+      fn0("showturtle",function(){ state.visible=true; refreshSprite(); });
+      Sk.builtins.st=Sk.builtins.showturtle;
+
+      Sk.builtins.heading=new Sk.builtin.func(function(){ return pyNum(state.heading); });
+      fn1("setheading",function(v){ state.heading=Number(v)||0; refreshSprite(); return none(); });
+      Sk.builtins.seth=Sk.builtins.setheading;
+      Sk.builtins.xcor=new Sk.builtin.func(function(){ return pyNum(state.x); });
+      Sk.builtins.ycor=new Sk.builtin.func(function(){ return pyNum(state.y); });
+      Sk.builtins.position=new Sk.builtin.func(function(){
+        return new Sk.builtin.tuple([pyNum(state.x),pyNum(state.y)]);
+      });
+      Sk.builtins.pos=Sk.builtins.position;
+
+      fn1("bgcolor",function(c){ world.style.backgroundColor=String(c); return none(); });
+      fn1("write",function(m){ writeText(m); return none(); });
+    }
+
+    return {
+      reset:reset,
+      clear:clear,
+      installBuiltins:installBuiltins
+    };
+  })();
+
   function clearWorld(){
-    var target = document.getElementById("turtle-canvas");
-    target.innerHTML = "";
+    TracyRuntime.reset();
   }
 
   var runToken = 0;
@@ -654,15 +922,8 @@ for i in range(4):
       inputfunTakesPrompt: true
     });
 
-    Sk.TurtleGraphics = {
-      target: "turtle-canvas",
-      width: 400,
-      height: 400,
-      animate: true
-    };
-
-    var prelude = "import turtle; _tracy=turtle.Turtle(); _tracy.pendown(); _screen=turtle.Screen(); forward=_tracy.forward; fd=_tracy.forward; backward=_tracy.backward; back=_tracy.backward; bk=_tracy.backward; left=_tracy.left; lt=_tracy.left; right=_tracy.right; rt=_tracy.right; goto=_tracy.goto; setpos=_tracy.setpos; setposition=_tracy.setposition; setx=_tracy.setx; sety=_tracy.sety; home=_tracy.home; penup=_tracy.penup; up=_tracy.penup; pu=_tracy.penup; pendown=_tracy.pendown; down=_tracy.pendown; pd=_tracy.pendown; isdown=_tracy.isdown; _raw_speed=_tracy.speed; speed=lambda s=None: _raw_speed() if s is None else _raw_speed(10 if s == 0 else s); circle=_tracy.circle; color=_tracy.color; pencolor=_tracy.pencolor; fillcolor=_tracy.fillcolor; pensize=_tracy.pensize; width=_tracy.width; begin_fill=_tracy.begin_fill; end_fill=_tracy.end_fill; clear=_tracy.clear; reset=_tracy.reset; dot=_tracy.dot; stamp=_tracy.stamp; shape=_tracy.shape; hideturtle=_tracy.hideturtle; ht=_tracy.hideturtle; showturtle=_tracy.showturtle; st=_tracy.showturtle; heading=_tracy.heading; setheading=_tracy.setheading; seth=_tracy.setheading; xcor=_tracy.xcor; ycor=_tracy.ycor; position=_tracy.position; pos=_tracy.pos; bgcolor=_screen.bgcolor\n";
-    var program = prelude + userCode;
+    TracyRuntime.installBuiltins();
+    var program = userCode;
 
     try {
       await Sk.misceval.asyncToPromise(function(){
@@ -701,7 +962,7 @@ for i in range(4):
     var line = null;
     if(err && err.traceback && err.traceback.length){
       var last = err.traceback[err.traceback.length - 1];
-      if(last && last.lineno) line = Math.max(1, last.lineno - 1);
+      if(last && last.lineno) line = Math.max(1, last.lineno);
     }
 
     if(line){
@@ -724,7 +985,10 @@ for i in range(4):
   }
 
   function resetWorld(){
-    stopCode();
+    runToken += 1;
+    runBtn.disabled = false;
+    stopBtn.disabled = true;
+    setStatus("");
     clearWorld();
     setOutput('<span class="muted">World reset. Your code is still here.</span>');
   }
@@ -779,6 +1043,7 @@ for i in range(4):
     }, 1200);
   }
 
+  clearWorld();
   editor.focus();
 })();
 </script>
