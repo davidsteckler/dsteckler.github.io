@@ -155,6 +155,7 @@ var ctxAudio=null,sourceAudio=null,monitorGain=null,audioDest=null,downloadUrl=n
 var canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
 var motionCanvas=document.createElement('canvas'),motionCtx=motionCanvas.getContext('2d',{willReadFrequently:true});
 motionCanvas.width=96;motionCanvas.height=96;
+var dogCanvas=document.createElement('canvas'),dogCtx=dogCanvas.getContext('2d');
 function fmt(t){t=Math.max(0,Number(t)||0);var m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+(s<10?'0':'')+s}
 function setStatus(id,msg,error){var el=$(id);el.textContent=msg;el.classList.toggle('show',!!msg);el.classList.toggle('error',!!error)}
 function bar(kind,val){var progress=$(kind+'Progress'),b=$(kind+'Bar');progress.classList.toggle('on',val!==null);b.style.width=((Math.max(0,Math.min(1,val||0)))*100)+'%'}
@@ -204,6 +205,7 @@ function changeFile(f){
 video.addEventListener('loadedmetadata',function(){
  duration=Number.isFinite(video.duration)?video.duration:0;
  if(!duration){setStatus('scanStatus','This file cannot be read by your browser. Try an MP4 (H.264).',true);return}
+ if(video.videoWidth>=video.videoHeight){dogCanvas.width=320;dogCanvas.height=Math.max(120,Math.round(320*video.videoHeight/video.videoWidth))}else{dogCanvas.height=320;dogCanvas.width=Math.max(120,Math.round(320*video.videoWidth/video.videoHeight))}
  $('durLabel').textContent=fmt(duration);$('scrub').max=duration;$('scrub').value=0;markIn=0;markOut=Math.min(5,duration);updateRange();renderClips()
 });
 video.addEventListener('timeupdate',function(){$('nowLabel').textContent=fmt(video.currentTime);$('scrub').value=video.currentTime});
@@ -282,7 +284,7 @@ $('analyzeBtn').addEventListener('click',async function(){
    for(var k=0;k<pix.length;k+=16){var val=(pix[k]+pix[k+1]+pix[k+2])/3;now.push(val);if(lastPixels)delta+=Math.abs(val-lastPixels[now.length-1])}
    var movement=lastPixels?Math.min(1,delta/now.length/40):0;lastPixels=now;
    if(model&&i%2===0){
-    try{var boxes=await model.detect(motionCanvas);lastDog=boxes.filter(function(b){return b.class==='dog'}).reduce(function(best,b){var area=b.bbox[2]*b.bbox[3]/(96*96);return Math.max(best,b.score*(.6+Math.min(1.5,area*2.1)))},0)}catch(e){model=null;lastDog=0}
+    try{dogCtx.drawImage(video,0,0,dogCanvas.width,dogCanvas.height);var boxes=await model.detect(dogCanvas);lastDog=boxes.filter(function(b){return b.class==='dog'}).reduce(function(best,b){var area=b.bbox[2]*b.bbox[3]/(dogCanvas.width*dogCanvas.height);return Math.max(best,b.score*(.6+Math.min(1.5,area*2.1)))},0)}catch(e){model=null;lastDog=0}
    }
    var thumb=(i%Math.max(1,Math.floor(duration/step/13))===0)?jpegFrame():null;
    samples.push({t:t,motion:movement,dog:lastDog,thumb:thumb});
