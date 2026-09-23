@@ -380,6 +380,8 @@
       font-size:.7rem;
       line-height:1.4;
     }
+    .command-tip strong{color:var(--teal)}
+    .extra-reference .command-item{padding:7px}
     .command-category{margin:14px 0 5px}
     .command-category:first-of-type{margin-top:6px}
     .command-category-title{
@@ -793,9 +795,9 @@ for i in range(4):
 
     <aside class="panel command-library" id="commandLibrary" aria-label="Turtle command library">
       <div class="panel-head">
-        <div class="panel-label">Turtle Commands</div>
+        <div class="panel-label">CodeHS Python Reference</div>
         <div style="display:flex;align-items:center;gap:3px">
-          <span class="commands-count" id="commandsCount">32 commands</span>
+          <span class="commands-count" id="commandsCount">reference</span>
           <button class="command-close" id="commandsClose" type="button" aria-label="Close command library">×</button>
         </div>
       </div>
@@ -803,80 +805,146 @@ for i in range(4):
         <input class="command-search" id="commandSearch" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false">
       </div>
       <div class="command-scroll" id="commandScroll">
-        <div class="command-tip">Click a command to insert it at the cursor. Search by name or purpose.</div>
-        <details class="recipe-panel">
-          <summary>Quick patterns <span>4 examples</span></summary>
+        <div class="command-tip"><strong>Matches CodeHS Tracy syntax.</strong> Click anything to insert it at the cursor. Search by command or purpose.</div>
+
+        <details class="recipe-panel" open>
+          <summary>CodeHS Turtle commands <span>official syntax</span></summary>
           <div class="recipe-body">
-            <button class="recipe-button" type="button" data-recipe="square"><strong>Repeat a shape</strong><code>for i in range(4):</code></button>
-            <button class="recipe-button" type="button" data-recipe="move"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
-            <button class="recipe-button" type="button" data-recipe="fill"><strong>Fill a shape</strong><code>begin_fill() → end_fill()</code></button>
-            <button class="recipe-button" type="button" data-recipe="print"><strong>Print Tracy's position</strong><code>print(position())</code></button>
-          </div>
-        </details>
-        <details class="recipe-panel">
-          <summary>Python essentials <span>5 references</span></summary>
-          <div class="recipe-body">
-            <button class="recipe-button" type="button" data-recipe="hello"><strong>Print text</strong><code>print("Hello")</code></button>
-            <button class="recipe-button" type="button" data-recipe="loop"><strong>Repeat with range()</strong><code>for i in range(5):</code></button>
-            <button class="recipe-button" type="button" data-recipe="function"><strong>Create a function</strong><code>def square(size):</code></button>
-            <button class="recipe-button" type="button" data-recipe="condition"><strong>Check a condition</strong><code>if xcor() &gt; 0:</code></button>
-            <button class="recipe-button" type="button" data-recipe="variable"><strong>Store a value</strong><code>distance = 80</code></button>
+            <button class="recipe-button" type="button" data-recipe="codehsSquare"><strong>Square</strong><code>for i in range(4):</code></button>
+            <button class="recipe-button" type="button" data-recipe="codehsMove"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
+            <button class="recipe-button" type="button" data-recipe="codehsFill"><strong>Filled shape</strong><code>begin_fill() → end_fill()</code></button>
+            <button class="recipe-button" type="button" data-recipe="codehsWrite"><strong>Styled text</strong><code>write(..., font=..., align=...)</code></button>
           </div>
         </details>
 
-        <div class="command-category" data-category="Movement">
-          <div class="command-category-title">Movement</div>
-          <button class="command-item" data-search="forward fd move distance" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Tracy forward 100 pixels.</span><span class="command-alias">alias: fd()</span></button>
-          <button class="command-item" data-search="backward back bk move distance" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Tracy backward 100 pixels.</span><span class="command-alias">aliases: back(), bk()</span></button>
-          <button class="command-item" data-search="left lt turn angle" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn left by 90 degrees.</span><span class="command-alias">alias: lt()</span></button>
-          <button class="command-item" data-search="right rt turn angle" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn right by 90 degrees.</span><span class="command-alias">alias: rt()</span></button>
-          <button class="command-item" data-search="goto coordinates x y setpos setposition move" data-insert="goto(100, 50)"><span class="command-syntax">goto(100, 50)</span><span class="command-desc">Move directly to an (x, y) coordinate.</span><span class="command-alias">aliases: setpos(), setposition()</span></button>
-          <button class="command-item" data-search="setx x coordinate" data-insert="setx(100)"><span class="command-syntax">setx(100)</span><span class="command-desc">Change only Tracy’s x-coordinate.</span></button>
-          <button class="command-item" data-search="sety y coordinate" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only Tracy’s y-coordinate.</span></button>
-          <button class="command-item" data-search="home origin center reset position" data-insert="home()"><span class="command-syntax">home()</span><span class="command-desc">Return to (0, 0) and face right.</span></button>
+        <div class="command-category" data-category="CodeHS Movement">
+          <div class="command-category-title">CodeHS · Movement & Position</div>
+          <button class="command-item" data-search="forward movement codehs" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Tracy forward by a distance.</span></button>
+          <button class="command-item" data-search="backward movement codehs" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Tracy backward by a distance.</span></button>
+          <button class="command-item" data-search="setposition position coordinate codehs" data-insert="setposition(100, 50)"><span class="command-syntax">setposition(100, 50)</span><span class="command-desc">Move to an exact (x, y) coordinate.</span></button>
+          <button class="command-item" data-search="goto position coordinate codehs" data-insert="goto(100, 50)"><span class="command-syntax">goto(100, 50)</span><span class="command-desc">CodeHS alternative to setposition().</span></button>
+          <button class="command-item" data-search="setx x coordinate codehs" data-insert="setx(100)"><span class="command-syntax">setx(100)</span><span class="command-desc">Change only the x-coordinate.</span></button>
+          <button class="command-item" data-search="sety y coordinate codehs" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only the y-coordinate.</span></button>
         </div>
 
-        <div class="command-category" data-category="Pen">
-          <div class="command-category-title">Pen</div>
-          <button class="command-item" data-search="penup up pu lift no draw" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Lift the pen so movement does not draw.</span><span class="command-alias">aliases: up(), pu()</span></button>
-          <button class="command-item" data-search="pendown down pd draw pen" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down so movement draws.</span><span class="command-alias">aliases: down(), pd()</span></button>
-          <button class="command-item" data-search="isdown pen status boolean" data-insert="isdown()"><span class="command-syntax">isdown()</span><span class="command-desc">Returns True if the pen is down.</span></button>
-          <button class="command-item" data-search="pensize width thickness line" data-insert="pensize(4)"><span class="command-syntax">pensize(4)</span><span class="command-desc">Set the line thickness.</span><span class="command-alias">alias: width()</span></button>
-          <button class="command-item" data-search="pencolor pen color colour line" data-insert='pencolor("blue")'><span class="command-syntax">pencolor("blue")</span><span class="command-desc">Change the line color.</span></button>
-          <button class="command-item" data-search="fillcolor fill color colour" data-insert='fillcolor("gold")'><span class="command-syntax">fillcolor("gold")</span><span class="command-desc">Choose the color used by fill.</span></button>
-          <button class="command-item" data-search="color pen fill color colour both" data-insert='color("purple")'><span class="command-syntax">color("purple")</span><span class="command-desc">Set both pen and fill color.</span></button>
+        <div class="command-category" data-category="CodeHS Rotation">
+          <div class="command-category-title">CodeHS · Rotation</div>
+          <button class="command-item" data-search="left turn degrees codehs" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn Tracy left by an angle.</span></button>
+          <button class="command-item" data-search="right turn degrees codehs" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn Tracy right by an angle.</span></button>
+          <button class="command-item" data-search="setheading seth heading direction codehs" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Face an absolute direction.</span><span class="command-alias">alias: seth()</span></button>
         </div>
 
-        <div class="command-category" data-category="Drawing">
-          <div class="command-category-title">Drawing</div>
-          <button class="command-item" data-search="circle radius draw" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a circle with radius 50.</span></button>
-          <button class="command-item" data-search="dot point circle draw" data-insert="dot(10)"><span class="command-syntax">dot(10)</span><span class="command-desc">Draw a filled dot at Tracy’s position.</span></button>
-          <button class="command-item" data-search="begin_fill fill shape start" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
-          <button class="command-item" data-search="end_fill fill shape finish" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape started with begin_fill().</span></button>
-          <button class="command-item" data-search="stamp turtle copy imprint" data-insert="stamp()"><span class="command-syntax">stamp()</span><span class="command-desc">Stamp a copy of the turtle onto the drawing.</span></button>
-          <button class="command-item" data-search="write text words label" data-insert='write("Hello")'><span class="command-syntax">write("Hello")</span><span class="command-desc">Write text at Tracy’s current position.</span></button>
-          <button class="command-item" data-search="clear drawing erase keep position" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase the drawing without moving Tracy.</span></button>
-          <button class="command-item" data-search="reset erase start over turtle" data-insert="reset()"><span class="command-syntax">reset()</span><span class="command-desc">Erase everything and return Tracy to the start.</span></button>
+        <div class="command-category" data-category="CodeHS Circles">
+          <div class="command-category-title">CodeHS · Circles</div>
+          <button class="command-item" data-search="circle radius codehs" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a full circle with radius 50.</span></button>
+          <button class="command-item" data-search="circle radius extent semicircle arc codehs" data-insert="circle(50, 180)"><span class="command-syntax">circle(50, 180)</span><span class="command-desc">Draw part of a circle using an extent.</span></button>
+          <button class="command-item" data-search="circle radius extent steps polygon triangle square codehs" data-insert="circle(50, 360, 4)"><span class="command-syntax">circle(50, 360, 4)</span><span class="command-desc">Use steps to make a polygon. Example: 4 = square.</span></button>
         </div>
 
-        <div class="command-category" data-category="Position">
-          <div class="command-category-title">Position & Heading</div>
-          <button class="command-item" data-search="xcor x coordinate get position" data-insert="xcor()"><span class="command-syntax">xcor()</span><span class="command-desc">Get Tracy’s current x-coordinate.</span></button>
-          <button class="command-item" data-search="ycor y coordinate get position" data-insert="ycor()"><span class="command-syntax">ycor()</span><span class="command-desc">Get Tracy’s current y-coordinate.</span></button>
-          <button class="command-item" data-search="position pos coordinates get tuple" data-insert="position()"><span class="command-syntax">position()</span><span class="command-desc">Get the current (x, y) coordinates.</span><span class="command-alias">alias: pos()</span></button>
-          <button class="command-item" data-search="heading direction angle get" data-insert="heading()"><span class="command-syntax">heading()</span><span class="command-desc">Get the direction Tracy is facing.</span></button>
-          <button class="command-item" data-search="setheading seth direction angle face" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Point Tracy at an exact angle.</span><span class="command-alias">alias: seth()</span></button>
+        <div class="command-category" data-category="CodeHS Pen">
+          <div class="command-category-title">CodeHS · Pen, Speed & Color</div>
+          <button class="command-item" data-search="penup lift no draw codehs" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Move without drawing.</span></button>
+          <button class="command-item" data-search="pendown draw codehs" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down. Tracy starts this way.</span></button>
+          <button class="command-item" data-search="pensize line width thickness codehs" data-insert="pensize(5)"><span class="command-syntax">pensize(5)</span><span class="command-desc">Set the trail thickness.</span></button>
+          <button class="command-item" data-search="speed animation 0 1 10 codehs" data-insert="speed(6)"><span class="command-syntax">speed(6)</span><span class="command-desc">Set Tracy speed from 0–10. CodeHS uses 0 as fastest.</span></button>
+          <button class="command-item" data-search="color colour trail turtle hex codehs" data-insert='color("blue")'><span class="command-syntax">color("blue")</span><span class="command-desc">Change Tracy and the trail color. Hex colors also work.</span></button>
+          <button class="command-item" data-search="bgcolor background color canvas codehs" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the canvas background color.</span></button>
         </div>
 
-        <div class="command-category" data-category="Turtle">
-          <div class="command-category-title">Turtle & World</div>
-          <button class="command-item" data-search="hideturtle ht hide cursor arrow" data-insert="hideturtle()"><span class="command-syntax">hideturtle()</span><span class="command-desc">Hide the turtle arrow.</span><span class="command-alias">alias: ht()</span></button>
-          <button class="command-item" data-search="showturtle st show cursor arrow" data-insert="showturtle()"><span class="command-syntax">showturtle()</span><span class="command-desc">Show the turtle arrow.</span><span class="command-alias">alias: st()</span></button>
-          <button class="command-item" data-search="speed animation fastest" data-insert="speed(0)"><span class="command-syntax">speed(0)</span><span class="command-desc">Set Turtle speed. In this sandbox, 0 means fastest.</span></button>
-          <button class="command-item" data-search="bgcolor background world color" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the Turtle world background color.</span></button>
+        <div class="command-category" data-category="CodeHS Fill Shape Clear">
+          <div class="command-category-title">CodeHS · Fill, Cursor & Clear</div>
+          <button class="command-item" data-search="begin_fill fill start codehs" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
+          <button class="command-item" data-search="end_fill fill finish codehs" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape drawn since begin_fill().</span></button>
+          <button class="command-item" data-search="shape cursor arrow turtle circle square triangle classic codehs" data-insert='shape("turtle")'><span class="command-syntax">shape("turtle")</span><span class="command-desc">Cursor options: arrow, turtle, circle, square, triangle, classic.</span></button>
+          <button class="command-item" data-search="clear erase screen codehs" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase all markings without changing Tracy’s position.</span></button>
         </div>
 
-        <div class="command-empty" id="commandEmpty">No commands match that search.</div>
+        <div class="command-category" data-category="CodeHS Text Interaction">
+          <div class="command-category-title">CodeHS · Text & Interaction</div>
+          <button class="command-item" data-search="write text canvas codehs" data-insert='write("Hello World!")'><span class="command-syntax">write("Hello World!")</span><span class="command-desc">Write text on the canvas.</span></button>
+          <button class="command-item" data-search="write font Arial size codehs" data-insert='write("Hi", font=("Arial", 20))'><span class="command-syntax">write("Hi", font=("Arial", 20))</span><span class="command-desc">Write using a chosen font and size.</span></button>
+          <button class="command-item" data-search="write align center left right codehs" data-insert='write("Tracy", align="center")'><span class="command-syntax">write("Tracy", align="center")</span><span class="command-desc">Align text left, center, or right around Tracy.</span></button>
+          <button class="command-item" data-search="onclick callback click turtle codehs" data-insert="onclick(make_square)"><span class="command-syntax">onclick(make_square)</span><span class="command-desc">Run a callback when Tracy is clicked. Callback takes x and y.</span></button>
+          <button class="command-item" data-search="getscreen canvas onclick click codehs" data-insert="canvas = getscreen()&#10;canvas.onclick(move_to_click)"><span class="command-syntax">canvas = getscreen()</span><span class="command-desc">Get the canvas so canvas.onclick(...) can respond anywhere.</span></button>
+        </div>
+
+        <details class="recipe-panel">
+          <summary>CodeHS Python language <span>loops · functions · input</span></summary>
+          <div class="recipe-body">
+            <button class="recipe-button" type="button" data-recipe="forLoop"><strong>for + range</strong><code>for i in range(4):</code></button>
+            <button class="recipe-button" type="button" data-recipe="whileLoop"><strong>while loop</strong><code>while count &lt; 5:</code></button>
+            <button class="recipe-button" type="button" data-recipe="function"><strong>Function + parameter</strong><code>def square(size):</code></button>
+            <button class="recipe-button" type="button" data-recipe="returnValue"><strong>Return a value</strong><code>return num</code></button>
+            <button class="recipe-button" type="button" data-recipe="inputValue"><strong>User input</strong><code>input("Color? ")</code></button>
+            <button class="recipe-button" type="button" data-recipe="ifElse"><strong>if / elif / else</strong><code>if count &lt; 5:</code></button>
+            <button class="recipe-button" type="button" data-recipe="printValue"><strong>Print to Text Output</strong><code>print("Hello")</code></button>
+          </div>
+        </details>
+
+        <div class="command-category" data-category="CodeHS Python Builtins">
+          <div class="command-category-title">CodeHS Python · Built-ins</div>
+          <button class="command-item" data-search="range for loop codehs python" data-insert="range(4)"><span class="command-syntax">range(4)</span><span class="command-desc">Numbers 0 through 3 for a loop.</span></button>
+          <button class="command-item" data-search="range start stop step codehs python" data-insert="range(25, 76, 25)"><span class="command-syntax">range(25, 76, 25)</span><span class="command-desc">range(start, stop, step).</span></button>
+          <button class="command-item" data-search="input user text codehs python" data-insert='input("Enter a value: ")'><span class="command-syntax">input("Enter a value: ")</span><span class="command-desc">Ask the user for text input.</span></button>
+          <button class="command-item" data-search="print console output codehs python" data-insert='print("Hello World!")'><span class="command-syntax">print("Hello World!")</span><span class="command-desc">Print to Text Output under Tracy’s world.</span></button>
+          <button class="command-item" data-search="int cast integer codehs python" data-insert="int(value)"><span class="command-syntax">int(value)</span><span class="command-desc">Convert a value to an integer.</span></button>
+          <button class="command-item" data-search="str cast string codehs python" data-insert="str(value)"><span class="command-syntax">str(value)</span><span class="command-desc">Convert a value to a string.</span></button>
+          <button class="command-item" data-search="float cast decimal codehs python" data-insert="float(value)"><span class="command-syntax">float(value)</span><span class="command-desc">Convert a value to a decimal number.</span></button>
+          <button class="command-item" data-search="type data type codehs python" data-insert="type(value)"><span class="command-syntax">type(value)</span><span class="command-desc">Find the data type of a value.</span></button>
+          <button class="command-item" data-search="len list length codehs python" data-insert="len(my_list)"><span class="command-syntax">len(my_list)</span><span class="command-desc">Get the number of items in a list.</span></button>
+        </div>
+
+        <div class="command-category" data-category="CodeHS String Methods">
+          <div class="command-category-title">CodeHS Python · String Methods</div>
+          <button class="command-item" data-search="capitalize string codehs" data-insert="text.capitalize()"><span class="command-syntax">text.capitalize()</span><span class="command-desc">Capitalize the first character.</span></button>
+          <button class="command-item" data-search="upper string codehs" data-insert="text.upper()"><span class="command-syntax">text.upper()</span><span class="command-desc">Make letters uppercase.</span></button>
+          <button class="command-item" data-search="lower string codehs" data-insert="text.lower()"><span class="command-syntax">text.lower()</span><span class="command-desc">Make letters lowercase.</span></button>
+          <button class="command-item" data-search="strip string whitespace codehs" data-insert="text.strip()"><span class="command-syntax">text.strip()</span><span class="command-desc">Remove outside whitespace.</span></button>
+          <button class="command-item" data-search="replace string codehs" data-insert='text.replace("old", "new")'><span class="command-syntax">text.replace("old", "new")</span><span class="command-desc">Replace matching text.</span></button>
+          <button class="command-item" data-search="find string index codehs" data-insert='text.find("a")'><span class="command-syntax">text.find("a")</span><span class="command-desc">Find the first matching index, or -1.</span></button>
+          <button class="command-item" data-search="count string occurrences codehs" data-insert='text.count("a")'><span class="command-syntax">text.count("a")</span><span class="command-desc">Count occurrences.</span></button>
+          <button class="command-item" data-search="isalpha string boolean codehs" data-insert="text.isalpha()"><span class="command-syntax">text.isalpha()</span><span class="command-desc">True when all characters are letters.</span></button>
+          <button class="command-item" data-search="isdigit string boolean codehs" data-insert="text.isdigit()"><span class="command-syntax">text.isdigit()</span><span class="command-desc">True when all characters are digits.</span></button>
+          <button class="command-item" data-search="isnumeric string boolean codehs" data-insert="text.isnumeric()"><span class="command-syntax">text.isnumeric()</span><span class="command-desc">True when all characters are numeric.</span></button>
+          <button class="command-item" data-search="isupper string boolean codehs" data-insert="text.isupper()"><span class="command-syntax">text.isupper()</span><span class="command-desc">True when all letters are uppercase.</span></button>
+          <button class="command-item" data-search="islower string boolean codehs" data-insert="text.islower()"><span class="command-syntax">text.islower()</span><span class="command-desc">True when all letters are lowercase.</span></button>
+          <button class="command-item" data-search="startswith string boolean codehs" data-insert='text.startswith("T")'><span class="command-syntax">text.startswith("T")</span><span class="command-desc">Check the beginning of a string.</span></button>
+          <button class="command-item" data-search="endswith string boolean codehs" data-insert='text.endswith("y")'><span class="command-syntax">text.endswith("y")</span><span class="command-desc">Check the end of a string.</span></button>
+          <button class="command-item" data-search="format string placeholders codehs" data-insert='message.format(value)'><span class="command-syntax">message.format(value)</span><span class="command-desc">Insert values into {} placeholders.</span></button>
+        </div>
+
+        <div class="command-category" data-category="CodeHS List Methods">
+          <div class="command-category-title">CodeHS Python · Lists</div>
+          <button class="command-item" data-search="list create codehs python" data-insert='my_list = ["a", "b", "c"]'><span class="command-syntax">my_list = ["a", "b", "c"]</span><span class="command-desc">Create a list.</span></button>
+          <button class="command-item" data-search="list index codehs python" data-insert="my_list[0]"><span class="command-syntax">my_list[0]</span><span class="command-desc">Access an item by index.</span></button>
+          <button class="command-item" data-search="list slice codehs python" data-insert="my_list[1:3]"><span class="command-syntax">my_list[1:3]</span><span class="command-desc">Take a slice of a list.</span></button>
+          <button class="command-item" data-search="append list add codehs python" data-insert="my_list.append(value)"><span class="command-syntax">my_list.append(value)</span><span class="command-desc">Add one item to the end.</span></button>
+          <button class="command-item" data-search="extend list add multiple codehs python" data-insert="my_list.extend(other_list)"><span class="command-syntax">my_list.extend(other_list)</span><span class="command-desc">Add multiple items to the end.</span></button>
+          <button class="command-item" data-search="insert list codehs python" data-insert="my_list.insert(1, value)"><span class="command-syntax">my_list.insert(1, value)</span><span class="command-desc">Insert at an index.</span></button>
+          <button class="command-item" data-search="pop list remove index codehs python" data-insert="my_list.pop()"><span class="command-syntax">my_list.pop()</span><span class="command-desc">Remove and return an item.</span></button>
+          <button class="command-item" data-search="remove list item codehs python" data-insert="my_list.remove(value)"><span class="command-syntax">my_list.remove(value)</span><span class="command-desc">Remove a matching item.</span></button>
+          <button class="command-item" data-search="del list delete keyword codehs python" data-insert="del my_list[0]"><span class="command-syntax">del my_list[0]</span><span class="command-desc">Delete an item by index.</span></button>
+          <button class="command-item" data-search="sort list codehs python" data-insert="my_list.sort()"><span class="command-syntax">my_list.sort()</span><span class="command-desc">Sort a list.</span></button>
+          <button class="command-item" data-search="reverse list codehs python" data-insert="my_list.reverse()"><span class="command-syntax">my_list.reverse()</span><span class="command-desc">Reverse a list in place.</span></button>
+        </div>
+
+        <details class="recipe-panel">
+          <summary>Sandbox extras <span>work here too</span></summary>
+          <div class="recipe-body extra-reference">
+            <button class="command-item" data-search="home extra turtle" data-insert="home()"><span class="command-syntax">home()</span><span class="command-desc">Return to (0, 0) and face right.</span></button>
+            <button class="command-item" data-search="xcor extra turtle" data-insert="xcor()"><span class="command-syntax">xcor()</span><span class="command-desc">Read Tracy’s x-coordinate.</span></button>
+            <button class="command-item" data-search="ycor extra turtle" data-insert="ycor()"><span class="command-syntax">ycor()</span><span class="command-desc">Read Tracy’s y-coordinate.</span></button>
+            <button class="command-item" data-search="position pos extra turtle" data-insert="position()"><span class="command-syntax">position()</span><span class="command-desc">Read Tracy’s (x, y) position.</span></button>
+            <button class="command-item" data-search="heading extra turtle" data-insert="heading()"><span class="command-syntax">heading()</span><span class="command-desc">Read Tracy’s heading.</span></button>
+            <button class="command-item" data-search="dot extra turtle" data-insert="dot(10)"><span class="command-syntax">dot(10)</span><span class="command-desc">Draw a dot.</span></button>
+            <button class="command-item" data-search="stamp extra turtle" data-insert="stamp()"><span class="command-syntax">stamp()</span><span class="command-desc">Stamp the current cursor.</span></button>
+            <button class="command-item" data-search="hide turtle hideturtle extra" data-insert="hideturtle()"><span class="command-syntax">hideturtle()</span><span class="command-desc">Hide the cursor.</span></button>
+            <button class="command-item" data-search="show turtle showturtle extra" data-insert="showturtle()"><span class="command-syntax">showturtle()</span><span class="command-desc">Show the cursor.</span></button>
+            <button class="command-item" data-search="reset extra turtle" data-insert="reset()"><span class="command-syntax">reset()</span><span class="command-desc">Reset drawing and turtle state.</span></button>
+          </div>
+        </details>
+
+        <div class="command-empty" id="commandEmpty">No reference items match that search.</div>
       </div>
     </aside>
     <div class="commands-overlay" id="commandsOverlay"></div>
@@ -1165,6 +1233,7 @@ for i in range(4):
       size:1,
       visible:true,
       speed:6,
+      shape:"turtle",
       filling:false,
       fillPoints:[]
     };
@@ -1201,14 +1270,30 @@ for i in range(4):
       target.save();
       target.translate(px(state.x),py(state.y));
       target.rotate(-rad(state.heading));
+      target.fillStyle=state.color||"#000";
+      target.strokeStyle=state.color||"#000";
+      target.lineWidth=1.5;
+      var shape=state.shape||"turtle";
       target.beginPath();
-      target.moveTo(9,0);
-      target.lineTo(-7,-5.5);
-      target.lineTo(-5,0);
-      target.lineTo(-7,5.5);
-      target.closePath();
-      target.fillStyle = state.color || "#000";
-      target.fill();
+      if(shape==="circle"){
+        target.arc(0,0,7,0,Math.PI*2);
+        target.fill();
+      }else if(shape==="square"){
+        target.fillRect(-7,-7,14,14);
+      }else if(shape==="triangle"){
+        target.moveTo(9,0);target.lineTo(-7,-7);target.lineTo(-7,7);target.closePath();target.fill();
+      }else if(shape==="classic"){
+        target.moveTo(10,0);target.lineTo(-7,-5);target.lineTo(-3,0);target.lineTo(-7,5);target.closePath();target.fill();
+      }else if(shape==="arrow"){
+        target.moveTo(10,0);target.lineTo(-6,-6);target.lineTo(-2,0);target.lineTo(-6,6);target.closePath();target.fill();
+      }else{
+        // A simple turtle silhouette for CodeHS's default "turtle" cursor.
+        target.ellipse(-1,0,8,5,0,0,Math.PI*2);target.fill();
+        target.beginPath();target.arc(8,0,3,0,Math.PI*2);target.fill();
+        [[-4,-6],[-4,6],[3,-6],[3,6]].forEach(function(p){
+          target.beginPath();target.arc(p[0],p[1],2,0,Math.PI*2);target.fill();
+        });
+      }
       target.restore();
     }
 
@@ -1345,11 +1430,12 @@ for i in range(4):
       });
     }
 
-    function animateCircle(radius,extent){
+    function animateCircle(radius,extent,steps){
       var r=Number(radius);
       var angle=extent===undefined?360:Number(extent);
-      if(!Number.isFinite(r)||!Number.isFinite(angle))
-        return Promise.reject(new Error("Circle radius and extent must be numbers"));
+      var stepCount=steps===undefined||steps===null?null:Math.max(1,Math.floor(Number(steps)));
+      if(!Number.isFinite(r)||!Number.isFinite(angle)||(stepCount!==null&&!Number.isFinite(stepCount)))
+        return Promise.reject(new Error("Circle radius, extent, and steps must be numbers"));
       if(r===0||angle===0)return Promise.resolve(none());
       var heading=state.heading;
       var base=rad(heading);
@@ -1358,6 +1444,29 @@ for i in range(4):
       var startAngle=Math.atan2(state.y-cy,state.x-cx);
       var signedExtent=rad(angle)*(r>=0?1:-1);
       var arcLength=Math.abs(r*rad(angle));
+
+      if(stepCount!==null){
+        var points=[[state.x,state.y]];
+        for(var s=1;s<=stepCount;s++){
+          var theta=startAngle+signedExtent*(s/stepCount);
+          points.push([cx+Math.abs(r)*Math.cos(theta),cy+Math.abs(r)*Math.sin(theta)]);
+        }
+        var lengths=[],total=0;
+        for(var p=1;p<points.length;p++){
+          var d=Math.hypot(points[p][0]-points[p-1][0],points[p][1]-points[p-1][1]);
+          lengths.push(d);total+=d;
+        }
+        return animate("move",total,function(t){
+          var target=t*total,used=0,index=0;
+          while(index<lengths.length-1&&used+lengths[index]<target){used+=lengths[index];index++;}
+          var local=lengths[index]?Math.max(0,Math.min(1,(target-used)/lengths[index])):1;
+          var a=points[index],b=points[index+1];
+          moveTo(a[0]+(b[0]-a[0])*local,a[1]+(b[1]-a[1])*local);
+          state.heading=heading+angle*(r>=0?1:-1)*t;
+          refreshSprite();
+        },"Drawing "+stepCount+"-step shape");
+      }
+
       return animate("move",arcLength,function(t){
         var a=startAngle+signedExtent*t;
         moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
@@ -1391,6 +1500,10 @@ for i in range(4):
       state.size=1;
       state.visible=true;
       state.speed=6;
+      state.shape="turtle";
+      state.turtleClickCallback=null;
+      state.screenClickCallback=null;
+      state.screenObject=null;
       state.filling=false;
       state.fillPoints=[];
       world.style.backgroundColor="#ffffff";
@@ -1450,13 +1563,88 @@ for i in range(4):
       refreshSprite();
     }
 
-    function writeText(message){
+    function writeText(message,font,align){
+      var family="Arial",size=14;
+      if(Array.isArray(font)&&font.length){
+        family=String(font[0]||family);
+        if(font.length>1&&Number.isFinite(Number(font[1])))size=Number(font[1]);
+      }
+      var alignment=String(align||"left").toLowerCase();
+      if(["left","center","right"].indexOf(alignment)<0)alignment="left";
       ctx.save();
       ctx.fillStyle=state.color;
-      ctx.font="16px ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.font=size+"px "+JSON.stringify(family);
       ctx.textBaseline="middle";
+      ctx.textAlign=alignment;
       ctx.fillText(String(message),px(state.x),py(state.y));
       ctx.restore();
+    }
+
+    function setShape(name){
+      var allowed=["arrow","turtle","circle","square","triangle","classic"];
+      var next=String(name);
+      if(allowed.indexOf(next)<0)throw new Error("Unknown turtle shape: "+next);
+      state.shape=next;
+      refreshSprite();
+    }
+
+
+    function pyNameToJs(pyName){
+      if(pyName&&typeof pyName.$jsstr==="function")return pyName.$jsstr();
+      return pyName&&pyName.v!==undefined?String(pyName.v):String(pyName);
+    }
+
+    function callClickCallback(callback,x,y){
+      if(!callback||playback.active)return;
+      playback.active=true;
+      playback.paused=false;
+      playback.stepOnce=false;
+      playback.codeSpeed=state.speed;
+      syncPlaybackButtons();
+      Sk.misceval.asyncToPromise(function(){
+        return Sk.misceval.callsimOrSuspend(callback,pyNum(x),pyNum(y));
+      }).catch(function(err){
+        appendOutput(formatError(err)+"\n","error");
+      }).finally(function(){
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        syncPlaybackButtons();
+      });
+    }
+
+    world.addEventListener("click",function(event){
+      var rect=world.getBoundingClientRect();
+      var localX=(event.clientX-rect.left)/rect.width*400;
+      var localY=(event.clientY-rect.top)/rect.height*400;
+      var x=localX-200,y=200-localY;
+      if(state.turtleClickCallback&&Math.hypot(x-state.x,y-state.y)<=20){
+        callClickCallback(state.turtleClickCallback,x,y);
+      }else if(state.screenClickCallback){
+        callClickCallback(state.screenClickCallback,x,y);
+      }
+    });
+
+    function getScreenObject(){
+      if(state.screenObject)return state.screenObject;
+      var obj=new Sk.builtin.object();
+      obj.tp$name="Screen";
+      obj.$attrs={};
+      var onclickFn=new Sk.builtin.func(function(callback){
+        state.screenClickCallback=callback;
+        return none();
+      });
+      obj.tp$getattr=function(pyName){
+        var name=pyNameToJs(pyName);
+        if(name==="onclick")return onclickFn;
+        return this.$attrs[name];
+      };
+      obj.tp$setattr=function(pyName,value){
+        this.$attrs[pyNameToJs(pyName)]=value;
+        return none();
+      };
+      state.screenObject=obj;
+      return obj;
     }
 
     function installBuiltins(){
@@ -1515,11 +1703,19 @@ for i in range(4):
         }
         return none();
       });
-      Sk.builtins.circle=new Sk.builtin.func(function(radius,extent){
+      var circleFn=function(radius,extent,steps){
         return Sk.misceval.promiseToSuspension(
-          animateCircle(js(radius),extent===undefined?undefined:js(extent))
+          animateCircle(
+            js(radius),
+            extent===Sk.builtin.none.none$?undefined:js(extent),
+            steps===Sk.builtin.none.none$?undefined:js(steps)
+          )
         );
-      });
+      };
+      circleFn.co_varnames=["radius","extent","steps"];
+      circleFn.co_argcount=3;
+      circleFn.$defaults=[new Sk.builtin.int_(360),Sk.builtin.none.none$];
+      Sk.builtins.circle=new Sk.builtin.func(circleFn);
 
       fn1("color",function(c){setColor(c);state.fillColor=String(c);return none();});
       fn1("pencolor",function(c){setColor(c);return none();});
@@ -1529,6 +1725,7 @@ for i in range(4):
       fn0("begin_fill",beginFill);
       fn0("end_fill",endFill);
       fn0("clear",clear);
+      fn1("shape",function(name){setShape(name);return none();});
       fn0("reset",reset);
       fn1("dot",function(v){dot(v);return none();});
       fn0("stamp",function(){drawSpriteOn(ctx,true);});
@@ -1548,7 +1745,26 @@ for i in range(4):
       Sk.builtins.pos=Sk.builtins.position;
 
       fn1("bgcolor",function(c){world.style.backgroundColor=String(c);return none();});
-      fn1("write",function(m){writeText(m);return none();});
+
+      var writeFn=function(message,move,align,font){
+        writeText(
+          js(message),
+          font===Sk.builtin.none.none$?null:js(font),
+          align===Sk.builtin.none.none$?"left":js(align)
+        );
+        return none();
+      };
+      writeFn.co_varnames=["message","move","align","font"];
+      writeFn.co_argcount=4;
+      writeFn.$defaults=[
+        Sk.builtin.bool.false$,
+        new Sk.builtin.str("left"),
+        Sk.builtin.none.none$
+      ];
+      Sk.builtins.write=new Sk.builtin.func(writeFn);
+
+      fn1("onclick",function(callback){state.turtleClickCallback=callback;return none();});
+      Sk.builtins.getscreen=new Sk.builtin.func(function(){return getScreenObject();});
     }
 
     return {
@@ -1846,15 +2062,17 @@ for i in range(4):
   });
 
   var recipes = {
-    square:"for i in range(4):\n    forward(100)\n    right(90)",
-    move:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
-    fill:'color("navy")\nfillcolor("gold")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
-    print:'print("Tracy is at:", position())',
-    hello:'print("Hello")',
-    loop:"for i in range(5):\n    forward(50)\n    right(72)",
+    codehsSquare:"for i in range(4):\n    forward(100)\n    right(90)",
+    codehsMove:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
+    codehsFill:'color("navy")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
+    codehsWrite:'write("Tracy", font=("Arial", 20), align="center")',
+    forLoop:"for i in range(4):\n    forward(50)\n    left(90)",
+    whileLoop:"count = 0\nwhile count < 5:\n    forward(20)\n    count += 1",
     function:"def square(size):\n    for i in range(4):\n        forward(size)\n        right(90)\n\nsquare(80)",
-    condition:"if xcor() > 0:\n    color(\"blue\")",
-    variable:"distance = 80\nforward(distance)"
+    returnValue:"def increase(num):\n    num += 100\n    return num\n\ncircle(increase(50))",
+    inputValue:'circle_color = input("What color? ")\ncolor(circle_color)\ncircle(50)',
+    ifElse:'count = 3\nif count < 5:\n    color("blue")\nelif count > 5:\n    color("red")\nelse:\n    color("green")',
+    printValue:'print("Hello World!")'
   };
   document.querySelectorAll(".recipe-button").forEach(function(button){
     button.addEventListener("click",function(){
@@ -1899,7 +2117,7 @@ for i in range(4):
     });
 
     commandEmpty.style.display = visibleCount ? "none" : "block";
-    commandsCount.textContent = visibleCount + (visibleCount === 1 ? " command" : " commands");
+    commandsCount.textContent = visibleCount + (visibleCount === 1 ? " item" : " items");
   }
 
   if(commandSearch) commandSearch.addEventListener("input", filterCommands);
