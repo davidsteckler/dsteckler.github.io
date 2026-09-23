@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Phone Case Words | David Steckler</title>
+<meta name="description" content="365 Little Mermaid-adjacent, sweet one-word ideas for a nightly phone case word.">
+<style>
+:root{
+  --deep:#082c3b;--deep2:#0d4757;--sea:#1f8290;--aqua:#69c8c7;--foam:#ecfbf8;
+  --sand:#fff5e7;--pearl:#fffdf8;--coral:#e78278;--ink:#15333b;--muted:#66848a;
+  --line:rgba(17,73,82,.12);--shadow:0 20px 55px rgba(7,44,59,.12);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:
+radial-gradient(circle at 10% 0%,rgba(105,200,199,.22),transparent 27%),
+radial-gradient(circle at 96% 6%,rgba(231,130,120,.16),transparent 26%),
+linear-gradient(180deg,#f3fffd 0%,#fff8ef 100%);min-height:100vh}
+button,input{font:inherit}
+.wrap{width:min(1120px,calc(100% - 28px));margin:0 auto}
+header{padding:22px 0 12px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-size:.78rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--deep2)}
+.note{font-size:.78rem;color:var(--muted)}
+.hero{margin-top:12px;display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
+.card{background:rgba(255,253,248,.78);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.today{padding:34px;position:relative;overflow:hidden;min-height:360px;display:flex;flex-direction:column;justify-content:space-between}
+.today:before{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;border:34px solid rgba(105,200,199,.13)}
+.today:after{content:"";position:absolute;right:62px;bottom:-82px;width:180px;height:180px;border-radius:50%;border:26px solid rgba(231,130,120,.10)}
+.kicker{position:relative;z-index:1;font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--sea)}
+.word{position:relative;z-index:1;font-family:Georgia,"Times New Roman",serif;font-size:clamp(4rem,10vw,7.4rem);line-height:.9;letter-spacing:-.055em;color:var(--deep);overflow-wrap:anywhere}
+.meta{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:.8rem}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-weight:750;color:var(--deep2);cursor:pointer}
+.btn.primary{background:var(--deep);color:white;border-color:var(--deep)}
+.side{padding:25px;display:flex;flex-direction:column;gap:18px}
+.side h1{font-family:Georgia,"Times New Roman",serif;font-size:2rem;line-height:1.04;margin:0;color:var(--deep)}
+.side p{margin:0;color:var(--muted);line-height:1.6;font-size:.92rem}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:7px 10px;border-radius:999px;background:rgba(31,130,144,.08);color:var(--deep2);font-size:.75rem;font-weight:700}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
+.mini div{border:1px solid var(--line);border-radius:16px;padding:13px;background:rgba(255,255,255,.55)}
+.mini strong{display:block;font-size:1.05rem;color:var(--deep)}
+.mini span{font-size:.68rem;color:var(--muted)}
+.toolbar{margin:26px 0 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toolbar h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:1.7rem;color:var(--deep)}
+.search{min-width:260px;flex:0 1 340px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:11px 13px;outline:none}
+.search:focus{border-color:rgba(31,130,144,.4);box-shadow:0 0 0 4px rgba(31,130,144,.08)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;padding-bottom:44px}
+.wordcard{border:1px solid var(--line);background:rgba(255,255,255,.64);border-radius:16px;padding:13px 12px;min-height:78px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.15s}
+.wordcard:hover{transform:translateY(-2px);background:#fff;box-shadow:0 10px 28px rgba(8,44,59,.08)}
+.wordcard.current{border-color:rgba(31,130,144,.48);background:rgba(105,200,199,.13)}
+.day{font-size:.64rem;color:var(--muted)}
+.w{font-family:Georgia,"Times New Roman",serif;font-size:1.15rem;color:var(--deep);line-height:1.05;overflow-wrap:anywhere}
+.cat{font-size:.62rem;color:var(--sea);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)}
+footer{padding:10px 0 32px;text-align:center;color:var(--muted);font-size:.72rem}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.today{min-height:320px}.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){header{padding-top:16px}.note{display:none}.today{padding:25px;min-height:300px}.word{font-size:clamp(3.7rem,18vw,5.6rem)}.meta{align-items:flex-start;flex-direction:column}.side{padding:21px}.mini{grid-template-columns:1fr 1fr 1fr}.toolbar{align-items:stretch}.search{min-width:0;width:100%;flex-basis:100%}.grid{grid-template-columns:repeat(2,1fr)}.wordcard{min-height:74px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div class="brand">Phone Case Words</div>
+    <div class="note">365 ideas · one for every night</div>
+  </div>
+</header>
+<main class="wrap">
+  <section class="hero">
+    <div class="card today">
+      <div class="kicker">Tonight's word</div>
+      <div class="word" id="todayWord">Treasure</div>
+      <div class="meta">
+        <span id="todayMeta">Day 1 · September 22</span>
+        <div class="actions">
+          <button class="btn" id="prevBtn" type="button">← previous</button>
+          <button class="btn" id="nextBtn" type="button">next →</button>
+          <button class="btn primary" id="randomBtn" type="button">random idea</button>
+        </div>
+      </div>
+    </div>
+    <aside class="card side">
+      <div>
+        <h1>Sweet, a little ocean-y, and easy to put on a case.</h1>
+        <p style="margin-top:10px">Some words are directly Little Mermaid. Most just live in the same world: sea, light, music, softness, keepsakes, love, and little things that feel personal.</p>
+      </div>
+      <div class="pills">
+        <span class="pill">ocean</span><span class="pill">mermaid</span><span class="pill">sweet</span><span class="pill">romantic</span><span class="pill">not too cheesy</span>
+      </div>
+      <div class="mini">
+        <div><strong>365</strong><span>unique words</span></div>
+        <div><strong>12</strong><span>idea groups</span></div>
+        <div><strong>1</strong><span>word nightly</span></div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="toolbar">
+    <h2>All 365 words</h2>
+    <input class="search" id="search" type="search" placeholder="Search words or themes…">
+  </div>
+  <section class="grid" id="grid"></section>
+</main>
+<footer>Starts September 22, 2026 · runs for 365 nights</footer>
+
+<script>
+const startDate = new Date(2026,8,22);
+const chapters = [{"name":"By the sea","words":["Treasure","Pearl","Seashell","Coral","Lagoon","Tide","Shore","Cove","Ripple","Seaspray","Driftwood","Seaglass","Sandbar","Ocean","Current","Foam","Reef","Horizon","Harbor","Dune","Island","Starfish","Pebble","Dolphin","Seahorse","Anemone","Shell","Wave","Marina","Azure","Shimmer"]},{"name":"Little lights","words":["Moonlight","Starlight","Sunrise","Sunset","Twilight","Daydream","Glow","Glimmer","Radiance","Sparkle","Sunbeam","Moonbeam","Luminous","Golden","Glisten","Flicker","Aurora","Halo","Lantern","Solstice","Celestial","Constellation","Starfall","Moonrise","Skylight","Dewdrop","Opal","Prism","Gleam","Brightness"]},{"name":"Sweet things","words":["Beloved","Darling","Sweetheart","Dearest","Adore","Cherish","Tenderness","Devotion","Affection","Warmth","Cuddle","Embrace","Snuggle","Kiss","Heartbeat","Honey","Sweetness","Precious","Enchanting","Lovely","Beautiful","Gentle","Kindness","Softness","Comfort","Closeness","Together","Forever","Always","Home"]},{"name":"Underwater story","words":["Ariel","Flounder","Sebastian","Scuttle","Eric","Triton","Atlantica","Grotto","Dinglehopper","Melody","Symphony","Harmony","Serenade","Lullaby","Songbird","Voice","Wish","Wonder","Magic","Enchantment","Storybook","Fairytale","Dream","Dancing","Kingdom","Castle","Crown","Mermaid","Siren","Splendor"]},{"name":"Into the blue","words":["Sway","Drift","Float","Sail","Wander","Roam","Journey","Voyage","Explore","Discover","Compass","Anchor","Sailboat","Lighthouse","Beacon","Wayfinder","Starboard","Bluewater","Deepblue","Saltwater","Seabreeze","Seafoam","Moonpool","Ebb","Flow","Surf","Splash","Bubbles","Waterfall","Raindrop","Mist"]},{"name":"Colors and jewels","words":["Aquamarine","Turquoise","Sapphire","Emerald","Amethyst","Lavender","Lilac","Rose","Blush","Peach","Apricot","Amber","Ivory","Silver","Indigo","Cerulean","Periwinkle","Mint","Jade","Topaz","Citrine","Garnet","Seasalt","Iridescent","Pastel","Velvet","Satin","Cashmere","Porcelain","Watercolor"]},{"name":"Things that bloom","words":["Bloom","Blossom","Petal","Garden","Wildflower","Daisy","Lily","Jasmine","Magnolia","Orchid","Poppy","Clover","Meadow","Willow","Fern","Ivy","Laurel","Springtime","Flourish","Sprout","Rainfall","Sunshine","Butterfly","Firefly","Hummingbird","Song","Petunia","Marigold","Wisteria","Honeysuckle","Hyacinth"]},{"name":"Little keepsakes","words":["Keepsake","Memento","Memory","Yesterday","Tomorrow","Tonight","Moment","Whisper","Secret","Promise","Ribbon","Letter","Postcard","Photograph","Polaroid","Souvenir","Trinket","Charm","Locket","Pendant","Bracelet","Necklace","Jewel","Gemstone","Heirloom","Notebook","Footprint","Handprint","Daylight","Nightfall"]},{"name":"After sunset","words":["Dreamland","Starshine","Moondust","Nightlight","Nightingale","Dreamer","Slumber","Rest","Hush","Quiet","Stillness","Serenity","Peace","Tranquility","Calm","Cozy","Pillow","Blanket","Nestle","Bedtime","Starlit","Moonlit","Nightbloom","Afterglow","Midnight","Evening","Dusk","Dawn","Sleepy","Goodnight","Sweetdreams"]},{"name":"The good in us","words":["Smile","Laughter","Joy","Delight","Bliss","Happiness","Hope","Trust","Grace","Patience","Care","Support","Belong","Belonging","Faithful","Loyal","Faith","Soulmate","Heartfelt","Grateful","Gratitude","Appreciation","Admiration","Inspiration","Courage","Strength","Bravery","Wonderstruck","Thankful","Contentment"]},{"name":"Ocean friends","words":["Turtle","Otter","Seal","Penguin","Puffin","Jellyfish","Octopus","Narwhal","Whale","Seasponge","Clam","Oyster","Sanddollar","Seahaven","Bubble","Seasong","Seabird","Seaflower","Moonstone","Sunstone","Seasparkle","Wishbone","Feather","Downy","Cotton","Meringue","Marshmallow","Cupcake","Sugarplum","Heartstrings"]},{"name":"All the tomorrows","words":["Evermore","Infinity","Eternity","Timeless","Endless","Unwritten","Someday","Whenever","Anywhere","Everywhere","Beyond","Stardust","Destiny","Serendipity","Fortunate","Lucky","Miracle","Wishing","Becoming","Togetherness","Entwined","Unbreakable","Safe","Shelter","Haven","Paradise","Utopia","Sanctuary","Heart","Love","Us"]}];
+const entries = chapters.flatMap(ch => ch.words.map(word => ({word, category:ch.name})));
+const grid = document.getElementById('grid');
+const todayWord = document.getElementById('todayWord');
+const todayMeta = document.getElementById('todayMeta');
+let selectedIndex = (() => {
+  const now = new Date();
+  const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = Math.floor((localMidnight - startDate) / 86400000);
+  return Math.max(0, Math.min(364, diff));
+})();
+
+function dateFor(index){
+  const d = new Date(startDate);
+  d.setDate(d.getDate()+index);
+  return d;
+}
+function formatDate(d){
+  return d.toLocaleDateString(undefined,{month:'long',day:'numeric'});
+}
+function show(index, scroll=false){
+  selectedIndex = (index+365)%365;
+  const e = entries[selectedIndex];
+  todayWord.textContent = e.word;
+  todayMeta.textContent = 'Day '+(selectedIndex+1)+' · '+formatDate(dateFor(selectedIndex))+' · '+e.category;
+  render(document.getElementById('search').value);
+  if(scroll) window.scrollTo({top:0,behavior:'smooth'});
+}
+function render(query=''){
+  const q=query.trim().toLowerCase();
+  grid.innerHTML='';
+  let shown=0;
+  entries.forEach((e,i)=>{
+    if(q && !(e.word.toLowerCase().includes(q)||e.category.toLowerCase().includes(q))) return;
+    shown++;
+    const card=document.createElement('button');
+    card.type='button';
+    card.className='wordcard'+(i===selectedIndex?' current':'');
+    card.innerHTML='<span class="day">DAY '+(i+1)+' · '+formatDate(dateFor(i)).toUpperCase()+'</span><span class="w">'+e.word+'</span><span class="cat">'+e.category+'</span>';
+    card.addEventListener('click',()=>show(i,true));
+    grid.appendChild(card);
+  });
+  if(!shown) grid.innerHTML='<div class="empty">No matches. Try a broader search.</div>';
+}
+document.getElementById('prevBtn').addEventListener('click',()=>show(selectedIndex-1));
+document.getElementById('nextBtn').addEventListener('click',()=>show(selectedIndex+1));
+document.getElementById('randomBtn').addEventListener('click',()=>show(Math.floor(Math.random()*365)));
+document.getElementById('search').addEventListener('input',e=>render(e.target.value));
+show(selectedIndex);
+</script>
+</body>
+</html>
