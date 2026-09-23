@@ -236,6 +236,15 @@
     .CodeMirror-linenumber{color:#697271}
     .CodeMirror-cursor{border-left:2px solid #e4bd66}
     .CodeMirror .turtle-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
+    .CodeMirror .turtle-error-line{
+      background:rgba(219,93,66,.18)!important;
+      box-shadow:inset 3px 0 #e16f55;
+    }
+    .CodeMirror .turtle-error-token{
+      text-decoration:underline wavy #ef8a70 1.5px;
+      text-decoration-skip-ink:none;
+      background:rgba(239,138,112,.10);
+    }
     .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
     .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
     .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
@@ -288,6 +297,22 @@
     #output .error{color:#f0a48c}
     #output .success{color:#9fd0b4}
     #output .muted{color:#7c8584}
+    .error-card{
+      display:block;margin:3px 0 8px;padding:11px 12px 12px;
+      border:1px solid #6c4138;border-radius:10px;background:#251d1b;
+      color:#e8e4df;white-space:normal;font-family:Arial,Helvetica,sans-serif;
+    }
+    .error-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+    .error-badge{color:#f2aa93;font:800 .67rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.05em}
+    .error-line-button{border:1px solid #65443d;background:#30231f;color:#f3c5b5;border-radius:7px;padding:5px 8px;font-size:.66rem;font-weight:800}
+    .error-line-button:hover{background:#3a2924}
+    .error-title{font-size:.87rem;font-weight:850;line-height:1.25;color:#fff;margin-bottom:5px}
+    .error-explanation{font-size:.76rem;line-height:1.45;color:#d7d0cb}
+    .error-source{display:block;margin-top:8px;padding:7px 8px;border-radius:7px;background:#171b1c;color:#f1d4c8;font:650 .72rem/1.45 "JetBrains Mono","SFMono-Regular",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .error-hint{display:block;margin-top:8px;padding:7px 8px;border-radius:7px;background:#e7f2ee;color:#174f48;font-size:.74rem;line-height:1.4;font-weight:750}
+    .error-raw{margin-top:8px;color:#9f9691;font-size:.66rem}
+    .error-raw summary{cursor:pointer;color:#b9aaa4;font-weight:750}
+    .error-raw code{display:block;margin-top:5px;color:#a9a09b;font:500 .65rem/1.4 "JetBrains Mono","SFMono-Regular",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
 
     .world-panel{
       display:grid;
@@ -854,10 +879,10 @@ for i in range(4):
 
       <div class="console" aria-label="Text output">
         <div class="console-head">
-          <span>Text Output · print()</span>
+          <span>Output · print() & errors</span>
           <button class="console-clear" id="clearConsole" type="button">clear</button>
         </div>
-        <pre id="output"><span class="muted">print() output will appear here.</span></pre>
+        <div id="output"><span class="muted">print() output will appear here.</span></div>
       </div>
     </section>
 
@@ -1282,8 +1307,42 @@ for i in range(4):
     if(saved !== null) editor.setValue(saved);
   } catch(e) {}
 
+  var errorLineMarker=null;
+  var errorTokenMarker=null;
+
+  function clearErrorHighlight(){
+    if(errorLineMarker!==null){
+      try{editor.removeLineClass(errorLineMarker,"background","turtle-error-line");}catch(e){}
+      errorLineMarker=null;
+    }
+    if(errorTokenMarker){
+      try{errorTokenMarker.clear();}catch(e){}
+      errorTokenMarker=null;
+    }
+  }
+
+  function highlightError(line,token){
+    clearErrorHighlight();
+    var n=Number(line);
+    if(!Number.isInteger(n)||n<1||n>editor.lineCount())return;
+    errorLineMarker=editor.addLineClass(n-1,"background","turtle-error-line");
+    var sourceLine=editor.getLine(n-1)||"";
+    if(token){
+      var start=sourceLine.indexOf(token);
+      if(start>=0){
+        errorTokenMarker=editor.markText(
+          {line:n-1,ch:start},
+          {line:n-1,ch:start+token.length},
+          {className:"turtle-error-token"}
+        );
+      }
+    }
+    editor.scrollIntoView({line:n-1,ch:0},80);
+  }
+
   var saveTimer = null;
   editor.on("change", function(){
+    clearErrorHighlight();
     saveStatus.textContent = "saving…";
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function(){
@@ -1311,6 +1370,200 @@ for i in range(4):
     span.textContent = text;
     output.appendChild(span);
     output.scrollTop = output.scrollHeight;
+  }
+
+  var TURTLE_ERROR_NAMES=[
+    "forward","backward","left","right","goto","setposition","setx","sety",
+    "penup","pendown","pensize","speed","circle","color","pencolor",
+    "fillcolor","bgcolor","begin_fill","end_fill","shape","clear","reset",
+    "dot","stamp","hideturtle","showturtle","setheading","write","onclick","getscreen"
+  ];
+
+  function editDistance(a,b){
+    a=String(a||"").toLowerCase();
+    b=String(b||"").toLowerCase();
+    var row=[];
+    for(var j=0;j<=b.length;j++)row[j]=j;
+    for(var i=1;i<=a.length;i++){
+      var previous=row[0];
+      row[0]=i;
+      for(var k=1;k<=b.length;k++){
+        var old=row[k];
+        row[k]=Math.min(row[k]+1,row[k-1]+1,previous+(a[i-1]===b[k-1]?0:1));
+        previous=old;
+      }
+    }
+    return row[b.length];
+  }
+
+  function likelyTurtleName(name){
+    if(!name||name.length<3)return null;
+    var best=null;
+    var distance=99;
+    TURTLE_ERROR_NAMES.forEach(function(candidate){
+      var d=editDistance(name,candidate);
+      if(d<distance){distance=d;best=candidate;}
+    });
+    return distance<=(name.length<=5?1:2)?best:null;
+  }
+
+  function getErrorLine(err,raw){
+    if(err&&err.traceback&&err.traceback.length){
+      for(var i=err.traceback.length-1;i>=0;i--){
+        if(err.traceback[i]&&err.traceback[i].lineno){
+          return Math.max(1,Number(err.traceback[i].lineno));
+        }
+      }
+    }
+    var match=String(raw||"").match(/\bline\s+(\d+)\b/i);
+    return match?Math.max(1,Number(match[1])):null;
+  }
+
+  function getErrorMessage(raw,name){
+    var text=String(raw||"").trim();
+    var prefix=String(name||"")+":";
+    if(text.toLowerCase().indexOf(prefix.toLowerCase())===0){
+      text=text.slice(prefix.length).trim();
+    }
+    return text.replace(/\s+on\s+line\s+\d+\s*$/i,"").trim();
+  }
+
+  function analyzeError(err){
+    var name=(err&&(err.tp$name||err.name))||"Error";
+    var raw="";
+    try{raw=err&&err.toString?err.toString():String(err);}
+    catch(e){raw=String(err);}
+
+    var line=getErrorLine(err,raw);
+    var lineText=(line&&line<=editor.lineCount())?(editor.getLine(line-1)||""):"";
+    var message=getErrorMessage(raw,name);
+    var title="Python found an error.";
+    var explanation="Check the highlighted line and the original Python message below.";
+    var hint="";
+    var token=null;
+
+    var nameMatch=message.match(/\bname ['"]([^'"]+)['"] is not defined/i);
+    if(name==="NameError"||nameMatch){
+      token=nameMatch?nameMatch[1]:null;
+      title=token?"Python doesn't know "+token+".":"Python doesn't recognize a name.";
+      explanation=token
+        ? "That name has not been defined yet. It may be misspelled, or it may need to be created before this line runs."
+        : "A variable or function on this line has not been defined yet.";
+      var guess=likelyTurtleName(token);
+      if(guess&&guess!==token)hint="Check the spelling. Did you mean "+guess+"()?";
+    }else if(name==="IndentationError"||/indent/i.test(message)){
+      title="Python is expecting different indentation.";
+      explanation="Indentation shows which lines belong inside a loop, function, or if statement.";
+      hint="Use 4 spaces for each level. Lines in the same block should line up.";
+    }else if(name==="SyntaxError"||name==="ParseError"||/bad input|syntax|unexpected eof|unexpected token/i.test(message)){
+      title="Python can't read this line yet.";
+      explanation="A punctuation or structure problem is stopping Python from understanding the code.";
+      var trimmed=lineText.trim();
+      var block=trimmed.match(/^(for|while|if|elif|else|def)\b/);
+      if(block&&!/:\s*(#.*)?$/.test(trimmed)){
+        hint="Add a colon (:) at the end of this "+block[1]+" line.";
+        token=block[1];
+      }else{
+        var opens=(lineText.match(/\(/g)||[]).length;
+        var closes=(lineText.match(/\)/g)||[]).length;
+        if(opens>closes)hint="There is an opening ( without a matching ).";
+        else if(closes>opens)hint="There is a closing ) without a matching opening (.";
+        else hint="Check this line and the line just above it. Python can notice a missing symbol one line later.";
+      }
+    }else if(name==="TypeError"){
+      title="This operation is using the wrong kind of value.";
+      explanation="Python understood the code, but the values or arguments do not fit this operation.";
+      if(/argument|takes|positional/i.test(message))hint="Check how many values are inside the parentheses.";
+    }else if(name==="ValueError"){
+      title="Python received a value it can't use here.";
+      explanation="The kind of value may be allowed, but this particular value is not valid for the operation.";
+    }else if(name==="IndexError"){
+      title="That list position doesn't exist.";
+      explanation="List indexes start at 0, and this code tried to use a position beyond the available items.";
+      hint="Check the list length and the index used on this line.";
+    }else if(name==="ZeroDivisionError"){
+      title="Python can't divide by zero.";
+      explanation="The value on the right side of /, //, or % became 0.";
+    }else if(name==="AttributeError"){
+      title="That object doesn't have this method or property.";
+      explanation="Check the name after the dot and make sure it belongs to this kind of value.";
+    }
+
+    return {
+      name:name,raw:raw,message:message,line:line,lineText:lineText,
+      title:title,explanation:explanation,hint:hint,token:token
+    };
+  }
+
+  function renderError(err){
+    var info=analyzeError(err);
+    highlightError(info.line,info.token);
+    output.textContent="";
+
+    var card=document.createElement("div");
+    card.className="error-card";
+
+    var top=document.createElement("div");
+    top.className="error-card-top";
+
+    var badge=document.createElement("span");
+    badge.className="error-badge";
+    badge.textContent=info.name+(info.line?" · line "+info.line:"");
+    top.appendChild(badge);
+
+    if(info.line){
+      var jump=document.createElement("button");
+      jump.type="button";
+      jump.className="error-line-button";
+      jump.textContent="Go to line "+info.line;
+      jump.addEventListener("click",function(){
+        editor.focus();
+        editor.setCursor({line:Math.max(0,info.line-1),ch:0});
+        editor.scrollIntoView({line:Math.max(0,info.line-1),ch:0},100);
+      });
+      top.appendChild(jump);
+    }
+
+    card.appendChild(top);
+
+    var title=document.createElement("div");
+    title.className="error-title";
+    title.textContent=info.title;
+    card.appendChild(title);
+
+    var explanation=document.createElement("div");
+    explanation.className="error-explanation";
+    explanation.textContent=info.explanation;
+    card.appendChild(explanation);
+
+    if(info.line&&info.lineText){
+      var source=document.createElement("code");
+      source.className="error-source";
+      source.textContent=info.line+" | "+info.lineText;
+      card.appendChild(source);
+    }
+
+    if(info.hint){
+      var hint=document.createElement("span");
+      hint.className="error-hint";
+      hint.textContent="Try this: "+info.hint;
+      card.appendChild(hint);
+    }
+
+    var details=document.createElement("details");
+    details.className="error-raw";
+    var summary=document.createElement("summary");
+    summary.textContent="Python's original message";
+    details.appendChild(summary);
+
+    var raw=document.createElement("code");
+    raw.textContent=info.raw;
+    details.appendChild(raw);
+    card.appendChild(details);
+
+    output.appendChild(card);
+    output.scrollTop=output.scrollHeight;
+    return info;
   }
 
   function outf(text){
@@ -1780,7 +2033,8 @@ for i in range(4):
       Sk.misceval.asyncToPromise(function(){
         return Sk.misceval.callsimOrSuspend(callback,pyNum(x),pyNum(y));
       }).catch(function(err){
-        appendOutput(formatError(err)+"\n","error");
+        renderError(err);
+        setStatus("bad");
       }).finally(function(){
         playback.active=false;
         playback.paused=false;
@@ -2106,6 +2360,7 @@ for i in range(4):
     }
     runToken++;
     var token=runToken, userCode=editor.getValue(), debugLine=0;
+    clearErrorHighlight();
     clearWorld();
     setOutput("");
     setStatus("running");
@@ -2161,7 +2416,7 @@ for i in range(4):
       setStatus("good");
     }catch(err){
       if(token!==runToken)return;
-      appendOutput(formatError(err)+"\n","error");
+      renderError(err);
       setStatus("bad");
     }finally{
       if(token===runToken){
@@ -2182,24 +2437,8 @@ for i in range(4):
   }
 
   function formatError(err){
-    var name = (err && (err.tp$name || err.name)) || "Error";
-    var text = "";
-    try {
-      text = err.toString();
-    } catch(e) {
-      text = String(err);
-    }
-
-    var line = null;
-    if(err && err.traceback && err.traceback.length){
-      var last = err.traceback[err.traceback.length - 1];
-      if(last && last.lineno) line = Math.max(1, last.lineno);
-    }
-
-    if(line){
-      return name + " on line " + line + ": " + text.replace(/^.*?:\s*/, "");
-    }
-    return text;
+    var info=analyzeError(err);
+    return info.name+(info.line?" on line "+info.line:"")+": "+info.message;
   }
 
   function stopCode(){
@@ -2213,6 +2452,7 @@ for i in range(4):
   function clearRun(){
     runToken++;
     cancelPlayback();
+    clearErrorHighlight();
     setStatus("");
     clearWorld();
     setOutput('<span class="muted">Run cleared. Your code is still here.</span>');
@@ -2236,11 +2476,13 @@ for i in range(4):
   clearRunBtn.addEventListener("click", clearRun);
 
   document.getElementById("clearConsole").addEventListener("click", function(){
-    setOutput('<span class="muted">Text output cleared.</span>');
+    clearErrorHighlight();
+    setOutput('<span class="muted">Output cleared.</span>');
   });
 
   examplesSelect.addEventListener("change", function(){
     if(!this.value || !examples[this.value]) return;
+    clearErrorHighlight();
     editor.setValue(examples[this.value]);
     editor.focus();
     this.value = "";
