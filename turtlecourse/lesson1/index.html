@@ -18,6 +18,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../site-theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 
 <style>
   :root{
@@ -141,30 +142,37 @@
   .code-card .panel-title{color:#c4ccca}
   .code-card .panel-mini{color:#899391}
 
-  .code-lines{
-    min-height:208px;
-    padding:15px 0;
+  #lesson-editor{display:none}
+  .code-card .CodeMirror{
+    height:230px;
     background:var(--editor);
-  }
-  .code-line{
-    display:grid;grid-template-columns:34px 1fr;
-    min-height:45px;align-items:center;
-    border-left:3px solid transparent;
-    font:600 15px/1.55 'JetBrains Mono',monospace;
     color:#e7eceb;
-    transition:background .12s,border-color .12s;
+    font:600 15px/1.62 'JetBrains Mono',monospace;
   }
-  .code-line .num{
-    padding-right:10px;text-align:right;color:#687271;
-    font-size:.72rem;font-weight:500;
+  .code-card .CodeMirror-gutters{
+    background:#1b2021;
+    border-right:1px solid #333a3b;
   }
-  .code-line.active{
-    background:rgba(30,169,154,.18);
-    border-left-color:#35bdad;
+  .code-card .CodeMirror-linenumber{color:#687271}
+  .code-card .CodeMirror-cursor{border-left:2px solid #e4bd66}
+  .code-card .CodeMirror-selected{background:#374243!important}
+  .code-card .cm-keyword{color:#d7a7df}
+  .code-card .cm-def{color:#87c8dc}
+  .code-card .cm-variable{color:#e7eceb}
+  .code-card .cm-variable-2{color:#a9d0e0}
+  .code-card .cm-number{color:#e4bd66}
+  .code-card .cm-string{color:#a9ce94}
+  .code-card .cm-comment{color:#7f9187;font-style:italic}
+  .code-card .cm-builtin{color:#85c7c0}
+  .code-card .cm-operator{color:#cfd6d5}
+  .code-card .CodeMirror .lesson-current-line{
+    background:rgba(30,169,154,.18)!important;
+    box-shadow:inset 3px 0 #35bdad;
   }
-  .fn{color:#85c7c0}
-  .value{color:#e4bd66}
-
+  .code-card .CodeMirror .lesson-error-line{
+    background:rgba(219,93,66,.17)!important;
+    box-shadow:inset 3px 0 #e16f55;
+  }
   .demo-controls{
     display:flex;gap:7px;flex-wrap:wrap;
     padding:12px;border-top:1px solid var(--editor-rule);background:#181c1d;
@@ -398,20 +406,9 @@
           <span class="panel-mini" id="lineStatus">ready</span>
         </div>
 
-        <div class="code-lines" id="codeLines">
-          <div class="code-line" data-line="0">
-            <span class="num">1</span>
-            <span><span class="fn">forward</span>(<span class="value">100</span>)</span>
-          </div>
-          <div class="code-line" data-line="1">
-            <span class="num">2</span>
-            <span><span class="fn">left</span>(<span class="value">90</span>)</span>
-          </div>
-          <div class="code-line" data-line="2">
-            <span class="num">3</span>
-            <span><span class="fn">forward</span>(<span class="value">50</span>)</span>
-          </div>
-        </div>
+        <textarea id="lesson-editor" spellcheck="false">forward(100)
+left(90)
+forward(50)</textarea>
 
         <div class="demo-controls">
           <button class="demo-btn primary" id="runDemo" type="button">▶ Run</button>
@@ -419,7 +416,7 @@
           <button class="demo-btn" id="resetDemo" type="button">↻ Reset</button>
         </div>
 
-        <div class="demo-hint" id="demoHint"><strong>Try Step first.</strong> One click = one line.</div>
+        <div class="demo-hint" id="demoHint"><strong>Edit the code.</strong> Run everything or Step through it one statement at a time.</div>
       </div>
 
       <div class="world-card">
@@ -502,6 +499,11 @@
   </div>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
 <script>
 (function(){
   "use strict";
@@ -515,15 +517,30 @@
     });
   }
 
+  var source=document.getElementById('lesson-editor');
+  var editor=CodeMirror.fromTextArea(source,{
+    mode:'python',
+    lineNumbers:true,
+    indentUnit:4,
+    tabSize:4,
+    indentWithTabs:false,
+    lineWrapping:false,
+    autofocus:false,
+    extraKeys:{
+      'Tab':function(cm){
+        if(cm.somethingSelected())cm.indentSelection('add');
+        else cm.replaceSelection('    ','end');
+      },
+      'Shift-Tab':function(cm){cm.indentSelection('subtract');},
+      'Ctrl-Enter':function(){runCode(false);},
+      'Cmd-Enter':function(){runCode(false);}
+    }
+  });
+
   var drawCanvas=document.getElementById('lesson-drawing');
   var spriteCanvas=document.getElementById('lesson-sprite');
   var ctx=drawCanvas.getContext('2d');
   var sctx=spriteCanvas.getContext('2d');
-
-  var state={x:0,y:0,heading:0};
-  var commandIndex=0;
-  var busy=false;
-  var cancelled=false;
 
   var runBtn=document.getElementById('runDemo');
   var stepBtn=document.getElementById('stepDemo');
@@ -532,24 +549,67 @@
   var demoHint=document.getElementById('demoHint');
   var positionReadout=document.getElementById('positionReadout');
   var headingReadout=document.getElementById('headingReadout');
-  var codeLines=Array.prototype.slice.call(document.querySelectorAll('.code-line'));
 
-  var commands=[
-    {type:'forward',value:100},
-    {type:'left',value:90},
-    {type:'forward',value:50}
-  ];
+  var state={
+    x:0,y:0,heading:0,
+    penDown:true,
+    color:'#176b73',
+    size:2
+  };
+
+  var runToken=0;
+  var playback={
+    active:false,
+    paused:false,
+    stepOnce:false,
+    autoStepOnFirstPause:false,
+    pending:null,
+    timer:null,
+    marker:null,
+    errorMarker:null
+  };
+  var motion=null;
 
   function px(x){return 200+x;}
   function py(y){return 200-y;}
   function rad(deg){return deg*Math.PI/180;}
+  function none(){return Sk.builtin.none.none$;}
+  function js(v){return Sk.ffi.remapToJs(v);}
+
+  function clearMarker(){
+    if(playback.marker!==null){
+      try{editor.removeLineClass(playback.marker,'background','lesson-current-line');}catch(e){}
+      playback.marker=null;
+    }
+  }
+
+  function clearErrorMarker(){
+    if(playback.errorMarker!==null){
+      try{editor.removeLineClass(playback.errorMarker,'background','lesson-error-line');}catch(e){}
+      playback.errorMarker=null;
+    }
+  }
+
+  function showLine(line){
+    clearMarker();
+    var n=Number(line);
+    if(Number.isInteger(n)&&n>0&&n<=editor.lineCount()){
+      playback.marker=editor.addLineClass(n-1,'background','lesson-current-line');
+      lineStatus.textContent='line '+n;
+      editor.scrollIntoView({line:n-1,ch:0},60);
+    }else{
+      lineStatus.textContent=playback.active?'running':'ready';
+    }
+  }
+
+  editor.on('change',function(){clearErrorMarker();});
 
   function drawSpriteOn(target){
     target.save();
     target.translate(px(state.x),py(state.y));
     target.rotate(-rad(state.heading));
 
-    var accent='#176b73';
+    var accent=state.color||'#176b73';
     var outline='#173b3d';
     var body='#8fc6ae';
 
@@ -601,7 +661,6 @@
     target.beginPath();
     target.arc(11.2,-1.2,.7,0,Math.PI*2);
     target.fill();
-
     target.restore();
   }
 
@@ -612,41 +671,46 @@
     headingReadout.textContent=Math.round(((state.heading%360)+360)%360)+'°';
   }
 
-  function drawSegment(x1,y1,x2,y2){
+  function configureLine(){
     ctx.lineCap='round';
     ctx.lineJoin='round';
-    ctx.lineWidth=2;
-    ctx.strokeStyle='#176b73';
+    ctx.lineWidth=Math.max(.5,Number(state.size)||1);
+    ctx.strokeStyle=state.color;
+  }
+
+  function drawSegment(x1,y1,x2,y2){
+    if(!state.penDown)return;
+    configureLine();
     ctx.beginPath();
     ctx.moveTo(px(x1),py(y1));
     ctx.lineTo(px(x2),py(y2));
     ctx.stroke();
   }
 
-  function setActiveLine(index){
-    codeLines.forEach(function(line,i){line.classList.toggle('active',i===index);});
-    if(index>=0&&index<commands.length)lineStatus.textContent='line '+(index+1);
-    else lineStatus.textContent=commandIndex>=commands.length?'finished':'ready';
-  }
+  function animateMove(distance){
+    distance=Number(distance);
+    if(!Number.isFinite(distance))return Promise.resolve(none());
 
-  function animateForward(distance){
-    return new Promise(function(resolve){
+    return new Promise(function(resolve,reject){
       var startX=state.x,startY=state.y;
       var targetX=startX+Math.cos(rad(state.heading))*distance;
       var targetY=startY+Math.sin(rad(state.heading))*distance;
+      var lastX=startX,lastY=startY;
       var started=null;
-      var previousX=startX,previousY=startY;
+      var operation={cancelled:false,reject:reject};
+      motion=operation;
 
       function frame(now){
-        if(cancelled){resolve();return;}
+        if(operation.cancelled){reject(new Error('Playback stopped'));return;}
         if(started===null)started=now;
-        var t=Math.min(1,(now-started)/520);
+        var duration=Math.max(180,Math.min(900,Math.abs(distance)*4.2));
+        var t=Math.min(1,(now-started)/duration);
         var eased=1-Math.pow(1-t,3);
         var x=startX+(targetX-startX)*eased;
         var y=startY+(targetY-startY)*eased;
 
-        drawSegment(previousX,previousY,x,y);
-        previousX=x;previousY=y;
+        drawSegment(lastX,lastY,x,y);
+        lastX=x;lastY=y;
         state.x=x;state.y=y;
         refreshSprite();
 
@@ -654,93 +718,323 @@
         else{
           state.x=targetX;state.y=targetY;
           refreshSprite();
-          resolve();
+          if(motion===operation)motion=null;
+          resolve(none());
         }
       }
       requestAnimationFrame(frame);
     });
   }
 
-  function animateLeft(angle){
-    return new Promise(function(resolve){
+  function animateTurn(angle){
+    angle=Number(angle);
+    if(!Number.isFinite(angle))return Promise.resolve(none());
+
+    return new Promise(function(resolve,reject){
       var start=state.heading;
       var started=null;
+      var operation={cancelled:false,reject:reject};
+      motion=operation;
+
       function frame(now){
-        if(cancelled){resolve();return;}
+        if(operation.cancelled){reject(new Error('Playback stopped'));return;}
         if(started===null)started=now;
-        var t=Math.min(1,(now-started)/360);
+        var duration=Math.max(160,Math.min(650,Math.abs(angle)*3.2));
+        var t=Math.min(1,(now-started)/duration);
         var eased=1-Math.pow(1-t,3);
         state.heading=start+angle*eased;
         refreshSprite();
+
         if(t<1)requestAnimationFrame(frame);
         else{
           state.heading=start+angle;
           refreshSprite();
-          resolve();
+          if(motion===operation)motion=null;
+          resolve(none());
         }
       }
       requestAnimationFrame(frame);
     });
   }
 
-  async function executeOne(){
-    if(busy||commandIndex>=commands.length)return;
-    busy=true;
-    cancelled=false;
-    runBtn.disabled=true;
-    stepBtn.disabled=true;
+  function cancelMotion(){
+    if(motion){
+      motion.cancelled=true;
+      motion=null;
+    }
+  }
 
-    var current=commandIndex;
-    var command=commands[current];
-    setActiveLine(current);
+  function installBuiltins(){
+    function anim1(name,callback){
+      Sk.builtins[name]=new Sk.builtin.func(function(value){
+        return Sk.misceval.promiseToSuspension(callback(js(value)));
+      });
+    }
+    function fn0(name,callback){
+      Sk.builtins[name]=new Sk.builtin.func(function(){
+        callback();
+        return none();
+      });
+    }
+    function fn1(name,callback){
+      Sk.builtins[name]=new Sk.builtin.func(function(value){
+        callback(js(value));
+        return none();
+      });
+    }
 
-    if(command.type==='forward')await animateForward(command.value);
-    if(command.type==='left')await animateLeft(command.value);
+    anim1('forward',animateMove);
+    Sk.builtins.fd=Sk.builtins.forward;
 
-    if(cancelled){
-      busy=false;
+    anim1('backward',function(distance){return animateMove(-Number(distance));});
+    Sk.builtins.back=Sk.builtins.backward;
+    Sk.builtins.bk=Sk.builtins.backward;
+
+    anim1('left',animateTurn);
+    Sk.builtins.lt=Sk.builtins.left;
+
+    anim1('right',function(angle){return animateTurn(-Number(angle));});
+    Sk.builtins.rt=Sk.builtins.right;
+
+    fn0('penup',function(){state.penDown=false;});
+    Sk.builtins.up=Sk.builtins.penup;
+    Sk.builtins.pu=Sk.builtins.penup;
+
+    fn0('pendown',function(){state.penDown=true;});
+    Sk.builtins.down=Sk.builtins.pendown;
+    Sk.builtins.pd=Sk.builtins.pendown;
+
+    fn1('pensize',function(value){state.size=Math.max(.5,Number(value)||1);});
+    Sk.builtins.width=Sk.builtins.pensize;
+
+    fn1('color',function(value){state.color=String(value);});
+  }
+
+  function builtinRead(name){
+    if(typeof Sk==='undefined'||!Sk.builtinFiles||!Sk.builtinFiles.files[name]){
+      throw new Error('File not found: '+name);
+    }
+    return Sk.builtinFiles.files[name];
+  }
+
+  function syncButtons(){
+    runBtn.disabled=playback.active;
+    stepBtn.disabled=playback.active ? (!playback.paused||!playback.pending) : false;
+  }
+
+  function schedulePlayback(){
+    if(playback.timer!==null){
+      clearTimeout(playback.timer);
+      playback.timer=null;
+    }
+    if(!playback.active||playback.paused||!playback.pending)return;
+
+    var pending=playback.pending;
+    playback.timer=setTimeout(function(){
+      playback.timer=null;
+      if(!playback.active||playback.paused||playback.pending!==pending)return;
+      playback.pending=null;
+      try{pending.resolve(pending.susp.resume());}
+      catch(e){pending.reject(e);}
+    },70);
+  }
+
+  function debugStatement(susp,token,line){
+    return new Promise(function(resolve,reject){
+      if(token!==runToken||!playback.active){
+        reject(new Error('Playback stopped'));
+        return;
+      }
+
+      showLine(line);
+      var firstStep=playback.autoStepOnFirstPause;
+      if(firstStep)playback.autoStepOnFirstPause=false;
+
+      playback.pending={susp:susp,resolve:resolve,reject:reject};
+
+      if(firstStep){
+        var first=playback.pending;
+        playback.pending=null;
+        playback.stepOnce=true;
+        syncButtons();
+        try{first.resolve(first.susp.resume());}
+        catch(e){first.reject(e);}
+        return;
+      }
+
+      if(playback.stepOnce){
+        playback.stepOnce=false;
+        playback.paused=true;
+      }
+
+      syncButtons();
+      schedulePlayback();
+    });
+  }
+
+  function resetWorld(){
+    runToken++;
+    if(playback.timer!==null){
+      clearTimeout(playback.timer);
+      playback.timer=null;
+    }
+
+    var pending=playback.pending;
+    playback.pending=null;
+    playback.active=false;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.autoStepOnFirstPause=false;
+
+    cancelMotion();
+    if(pending){
+      try{pending.reject(new Error('Playback stopped'));}catch(e){}
+    }
+
+    state.x=0;
+    state.y=0;
+    state.heading=0;
+    state.penDown=true;
+    state.color='#176b73';
+    state.size=2;
+
+    ctx.clearRect(0,0,400,400);
+    refreshSprite();
+    clearMarker();
+    clearErrorMarker();
+
+    lineStatus.textContent='ready';
+    demoHint.innerHTML='<strong>Edit the code.</strong> Run everything or Step through it one statement at a time.';
+    syncButtons();
+  }
+
+  function showError(err){
+    var name=(err&&(err.tp$name||err.name))||'Error';
+    var raw='';
+    try{raw=err.toString();}catch(e){raw=String(err);}
+
+    var line=null;
+    if(err&&err.traceback&&err.traceback.length){
+      var last=err.traceback[err.traceback.length-1];
+      if(last&&last.lineno)line=Number(last.lineno);
+    }
+    if(!line){
+      var match=raw.match(/\bline\s+(\d+)\b/i);
+      if(match)line=Number(match[1]);
+    }
+
+    clearErrorMarker();
+    if(line&&line>=1&&line<=editor.lineCount()){
+      playback.errorMarker=editor.addLineClass(line-1,'background','lesson-error-line');
+      editor.scrollIntoView({line:line-1,ch:0},60);
+    }
+
+    lineStatus.textContent='error';
+    demoHint.textContent=(line?'Line '+line+' · ':'')+name+': '+raw.replace(/^.*?:\s*/,'');
+  }
+
+  async function runCode(startWithStep){
+    if(playback.active)return;
+    if(typeof Sk==='undefined'){
+      demoHint.textContent='Python did not load. Refresh the page and try again.';
       return;
     }
 
-    commandIndex++;
-    busy=false;
-    runBtn.disabled=commandIndex>=commands.length;
-    stepBtn.disabled=commandIndex>=commands.length;
-    setActiveLine(commandIndex<commands.length?commandIndex:-1);
+    resetWorld();
+    runToken++;
+    var token=runToken;
+    var userCode=editor.getValue();
+    var debugLine=0;
 
-    if(commandIndex>=commands.length){
-      demoHint.innerHTML='<strong>Done.</strong> Reset and try Run to compare.';
-    }else{
-      demoHint.innerHTML='<strong>Next:</strong> click Step again.';
+    playback.active=true;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.autoStepOnFirstPause=!!startWithStep;
+    playback.pending=null;
+    lineStatus.textContent='running';
+    demoHint.innerHTML=startWithStep
+      ? '<strong>Step mode.</strong> Watch the highlighted line.'
+      : '<strong>Running.</strong> The editor is executing your code.';
+    syncButtons();
+
+    Sk.configure({
+      output:function(text){
+        if(String(text).trim())demoHint.textContent='print: '+String(text).trim();
+      },
+      read:builtinRead,
+      __future__:Sk.python3,
+      debugging:true,
+      breakpoints:function(filename,lineno){
+        if(token!==runToken)return false;
+        if(String(filename).indexOf('<stdin>')<0)return false;
+        debugLine=lineno;
+        return true;
+      },
+      execLimit:null,
+      yieldLimit:100
+    });
+
+    installBuiltins();
+
+    try{
+      await Sk.misceval.asyncToPromise(function(){
+        return Sk.importMainWithBody('<stdin>',false,userCode,true);
+      },{
+        'Sk.debug':function(susp){
+          return debugStatement(susp,token,debugLine);
+        }
+      });
+
+      if(token!==runToken)return;
+      lineStatus.textContent='finished';
+      demoHint.innerHTML='<strong>Finished.</strong> Change the code and run it again.';
+    }catch(err){
+      if(token!==runToken)return;
+      if(String(err).indexOf('Playback stopped')<0)showError(err);
+    }finally{
+      if(token===runToken){
+        if(playback.timer!==null){
+          clearTimeout(playback.timer);
+          playback.timer=null;
+        }
+        playback.pending=null;
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        playback.autoStepOnFirstPause=false;
+        clearMarker();
+        syncButtons();
+      }
     }
   }
 
-  async function runAll(){
-    if(busy||commandIndex>=commands.length)return;
-    runBtn.disabled=true;
-    stepBtn.disabled=true;
-    while(commandIndex<commands.length&&!cancelled){
-      await executeOne();
+  runBtn.addEventListener('click',function(){runCode(false);});
+
+  stepBtn.addEventListener('click',function(){
+    if(!playback.active){
+      runCode(true);
+      return;
     }
-  }
+    if(!playback.paused||!playback.pending)return;
 
-  function resetDemo(){
-    cancelled=true;
-    commandIndex=0;
-    busy=false;
-    state.x=0;state.y=0;state.heading=0;
-    ctx.clearRect(0,0,400,400);
-    refreshSprite();
-    setActiveLine(-1);
-    runBtn.disabled=false;
-    stepBtn.disabled=false;
-    demoHint.innerHTML='<strong>Try Step first.</strong> One click = one line.';
-  }
+    var pending=playback.pending;
+    playback.pending=null;
+    if(playback.timer!==null){
+      clearTimeout(playback.timer);
+      playback.timer=null;
+    }
 
-  runBtn.addEventListener('click',runAll);
-  stepBtn.addEventListener('click',executeOne);
-  resetBtn.addEventListener('click',resetDemo);
-  resetDemo();
+    playback.stepOnce=true;
+    playback.paused=false;
+    syncButtons();
+
+    try{pending.resolve(pending.susp.resume());}
+    catch(e){pending.reject(e);}
+  });
+
+  resetBtn.addEventListener('click',resetWorld);
+
+  resetWorld();
 
   var checkState={};
   var checks=Array.prototype.slice.call(document.querySelectorAll('.check'));
