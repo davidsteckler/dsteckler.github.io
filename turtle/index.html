@@ -612,6 +612,7 @@
       .code-panel .panel-label{font-size:.66rem}
       .code-panel .panel-mini{font-size:.6rem;white-space:nowrap}
       .world-panel .panel-mini{display:none}
+      .world-panel{scroll-margin-top:145px}
       .clear-run-btn{height:33px}
       .world-info{grid-template-columns:1fr auto}
       .world-copy{font-size:.68rem}
@@ -772,6 +773,16 @@ for i in range(4):
             <button class="recipe-button" type="button" data-recipe="move"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
             <button class="recipe-button" type="button" data-recipe="fill"><strong>Fill a shape</strong><code>begin_fill() → end_fill()</code></button>
             <button class="recipe-button" type="button" data-recipe="print"><strong>Print Tracy's position</strong><code>print(position())</code></button>
+          </div>
+        </details>
+        <details class="recipe-panel">
+          <summary>Python essentials <span>5 references</span></summary>
+          <div class="recipe-body">
+            <button class="recipe-button" type="button" data-recipe="hello"><strong>Print text</strong><code>print("Hello")</code></button>
+            <button class="recipe-button" type="button" data-recipe="loop"><strong>Repeat with range()</strong><code>for i in range(5):</code></button>
+            <button class="recipe-button" type="button" data-recipe="function"><strong>Create a function</strong><code>def square(size):</code></button>
+            <button class="recipe-button" type="button" data-recipe="condition"><strong>Check a condition</strong><code>if xcor() &gt; 0:</code></button>
+            <button class="recipe-button" type="button" data-recipe="variable"><strong>Store a value</strong><code>distance = 80</code></button>
           </div>
         </details>
 
@@ -1406,6 +1417,11 @@ for i in range(4):
       if(myToken === runToken){
         runBtn.disabled = false;
         stopBtn.disabled = true;
+        if(window.innerWidth<=560){
+          requestAnimationFrame(function(){
+            worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
+          });
+        }
       }
     }
   }
@@ -1454,6 +1470,8 @@ for i in range(4):
   }
 
   function clearCode(){
+    if(!editor.getValue())return;
+    if(!window.confirm("Clear all code from the editor? Tracy's drawing and text output will stay."))return;
     editor.setValue("");
     editor.focus();
     try {
@@ -1503,7 +1521,12 @@ for i in range(4):
     square:"for i in range(4):\n    forward(100)\n    right(90)",
     move:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
     fill:'color("navy")\nfillcolor("gold")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
-    print:'print("Tracy is at:", position())'
+    print:'print("Tracy is at:", position())',
+    hello:'print("Hello")',
+    loop:"for i in range(5):\n    forward(50)\n    right(72)",
+    function:"def square(size):\n    for i in range(4):\n        forward(size)\n        right(90)\n\nsquare(80)",
+    condition:"if xcor() > 0:\n    color(\"blue\")",
+    variable:"distance = 80\nforward(distance)"
   };
   document.querySelectorAll(".recipe-button").forEach(function(button){
     button.addEventListener("click",function(){
