@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A simple Tracy-style Python Turtle sandbox for learning Python in the browser.">
+  <meta name="description" content="A browser-based Python Turtle sandbox for learning Python visually.">
   <title>Python Turtle Sandbox | David Steckler</title>
 
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -197,7 +197,7 @@
     .CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}
     .CodeMirror-linenumber{color:#697271}
     .CodeMirror-cursor{border-left:2px solid #e4bd66}
-    .CodeMirror .tracy-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
+    .CodeMirror .turtle-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
     .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
     .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
     .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
@@ -313,15 +313,15 @@
       z-index:2;
       pointer-events:none;
     }
-    #tracy-drawing,#tracy-sprite{
+    #turtle-drawing,#turtle-sprite{
       position:absolute;
       inset:0;
       width:400px;
       height:400px;
       display:block;
     }
-    #tracy-drawing{z-index:2}
-    #tracy-sprite{z-index:3}
+    #turtle-drawing{z-index:2}
+    #turtle-sprite{z-index:3}
 
     .world-info{
       display:grid;
@@ -669,7 +669,7 @@
       <div class="turtle-badge" aria-hidden="true">▲</div>
       <div>
         <div class="tool-title">Python Turtle Sandbox</div>
-        <div class="tool-note">Tracy-style Python. No setup. Run it here.</div>
+        <div class="tool-note">Python Turtle in your browser. Write it. Run it. Watch it move.</div>
       </div>
     </div>
 
@@ -726,7 +726,7 @@
     <section class="panel code-panel">
       <div class="panel-head">
         <div class="editor-head-start">
-          <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Tracy's output alone">⌫ Clear all code</button>
+          <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Turtle's output alone">⌫ Clear all code</button>
           <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
         </div>
         <div class="editor-head-right">
@@ -735,7 +735,7 @@
         </div>
       </div>
 
-      <textarea id="editor-source" spellcheck="false"># Tracy starts at (0, 0), facing right.
+      <textarea id="editor-source" spellcheck="false"># Turtle starts at (0, 0), facing right.
 # Try changing the distance or the number of repeats.
 
 for i in range(4):
@@ -748,11 +748,11 @@ for i in range(4):
 
     <section class="panel world-panel" id="worldPanel">
       <div class="panel-head">
-        <div class="panel-label">Tracy's World</div>
+        <div class="panel-label">Turtle World</div>
         <div class="world-head-actions">
           <span class="panel-mini" id="worldLineStatus">400 × 400</span>
           <button class="world-edit-link" id="editCodeBtn" type="button">↑ Edit code</button>
-          <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Tracy's drawing and printed output; keep your code">↻ Clear Run</button>
+          <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Turtle's drawing and printed output; keep your code">↻ Clear Run</button>
         </div>
       </div>
 
@@ -769,8 +769,8 @@ for i in range(4):
           <span class="axis-label yneg">−200</span>
           <span class="origin"></span>
           <div id="turtle-canvas" aria-label="Turtle drawing canvas">
-            <canvas id="tracy-drawing" width="400" height="400"></canvas>
-            <canvas id="tracy-sprite" width="400" height="400"></canvas>
+            <canvas id="turtle-drawing" width="400" height="400"></canvas>
+            <canvas id="turtle-sprite" width="400" height="400"></canvas>
           </div>
           <div class="loading" id="loading">Loading Python…</div>
           </div>
@@ -795,7 +795,7 @@ for i in range(4):
 
     <aside class="panel command-library" id="commandLibrary" aria-label="Turtle command library">
       <div class="panel-head">
-        <div class="panel-label">CodeHS Python Reference</div>
+        <div class="panel-label">Python Turtle Reference</div>
         <div style="display:flex;align-items:center;gap:3px">
           <span class="commands-count" id="commandsCount">reference</span>
           <button class="command-close" id="commandsClose" type="button" aria-label="Close command library">×</button>
@@ -805,71 +805,71 @@ for i in range(4):
         <input class="command-search" id="commandSearch" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false">
       </div>
       <div class="command-scroll" id="commandScroll">
-        <div class="command-tip"><strong>Matches CodeHS Tracy syntax.</strong> Click anything to insert it at the cursor. Search by command or purpose.</div>
+        <div class="command-tip"><strong>Matches Python Turtle Turtle syntax.</strong> Click anything to insert it at the cursor. Search by command or purpose.</div>
 
         <details class="recipe-panel" open>
-          <summary>CodeHS Turtle commands <span>official syntax</span></summary>
+          <summary>Python Turtle commands <span>core syntax</span></summary>
           <div class="recipe-body">
-            <button class="recipe-button" type="button" data-recipe="codehsSquare"><strong>Square</strong><code>for i in range(4):</code></button>
-            <button class="recipe-button" type="button" data-recipe="codehsMove"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
-            <button class="recipe-button" type="button" data-recipe="codehsFill"><strong>Filled shape</strong><code>begin_fill() → end_fill()</code></button>
-            <button class="recipe-button" type="button" data-recipe="codehsWrite"><strong>Styled text</strong><code>write(..., font=..., align=...)</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleSquare"><strong>Square</strong><code>for i in range(4):</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleMove"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleFill"><strong>Filled shape</strong><code>begin_fill() → end_fill()</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleWrite"><strong>Styled text</strong><code>write(..., font=..., align=...)</code></button>
           </div>
         </details>
 
-        <div class="command-category" data-category="CodeHS Movement">
-          <div class="command-category-title">CodeHS · Movement & Position</div>
-          <button class="command-item" data-search="forward movement codehs" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Tracy forward by a distance.</span></button>
-          <button class="command-item" data-search="backward movement codehs" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Tracy backward by a distance.</span></button>
-          <button class="command-item" data-search="setposition position coordinate codehs" data-insert="setposition(100, 50)"><span class="command-syntax">setposition(100, 50)</span><span class="command-desc">Move to an exact (x, y) coordinate.</span></button>
-          <button class="command-item" data-search="goto position coordinate codehs" data-insert="goto(100, 50)"><span class="command-syntax">goto(100, 50)</span><span class="command-desc">CodeHS alternative to setposition().</span></button>
-          <button class="command-item" data-search="setx x coordinate codehs" data-insert="setx(100)"><span class="command-syntax">setx(100)</span><span class="command-desc">Change only the x-coordinate.</span></button>
-          <button class="command-item" data-search="sety y coordinate codehs" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only the y-coordinate.</span></button>
+        <div class="command-category" data-category="Python Turtle Movement">
+          <div class="command-category-title">Turtle · Movement & Position</div>
+          <button class="command-item" data-search="forward movement python" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Turtle forward by a distance.</span></button>
+          <button class="command-item" data-search="backward movement python" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Turtle backward by a distance.</span></button>
+          <button class="command-item" data-search="setposition position coordinate python" data-insert="setposition(100, 50)"><span class="command-syntax">setposition(100, 50)</span><span class="command-desc">Move to an exact (x, y) coordinate.</span></button>
+          <button class="command-item" data-search="goto position coordinate python" data-insert="goto(100, 50)"><span class="command-syntax">goto(100, 50)</span><span class="command-desc">Another way to move to an exact coordinate.</span></button>
+          <button class="command-item" data-search="setx x coordinate python" data-insert="setx(100)"><span class="command-syntax">setx(100)</span><span class="command-desc">Change only the x-coordinate.</span></button>
+          <button class="command-item" data-search="sety y coordinate python" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only the y-coordinate.</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS Rotation">
-          <div class="command-category-title">CodeHS · Rotation</div>
-          <button class="command-item" data-search="left turn degrees codehs" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn Tracy left by an angle.</span></button>
-          <button class="command-item" data-search="right turn degrees codehs" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn Tracy right by an angle.</span></button>
-          <button class="command-item" data-search="setheading seth heading direction codehs" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Face an absolute direction.</span><span class="command-alias">alias: seth()</span></button>
+        <div class="command-category" data-category="Python Turtle Rotation">
+          <div class="command-category-title">Turtle · Rotation</div>
+          <button class="command-item" data-search="left turn degrees python" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn Turtle left by an angle.</span></button>
+          <button class="command-item" data-search="right turn degrees python" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn Turtle right by an angle.</span></button>
+          <button class="command-item" data-search="setheading seth heading direction python" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Face an absolute direction.</span><span class="command-alias">alias: seth()</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS Circles">
-          <div class="command-category-title">CodeHS · Circles</div>
-          <button class="command-item" data-search="circle radius codehs" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a full circle with radius 50.</span></button>
-          <button class="command-item" data-search="circle radius extent semicircle arc codehs" data-insert="circle(50, 180)"><span class="command-syntax">circle(50, 180)</span><span class="command-desc">Draw part of a circle using an extent.</span></button>
-          <button class="command-item" data-search="circle radius extent steps polygon triangle square codehs" data-insert="circle(50, 360, 4)"><span class="command-syntax">circle(50, 360, 4)</span><span class="command-desc">Use steps to make a polygon. Example: 4 = square.</span></button>
+        <div class="command-category" data-category="Python Turtle Circles">
+          <div class="command-category-title">Turtle · Circles</div>
+          <button class="command-item" data-search="circle radius python" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a full circle with radius 50.</span></button>
+          <button class="command-item" data-search="circle radius extent semicircle arc python" data-insert="circle(50, 180)"><span class="command-syntax">circle(50, 180)</span><span class="command-desc">Draw part of a circle using an extent.</span></button>
+          <button class="command-item" data-search="circle radius extent steps polygon triangle square python" data-insert="circle(50, 360, 4)"><span class="command-syntax">circle(50, 360, 4)</span><span class="command-desc">Use steps to make a polygon. Example: 4 = square.</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS Pen">
-          <div class="command-category-title">CodeHS · Pen, Speed & Color</div>
-          <button class="command-item" data-search="penup lift no draw codehs" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Move without drawing.</span></button>
-          <button class="command-item" data-search="pendown draw codehs" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down. Tracy starts this way.</span></button>
-          <button class="command-item" data-search="pensize line width thickness codehs" data-insert="pensize(5)"><span class="command-syntax">pensize(5)</span><span class="command-desc">Set the trail thickness.</span></button>
-          <button class="command-item" data-search="speed animation 0 1 10 codehs" data-insert="speed(6)"><span class="command-syntax">speed(6)</span><span class="command-desc">Set Tracy speed from 0–10. CodeHS uses 0 as fastest.</span></button>
-          <button class="command-item" data-search="color colour trail turtle hex codehs" data-insert='color("blue")'><span class="command-syntax">color("blue")</span><span class="command-desc">Change Tracy and the trail color. Hex colors also work.</span></button>
-          <button class="command-item" data-search="bgcolor background color canvas codehs" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the canvas background color.</span></button>
+        <div class="command-category" data-category="Python Turtle Pen">
+          <div class="command-category-title">Turtle · Pen, Speed & Color</div>
+          <button class="command-item" data-search="penup lift no draw python" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Move without drawing.</span></button>
+          <button class="command-item" data-search="pendown draw python" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down. Turtle starts this way.</span></button>
+          <button class="command-item" data-search="pensize line width thickness python" data-insert="pensize(5)"><span class="command-syntax">pensize(5)</span><span class="command-desc">Set the trail thickness.</span></button>
+          <button class="command-item" data-search="speed animation 0 1 10 python" data-insert="speed(6)"><span class="command-syntax">speed(6)</span><span class="command-desc">Set Turtle speed from 0–10. 0 means fastest.</span></button>
+          <button class="command-item" data-search="color colour trail turtle hex python" data-insert='color("blue")'><span class="command-syntax">color("blue")</span><span class="command-desc">Change Turtle and the trail color. Hex colors also work.</span></button>
+          <button class="command-item" data-search="bgcolor background color canvas python" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the canvas background color.</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS Fill Shape Clear">
-          <div class="command-category-title">CodeHS · Fill, Cursor & Clear</div>
-          <button class="command-item" data-search="begin_fill fill start codehs" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
-          <button class="command-item" data-search="end_fill fill finish codehs" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape drawn since begin_fill().</span></button>
-          <button class="command-item" data-search="shape cursor arrow turtle circle square triangle classic codehs" data-insert='shape("turtle")'><span class="command-syntax">shape("turtle")</span><span class="command-desc">Cursor options: arrow, turtle, circle, square, triangle, classic.</span></button>
-          <button class="command-item" data-search="clear erase screen codehs" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase all markings without changing Tracy’s position.</span></button>
+        <div class="command-category" data-category="Python Turtle Fill Shape Clear">
+          <div class="command-category-title">Turtle · Fill, Cursor & Clear</div>
+          <button class="command-item" data-search="begin_fill fill start python" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
+          <button class="command-item" data-search="end_fill fill finish python" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape drawn since begin_fill().</span></button>
+          <button class="command-item" data-search="shape cursor arrow turtle circle square triangle classic python" data-insert='shape("turtle")'><span class="command-syntax">shape("turtle")</span><span class="command-desc">Cursor options: arrow, turtle, circle, square, triangle, classic.</span></button>
+          <button class="command-item" data-search="clear erase screen python" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase all markings without changing Turtle’s position.</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS Text Interaction">
-          <div class="command-category-title">CodeHS · Text & Interaction</div>
-          <button class="command-item" data-search="write text canvas codehs" data-insert='write("Hello World!")'><span class="command-syntax">write("Hello World!")</span><span class="command-desc">Write text on the canvas.</span></button>
-          <button class="command-item" data-search="write font Arial size codehs" data-insert='write("Hi", font=("Arial", 20))'><span class="command-syntax">write("Hi", font=("Arial", 20))</span><span class="command-desc">Write using a chosen font and size.</span></button>
-          <button class="command-item" data-search="write align center left right codehs" data-insert='write("Tracy", align="center")'><span class="command-syntax">write("Tracy", align="center")</span><span class="command-desc">Align text left, center, or right around Tracy.</span></button>
-          <button class="command-item" data-search="onclick callback click turtle codehs" data-insert="onclick(make_square)"><span class="command-syntax">onclick(make_square)</span><span class="command-desc">Run a callback when Tracy is clicked. Callback takes x and y.</span></button>
-          <button class="command-item" data-search="getscreen canvas onclick click codehs" data-insert="canvas = getscreen()&#10;canvas.onclick(move_to_click)"><span class="command-syntax">canvas = getscreen()</span><span class="command-desc">Get the canvas so canvas.onclick(...) can respond anywhere.</span></button>
+        <div class="command-category" data-category="Python Turtle Text Interaction">
+          <div class="command-category-title">Turtle · Text & Interaction</div>
+          <button class="command-item" data-search="write text canvas python" data-insert='write("Hello World!")'><span class="command-syntax">write("Hello World!")</span><span class="command-desc">Write text on the canvas.</span></button>
+          <button class="command-item" data-search="write font Arial size python" data-insert='write("Hi", font=("Arial", 20))'><span class="command-syntax">write("Hi", font=("Arial", 20))</span><span class="command-desc">Write using a chosen font and size.</span></button>
+          <button class="command-item" data-search="write align center left right python" data-insert='write("Turtle", align="center")'><span class="command-syntax">write("Turtle", align="center")</span><span class="command-desc">Align text left, center, or right around Turtle.</span></button>
+          <button class="command-item" data-search="onclick callback click turtle python" data-insert="onclick(make_square)"><span class="command-syntax">onclick(make_square)</span><span class="command-desc">Run a callback when Turtle is clicked. Callback takes x and y.</span></button>
+          <button class="command-item" data-search="getscreen canvas onclick click python" data-insert="canvas = getscreen()&#10;canvas.onclick(move_to_click)"><span class="command-syntax">canvas = getscreen()</span><span class="command-desc">Get the canvas so canvas.onclick(...) can respond anywhere.</span></button>
         </div>
 
         <details class="recipe-panel">
-          <summary>CodeHS Python language <span>loops · functions · input</span></summary>
+          <summary>Python language <span>loops · functions · input</span></summary>
           <div class="recipe-body">
             <button class="recipe-button" type="button" data-recipe="forLoop"><strong>for + range</strong><code>for i in range(4):</code></button>
             <button class="recipe-button" type="button" data-recipe="whileLoop"><strong>while loop</strong><code>while count &lt; 5:</code></button>
@@ -881,61 +881,61 @@ for i in range(4):
           </div>
         </details>
 
-        <div class="command-category" data-category="CodeHS Python Builtins">
-          <div class="command-category-title">CodeHS Python · Built-ins</div>
-          <button class="command-item" data-search="range for loop codehs python" data-insert="range(4)"><span class="command-syntax">range(4)</span><span class="command-desc">Numbers 0 through 3 for a loop.</span></button>
-          <button class="command-item" data-search="range start stop step codehs python" data-insert="range(25, 76, 25)"><span class="command-syntax">range(25, 76, 25)</span><span class="command-desc">range(start, stop, step).</span></button>
-          <button class="command-item" data-search="input user text codehs python" data-insert='input("Enter a value: ")'><span class="command-syntax">input("Enter a value: ")</span><span class="command-desc">Ask the user for text input.</span></button>
-          <button class="command-item" data-search="print console output codehs python" data-insert='print("Hello World!")'><span class="command-syntax">print("Hello World!")</span><span class="command-desc">Print to Text Output under Tracy’s world.</span></button>
-          <button class="command-item" data-search="int cast integer codehs python" data-insert="int(value)"><span class="command-syntax">int(value)</span><span class="command-desc">Convert a value to an integer.</span></button>
-          <button class="command-item" data-search="str cast string codehs python" data-insert="str(value)"><span class="command-syntax">str(value)</span><span class="command-desc">Convert a value to a string.</span></button>
-          <button class="command-item" data-search="float cast decimal codehs python" data-insert="float(value)"><span class="command-syntax">float(value)</span><span class="command-desc">Convert a value to a decimal number.</span></button>
-          <button class="command-item" data-search="type data type codehs python" data-insert="type(value)"><span class="command-syntax">type(value)</span><span class="command-desc">Find the data type of a value.</span></button>
-          <button class="command-item" data-search="len list length codehs python" data-insert="len(my_list)"><span class="command-syntax">len(my_list)</span><span class="command-desc">Get the number of items in a list.</span></button>
+        <div class="command-category" data-category="Python Turtle Python Builtins">
+          <div class="command-category-title">Python · Built-ins</div>
+          <button class="command-item" data-search="range for loop python python" data-insert="range(4)"><span class="command-syntax">range(4)</span><span class="command-desc">Numbers 0 through 3 for a loop.</span></button>
+          <button class="command-item" data-search="range start stop step python python" data-insert="range(25, 76, 25)"><span class="command-syntax">range(25, 76, 25)</span><span class="command-desc">range(start, stop, step).</span></button>
+          <button class="command-item" data-search="input user text python python" data-insert='input("Enter a value: ")'><span class="command-syntax">input("Enter a value: ")</span><span class="command-desc">Ask the user for text input.</span></button>
+          <button class="command-item" data-search="print console output python python" data-insert='print("Hello World!")'><span class="command-syntax">print("Hello World!")</span><span class="command-desc">Print to Text Output under Turtle’s world.</span></button>
+          <button class="command-item" data-search="int cast integer python python" data-insert="int(value)"><span class="command-syntax">int(value)</span><span class="command-desc">Convert a value to an integer.</span></button>
+          <button class="command-item" data-search="str cast string python python" data-insert="str(value)"><span class="command-syntax">str(value)</span><span class="command-desc">Convert a value to a string.</span></button>
+          <button class="command-item" data-search="float cast decimal python python" data-insert="float(value)"><span class="command-syntax">float(value)</span><span class="command-desc">Convert a value to a decimal number.</span></button>
+          <button class="command-item" data-search="type data type python python" data-insert="type(value)"><span class="command-syntax">type(value)</span><span class="command-desc">Find the data type of a value.</span></button>
+          <button class="command-item" data-search="len list length python python" data-insert="len(my_list)"><span class="command-syntax">len(my_list)</span><span class="command-desc">Get the number of items in a list.</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS String Methods">
-          <div class="command-category-title">CodeHS Python · String Methods</div>
-          <button class="command-item" data-search="capitalize string codehs" data-insert="text.capitalize()"><span class="command-syntax">text.capitalize()</span><span class="command-desc">Capitalize the first character.</span></button>
-          <button class="command-item" data-search="upper string codehs" data-insert="text.upper()"><span class="command-syntax">text.upper()</span><span class="command-desc">Make letters uppercase.</span></button>
-          <button class="command-item" data-search="lower string codehs" data-insert="text.lower()"><span class="command-syntax">text.lower()</span><span class="command-desc">Make letters lowercase.</span></button>
-          <button class="command-item" data-search="strip string whitespace codehs" data-insert="text.strip()"><span class="command-syntax">text.strip()</span><span class="command-desc">Remove outside whitespace.</span></button>
-          <button class="command-item" data-search="replace string codehs" data-insert='text.replace("old", "new")'><span class="command-syntax">text.replace("old", "new")</span><span class="command-desc">Replace matching text.</span></button>
-          <button class="command-item" data-search="find string index codehs" data-insert='text.find("a")'><span class="command-syntax">text.find("a")</span><span class="command-desc">Find the first matching index, or -1.</span></button>
-          <button class="command-item" data-search="count string occurrences codehs" data-insert='text.count("a")'><span class="command-syntax">text.count("a")</span><span class="command-desc">Count occurrences.</span></button>
-          <button class="command-item" data-search="isalpha string boolean codehs" data-insert="text.isalpha()"><span class="command-syntax">text.isalpha()</span><span class="command-desc">True when all characters are letters.</span></button>
-          <button class="command-item" data-search="isdigit string boolean codehs" data-insert="text.isdigit()"><span class="command-syntax">text.isdigit()</span><span class="command-desc">True when all characters are digits.</span></button>
-          <button class="command-item" data-search="isnumeric string boolean codehs" data-insert="text.isnumeric()"><span class="command-syntax">text.isnumeric()</span><span class="command-desc">True when all characters are numeric.</span></button>
-          <button class="command-item" data-search="isupper string boolean codehs" data-insert="text.isupper()"><span class="command-syntax">text.isupper()</span><span class="command-desc">True when all letters are uppercase.</span></button>
-          <button class="command-item" data-search="islower string boolean codehs" data-insert="text.islower()"><span class="command-syntax">text.islower()</span><span class="command-desc">True when all letters are lowercase.</span></button>
-          <button class="command-item" data-search="startswith string boolean codehs" data-insert='text.startswith("T")'><span class="command-syntax">text.startswith("T")</span><span class="command-desc">Check the beginning of a string.</span></button>
-          <button class="command-item" data-search="endswith string boolean codehs" data-insert='text.endswith("y")'><span class="command-syntax">text.endswith("y")</span><span class="command-desc">Check the end of a string.</span></button>
-          <button class="command-item" data-search="format string placeholders codehs" data-insert='message.format(value)'><span class="command-syntax">message.format(value)</span><span class="command-desc">Insert values into {} placeholders.</span></button>
+        <div class="command-category" data-category="Python Turtle String Methods">
+          <div class="command-category-title">Python · String Methods</div>
+          <button class="command-item" data-search="capitalize string python" data-insert="text.capitalize()"><span class="command-syntax">text.capitalize()</span><span class="command-desc">Capitalize the first character.</span></button>
+          <button class="command-item" data-search="upper string python" data-insert="text.upper()"><span class="command-syntax">text.upper()</span><span class="command-desc">Make letters uppercase.</span></button>
+          <button class="command-item" data-search="lower string python" data-insert="text.lower()"><span class="command-syntax">text.lower()</span><span class="command-desc">Make letters lowercase.</span></button>
+          <button class="command-item" data-search="strip string whitespace python" data-insert="text.strip()"><span class="command-syntax">text.strip()</span><span class="command-desc">Remove outside whitespace.</span></button>
+          <button class="command-item" data-search="replace string python" data-insert='text.replace("old", "new")'><span class="command-syntax">text.replace("old", "new")</span><span class="command-desc">Replace matching text.</span></button>
+          <button class="command-item" data-search="find string index python" data-insert='text.find("a")'><span class="command-syntax">text.find("a")</span><span class="command-desc">Find the first matching index, or -1.</span></button>
+          <button class="command-item" data-search="count string occurrences python" data-insert='text.count("a")'><span class="command-syntax">text.count("a")</span><span class="command-desc">Count occurrences.</span></button>
+          <button class="command-item" data-search="isalpha string boolean python" data-insert="text.isalpha()"><span class="command-syntax">text.isalpha()</span><span class="command-desc">True when all characters are letters.</span></button>
+          <button class="command-item" data-search="isdigit string boolean python" data-insert="text.isdigit()"><span class="command-syntax">text.isdigit()</span><span class="command-desc">True when all characters are digits.</span></button>
+          <button class="command-item" data-search="isnumeric string boolean python" data-insert="text.isnumeric()"><span class="command-syntax">text.isnumeric()</span><span class="command-desc">True when all characters are numeric.</span></button>
+          <button class="command-item" data-search="isupper string boolean python" data-insert="text.isupper()"><span class="command-syntax">text.isupper()</span><span class="command-desc">True when all letters are uppercase.</span></button>
+          <button class="command-item" data-search="islower string boolean python" data-insert="text.islower()"><span class="command-syntax">text.islower()</span><span class="command-desc">True when all letters are lowercase.</span></button>
+          <button class="command-item" data-search="startswith string boolean python" data-insert='text.startswith("T")'><span class="command-syntax">text.startswith("T")</span><span class="command-desc">Check the beginning of a string.</span></button>
+          <button class="command-item" data-search="endswith string boolean python" data-insert='text.endswith("y")'><span class="command-syntax">text.endswith("y")</span><span class="command-desc">Check the end of a string.</span></button>
+          <button class="command-item" data-search="format string placeholders python" data-insert='message.format(value)'><span class="command-syntax">message.format(value)</span><span class="command-desc">Insert values into {} placeholders.</span></button>
         </div>
 
-        <div class="command-category" data-category="CodeHS List Methods">
-          <div class="command-category-title">CodeHS Python · Lists</div>
-          <button class="command-item" data-search="list create codehs python" data-insert='my_list = ["a", "b", "c"]'><span class="command-syntax">my_list = ["a", "b", "c"]</span><span class="command-desc">Create a list.</span></button>
-          <button class="command-item" data-search="list index codehs python" data-insert="my_list[0]"><span class="command-syntax">my_list[0]</span><span class="command-desc">Access an item by index.</span></button>
-          <button class="command-item" data-search="list slice codehs python" data-insert="my_list[1:3]"><span class="command-syntax">my_list[1:3]</span><span class="command-desc">Take a slice of a list.</span></button>
-          <button class="command-item" data-search="append list add codehs python" data-insert="my_list.append(value)"><span class="command-syntax">my_list.append(value)</span><span class="command-desc">Add one item to the end.</span></button>
-          <button class="command-item" data-search="extend list add multiple codehs python" data-insert="my_list.extend(other_list)"><span class="command-syntax">my_list.extend(other_list)</span><span class="command-desc">Add multiple items to the end.</span></button>
-          <button class="command-item" data-search="insert list codehs python" data-insert="my_list.insert(1, value)"><span class="command-syntax">my_list.insert(1, value)</span><span class="command-desc">Insert at an index.</span></button>
-          <button class="command-item" data-search="pop list remove index codehs python" data-insert="my_list.pop()"><span class="command-syntax">my_list.pop()</span><span class="command-desc">Remove and return an item.</span></button>
-          <button class="command-item" data-search="remove list item codehs python" data-insert="my_list.remove(value)"><span class="command-syntax">my_list.remove(value)</span><span class="command-desc">Remove a matching item.</span></button>
-          <button class="command-item" data-search="del list delete keyword codehs python" data-insert="del my_list[0]"><span class="command-syntax">del my_list[0]</span><span class="command-desc">Delete an item by index.</span></button>
-          <button class="command-item" data-search="sort list codehs python" data-insert="my_list.sort()"><span class="command-syntax">my_list.sort()</span><span class="command-desc">Sort a list.</span></button>
-          <button class="command-item" data-search="reverse list codehs python" data-insert="my_list.reverse()"><span class="command-syntax">my_list.reverse()</span><span class="command-desc">Reverse a list in place.</span></button>
+        <div class="command-category" data-category="Python Turtle List Methods">
+          <div class="command-category-title">Python · Lists</div>
+          <button class="command-item" data-search="list create python python" data-insert='my_list = ["a", "b", "c"]'><span class="command-syntax">my_list = ["a", "b", "c"]</span><span class="command-desc">Create a list.</span></button>
+          <button class="command-item" data-search="list index python python" data-insert="my_list[0]"><span class="command-syntax">my_list[0]</span><span class="command-desc">Access an item by index.</span></button>
+          <button class="command-item" data-search="list slice python python" data-insert="my_list[1:3]"><span class="command-syntax">my_list[1:3]</span><span class="command-desc">Take a slice of a list.</span></button>
+          <button class="command-item" data-search="append list add python python" data-insert="my_list.append(value)"><span class="command-syntax">my_list.append(value)</span><span class="command-desc">Add one item to the end.</span></button>
+          <button class="command-item" data-search="extend list add multiple python python" data-insert="my_list.extend(other_list)"><span class="command-syntax">my_list.extend(other_list)</span><span class="command-desc">Add multiple items to the end.</span></button>
+          <button class="command-item" data-search="insert list python python" data-insert="my_list.insert(1, value)"><span class="command-syntax">my_list.insert(1, value)</span><span class="command-desc">Insert at an index.</span></button>
+          <button class="command-item" data-search="pop list remove index python python" data-insert="my_list.pop()"><span class="command-syntax">my_list.pop()</span><span class="command-desc">Remove and return an item.</span></button>
+          <button class="command-item" data-search="remove list item python python" data-insert="my_list.remove(value)"><span class="command-syntax">my_list.remove(value)</span><span class="command-desc">Remove a matching item.</span></button>
+          <button class="command-item" data-search="del list delete keyword python python" data-insert="del my_list[0]"><span class="command-syntax">del my_list[0]</span><span class="command-desc">Delete an item by index.</span></button>
+          <button class="command-item" data-search="sort list python python" data-insert="my_list.sort()"><span class="command-syntax">my_list.sort()</span><span class="command-desc">Sort a list.</span></button>
+          <button class="command-item" data-search="reverse list python python" data-insert="my_list.reverse()"><span class="command-syntax">my_list.reverse()</span><span class="command-desc">Reverse a list in place.</span></button>
         </div>
 
         <details class="recipe-panel">
           <summary>Sandbox extras <span>work here too</span></summary>
           <div class="recipe-body extra-reference">
             <button class="command-item" data-search="home extra turtle" data-insert="home()"><span class="command-syntax">home()</span><span class="command-desc">Return to (0, 0) and face right.</span></button>
-            <button class="command-item" data-search="xcor extra turtle" data-insert="xcor()"><span class="command-syntax">xcor()</span><span class="command-desc">Read Tracy’s x-coordinate.</span></button>
-            <button class="command-item" data-search="ycor extra turtle" data-insert="ycor()"><span class="command-syntax">ycor()</span><span class="command-desc">Read Tracy’s y-coordinate.</span></button>
-            <button class="command-item" data-search="position pos extra turtle" data-insert="position()"><span class="command-syntax">position()</span><span class="command-desc">Read Tracy’s (x, y) position.</span></button>
-            <button class="command-item" data-search="heading extra turtle" data-insert="heading()"><span class="command-syntax">heading()</span><span class="command-desc">Read Tracy’s heading.</span></button>
+            <button class="command-item" data-search="xcor extra turtle" data-insert="xcor()"><span class="command-syntax">xcor()</span><span class="command-desc">Read Turtle’s x-coordinate.</span></button>
+            <button class="command-item" data-search="ycor extra turtle" data-insert="ycor()"><span class="command-syntax">ycor()</span><span class="command-desc">Read Turtle’s y-coordinate.</span></button>
+            <button class="command-item" data-search="position pos extra turtle" data-insert="position()"><span class="command-syntax">position()</span><span class="command-desc">Read Turtle’s (x, y) position.</span></button>
+            <button class="command-item" data-search="heading extra turtle" data-insert="heading()"><span class="command-syntax">heading()</span><span class="command-desc">Read Turtle’s heading.</span></button>
             <button class="command-item" data-search="dot extra turtle" data-insert="dot(10)"><span class="command-syntax">dot(10)</span><span class="command-desc">Draw a dot.</span></button>
             <button class="command-item" data-search="stamp extra turtle" data-insert="stamp()"><span class="command-syntax">stamp()</span><span class="command-desc">Stamp the current cursor.</span></button>
             <button class="command-item" data-search="hide turtle hideturtle extra" data-insert="hideturtle()"><span class="command-syntax">hideturtle()</span><span class="command-desc">Hide the cursor.</span></button>
@@ -962,7 +962,7 @@ for i in range(4):
 
   var STORAGE_KEY = "dsteckler-turtle-code-v1";
   var DEFAULT_CODE = [
-    "# Tracy starts at (0, 0), facing right.",
+    "# Turtle starts at (0, 0), facing right.",
     "# Try changing the distance or the number of repeats.",
     "",
     "for i in range(4):",
@@ -1218,9 +1218,9 @@ for i in range(4):
     return Sk.builtinFiles.files[x];
   }
 
-  var TracyRuntime = (function(){
-    var drawCanvas = document.getElementById("tracy-drawing");
-    var spriteCanvas = document.getElementById("tracy-sprite");
+  var TurtleRuntime = (function(){
+    var drawCanvas = document.getElementById("turtle-drawing");
+    var spriteCanvas = document.getElementById("turtle-sprite");
     var ctx = drawCanvas.getContext("2d");
     var sctx = spriteCanvas.getContext("2d");
     var world = document.getElementById("worldWrap");
@@ -1270,30 +1270,92 @@ for i in range(4):
       target.save();
       target.translate(px(state.x),py(state.y));
       target.rotate(-rad(state.heading));
-      target.fillStyle=state.color||"#000";
-      target.strokeStyle=state.color||"#000";
-      target.lineWidth=1.5;
+
+      var accent=state.color||"#176b73";
+      var outline="#173b3d";
+      var body="#8fc6ae";
       var shape=state.shape||"turtle";
-      target.beginPath();
-      if(shape==="circle"){
-        target.arc(0,0,7,0,Math.PI*2);
-        target.fill();
-      }else if(shape==="square"){
-        target.fillRect(-7,-7,14,14);
-      }else if(shape==="triangle"){
-        target.moveTo(9,0);target.lineTo(-7,-7);target.lineTo(-7,7);target.closePath();target.fill();
-      }else if(shape==="classic"){
-        target.moveTo(10,0);target.lineTo(-7,-5);target.lineTo(-3,0);target.lineTo(-7,5);target.closePath();target.fill();
-      }else if(shape==="arrow"){
-        target.moveTo(10,0);target.lineTo(-6,-6);target.lineTo(-2,0);target.lineTo(-6,6);target.closePath();target.fill();
-      }else{
-        // A simple turtle silhouette for CodeHS's default "turtle" cursor.
-        target.ellipse(-1,0,8,5,0,0,Math.PI*2);target.fill();
-        target.beginPath();target.arc(8,0,3,0,Math.PI*2);target.fill();
-        [[-4,-6],[-4,6],[3,-6],[3,6]].forEach(function(p){
-          target.beginPath();target.arc(p[0],p[1],2,0,Math.PI*2);target.fill();
-        });
+
+      target.lineCap="round";
+      target.lineJoin="round";
+      target.lineWidth=1.35;
+
+      if(shape!=="turtle"){
+        target.fillStyle=accent;
+        target.strokeStyle=outline;
+        target.beginPath();
+        if(shape==="circle"){
+          target.arc(0,0,7,0,Math.PI*2);
+          target.fill();target.stroke();
+        }else if(shape==="square"){
+          target.fillRect(-7,-7,14,14);
+          target.strokeRect(-7,-7,14,14);
+        }else if(shape==="triangle"){
+          target.moveTo(9,0);target.lineTo(-7,-7);target.lineTo(-7,7);target.closePath();
+          target.fill();target.stroke();
+        }else if(shape==="classic"){
+          target.moveTo(10,0);target.lineTo(-7,-5);target.lineTo(-3,0);target.lineTo(-7,5);target.closePath();
+          target.fill();target.stroke();
+        }else{
+          target.moveTo(10,0);target.lineTo(-6,-6);target.lineTo(-2,0);target.lineTo(-6,6);target.closePath();
+          target.fill();target.stroke();
+        }
+        target.restore();
+        return;
       }
+
+      target.fillStyle=body;
+      target.strokeStyle=outline;
+
+      // Tail.
+      target.beginPath();
+      target.moveTo(-10.5,0);
+      target.lineTo(-14.5,-2.1);
+      target.lineTo(-14.5,2.1);
+      target.closePath();
+      target.fill();target.stroke();
+
+      // Four flippers, spaced away from the shell so they remain distinct.
+      [[-5,-7,-.34],[-5,7,.34],[4,-7,-.52],[4,7,.52]].forEach(function(leg){
+        target.save();
+        target.translate(leg[0],leg[1]);
+        target.rotate(leg[2]);
+        target.beginPath();
+        target.ellipse(0,0,3.7,2,0,0,Math.PI*2);
+        target.fill();target.stroke();
+        target.restore();
+      });
+
+      // Shell.
+      target.fillStyle=accent;
+      target.beginPath();
+      target.ellipse(-1,0,8.8,6.3,0,0,Math.PI*2);
+      target.fill();target.stroke();
+
+      // Subtle shell markings keep the shape readable at small sizes.
+      target.save();
+      target.globalAlpha=.45;
+      target.strokeStyle="#ffffff";
+      target.lineWidth=.9;
+      target.beginPath();
+      target.moveTo(-6.5,-3);target.lineTo(4.5,2.8);
+      target.moveTo(-6.5,3);target.lineTo(4.5,-2.8);
+      target.stroke();
+      target.restore();
+
+      // Head. Its position makes heading immediately obvious.
+      target.fillStyle=body;
+      target.strokeStyle=outline;
+      target.beginPath();
+      target.arc(9.8,0,4,0,Math.PI*2);
+      target.fill();target.stroke();
+
+      // Eye.
+      target.fillStyle=outline;
+      target.beginPath();
+      target.arc(11.2,-1.2,.7,0,Math.PI*2);
+      target.fill();
+
       target.restore();
     }
 
@@ -1332,7 +1394,7 @@ for i in range(4):
           start:null, cancel:null
         };
         motion=operation;
-        motionStatus.textContent=label||"Moving Tracy";
+        motionStatus.textContent=label||"Moving Turtle";
         function finish(){
           operation.finished=true;
           if(operation.raf!==null)cancelAnimationFrame(operation.raf);
@@ -1777,7 +1839,7 @@ for i in range(4):
   })();
 
   function clearWorld(){
-    TracyRuntime.reset();
+    TurtleRuntime.reset();
   }
 
   var runToken = 0;
@@ -1808,12 +1870,12 @@ for i in range(4):
 
   function showExecutingLine(line){
     if(playback.marker!==null){
-      try{editor.removeLineClass(playback.marker,"background","tracy-current-line");}catch(e){}
+      try{editor.removeLineClass(playback.marker,"background","turtle-current-line");}catch(e){}
       playback.marker=null;
     }
     var n=Number(line);
     if(Number.isInteger(n)&&n>0&&n<=editor.lineCount()){
-      playback.marker=editor.addLineClass(n-1,"background","tracy-current-line");
+      playback.marker=editor.addLineClass(n-1,"background","turtle-current-line");
       playbackLineStatus.textContent="Line "+n;
       worldLineStatus.textContent="Line "+n+" · "+(editor.getLine(n-1)||"").trim().slice(0,32);
       editor.scrollIntoView({line:n-1,ch:0},60);
@@ -1851,7 +1913,7 @@ for i in range(4):
     playback.active=false;
     playback.paused=false;
     playback.stepOnce=false;
-    TracyRuntime.cancelAnimation();
+    TurtleRuntime.cancelAnimation();
     if(pending)pending.reject(new Error("Playback stopped"));
     syncPlaybackButtons();
     showExecutingLine(null);
@@ -1878,7 +1940,7 @@ for i in range(4):
     playback.paused=!playback.paused;
     playback.stepOnce=false;
     syncPlaybackButtons();
-    TracyRuntime.syncAnimationPause();
+    TurtleRuntime.syncAnimationPause();
     schedulePlayback();
   });
   stepBtn.addEventListener("click",function(){
@@ -1937,7 +1999,7 @@ for i in range(4):
       inputfunTakesPrompt:true
     });
 
-    TracyRuntime.installBuiltins();
+    TurtleRuntime.installBuiltins();
     try{
       await Sk.misceval.asyncToPromise(function(){
         return Sk.importMainWithBody("<stdin>",false,userCode,true);
@@ -2015,7 +2077,7 @@ for i in range(4):
   function clearCode(){
     if(playback.active)stopCode();
     if(!editor.getValue())return;
-    if(!window.confirm("Clear all code from the editor? Tracy's drawing and text output will stay."))return;
+    if(!window.confirm("Clear all code from the editor? Turtle's drawing and text output will stay."))return;
     editor.setValue("");
     editor.focus();
     try {
@@ -2062,10 +2124,10 @@ for i in range(4):
   });
 
   var recipes = {
-    codehsSquare:"for i in range(4):\n    forward(100)\n    right(90)",
-    codehsMove:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
-    codehsFill:'color("navy")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
-    codehsWrite:'write("Tracy", font=("Arial", 20), align="center")',
+    turtleSquare:"for i in range(4):\n    forward(100)\n    right(90)",
+    turtleMove:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
+    turtleFill:'color("navy")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
+    turtleWrite:'write("Hello", font=("Arial", 20), align="center")',
     forLoop:"for i in range(4):\n    forward(50)\n    left(90)",
     whileLoop:"count = 0\nwhile count < 5:\n    forward(20)\n    count += 1",
     function:"def square(size):\n    for i in range(4):\n        forward(size)\n        right(90)\n\nsquare(80)",
