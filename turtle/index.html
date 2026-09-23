@@ -726,7 +726,7 @@
       </select>
       <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
       <button class="btn" id="pauseBtn" type="button" disabled>⏸ Pause</button>
-      <button class="btn" id="stepBtn" type="button" disabled title="Execute one Python statement">↳ Step</button>
+      <button class="btn" id="stepBtn" type="button" disabled title="Execute one Python statement. You can start with Step without pressing Run first.">↳ Step</button>
       <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
       <button class="btn commands-toggle" id="commandsToggle" type="button" aria-controls="commandLibrary" aria-expanded="false">☰ Commands</button>
       <button class="btn mobile-output" id="viewWorldBtn" type="button">View world ↓</button>
@@ -1750,6 +1750,7 @@ for i in range(4):
         playback.active=false;
         playback.paused=false;
         playback.stepOnce=false;
+        playback.autoStepOnFirstPause=false;
         syncPlaybackButtons();
       });
     }
@@ -1924,6 +1925,7 @@ for i in range(4):
   var runToken = 0;
   var playback = {
     active:false, paused:false, stepOnce:false,
+    autoStepOnFirstPause:false,
     pending:null, timer:null,
     speed:6,
     marker:null
@@ -1964,7 +1966,9 @@ for i in range(4):
     runBtn.disabled=playback.active;
     stopBtn.disabled=!playback.active;
     pauseBtn.disabled=!playback.active;
-    stepBtn.disabled=!playback.active||!playback.paused||!playback.pending;
+    // Step is available before a run starts. During a run, it becomes
+    // available whenever execution is paused on a real Python statement.
+    stepBtn.disabled=playback.active ? (!playback.paused||!playback.pending) : false;
     pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
   }
   function schedulePlayback(){
@@ -1989,6 +1993,7 @@ for i in range(4):
     playback.active=false;
     playback.paused=false;
     playback.stepOnce=false;
+    playback.autoStepOnFirstPause=false;
     TurtleRuntime.cancelAnimation();
     if(pending)pending.reject(new Error("Playback stopped"));
     syncPlaybackButtons();
@@ -2000,13 +2005,31 @@ for i in range(4):
         reject(new Error("Playback stopped"));
         return;
       }
+
       showExecutingLine(line);
+      var autoFirstStep=playback.autoStepOnFirstPause;
+      if(autoFirstStep) playback.autoStepOnFirstPause=false;
+
       playback.pending={susp:susp,resolve:resolve,reject:reject};
+
+      // A Step click from the stopped state should execute the first
+      // statement immediately, then pause on the next statement.
+      if(autoFirstStep){
+        var first=playback.pending;
+        playback.pending=null;
+        playback.stepOnce=true;
+        syncPlaybackButtons();
+        try{first.resolve(first.susp.resume());}
+        catch(e){first.reject(e);}
+        return;
+      }
+
+      // After executing one statement, stop at the next executable line.
       if(playback.stepOnce){
         playback.stepOnce=false;
         playback.paused=true;
-        syncPlaybackButtons();
       }
+
       syncPlaybackButtons();
       schedulePlayback();
     });
@@ -2020,17 +2043,26 @@ for i in range(4):
     schedulePlayback();
   });
   stepBtn.addEventListener("click",function(){
-    if(!playback.active||!playback.paused||!playback.pending)return;
+    // From a stopped program, Step starts fresh, executes the first
+    // statement, and pauses on the next one.
+    if(!playback.active){
+      runCode(true);
+      return;
+    }
+
+    if(!playback.paused||!playback.pending)return;
     var pending=playback.pending;
     playback.pending=null;
     if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
     playback.stepOnce=true;
+    playback.paused=false;
     syncPlaybackButtons();
+    TurtleRuntime.syncAnimationPause();
     try{pending.resolve(pending.susp.resume());}
     catch(e){pending.reject(e);}
   });
 
-  async function runCode(){
+  async function runCode(startWithStep){
     if(playback.active)return;
     if(typeof Sk==="undefined"){
       setStatus("bad");
@@ -2045,6 +2077,7 @@ for i in range(4):
     playback.active=true;
     playback.paused=false;
     playback.stepOnce=false;
+    playback.autoStepOnFirstPause=!!startWithStep;
     playback.pending=null;
     playback.speed=6;
     showExecutingLine(null);
@@ -2162,7 +2195,7 @@ for i in range(4):
     } catch(e) {}
   }
 
-  runBtn.addEventListener("click", runCode);
+  runBtn.addEventListener("click",function(){runCode(false);});
   stopBtn.addEventListener("click", stopCode);
   clearCodeBtn.addEventListener("click", clearCode);
   clearRunBtn.addEventListener("click", clearRun);
