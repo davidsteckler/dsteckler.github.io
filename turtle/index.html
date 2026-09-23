@@ -1404,59 +1404,181 @@ for i in range(4):
   }
 
   var runToken = 0;
+  var playback = {
+    active:false, paused:false, stepOnce:false,
+    pending:null, timer:null, codeSpeed:6, uiSpeed:6,
+    marker:null
+  };
+
+  // Skulpt pauses before each real Python statement, including loop bodies
+  // and statements inside user-defined functions. Rendering remains immediate
+  // when a statement executes; the next statement waits for the speed timer.
+  function lineDelay(){
+    var codeDelay=playback.codeSpeed===0?30:Math.round(1050/(playback.codeSpeed*.9+.6));
+    var factor=Math.pow(1.5,6-playback.uiSpeed);
+    return Math.max(18,Math.min(2000,Math.round(codeDelay*factor)));
+  }
+  function updateSpeedLabel(){
+    playSpeedValue.textContent=playback.uiSpeed+" / 10";
+    playSpeed.title="About "+lineDelay()+" ms per Python statement";
+  }
+  playSpeed.addEventListener("input",function(){
+    playback.uiSpeed=Number(this.value);
+    updateSpeedLabel();
+    schedulePlayback();
+  });
+  updateSpeedLabel();
+
+  function showExecutingLine(line){
+    if(playback.marker!==null){
+      try{editor.removeLineClass(playback.marker,"background","tracy-current-line");}catch(e){}
+      playback.marker=null;
+    }
+    var n=Number(line);
+    if(Number.isInteger(n)&&n>0&&n<=editor.lineCount()){
+      playback.marker=editor.addLineClass(n-1,"background","tracy-current-line");
+      playbackLineStatus.textContent="Line "+n;
+      editor.scrollIntoView({line:n-1,ch:0},60);
+    }else{
+      playbackLineStatus.textContent="";
+    }
+  }
+  function syncPlaybackButtons(){
+    runBtn.disabled=playback.active;
+    stopBtn.disabled=!playback.active;
+    pauseBtn.disabled=!playback.active;
+    stepBtn.disabled=!playback.active||!playback.paused;
+    pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
+  }
+  function schedulePlayback(){
+    if(playback.timer!==null){
+      clearTimeout(playback.timer);
+      playback.timer=null;
+    }
+    if(!playback.active||playback.paused||!playback.pending)return;
+    var pending=playback.pending;
+    playback.timer=setTimeout(function(){
+      playback.timer=null;
+      if(!playback.active||playback.paused||playback.pending!==pending)return;
+      playback.pending=null;
+      try{pending.resolve(pending.susp.resume());}
+      catch(e){pending.reject(e);}
+    },lineDelay());
+  }
+  function cancelPlayback(){
+    if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+    var pending=playback.pending;
+    playback.pending=null;
+    playback.active=false;
+    playback.paused=false;
+    playback.stepOnce=false;
+    if(pending)pending.reject(new Error("Playback stopped"));
+    syncPlaybackButtons();
+    showExecutingLine(null);
+  }
+  function debugStatement(susp,token,line){
+    return new Promise(function(resolve,reject){
+      if(token!==runToken||!playback.active){
+        reject(new Error("Playback stopped"));
+        return;
+      }
+      showExecutingLine(line);
+      playback.pending={susp:susp,resolve:resolve,reject:reject};
+      if(playback.stepOnce){
+        playback.stepOnce=false;
+        playback.paused=true;
+        syncPlaybackButtons();
+      }
+      schedulePlayback();
+    });
+  }
+  pauseBtn.addEventListener("click",function(){
+    if(!playback.active)return;
+    playback.paused=!playback.paused;
+    playback.stepOnce=false;
+    syncPlaybackButtons();
+    schedulePlayback();
+  });
+  stepBtn.addEventListener("click",function(){
+    if(!playback.active||!playback.paused||!playback.pending)return;
+    var pending=playback.pending;
+    playback.pending=null;
+    if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+    playback.stepOnce=true;
+    try{pending.resolve(pending.susp.resume());}
+    catch(e){pending.reject(e);}
+  });
 
   async function runCode(){
-    if(typeof Sk === "undefined"){
+    if(playback.active)return;
+    if(typeof Sk==="undefined"){
       setStatus("bad");
       setOutput('<span class="error">Python did not load. Check the internet connection and refresh the page.</span>');
       return;
     }
-
-    runToken += 1;
-    var myToken = runToken;
-    var userCode = editor.getValue();
+    runToken++;
+    var token=runToken, userCode=editor.getValue(), debugLine=0;
     clearWorld();
     setOutput("");
     setStatus("running");
-    runBtn.disabled = true;
-    stopBtn.disabled = false;
+    playback.active=true;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.pending=null;
+    playback.codeSpeed=6;
+    showExecutingLine(null);
+    syncPlaybackButtons();
 
     Sk.configure({
-      output: outf,
-      read: builtinRead,
-      __future__: Sk.python3,
-      execLimit: 8000,
-      inputfun: function(promptText){
-        var value = window.prompt(promptText || "");
-        return Promise.resolve(value === null ? "" : value);
+      output:outf,
+      read:builtinRead,
+      __future__:Sk.python3,
+      debugging:true,
+      breakpoints:function(filename,lineno){
+        if(token!==runToken)return false;
+        // Don't stop in modules imported by the student's code.
+        if(String(filename).indexOf("<stdin>")<0)return false;
+        debugLine=lineno;
+        return true;
       },
-      inputfunTakesPrompt: true
+      execLimit:30000,
+      yieldLimit:100,
+      inputfun:function(promptText){
+        var value=window.prompt(promptText||"");
+        return Promise.resolve(value===null?"":value);
+      },
+      inputfunTakesPrompt:true
     });
 
     TracyRuntime.installBuiltins();
-    var program = userCode;
-
-    try {
+    try{
       await Sk.misceval.asyncToPromise(function(){
-        return Sk.importMainWithBody("<stdin>", false, program, true);
+        return Sk.importMainWithBody("<stdin>",false,userCode,true);
+      },{
+        "Sk.debug":function(susp){
+          return debugStatement(susp,token,debugLine);
+        }
       });
-
-      if(myToken !== runToken) return;
+      if(token!==runToken)return;
       if(!output.textContent.trim()){
-        appendOutput("Program finished. No text was printed.\n", "muted");
-      } else {
-        appendOutput("\nProgram finished.\n", "success");
+        appendOutput("Program finished. No text was printed.\n","muted");
+      }else{
+        appendOutput("\nProgram finished.\n","success");
       }
       setStatus("good");
-    } catch(err) {
-      if(myToken !== runToken) return;
-      var message = formatError(err);
-      appendOutput(message + "\n", "error");
+    }catch(err){
+      if(token!==runToken)return;
+      appendOutput(formatError(err)+"\n","error");
       setStatus("bad");
-    } finally {
-      if(myToken === runToken){
-        runBtn.disabled = false;
-        stopBtn.disabled = true;
+    }finally{
+      if(token===runToken){
+        if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+        playback.pending=null;
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        syncPlaybackButtons();
+        showExecutingLine(null);
         if(window.innerWidth<=560){
           requestAnimationFrame(function(){
             worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
@@ -1488,28 +1610,23 @@ for i in range(4):
   }
 
   function stopCode(){
-    runToken += 1;
-    try {
-      if(Sk && Sk.TurtleGraphics && typeof Sk.TurtleGraphics.stop === "function"){
-        Sk.TurtleGraphics.stop();
-      }
-    } catch(e) {}
-    runBtn.disabled = false;
-    stopBtn.disabled = true;
+    if(!playback.active)return;
+    runToken++;
+    cancelPlayback();
     setStatus("");
-    appendOutput("\nStopped.\n", "muted");
+    appendOutput("\nStopped.\n","muted");
   }
 
   function clearRun(){
-    runToken += 1;
-    runBtn.disabled = false;
-    stopBtn.disabled = true;
+    runToken++;
+    cancelPlayback();
     setStatus("");
     clearWorld();
     setOutput('<span class="muted">Run cleared. Your code is still here.</span>');
   }
 
   function clearCode(){
+    if(playback.active)stopCode();
     if(!editor.getValue())return;
     if(!window.confirm("Clear all code from the editor? Tracy's drawing and text output will stay."))return;
     editor.setValue("");
