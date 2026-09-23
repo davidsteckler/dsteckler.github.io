@@ -75,7 +75,7 @@ jobs:
               text = script_block.sub(remove_ga_script, text)
 
               # Clean the literal backslash-n left by the previous pass, only at document start.
-              text = re.sub(r"^(?:\\n)+(?=\s*(?:<!doctype|<html))", "", text, flags=re.IGNORECASE)
+              text = re.sub(r"^\s*(?:\\n)+(?=\s*(?:<!doctype|<html))", "", text, flags=re.IGNORECASE)
 
               newline = "\r\n" if "\r\n" in original[:2000] else "\n"
               snippet = SNIPPET.replace("\n", newline)
