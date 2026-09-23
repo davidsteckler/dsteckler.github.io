@@ -893,14 +893,20 @@ const shadeLevels=[
 
 function renderShade(){
   const count=Number(document.getElementById('shadeDetail').value);
-  const chars=shadeRamp.slice(0,count);
-  const rows=shadeLevels.map(row=>row.map(level=>{
-    const normalized=level/9;
-    const index=Math.round(normalized*(chars.length-1));
-    return chars[index];
-  }).join(''));
+  // Keep both the lightest and the darkest character at every level.
+  const chars=Array.from({length:count},(_,i)=>shadeRamp[Math.round(i*9/(count-1))]);
+  const rows=shadeLevels.map(row=>row.map(level=>chars[Math.round(level*(count-1)/9)]).join(''));
   document.getElementById('shadePicture').textContent=rows.join('\n');
   document.getElementById('shadeLabel').textContent=count+' characters';
+  const original=document.getElementById('shadeOriginal');
+  if(!original.childElementCount){
+    shadeLevels.flat().forEach(level=>{
+      const tile=document.createElement('span');
+      const brightness=235-Math.round(level*205/9);
+      tile.style.backgroundColor='rgb('+brightness+','+brightness+','+brightness+')';
+      original.appendChild(tile);
+    });
+  }
 }
 document.getElementById('shadeDetail').addEventListener('input',renderShade);
 
@@ -961,6 +967,25 @@ document.getElementById('sampleSprite').addEventListener('click',loadSampleSprit
 
 renderShade();
 loadSampleSprite();
+
+document.getElementById('moreGuides').addEventListener('click',e=>{
+  const extra=document.getElementById('extraGuides');
+  extra.hidden=!extra.hidden;
+  e.currentTarget.setAttribute('aria-expanded',String(!extra.hidden));
+  e.currentTarget.textContent=extra.hidden?'See 2 more real game guides ↓':'Show fewer game guides ↑';
+});
+
+document.querySelectorAll('.exit-choice').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.exit-choice').forEach(x=>x.classList.toggle('selected',x===btn));
+    const correct=btn.dataset.correct==='true';
+    const result=document.getElementById('exitResult');
+    result.textContent=correct
+      ? 'Correct. The arrangement of ordinary characters creates a picture.'
+      : 'Not quite. Computers are still displaying text characters here. Think about their arrangement.';
+    result.style.color=correct?'var(--teal)':'var(--terra)';
+  });
+});
 
 document.getElementById('menuButton').onclick=()=>document.getElementById('siteNav').classList.toggle('open');
 </script>
