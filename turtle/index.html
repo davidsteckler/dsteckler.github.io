@@ -199,6 +199,7 @@
     .CodeMirror-cursor{border-left:2px solid #e4bd66}
     .CodeMirror .tracy-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
     .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
+    .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
     .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
     .playback-speed-group{padding:0 3px}
     .playback-speed-group input[type="range"]{width:115px}
@@ -583,6 +584,7 @@
       .toolbar{gap:6px}
       .toolbar .btn,.toolbar .example-select{height:35px;padding-left:10px;padding-right:10px}
       .mobile-output{display:inline-flex}
+      .world-edit-link{display:inline-block}
       .layoutbar{gap:8px;padding:8px 10px}
       .layout-editor{display:none}
       .layout-mobile-editor{display:flex}
@@ -608,7 +610,7 @@
       .toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:5px}
       .toolbar .btn,.toolbar .example-select{height:38px;width:100%;min-width:0;font-size:.72rem;padding:0 4px}
       .toolbar .primary{grid-column:auto}
-      .toolbar #viewWorldBtn{display:none}
+      .toolbar #viewWorldBtn{display:inline-flex}
       .shortcut{display:none}
       .layoutbar{justify-content:space-between;gap:6px}
       .layout-output input[type="range"]{width:58px}
@@ -737,7 +739,8 @@ for i in range(4):
       <div class="panel-head">
         <div class="panel-label">Tracy's World</div>
         <div class="world-head-actions">
-          <span class="panel-mini">400 × 400</span>
+          <span class="panel-mini" id="worldLineStatus">400 × 400</span>
+          <button class="world-edit-link" id="editCodeBtn" type="button">↑ Edit code</button>
           <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Tracy's drawing and printed output; keep your code">↻ Clear Run</button>
         </div>
       </div>
@@ -933,6 +936,10 @@ for i in range(4):
   var playSpeed = document.getElementById("playSpeed");
   var playSpeedValue = document.getElementById("playSpeedValue");
   var playbackLineStatus = document.getElementById("playbackLineStatus");
+  var worldLineStatus = document.getElementById("worldLineStatus");
+  document.getElementById("editCodeBtn").addEventListener("click",function(){
+    document.querySelector(".code-panel").scrollIntoView({behavior:"smooth",block:"start"});
+  });
   var clearCodeBtn = document.getElementById("clearCodeBtn");
   var clearRunBtn = document.getElementById("clearRunBtn");
   var codeStatus = document.getElementById("codeStatus");
@@ -1438,9 +1445,11 @@ for i in range(4):
     if(Number.isInteger(n)&&n>0&&n<=editor.lineCount()){
       playback.marker=editor.addLineClass(n-1,"background","tracy-current-line");
       playbackLineStatus.textContent="Line "+n;
+      worldLineStatus.textContent="Line "+n+" · "+(editor.getLine(n-1)||"").trim().slice(0,32);
       editor.scrollIntoView({line:n-1,ch:0},60);
     }else{
       playbackLineStatus.textContent="";
+      worldLineStatus.textContent="400 × 400";
     }
   }
   function syncPlaybackButtons(){
@@ -1528,6 +1537,9 @@ for i in range(4):
     playback.codeSpeed=6;
     showExecutingLine(null);
     syncPlaybackButtons();
+    if(window.innerWidth<=560){
+      requestAnimationFrame(function(){worldPanel.scrollIntoView({behavior:"smooth",block:"start"});});
+    }
 
     Sk.configure({
       output:outf,
@@ -1541,7 +1553,8 @@ for i in range(4):
         debugLine=lineno;
         return true;
       },
-      execLimit:30000,
+      // Stepping may legitimately take several minutes; Stop can interrupt it.
+      execLimit:null,
       yieldLimit:100,
       inputfun:function(promptText){
         var value=window.prompt(promptText||"");
