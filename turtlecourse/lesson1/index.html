@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Lesson 1 of the Python Turtle Course: meet the turtle, understand the coordinate world, and learn how Run and Step help you follow a program.">
+<title>Lesson 1: Meet the Turtle | Python Turtle Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../site-theme.css">
+
+<style>
+  :root{--lesson-max:1040px}
+  html{scroll-behavior:smooth}
+  .lesson-shell{width:min(calc(100% - 36px),var(--lesson-max));margin:0 auto}
+  .lesson-main{padding-bottom:70px}
+
+  .lesson-nav{
+    border-bottom:1px solid var(--rule);
+    background:rgba(240,235,225,.92);
+  }
+  .lesson-nav-inner{
+    min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:18px;
+  }
+  .lesson-nav a{
+    font-family:'Outfit',sans-serif;font-size:.77rem;font-weight:750;color:var(--soft);
+  }
+  .lesson-nav a:hover{color:var(--ink);text-decoration:none}
+  .lesson-nav-current{
+    font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--terracotta);
+  }
+
+  .hero{
+    display:grid;grid-template-columns:minmax(0,1fr) 280px;
+    gap:42px;align-items:end;padding:55px 0 38px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--terracotta);margin-bottom:13px;
+  }
+  .hero h1{
+    margin:0;font-family:'Outfit',sans-serif;
+    font-size:clamp(2.7rem,6vw,5.2rem);line-height:.96;
+    letter-spacing:-.055em;font-weight:800;
+  }
+  .hero-lead{
+    max-width:690px;margin:20px 0 0;color:var(--mid);
+    font-size:1.06rem;line-height:1.68;
+  }
+  .hero-goal{
+    border-top:1px solid var(--rule-strong);padding-top:16px;
+  }
+  .hero-goal span{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:.61rem;
+    color:var(--ghost);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;
+  }
+  .hero-goal strong{
+    display:block;font-family:'Outfit',sans-serif;font-size:1.1rem;line-height:1.25;
+  }
+  .hero-goal p{font-size:.88rem;line-height:1.5;color:var(--soft);margin:8px 0 0}
+
+  .lesson-section{padding:54px 0;border-top:1px solid var(--rule)}
+  .section-head{
+    display:grid;grid-template-columns:120px minmax(0,1fr);gap:28px;margin-bottom:26px;
+  }
+  .section-index{
+    font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--ghost);padding-top:6px;
+  }
+  .section-index strong{
+    display:block;font-family:'Outfit',sans-serif;color:var(--teal);
+    text-transform:uppercase;letter-spacing:.08em;font-size:.7rem;margin-top:3px;
+  }
+  .section-copy h2{
+    margin:0 0 10px;font-family:'Outfit',sans-serif;
+    font-size:clamp(1.85rem,3.5vw,2.8rem);line-height:1.05;
+    letter-spacing:-.035em;font-weight:800;
+  }
+  .section-copy p{max-width:720px;margin:0;color:var(--mid);font-size:.98rem}
+
+  .idea-row{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border-top:1px solid var(--rule-strong);border-bottom:1px solid var(--rule-strong);
+  }
+  .idea{padding:21px 18px;border-right:1px solid var(--rule)}
+  .idea:last-child{border-right:0}
+  .idea span{
+    font-family:'JetBrains Mono',monospace;color:var(--terracotta);
+    font-size:.63rem;display:block;margin-bottom:8px;
+  }
+  .idea strong{font-family:'Outfit',sans-serif;display:block;font-size:1rem;margin-bottom:5px}
+  .idea p{margin:0;color:var(--soft);font-size:.85rem;line-height:1.5}
+
+  .world-card{
+    display:grid;grid-template-columns:minmax(360px,1fr) 300px;
+    gap:28px;align-items:start;
+  }
+  .world-frame{
+    border:1px solid var(--rule-strong);border-radius:18px;background:#fffdf8;
+    padding:16px;box-shadow:0 14px 40px rgba(28,27,24,.05);
+  }
+  .world{
+    position:relative;width:100%;aspect-ratio:1/1;max-width:470px;margin:0 auto;
+    border:2px solid #bbb4a7;overflow:hidden;background-color:white;
+    background-image:
+      linear-gradient(to right,rgba(28,27,24,.075) 1px,transparent 1px),
+      linear-gradient(to bottom,rgba(28,27,24,.075) 1px,transparent 1px);
+    background-size:10% 10%;
+  }
+  .axis-x,.axis-y{position:absolute;background:rgba(28,27,24,.4);z-index:1}
+  .axis-x{left:0;right:0;top:50%;height:1px}
+  .axis-y{top:0;bottom:0;left:50%;width:1px}
+  .axis-label{
+    position:absolute;z-index:2;font:600 .61rem/1 'JetBrains Mono',monospace;
+    color:#777168;background:rgba(255,255,255,.78);padding:2px 4px;border-radius:4px;
+  }
+  .label-zero{left:calc(50% + 4px);top:calc(50% + 5px)}
+  .label-right{right:5px;top:calc(50% + 5px)}
+  .label-left{left:5px;top:calc(50% + 5px)}
+  .label-top{left:calc(50% + 5px);top:5px}
+  .label-bottom{left:calc(50% + 5px);bottom:5px}
+  .mini-turtle{
+    position:absolute;z-index:5;width:32px;height:22px;
+    left:50%;top:50%;transform:translate(-50%,-50%);
+    transition:left .22s ease,top .22s ease;
+  }
+  .mini-shell{
+    position:absolute;width:21px;height:15px;left:4px;top:3px;
+    border:2px solid #173b3d;background:var(--teal);border-radius:50%;
+  }
+  .mini-head{
+    position:absolute;width:9px;height:9px;right:-1px;top:6px;
+    border:2px solid #173b3d;background:#8fc6ae;border-radius:50%;
+  }
+  .mini-tail{
+    position:absolute;left:0;top:8px;width:0;height:0;
+    border-top:3px solid transparent;border-bottom:3px solid transparent;border-right:6px solid #173b3d;
+  }
+  .mini-leg{position:absolute;width:7px;height:4px;background:#8fc6ae;border:1px solid #173b3d;border-radius:50%}
+  .leg-a{left:6px;top:0}.leg-b{left:6px;bottom:0}.leg-c{left:18px;top:0}.leg-d{left:18px;bottom:0}
+  .coordinate-readout{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-top:11px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--soft);
+  }
+  .coordinate-readout strong{color:var(--teal);font-size:.78rem}
+  .world-controls{
+    border-top:1px solid var(--rule-strong);
+  }
+  .control-row{padding:16px 0;border-bottom:1px solid var(--rule)}
+  .control-row label{
+    display:flex;justify-content:space-between;gap:10px;margin-bottom:9px;
+    font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:750;
+  }
+  .control-row label output{font-family:'JetBrains Mono',monospace;color:var(--teal)}
+  .control-row input{width:100%;accent-color:var(--teal);margin:0}
+  .quick-positions{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
+  .quick-position{
+    border:1px solid var(--rule-strong);background:rgba(255,255,255,.45);
+    color:var(--mid);border-radius:9px;padding:7px 9px;
+    font:700 .68rem/1 'JetBrains Mono',monospace;
+  }
+  .quick-position:hover{border-color:var(--teal);color:var(--teal)}
+  .coordinate-note{
+    margin-top:18px;padding:14px 15px;border-radius:13px;
+    background:var(--teal-light);color:var(--mid);font-size:.87rem;line-height:1.5;
+  }
+
+  .predict-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .predict-card{
+    border:1px solid var(--rule);border-radius:17px;padding:20px;
+    background:rgba(255,255,255,.34);
+  }
+  .predict-label{
+    font-family:'JetBrains Mono',monospace;font-size:.61rem;color:var(--terracotta);
+    text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;
+  }
+  .predict-card h3{
+    margin:0 0 14px;font-family:'Outfit',sans-serif;font-size:1.05rem;line-height:1.3;
+  }
+  .code-inline{
+    display:block;margin:11px 0 15px;padding:10px 11px;border-radius:9px;
+    background:#202526;color:#e7eceb;font:500 .76rem/1.5 'JetBrains Mono',monospace;
+  }
+  .choices{display:grid;gap:7px}
+  .choice{
+    text-align:left;border:1px solid var(--rule-strong);background:#fffdf8;
+    border-radius:10px;padding:10px 11px;color:var(--mid);
+    font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:650;
+  }
+  .choice:hover{border-color:var(--teal);color:var(--ink)}
+  .choice.correct{border-color:#2c7a58;background:rgba(44,122,88,.09);color:#1f6045}
+  .choice.wrong{border-color:#b85d3f;background:rgba(184,93,63,.08);color:#8d442f}
+  .feedback{min-height:21px;margin-top:10px;font-size:.78rem;line-height:1.4;color:var(--soft)}
+  .feedback.good{color:#2c7a58;font-weight:700}
+  .feedback.bad{color:#a35137;font-weight:700}
+
+  .sandbox-mission{
+    display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:26px;align-items:start;
+  }
+  .mission-steps{counter-reset:mission;border-top:1px solid var(--rule-strong)}
+  .mission-step{
+    counter-increment:mission;display:grid;grid-template-columns:35px 1fr;gap:12px;
+    padding:15px 0;border-bottom:1px solid var(--rule);
+  }
+  .mission-step::before{
+    content:counter(mission,decimal-leading-zero);
+    font:600 .64rem/1.6 'JetBrains Mono',monospace;color:var(--terracotta);
+  }
+  .mission-step strong{display:block;font-family:'Outfit',sans-serif;font-size:.93rem;margin-bottom:3px}
+  .mission-step p{margin:0;color:var(--soft);font-size:.84rem;line-height:1.5}
+  .code-panel{
+    border:1px solid #303839;border-radius:15px;background:#202526;color:#e7eceb;overflow:hidden;
+  }
+  .code-head{
+    min-height:40px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 12px;background:#292f30;border-bottom:1px solid #3a4142;
+    font:650 .63rem/1 'JetBrains Mono',monospace;color:#aeb8b6;text-transform:uppercase;
+  }
+  .code-panel pre{margin:0;padding:16px;overflow:auto;font:500 .8rem/1.7 'JetBrains Mono',monospace}
+  .sandbox-open{
+    display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;
+    margin-top:10px;border-radius:11px;background:var(--teal);color:white!important;
+    font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:800;
+  }
+  .sandbox-open:hover{text-decoration:none!important;background:#144e59}
+  .mission-note{
+    margin-top:9px;color:var(--soft);font-size:.73rem;line-height:1.45;
+  }
+
+  .check-list{display:grid;gap:12px}
+  .check-question{
+    border:1px solid var(--rule);border-radius:16px;padding:18px 19px;
+    background:rgba(255,255,255,.35);
+  }
+  .check-question h3{
+    margin:0 0 12px;font-family:'Outfit',sans-serif;font-size:1rem;line-height:1.35;
+  }
+  .check-options{display:flex;gap:7px;flex-wrap:wrap}
+  .check-option{
+    border:1px solid var(--rule-strong);background:#fffdf8;border-radius:9px;
+    padding:8px 11px;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:700;color:var(--mid);
+  }
+  .check-option.correct{background:rgba(44,122,88,.09);border-color:#2c7a58;color:#1f6045}
+  .check-option.wrong{background:rgba(184,93,63,.08);border-color:#b85d3f;color:#8d442f}
+  .check-result{margin-top:9px;min-height:18px;font-size:.76rem;color:var(--soft)}
+
+  .finish-box{
+    display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;
+    margin-top:25px;padding:22px;border:1px solid var(--rule-strong);border-radius:17px;
+    background:rgba(255,255,255,.38);
+  }
+  .finish-box.ready{border-color:rgba(26,92,107,.28);background:var(--teal-light)}
+  .finish-box strong{display:block;font-family:'Outfit',sans-serif;font-size:1.08rem;margin-bottom:4px}
+  .finish-box p{margin:0;color:var(--soft);font-size:.84rem}
+  .finish-button{
+    min-height:43px;padding:0 15px;border:0;border-radius:11px;
+    background:#b8b2a8;color:white;font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:800;
+  }
+  .finish-button:not(:disabled){background:var(--teal)}
+  .finish-button:not(:disabled):hover{background:#144e59}
+  .finish-button:disabled{cursor:not-allowed}
+
+  @media(max-width:820px){
+    .hero{grid-template-columns:1fr;gap:26px}
+    .hero-goal{max-width:620px}
+    .world-card,.sandbox-mission{grid-template-columns:1fr}
+    .world-controls{max-width:540px}
+  }
+  @media(max-width:650px){
+    .lesson-shell{width:min(calc(100% - 24px),var(--lesson-max))}
+    .hero{padding:36px 0 28px}
+    .hero h1{font-size:clamp(2.5rem,14vw,4rem)}
+    .lesson-section{padding:42px 0}
+    .section-head{grid-template-columns:1fr;gap:9px}
+    .section-index{padding-top:0}
+    .idea-row{grid-template-columns:1fr}
+    .idea{border-right:0;border-bottom:1px solid var(--rule)}
+    .idea:last-child{border-bottom:0}
+    .predict-grid{grid-template-columns:1fr}
+    .finish-box{grid-template-columns:1fr}
+    .finish-button{justify-self:start}
+    .lesson-nav-current{display:none}
+  }
+</style>
+</head>
+
+<body class="site-theme">
+<header class="site-header">
+  <div class="wrap topbar">
+    <a class="brand" href="../../index.html">
+      <span class="brand-title">David Steckler</span>
+      <span class="brand-sub">// computer science · build things · figure it out</span>
+    </a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav>
+      <a href="../../index.html">Home</a>
+      <a href="../../course.html">Course</a>
+      <a class="active" href="../">Python Turtle</a>
+      <a href="../../turtle/">Sandbox</a>
+    </nav>
+  </div>
+</header>
+
+<div class="lesson-nav">
+  <div class="lesson-shell lesson-nav-inner">
+    <a href="../">← Python Turtle Course</a>
+    <span class="lesson-nav-current">Lesson 1 · Meet the Turtle</span>
+    <a href="../../turtle/" target="_blank" rel="noopener">Open Sandbox ↗</a>
+  </div>
+</div>
+
+<main class="lesson-main">
+  <div class="lesson-shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">// lesson 01</div>
+        <h1>Meet the Turtle.</h1>
+        <p class="hero-lead">Before you make anything complicated, you need to know where the turtle is, which way it is facing, and how to follow the instructions Python is executing.</p>
+      </div>
+      <aside class="hero-goal">
+        <span>By the end</span>
+        <strong>You can explain the Turtle world and follow a program one line at a time.</strong>
+        <p>You do not need to memorize every command yet.</p>
+      </aside>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-head">
+        <div class="section-index">01<strong>start here</strong></div>
+        <div class="section-copy">
+          <h2>The turtle lives on a coordinate grid.</h2>
+          <p>The middle of the world is <strong>(0, 0)</strong>. The first number tells you left or right. The second tells you down or up.</p>
+        </div>
+      </div>
+
+      <div class="idea-row">
+        <div class="idea"><span>x</span><strong>Left ↔ Right</strong><p>Positive x moves right. Negative x moves left.</p></div>
+        <div class="idea"><span>y</span><strong>Down ↕ Up</strong><p>Positive y moves up. Negative y moves down.</p></div>
+        <div class="idea"><span>start</span><strong>(0, 0), facing right</strong><p>Every fresh Turtle run starts from the center unless your code moves it.</p></div>
+      </div>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-head">
+        <div class="section-index">02<strong>explore</strong></div>
+        <div class="section-copy">
+          <h2>Move around the grid without writing code yet.</h2>
+          <p>Change x and y independently. Watch which direction changes each time.</p>
+        </div>
+      </div>
+
+      <div class="world-card">
+        <div class="world-frame">
+          <div class="world" id="coordinateWorld" aria-label="Interactive Turtle coordinate grid">
+            <div class="axis-x"></div>
+            <div class="axis-y"></div>
+            <span class="axis-label label-zero">(0, 0)</span>
+            <span class="axis-label label-right">+x</span>
+            <span class="axis-label label-left">−x</span>
+            <span class="axis-label label-top">+y</span>
+            <span class="axis-label label-bottom">−y</span>
+            <div class="mini-turtle" id="miniTurtle" aria-label="Turtle">
+              <span class="mini-tail"></span>
+              <span class="mini-leg leg-a"></span>
+              <span class="mini-leg leg-b"></span>
+              <span class="mini-leg leg-c"></span>
+              <span class="mini-leg leg-d"></span>
+              <span class="mini-shell"></span>
+              <span class="mini-head"></span>
+            </div>
+          </div>
+          <div class="coordinate-readout">
+            <span>current position</span>
+            <strong id="coordinateReadout">(0, 0)</strong>
+          </div>
+        </div>
+
+        <div>
+          <div class="world-controls">
+            <div class="control-row">
+              <label for="xSlider"><span>x coordinate</span><output id="xOutput">0</output></label>
+              <input id="xSlider" type="range" min="-180" max="180" value="0" step="10">
+            </div>
+            <div class="control-row">
+              <label for="ySlider"><span>y coordinate</span><output id="yOutput">0</output></label>
+              <input id="ySlider" type="range" min="-180" max="180" value="0" step="10">
+            </div>
+          </div>
+
+          <div class="quick-positions" aria-label="Example coordinates">
+            <button class="quick-position" type="button" data-x="0" data-y="0">(0, 0)</button>
+            <button class="quick-position" type="button" data-x="100" data-y="0">(100, 0)</button>
+            <button class="quick-position" type="button" data-x="0" data-y="100">(0, 100)</button>
+            <button class="quick-position" type="button" data-x="-100" data-y="-50">(-100, -50)</button>
+          </div>
+
+          <div class="coordinate-note"><strong>Notice:</strong> changing x never moves the turtle up or down. Changing y never moves it left or right.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-head">
+        <div class="section-index">03<strong>predict</strong></div>
+        <div class="section-copy">
+          <h2>Read first. Run second.</h2>
+          <p>A useful programming habit is deciding what you expect before the computer shows you what actually happens.</p>
+        </div>
+      </div>
+
+      <div class="predict-grid">
+        <article class="predict-card" data-answer="100,0">
+          <div class="predict-label">prediction 01</div>
+          <h3>The turtle starts at (0, 0), facing right.</h3>
+          <code class="code-inline">forward(100)</code>
+          <div class="choices">
+            <button class="choice" type="button" data-choice="100,0">(100, 0)</button>
+            <button class="choice" type="button" data-choice="0,100">(0, 100)</button>
+            <button class="choice" type="button" data-choice="-100,0">(-100, 0)</button>
+          </div>
+          <div class="feedback" aria-live="polite"></div>
+        </article>
+
+        <article class="predict-card" data-answer="direction">
+          <div class="predict-label">prediction 02</div>
+          <h3>What changes when this line runs?</h3>
+          <code class="code-inline">left(90)</code>
+          <div class="choices">
+            <button class="choice" type="button" data-choice="position">Only its position</button>
+            <button class="choice" type="button" data-choice="direction">Only its direction</button>
+            <button class="choice" type="button" data-choice="both">Position and direction</button>
+          </div>
+          <div class="feedback" aria-live="polite"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-head">
+        <div class="section-index">04<strong>sandbox</strong></div>
+        <div class="section-copy">
+          <h2>Now watch Python execute the instructions.</h2>
+          <p>Type the three lines yourself. Run the whole program once. Then clear the run and use <strong>Step</strong> so you can watch one statement at a time.</p>
+        </div>
+      </div>
+
+      <div class="sandbox-mission">
+        <div class="mission-steps">
+          <div class="mission-step"><div><strong>Open the sandbox.</strong><p>Keep this lesson open in one tab and the sandbox in another.</p></div></div>
+          <div class="mission-step"><div><strong>Type the three lines.</strong><p>Do not worry about memorizing them yet. Lesson 2 will spend more time on movement and turns.</p></div></div>
+          <div class="mission-step"><div><strong>Predict the ending position.</strong><p>Before Run, decide where the turtle should finish.</p></div></div>
+          <div class="mission-step"><div><strong>Run it once.</strong><p>Watch the whole program play through.</p></div></div>
+          <div class="mission-step"><div><strong>Clear Run, then use Step.</strong><p>Notice which line is highlighted and what changes after each click.</p></div></div>
+          <div class="mission-step"><div><strong>Change 50 to 100.</strong><p>Run it again. Be ready to explain exactly what changed and what stayed the same.</p></div></div>
+        </div>
+
+        <aside>
+          <div class="code-panel">
+            <div class="code-head"><span>type this</span><span>main.py</span></div>
+            <pre>forward(100)
+left(90)
+forward(50)</pre>
+          </div>
+          <a class="sandbox-open" href="../../turtle/" target="_blank" rel="noopener">Open Sandbox ↗</a>
+          <p class="mission-note">The turtle starts in the center facing right. Use the animation, line highlighting, and Step button as evidence.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-head">
+        <div class="section-index">05<strong>check</strong></div>
+        <div class="section-copy">
+          <h2>Can you explain what you just used?</h2>
+          <p>Get all three checks correct to finish Lesson 1.</p>
+        </div>
+      </div>
+
+      <div class="check-list">
+        <article class="check-question" data-check="start" data-answer="0,0">
+          <h3>Where does the turtle begin when a fresh program starts?</h3>
+          <div class="check-options">
+            <button class="check-option" type="button" data-choice="-200,200">(-200, 200)</button>
+            <button class="check-option" type="button" data-choice="0,0">(0, 0)</button>
+            <button class="check-option" type="button" data-choice="200,200">(200, 200)</button>
+          </div>
+          <div class="check-result" aria-live="polite"></div>
+        </article>
+
+        <article class="check-question" data-check="y" data-answer="up">
+          <h3>If y increases while x stays the same, which way does the turtle move?</h3>
+          <div class="check-options">
+            <button class="check-option" type="button" data-choice="right">Right</button>
+            <button class="check-option" type="button" data-choice="up">Up</button>
+            <button class="check-option" type="button" data-choice="down">Down</button>
+          </div>
+          <div class="check-result" aria-live="polite"></div>
+        </article>
+
+        <article class="check-question" data-check="step" data-answer="one">
+          <h3>What is Step useful for?</h3>
+          <div class="check-options">
+            <button class="check-option" type="button" data-choice="fast">Making the finished drawing appear faster</button>
+            <button class="check-option" type="button" data-choice="one">Following the program one statement at a time</button>
+            <button class="check-option" type="button" data-choice="erase">Erasing the code after each line</button>
+          </div>
+          <div class="check-result" aria-live="polite"></div>
+        </article>
+      </div>
+
+      <div class="finish-box" id="finishBox">
+        <div>
+          <strong id="finishTitle">Complete the three checks.</strong>
+          <p id="finishCopy">Your course progress will update when Lesson 1 is finished.</p>
+        </div>
+        <button class="finish-button" id="finishButton" type="button" disabled>Finish Lesson 1</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="lesson-shell footer-inner">
+    <p>Python Turtle Course · Lesson 1</p>
+    <p>David Steckler · Computer Science</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  var menuButton=document.querySelector('.menu-toggle');
+  var nav=document.querySelector('.site-header nav');
+  if(menuButton&&nav){
+    menuButton.addEventListener('click',function(){
+      var open=nav.classList.toggle('active');
+      menuButton.setAttribute('aria-expanded',open?'true':'false');
+    });
+  }
+
+  var xSlider=document.getElementById('xSlider');
+  var ySlider=document.getElementById('ySlider');
+  var xOutput=document.getElementById('xOutput');
+  var yOutput=document.getElementById('yOutput');
+  var coordinateReadout=document.getElementById('coordinateReadout');
+  var turtle=document.getElementById('miniTurtle');
+
+  function updateWorld(){
+    var x=Number(xSlider.value);
+    var y=Number(ySlider.value);
+    var left=50+(x/400*100);
+    var top=50-(y/400*100);
+    turtle.style.left=left+'%';
+    turtle.style.top=top+'%';
+    xOutput.textContent=x;
+    yOutput.textContent=y;
+    coordinateReadout.textContent='('+x+', '+y+')';
+  }
+
+  xSlider.addEventListener('input',updateWorld);
+  ySlider.addEventListener('input',updateWorld);
+
+  document.querySelectorAll('.quick-position').forEach(function(button){
+    button.addEventListener('click',function(){
+      xSlider.value=button.getAttribute('data-x');
+      ySlider.value=button.getAttribute('data-y');
+      updateWorld();
+    });
+  });
+  updateWorld();
+
+  document.querySelectorAll('.predict-card').forEach(function(card){
+    var answer=card.getAttribute('data-answer');
+    var feedback=card.querySelector('.feedback');
+    card.querySelectorAll('.choice').forEach(function(choice){
+      choice.addEventListener('click',function(){
+        card.querySelectorAll('.choice').forEach(function(item){
+          item.classList.remove('correct','wrong');
+        });
+        if(choice.getAttribute('data-choice')===answer){
+          choice.classList.add('correct');
+          feedback.className='feedback good';
+          feedback.textContent=answer==='100,0'
+            ? 'Yes. Facing right means forward changes x first.'
+            : 'Yes. A turn changes the direction the turtle faces, not its position.';
+        }else{
+          choice.classList.add('wrong');
+          feedback.className='feedback bad';
+          feedback.textContent='Not quite. Look at the starting direction and decide what this instruction changes.';
+        }
+      });
+    });
+  });
+
+  var checkState={};
+  var checkQuestions=Array.prototype.slice.call(document.querySelectorAll('.check-question'));
+  var finishBox=document.getElementById('finishBox');
+  var finishButton=document.getElementById('finishButton');
+  var finishTitle=document.getElementById('finishTitle');
+  var finishCopy=document.getElementById('finishCopy');
+
+  function updateFinish(){
+    var allCorrect=checkQuestions.every(function(question){
+      return checkState[question.getAttribute('data-check')]===true;
+    });
+    finishButton.disabled=!allCorrect;
+    finishBox.classList.toggle('ready',allCorrect);
+    if(allCorrect){
+      finishTitle.textContent='You have the Lesson 1 ideas.';
+      finishCopy.textContent='Finish the lesson to mark it complete on the course page.';
+    }else{
+      var correct=Object.keys(checkState).filter(function(key){return checkState[key];}).length;
+      finishTitle.textContent='Complete the three checks.';
+      finishCopy.textContent=correct+' of 3 correct.';
+    }
+  }
+
+  checkQuestions.forEach(function(question){
+    var answer=question.getAttribute('data-answer');
+    var id=question.getAttribute('data-check');
+    var result=question.querySelector('.check-result');
+    question.querySelectorAll('.check-option').forEach(function(option){
+      option.addEventListener('click',function(){
+        question.querySelectorAll('.check-option').forEach(function(item){
+          item.classList.remove('correct','wrong');
+        });
+        var correct=option.getAttribute('data-choice')===answer;
+        checkState[id]=correct;
+        option.classList.add(correct?'correct':'wrong');
+        result.textContent=correct?'Correct.':'Try again.';
+        updateFinish();
+      });
+    });
+  });
+
+  finishButton.addEventListener('click',function(){
+    if(finishButton.disabled)return;
+    var key='dsteckler-turtlecourse-progress-v1';
+    var progress={};
+    try{progress=JSON.parse(localStorage.getItem(key)||'{}')||{};}catch(e){progress={};}
+    progress['1']=true;
+    try{localStorage.setItem(key,JSON.stringify(progress));}catch(e){}
+    finishButton.textContent='Lesson 1 complete ✓';
+    finishButton.disabled=true;
+    finishTitle.textContent='Lesson 1 complete.';
+    finishCopy.textContent='Your course progress has been updated.';
+    setTimeout(function(){window.location.href='../';},650);
+  });
+
+  updateFinish();
+})();
+</script>
+</body>
+</html>
