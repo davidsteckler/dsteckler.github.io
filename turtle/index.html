@@ -197,6 +197,14 @@
     .CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}
     .CodeMirror-linenumber{color:#697271}
     .CodeMirror-cursor{border-left:2px solid #e4bd66}
+    .CodeMirror .tracy-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
+    .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
+    .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
+    .playback-speed-group{padding:0 3px}
+    .playback-speed-group input[type="range"]{width:115px}
+    .speed-endpoint{font:650 .65rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--soft)}
+    #playSpeedValue{min-width:47px}
+    #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
     .CodeMirror-selected{background:#374243 !important}
     .cm-s-default .cm-keyword{color:#d7a7df}
     .cm-s-default .cm-def{color:#87c8dc}
@@ -581,6 +589,7 @@
       .layout-output{display:flex}
       .layout-group input[type="range"]{width:85px}
       .layout-group output{min-width:42px}
+      .playback-speed-group{order:-1}
       .workspace{display:flex;flex-direction:column;min-height:0;height:auto;gap:9px;padding:9px;overflow:visible}
       .resize-divider{display:none}
       .code-panel{height:var(--mobile-editor-height,355px);min-height:220px;flex:none;grid-template-rows:47px minmax(0,1fr)}
@@ -603,6 +612,8 @@
       .shortcut{display:none}
       .layoutbar{justify-content:space-between;gap:6px}
       .layout-output input[type="range"]{width:58px}
+      .playback-speed-group{width:100%;justify-content:center}
+      .playback-speed-group input[type="range"]{width:min(170px,31vw)}
       .layout-group{gap:4px}
       .layout-group label{font-size:.65rem}
       .layout-group output{font-size:.61rem}
@@ -611,6 +622,8 @@
       .clear-code-btn{font-size:.68rem;height:33px;padding:0 8px}
       .code-panel .panel-label{font-size:.66rem}
       .code-panel .panel-mini{font-size:.6rem;white-space:nowrap}
+      .editor-head-right{gap:4px}
+      .playback-line-status{font-size:.6rem}
       .world-panel .panel-mini{display:none}
       .world-panel{scroll-margin-top:145px}
       .clear-run-btn{height:33px}
@@ -656,6 +669,8 @@
         <option value="colors">Color Wheel</option>
       </select>
       <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
+      <button class="btn" id="pauseBtn" type="button" disabled>⏸ Pause</button>
+      <button class="btn" id="stepBtn" type="button" disabled title="Execute one Python statement">↳ Step</button>
       <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
       <button class="btn commands-toggle" id="commandsToggle" type="button" aria-controls="commandLibrary" aria-expanded="false">☰ Commands</button>
       <button class="btn mobile-output" id="viewWorldBtn" type="button">View world ↓</button>
@@ -679,6 +694,13 @@
       <input id="mobileEditorSize" type="range" min="220" max="650" value="355" step="10">
       <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
     </div>
+    <div class="layout-group playback-speed-group">
+      <label for="playSpeed">Playback speed</label>
+      <span class="speed-endpoint">Slow</span>
+      <input id="playSpeed" type="range" min="1" max="10" value="6" step="1" aria-label="Execution speed in lines per second">
+      <span class="speed-endpoint">Fast</span>
+      <output id="playSpeedValue" for="playSpeed">6 / 10</output>
+    </div>
     <div class="layout-group layout-output">
       <label for="outputSize">Text output</label>
       <input id="outputSize" type="range" min="100" max="290" value="150" step="10" aria-label="Text output panel height">
@@ -694,7 +716,10 @@
           <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Tracy's output alone">⌫ Clear all code</button>
           <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
         </div>
-        <div class="panel-mini" id="saveStatus">saved locally</div>
+        <div class="editor-head-right">
+          <span class="playback-line-status" id="playbackLineStatus" aria-live="polite"></span>
+          <div class="panel-mini" id="saveStatus">saved locally</div>
+        </div>
       </div>
 
       <textarea id="editor-source" spellcheck="false"># Tracy starts at (0, 0), facing right.
@@ -903,6 +928,11 @@ for i in range(4):
   var output = document.getElementById("output");
   var runBtn = document.getElementById("runBtn");
   var stopBtn = document.getElementById("stopBtn");
+  var pauseBtn = document.getElementById("pauseBtn");
+  var stepBtn = document.getElementById("stepBtn");
+  var playSpeed = document.getElementById("playSpeed");
+  var playSpeedValue = document.getElementById("playSpeedValue");
+  var playbackLineStatus = document.getElementById("playbackLineStatus");
   var clearCodeBtn = document.getElementById("clearCodeBtn");
   var clearRunBtn = document.getElementById("clearRunBtn");
   var codeStatus = document.getElementById("codeStatus");
@@ -1307,6 +1337,8 @@ for i in range(4):
       Sk.builtins.rt=Sk.builtins.right;
 
       fn2("goto",function(x,y){ moveTo(x,y); return none(); });
+      // Skulpt rewrites goto as a reserved JavaScript word while compiling.
+      Sk.builtins["goto_$rw$"]=Sk.builtins.goto;
       Sk.builtins.setpos=Sk.builtins.goto; Sk.builtins.setposition=Sk.builtins.goto;
       fn1("setx",function(x){ moveTo(x,state.y); return none(); });
       fn1("sety",function(y){ moveTo(state.x,y); return none(); });
@@ -1318,7 +1350,15 @@ for i in range(4):
       Sk.builtins.down=Sk.builtins.pendown; Sk.builtins.pd=Sk.builtins.pendown;
 
       Sk.builtins.isdown=new Sk.builtin.func(function(){ return Sk.ffi.remapToPy(state.penDown); });
-      fn1("speed",function(v){ state.speed=Number(v)||0; return none(); });
+      fn1("speed",function(v){
+        state.speed=Number(v)||0;
+        if(playback.active){
+          playback.codeSpeed=clamp(state.speed,0,10);
+          updateSpeedLabel();
+          schedulePlayback();
+        }
+        return none();
+      });
       fn1("circle",function(r){ circle(r,360); return none(); });
 
       fn1("color",function(c){ setColor(c); state.fillColor=String(c); return none(); });
