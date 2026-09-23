@@ -458,80 +458,166 @@
     }
     .loading.show{display:grid}
 
-    @media(max-width:1280px){
-      .workspace{grid-template-columns:minmax(340px,1fr) minmax(400px,1fr)}
+
+    /* A viewport workspace lets each panel scroll independently. */
+    .app{height:100dvh;min-height:0;grid-template-rows:auto auto auto minmax(0,1fr);overflow:hidden}
+    .sitebar{min-height:48px;padding:7px 15px}
+    .toolhead{padding:9px 14px;gap:10px}
+    .layoutbar{
+      display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+      min-height:44px;padding:7px 15px;border-bottom:1px solid var(--rule);
+      background:#eee9df;color:var(--mid);
+    }
+    .layout-group{display:flex;align-items:center;gap:9px;min-width:0}
+    .layout-group label{white-space:nowrap;font-size:.72rem;font-weight:800}
+    .layout-group input[type="range"]{width:114px;accent-color:var(--teal);cursor:ew-resize}
+    .layout-group output{
+      white-space:nowrap;min-width:61px;
+      font:650 .66rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--soft);font-variant-numeric:tabular-nums;
+    }
+    .layout-mobile-editor{display:none}
+    .layout-output input[type="range"]{width:86px}
+    .layout-text-button{
+      border:0;background:transparent;border-radius:7px;color:var(--teal);
+      font-size:.7rem;font-weight:800;padding:5px 6px;white-space:nowrap;
+    }
+    .layout-text-button:hover{background:rgba(23,107,115,.09)}
+    .reset-layout{margin-left:auto}
+    .workspace{
+      --code-fr:53fr;--world-fr:47fr;--library-width:300px;
+      display:grid;
+      grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr)) 10px var(--library-width);
+      gap:5px;padding:9px;
+      min-height:0;height:100%;
+      overflow:hidden;align-items:stretch;
+    }
+    .panel{height:100%;min-width:0}
+    .code-panel{grid-template-rows:47px minmax(0,1fr)}
+    .code-panel .CodeMirror{height:100%}
+    .panel-head{height:47px}
+    .editor-head-start,.world-head-actions{display:flex;align-items:center;gap:9px;min-width:0}
+    .clear-code-btn{
+      height:32px;padding:0 10px;border-color:#bf6047;
+      color:#8c3427;background:#fff4ef;
+      font-size:.73rem;white-space:nowrap;
+    }
+    .clear-code-btn:hover{border-color:#9a4633;background:#ffeae0}
+    .code-panel .panel-head{background:#292f30}
+    .code-panel .clear-code-btn{background:#452d28;color:#ffe0d2;border-color:#a2634d}
+    .code-panel .clear-code-btn:hover{background:#5b352d;border-color:#cc896f}
+    .world-head-actions .panel-mini{white-space:nowrap}
+    .clear-run-btn{height:31px;padding:0 10px;font-size:.72rem;color:var(--teal);white-space:nowrap}
+    .world-panel{grid-template-rows:47px minmax(185px,1fr) auto var(--output-height,150px)}
+    .world-stage{
+      min-height:0;display:flex;justify-content:center;align-items:flex-start;
+      padding:12px;overflow:auto;
+    }
+    .world-scale-box{position:relative;flex:none;width:404px;height:404px}
+    .world-wrap{transform-origin:top left}
+    .world-info{padding:7px 12px;gap:8px}
+    .world-copy{font-size:.72rem}
+    .toggle{font-size:.69rem}
+    .resize-divider{
+      min-width:0;position:relative;cursor:col-resize;touch-action:none;
+      align-self:stretch;border-radius:10px;outline:none;
+    }
+    .resize-divider:before{
+      content:"";position:absolute;left:50%;top:calc(50% - 31px);
+      transform:translateX(-50%);width:5px;height:62px;border-radius:8px;
+      background:#bab6ab;transition:background .15s;
+    }
+    .resize-divider:hover:before,.resize-divider:focus-visible:before,.resize-divider.dragging:before{background:var(--teal)}
+    body.is-resizing,body.is-resizing *{cursor:col-resize!important;user-select:none!important}
+    .command-library{grid-template-rows:47px auto minmax(0,1fr)}
+    .command-scroll{overscroll-behavior:contain}
+    .recipe-panel{border:1px solid #cfdbd8;border-radius:10px;background:#f3f8f6;margin:4px 0 12px}
+    .recipe-panel summary{cursor:pointer;font-size:.74rem;font-weight:800;color:var(--teal);padding:11px 10px}
+    .recipe-panel summary span{float:right;color:var(--soft);font-size:.62rem;font-weight:650}
+    .recipe-body{padding:0 7px 7px}
+    .recipe-button{display:block;text-align:left;width:100%;padding:8px 7px;border:0;border-top:1px solid #d4e4e1;background:transparent;border-radius:6px;color:var(--ink)}
+    .recipe-button:hover{background:#e2f0ec}
+    .recipe-button strong{display:block;font-size:.7rem;margin-bottom:3px}
+    .recipe-button code{font-size:.65rem;color:var(--soft)}
+    .mobile-output{display:none}
+    @media(min-width:1351px){
+      body.library-hidden .workspace{
+        grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr));
+      }
+      body.library-hidden .library-divider,
+      body.library-hidden .command-library{display:none}
+    }
+    @media(max-width:1350px){
+      .workspace{grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(320px,var(--world-fr))}
+      .layout-library{display:none}
+      .library-divider{display:none}
       .command-library{
-        position:fixed;
-        z-index:40;
-        top:0;
-        right:0;
-        bottom:0;
-        width:min(340px,88vw);
-        border-radius:0;
-        transform:translateX(105%);
-        transition:transform .2s ease;
+        display:grid;position:fixed;z-index:42;top:0;right:0;bottom:0;
+        height:100dvh;width:min(360px,90vw);border-radius:0;
+        transform:translateX(105%);transition:transform .2s ease;
         box-shadow:-18px 0 42px rgba(32,37,37,.18);
       }
       body.commands-open .command-library{transform:translateX(0)}
       .commands-toggle{display:inline-flex}
       .command-close{display:block}
       .commands-overlay{
-        position:fixed;
-        inset:0;
-        z-index:39;
-        background:rgba(24,28,28,.35);
+        position:fixed;inset:0;z-index:41;background:rgba(24,28,28,.4);
       }
       body.commands-open .commands-overlay{display:block}
     }
-    @media(max-width:980px){
-      .workspace{grid-template-columns:1fr;overflow:auto}
-      .code-panel{min-height:600px}
-      .world-panel{min-height:600px}
-    }
-    @media(max-width:620px){
-      .sitebar{padding:9px 12px}.brand-sub{display:none}.site-actions{display:none}
-      .toolhead{
-        align-items:flex-start;
-        flex-direction:column;
-        padding:10px 10px 8px;
-        position:sticky;
-        top:0;
-        z-index:30;
-        box-shadow:0 5px 16px rgba(32,37,37,.08);
-      }
-      .title-wrap{width:100%}
+    @media(max-width:840px){
+      .app{height:auto;min-height:100dvh;overflow:visible;display:block}
+      .sitebar{min-height:43px}
+      .toolhead{position:sticky;top:0;z-index:30;background:var(--surface);box-shadow:0 3px 12px rgba(32,37,37,.07)}
+      .turtle-badge{width:30px;height:30px;font-size:17px}
+      .tool-title{font-size:.89rem}
       .tool-note{display:none}
-      .toolbar{
-        width:100%;
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:6px;
-      }
-      .toolbar .btn,.toolbar .example-select{
-        width:100%;
-        min-width:0;
-        height:40px;
-        padding-left:8px;
-        padding-right:8px;
-      }
-      .toolbar .primary{grid-column:1/-1;height:44px;font-size:.88rem}
-      .workspace{padding:8px;gap:8px}
+      .toolbar{gap:6px}
+      .toolbar .btn,.toolbar .example-select{height:35px;padding-left:10px;padding-right:10px}
+      .mobile-output{display:inline-flex}
+      .layoutbar{gap:8px;padding:8px 10px}
+      .layout-editor{display:none}
+      .layout-mobile-editor{display:flex}
+      .layout-output{display:flex}
+      .layout-group input[type="range"]{width:85px}
+      .layout-group output{min-width:42px}
+      .workspace{display:flex;flex-direction:column;min-height:0;height:auto;gap:9px;padding:9px;overflow:visible}
+      .resize-divider{display:none}
+      .code-panel{height:var(--mobile-editor-height,355px);min-height:220px;flex:none;grid-template-rows:47px minmax(0,1fr)}
+      .world-panel{height:auto;min-height:0;flex:none;grid-template-rows:47px auto auto var(--output-height,150px)}
+      .world-stage{min-height:0;padding:10px;overflow:hidden}
+      .world-scale-box{flex:none}
+      .command-library{height:100dvh}
       .panel{border-radius:13px}
-      .code-panel{grid-template-rows:43px 48vh;min-height:0}
-      .world-panel{grid-template-rows:43px auto auto 170px;min-height:0}
-      .world-stage{padding:8px;justify-content:start}
-      .world-wrap{transform-origin:top left}
-      .world-info{
-        grid-template-columns:1fr;
-        align-items:start;
-        padding:10px 12px;
-      }
-      .toggle{justify-self:start}
-      .shortcut{display:none}
-      .command-library{width:min(360px,94vw)}
-      .console-head{height:36px}
-      #output{font-size:13px}
     }
+    @media(max-width:560px){
+      .sitebar{padding:6px 10px}
+      .brand-title{font-size:.82rem}
+      .brand-sub,.site-actions{display:none}
+      .toolhead{display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding:8px}
+      .title-wrap{width:100%}
+      .toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:5px}
+      .toolbar .btn,.toolbar .example-select{height:38px;width:100%;min-width:0;font-size:.72rem;padding:0 4px}
+      .toolbar .primary{grid-column:auto}
+      .toolbar #viewWorldBtn{display:none}
+      .shortcut{display:none}
+      .layoutbar{justify-content:space-between;gap:6px}
+      .layout-output input[type="range"]{width:58px}
+      .layout-group{gap:4px}
+      .layout-group label{font-size:.65rem}
+      .layout-group output{font-size:.61rem}
+      .reset-layout{font-size:.63rem;margin-left:0}
+      .editor-head-start{gap:6px}
+      .clear-code-btn{font-size:.68rem;height:33px;padding:0 8px}
+      .code-panel .panel-label{font-size:.66rem}
+      .code-panel .panel-mini{font-size:.6rem;white-space:nowrap}
+      .world-panel .panel-mini{display:none}
+      .clear-run-btn{height:33px}
+      .world-info{grid-template-columns:1fr auto}
+      .world-copy{font-size:.68rem}
+      .command-library{width:min(365px,94vw)}
+    }
+
   </style>
 </head>
 
@@ -570,16 +656,43 @@
       </select>
       <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
       <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
-      <button class="btn soft-danger" id="clearCodeBtn" type="button">⌫ Clear Code</button>
-      <button class="btn" id="clearRunBtn" type="button">↻ Clear Run</button>
-      <button class="btn commands-toggle" id="commandsToggle" type="button">☰ Commands</button>
+      <button class="btn commands-toggle" id="commandsToggle" type="button" aria-controls="commandLibrary" aria-expanded="false">☰ Commands</button>
+      <button class="btn mobile-output" id="viewWorldBtn" type="button">View world ↓</button>
     </div>
   </section>
 
-  <main class="workspace">
+  <section class="layoutbar" aria-label="Workspace layout controls">
+    <div class="layout-group layout-editor">
+      <label for="editorSize">Editor / World</label>
+      <input id="editorSize" type="range" min="30" max="70" value="53" step="1" aria-label="Editor width as a percentage of the editor and world space">
+      <output id="editorSizeValue" for="editorSize">53% editor</output>
+    </div>
+    <div class="layout-group layout-library">
+      <label for="librarySize">Library width</label>
+      <input id="librarySize" type="range" min="250" max="420" value="300" step="10">
+      <output id="librarySizeValue" for="librarySize">300 px</output>
+      <button class="layout-text-button" id="libraryToggle" type="button">Hide library</button>
+    </div>
+    <div class="layout-group layout-mobile-editor">
+      <label for="mobileEditorSize">Editor height</label>
+      <input id="mobileEditorSize" type="range" min="220" max="650" value="355" step="10">
+      <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
+    </div>
+    <div class="layout-group layout-output">
+      <label for="outputSize">Text output</label>
+      <input id="outputSize" type="range" min="100" max="290" value="150" step="10" aria-label="Text output panel height">
+      <output id="outputSizeValue" for="outputSize">150 px</output>
+    </div>
+    <button class="layout-text-button reset-layout" id="resetLayout" type="button">Reset layout</button>
+  </section>
+
+  <main class="workspace" id="workspace">
     <section class="panel code-panel">
       <div class="panel-head">
-        <div class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</div>
+        <div class="editor-head-start">
+          <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Tracy's output alone">⌫ Clear all code</button>
+          <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
+        </div>
         <div class="panel-mini" id="saveStatus">saved locally</div>
       </div>
 
@@ -592,14 +705,20 @@ for i in range(4):
 
     </section>
 
-    <section class="panel world-panel">
+    <div class="resize-divider editor-divider" id="editorDivider" role="separator" tabindex="0" aria-label="Resize code editor and Turtle world" aria-orientation="vertical" aria-valuenow="53" aria-valuemin="30" aria-valuemax="70" title="Drag to resize editor and world"></div>
+
+    <section class="panel world-panel" id="worldPanel">
       <div class="panel-head">
         <div class="panel-label">Tracy's World</div>
-        <div class="panel-mini">400 × 400 · center = (0, 0)</div>
+        <div class="world-head-actions">
+          <span class="panel-mini">400 × 400</span>
+          <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Tracy's drawing and printed output; keep your code">↻ Clear Run</button>
+        </div>
       </div>
 
       <div class="world-stage" id="worldStage">
-        <div class="world-wrap" id="worldWrap">
+        <div class="world-scale-box" id="worldScaleBox">
+          <div class="world-wrap" id="worldWrap">
           <div class="grid" id="grid"></div>
           <div class="axis-x" id="axisX"></div>
           <div class="axis-y" id="axisY"></div>
@@ -613,11 +732,12 @@ for i in range(4):
             <canvas id="tracy-sprite" width="400" height="400"></canvas>
           </div>
           <div class="loading" id="loading">Loading Python…</div>
+          </div>
         </div>
       </div>
 
       <div class="world-info">
-        <div class="world-copy"><strong>Same idea as Tracy:</strong> the pen starts down. Use <code>penup()</code> to move without drawing and <code>pendown()</code> to draw again.</div>
+        <div class="world-copy"><strong>Pen starts down.</strong> <code>penup()</code> moves without drawing; <code>pendown()</code> draws again.</div>
         <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
       </div>
 
@@ -629,6 +749,8 @@ for i in range(4):
         <pre id="output"><span class="muted">print() output will appear here.</span></pre>
       </div>
     </section>
+
+    <div class="resize-divider library-divider" id="libraryDivider" role="separator" tabindex="0" aria-label="Resize command library" aria-orientation="vertical" aria-valuenow="300" aria-valuemin="250" aria-valuemax="420" title="Drag to resize command library"></div>
 
     <aside class="panel command-library" id="commandLibrary" aria-label="Turtle command library">
       <div class="panel-head">
@@ -642,7 +764,16 @@ for i in range(4):
         <input class="command-search" id="commandSearch" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false">
       </div>
       <div class="command-scroll" id="commandScroll">
-        <div class="command-tip">Click any command to insert it at your cursor.</div>
+        <div class="command-tip">Click a command to insert it at the cursor. Search by name or purpose.</div>
+        <details class="recipe-panel">
+          <summary>Quick patterns <span>4 examples</span></summary>
+          <div class="recipe-body">
+            <button class="recipe-button" type="button" data-recipe="square"><strong>Repeat a shape</strong><code>for i in range(4):</code></button>
+            <button class="recipe-button" type="button" data-recipe="move"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
+            <button class="recipe-button" type="button" data-recipe="fill"><strong>Fill a shape</strong><code>begin_fill() → end_fill()</code></button>
+            <button class="recipe-button" type="button" data-recipe="print"><strong>Print Tracy's position</strong><code>print(position())</code></button>
+          </div>
+        </details>
 
         <div class="command-category" data-category="Movement">
           <div class="command-category-title">Movement</div>
@@ -776,6 +907,120 @@ for i in range(4):
   var commandSearch = document.getElementById("commandSearch");
   var commandEmpty = document.getElementById("commandEmpty");
   var commandsCount = document.getElementById("commandsCount");
+
+  var workspace = document.getElementById("workspace");
+  var worldScaleBox = document.getElementById("worldScaleBox");
+  var worldPanel = document.getElementById("worldPanel");
+  var viewWorldBtn = document.getElementById("viewWorldBtn");
+  var editorDivider = document.getElementById("editorDivider");
+  var libraryDivider = document.getElementById("libraryDivider");
+  var editorSize = document.getElementById("editorSize");
+  var librarySize = document.getElementById("librarySize");
+  var mobileEditorSize = document.getElementById("mobileEditorSize");
+  var outputSize = document.getElementById("outputSize");
+  var libraryToggle = document.getElementById("libraryToggle");
+  var LAYOUT_KEY = "dsteckler-turtle-layout-v2";
+  var layoutDefaults = { editor:53, library:300, mobile:355, output:150, libraryVisible:true };
+  var layoutState = Object.assign({},layoutDefaults);
+  function clamp(n,low,high){ return Math.min(high,Math.max(low,n)); }
+  try{
+    var storedLayout=JSON.parse(localStorage.getItem(LAYOUT_KEY)||"null");
+    if(storedLayout){
+      ["editor","library","mobile","output"].forEach(function(k){
+        if(Number.isFinite(storedLayout[k]))layoutState[k]=storedLayout[k];
+      });
+      if(typeof storedLayout.libraryVisible==="boolean")layoutState.libraryVisible=storedLayout.libraryVisible;
+    }
+  }catch(e){}
+  function applyLayout(save){
+    layoutState.editor=clamp(layoutState.editor,30,70);
+    layoutState.library=clamp(layoutState.library,250,420);
+    layoutState.mobile=clamp(layoutState.mobile,220,650);
+    layoutState.output=clamp(layoutState.output,100,290);
+    workspace.style.setProperty("--code-fr",layoutState.editor+"fr");
+    workspace.style.setProperty("--world-fr",(100-layoutState.editor)+"fr");
+    workspace.style.setProperty("--library-width",layoutState.library+"px");
+    document.documentElement.style.setProperty("--mobile-editor-height",layoutState.mobile+"px");
+    document.documentElement.style.setProperty("--output-height",layoutState.output+"px");
+    document.body.classList.toggle("library-hidden",!layoutState.libraryVisible);
+    editorSize.value=layoutState.editor;
+    librarySize.value=layoutState.library;
+    mobileEditorSize.value=layoutState.mobile;
+    outputSize.value=layoutState.output;
+    document.getElementById("editorSizeValue").textContent=layoutState.editor+"% editor";
+    document.getElementById("librarySizeValue").textContent=layoutState.library+" px";
+    document.getElementById("mobileEditorSizeValue").textContent=layoutState.mobile+" px";
+    document.getElementById("outputSizeValue").textContent=layoutState.output+" px";
+    libraryToggle.textContent=layoutState.libraryVisible?"Hide library":"Show library";
+    editorDivider.setAttribute("aria-valuenow",layoutState.editor);
+    libraryDivider.setAttribute("aria-valuenow",layoutState.library);
+    if(save)try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(layoutState));}catch(e){}
+    if(typeof editor!=="undefined"&&editor)editor.refresh();
+    if(typeof fitWorld==="function")requestAnimationFrame(fitWorld);
+  }
+  [
+    [editorSize,"editor"],
+    [librarySize,"library"],
+    [mobileEditorSize,"mobile"],
+    [outputSize,"output"]
+  ].forEach(function(pair){
+    pair[0].addEventListener("input",function(){
+      layoutState[pair[1]]=Number(this.value);
+      applyLayout(true);
+    });
+  });
+  libraryToggle.addEventListener("click",function(){
+    layoutState.libraryVisible=!layoutState.libraryVisible;
+    applyLayout(true);
+  });
+  document.getElementById("resetLayout").addEventListener("click",function(){
+    layoutState=Object.assign({},layoutDefaults);
+    applyLayout(true);
+  });
+  function enableDivider(divider,field,min,max,compute){
+    var dragging=false;
+    divider.addEventListener("pointerdown",function(e){
+      if(e.button!==0||window.innerWidth<=840||(field==="library"&&window.innerWidth<=1350))return;
+      dragging=true;
+      divider.setPointerCapture(e.pointerId);
+      divider.classList.add("dragging");
+      document.body.classList.add("is-resizing");
+      e.preventDefault();
+    });
+    divider.addEventListener("pointermove",function(e){
+      if(!dragging)return;
+      layoutState[field]=clamp(compute(e),min,max);
+      applyLayout(true);
+    });
+    function stopDrag(){
+      dragging=false;
+      divider.classList.remove("dragging");
+      document.body.classList.remove("is-resizing");
+    }
+    divider.addEventListener("pointerup",stopDrag);
+    divider.addEventListener("pointercancel",stopDrag);
+    divider.addEventListener("lostpointercapture",stopDrag);
+    divider.addEventListener("keydown",function(e){
+      if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+      e.preventDefault();
+      var step=field==="library"?10:2;
+      layoutState[field]=clamp(layoutState[field]+(e.key==="ArrowRight"?(field==="library"?-step:step):(field==="library"?step:-step)),min,max);
+      applyLayout(true);
+    });
+  }
+  enableDivider(editorDivider,"editor",30,70,function(e){
+    var codeRect=document.querySelector(".code-panel").getBoundingClientRect();
+    var worldRect=worldPanel.getBoundingClientRect();
+    var total=codeRect.width+worldRect.width;
+    return Math.round((e.clientX-codeRect.left)/total*100);
+  });
+  enableDivider(libraryDivider,"library",250,420,function(e){
+    return Math.round((workspace.getBoundingClientRect().right-e.clientX-9)/10)*10;
+  });
+  viewWorldBtn.addEventListener("click",function(){
+    worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  applyLayout(false);
 
   var editor = CodeMirror.fromTextArea(source, {
     mode: "python",
@@ -1235,13 +1480,15 @@ for i in range(4):
 
   function openCommands(){
     document.body.classList.add("commands-open");
-    if(commandSearch && window.innerWidth <= 1280){
+    if(commandsToggle)commandsToggle.setAttribute("aria-expanded","true");
+    if(commandSearch && window.innerWidth <= 1350){
       setTimeout(function(){ commandSearch.focus(); }, 180);
     }
   }
 
   function closeCommands(){
     document.body.classList.remove("commands-open");
+    if(commandsToggle)commandsToggle.setAttribute("aria-expanded","false");
   }
 
   if(commandsToggle) commandsToggle.addEventListener("click", openCommands);
@@ -1252,6 +1499,22 @@ for i in range(4):
     if(e.key === "Escape") closeCommands();
   });
 
+  var recipes = {
+    square:"for i in range(4):\n    forward(100)\n    right(90)",
+    move:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
+    fill:'color("navy")\nfillcolor("gold")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
+    print:'print("Tracy is at:", position())'
+  };
+  document.querySelectorAll(".recipe-button").forEach(function(button){
+    button.addEventListener("click",function(){
+      var snippet=recipes[button.getAttribute("data-recipe")];
+      if(!snippet)return;
+      var doc=editor.getDoc();
+      doc.replaceRange(snippet,doc.getCursor());
+      editor.focus();
+      if(window.innerWidth<=1350)closeCommands();
+    });
+  });
   var commandItems = Array.prototype.slice.call(document.querySelectorAll(".command-item"));
 
   commandItems.forEach(function(item){
@@ -1262,7 +1525,7 @@ for i in range(4):
       doc.replaceRange(snippet, cursor);
       doc.setCursor({line:cursor.line, ch:cursor.ch + snippet.length});
       editor.focus();
-      if(window.innerWidth <= 1280) closeCommands();
+      if(window.innerWidth <= 1350) closeCommands();
     });
   });
 
@@ -1302,18 +1565,26 @@ for i in range(4):
   });
 
   function fitWorld(){
-    if(window.innerWidth > 620){
-      worldWrap.style.transform = "";
-      worldStage.style.height = "";
-      return;
-    }
-    var available = Math.max(260, worldStage.clientWidth - 16);
-    var scale = Math.min(1, available / 404);
-    worldWrap.style.transform = "scale(" + scale + ")";
-    worldStage.style.height = Math.ceil(404 * scale + 16) + "px";
+    var mobile=window.innerWidth<=840;
+    var stageWidth=worldStage.clientWidth;
+    var stageHeight=worldStage.clientHeight;
+    var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
+    var usableHeight=mobile?404:Math.max(180,stageHeight-24);
+    var scale=Math.min(1,usableWidth/404,usableHeight/404);
+    worldWrap.style.transform="scale("+scale+")";
+    worldScaleBox.style.width=(404*scale)+"px";
+    worldScaleBox.style.height=(404*scale)+"px";
   }
-  window.addEventListener("resize", fitWorld);
-  fitWorld();
+  window.addEventListener("resize",fitWorld);
+  if(typeof ResizeObserver!=="undefined"){
+    var layoutObserver=new ResizeObserver(function(){
+      if(typeof editor!=="undefined"&&editor)editor.refresh();
+      fitWorld();
+    });
+    layoutObserver.observe(worldStage);
+    layoutObserver.observe(document.querySelector(".code-panel"));
+  }
+  requestAnimationFrame(fitWorld);
 
   if(typeof Sk === "undefined"){
     loading.classList.add("show");
