@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A student-facing Python Turtle course for learning movement, loops, functions, parameters, debugging, and visual programming.">
+<title>Python Turtle Course | David Steckler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../site-theme.css">
+
+<style>
+  :root{--course-max:1080px}
+  html{scroll-behavior:smooth}
+  .course-shell{width:min(calc(100% - 36px),var(--course-max));margin:0 auto}
+  .course-main{padding:0 0 72px}
+
+  .hero{
+    padding:58px 0 42px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 330px;
+    gap:42px;
+    align-items:end;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--terracotta);
+    margin-bottom:13px;
+  }
+  .hero h1{
+    margin:0;
+    max-width:760px;
+    font-family:'Outfit',sans-serif;
+    font-size:clamp(2.7rem,6vw,5.4rem);
+    line-height:.96;
+    letter-spacing:-.055em;
+    font-weight:800;
+  }
+  .hero-lead{
+    max-width:700px;
+    margin:20px 0 0;
+    color:var(--mid);
+    font-size:1.08rem;
+    line-height:1.68;
+  }
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+  .course-button{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:0 16px;border-radius:12px;
+    font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:800;
+    border:1px solid var(--ink);transition:transform .15s ease,background .15s ease;
+  }
+  .course-button:hover{transform:translateY(-1px);text-decoration:none!important}
+  .course-button.primary{background:var(--ink);color:var(--surface)}
+  .course-button.secondary{background:rgba(255,255,255,.38);color:var(--ink)}
+
+  .hero-side{
+    border-top:1px solid var(--rule-strong);
+    padding-top:16px;
+  }
+  .hero-side-label{
+    font-family:'JetBrains Mono',monospace;font-size:.62rem;
+    color:var(--ghost);letter-spacing:.07em;text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .hero-side strong{
+    display:block;font-family:'Outfit',sans-serif;font-size:1.2rem;line-height:1.2;margin-bottom:8px;
+  }
+  .hero-side p{font-size:.9rem;line-height:1.55;color:var(--soft);margin:0}
+
+  .progress-strip{
+    position:sticky;top:64px;z-index:50;
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+    background:rgba(240,235,225,.94);
+    backdrop-filter:blur(12px);
+  }
+  .progress-inner{
+    min-height:50px;display:flex;align-items:center;gap:16px;
+  }
+  .progress-copy{
+    display:flex;align-items:center;gap:9px;min-width:145px;
+    font-family:'Outfit',sans-serif;font-size:.77rem;font-weight:800;
+  }
+  .progress-copy span{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:.67rem}
+  .progress-track{height:7px;flex:1;background:rgba(28,27,24,.09);border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;width:0;background:var(--teal);border-radius:999px;transition:width .25s ease}
+  .progress-reset{
+    border:0;background:transparent;color:var(--soft);
+    font-family:'Outfit',sans-serif;font-weight:700;font-size:.7rem;
+    padding:7px;border-radius:8px;
+  }
+  .progress-reset:hover{background:rgba(28,27,24,.05);color:var(--ink)}
+
+  .course-section{padding:58px 0;border-bottom:1px solid var(--rule)}
+  .section-intro{
+    display:grid;grid-template-columns:145px minmax(0,1fr);gap:28px;margin-bottom:28px;
+  }
+  .section-index{
+    font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--ghost);
+    padding-top:6px;
+  }
+  .section-index strong{
+    display:block;margin-top:3px;color:var(--teal);
+    font-family:'Outfit',sans-serif;font-size:.71rem;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .section-intro h2{
+    margin:0 0 10px;font-family:'Outfit',sans-serif;
+    font-size:clamp(1.9rem,3vw,2.8rem);line-height:1.04;letter-spacing:-.035em;font-weight:800;
+  }
+  .section-intro p{max-width:720px;margin:0;color:var(--mid);font-size:1rem}
+
+  .lesson-list{border-top:1px solid var(--rule-strong)}
+  .lesson{
+    display:grid;
+    grid-template-columns:42px 72px minmax(0,1fr) minmax(180px,280px) 30px;
+    gap:16px;
+    align-items:center;
+    padding:22px 4px;
+    border-bottom:1px solid var(--rule);
+    transition:background .15s ease,padding .15s ease;
+  }
+  .lesson:hover{background:rgba(255,255,255,.28);padding-left:9px;padding-right:9px}
+  .lesson-check{
+    width:26px;height:26px;border:1px solid var(--rule-strong);
+    border-radius:8px;background:rgba(255,255,255,.45);
+    display:grid;place-items:center;color:transparent;
+    font-family:'Outfit',sans-serif;font-weight:800;font-size:.76rem;
+    cursor:pointer;
+  }
+  .lesson.done .lesson-check{background:var(--teal);border-color:var(--teal);color:white}
+  .lesson-num{font-family:'JetBrains Mono',monospace;font-size:.69rem;color:var(--terracotta)}
+  .lesson-title strong{
+    display:block;font-family:'Outfit',sans-serif;font-size:1.03rem;line-height:1.2;color:var(--ink);
+  }
+  .lesson-title span{
+    display:block;margin-top:4px;
+    font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ghost);
+  }
+  .lesson-focus{margin:0;color:var(--mid);font-size:.9rem;line-height:1.48}
+  .lesson-go{
+    font-family:'Outfit',sans-serif;color:var(--teal);font-weight:800;
+    font-size:.95rem;text-align:right;
+  }
+
+  .course-loop{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--rule-strong);
+    border-bottom:1px solid var(--rule-strong);
+  }
+  .loop{
+    padding:20px 18px;border-right:1px solid var(--rule);
+  }
+  .loop:last-child{border-right:0}
+  .loop span{
+    display:block;font-family:'JetBrains Mono',monospace;
+    color:var(--terracotta);font-size:.62rem;margin-bottom:7px;
+  }
+  .loop strong{display:block;font-family:'Outfit',sans-serif;font-size:1rem;margin-bottom:5px}
+  .loop p{font-size:.84rem;line-height:1.5;color:var(--soft);margin:0}
+
+  .sandbox-band{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    gap:24px;align-items:center;
+    margin-top:30px;padding:22px 24px;
+    border:1px solid rgba(26,92,107,.15);
+    background:var(--teal-light);border-radius:17px;
+  }
+  .sandbox-band strong{display:block;font-family:'Outfit',sans-serif;font-size:1.08rem;margin-bottom:4px}
+  .sandbox-band p{margin:0;color:var(--mid);font-size:.9rem}
+  .sandbox-band a{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:42px;padding:0 15px;border-radius:11px;
+    background:var(--teal);color:white!important;
+    font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:800;
+  }
+  .sandbox-band a:hover{text-decoration:none!important;background:#144e59}
+
+  .code-snapshot{
+    margin-top:28px;border:1px solid #313839;border-radius:17px;
+    background:#202526;color:#e7eceb;overflow:hidden;
+  }
+  .code-top{
+    min-height:42px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 14px;background:#292f30;border-bottom:1px solid #3a4142;
+    color:#bac2c1;font:700 .67rem/1 'JetBrains Mono',monospace;text-transform:uppercase;
+  }
+  .code-snapshot pre{
+    margin:0;padding:18px;overflow:auto;
+    font:500 .82rem/1.7 'JetBrains Mono',monospace;
+  }
+  .code-snapshot .kw{color:#d7a7df}.code-snapshot .fn{color:#85c7c0}.code-snapshot .num{color:#e4bd66}
+
+  .course-end{
+    padding:56px 0 14px;display:grid;grid-template-columns:1fr auto;
+    align-items:center;gap:26px;
+  }
+  .course-end h2{
+    font-family:'Outfit',sans-serif;font-size:clamp(2rem,4vw,3.3rem);
+    line-height:1.02;letter-spacing:-.04em;margin:0 0 10px;
+  }
+  .course-end p{max-width:650px;color:var(--mid);margin:0}
+
+  @media(max-width:860px){
+    .hero{grid-template-columns:1fr;gap:28px;padding-top:42px}
+    .hero-side{max-width:620px}
+    .lesson{grid-template-columns:36px 54px minmax(0,1fr) 24px}
+    .lesson-focus{grid-column:3/5;margin-top:-7px}
+    .course-loop{grid-template-columns:1fr 1fr}
+    .loop:nth-child(2){border-right:0}.loop:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  }
+  @media(max-width:620px){
+    .course-shell{width:min(calc(100% - 24px),var(--course-max))}
+    .hero{padding:34px 0 28px}
+    .hero h1{font-size:clamp(2.45rem,13vw,4rem)}
+    .progress-strip{top:62px}
+    .progress-inner{gap:8px}.progress-copy{min-width:auto}.progress-copy strong{display:none}
+    .progress-reset{display:none}
+    .course-section{padding:42px 0}
+    .section-intro{grid-template-columns:1fr;gap:9px}
+    .section-index{padding-top:0}
+    .lesson{
+      grid-template-columns:34px 44px minmax(0,1fr) 22px;
+      gap:9px;padding:18px 0;
+    }
+    .lesson-focus{grid-column:3/5;font-size:.84rem}
+    .lesson-title strong{font-size:.96rem}
+    .sandbox-band{grid-template-columns:1fr}
+    .sandbox-band a{justify-self:start}
+    .course-loop{grid-template-columns:1fr}
+    .loop{border-right:0;border-bottom:1px solid var(--rule)}
+    .loop:last-child{border-bottom:0}
+    .course-end{grid-template-columns:1fr}
+  }
+</style>
+</head>
+
+<body class="site-theme">
+<header class="site-header">
+  <div class="wrap topbar">
+    <a class="brand" href="../index.html">
+      <span class="brand-title">David Steckler</span>
+      <span class="brand-sub">// computer science · build things · figure it out</span>
+    </a>
+    <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../course.html">Course</a>
+      <a class="active" href="./">Python Turtle</a>
+      <a href="../turtle/">Sandbox</a>
+    </nav>
+  </div>
+</header>
+
+<div class="progress-strip">
+  <div class="course-shell progress-inner">
+    <div class="progress-copy"><strong>Your progress</strong><span id="progressText">0 / 10</span></div>
+    <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+    <button class="progress-reset" id="resetProgress" type="button">Reset</button>
+  </div>
+</div>
+
+<main class="course-main">
+  <div class="course-shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">// python turtle course</div>
+        <h1>Learn Python by making it move.</h1>
+        <p class="hero-lead">Write a few instructions. Run them. Watch what the turtle actually does. Then change the code until the picture matches what you had in mind.</p>
+        <div class="hero-actions">
+          <a class="course-button primary" href="#lessons">Start the course →</a>
+          <a class="course-button secondary" href="../turtle/">Open the sandbox</a>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div class="hero-side-label">What this course builds toward</div>
+        <strong>Code you can see, test, debug, and explain.</strong>
+        <p>Movement comes first. Loops make repetition manageable. Functions and parameters let you turn repeated ideas into tools of your own.</p>
+      </aside>
+    </section>
+
+    <section class="course-section">
+      <div class="section-intro">
+        <div class="section-index">00<strong>how it works</strong></div>
+        <div>
+          <h2>One loop for the whole course.</h2>
+          <p>You do not need to understand everything before you begin. The program gives you feedback every time you run it.</p>
+        </div>
+      </div>
+
+      <div class="course-loop">
+        <div class="loop"><span>01</span><strong>Predict</strong><p>Read the code and decide what you think the turtle will do.</p></div>
+        <div class="loop"><span>02</span><strong>Run</strong><p>Watch the movement instead of only looking at the finished picture.</p></div>
+        <div class="loop"><span>03</span><strong>Notice</strong><p>Compare what happened with what you expected.</p></div>
+        <div class="loop"><span>04</span><strong>Change</strong><p>Adjust one thing, run it again, and explain what changed.</p></div>
+      </div>
+
+      <div class="sandbox-band">
+        <div>
+          <strong>The sandbox is your workspace.</strong>
+          <p>Use Run for the whole program or Step when you want to follow one statement at a time.</p>
+        </div>
+        <a href="../turtle/">Open Python Turtle Sandbox →</a>
+      </div>
+    </section>
+
+    <section class="course-section" id="lessons">
+      <div class="section-intro">
+        <div class="section-index">01<strong>course path</strong></div>
+        <div>
+          <h2>Build one idea at a time.</h2>
+          <p>Each lesson adds something that becomes useful later. Mark a lesson complete when you can use the idea and explain what your code is doing.</p>
+        </div>
+      </div>
+
+      <div class="lesson-list" id="lessonList">
+        <article class="lesson" data-lesson="1">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 1 complete">✓</button>
+          <div class="lesson-num">01</div>
+          <div class="lesson-title"><strong>Meet the Turtle</strong><span>run · step · coordinates</span></div>
+          <p class="lesson-focus">Learn where the turtle starts, which way it faces, and how the sandbox shows you what the code is doing.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="2">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 2 complete">✓</button>
+          <div class="lesson-num">02</div>
+          <div class="lesson-title"><strong>Move & Turn</strong><span>forward · backward · left · right</span></div>
+          <p class="lesson-focus">Control distance and direction. Build shapes from a sequence of precise movements.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="3">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 3 complete">✓</button>
+          <div class="lesson-num">03</div>
+          <div class="lesson-title"><strong>Pen & Position</strong><span>penup · pendown · goto</span></div>
+          <p class="lesson-focus">Move around the coordinate grid without always drawing a line. Put the turtle exactly where you want it.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="4">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 4 complete">✓</button>
+          <div class="lesson-num">04</div>
+          <div class="lesson-title"><strong>Repeat with Loops</strong><span>for · range · indentation</span></div>
+          <p class="lesson-focus">Replace repeated instructions with a loop and watch the same lines execute again and again.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="5">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 5 complete">✓</button>
+          <div class="lesson-num">05</div>
+          <div class="lesson-title"><strong>Variables & Patterns</strong><span>names · values · expressions</span></div>
+          <p class="lesson-focus">Store values and change them while a program runs. Use the loop variable to create growing patterns.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="6">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 6 complete">✓</button>
+          <div class="lesson-num">06</div>
+          <div class="lesson-title"><strong>Style the Drawing</strong><span>color · pensize · circle · fill</span></div>
+          <p class="lesson-focus">Change how the output looks while keeping the program logic understandable.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="7">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 7 complete">✓</button>
+          <div class="lesson-num">07</div>
+          <div class="lesson-title"><strong>Functions</strong><span>def · call · reuse</span></div>
+          <p class="lesson-focus">Give a group of instructions a name so you can use the idea again without rewriting it.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="8">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 8 complete">✓</button>
+          <div class="lesson-num">08</div>
+          <div class="lesson-title"><strong>Parameters</strong><span>size · color · choices</span></div>
+          <p class="lesson-focus">Make one function produce different results by passing information into it.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="9">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 9 complete">✓</button>
+          <div class="lesson-num">09</div>
+          <div class="lesson-title"><strong>Debugging</strong><span>NameError · syntax · indentation</span></div>
+          <p class="lesson-focus">Use the error message, highlighted line, and program behavior to figure out what needs to change.</p>
+          <div class="lesson-go">→</div>
+        </article>
+
+        <article class="lesson" data-lesson="10">
+          <button class="lesson-check" type="button" aria-label="Mark lesson 10 complete">✓</button>
+          <div class="lesson-num">10</div>
+          <div class="lesson-title"><strong>Build Something Worth Explaining</strong><span>plan · build · test · explain</span></div>
+          <p class="lesson-focus">Combine the course ideas into an original visual program you can walk someone else through.</p>
+          <div class="lesson-go">→</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="course-section">
+      <div class="section-intro">
+        <div class="section-index">02<strong>where this goes</strong></div>
+        <div>
+          <h2>From instructions to reusable ideas.</h2>
+          <p>A short Turtle program can already contain most of the programming ideas we care about: sequence, repetition, variables, functions, parameters, and debugging.</p>
+        </div>
+      </div>
+
+      <div class="code-snapshot" aria-label="Python Turtle example">
+        <div class="code-top"><span>main.py</span><span>functions + parameters</span></div>
+        <pre><span class="kw">def</span> <span class="fn">square</span>(size):
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="num">4</span>):
+        forward(size)
+        right(<span class="num">90</span>)
+
+square(<span class="num">50</span>)
+square(<span class="num">100</span>)</pre>
+      </div>
+    </section>
+
+    <section class="course-end">
+      <div>
+        <div class="eyebrow">// ready when you are</div>
+        <h2>The turtle only does what the code says.</h2>
+        <p>That is what makes it useful. When the output surprises you, there is something in the instructions worth finding.</p>
+      </div>
+      <a class="course-button primary" href="../turtle/">Open the sandbox →</a>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="course-shell footer-inner">
+    <p>David Steckler · Computer Science</p>
+    <p>Python Turtle Course</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var menuButton=document.querySelector('.menu-toggle');
+  var nav=document.querySelector('.site-header nav');
+  if(menuButton&&nav){
+    menuButton.addEventListener('click',function(){
+      var open=nav.classList.toggle('active');
+      menuButton.setAttribute('aria-expanded',open?'true':'false');
+    });
+  }
+
+  var STORAGE_KEY='dsteckler-turtlecourse-progress-v1';
+  var lessons=Array.prototype.slice.call(document.querySelectorAll('.lesson'));
+  var progressText=document.getElementById('progressText');
+  var progressFill=document.getElementById('progressFill');
+  var resetButton=document.getElementById('resetProgress');
+  var completed={};
+
+  try{completed=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')||{};}catch(e){completed={};}
+
+  function renderProgress(){
+    var count=0;
+    lessons.forEach(function(lesson){
+      var id=lesson.getAttribute('data-lesson');
+      var done=!!completed[id];
+      lesson.classList.toggle('done',done);
+      lesson.querySelector('.lesson-check').setAttribute('aria-pressed',done?'true':'false');
+      if(done)count++;
+    });
+    progressText.textContent=count+' / '+lessons.length;
+    progressFill.style.width=(count/lessons.length*100)+'%';
+  }
+
+  lessons.forEach(function(lesson){
+    var check=lesson.querySelector('.lesson-check');
+    check.addEventListener('click',function(){
+      var id=lesson.getAttribute('data-lesson');
+      completed[id]=!completed[id];
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(completed));}catch(e){}
+      renderProgress();
+    });
+  });
+
+  resetButton.addEventListener('click',function(){
+    if(!confirm('Reset your Python Turtle course progress?'))return;
+    completed={};
+    try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+    renderProgress();
+  });
+
+  renderProgress();
+})();
+</script>
+</body>
+</html>
