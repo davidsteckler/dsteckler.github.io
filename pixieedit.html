@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f1ece3">
+<title>Pixie Edit | David Steckler</title>
+<meta name="description" content="Find the natural moments in your video, build a short edit, and export with the original sound. Your footage stays on your device.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1ece3;--paper:#faf8f2;--ink:#24211e;--muted:#756e65;--line:#ddd7cb;--teal:#285f66;--tealbg:#e7efed;--orange:#b86842}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Outfit',sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+a{color:inherit} .wrap{width:min(1150px,calc(100% - 36px));margin:auto}
+header{border-bottom:1px solid var(--line);background:#f7f3eb}
+.top{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{text-decoration:none;font-weight:800;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
+.toplinks{display:flex;gap:14px;align-items:center}.toplinks a{font-size:13px;text-decoration:none;color:var(--muted)}
+.pill{border:1px solid #bbd3ce;background:var(--tealbg);color:var(--teal);padding:6px 10px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:.03em}
+.hero{padding:45px 0 30px;display:grid;grid-template-columns:1fr auto;gap:25px;align-items:end}
+.eyebrow{font:11px 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--orange)}
+h1{font:600 clamp(39px,6vw,76px)/.99 'Fraunces',Georgia,serif;letter-spacing:-.055em;margin:13px 0 14px}
+h1 em{font-weight:400;color:var(--teal)}
+.hero p{max-width:580px;color:#615b54;margin:0;font-size:17px;line-height:1.55}
+.hero-note{text-align:right;font-size:12px;color:var(--muted);max-width:230px}
+.shell{background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 32px rgba(35,30,20,.035)}
+.upload{padding:39px 20px;text-align:center;border:1.5px dashed #c5bfb3;border-radius:15px;margin:16px;transition:.2s}
+.upload.drag{border-color:var(--teal);background:var(--tealbg)}
+.upload .symbol{font-size:30px;width:64px;height:64px;display:grid;place-items:center;border-radius:18px;background:#e9e6db;margin:0 auto 16px}
+.upload h2{font:600 29px/1.15 'Fraunces',Georgia,serif;letter-spacing:-.02em;margin:0 0 7px}
+.upload p{color:var(--muted);margin:0 0 20px}
+.btn{border:1px solid var(--line);border-radius:11px;background:#fff;padding:11px 15px;min-height:43px;font-weight:700;color:var(--ink)}
+.btn:hover:not(:disabled){border-color:#9aada8}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:white}
+.btn.primary:hover:not(:disabled){background:#1b4b50}
+.btn.quiet{background:transparent}.btn.small{padding:7px 10px;min-height:34px;font-size:12px;border-radius:8px}
+#fileInput{position:absolute;left:-9999px}
+.privacy{margin-top:14px!important;font-size:12px;color:var(--muted)}
+.workspace{display:none}.workspace.active{display:block}
+.toolbar{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.file-meta{min-width:0;display:flex;align-items:center;gap:10px}.file-meta strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:310px;font-size:13px}
+.meta-sub{font:11px 'JetBrains Mono',monospace;color:var(--muted)}
+.editor{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(330px,.84fr);gap:16px;align-items:start;padding-top:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.card-head{padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card h2{margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:12px}
+.player-bg{background:#1b1a19;display:flex;justify-content:center;align-items:center;min-height:340px;max-height:510px;overflow:hidden}
+.player-bg video{display:block;max-height:510px;width:100%;max-width:100%;height:auto;object-fit:contain;background:#161616}
+.player-controls{padding:16px 18px}
+.time-row{display:flex;justify-content:space-between;font:12px 'JetBrains Mono',monospace;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--teal);cursor:pointer}
+.scrub{margin:10px 0 8px}
+.track{height:15px;margin:5px 0 17px;border:1px solid var(--line);border-radius:7px;position:relative;overflow:hidden;background:#e7e1d7}
+.track span{position:absolute;top:0;bottom:0;background:#7b9b94;border-right:1px solid #f5f4ef}
+.control-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.mark{padding:11px 13px;background:#edeae2;border-radius:12px;margin-top:14px}
+.mark-title{font-size:12px;color:var(--muted);margin-bottom:9px}
+.mark-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mark-row .range-info{font:12px 'JetBrains Mono',monospace;margin-right:auto}
+.right-stack{display:flex;flex-direction:column;gap:14px}
+.padded{padding:18px}
+.step-label{font:11px 'JetBrains Mono',monospace;color:var(--orange);margin-bottom:7px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:11px}
+.settings-row strong{font-size:14px}
+.seg{display:flex;gap:5px;background:#eee9e1;border-radius:10px;padding:4px}
+.seg button{border:none;border-radius:7px;padding:7px 10px;background:transparent;color:var(--muted);font-size:12px;font-weight:700;flex:1}
+.seg button.on{background:white;color:var(--ink);box-shadow:0 1px 4px #0001}
+.hint{font-size:12px;color:var(--muted);line-height:1.55;margin:11px 0 0}
+.auto-actions{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}
+.status{display:none;background:var(--tealbg);border:1px solid #c0d8d1;color:#264f4f;padding:12px;border-radius:11px;margin-top:12px;font-size:12px;white-space:pre-line}
+.status.show{display:block}.status.error{background:#fff0e8;border-color:#edc4b0;color:#984e30}
+.progress{height:5px;border-radius:5px;background:#d2dfd9;margin-top:10px;overflow:hidden;display:none}.progress.on{display:block}.progress span{display:block;width:0%;height:100%;background:var(--teal);transition:width .15s}
+.section-label{font-size:12px;color:var(--muted);margin:0}
+.clips{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:375px;overflow:auto}
+.clip{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px}
+.clip-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.clip-top strong{font-size:13px}.clip-tools{display:flex;gap:3px;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:#f8f6f0;border-radius:7px;width:29px;height:29px;display:grid;place-items:center;font-size:12px}
+.clip-times{display:flex;align-items:center;gap:6px;font:11px 'JetBrains Mono',monospace;color:var(--muted)}
+.clip-times input{width:77px;min-width:0;padding:7px;border:1px solid var(--line);border-radius:7px;font:12px 'JetBrains Mono',monospace;color:var(--ink);background:white}
+.empty{padding:22px 12px;text-align:center;color:var(--muted);background:#f4f1ea;border:1px dashed var(--line);border-radius:12px;font-size:13px}
+.total{display:flex;justify-content:space-between;align-items:center;padding-top:13px;margin-top:10px;border-top:1px solid var(--line);font-size:13px}
+.total strong{font:600 19px 'Fraunces',Georgia,serif}
+.export-box{background:#e8efeb;border-top:1px solid #cddad4;padding:18px}
+.export-box .btn{width:100%;margin:9px 0 0}
+.export-box p{font-size:12px;color:#4e6961;margin:8px 0 0}
+.download{display:none;text-align:center;margin-top:12px;padding:12px;border-radius:11px;background:white;border:1px solid #adcfc1}
+.download a{font-weight:800;color:var(--teal)}.download small{display:block;margin-top:4px;color:var(--muted)}
+.moments{padding:22px;margin-top:17px;margin-bottom:36px}
+.moments-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.frames{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:white;text-align:left;padding:0}
+.frame img{aspect-ratio:4/3;width:100%;object-fit:cover;background:#dedad0;display:block}
+.frame div{padding:6px 7px;font:11px 'JetBrains Mono',monospace}
+.frame:hover{border-color:var(--teal)}
+.below{color:var(--muted);font-size:12px;padding:0 0 24px}
+.fine{font:11px 'JetBrains Mono',monospace;color:var(--muted)}
+footer{margin:0 0 27px;border-top:1px solid var(--line);padding-top:16px;display:flex;justify-content:space-between;gap:15px;font-size:12px;color:var(--muted)}
+@media(max-width:850px){.editor{grid-template-columns:1fr}.hero{grid-template-columns:1fr;padding:30px 0 20px}.hero-note{text-align:left}.frames{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:520px){.frames{grid-template-columns:repeat(3,minmax(0,1fr))}.player-bg{min-height:260px}.hero h1{font-size:47px}.toplinks a:first-child{display:none}.mark-row .range-info{flex:1 1 100%}.upload{margin:9px}}
+</style>
+</head>
+<body>
+<header><div class="wrap top"><a class="brand" href="index.html">David Steckler</a><div class="toplinks"><a href="index.html">← Back to the site</a><span class="pill">PRIVATE · ON YOUR DEVICE</span></div></div></header>
+<main class="wrap">
+<section class="hero"><div><div class="eyebrow">// PIXIE EDIT · NATURAL VIDEO EDITOR</div><h1>Keep the parts that<br><em>feel like them.</em></h1><p>Find the little reactions and genuine moments in your footage. Make a short edit, keep the original sound, and leave the rest alone.</p></div><div class="hero-note">No music added. No filters. No captions burned in. Nothing uploaded.</div></section>
+<div id="uploadShell" class="shell"><div class="upload" id="dropZone"><div class="symbol">↥</div><h2>Start with the original video.</h2><p>MP4, MOV, or WebM. Portrait or landscape.</p><label class="btn primary" for="fileInput" style="display:inline-flex;align-items:center">Choose a video</label><input id="fileInput" type="file" accept="video/*,.mov,.mp4,.webm"><p class="privacy">Or drag the file here. Everything stays in your browser.</p></div></div>
+<section id="workspace" class="workspace">
+<div class="shell toolbar"><div class="file-meta"><span class="pill">ORIGINAL FOOTAGE</span><strong id="fileName">Video</strong><span class="meta-sub" id="fileInfo"></span></div><label for="fileInput" class="btn small">Change video</label></div>
+<div class="editor">
+<div class="card">
+<div class="card-head"><h2>Original footage</h2><span class="sub">Listen with the sound on.</span></div>
+<div class="player-bg"><video id="video" playsinline preload="auto" controls></video></div>
+<div class="player-controls">
+<div class="time-row"><span id="nowLabel">0:00</span><span id="durLabel">0:00</span></div>
+<input id="scrub" class="scrub" type="range" min="0" max="100" value="0" step="0.05" aria-label="Scrub video">
+<div class="track" id="track" title="Selected parts of the original video"></div>
+<div class="control-row"><button class="btn small" id="backBtn" type="button">− 5 sec</button><button class="btn small" id="forwardBtn" type="button">+ 5 sec</button><button class="btn small" id="previewBtn" type="button">▶ Preview your edit</button><button class="btn small quiet" id="stopBtn" type="button">Stop preview</button></div>
+<div class="mark"><div class="mark-title">Keep a moment manually</div><div class="mark-row"><button class="btn small" id="inBtn" type="button">Set start</button><button class="btn small" id="outBtn" type="button">Set end</button><span class="range-info" id="rangeLabel">0:00 – 0:05</span><button class="btn small primary" id="addBtn" type="button">+ Keep this part</button></div></div>
+</div></div>
+<div class="right-stack">
+<div class="card"><div class="card-head"><h2>Make a first cut</h2><span class="sub">You decide what stays.</span></div><div class="padded">
+<div class="step-label">01 / LENGTH</div>
+<div class="seg" id="lengthSeg"><button data-length="20" type="button">~20 sec</button><button class="on" data-length="30" type="button">~30 sec</button><button data-length="45" type="button">~45 sec</button></div>
+<div class="step-label" style="margin-top:17px">02 / PACING</div>
+<div class="seg" id="paceSeg"><button class="on" data-pace="natural" type="button">Natural</button><button data-pace="tight" type="button">A little tighter</button></div>
+<p class="hint">The on-device scan looks for the dog, movement and visual changes. It's a rough cut: it cannot understand a funny expression or a conversation the way a person can. Natural pauses are given room.</p>
+<div class="auto-actions"><button id="analyzeBtn" class="btn primary" type="button">Find moments & make draft</button><button id="wholeBtn" class="btn small" type="button">Keep whole video</button></div>
+<div id="scanStatus" class="status" role="status" aria-live="polite"></div><div class="progress" id="scanProgress"><span id="scanBar"></span></div>
+</div></div>
+<div class="card"><div class="card-head"><h2>Your edit</h2><span id="clipCount" class="sub">0 parts</span></div><div class="padded">
+<p class="section-label">These sections play in this order. Adjust the start and end of any clip.</p>
+<div id="clips" class="clips"><div class="empty">Find moments automatically, or set the start and end of a moment you want to keep.</div></div>
+<div class="total"><span>Total running time</span><strong id="totalLabel">0:00</strong></div>
+<div class="control-row" style="margin-top:13px"><button id="clearBtn" class="btn small quiet" type="button">Clear edit</button><button id="copyBtn" class="btn small quiet" type="button">Copy cut list</button></div>
+</div>
+<div class="export-box"><div class="step-label" style="color:var(--teal)">03 / EXPORT</div><strong style="font-size:16px">Original sound. No added effects.</strong><p>Exports at normal speed in your browser. Keep this tab open and visible while it records your selected moments. MP4 where supported; WebM otherwise.</p><button id="exportBtn" class="btn primary" type="button">Export your edit</button><div class="status" id="exportStatus" role="status" aria-live="polite"></div><div class="progress" id="exportProgress"><span id="exportBar"></span></div><div id="download" class="download"></div></div>
+</div></div>
+</div>
+</section>
+<section id="momentsSection" class="card moments" hidden><div class="moments-top"><div><h2>Frames from your footage</h2><p class="hint" style="margin:3px 0 0">Tap a frame to jump there. Use the start and end controls above to keep it.</p></div><span id="scanNote" class="fine"></span></div><div class="frames" id="frames"></div></section>
+<p class="below">This is a browser-based rough-cut editor. For truly scene-aware edits that interpret dialogue, emotion, or Pixie's exact behavior, you'd need a separate video-analysis service.</p>
+<footer><span>Pixie Edit · made for the little moments</span><span>Private local processing · no account required</span></footer>
+</main>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var video=$('video'),file=null,objectUrl=null,duration=0,clips=[],samples=[],target=30,pace='natural';
+var markIn=0,markOut=5,preview=false,previewIndex=0,scanBusy=false,exportBusy=false,scanToken=0;
+var ctxAudio=null,sourceAudio=null,monitorGain=null,audioDest=null,downloadUrl=null;
+var canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
+var motionCanvas=document.createElement('canvas'),motionCtx=motionCanvas.getContext('2d',{willReadFrequently:true});
+motionCanvas.width=96;motionCanvas.height=96;
+function fmt(t){t=Math.max(0,Number(t)||0);var m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+(s<10?'0':'')+s}
+function setStatus(id,msg,error){var el=$(id);el.textContent=msg;el.classList.toggle('show',!!msg);el.classList.toggle('error',!!error)}
+function bar(kind,val){var progress=$(kind+'Progress'),b=$(kind+'Bar');progress.classList.toggle('on',val!==null);b.style.width=((Math.max(0,Math.min(1,val||0)))*100)+'%'}
+function total(){return clips.reduce(function(n,c){return n+c.end-c.start},0)}
+function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+function seek(t){return new Promise(function(resolve){var to=clamp(t,0,Math.max(0,duration-.05));if(Math.abs(video.currentTime-to)<.055&&video.readyState>=2){resolve();return}var timeout=setTimeout(done,1800);function done(){clearTimeout(timeout);video.removeEventListener('seeked',done);resolve()}video.addEventListener('seeked',done);video.currentTime=to})}
+function updateRange(){markIn=clamp(markIn,0,duration);markOut=clamp(markOut,markIn,duration);$('rangeLabel').textContent=fmt(markIn)+' – '+fmt(markOut)}
+function refreshTrack(){var el=$('track');el.replaceChildren();clips.forEach(function(c){var s=document.createElement('span');s.style.left=(c.start/duration*100)+'%';s.style.width=((c.end-c.start)/duration*100)+'%';el.appendChild(s)})}
+function renderClips(){
+ var el=$('clips');el.replaceChildren();
+ if(!clips.length){var empty=document.createElement('div');empty.className='empty';empty.textContent='Find moments automatically, or set the start and end of a moment you want to keep.';el.appendChild(empty)}
+ clips.forEach(function(c,i){
+  var card=document.createElement('div');card.className='clip';
+  var top=document.createElement('div');top.className='clip-top';
+  var label=document.createElement('strong');label.textContent='Part '+(i+1)+'  ·  '+fmt(c.end-c.start);top.appendChild(label);
+  var tools=document.createElement('div');tools.className='clip-tools';
+  [['▶','Play this part'],['↑','Move earlier'],['↓','Move later'],['×','Remove']].forEach(function(spec,k){
+   var b=document.createElement('button');b.type='button';b.className='mini';b.title=spec[1];b.setAttribute('aria-label',spec[1]+' '+(i+1));b.textContent=spec[0];b.disabled=(k===1&&i===0)||(k===2&&i===clips.length-1);
+   b.addEventListener('click',function(){if(k===0){playEdit(i,i+1);return}if(k===3)clips.splice(i,1);else{var j=i+(k===1?-1:1),v=clips[i];clips[i]=clips[j];clips[j]=v}renderClips()});tools.appendChild(b)
+  });top.appendChild(tools);card.appendChild(top);
+  var inputs=document.createElement('div');inputs.className='clip-times';
+  ['start','end'].forEach(function(which,index){var lab=document.createElement('label');lab.textContent=index?'to ':'from ';var inp=document.createElement('input');inp.type='number';inp.min='0';inp.max=duration.toFixed(2);inp.step='.1';inp.value=c[which].toFixed(1);inp.setAttribute('aria-label','Part '+(i+1)+' '+which+' seconds');inp.addEventListener('change',function(){var n=Number(inp.value);if(!Number.isFinite(n)){renderClips();return}if(which==='start')c.start=clamp(n,0,c.end-.2);else c.end=clamp(n,c.start+.2,duration);renderClips()});lab.appendChild(inp);inputs.appendChild(lab)});card.appendChild(inputs);el.appendChild(card)
+ });
+ $('clipCount').textContent=clips.length+' '+(clips.length===1?'part':'parts');$('totalLabel').textContent=fmt(total());refreshTrack();$('exportBtn').disabled=!clips.length||exportBusy;$('previewBtn').disabled=!clips.length||exportBusy;$('clearBtn').disabled=!clips.length||exportBusy;$('copyBtn').disabled=!clips.length
+}
+function stopPreview(){preview=false;video.pause();$('previewBtn').textContent='▶ Preview your edit'}
+async function playEdit(from,until){
+ if(!clips.length||exportBusy)return;stopPreview();preview=true;until=until===undefined?clips.length:until;
+ $('previewBtn').textContent='Playing edit…';
+ for(var i=from;i<until&&preview;i++){previewIndex=i;await seek(clips[i].start);if(!preview)break;try{await video.play()}catch(e){setStatus('scanStatus','Tap play on the video to allow playback, then preview again.',true);break}
+  await new Promise(function(done){function tick(){if(!preview||video.currentTime>=clips[i].end-.055||video.ended){video.pause();done()}else requestAnimationFrame(tick)}requestAnimationFrame(tick)})
+ }stopPreview()
+}
+function addClip(s,e){
+ if(!duration)return;s=clamp(s,0,Math.max(0,duration-.2));e=clamp(e,s+.2,duration);clips.push({start:s,end:e});renderClips()
+}
+function changeFile(f){
+ if(!f)return;
+ if(!f.type.startsWith('video/')&&!/\.(mp4|mov|webm|m4v)$/i.test(f.name)){alert('Please choose a video file.');return}
+ ++scanToken;stopPreview();file=f;clips=[];samples=[];duration=0;
+ if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(f);video.src=objectUrl;video.load();
+ $('fileName').textContent=f.name;$('fileInfo').textContent=(f.size/1048576).toFixed(1)+' MB';
+ $('uploadShell').style.display='none';$('workspace').classList.add('active');$('momentsSection').hidden=true;
+ setStatus('scanStatus','');setStatus('exportStatus','');bar('scan',null);bar('export',null);
+ if(downloadUrl)URL.revokeObjectURL(downloadUrl);$('download').style.display='none';renderClips()
+}
+video.addEventListener('loadedmetadata',function(){
+ duration=Number.isFinite(video.duration)?video.duration:0;
+ if(!duration){setStatus('scanStatus','This file cannot be read by your browser. Try an MP4 (H.264).',true);return}
+ $('durLabel').textContent=fmt(duration);$('scrub').max=duration;$('scrub').value=0;markIn=0;markOut=Math.min(5,duration);updateRange();renderClips()
+});
+video.addEventListener('timeupdate',function(){$('nowLabel').textContent=fmt(video.currentTime);$('scrub').value=video.currentTime});
+$('fileInput').addEventListener('change',function(e){changeFile(e.target.files[0])});
+var dz=$('dropZone');['dragenter','dragover'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag')})});
+['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('drag')})});
+dz.addEventListener('drop',function(e){changeFile(e.dataTransfer.files[0])});
+$('scrub').addEventListener('input',function(){stopPreview();video.currentTime=Number(this.value)});
+$('backBtn').addEventListener('click',function(){stopPreview();video.currentTime=clamp(video.currentTime-5,0,duration)});
+$('forwardBtn').addEventListener('click',function(){stopPreview();video.currentTime=clamp(video.currentTime+5,0,duration)});
+$('inBtn').addEventListener('click',function(){markIn=video.currentTime;if(markIn>=markOut)markOut=Math.min(duration,markIn+5);updateRange()});
+$('outBtn').addEventListener('click',function(){markOut=video.currentTime;if(markOut<=markIn)markIn=Math.max(0,markOut-5);updateRange()});
+$('addBtn').addEventListener('click',function(){if(markOut-markIn<.2)return;addClip(markIn,markOut)});
+$('previewBtn').addEventListener('click',function(){if(preview)stopPreview();else playEdit(0)});
+$('stopBtn').addEventListener('click',stopPreview);
+$('clearBtn').addEventListener('click',function(){stopPreview();clips=[];renderClips()});
+$('wholeBtn').addEventListener('click',function(){if(duration){clips=[{start:0,end:duration}];renderClips()}});
+$('lengthSeg').addEventListener('click',function(e){var b=e.target.closest('[data-length]');if(!b)return;target=Number(b.dataset.length);this.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)})});
+$('paceSeg').addEventListener('click',function(e){var b=e.target.closest('[data-pace]');if(!b)return;pace=b.dataset.pace;this.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)})});
+$('copyBtn').addEventListener('click',async function(){var text=clips.map(function(c,i){return (i+1)+'. '+c.start.toFixed(2)+'s – '+c.end.toFixed(2)+'s'}).join('\n');try{await navigator.clipboard.writeText(text);this.textContent='Copied ✓';var b=this;setTimeout(function(){b.textContent='Copy cut list'},1700)}catch(e){alert(text)}});
+function loadScript(src){return new Promise(function(resolve,reject){var s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=function(){reject(Error('Could not load on-device detector'))};document.head.appendChild(s)})}
+var modelPromise=null;
+function getDogModel(){
+ if(!modelPromise)modelPromise=(async function(){
+  if(!window.tf)await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');
+  if(!window.cocoSsd)await loadScript('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js');
+  return await cocoSsd.load({base:'lite_mobilenet_v2'})
+ })().catch(function(){return null});
+ return modelPromise
+}
+function jpegFrame(){var c=document.createElement('canvas');c.width=200;c.height=160;c.getContext('2d').drawImage(video,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.69)}
+function showFrames(){
+ var el=$('frames');el.replaceChildren();var choices=samples.filter(function(_,i){return i%Math.max(1,Math.floor(samples.length/12))===0}).slice(0,12);
+ choices.forEach(function(x){var b=document.createElement('button');b.type='button';b.className='frame';b.title='Jump to '+fmt(x.t);var img=document.createElement('img');img.src=x.thumb;img.alt='Frame at '+fmt(x.t);var lbl=document.createElement('div');lbl.textContent=fmt(x.t)+(x.dog>0?' · dog':'');b.appendChild(img);b.appendChild(lbl);b.addEventListener('click',function(){stopPreview();seek(x.t);$('video').scrollIntoView({behavior:'smooth',block:'center'})});el.appendChild(b)});
+ $('momentsSection').hidden=false;$('scanNote').textContent=samples.length+' samples checked'
+}
+function makeDraft(){
+ var d=duration,goal=Math.min(target,d),windowLen=pace==='tight'?3.1:4.9,desiredCount=Math.max(1,Math.round(goal/windowLen));
+ var hasDog=samples.some(function(x){return x.dog>.5});
+ function frameScore(x){return .18+(hasDog?Math.min(4,x.dog*3.6):0)+Math.min(1.2,x.motion*1.4)}
+ var candidates=samples.map(function(x){
+  var s=clamp(x.t-(pace==='tight'?1.0:1.8),0,Math.max(0,d-windowLen)),e=Math.min(d,s+windowLen);
+  var nearby=samples.filter(function(y){return y.t>=s&&y.t<e});
+  var score=nearby.reduce(function(n,y){return n+frameScore(y)},0)/Math.max(1,nearby.length);
+  return {start:s,end:e,score:score+.12*(s/d<.12)}
+ }).sort(function(a,b){return b.score-a.score});
+ var chosen=[],filled=0;
+ if(d<=goal+3){clips=[{start:0,end:d}];renderClips();return}
+ // If the video starts with the subject, keep its opening context.
+ if(hasDog&&samples.slice(0,Math.max(2,Math.floor(samples.length*.12))).some(function(x){return x.dog>.5})){chosen.push({start:0,end:Math.min(d,windowLen)});filled+=chosen[0].end}
+ for(var i=0;i<candidates.length&&filled<goal-1&&chosen.length<desiredCount+2;i++){
+  var c=candidates[i],overlap=chosen.some(function(k){return c.start<k.end+1.15&&k.start<c.end+1.15});
+  if(overlap)continue;var left=goal-filled;var length=Math.min(c.end-c.start,left);if(length<1.8)break;
+  chosen.push({start:c.start,end:c.start+length});filled+=length
+ }
+ if(!chosen.length){chosen=[{start:0,end:Math.min(d,goal)}]}
+ chosen.sort(function(a,b){return a.start-b.start});
+ // Preserve chronological flow, joining neighboring moments when they nearly touch.
+ var merged=[];chosen.forEach(function(c){var last=merged[merged.length-1];if(last&&c.start-last.end<.7)last.end=Math.max(last.end,c.end);else merged.push(c)});
+ clips=merged.map(function(c){return {start:Math.round(c.start*10)/10,end:Math.round(c.end*10)/10}});renderClips()
+}
+$('analyzeBtn').addEventListener('click',async function(){
+ if(!duration||scanBusy||exportBusy)return;stopPreview();scanBusy=true;var token=++scanToken;this.disabled=true;samples=[];
+ bar('scan',.01);setStatus('scanStatus','Preparing an on-device scan. The first run may need to download the dog detector.');
+ try{
+  var model=await getDogModel();if(token!==scanToken)return;
+  if(!model)setStatus('scanStatus','Dog detection unavailable. Using visual movement to propose a rough cut.');
+  video.pause();
+  var step=Math.max(1.3,duration/65),lastPixels=null,lastDog=0;
+  for(var t=.2,i=0;t<duration-.08&&i<75;t+=step,i++){
+   if(token!==scanToken)break;
+   await seek(t);
+   if(video.readyState<2)continue;
+   motionCtx.drawImage(video,0,0,96,96);
+   var pix=motionCtx.getImageData(0,0,96,96).data,now=[],delta=0;
+   for(var k=0;k<pix.length;k+=16){var val=(pix[k]+pix[k+1]+pix[k+2])/3;now.push(val);if(lastPixels)delta+=Math.abs(val-lastPixels[now.length-1])}
+   var movement=lastPixels?Math.min(1,delta/now.length/40):0;lastPixels=now;
+   if(model&&i%2===0){
+    try{var boxes=await model.detect(motionCanvas);lastDog=boxes.filter(function(b){return b.class==='dog'}).reduce(function(best,b){var area=b.bbox[2]*b.bbox[3]/(96*96);return Math.max(best,b.score*(.6+Math.min(1.5,area*2.1)))},0)}catch(e){model=null;lastDog=0}
+   }
+   var thumb=(i%Math.max(1,Math.floor(duration/step/13))===0)?jpegFrame():null;
+   samples.push({t:t,motion:movement,dog:lastDog,thumb:thumb});
+   bar('scan',t/duration);
+   if(i%3===0){setStatus('scanStatus','Checking frames locally… '+Math.min(99,Math.round(t/duration*100))+'%'+(model?' · looking for the dog':' · movement only'));await new Promise(function(resolve){setTimeout(resolve,0)})}
+  }
+  if(token===scanToken){makeDraft();showFrames();setStatus('scanStatus','Draft ready. Review it with the original audio and adjust anything you want.');bar('scan',1)}
+ }catch(e){setStatus('scanStatus','Automatic scan could not finish: '+(e.message||e)+'. You can still select moments manually.',true)}
+ finally{scanBusy=false;$('analyzeBtn').disabled=false}
+});
+function setupAudio(){
+ if(!ctxAudio){ctxAudio=new (window.AudioContext||window.webkitAudioContext)();sourceAudio=ctxAudio.createMediaElementSource(video);monitorGain=ctxAudio.createGain();audioDest=ctxAudio.createMediaStreamDestination();sourceAudio.connect(monitorGain);monitorGain.connect(ctxAudio.destination);sourceAudio.connect(audioDest)}
+ return ctxAudio.resume()
+}
+function mimeChoice(){
+ var types=['video/mp4;codecs="avc1.42E01E,mp4a.40.2"','video/mp4;codecs="avc1.42E01E"','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+ for(var i=0;i<types.length;i++)if(MediaRecorder.isTypeSupported(types[i]))return types[i];return null
+}
+function waitPart(end){return new Promise(function(resolve,reject){
+ var started=performance.now(),last=video.currentTime;
+ function tick(){
+  if(!exportBusy){reject(Error('Export interrupted'));return}
+  var played=video.currentTime;
+  if(played>=end-.045||video.ended){video.pause();resolve();return}
+  if(performance.now()-started>(end-last+10)*1000){reject(Error('Playback stopped before the end of a clip'));return}
+  requestAnimationFrame(tick)
+ }requestAnimationFrame(tick)
+})}
+$('exportBtn').addEventListener('click',async function(){
+ if(!file||!clips.length||exportBusy||scanBusy)return;
+ if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){setStatus('exportStatus','This browser cannot export local video. Try an up-to-date desktop Chrome, Edge or Safari.',true);return}
+ var mime=mimeChoice();if(!mime){setStatus('exportStatus','No supported video export format found in this browser.',true);return}
+ stopPreview();exportBusy=true;renderClips();$('analyzeBtn').disabled=true;
+ setStatus('exportStatus','Preparing the original audio and video…');bar('export',0);
+ var recorder=null,stream=null,painting=false,parts=[],paintCanvas=document.createElement('canvas'),paint=paintCanvas.getContext('2d');
+ try{
+  var scale=Math.min(1,1080/video.videoWidth,1080/video.videoHeight);
+  paintCanvas.width=Math.max(2,Math.round(video.videoWidth*scale/2)*2);paintCanvas.height=Math.max(2,Math.round(video.videoHeight*scale/2)*2);
+  await setupAudio();monitorGain.gain.value=0;await seek(clips[0].start);
+  paint.drawImage(video,0,0,paintCanvas.width,paintCanvas.height);
+  var canvasStream=paintCanvas.captureStream(30),tracks=[...canvasStream.getVideoTracks(),...audioDest.stream.getAudioTracks()];
+  stream=new MediaStream(tracks);
+  recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:5000000,audioBitsPerSecond:128000});
+  recorder.ondataavailable=function(e){if(e.data&&e.data.size)parts.push(e.data)};
+  var stopped=new Promise(function(resolve,reject){recorder.onstop=resolve;recorder.onerror=function(e){reject(e.error||Error('Recorder failed'))}});
+  painting=true;
+  function paintFrame(){if(!painting)return;if(!video.seeking&&video.readyState>=2)paint.drawImage(video,0,0,paintCanvas.width,paintCanvas.height);requestAnimationFrame(paintFrame)}
+  paintFrame();recorder.start(400);
+  var done=0,sum=total();
+  for(var i=0;i<clips.length;i++){
+   var c=clips[i];setStatus('exportStatus','Recording part '+(i+1)+' of '+clips.length+'. Keep this tab visible.');
+   await seek(c.start);await video.play();await waitPart(c.end);done+=c.end-c.start;bar('export',done/sum)
+  }
+  recorder.stop();await stopped;
+  if(!parts.length)throw Error('The browser recorded no video data');
+  var ext=mime.indexOf('mp4')>=0?'mp4':'webm',blob=new Blob(parts,{type:mime.split(';')[0]});
+  if(downloadUrl)URL.revokeObjectURL(downloadUrl);downloadUrl=URL.createObjectURL(blob);
+  var panel=$('download');panel.replaceChildren();
+  var a=document.createElement('a');a.href=downloadUrl;a.download='Pixie_Natural_Edit.'+ext;a.textContent='↓ Download '+ext.toUpperCase()+' ('+(blob.size/1048576).toFixed(1)+' MB)';
+  var sm=document.createElement('small');sm.textContent=ext==='mp4'?'Ready to post. Natural audio, no extras.':'This browser only supports WebM recording. Open the downloaded file in a video converter for MP4.';
+  panel.appendChild(a);panel.appendChild(sm);panel.style.display='block';
+  setStatus('exportStatus','Your video is ready. Listen through once before posting.');bar('export',1)
+ }catch(e){if(recorder&&recorder.state==='recording'){try{recorder.stop()}catch(x){}}setStatus('exportStatus','Export did not complete: '+(e.message||e)+'. Try a shorter edit or desktop browser.',true)}
+ finally{painting=false;video.pause();monitorGain&&(monitorGain.gain.value=1);if(stream)stream.getVideoTracks().forEach(function(t){t.stop()});exportBusy=false;renderClips();$('analyzeBtn').disabled=false}
+});
+renderClips();
+})();
+</script>
+</body>
+</html>
