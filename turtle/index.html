@@ -201,31 +201,6 @@
     .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
     .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
     .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
-    .playback-speed-group{padding:0 3px}
-    .playback-speed-group label{display:flex;align-items:center;gap:6px}
-    .playback-speed-group input[type="range"]{width:130px}
-    .speed-endpoint{font:650 .65rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--soft)}
-    #playSpeedValue{
-      min-width:32px;
-      border:1px solid var(--rule);
-      border-radius:7px;
-      background:#fffdf8;
-      padding:4px 6px;
-      text-align:center;
-      color:var(--teal-dark);
-      font-weight:800;
-    }
-    .live-speed-badge{
-      display:none;
-      border-radius:999px;
-      padding:3px 5px;
-      background:#dff1eb;
-      color:#176b58;
-      font:800 .53rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.04em;
-    }
-    .playback-speed-group.is-live .live-speed-badge{display:inline-block}
-    .playback-speed-group.is-live input[type="range"]{accent-color:#16826f}
     #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
     .CodeMirror-selected{background:#374243 !important}
     .cm-s-default .cm-keyword{color:#d7a7df}
@@ -659,7 +634,6 @@
       .layout-output{display:flex}
       .layout-group input[type="range"]{width:85px}
       .layout-group output{min-width:42px}
-      .playback-speed-group{order:-1}
       .workspace{display:flex;flex-direction:column;min-height:0;height:auto;gap:9px;padding:9px;overflow:visible}
       .resize-divider{display:none}
       .code-panel{height:var(--mobile-editor-height,355px);min-height:220px;flex:none;grid-template-rows:47px minmax(0,1fr)}
@@ -683,8 +657,6 @@
       .shortcut{display:none}
       .layoutbar{justify-content:space-between;gap:6px}
       .layout-output input[type="range"]{width:58px}
-      .playback-speed-group{width:100%;justify-content:center}
-      .playback-speed-group input[type="range"]{width:min(170px,31vw)}
       .layout-group{gap:4px}
       .layout-group label{font-size:.65rem}
       .layout-group output{font-size:.61rem}
@@ -764,13 +736,6 @@
       <label for="mobileEditorSize">Editor height</label>
       <input id="mobileEditorSize" type="range" min="220" max="650" value="355" step="10">
       <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
-    </div>
-    <div class="layout-group playback-speed-group" id="playbackSpeedGroup">
-      <label for="playSpeed">Live speed <span class="live-speed-badge" id="liveSpeedBadge">RUNNING</span></label>
-      <span class="speed-endpoint">0</span>
-      <input id="playSpeed" type="range" min="0" max="10" value="6" step="0.5" aria-label="Live playback speed from 0 to 10">
-      <span class="speed-endpoint">10</span>
-      <output id="playSpeedValue" for="playSpeed">6</output>
     </div>
     <div class="layout-group layout-output">
       <label for="outputSize">Text output</label>
@@ -916,7 +881,7 @@ for i in range(4):
           <button class="command-item" data-search="penup lift no draw python" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Move without drawing.</span></button>
           <button class="command-item" data-search="pendown draw python" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down. Turtle starts this way.</span></button>
           <button class="command-item" data-search="pensize line width thickness python" data-insert="pensize(5)"><span class="command-syntax">pensize(5)</span><span class="command-desc">Set the trail thickness.</span></button>
-          <button class="command-item" data-search="speed animation 0 1 10 python" data-insert="speed(6.5)"><span class="command-syntax">speed(6.5)</span><span class="command-desc">Use any value from 1–10, including decimals. 0 is essentially instant.</span></button>
+          <button class="command-item" data-search="speed animation 0 1 10 python" data-insert="speed(6.5)"><span class="command-syntax">speed(6.5)</span><span class="command-desc">Controls the turtle animation from code. Decimals work; 0 is essentially instant.</span></button>
           <button class="command-item" data-search="color colour trail turtle hex python" data-insert='color("blue")'><span class="command-syntax">color("blue")</span><span class="command-desc">Change Turtle and the trail color. Hex colors also work.</span></button>
           <button class="command-item" data-search="bgcolor background color canvas python" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the canvas background color.</span></button>
         </div>
@@ -1107,9 +1072,6 @@ for i in range(4):
   var stopBtn = document.getElementById("stopBtn");
   var pauseBtn = document.getElementById("pauseBtn");
   var stepBtn = document.getElementById("stepBtn");
-  var playSpeed = document.getElementById("playSpeed");
-  var playSpeedValue = document.getElementById("playSpeedValue");
-  var playbackSpeedGroup = document.getElementById("playbackSpeedGroup");
   var playbackLineStatus = document.getElementById("playbackLineStatus");
   var worldLineStatus = document.getElementById("worldLineStatus");
   document.getElementById("editCodeBtn").addEventListener("click",function(){
@@ -1866,8 +1828,6 @@ for i in range(4):
         next=clamp(next,0,10);
         state.speed=next;
         playback.speed=next;
-        playSpeed.value=next;
-        updateSpeedLabel();
         schedulePlayback();
         return none();
       });
@@ -1952,7 +1912,7 @@ for i in range(4):
   var playback = {
     active:false, paused:false, stepOnce:false,
     pending:null, timer:null,
-    speed:Number(playSpeed.value)||6,
+    speed:6,
     marker:null
   };
 
@@ -1971,25 +1931,6 @@ for i in range(4):
     var codeDelay=230*Math.pow(18/230,t);
     return Math.max(8,Math.min(1200,Math.round(codeDelay)));
   }
-  function updateSpeedLabel(){
-    var value=currentSpeed();
-    playSpeedValue.textContent=Number.isInteger(value)?String(value):value.toFixed(1);
-    playSpeed.title=value===0
-      ? "Speed 0 — essentially instant"
-      : "Live speed "+playSpeedValue.textContent+" / 10 — drag while running";
-  }
-
-  playSpeed.addEventListener("input",function(){
-    playback.speed=Number(this.value);
-    updateSpeedLabel();
-
-    // The same playback.speed value drives every animation frame and the
-    // delay before the next Python statement.
-    schedulePlayback();
-  });
-
-  updateSpeedLabel();
-
   function showExecutingLine(line){
     if(playback.marker!==null){
       try{editor.removeLineClass(playback.marker,"background","turtle-current-line");}catch(e){}
@@ -2012,7 +1953,6 @@ for i in range(4):
     pauseBtn.disabled=!playback.active;
     stepBtn.disabled=!playback.active||!playback.paused||!playback.pending;
     pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
-    playbackSpeedGroup.classList.toggle("is-live",playback.active);
   }
   function schedulePlayback(){
     if(playback.timer!==null){
@@ -2094,8 +2034,6 @@ for i in range(4):
     playback.stepOnce=false;
     playback.pending=null;
     playback.speed=6;
-    playSpeed.value=6;
-    updateSpeedLabel();
     showExecutingLine(null);
     syncPlaybackButtons();
     if(window.innerWidth<=560){
