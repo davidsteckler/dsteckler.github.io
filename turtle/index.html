@@ -202,9 +202,30 @@
     .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
     .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
     .playback-speed-group{padding:0 3px}
-    .playback-speed-group input[type="range"]{width:115px}
+    .playback-speed-group label{display:flex;align-items:center;gap:6px}
+    .playback-speed-group input[type="range"]{width:130px}
     .speed-endpoint{font:650 .65rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--soft)}
-    #playSpeedValue{min-width:47px}
+    #playSpeedValue{
+      min-width:32px;
+      border:1px solid var(--rule);
+      border-radius:7px;
+      background:#fffdf8;
+      padding:4px 6px;
+      text-align:center;
+      color:var(--teal-dark);
+      font-weight:800;
+    }
+    .live-speed-badge{
+      display:none;
+      border-radius:999px;
+      padding:3px 5px;
+      background:#dff1eb;
+      color:#176b58;
+      font:800 .53rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.04em;
+    }
+    .playback-speed-group.is-live .live-speed-badge{display:inline-block}
+    .playback-speed-group.is-live input[type="range"]{accent-color:#16826f}
     #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
     .CodeMirror-selected{background:#374243 !important}
     .cm-s-default .cm-keyword{color:#d7a7df}
@@ -744,12 +765,12 @@
       <input id="mobileEditorSize" type="range" min="220" max="650" value="355" step="10">
       <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
     </div>
-    <div class="layout-group playback-speed-group">
-      <label for="playSpeed">Playback speed</label>
-      <span class="speed-endpoint">Slow</span>
-      <input id="playSpeed" type="range" min="1" max="10" value="6" step="0.5" aria-label="Playback speed">
-      <span class="speed-endpoint">Fast</span>
-      <output id="playSpeedValue" for="playSpeed">6 / 10</output>
+    <div class="layout-group playback-speed-group" id="playbackSpeedGroup">
+      <label for="playSpeed">Live speed <span class="live-speed-badge" id="liveSpeedBadge">LIVE</span></label>
+      <span class="speed-endpoint">1</span>
+      <input id="playSpeed" type="range" min="1" max="10" value="6" step="0.5" aria-label="Live playback speed from 1 to 10">
+      <span class="speed-endpoint">10</span>
+      <output id="playSpeedValue" for="playSpeed">6</output>
     </div>
     <div class="layout-group layout-output">
       <label for="outputSize">Text output</label>
@@ -1088,6 +1109,7 @@ for i in range(4):
   var stepBtn = document.getElementById("stepBtn");
   var playSpeed = document.getElementById("playSpeed");
   var playSpeedValue = document.getElementById("playSpeedValue");
+  var playbackSpeedGroup = document.getElementById("playbackSpeedGroup");
   var playbackLineStatus = document.getElementById("playbackLineStatus");
   var worldLineStatus = document.getElementById("worldLineStatus");
   document.getElementById("editCodeBtn").addEventListener("click",function(){
@@ -1956,12 +1978,17 @@ for i in range(4):
     return Math.max(8,Math.min(1200,Math.round(codeDelay*factor)));
   }
   function updateSpeedLabel(){
-    playSpeedValue.textContent=playback.uiSpeed+" / 10";
-    playSpeed.title="About "+lineDelay()+" ms per Python statement";
+    var value=Number(playback.uiSpeed);
+    playSpeedValue.textContent=Number.isInteger(value)?String(value):value.toFixed(1);
+    playSpeed.title="Live speed "+playSpeedValue.textContent+" / 10 — change this while the program is running";
   }
   playSpeed.addEventListener("input",function(){
     playback.uiSpeed=Number(this.value);
     updateSpeedLabel();
+
+    // Active turtle motion reads playback.uiSpeed every animation frame,
+    // so dragging this control changes the current movement immediately.
+    // Reschedule a pending Python statement as well.
     schedulePlayback();
   });
   updateSpeedLabel();
@@ -1988,6 +2015,7 @@ for i in range(4):
     pauseBtn.disabled=!playback.active;
     stepBtn.disabled=!playback.active||!playback.paused||!playback.pending;
     pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
+    playbackSpeedGroup.classList.toggle("is-live",playback.active);
   }
   function schedulePlayback(){
     if(playback.timer!==null){
