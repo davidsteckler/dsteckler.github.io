@@ -340,7 +340,7 @@
     .command-library{
       min-height:0;
       display:grid;
-      grid-template-rows:auto auto 1fr;
+      grid-template-rows:auto auto auto 1fr;
       background:var(--surface);
     }
     .command-library .panel-head{padding-right:8px}
@@ -365,6 +365,47 @@
       font-size:.78rem;
     }
     .command-search:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,107,115,.08)}
+    .library-nav{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:4px;
+      padding:8px 8px 7px;
+      border-bottom:1px solid var(--rule);
+      background:#f6f2e9;
+    }
+    .library-tab{
+      min-width:0;
+      border:1px solid transparent;
+      border-radius:8px;
+      background:transparent;
+      color:var(--soft);
+      padding:7px 4px;
+      font-size:.66rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .library-tab:hover{background:white;color:var(--ink)}
+    .library-tab.active{
+      background:var(--teal-light);
+      border-color:#bfdad6;
+      color:var(--teal-dark);
+    }
+    .library-section{display:none}
+    .library-section.active{display:block}
+    .library-section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:8px;
+      margin:8px 2px 10px;
+      padding-bottom:8px;
+      border-bottom:1px solid var(--rule);
+    }
+    .library-section-head strong{font-size:.8rem;color:var(--ink)}
+    .library-section-head span{font-size:.66rem;color:var(--soft)}
+    .library-searching .library-section{display:block}
+    .library-searching .library-section-head{display:none}
+
     .command-scroll{
       min-height:0;
       overflow:auto;
@@ -544,7 +585,7 @@
     }
     .resize-divider:hover:before,.resize-divider:focus-visible:before,.resize-divider.dragging:before{background:var(--teal)}
     body.is-resizing,body.is-resizing *{cursor:col-resize!important;user-select:none!important}
-    .command-library{grid-template-rows:47px auto minmax(0,1fr)}
+    .command-library{grid-template-rows:47px auto auto minmax(0,1fr)}
     .command-scroll{overscroll-behavior:contain}
     .recipe-panel{border:1px solid #cfdbd8;border-radius:10px;background:#f3f8f6;margin:4px 0 12px}
     .recipe-panel summary{cursor:pointer;font-size:.74rem;font-weight:800;color:var(--teal);padding:11px 10px}
@@ -706,7 +747,7 @@
     <div class="layout-group playback-speed-group">
       <label for="playSpeed">Playback speed</label>
       <span class="speed-endpoint">Slow</span>
-      <input id="playSpeed" type="range" min="1" max="10" value="6" step="1" aria-label="Execution speed in lines per second">
+      <input id="playSpeed" type="range" min="1" max="10" value="6" step="0.5" aria-label="Playback speed">
       <span class="speed-endpoint">Fast</span>
       <output id="playSpeedValue" for="playSpeed">6 / 10</output>
     </div>
@@ -799,10 +840,19 @@ for i in range(4):
       <div class="command-search-wrap">
         <input class="command-search" id="commandSearch" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false">
       </div>
+      <div class="library-nav" id="libraryNav" role="tablist" aria-label="Reference sections">
+        <button class="library-tab active" type="button" data-library-tab="turtle">Turtle</button>
+        <button class="library-tab" type="button" data-library-tab="python">Python</button>
+        <button class="library-tab" type="button" data-library-tab="strings">Strings</button>
+        <button class="library-tab" type="button" data-library-tab="lists">Lists</button>
+        <button class="library-tab" type="button" data-library-tab="extras">Extras</button>
+      </div>
       <div class="command-scroll" id="commandScroll">
-        <div class="command-tip"><strong>Python Turtle reference.</strong> Click an item to insert a runnable example at the cursor. Search by command or purpose.</div>
+        <div class="command-tip"><strong>Python Turtle reference.</strong> Pick a section, or search everything. Click an item to insert a runnable example.</div>
 
-        <details class="recipe-panel" open>
+        <section class="library-section active" data-library-section="turtle">
+          <div class="library-section-head"><strong>Turtle</strong><span>movement · drawing · interaction</span></div>
+<details class="recipe-panel" open>
           <summary>Python Turtle commands <span>core syntax</span></summary>
           <div class="recipe-body">
             <button class="recipe-button" type="button" data-recipe="turtleSquare"><strong>Square</strong><code>for i in range(4):</code></button>
@@ -812,7 +862,8 @@ for i in range(4):
           </div>
         </details>
 
-        <div class="command-category" data-category="Python Turtle Movement">
+        
+<div class="command-category" data-category="Python Turtle Movement">
           <div class="command-category-title">Turtle · Movement & Position</div>
           <button class="command-item" data-search="forward movement python" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Turtle forward by a distance.</span></button>
           <button class="command-item" data-search="backward movement python" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Turtle backward by a distance.</span></button>
@@ -822,31 +873,35 @@ for i in range(4):
           <button class="command-item" data-search="sety y coordinate python" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only the y-coordinate.</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle Rotation">
+        
+<div class="command-category" data-category="Python Turtle Rotation">
           <div class="command-category-title">Turtle · Rotation</div>
           <button class="command-item" data-search="left turn degrees python" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn Turtle left by an angle.</span></button>
           <button class="command-item" data-search="right turn degrees python" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn Turtle right by an angle.</span></button>
           <button class="command-item" data-search="setheading seth heading direction python" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Face an absolute direction.</span><span class="command-alias">alias: seth()</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle Circles">
+        
+<div class="command-category" data-category="Python Turtle Circles">
           <div class="command-category-title">Turtle · Circles</div>
           <button class="command-item" data-search="circle radius python" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a full circle with radius 50.</span></button>
           <button class="command-item" data-search="circle radius extent semicircle arc python" data-insert="circle(50, 180)"><span class="command-syntax">circle(50, 180)</span><span class="command-desc">Draw part of a circle using an extent.</span></button>
           <button class="command-item" data-search="circle radius extent steps polygon triangle square python" data-insert="circle(50, 360, 4)"><span class="command-syntax">circle(50, 360, 4)</span><span class="command-desc">Use steps to make a polygon. Example: 4 = square.</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle Pen">
+        
+<div class="command-category" data-category="Python Turtle Pen">
           <div class="command-category-title">Turtle · Pen, Speed & Color</div>
           <button class="command-item" data-search="penup lift no draw python" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Move without drawing.</span></button>
           <button class="command-item" data-search="pendown draw python" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down. Turtle starts this way.</span></button>
           <button class="command-item" data-search="pensize line width thickness python" data-insert="pensize(5)"><span class="command-syntax">pensize(5)</span><span class="command-desc">Set the trail thickness.</span></button>
-          <button class="command-item" data-search="speed animation 0 1 10 python" data-insert="speed(6)"><span class="command-syntax">speed(6)</span><span class="command-desc">1 = slowest, 10 = fast, 0 = essentially instant.</span></button>
+          <button class="command-item" data-search="speed animation 0 1 10 python" data-insert="speed(6.5)"><span class="command-syntax">speed(6.5)</span><span class="command-desc">Use any value from 1–10, including decimals. 0 is essentially instant.</span></button>
           <button class="command-item" data-search="color colour trail turtle hex python" data-insert='color("blue")'><span class="command-syntax">color("blue")</span><span class="command-desc">Change Turtle and the trail color. Hex colors also work.</span></button>
           <button class="command-item" data-search="bgcolor background color canvas python" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the canvas background color.</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle Fill Shape Clear">
+        
+<div class="command-category" data-category="Python Turtle Fill Shape Clear">
           <div class="command-category-title">Turtle · Fill, Cursor & Clear</div>
           <button class="command-item" data-search="begin_fill fill start python" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
           <button class="command-item" data-search="end_fill fill finish python" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape drawn since begin_fill().</span></button>
@@ -854,7 +909,8 @@ for i in range(4):
           <button class="command-item" data-search="clear erase screen python" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase all markings without changing Turtle’s position.</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle Text Interaction">
+        
+<div class="command-category" data-category="Python Turtle Text Interaction">
           <div class="command-category-title">Turtle · Text & Interaction</div>
           <button class="command-item" data-search="write text canvas python" data-insert='write("Hello World!")'><span class="command-syntax">write("Hello World!")</span><span class="command-desc">Write text on the canvas.</span></button>
           <button class="command-item" data-search="write font Arial size python" data-insert='write("Hi", font=("Arial", 20))'><span class="command-syntax">write("Hi", font=("Arial", 20))</span><span class="command-desc">Write using a chosen font and size.</span></button>
@@ -863,7 +919,12 @@ for i in range(4):
           <button class="command-item" data-search="getscreen canvas onclick click python" data-insert="def move_to_click(x, y):&#10;    penup()&#10;    goto(x, y)&#10;    pendown()&#10;&#10;canvas = getscreen()&#10;canvas.onclick(move_to_click)"><span class="command-syntax">canvas = getscreen()</span><span class="command-desc">Respond anywhere on the canvas. The inserted example defines move_to_click() first.</span></button>
         </div>
 
-        <details class="recipe-panel">
+        
+        </section>
+
+        <section class="library-section" data-library-section="python">
+          <div class="library-section-head"><strong>Python</strong><span>language · built-ins</span></div>
+<details class="recipe-panel">
           <summary>Python language <span>loops · functions · input</span></summary>
           <div class="recipe-body">
             <button class="recipe-button" type="button" data-recipe="forLoop"><strong>for + range</strong><code>for i in range(4):</code></button>
@@ -876,7 +937,8 @@ for i in range(4):
           </div>
         </details>
 
-        <div class="command-category" data-category="Python Turtle Python Builtins">
+        
+<div class="command-category" data-category="Python Turtle Python Builtins">
           <div class="command-category-title">Python · Built-ins</div>
           <button class="command-item" data-search="range for loop python python" data-insert="range(4)"><span class="command-syntax">range(4)</span><span class="command-desc">Numbers 0 through 3 for a loop.</span></button>
           <button class="command-item" data-search="range start stop step python python" data-insert="range(25, 76, 25)"><span class="command-syntax">range(25, 76, 25)</span><span class="command-desc">range(start, stop, step).</span></button>
@@ -889,7 +951,12 @@ for i in range(4):
           <button class="command-item" data-search="len list length python python" data-insert="my_list = [1, 2, 3]&#10;print(len(my_list))"><span class="command-syntax">len(my_list)</span><span class="command-desc">Get the number of items in a list.</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle String Methods">
+        
+        </section>
+
+        <section class="library-section" data-library-section="strings">
+          <div class="library-section-head"><strong>Strings</strong><span>text methods</span></div>
+<div class="command-category" data-category="Python Turtle String Methods">
           <div class="command-category-title">Python · String Methods</div>
           <button class="command-item" data-search="capitalize string python" data-insert="text = &quot;turtle&quot;&#10;print(text.capitalize())"><span class="command-syntax">text.capitalize()</span><span class="command-desc">Capitalize the first character.</span></button>
           <button class="command-item" data-search="upper string python" data-insert="text = &quot;Turtle&quot;&#10;print(text.upper())"><span class="command-syntax">text.upper()</span><span class="command-desc">Make letters uppercase.</span></button>
@@ -908,7 +975,12 @@ for i in range(4):
           <button class="command-item" data-search="format string placeholders python" data-insert='message.format(value)'><span class="command-syntax">message.format(value)</span><span class="command-desc">Insert values into {} placeholders.</span></button>
         </div>
 
-        <div class="command-category" data-category="Python Turtle List Methods">
+        
+        </section>
+
+        <section class="library-section" data-library-section="lists">
+          <div class="library-section-head"><strong>Lists</strong><span>list methods</span></div>
+<div class="command-category" data-category="Python Turtle List Methods">
           <div class="command-category-title">Python · Lists</div>
           <button class="command-item" data-search="list create python python" data-insert='my_list = ["a", "b", "c"]'><span class="command-syntax">my_list = ["a", "b", "c"]</span><span class="command-desc">Create a list.</span></button>
           <button class="command-item" data-search="list index python python" data-insert="my_list = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]&#10;print(my_list[0])"><span class="command-syntax">my_list[0]</span><span class="command-desc">Access an item by index.</span></button>
@@ -923,7 +995,12 @@ for i in range(4):
           <button class="command-item" data-search="reverse list python python" data-insert="my_list = [1, 2, 3]&#10;my_list.reverse()&#10;print(my_list)"><span class="command-syntax">my_list.reverse()</span><span class="command-desc">Reverse a list in place.</span></button>
         </div>
 
-        <details class="recipe-panel">
+        
+        </section>
+
+        <section class="library-section" data-library-section="extras">
+          <div class="library-section-head"><strong>Extras</strong><span>additional turtle helpers</span></div>
+<details class="recipe-panel">
           <summary>Sandbox extras <span>work here too</span></summary>
           <div class="recipe-body extra-reference">
             <button class="command-item" data-search="home extra turtle" data-insert="home()"><span class="command-syntax">home()</span><span class="command-desc">Return to (0, 0) and face right.</span></button>
@@ -938,6 +1015,9 @@ for i in range(4):
             <button class="command-item" data-search="reset extra turtle" data-insert="reset()"><span class="command-syntax">reset()</span><span class="command-desc">Reset drawing and turtle state.</span></button>
           </div>
         </details>
+
+
+        </section>
 
         <div class="command-empty" id="commandEmpty">No reference items match that search.</div>
       </div>
@@ -1366,31 +1446,25 @@ for i in range(4):
       var amount=Math.abs(magnitude)||0;
       var speed=clamp(Number(playback.codeSpeed)||0,0,10);
 
-      // Python Turtle convention: speed(1) is slowest, speed(10) is fast,
-      // and speed(0) is effectively instant.
-      if(speed===0) return 8;
+      // 0 is essentially instant. 1–10 use a continuous curve, so decimal
+      // speeds such as 3.5 or 8.25 behave naturally between whole numbers.
+      if(speed===0) return 6;
 
       var base=kind==="turn"
-        ? Math.max(120,amount*3.5)
-        : Math.max(140,amount*4.5);
+        ? Math.max(100,amount*3.0)
+        : Math.max(115,amount*4.0);
 
-      var turtleFactors={
-        1:5.0,
-        2:4.0,
-        3:3.0,
-        4:2.2,
-        5:1.5,
-        6:1.0,
-        7:.72,
-        8:.50,
-        9:.34,
-        10:.22
-      };
+      // speed(1) is deliberately watchable without dragging; speed(10)
+      // is genuinely quick. Exponential interpolation keeps decimals smooth.
+      var slowFactor=2.65;
+      var fastFactor=.105;
+      var t=(speed-1)/9;
+      var turtleFactor=slowFactor*Math.pow(fastFactor/slowFactor,t);
 
-      // The page slider is a second, user-controlled playback multiplier.
-      // At its default value of 6 it leaves Python's speed() unchanged.
-      var sliderFactor=Math.pow(1.32,6-playback.uiSpeed);
-      return Math.max(55,Math.min(12000,base*turtleFactors[speed]*sliderFactor));
+      // The page playback slider is an additional fine-control multiplier.
+      // 6 is neutral; it accepts half steps.
+      var sliderFactor=Math.pow(1.26,6-playback.uiSpeed);
+      return Math.max(38,Math.min(8000,base*turtleFactor*sliderFactor));
     }
 
     function animate(kind,amount,update,label){
@@ -1774,7 +1848,7 @@ for i in range(4):
       fn1("speed",function(v){
         var next=Number(v);
         if(!Number.isFinite(next)) throw new Error("speed() needs a number from 0 to 10");
-        next=Math.round(clamp(next,0,10));
+        next=clamp(next,0,10);
         state.speed=next;
         if(playback.active){
           playback.codeSpeed=next;
@@ -1873,12 +1947,13 @@ for i in range(4):
   function lineDelay(){
     var speed=clamp(Number(playback.codeSpeed)||0,0,10);
     if(speed===0) return 0;
-    var codeDelay={
-      1:520,2:430,3:350,4:285,5:225,
-      6:175,7:135,8:100,9:72,10:48
-    }[speed];
-    var factor=Math.pow(1.32,6-playback.uiSpeed);
-    return Math.max(15,Math.min(2000,Math.round(codeDelay*factor)));
+
+    // Continuous 1–10 curve: about 230 ms at 1 and 18 ms at 10 before
+    // the playback-slider multiplier. Decimal speed() values interpolate.
+    var t=(speed-1)/9;
+    var codeDelay=230*Math.pow(18/230,t);
+    var factor=Math.pow(1.26,6-playback.uiSpeed);
+    return Math.max(8,Math.min(1200,Math.round(codeDelay*factor)));
   }
   function updateSpeedLabel(){
     playSpeedValue.textContent=playback.uiSpeed+" / 10";
@@ -2183,26 +2258,80 @@ for i in range(4):
     });
   });
 
-  function filterCommands(){
-    var query = (commandSearch.value || "").trim().toLowerCase();
-    var visibleCount = 0;
+  var activeLibrarySection="turtle";
+  var libraryTabs=Array.prototype.slice.call(document.querySelectorAll(".library-tab"));
+  var librarySections=Array.prototype.slice.call(document.querySelectorAll(".library-section"));
 
-    document.querySelectorAll(".command-category").forEach(function(category){
-      var categoryVisible = 0;
-      category.querySelectorAll(".command-item").forEach(function(item){
-        var haystack = (
-          (item.getAttribute("data-search") || "") + " " +
+  function selectLibrarySection(name){
+    activeLibrarySection=name;
+    libraryTabs.forEach(function(tab){
+      var selected=tab.getAttribute("data-library-tab")===name;
+      tab.classList.toggle("active",selected);
+      tab.setAttribute("aria-selected",selected?"true":"false");
+    });
+    filterCommands();
+    var scroll=document.getElementById("commandScroll");
+    if(scroll)scroll.scrollTop=0;
+  }
+
+  libraryTabs.forEach(function(tab){
+    tab.addEventListener("click",function(){
+      commandSearch.value="";
+      selectLibrarySection(tab.getAttribute("data-library-tab"));
+    });
+  });
+
+  function filterCommands(){
+    var query=(commandSearch.value||"").trim().toLowerCase();
+    var searching=!!query;
+    var visibleCount=0;
+    var library=document.getElementById("commandLibrary");
+    library.classList.toggle("library-searching",searching);
+
+    librarySections.forEach(function(section){
+      var sectionName=section.getAttribute("data-library-section");
+      var sectionMatches=0;
+
+      section.querySelectorAll(".command-item,.recipe-button").forEach(function(item){
+        var haystack=(
+          (item.getAttribute("data-search")||"")+" "+
+          (item.getAttribute("data-insert")||"")+" "+
           item.textContent
         ).toLowerCase();
-        var show = !query || haystack.indexOf(query) !== -1;
-        item.style.display = show ? "" : "none";
-        if(show){ categoryVisible += 1; visibleCount += 1; }
+        var show=!searching||haystack.indexOf(query)!==-1;
+        item.style.display=show?"":"none";
+        if(show)sectionMatches++;
       });
-      category.style.display = categoryVisible ? "" : "none";
+
+      section.querySelectorAll(".command-category").forEach(function(category){
+        var any=Array.prototype.some.call(
+          category.querySelectorAll(".command-item"),
+          function(item){return item.style.display!=="none";}
+        );
+        category.style.display=any?"":"none";
+      });
+
+      section.querySelectorAll(".recipe-panel").forEach(function(panel){
+        var any=Array.prototype.some.call(
+          panel.querySelectorAll(".recipe-button,.command-item"),
+          function(item){return item.style.display!=="none";}
+        );
+        panel.style.display=any?"":"none";
+        if(searching&&any)panel.open=true;
+      });
+
+      if(searching){
+        section.style.display=sectionMatches?"block":"none";
+        visibleCount+=sectionMatches;
+      }else{
+        var active=sectionName===activeLibrarySection;
+        section.style.display=active?"block":"none";
+        if(active)visibleCount=sectionMatches;
+      }
     });
 
-    commandEmpty.style.display = visibleCount ? "none" : "block";
-    commandsCount.textContent = visibleCount + (visibleCount === 1 ? " item" : " items");
+    commandEmpty.style.display=visibleCount?"none":"block";
+    commandsCount.textContent=visibleCount+(visibleCount===1?" item":" items");
   }
 
   if(commandSearch) commandSearch.addEventListener("input", filterCommands);
