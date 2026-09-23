@@ -519,9 +519,17 @@
     .clear-run-btn{height:31px;padding:0 10px;font-size:.72rem;color:var(--teal);white-space:nowrap}
     .world-panel{grid-template-rows:47px minmax(185px,1fr) auto var(--output-height,150px)}
     .world-stage{
-      min-height:0;display:flex;justify-content:center;align-items:flex-start;
+      position:relative;min-height:0;display:flex;justify-content:center;align-items:flex-start;
       padding:12px;overflow:auto;
     }
+    .motion-status{
+      position:absolute;left:12px;bottom:9px;z-index:5;
+      border-radius:6px;padding:4px 7px;
+      background:rgba(234,246,241,.95);color:var(--teal);
+      font:700 .67rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+      pointer-events:none;
+    }
+    .motion-status:empty{display:none}
     .world-scale-box{position:relative;flex:none;width:404px;height:404px}
     .world-wrap{transform-origin:top left}
     .world-info{padding:7px 12px;gap:8px}
@@ -597,6 +605,7 @@
       .code-panel{height:var(--mobile-editor-height,355px);min-height:220px;flex:none;grid-template-rows:47px minmax(0,1fr)}
       .world-panel{height:auto;min-height:0;flex:none;grid-template-rows:47px auto auto var(--output-height,150px)}
       .world-stage{min-height:0;padding:10px;overflow:hidden}
+      .motion-status{bottom:7px;left:9px;font-size:.64rem}
       .world-scale-box{flex:none}
       .command-library{height:100dvh}
       .panel{border-radius:13px}
@@ -746,6 +755,7 @@ for i in range(4):
       </div>
 
       <div class="world-stage" id="worldStage">
+        <div class="motion-status" id="motionStatus" aria-live="polite"></div>
         <div class="world-scale-box" id="worldScaleBox">
           <div class="world-wrap" id="worldWrap">
           <div class="grid" id="grid"></div>
@@ -1207,44 +1217,171 @@ for i in range(4):
       drawSpriteOn(sctx,false);
     }
 
+    var motion = null;
+    var motionStatus = document.getElementById("motionStatus");
+
+    function durationMs(kind, magnitude){
+      var amount = Math.abs(magnitude) || 0;
+      var base = kind === "turn"
+        ? Math.max(150, amount*4.0)
+        : Math.max(155, amount*5.0);
+      var turtleFactor = playback.codeSpeed === 0 ? .35 : 6 / Math.max(1,playback.codeSpeed);
+      var sliderFactor = Math.pow(1.45,6-playback.uiSpeed);
+      // Even at the fastest setting, a movement has visible frames.
+      return Math.max(105,Math.min(12000,base*turtleFactor*sliderFactor));
+    }
+
+    function animate(kind,amount,update,label){
+      if(!Number.isFinite(amount) || amount === 0){
+        update(1);
+        return Promise.resolve(none());
+      }
+      if(!playback.active){
+        update(1);
+        return Promise.resolve(none());
+      }
+      return new Promise(function(resolve,reject){
+        var operation = {
+          raf:null, lastTime:null, fraction:0, finished:false,
+          resolve:resolve, reject:reject,
+          start:null, cancel:null
+        };
+        motion=operation;
+        motionStatus.textContent=label||"Moving Tracy";
+        function finish(){
+          operation.finished=true;
+          if(operation.raf!==null)cancelAnimationFrame(operation.raf);
+          if(motion===operation)motion=null;
+          motionStatus.textContent="";
+          resolve(none());
+        }
+        function frame(now){
+          operation.raf=null;
+          if(operation.finished||motion!==operation)return;
+          if(!playback.active){
+            operation.cancel();
+            return;
+          }
+          if(playback.paused&&!playback.stepOnce){
+            operation.lastTime=null;
+            return;
+          }
+          if(operation.lastTime===null)operation.lastTime=now;
+          var dt=Math.min(60,Math.max(0,now-operation.lastTime));
+          operation.lastTime=now;
+          operation.fraction=Math.min(1,operation.fraction+dt/durationMs(kind,amount));
+          update(operation.fraction);
+          if(operation.fraction>=1)finish();
+          else operation.raf=requestAnimationFrame(frame);
+        }
+        operation.start=function(){
+          if(operation.finished||operation.raf!==null)return;
+          if(playback.paused&&!playback.stepOnce)return;
+          operation.lastTime=null;
+          operation.raf=requestAnimationFrame(frame);
+        };
+        operation.cancel=function(){
+          if(operation.finished)return;
+          operation.finished=true;
+          if(operation.raf!==null)cancelAnimationFrame(operation.raf);
+          if(motion===operation)motion=null;
+          motionStatus.textContent="";
+          reject(new Error("Playback stopped"));
+        };
+        operation.start();
+      });
+    }
+
     function moveTo(x,y){
-      x = Number(x); y = Number(y);
-      if(!Number.isFinite(x) || !Number.isFinite(y)) return;
-      var ox=state.x, oy=state.y;
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y))return;
+      var ox=state.x,oy=state.y;
       drawSegment(ox,oy,x,y);
-      state.x=x; state.y=y;
+      state.x=x;state.y=y;
       recordFillPoint();
       refreshSprite();
     }
 
-    function forward(distance){
-      distance=Number(distance)||0;
-      var a=rad(state.heading);
-      moveTo(state.x + Math.cos(a)*distance, state.y + Math.sin(a)*distance);
+    function animateMoveTo(x,y,label){
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y))
+        return Promise.reject(new Error("Turtle coordinates must be numbers"));
+      var ox=state.x,oy=state.y;
+      var dx=x-ox,dy=y-oy;
+      return animate("move",Math.hypot(dx,dy),function(t){
+        moveTo(ox+dx*t,oy+dy*t);
+      },label||"Moving "+Math.round(Math.hypot(dx,dy))+" px");
     }
 
-    function circle(radius,extent){
-      radius=Number(radius)||0;
-      extent=(extent===undefined)?360:Number(extent);
-      if(!radius || !extent){ refreshSprite(); return; }
+    function animateForward(distance){
+      var d=Number(distance);
+      if(!Number.isFinite(d))return Promise.reject(new Error("Distance must be a number"));
+      var a=rad(state.heading);
+      return animateMoveTo(
+        state.x+Math.cos(a)*d,
+        state.y+Math.sin(a)*d,
+        (d<0?"Backward ":"Forward ")+Math.abs(d)+" px"
+      );
+    }
 
-      var startHeading=rad(state.heading);
-      var cx=state.x - radius*Math.sin(startHeading);
-      var cy=state.y + radius*Math.cos(startHeading);
+    function animateTurn(degrees){
+      var angle=Number(degrees);
+      if(!Number.isFinite(angle))return Promise.reject(new Error("Angle must be a number"));
+      var start=state.heading;
+      return animate("turn",angle,function(t){
+        state.heading=start+angle*t;
+        refreshSprite();
+      },(angle<0?"Turning right ":"Turning left ")+Math.abs(angle)+"°");
+    }
+
+    function animateHeading(heading){
+      var target=Number(heading);
+      if(!Number.isFinite(target))return Promise.reject(new Error("Heading must be a number"));
+      var delta=((target-state.heading)%360+540)%360-180;
+      return animateTurn(delta).then(function(){
+        state.heading=target;
+        refreshSprite();
+        return none();
+      });
+    }
+
+    function animateCircle(radius,extent){
+      var r=Number(radius);
+      var angle=extent===undefined?360:Number(extent);
+      if(!Number.isFinite(r)||!Number.isFinite(angle))
+        return Promise.reject(new Error("Circle radius and extent must be numbers"));
+      if(r===0||angle===0)return Promise.resolve(none());
+      var heading=state.heading;
+      var base=rad(heading);
+      var cx=state.x-r*Math.sin(base);
+      var cy=state.y+r*Math.cos(base);
       var startAngle=Math.atan2(state.y-cy,state.x-cx);
-      var signedExtent=rad(extent) * (radius>=0 ? 1 : -1);
-      var steps=Math.max(8,Math.ceil(Math.abs(extent)/6));
-      var rr=Math.abs(radius);
+      var signedExtent=rad(angle)*(r>=0?1:-1);
+      var arcLength=Math.abs(r*rad(angle));
+      return animate("move",arcLength,function(t){
+        var a=startAngle+signedExtent*t;
+        moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
+        state.heading=heading+angle*(r>=0?1:-1)*t;
+        refreshSprite();
+      },"Drawing arc "+Math.abs(angle)+"°");
+    }
 
-      for(var i=1;i<=steps;i++){
-        var a=startAngle + signedExtent*(i/steps);
-        moveTo(cx + rr*Math.cos(a), cy + rr*Math.sin(a));
-      }
-      state.heading=(state.heading + extent*(radius>=0?1:-1))%360;
-      refreshSprite();
+    function syncAnimationPause(){
+      if(!motion)return;
+      if(playback.paused&&!playback.stepOnce){
+        if(motion.raf!==null)cancelAnimationFrame(motion.raf);
+        motion.raf=null;
+        motion.lastTime=null;
+      }else motion.start();
+    }
+
+    function cancelAnimation(){
+      if(motion)motion.cancel();
+      motionStatus.textContent="";
     }
 
     function reset(){
+      motionStatus.textContent="";
       ctx.clearRect(0,0,400,400);
       sctx.clearRect(0,0,400,400);
       state.x=0; state.y=0; state.heading=0;
@@ -1324,39 +1461,51 @@ for i in range(4):
 
     function installBuiltins(){
       function fn0(name,cb){
-        Sk.builtins[name]=new Sk.builtin.func(function(){ cb(); return none(); });
+        Sk.builtins[name]=new Sk.builtin.func(function(){cb();return none();});
       }
       function fn1(name,cb){
-        Sk.builtins[name]=new Sk.builtin.func(function(a){ return cb(js(a)); });
+        Sk.builtins[name]=new Sk.builtin.func(function(a){return cb(js(a));});
       }
       function fn2(name,cb){
-        Sk.builtins[name]=new Sk.builtin.func(function(a,b){ return cb(js(a),js(b)); });
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){return cb(js(a),js(b));});
       }
-
-      fn1("forward",function(d){ forward(d); return none(); });
+      function anim1(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a){
+          return Sk.misceval.promiseToSuspension(cb(js(a)));
+        });
+      }
+      function anim2(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){
+          return Sk.misceval.promiseToSuspension(cb(js(a),js(b)));
+        });
+      }
+      anim1("forward",animateForward);
       Sk.builtins.fd=Sk.builtins.forward;
-      fn1("backward",function(d){ forward(-Number(d||0)); return none(); });
-      Sk.builtins.back=Sk.builtins.backward; Sk.builtins.bk=Sk.builtins.backward;
-
-      fn1("left",function(a){ state.heading=(state.heading+Number(a||0))%360; refreshSprite(); return none(); });
+      anim1("backward",function(d){return animateForward(-Number(d));});
+      Sk.builtins.back=Sk.builtins.backward;Sk.builtins.bk=Sk.builtins.backward;
+      anim1("left",animateTurn);
       Sk.builtins.lt=Sk.builtins.left;
-      fn1("right",function(a){ state.heading=(state.heading-Number(a||0))%360; refreshSprite(); return none(); });
+      anim1("right",function(a){return animateTurn(-Number(a));});
       Sk.builtins.rt=Sk.builtins.right;
 
-      fn2("goto",function(x,y){ moveTo(x,y); return none(); });
-      // Skulpt rewrites goto as a reserved JavaScript word while compiling.
+      anim2("goto",function(x,y){return animateMoveTo(x,y);});
+      // Skulpt rewrites the JavaScript-reserved identifier goto.
       Sk.builtins["goto_$rw$"]=Sk.builtins.goto;
-      Sk.builtins.setpos=Sk.builtins.goto; Sk.builtins.setposition=Sk.builtins.goto;
-      fn1("setx",function(x){ moveTo(x,state.y); return none(); });
-      fn1("sety",function(y){ moveTo(state.x,y); return none(); });
+      Sk.builtins.setpos=Sk.builtins.goto;Sk.builtins.setposition=Sk.builtins.goto;
+      anim1("setx",function(x){return animateMoveTo(x,state.y);});
+      anim1("sety",function(y){return animateMoveTo(state.x,y);});
+      Sk.builtins.home=new Sk.builtin.func(function(){
+        return Sk.misceval.promiseToSuspension(
+          animateMoveTo(0,0,"Returning home").then(function(){return animateHeading(0);})
+        );
+      });
 
-      fn0("home",function(){ moveTo(0,0); state.heading=0; refreshSprite(); });
-      fn0("penup",function(){ state.penDown=false; });
-      Sk.builtins.up=Sk.builtins.penup; Sk.builtins.pu=Sk.builtins.penup;
-      fn0("pendown",function(){ state.penDown=true; });
-      Sk.builtins.down=Sk.builtins.pendown; Sk.builtins.pd=Sk.builtins.pendown;
+      fn0("penup",function(){state.penDown=false;});
+      Sk.builtins.up=Sk.builtins.penup;Sk.builtins.pu=Sk.builtins.penup;
+      fn0("pendown",function(){state.penDown=true;});
+      Sk.builtins.down=Sk.builtins.pendown;Sk.builtins.pd=Sk.builtins.pendown;
+      Sk.builtins.isdown=new Sk.builtin.func(function(){return Sk.ffi.remapToPy(state.penDown);});
 
-      Sk.builtins.isdown=new Sk.builtin.func(function(){ return Sk.ffi.remapToPy(state.penDown); });
       fn1("speed",function(v){
         state.speed=Number(v)||0;
         if(playback.active){
@@ -1366,43 +1515,48 @@ for i in range(4):
         }
         return none();
       });
-      fn1("circle",function(r){ circle(r,360); return none(); });
+      Sk.builtins.circle=new Sk.builtin.func(function(radius,extent){
+        return Sk.misceval.promiseToSuspension(
+          animateCircle(js(radius),extent===undefined?undefined:js(extent))
+        );
+      });
 
-      fn1("color",function(c){ setColor(c); state.fillColor=String(c); return none(); });
-      fn1("pencolor",function(c){ setColor(c); return none(); });
-      fn1("fillcolor",function(c){ setFillColor(c); return none(); });
-      fn1("pensize",function(v){ state.size=Math.max(.5,Number(v)||1); return none(); });
+      fn1("color",function(c){setColor(c);state.fillColor=String(c);return none();});
+      fn1("pencolor",function(c){setColor(c);return none();});
+      fn1("fillcolor",function(c){setFillColor(c);return none();});
+      fn1("pensize",function(v){state.size=Math.max(.5,Number(v)||1);return none();});
       Sk.builtins.width=Sk.builtins.pensize;
-
       fn0("begin_fill",beginFill);
       fn0("end_fill",endFill);
       fn0("clear",clear);
       fn0("reset",reset);
-      fn1("dot",function(v){ dot(v); return none(); });
-      fn0("stamp",function(){ drawSpriteOn(ctx,true); });
-      fn0("hideturtle",function(){ state.visible=false; refreshSprite(); });
+      fn1("dot",function(v){dot(v);return none();});
+      fn0("stamp",function(){drawSpriteOn(ctx,true);});
+      fn0("hideturtle",function(){state.visible=false;refreshSprite();});
       Sk.builtins.ht=Sk.builtins.hideturtle;
-      fn0("showturtle",function(){ state.visible=true; refreshSprite(); });
+      fn0("showturtle",function(){state.visible=true;refreshSprite();});
       Sk.builtins.st=Sk.builtins.showturtle;
 
-      Sk.builtins.heading=new Sk.builtin.func(function(){ return pyNum(state.heading); });
-      fn1("setheading",function(v){ state.heading=Number(v)||0; refreshSprite(); return none(); });
+      Sk.builtins.heading=new Sk.builtin.func(function(){return pyNum(state.heading);});
+      anim1("setheading",animateHeading);
       Sk.builtins.seth=Sk.builtins.setheading;
-      Sk.builtins.xcor=new Sk.builtin.func(function(){ return pyNum(state.x); });
-      Sk.builtins.ycor=new Sk.builtin.func(function(){ return pyNum(state.y); });
+      Sk.builtins.xcor=new Sk.builtin.func(function(){return pyNum(state.x);});
+      Sk.builtins.ycor=new Sk.builtin.func(function(){return pyNum(state.y);});
       Sk.builtins.position=new Sk.builtin.func(function(){
         return new Sk.builtin.tuple([pyNum(state.x),pyNum(state.y)]);
       });
       Sk.builtins.pos=Sk.builtins.position;
 
-      fn1("bgcolor",function(c){ world.style.backgroundColor=String(c); return none(); });
-      fn1("write",function(m){ writeText(m); return none(); });
+      fn1("bgcolor",function(c){world.style.backgroundColor=String(c);return none();});
+      fn1("write",function(m){writeText(m);return none();});
     }
 
     return {
       reset:reset,
       clear:clear,
-      installBuiltins:installBuiltins
+      installBuiltins:installBuiltins,
+      syncAnimationPause:syncAnimationPause,
+      cancelAnimation:cancelAnimation
     };
   })();
 
@@ -1456,7 +1610,7 @@ for i in range(4):
     runBtn.disabled=playback.active;
     stopBtn.disabled=!playback.active;
     pauseBtn.disabled=!playback.active;
-    stepBtn.disabled=!playback.active||!playback.paused;
+    stepBtn.disabled=!playback.active||!playback.paused||!playback.pending;
     pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
   }
   function schedulePlayback(){
@@ -1481,6 +1635,7 @@ for i in range(4):
     playback.active=false;
     playback.paused=false;
     playback.stepOnce=false;
+    TracyRuntime.cancelAnimation();
     if(pending)pending.reject(new Error("Playback stopped"));
     syncPlaybackButtons();
     showExecutingLine(null);
@@ -1498,6 +1653,7 @@ for i in range(4):
         playback.paused=true;
         syncPlaybackButtons();
       }
+      syncPlaybackButtons();
       schedulePlayback();
     });
   }
@@ -1506,6 +1662,7 @@ for i in range(4):
     playback.paused=!playback.paused;
     playback.stepOnce=false;
     syncPlaybackButtons();
+    TracyRuntime.syncAnimationPause();
     schedulePlayback();
   });
   stepBtn.addEventListener("click",function(){
@@ -1514,6 +1671,7 @@ for i in range(4):
     playback.pending=null;
     if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
     playback.stepOnce=true;
+    syncPlaybackButtons();
     try{pending.resolve(pending.susp.resume());}
     catch(e){pending.reject(e);}
   });
