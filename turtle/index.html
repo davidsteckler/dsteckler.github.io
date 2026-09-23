@@ -226,19 +226,6 @@
     }
     .playback-speed-group.is-live .live-speed-badge{display:inline-block}
     .playback-speed-group.is-live input[type="range"]{accent-color:#16826f}
-    .speed-auto-button{
-      display:none;
-      border:0;
-      background:transparent;
-      color:var(--teal);
-      padding:4px 5px;
-      border-radius:6px;
-      font-size:.62rem;
-      font-weight:800;
-      white-space:nowrap;
-    }
-    .playback-speed-group.is-live .speed-auto-button{display:inline-block}
-    .speed-auto-button:hover{background:rgba(23,107,115,.09)}
     #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
     .CodeMirror-selected{background:#374243 !important}
     .cm-s-default .cm-keyword{color:#d7a7df}
@@ -779,12 +766,11 @@
       <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
     </div>
     <div class="layout-group playback-speed-group" id="playbackSpeedGroup">
-      <label for="playSpeed">Live speed <span class="live-speed-badge" id="liveSpeedBadge">LIVE</span></label>
-      <span class="speed-endpoint">1</span>
-      <input id="playSpeed" type="range" min="1" max="10" value="6" step="0.5" aria-label="Live playback speed from 1 to 10">
+      <label for="playSpeed">Live speed <span class="live-speed-badge" id="liveSpeedBadge">RUNNING</span></label>
+      <span class="speed-endpoint">0</span>
+      <input id="playSpeed" type="range" min="0" max="10" value="6" step="0.5" aria-label="Live playback speed from 0 to 10">
       <span class="speed-endpoint">10</span>
       <output id="playSpeedValue" for="playSpeed">6</output>
-      <button class="speed-auto-button" id="speedAutoBtn" type="button" title="Stop overriding the program's speed() setting">Use code speed</button>
     </div>
     <div class="layout-group layout-output">
       <label for="outputSize">Text output</label>
@@ -1124,7 +1110,6 @@ for i in range(4):
   var playSpeed = document.getElementById("playSpeed");
   var playSpeedValue = document.getElementById("playSpeedValue");
   var playbackSpeedGroup = document.getElementById("playbackSpeedGroup");
-  var speedAutoBtn = document.getElementById("speedAutoBtn");
   var playbackLineStatus = document.getElementById("playbackLineStatus");
   var worldLineStatus = document.getElementById("worldLineStatus");
   document.getElementById("editCodeBtn").addEventListener("click",function(){
@@ -1481,7 +1466,7 @@ for i in range(4):
 
     function durationMs(kind, magnitude){
       var amount=Math.abs(magnitude)||0;
-      var speed=effectiveSpeed();
+      var speed=currentSpeed();
 
       if(speed===0) return 6;
 
@@ -1780,7 +1765,7 @@ for i in range(4):
       playback.active=true;
       playback.paused=false;
       playback.stepOnce=false;
-      playback.codeSpeed=state.speed;
+      playback.speed=state.speed;
       syncPlaybackButtons();
       Sk.misceval.asyncToPromise(function(){
         return Sk.misceval.callsimOrSuspend(callback,pyNum(x),pyNum(y));
@@ -1880,13 +1865,8 @@ for i in range(4):
         if(!Number.isFinite(next)) throw new Error("speed() needs a number from 0 to 10");
         next=clamp(next,0,10);
         state.speed=next;
-        playback.codeSpeed=next;
-
-        if(!playback.liveOverride && next>=1){
-          playback.uiSpeed=next;
-          playSpeed.value=next;
-        }
-
+        playback.speed=next;
+        playSpeed.value=next;
         updateSpeedLabel();
         schedulePlayback();
         return none();
@@ -1972,23 +1952,19 @@ for i in range(4):
   var playback = {
     active:false, paused:false, stepOnce:false,
     pending:null, timer:null,
-    codeSpeed:6,
-    uiSpeed:Number(playSpeed.value)||6,
-    liveOverride:false,
+    speed:Number(playSpeed.value)||6,
     marker:null
   };
 
-  function effectiveSpeed(){
-    return playback.liveOverride
-      ? clamp(Number(playback.uiSpeed)||1,1,10)
-      : clamp(Number(playback.codeSpeed)||0,0,10);
+  function currentSpeed(){
+    return clamp(Number(playback.speed)||0,0,10);
   }
 
   // Skulpt pauses before each real Python statement, including loop bodies
   // and statements inside user-defined functions. Rendering remains immediate
   // when a statement executes; the next statement waits for the speed timer.
   function lineDelay(){
-    var speed=effectiveSpeed();
+    var speed=currentSpeed();
     if(speed===0) return 0;
 
     var t=(speed-1)/9;
@@ -1996,30 +1972,22 @@ for i in range(4):
     return Math.max(8,Math.min(1200,Math.round(codeDelay)));
   }
   function updateSpeedLabel(){
-    var value=playback.liveOverride ? Number(playback.uiSpeed) : effectiveSpeed();
+    var value=currentSpeed();
     playSpeedValue.textContent=Number.isInteger(value)?String(value):value.toFixed(1);
-    playSpeed.title=playback.liveOverride
-      ? "Live override: "+playSpeedValue.textContent+" / 10"
-      : "Following speed() in the code. Drag to override live.";
+    playSpeed.title=value===0
+      ? "Speed 0 — essentially instant"
+      : "Live speed "+playSpeedValue.textContent+" / 10 — drag while running";
   }
+
   playSpeed.addEventListener("input",function(){
-    playback.uiSpeed=Number(this.value);
-    playback.liveOverride=true;
+    playback.speed=Number(this.value);
     updateSpeedLabel();
 
-    // durationMs() reads effectiveSpeed() on every animation frame, so
-    // this changes a forward(), turn, goto(), or circle already in motion.
+    // The same playback.speed value drives every animation frame and the
+    // delay before the next Python statement.
     schedulePlayback();
   });
-  speedAutoBtn.addEventListener("click",function(){
-    playback.liveOverride=false;
-    if(playback.codeSpeed>=1){
-      playback.uiSpeed=playback.codeSpeed;
-      playSpeed.value=playback.codeSpeed;
-    }
-    updateSpeedLabel();
-    schedulePlayback();
-  });
+
   updateSpeedLabel();
 
   function showExecutingLine(line){
@@ -2044,7 +2012,7 @@ for i in range(4):
     pauseBtn.disabled=!playback.active;
     stepBtn.disabled=!playback.active||!playback.paused||!playback.pending;
     pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
-    playbackSpeedGroup.classList.toggle("is-live",playback.liveOverride);
+    playbackSpeedGroup.classList.toggle("is-live",playback.active);
   }
   function schedulePlayback(){
     if(playback.timer!==null){
@@ -2125,11 +2093,8 @@ for i in range(4):
     playback.paused=false;
     playback.stepOnce=false;
     playback.pending=null;
-    playback.codeSpeed=6;
-    if(!playback.liveOverride){
-      playback.uiSpeed=6;
-      playSpeed.value=6;
-    }
+    playback.speed=6;
+    playSpeed.value=6;
     updateSpeedLabel();
     showExecutingLine(null);
     syncPlaybackButtons();
