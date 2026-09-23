@@ -757,29 +757,47 @@ function classForGameChar(ch,isPlayer){
   return 'void';
 }
 
+const tileMeanings={
+  '@':'Player: one character stands for your hero.',
+  '$':'Treasure: a dollar sign becomes an item in the game.',
+  '#':'Corridor: number signs form a passage.',
+  '+':'Door: a plus sign joins two areas.',
+  '.':'Floor: each dot marks one space you can walk on.',
+  'D':'Dragon: an ordinary letter represents a monster.',
+  '-':'Wall: hyphens draw the horizontal edges of a room.',
+  '|':'Wall: vertical bars draw the sides of a room.',
+  ' ':'Empty space: even a blank has an ASCII code (32).'
+};
+let inspected={char:'@',row:null,col:null};
+
+function inspectChar(ch,row=null,col=null){
+  inspected={char:ch,row,col};
+  document.getElementById('tileCharacter').textContent=ch===' '?'SPACE':ch;
+  document.getElementById('tileDecimal').textContent=ch.charCodeAt(0);
+  document.getElementById('tileBinary').textContent=ch.charCodeAt(0).toString(2).padStart(8,'0');
+  document.getElementById('tileExplanation').textContent=tileMeanings[ch]||'This symbol is stored as an ordinary character.';
+}
 function renderDungeon(){
   gameEl.innerHTML='';
   const frag=document.createDocumentFragment();
-
   for(let r=0;r<dungeon.length;r++){
     for(let col=0;col<dungeon[r].length;col++){
-      const isPlayer=r===gameState.row && col===gameState.col;
-      const ch=isPlayer ? '@' : dungeon[r][col];
+      const isPlayer=r===gameState.row&&col===gameState.col;
+      const ch=isPlayer?'@':dungeon[r][col];
       const cell=document.createElement('span');
-      cell.className='game-cell '+classForGameChar(ch,isPlayer);
-      cell.textContent=ch===' ' ? '·' : ch;
+      const selected=inspected.row===r&&inspected.col===col;
+      cell.className='game-cell '+classForGameChar(ch,isPlayer)+(selected?' inspected':'');
+      cell.textContent=ch===' '?'·':ch;
+      cell.dataset.character=ch;
+      cell.dataset.row=r;
+      cell.dataset.col=col;
       cell.setAttribute('role','gridcell');
+      cell.setAttribute('aria-label',ch===' '?'Empty space':'Character '+ch);
       frag.appendChild(cell);
     }
   }
-
   gameEl.appendChild(frag);
-  document.getElementById('moveCount').textContent=
-    gameState.moves+' move'+(gameState.moves===1?'':'s');
-
-  document.getElementById('tileCharacter').textContent='@';
-  document.getElementById('tileDecimal').textContent='64';
-  document.getElementById('tileBinary').textContent='01000000';
+  document.getElementById('moveCount').textContent=gameState.moves+' move'+(gameState.moves===1?'':'s');
 }
 
 function tryMove(dr,dc){
@@ -788,6 +806,7 @@ function tryMove(dr,dc){
   const nr=gameState.row+dr;
   const nc=gameState.col+dc;
   const next=dungeon[nr]?.[nc];
+  if(next!==undefined)inspectChar(next,nr,nc);
 
   if(next===undefined || next===' ' || next==='-' || next==='|'){
     gameResult.textContent='That character is a wall or empty space.';
@@ -831,8 +850,20 @@ function resetDungeon(){
   resetDungeonData();
   gameResult.textContent='Use the arrow buttons or WASD. Reach the $.';
   gameResult.classList.remove('won');
+  inspectChar('@',gameState.row,gameState.col);
   renderDungeon();
 }
+
+gameEl.addEventListener('click',e=>{
+  const cell=e.target.closest('.game-cell');
+  if(!cell)return;
+  const ch=cell.dataset.character;
+  inspectChar(ch,Number(cell.dataset.row),Number(cell.dataset.col));
+  gameResult.textContent=(ch===' '?'SPACE':ch)+' → ASCII '+ch.charCodeAt(0)+' → '+ch.charCodeAt(0).toString(2).padStart(8,'0');
+  gameResult.classList.remove('won');
+  renderDungeon();
+  gameEl.focus({preventScroll:true});
+});
 
 document.querySelectorAll('[data-move]').forEach(btn=>{
   btn.addEventListener('click',()=>{
