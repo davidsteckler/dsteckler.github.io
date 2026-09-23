@@ -947,26 +947,95 @@ const spriteCols=12;
 let sprite=Array.from({length:spriteRows},()=>Array(spriteCols).fill(' '));
 let paintChar='@';
 
+const spriteGrid=document.getElementById('spriteGrid');
+let showSpaces=false;
+let drawing=false;
+
+function rawSpriteText(){
+  return sprite.map(row=>row.join('')).join('\n');
+}
+function updateSpriteText(){
+  const raw=rawSpriteText();
+  document.getElementById('spriteOutput').textContent=showSpaces?raw.replace(/ /g,'·'):raw;
+  const filled=sprite.flat().filter(ch=>ch!==' ').length;
+  document.getElementById('spriteStats').textContent=
+    filled+' filled cells · '+raw.length+' characters = '+
+    new TextEncoder().encode(raw).length+' ASCII bytes (including '+(spriteRows-1)+' line breaks)';
+}
+function paintSpriteCell(cell){
+  if(!cell||!spriteGrid.contains(cell))return;
+  const row=Number(cell.dataset.row),col=Number(cell.dataset.col);
+  if(sprite[row][col]===paintChar)return;
+  sprite[row][col]=paintChar;
+  cell.textContent=paintChar;
+  cell.setAttribute('aria-label','Row '+(row+1)+', column '+(col+1)+', '+(paintChar===' '?'blank':paintChar));
+  updateSpriteText();
+}
 function renderSprite(){
-  const grid=document.getElementById('spriteGrid');
-  grid.innerHTML='';
-  for(let r=0;r<spriteRows;r++){
+  spriteGrid.innerHTML='';
+  for(let row=0;row<spriteRows;row++){
     for(let col=0;col<spriteCols;col++){
       const cell=document.createElement('button');
       cell.type='button';
       cell.className='sprite-cell';
-      cell.textContent=sprite[r][col];
+      cell.textContent=sprite[row][col];
+      cell.dataset.row=row;
+      cell.dataset.col=col;
       cell.setAttribute('role','gridcell');
-      cell.setAttribute('aria-label','Row '+(r+1)+', column '+(col+1)+', '+(sprite[r][col]===' '?'blank':sprite[r][col]));
-      cell.addEventListener('click',()=>{
-        sprite[r][col]=paintChar;
-        renderSprite();
-      });
-      grid.appendChild(cell);
+      cell.setAttribute('aria-label','Row '+(row+1)+', column '+(col+1)+', '+(sprite[row][col]===' '?'blank':sprite[row][col]));
+      spriteGrid.appendChild(cell);
     }
   }
-  document.getElementById('spriteOutput').textContent=sprite.map(row=>row.join('')).join('\n');
+  updateSpriteText();
 }
+spriteGrid.addEventListener('pointerdown',e=>{
+  const cell=e.target.closest('.sprite-cell');
+  if(!cell)return;
+  drawing=true;
+  if(e.pointerType!=='mouse')e.preventDefault();
+  spriteGrid.setPointerCapture(e.pointerId);
+  paintSpriteCell(cell);
+});
+spriteGrid.addEventListener('pointermove',e=>{
+  if(!drawing)return;
+  const cell=document.elementFromPoint(e.clientX,e.clientY)?.closest('.sprite-cell');
+  if(cell&&spriteGrid.contains(cell))paintSpriteCell(cell);
+});
+spriteGrid.addEventListener('pointerup',()=>{drawing=false});
+spriteGrid.addEventListener('pointercancel',()=>{drawing=false});
+window.addEventListener('pointerup',()=>{drawing=false});
+spriteGrid.addEventListener('click',e=>{
+  if(e.detail===0)paintSpriteCell(e.target.closest('.sprite-cell'));
+});
+
+document.getElementById('showSpriteSpaces').addEventListener('click',e=>{
+  showSpaces=!showSpaces;
+  e.currentTarget.setAttribute('aria-pressed',String(showSpaces));
+  e.currentTarget.textContent=showSpaces?'Hide spaces':'Show spaces';
+  updateSpriteText();
+});
+document.getElementById('copySprite').addEventListener('click',async()=>{
+  const raw=rawSpriteText();
+  const status=document.getElementById('spriteStatus');
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(raw);
+    }else{
+      const field=document.createElement('textarea');
+      field.value=raw;
+      field.style.position='fixed';
+      field.style.opacity='0';
+      document.body.appendChild(field);
+      field.select();
+      const success=document.execCommand('copy');
+      field.remove();
+      if(!success)throw Error('Copy unavailable');
+    }
+    status.textContent='Copied as plain text.';
+  }catch(error){
+    status.textContent='Clipboard access was blocked. Select the text on the right to copy it.';
+  }
+});
 
 document.querySelectorAll('.palette-char').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -977,6 +1046,7 @@ document.querySelectorAll('.palette-char').forEach(btn=>{
 
 document.getElementById('clearSprite').addEventListener('click',()=>{
   sprite=Array.from({length:spriteRows},()=>Array(spriteCols).fill(' '));
+  document.getElementById('spriteStatus').textContent='';
   renderSprite();
 });
 
