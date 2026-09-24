@@ -5,7 +5,7 @@
   var A = null, master = null, music = null, fx = null, limiter = null;
   var buses = {}, noiseBuffer = null, timer = null, enabled = false, unlocked = false;
   var world = 'city', danger = 1, step = 0, nextBeat = 0, musicLevel = .75, fxLevel = .85;
-  var lastWorld = 'city', switching = false;
+  var lastWorld = 'city', switching = false, suspendToken = 0;
   var TAU = Math.PI * 2;
   var cityHarmony = [
     [50, 62, 65, 69, 76],  // Dm(add9)
@@ -206,6 +206,8 @@
     if (w === 'city' || w === 'wild') world=w;
     if (!build()) return false;
     enabled=true;
+    ++suspendToken;
+    music.gain.setTargetAtTime(musicLevel*.7,A.currentTime,.15);
     try { var p=A.resume();if(p&&p.catch)p.catch(function(){}); } catch(err){}
     unlocked=true;
     master.gain.cancelScheduledValues(A.currentTime);
@@ -220,7 +222,22 @@
   function disable() {
     enabled=false;
     if (timer){global.clearInterval(timer);timer=null;}
-    if (A){master.gain.cancelScheduledValues(A.currentTime);master.gain.setTargetAtTime(.00001,A.currentTime,.075);}
+    var token=++suspendToken;
+    if(A){
+      master.gain.cancelScheduledValues(A.currentTime);
+      master.gain.setTargetAtTime(.00001,A.currentTime,.075);
+      // Suspending the graph keeps a muted phone from wasting battery on ambience.
+      global.setTimeout(function(){
+        if(token!==suspendToken||enabled)return;
+        var promise=A.suspend();if(promise&&promise.catch)promise.catch(function(){});
+      },260);
+    }
+  }
+  function endScore(){
+    if(!A||!enabled)return;
+    if(timer){global.clearInterval(timer);timer=null;}
+    music.gain.cancelScheduledValues(A.currentTime);
+    music.gain.setTargetAtTime(.00001,A.currentTime,.38);
   }
   function setWorld(w,d) {
     if (d !== undefined)setDanger(d);
@@ -313,7 +330,7 @@
     }
   });
   global.OtherSleepAudio={
-    enable:enable,disable:disable,setWorld:setWorld,setDanger:setDanger,
+    enable:enable,disable:disable,endScore:endScore,setWorld:setWorld,setDanger:setDanger,
     setLevels:setLevels,sfx:sfx,isEnabled:function(){return enabled;},
     status:function(){return {enabled:enabled,world:world,danger:danger,music:musicLevel,sfx:fxLevel,context:A&&A.state};}
   };
