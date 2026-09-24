@@ -35,6 +35,8 @@
 
 /* Compact, touch-friendly sound mixer lives in the field manual. */
 .iconbtn.audio-on{border-color:#b6f4a5;color:#c9ffc0;background:#16452b}
+.audio-choice{width:100%;height:37px;margin:6px 0 10px;border:1px solid #83687a;background:#29202f;color:#f0cfa9;font:800 11px 'DM Sans',sans-serif;letter-spacing:.07em}
+.audio-choice.audio-on{background:#173c2c;border-color:#b5efaa;color:#d1ffce}
 .audio-mixer{margin:14px 0 18px;padding:13px 14px;background:#23202d;border:1px solid #665666}
 .audio-mixer h2{font:900 23px 'Barlow Condensed',Impact,sans-serif;letter-spacing:.08em;color:#f4d0ab;margin:0 0 3px}
 .audio-mixer p{font-size:11px;color:#c6bdc9;margin:0 0 12px}
@@ -53,7 +55,7 @@
   <section class="play"><div class="play-head"><h3>CHOOSE YOUR NEXT MOVE</h3><div class="energy" id="energy" aria-label="3 energy"><b>1</b><b>2</b><b>3</b> ENERGY</div></div><div class="cards" id="hand" role="group" aria-label="Cards in your hand"></div><div class="hand-note" id="handNote"><span>Tap a card</span> to play. Swipe to see more.</div></section>
   <footer class="footer"><button id="sleepBtn" class="sleep"><span><small id="sleepSub">END YOUR TURN · WAKE ON ILYRA</small><strong id="sleepLabel">GO TO SLEEP</strong></span><span class="sleep-arrow">➜</span></button><button class="utility" id="deckBtn" aria-label="View deck and rules"><span>▤</span><small>DECK</small></button></footer>
 </div>
-<div class="layer" id="intro"><div class="panel"><div class="intro-art" aria-hidden="true"><div class="half"><div class="planet"></div><div class="person"></div></div><div class="half"><div class="planet"></div><div class="person"></div></div><div class="split"></div></div><div class="panel-inner"><div class="pretitle">A TWO-WORLD CARD ROGUELITE</div><h1>YOU SLEEP.<br><em>YOU WAKE.</em><br>YOU RUN.</h1><p>On Cael, you are the grandmother of a hated president, hunted through the capital by the native rebel force, the Samir Guard. On Ilyra, you are eleven years old, alone beneath the shadow of Jurassic giants.</p><div class="intro-worlds"><div><strong>ONE MIND</strong><span>Play cards to survive the world you're in.</span></div><div><strong>TWO LIVES</strong><span>Sleep to switch planets. The abandoned life keeps getting worse.</span></div></div><div class="how"><strong>THE RULE:</strong> You have 3 energy each waking. Tap cards, watch the enemy's next move, then sleep. If either life ends, the run ends. Defeat four threats on each planet.</div><button class="cta" id="startBtn">BEGIN THE FIRST WAKING</button><button class="secondary" id="resumeBtn" hidden>CONTINUE SAVED RUN</button></div></div></div>
+<div class="layer" id="intro"><div class="panel"><div class="intro-art" aria-hidden="true"><div class="half"><div class="planet"></div><div class="person"></div></div><div class="half"><div class="planet"></div><div class="person"></div></div><div class="split"></div></div><div class="panel-inner"><div class="pretitle">A TWO-WORLD CARD ROGUELITE</div><h1>YOU SLEEP.<br><em>YOU WAKE.</em><br>YOU RUN.</h1><p>On Cael, you are the grandmother of a hated president, hunted through the capital by the native rebel force, the Samir Guard. On Ilyra, you are eleven years old, alone beneath the shadow of Jurassic giants.</p><div class="intro-worlds"><div><strong>ONE MIND</strong><span>Play cards to survive the world you're in.</span></div><div><strong>TWO LIVES</strong><span>Sleep to switch planets. The abandoned life keeps getting worse.</span></div></div><div class="how"><strong>THE RULE:</strong> You have 3 energy each waking. Tap cards, watch the enemy's next move, then sleep. If either life ends, the run ends. Defeat four threats on each planet.</div><button class="audio-choice" id="introSoundBtn" aria-pressed="false" type="button">♪ ENABLE MUSIC + SOUND EFFECTS</button><button class="cta" id="startBtn">BEGIN THE FIRST WAKING</button><button class="secondary" id="resumeBtn" hidden>CONTINUE SAVED RUN</button></div></div></div>
 <div class="layer" id="rewardLayer" hidden><div class="panel reward"><div class="reward-top"><b>YOU SURVIVED.</b></div><div class="panel-inner"><div class="pretitle" id="rewardPlanet">CAEL · ENCOUNTER COMPLETE</div><h1 style="font-size:52px;margin:10px 0">TAKE ONE.</h1><p>One more memory for this life. The other one is waiting.</p><div class="reward-options" id="rewardOptions"></div></div></div></div>
 <div class="layer" id="helpLayer" hidden><div class="panel"><div class="panel-inner"><div class="pretitle">FIELD MANUAL / 001</div><h1 style="font-size:58px">STAY<br>ALIVE.</h1><div class="rulegrid"><div><b>01 / PLAY</b>Spend up to 3 energy on cards. Attack before sleeping to stop an enemy's next move. Block absorbs damage when you sleep.</div><div><b>02 / SLEEP</b>Sleep at any time to wake on the other planet. Enemies strike in the world you leave; pursuit and hunger rise while you are away.</div><div><b>03 / BOTH LIVES</b>Some cards send help through your dreams. Reduce pursuit on Cael, gather food on Ilyra, and protect both health bars. Nine pursuit or hunger costs 3 life.</div><div><b>04 / GROW</b>Defeat an enemy to add one card to that world's deck. Clear all four threats on both planets to finish the story.</div></div><div id="deckDetails" class="muted"></div><section class="audio-mixer" aria-label="Music and effects settings"><h2>TWO WORLDS. TWO SOUNDS.</h2><p>Original music is generated in your browser. Tap ♪ at the top to turn it on.</p><div class="mix-row"><label for="musicSlider">MUSIC</label><input id="musicSlider" aria-label="Music volume" type="range" min="0" max="100" value="75"><output id="musicValue" for="musicSlider">75%</output></div><div class="mix-row"><label for="effectsSlider">EFFECTS</label><input id="effectsSlider" aria-label="Sound effects volume" type="range" min="0" max="100" value="85"><output id="effectsValue" for="effectsSlider">85%</output></div></section><button class="cta" id="closeHelp">BACK TO THE WORLD</button><button class="secondary" id="restartBtn">START A NEW RUN</button></div></div></div>
 <div class="layer" id="endLayer" hidden><div class="panel"><div class="result-art" id="endArt">THE<br>OTHER<br>SLEEP</div><div class="panel-inner"><div class="pretitle" id="endKicker">YOUR STORY</div><h1 style="font-size:57px" id="endTitle">ONE LIFE ENDS.</h1><p id="endText"></p><div class="result-stats"><div><strong id="endWakings">0</strong><span>WAKINGS SURVIVED</span></div><div><strong id="endDefeated">0 / 8</strong><span>THREATS DEFEATED</span></div></div><p class="muted" id="bestRecord"></p><button class="cta" id="againBtn">BEGIN ANOTHER LIFE</button></div></div></div>
@@ -67,7 +69,7 @@
   var A = null, master = null, music = null, fx = null, limiter = null;
   var buses = {}, noiseBuffer = null, timer = null, enabled = false, unlocked = false;
   var world = 'city', danger = 1, step = 0, nextBeat = 0, musicLevel = .75, fxLevel = .85;
-  var lastWorld = 'city', switching = false;
+  var lastWorld = 'city', switching = false, suspendToken = 0;
   var TAU = Math.PI * 2;
   var cityHarmony = [
     [50, 62, 65, 69, 76],  // Dm(add9)
@@ -268,6 +270,8 @@
     if (w === 'city' || w === 'wild') world=w;
     if (!build()) return false;
     enabled=true;
+    ++suspendToken;
+    music.gain.setTargetAtTime(musicLevel*.7,A.currentTime,.15);
     try { var p=A.resume();if(p&&p.catch)p.catch(function(){}); } catch(err){}
     unlocked=true;
     master.gain.cancelScheduledValues(A.currentTime);
@@ -282,7 +286,22 @@
   function disable() {
     enabled=false;
     if (timer){global.clearInterval(timer);timer=null;}
-    if (A){master.gain.cancelScheduledValues(A.currentTime);master.gain.setTargetAtTime(.00001,A.currentTime,.075);}
+    var token=++suspendToken;
+    if(A){
+      master.gain.cancelScheduledValues(A.currentTime);
+      master.gain.setTargetAtTime(.00001,A.currentTime,.075);
+      // Suspending the graph keeps a muted phone from wasting battery on ambience.
+      global.setTimeout(function(){
+        if(token!==suspendToken||enabled)return;
+        var promise=A.suspend();if(promise&&promise.catch)promise.catch(function(){});
+      },260);
+    }
+  }
+  function endScore(){
+    if(!A||!enabled)return;
+    if(timer){global.clearInterval(timer);timer=null;}
+    music.gain.cancelScheduledValues(A.currentTime);
+    music.gain.setTargetAtTime(.00001,A.currentTime,.38);
   }
   function setWorld(w,d) {
     if (d !== undefined)setDanger(d);
@@ -375,7 +394,7 @@
     }
   });
   global.OtherSleepAudio={
-    enable:enable,disable:disable,setWorld:setWorld,setDanger:setDanger,
+    enable:enable,disable:disable,endScore:endScore,setWorld:setWorld,setDanger:setDanger,
     setLevels:setLevels,sfx:sfx,isEnabled:function(){return enabled;},
     status:function(){return {enabled:enabled,world:world,danger:danger,music:musicLevel,sfx:fxLevel,context:A&&A.state};}
   };
@@ -454,7 +473,7 @@ function showReward(w){let list=shuffle(offers[w]).slice(0,3);$('rewardPlanet').
 function chooseReward(id){if(!s?.pendingReward||!cards[id]||cards[id].w!==s.pendingReward)return;let w=s.pendingReward;s.lives[w].deck.push(id);s.lives[w].discard.push(id);s.pendingReward=null;$('rewardLayer').hidden=true;log('You remember '+cards[id].name.toLowerCase()+'. Then your eyes grow heavy.');audio('reward');save();sleep(true)}
 function resolveHazards(){for(let w of ['city','wild']){let l=s.lives[w];if(l.stage>=MAXSTAGE)continue;if(l.danger>=9){l.hp=Math.max(0,l.hp-3);l.danger=5;log(w==='city'?'The Samir Guard raids your hiding place. −3 life.':'The long hunger catches up to the child. −3 life.');audio('hazard',{world:w});toast((w==='city'?'RAID':'STARVATION')+' · −3 '+(w==='city'?'GRANDMOTHER':'CHILD')+' LIFE')}}}
 function sleep(auto=false){if(!s||s.over||s.pendingReward)return;let w=s.world,ow=other(w),l=s.lives[w];if(!auto&&l.enemy){let f=foes[w][l.stage];let dmg=Math.max(0,f.hit-(l.enemy.weak||0));let taken=Math.max(0,dmg-l.block);l.hp=Math.max(0,l.hp-taken);if(taken){log(f.name+' strikes. −'+taken+' life.');audio('damage',{world:w});vibrate([30,30,50])}else if(dmg>0)log('Your defenses hold. The '+f.name.toLowerCase()+' retreats.');if(f.heat)dangerChange(w,f.heat);l.enemy.weak=0}l.block=0;l.discard.push(...l.hand);l.hand=[];dangerChange(w,1);dangerChange(ow,1);resolveHazards();if(s.lives.city.hp<=0||s.lives.wild.hp<=0){end(false);return}s.wakes++;s.world=ow;audio('sleep');const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced){$('transitionText').textContent=ow==='city'?'CAEL':'ILYRA';$('transitionSub').textContent=ow==='city'?'THE SEARCHLIGHTS RETURN':'THE OTHER SUN RISES';$('transition').className='transition show '+(ow==='wild'?'wild-transition':'');clearTimeout(transitionTimer);transitionTimer=setTimeout(()=>$('transition').classList.remove('show'),490)}enter(ow);save()}
-function end(win){s.over=true;s.win=win;record(win);try{localStorage.removeItem(SAVEKEY)}catch(e){}$('endKicker').textContent=win?'THE TWO WORLDS REMEMBER':'THE DREAM BREAKS';$('endTitle').innerHTML=win?'BOTH<br>LIVES<br>SURVIVE.':'ONE LIFE<br>ENDS.';$('endText').textContent=win?'The Samir archive names the world your grandson tried to hide: Ilyra. Beneath the dinosaur nest, the same silver insignia waits. You wake on Cael with two sets of memories. For the first time, you can tell both planets what happened.':'One heartbeat stops. Across the distance between planets, the other body never opens its eyes. Their unfinished lives will be waiting for you in the next run.';$('endWakings').textContent=s.wakes;$('endDefeated').textContent=(s.lives.city.stage+s.lives.wild.stage)+' / 8';let v={};try{v=JSON.parse(localStorage.getItem(RECORDKEY)||'{}')}catch(e){}$('bestRecord').textContent='PERSONAL BEST: '+(v.best||s.wakes)+' wakings · '+(v.wins||0)+' completed runs';$('endArt').innerHTML=win?'TWO<br>SUNS<br>RISE.':'THE<br>DREAM<br>BREAKS.';$('rewardLayer').hidden=true;$('endLayer').hidden=false;audio(win?'victory':'failure');render()}
+function end(win){s.over=true;s.win=win;record(win);try{localStorage.removeItem(SAVEKEY)}catch(e){}$('endKicker').textContent=win?'THE TWO WORLDS REMEMBER':'THE DREAM BREAKS';$('endTitle').innerHTML=win?'BOTH<br>LIVES<br>SURVIVE.':'ONE LIFE<br>ENDS.';$('endText').textContent=win?'The Samir archive names the world your grandson tried to hide: Ilyra. Beneath the dinosaur nest, the same silver insignia waits. You wake on Cael with two sets of memories. For the first time, you can tell both planets what happened.':'One heartbeat stops. Across the distance between planets, the other body never opens its eyes. Their unfinished lives will be waiting for you in the next run.';$('endWakings').textContent=s.wakes;$('endDefeated').textContent=(s.lives.city.stage+s.lives.wild.stage)+' / 8';let v={};try{v=JSON.parse(localStorage.getItem(RECORDKEY)||'{}')}catch(e){}$('bestRecord').textContent='PERSONAL BEST: '+(v.best||s.wakes)+' wakings · '+(v.wins||0)+' completed runs';$('endArt').innerHTML=win?'TWO<br>SUNS<br>RISE.':'THE<br>DREAM<br>BREAKS.';$('rewardLayer').hidden=true;$('endLayer').hidden=false;audio(win?'victory':'failure');OtherSleepAudio.endScore();render()}
 function render(){if(!s)return;let w=s.world,l=s.lives[w],f=l.enemy?foes[w][l.stage]:null;OtherSleepAudio.setDanger(l.danger);document.body.className=w;$('wakeCount').textContent=String(s.wakes).padStart(2,'0');for(let name of ['city','wild']){let z=s.lives[name];$(name+'Status').classList.toggle('active',w===name);$(name+'HP').textContent=z.hp;$(name+'Bar').style.width=(100*z.hp/MAXHP)+'%';$(name+'Danger').textContent=z.stage>=MAXSTAGE?'CLEARED':z.danger+' / 9';$(name+'Danger').style.color=z.danger>=7?'#ff8d78':''}
 $('sceneKicker').textContent=w==='city'?'CAEL · THE OCCUPIED CAPITAL':'ILYRA · THE JURASSIC WILDS';$('sceneTitle').innerHTML=w==='city'?'THE CITY<br>REMEMBERS':'THE FOREST<br>HUNTS';$('sceneSub').textContent=w==='city'?'Your grandson is president. The Samir Guard wants his grandmother.':'Eleven years old. No shelter. Something huge is following you.';$('story').textContent=s.log;$('enemyPanel').classList.toggle('noenemy',!l.enemy);$('enemyLabel').textContent=l.enemy?f.label+' · '+(l.stage+1).toString().padStart(2,'0')+' / 04':'THIS PLANET IS CLEAR';$('enemyName').textContent=l.enemy?f.name:'THE OTHER LIFE IS WAITING';$('enemyHP').textContent=l.enemy?l.enemy.hp:0;$('enemyBar').style.width=l.enemy?(l.enemy.hp/l.enemy.max*100)+'%':'100%';$('intent').innerHTML=l.enemy?'<i></i>NEXT ON SLEEP: '+Math.max(0,f.hit-(l.enemy.weak||0))+' DAMAGE'+(f.heat?' · +'+f.heat+' '+(w==='city'?'PURSUIT':'HUNGER'):'')+(l.block?' · '+l.block+' BLOCK':''):'<i style="background:#a9eaa3"></i> NO ENEMY HERE';let en=$('energy');en.innerHTML=[1,2,3].map(i=>'<b class="'+(i>s.energy?'empty':'')+'">'+i+'</b>').join('')+' ENERGY';en.setAttribute('aria-label',s.energy+' energy');$('hand').innerHTML=l.hand.map((id,i)=>{let c=cards[id];return `<button class="card ${c.w==='wild'?'wildcard':''}" data-i="${i}" ${cardPlayable(c)?'':'disabled'} aria-label="Play ${c.name}, ${c.cost} energy: ${c.desc}"><span class="card-top"><span class="card-title">${c.name}</span><span class="cost">${c.cost}</span></span><span class="card-art" style="--accent:${c.bg}">${artSVG(id)}</span><span class="card-desc">${c.desc}</span><span class="card-tag">${c.tag}</span></button>`}).join('');$('handNote').innerHTML=l.stage===MAXSTAGE?'<span>Planet secured.</span> Sleep to protect your other life.':s.energy===0?'<span>Out of energy.</span> Sleep to wake on the other planet.':'<span>Tap a card</span> to play. Swipe to see more.';$('sleepSub').textContent='END THIS WAKING · WAKE ON '+(w==='city'?'ILYRA':'CAEL');$('sleepLabel').textContent='GO TO SLEEP';$('sleepBtn').disabled=!!s.pendingReward||s.over;if(art.world!==w)art.world=w;save()}
 function showDeck(){if(!s)return;let city=s.lives.city,wild=s.lives.wild;$('deckDetails').innerHTML='<strong style="font:900 23px Impact,Arial,sans-serif;color:#f2d1ae">YOUR DECKS</strong><br>CAEL: '+city.deck.length+' cards · '+city.stage+'/4 threats cleared<br>ILYRA: '+wild.deck.length+' cards · '+wild.stage+'/4 threats cleared<br><br>Cards reshuffle after you use them. You can sleep before spending all 3 energy.';$('helpLayer').hidden=false}
@@ -463,8 +482,9 @@ $('hand').addEventListener('click',e=>{let btn=e.target.closest('button[data-i]'
  b.setAttribute('aria-pressed',String(sound));
  b.setAttribute('aria-label',sound?'Mute music and sound effects':'Turn on music and sound effects');
  b.title=sound?'Mute music and effects':'Play original music and sound effects';
+ const intro=$('introSoundBtn');intro.textContent=sound?'♫ SOUNDTRACK ON · TAP TO MUTE':'♪ ENABLE MUSIC + SOUND EFFECTS';intro.setAttribute('aria-pressed',String(sound));intro.classList.toggle('audio-on',sound);
 }
-$('soundBtn').addEventListener('click',()=>{
+function toggleSound(){
  sound=!sound;
  if(sound){
   OtherSleepAudio.setLevels(musicMix,effectsMix);
@@ -473,7 +493,9 @@ $('soundBtn').addEventListener('click',()=>{
  }else {OtherSleepAudio.disable();toast('AUDIO OFF');}
  try{localStorage.setItem('the-other-sleep-audio-v1',sound?'1':'0')}catch(e){}
  showSoundState();
-});
+}
+$('soundBtn').addEventListener('click',toggleSound);
+$('introSoundBtn').addEventListener('click',toggleSound);
 for(let setting of [{name:'music',slider:'musicSlider',output:'musicValue'},{name:'effects',slider:'effectsSlider',output:'effectsValue'}]){
  const input=$(setting.slider),output=$(setting.output),initial=setting.name==='music'?musicMix:effectsMix;
  input.value=Math.round(initial*100);output.textContent=input.value+'%';
