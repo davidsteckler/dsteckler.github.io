@@ -128,7 +128,7 @@
     opts = opts || {};
     t = when(t);
     var source = A.createBufferSource(), f = A.createBiquadFilter(), g = A.createGain();
-    source.buffer = noiseBuffer; f.type = opts.type || 'bandpass';
+    source.buffer = noiseBuffer; source.loop = true; f.type = opts.type || 'bandpass';
     f.frequency.setValueAtTime(opts.freq || 1100, t);
     f.Q.value = opts.q || .65;
     source.connect(f); f.connect(g); g.connect(dest);
@@ -260,7 +260,7 @@
       var length=Math.ceil(A.sampleRate*2);
       noiseBuffer=A.createBuffer(1,length,A.sampleRate);
       var data=noiseBuffer.getChannelData(0), last=0;
-      for(var i=0;i<length;i++){last=(last+(.023*(Math.random()*2-1)))/1.012;data[i]=Math.max(-.7,Math.min(.7,last));}
+      for(var i=0;i<length;i++){var white=Math.random()*2-1;last=(last+.02*white)/1.012;data[i]=Math.max(-.7,Math.min(.7,last*.72+white*.22));}
       ambience('city');ambience('wild');
       master.gain.value=.00001;
       return true;
