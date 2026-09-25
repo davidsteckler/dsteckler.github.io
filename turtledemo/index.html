@@ -2203,7 +2203,14 @@ for i in range(4):
       fn0("clear",clear);
       fn1("shape",function(name){setShape(name);return none();});
       fn0("reset",reset);
-      fn1("dot",function(v){dot(v);return none();});
+      var dotFn=function(size,shade){
+        dot(js(size),shade===Sk.builtin.none.none$?undefined:js(shade));
+        return none();
+      };
+      dotFn.co_varnames=["size","color"];
+      dotFn.co_argcount=2;
+      dotFn.$defaults=[Sk.builtin.none.none$];
+      Sk.builtins.dot=new Sk.builtin.func(dotFn);
       fn0("stamp",function(){drawSpriteOn(ctx,true);});
       fn0("hideturtle",function(){state.visible=false;refreshSprite();});
       Sk.builtins.ht=Sk.builtins.hideturtle;
