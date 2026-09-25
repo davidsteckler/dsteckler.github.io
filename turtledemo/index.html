@@ -1908,33 +1908,43 @@ for i in range(4):
       var startAngle=Math.atan2(state.y-cy,state.x-cx);
       var signedExtent=rad(angle)*(r>=0?1:-1);
       var arcLength=Math.abs(r*rad(angle));
+      var lastFraction=0;
 
+      // Render EVERY point along the path. At speed(0), animation jumps directly
+      // to t=1. Previously this only joined the first and last point: full
+      // circles vanished completely and petals became straight rays.
       if(stepCount!==null){
-        var points=[[state.x,state.y]];
+        var vertices=[[state.x,state.y]];
         for(var s=1;s<=stepCount;s++){
-          var theta=startAngle+signedExtent*(s/stepCount);
-          points.push([cx+Math.abs(r)*Math.cos(theta),cy+Math.abs(r)*Math.sin(theta)]);
+          var vertexAngle=startAngle+signedExtent*(s/stepCount);
+          vertices.push([cx+Math.abs(r)*Math.cos(vertexAngle),cy+Math.abs(r)*Math.sin(vertexAngle)]);
         }
-        var lengths=[],total=0;
-        for(var p=1;p<points.length;p++){
-          var d=Math.hypot(points[p][0]-points[p-1][0],points[p][1]-points[p-1][1]);
-          lengths.push(d);total+=d;
-        }
-        return animate("move",total,function(t){
-          var target=t*total,used=0,index=0;
-          while(index<lengths.length-1&&used+lengths[index]<target){used+=lengths[index];index++;}
-          var local=lengths[index]?Math.max(0,Math.min(1,(target-used)/lengths[index])):1;
-          var a=points[index],b=points[index+1];
-          moveTo(a[0]+(b[0]-a[0])*local,a[1]+(b[1]-a[1])*local);
+        return animate("move",arcLength,function(t){
+          var from=lastFraction*stepCount, to=t*stepCount;
+          var first=Math.floor(from)+1;
+          for(var n=first;n<=Math.floor(to);n++){
+            if(n>0 && n<=stepCount)moveTo(vertices[n][0],vertices[n][1]);
+          }
+          if(to<stepCount){
+            var segment=Math.floor(to),fraction=to-segment;
+            var a=vertices[segment],b=vertices[segment+1];
+            moveTo(a[0]+(b[0]-a[0])*fraction,a[1]+(b[1]-a[1])*fraction);
+          }else moveTo(vertices[stepCount][0],vertices[stepCount][1]);
           state.heading=heading+angle*(r>=0?1:-1)*t;
+          lastFraction=t;
           refreshSprite();
         },"Drawing "+stepCount+"-step shape");
       }
 
       return animate("move",arcLength,function(t){
-        var a=startAngle+signedExtent*t;
-        moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
+        var step=Math.max(1,Math.ceil(Math.abs(angle)*(t-lastFraction)/2));
+        for(var i=1;i<=step;i++){
+          var fraction=lastFraction+(t-lastFraction)*i/step;
+          var theta=startAngle+signedExtent*fraction;
+          moveTo(cx+Math.abs(r)*Math.cos(theta),cy+Math.abs(r)*Math.sin(theta));
+        }
         state.heading=heading+angle*(r>=0?1:-1)*t;
+        lastFraction=t;
         refreshSprite();
       },"Drawing arc "+Math.abs(angle)+"°");
     }
