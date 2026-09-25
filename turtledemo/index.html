@@ -1127,6 +1127,7 @@ for i in range(4):
 (function(){
   "use strict";
 
+  var PREVIEW_MODE = new URLSearchParams(location.search).has("renderPreview");
   var STORAGE_KEY = "dsteckler-turtle-demo-code-v1";
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
@@ -1337,7 +1338,7 @@ for i in range(4):
 
   try {
     var saved = localStorage.getItem(STORAGE_KEY);
-    if(saved !== null) editor.setValue(saved);
+    if(saved !== null && !PREVIEW_MODE) editor.setValue(saved);
   } catch(e) {}
 
   var errorLineMarker=null;
@@ -1375,6 +1376,7 @@ for i in range(4):
 
   var saveTimer = null;
   editor.on("change", function(){
+    if(PREVIEW_MODE)return;
     clearErrorHighlight();
     saveStatus.textContent = "saving…";
     clearTimeout(saveTimer);
@@ -1783,7 +1785,7 @@ for i in range(4):
         update(1);
         return Promise.resolve(none());
       }
-      if(!playback.active){
+      if(!playback.active || PREVIEW_MODE){
         update(1);
         return Promise.resolve(none());
       }
@@ -2306,7 +2308,7 @@ for i in range(4):
       playback.pending=null;
       try{pending.resolve(pending.susp.resume());}
       catch(e){pending.reject(e);}
-    },lineDelay());
+    },PREVIEW_MODE?0:lineDelay());
   }
   function cancelPlayback(){
     if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
@@ -2405,7 +2407,7 @@ for i in range(4):
     playback.speed=6;
     showExecutingLine(null);
     syncPlaybackButtons();
-    if(window.innerWidth<=560){
+    if(!PREVIEW_MODE && window.innerWidth<=560){
       requestAnimationFrame(function(){worldPanel.scrollIntoView({behavior:"smooth",block:"start"});});
     }
 
@@ -2413,8 +2415,9 @@ for i in range(4):
       output:outf,
       read:builtinRead,
       __future__:Sk.python3,
-      debugging:true,
+      debugging:!PREVIEW_MODE,
       breakpoints:function(filename,lineno){
+        if(PREVIEW_MODE)return false;
         if(token!==runToken)return false;
         // Don't stop in modules imported by the student's code.
         if(String(filename).indexOf("<stdin>")<0)return false;
@@ -2533,38 +2536,68 @@ for i in range(4):
     var btn=document.createElement("button");btn.className="demo-filter"+(cat==="All"?" active":"");btn.textContent=cat;btn.type="button";
     btn.addEventListener("click",function(){currentDemoFilter=cat;demoFilters.querySelectorAll(".demo-filter").forEach(function(b){b.classList.toggle("active",b===btn);});renderDemoGallery();});demoFilters.appendChild(btn);
   });
-  function previewDemo(canvas,d,index){
-    var c=canvas.getContext("2d");if(!c)return;
-    var w=308,h=198;canvas.width=w;canvas.height=h;
-    var dark=["rays","sky","skyline","maze","tree"].indexOf(d.art)!==-1 || (index%7===1);
-    c.fillStyle=dark?"#142939":"#faf4e9";c.fillRect(0,0,w,h);
-    var colors=dark?["#75d7ca","#f1cd79","#f48fa8","#a2b1ec"]:["#176b73","#d8815b","#e4ba5c","#9179b1"];
-    c.save();c.translate(w/2,h/2);
-    function line(x,y,xx,yy,color,width){c.strokeStyle=color;c.lineWidth=width||2;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();}
-    function circ(x,y,r,color,width){c.strokeStyle=color;c.lineWidth=width||2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();}
-    if(d.art==="rings"||d.art==="mandala"||d.art==="flower"){
-      for(var i=0;i<36;i++){c.save();c.rotate(i*Math.PI/18);c.strokeStyle=colors[i%4];c.lineWidth=2;c.beginPath();c.ellipse(0,32,25+(index%4)*5,49,0,0,Math.PI*2);c.stroke();c.restore();}
-      if(d.art==="flower"){c.fillStyle="#c28a37";c.beginPath();c.arc(0,0,15,0,Math.PI*2);c.fill();}
-    }else if(d.art==="rays"||d.art==="snow"||d.art==="star"){
-      for(var i=0;i<64;i++){var a=i*Math.PI/32,r=43+(i%5)*9;line(Math.cos(a)*11,Math.sin(a)*11,Math.cos(a)*r*1.6,Math.sin(a)*r*1.1,colors[i%4],i%3===0?3:1);}
-    }else if(d.art==="spiral"||d.art==="walk"){
-      c.beginPath();for(var i=0;i<700;i++){var a=i*.105,r=i*.15;var x=Math.cos(a)*r,y=Math.sin(a)*r*.72;if(!i)c.moveTo(x,y);else c.lineTo(x,y);}c.strokeStyle=colors[index%4];c.lineWidth=3;c.stroke();
-    }else if(d.art==="waves"){
-      for(var j=0;j<6;j++){c.beginPath();for(var x=-154;x<=154;x+=3){var y=Math.sin(x/17+j)*13+(j-2.5)*26;if(x===-154)c.moveTo(x,y);else c.lineTo(x,y);}c.strokeStyle=colors[j%4];c.lineWidth=3;c.stroke();}
-    }else if(d.art==="heart"){
-      for(var y=0;y<8;y++)for(var x=0;x<9;x++){var dx=x-4,dy=y-2.4;if(Math.pow(dx*dx+dy*dy-11,3)-dx*dx*dy*dy*20<0){c.fillStyle="#e95b75";c.fillRect(dx*22-9,dy*19-9,18,16);}}
-    }else if(d.art==="checker"||d.art==="dots"||d.art==="hex"){
-      for(var y=0;y<6;y++)for(var x=0;x<9;x++){c.fillStyle=colors[(x+y)%4];if(d.art==="dots"){c.beginPath();c.arc(-127+x*31,-79+y*31,4+(x*y)%10,0,7);c.fill();}else if(d.art==="hex"){circ(-125+x*30+(y%2)*15,-75+y*29,16,colors[(x+y)%4],2);}else c.fillRect(-135+x*30,-89+y*30,30,30);}
-    }else if(d.art==="face"||d.art==="robot"){
-      c.fillStyle="#edbd5d";c.beginPath();c.arc(0,0,68,0,7);c.fill();c.fillStyle="#263d49";for(var x of [-25,25]){c.beginPath();c.arc(x,-15,8,0,7);c.fill();}c.strokeStyle="#263d49";c.lineWidth=5;c.beginPath();c.arc(0,4,35,.15,Math.PI-.15);c.stroke();
-    }else if(d.art==="type"){c.fillStyle="#176b73";c.fillRect(-154,-99,308,198);c.fillStyle="#f1cc82";c.font="bold 49px Arial";c.textAlign="center";c.fillText("HELLO",0,-8);c.font="bold 40px Arial";c.fillText("WORLD",0,40);
-    }else if(d.art==="skyline"||d.art==="mountain"||d.art==="tree"){
-      for(var i=0;i<7;i++){c.fillStyle=colors[i%4];if(d.art==="mountain"){c.beginPath();c.moveTo(-160+i*55,100);c.lineTo(-100+i*50,-70+i%3*23);c.lineTo(-36+i*55,100);c.fill();}else c.fillRect(-155+i*45,95-(i*41)%145,40,160);}
-    }else{
-      for(var i=0;i<24;i++){c.save();c.rotate(i*Math.PI/12);c.strokeStyle=colors[i%4];c.lineWidth=2;c.strokeRect(-30,-58,60+i*.9,60+i*.9);c.restore();}
-    }
-    c.restore();
+
+  // Real thumbnails: run each Python program through our existing Turtle engine
+  // in one isolated renderer, then capture its actual canvas.
+  var previewCache={}, previewQueue=[], previewFrame=null, previewReady=false, previewBusy=false;
+  function previewDemo(canvas,d){
+    canvas.width=400;canvas.height=400;
+    var c=canvas.getContext("2d");c.fillStyle="#fffdf8";c.fillRect(0,0,400,400);
+    c.fillStyle="#78827c";c.font="15px Arial";c.textAlign="center";c.fillText("Rendering…",200,204);
+    if(previewCache[d.id]){paintPreview(d.id);return;}
+    if(!previewQueue.some(function(job){return job.id===d.id;}))previewQueue.push({id:d.id,code:d.code});
+    pumpPreviews();
   }
+  function paintPreview(id){
+    if(!previewCache[id])return;
+    var image=new Image();
+    image.onload=function(){
+      demoGallery.querySelectorAll(".demo-tile").forEach(function(tile){
+        if(tile.dataset.demoId!==id)return;
+        var canvas=tile.querySelector("canvas");
+        canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+      });
+    };
+    image.src=previewCache[id];
+  }
+  function pumpPreviews(){
+    if(PREVIEW_MODE||previewBusy||!previewQueue.length)return;
+    if(!previewFrame){
+      previewFrame=document.createElement("iframe");
+      previewFrame.title="Turtle thumbnail renderer";
+      previewFrame.setAttribute("aria-hidden","true");
+      previewFrame.style.cssText="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-2000px";
+      previewFrame.onload=function(){previewReady=true;pumpPreviews();};
+      previewFrame.src=location.pathname+"?renderPreview=1";
+      document.body.appendChild(previewFrame);
+      return;
+    }
+    if(!previewReady)return;
+    var job=previewQueue.shift();previewBusy=true;
+    previewFrame.contentWindow.postMessage({kind:"turtle-render",id:job.id,code:job.code},location.origin);
+  }
+  if(!PREVIEW_MODE)window.addEventListener("message",function(event){
+    if(event.origin!==location.origin||!previewFrame||event.source!==previewFrame.contentWindow)return;
+    if(!event.data||event.data.kind!=="turtle-rendered")return;
+    previewBusy=false;
+    if(event.data.image){previewCache[event.data.id]=event.data.image;paintPreview(event.data.id);}
+    pumpPreviews();
+  });
+  if(PREVIEW_MODE)window.addEventListener("message",async function(event){
+    if(event.origin!==location.origin||!event.data||event.data.kind!=="turtle-render")return;
+    var task=event.data,image=null;
+    try{
+      editor.setValue(task.code);
+      await runCode(false);
+      var snapshot=document.createElement("canvas");snapshot.width=400;snapshot.height=400;
+      var brush=snapshot.getContext("2d");
+      brush.fillStyle=document.getElementById("worldWrap").style.backgroundColor||"#fff";
+      brush.fillRect(0,0,400,400);
+      brush.drawImage(document.getElementById("turtle-drawing"),0,0);
+      image=snapshot.toDataURL("image/png");
+    }catch(error){console.warn("Preview rendering failed",task.id,error);}
+    event.source.postMessage({kind:"turtle-rendered",id:task.id,image:image},event.origin);
+  });
   function renderDemoGallery(){
     var query=(demoSearch.value||"").trim().toLowerCase();
     var visible=DEMO_PROGRAMS.filter(function(d){return (currentDemoFilter==="All"||d.category===currentDemoFilter) && (d.title+" "+d.category+" "+d.desc).toLowerCase().indexOf(query)!==-1;});
@@ -2573,6 +2606,7 @@ for i in range(4):
     document.getElementById("demoEmpty").style.display=visible.length?"none":"block";
     visible.forEach(function(d){
       var button=document.createElement("button");button.type="button";button.className="demo-tile";button.title="Load and run "+d.title;
+      button.dataset.demoId=d.id;
       var canvas=document.createElement("canvas");canvas.setAttribute("aria-hidden","true");button.appendChild(canvas);
       var body=document.createElement("div");body.className="demo-tile-copy";
       var name=document.createElement("div");name.className="demo-tile-name";name.textContent=d.title;
@@ -2585,11 +2619,11 @@ for i in range(4):
         button.style.borderColor="#176b73";
         runCode(false);
         if(window.innerWidth<=840)document.getElementById("worldPanel").scrollIntoView({behavior:"smooth",block:"start"});
-      });demoGallery.appendChild(button);previewDemo(canvas,d,Number(d.id.slice(7)));
+      });demoGallery.appendChild(button);previewDemo(canvas,d);
     });
   }
   demoSearch.addEventListener("input",renderDemoGallery);
-  renderDemoGallery();
+  if(!PREVIEW_MODE)renderDemoGallery();
   function openCommands(){
     document.body.classList.add("commands-open");
     if(commandsToggle)commandsToggle.setAttribute("aria-expanded","true");
