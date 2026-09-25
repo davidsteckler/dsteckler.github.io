@@ -1,7 +1,7 @@
 /* THE OTHER SLEEP — ORIGINAL CINEMATIC SCORES, composed & synthesized in-browser.
    Cael: 72 BPM noir/analog strings, distant felt-piano, muted heartbeat, rain.
    Ilyra: 91 BPM organic marimba, hand drums, soft choir, living forest.
-   16-bar evolving harmony per world, original leitmotif, reactive enemy tension.
+   8-bar evolving harmony per world, original leitmotif, reactive enemy tension.
    The same four descending notes migrate between both planets. No samples or downloads. */
 (function(win){'use strict';
 let A=null,master=null,compressor=null,lowpass=null,rev=null,wet=null,music=null,fx=null,city=null,wild=null,noiseBuffer=null,ambienceNodes=[],
