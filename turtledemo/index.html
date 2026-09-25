@@ -1,0 +1,2779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore dozens of editable Python Turtle programs and see what code can draw.">
+  <title>Python Turtle Demo Gallery | David Steckler</title>
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+
+  <style>
+    :root{
+      --bg:#f0ebe1;
+      --paper:#faf7f0;
+      --surface:#fffdf8;
+      --ink:#202525;
+      --mid:#4f5858;
+      --soft:#737b79;
+      --ghost:#9da3a0;
+      --rule:#d8d2c6;
+      --rule-strong:#bdb5a7;
+      --teal:#176b73;
+      --teal-dark:#0f5057;
+      --teal-light:#e1efed;
+      --terra:#b85d3f;
+      --terra-light:#f5e6df;
+      --green:#2c7a58;
+      --editor:#202526;
+      --editor-2:#292f30;
+      --editor-rule:#3a4142;
+      --editor-text:#e7eceb;
+      --shadow:0 12px 35px rgba(37,43,42,.09);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink)}
+    body{
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      overflow:hidden;
+    }
+    button,select,input{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+    }
+
+    .appbar{
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:8px 14px;
+      border-bottom:1px solid var(--rule);
+      background:rgba(250,247,240,.96);
+      backdrop-filter:blur(12px);
+    }
+    .appbar-left,.appbar-right{
+      display:flex;
+      align-items:center;
+      min-width:0;
+    }
+    .appbar-left{gap:12px}
+    .appbar-right{gap:12px;justify-content:flex-end}
+    .appbar-divider{
+      width:1px;height:30px;flex:0 0 auto;
+      background:var(--rule-strong);
+      opacity:.75;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      text-decoration:none;
+      min-width:0;
+      flex:0 0 auto;
+    }
+    .brand-mark{
+      width:32px;height:32px;border-radius:9px;
+      display:grid;place-items:center;
+      color:white;background:var(--teal);
+      font:800 14px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .brand-title{
+      font-weight:820;
+      font-size:.84rem;
+      letter-spacing:-.01em;
+      white-space:nowrap;
+    }
+    .title-wrap{display:flex;align-items:center;gap:9px;min-width:0}
+    .turtle-badge{
+      width:31px;height:31px;border-radius:9px;
+      display:grid;place-items:center;
+      border:1px solid #b8d8d4;
+      background:var(--teal-light);
+      color:var(--teal);
+      font-size:17px;
+      flex:0 0 auto;
+    }
+    .tool-copy{min-width:0}
+    .tool-title{
+      font-weight:850;
+      font-size:.92rem;
+      line-height:1.1;
+      letter-spacing:-.02em;
+      white-space:nowrap;
+    }
+    .tool-note{
+      color:var(--soft);
+      font-size:.67rem;
+      line-height:1.2;
+      margin-top:2px;
+      white-space:nowrap;
+    }
+    .site-actions{display:flex;align-items:center;gap:1px;flex:0 0 auto}
+    .site-link{
+      text-decoration:none;
+      color:var(--mid);
+      font-size:.7rem;
+      font-weight:750;
+      padding:7px 7px;
+      border-radius:8px;
+    }
+    .site-link:hover{background:rgba(255,255,255,.7);color:var(--ink)}
+    .toolbar{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:nowrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      height:34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border:1px solid var(--rule);
+      background:white;
+      color:var(--ink);
+      border-radius:9px;
+      padding:0 11px;
+      font-weight:800;
+      font-size:.75rem;
+      box-shadow:0 1px 1px rgba(0,0,0,.02);
+      white-space:nowrap;
+    }
+    .btn:hover{border-color:var(--rule-strong);background:#fff}
+    .btn.primary{background:var(--teal);border-color:var(--teal);color:white}
+    .btn.primary:hover{background:var(--teal-dark)}
+    .btn.danger{color:#8c422d}
+    .btn.soft-danger{color:#8c422d;background:#fff8f5;border-color:#e6cfc5}
+    .btn.soft-danger:hover{background:#fff2ec;border-color:#d9b5a7}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .shortcut{opacity:.72;font:600 .61rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .workspace{
+      min-height:0;
+      padding:14px;
+      display:grid;
+      grid-template-columns:minmax(360px,1.08fr) minmax(410px,.92fr) 292px;
+      gap:14px;
+      align-items:stretch;
+    }
+    .panel{
+      min-height:0;
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:var(--surface);
+      box-shadow:var(--shadow);
+    }
+    .panel-head{
+      height:43px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 13px;
+      border-bottom:1px solid var(--rule);
+      background:#f8f4ec;
+    }
+    .panel-label{
+      display:flex;align-items:center;gap:8px;
+      font:800 .72rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--mid);
+    }
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--ghost)}
+    .status-dot.running{background:#d89e38;box-shadow:0 0 0 4px rgba(216,158,56,.12)}
+    .status-dot.good{background:var(--green);box-shadow:0 0 0 4px rgba(44,122,88,.10)}
+    .status-dot.bad{background:var(--terra);box-shadow:0 0 0 4px rgba(184,93,63,.10)}
+    .panel-mini{color:var(--ghost);font-size:.68rem;font-weight:700}
+
+    .code-panel{
+      display:grid;
+      grid-template-rows:43px minmax(320px,1fr);
+      background:var(--editor);
+      border-color:#343a3b;
+    }
+    .code-panel .panel-head{
+      border-color:var(--editor-rule);
+      background:var(--editor-2);
+    }
+    .code-panel .panel-label{color:#bac2c1}
+    .code-panel .panel-mini{color:#818a89}
+
+    #editor-source{display:none}
+    .CodeMirror{
+      height:100%;
+      font:500 15px/1.62 "JetBrains Mono","SFMono-Regular",Consolas,Monaco,monospace;
+      background:var(--editor);
+      color:var(--editor-text);
+    }
+    .CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}
+    .CodeMirror-linenumber{color:#697271}
+    .CodeMirror-cursor{border-left:2px solid #e4bd66}
+    .CodeMirror .turtle-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
+    .CodeMirror .turtle-error-line{
+      background:rgba(219,93,66,.18)!important;
+      box-shadow:inset 3px 0 #e16f55;
+    }
+    .CodeMirror .turtle-error-token{
+      text-decoration:underline wavy #ef8a70 1.5px;
+      text-decoration-skip-ink:none;
+      background:rgba(239,138,112,.10);
+    }
+    .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
+    .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
+    .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
+    #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
+    .CodeMirror-selected{background:#374243 !important}
+    .cm-s-default .cm-keyword{color:#d7a7df}
+    .cm-s-default .cm-def{color:#87c8dc}
+    .cm-s-default .cm-variable{color:#e7eceb}
+    .cm-s-default .cm-variable-2{color:#a9d0e0}
+    .cm-s-default .cm-variable-3{color:#dfb48b}
+    .cm-s-default .cm-number{color:#e4bd66}
+    .cm-s-default .cm-string{color:#a9ce94}
+    .cm-s-default .cm-comment{color:#7f9187;font-style:italic}
+    .cm-s-default .cm-builtin{color:#85c7c0}
+    .cm-s-default .cm-operator{color:#cfd6d5}
+
+    .console{
+      border-top:1px solid var(--editor-rule);
+      display:grid;
+      grid-template-rows:34px 1fr;
+      min-height:0;
+      background:#181c1d;
+    }
+    .world-panel .console{
+      border-top:1px solid #303738;
+      background:#181c1d;
+    }
+    .console-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;
+      color:#9da6a5;
+      font:700 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .console-clear{
+      border:0;background:transparent;color:#818a89;
+      font-size:.67rem;font-weight:700;padding:5px 7px;border-radius:6px;
+    }
+    .console-clear:hover{background:#262c2d;color:#c9cecd}
+    #output{
+      margin:0;
+      padding:2px 13px 12px;
+      overflow:auto;
+      color:#cfd6d5;
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
+      font:500 12.5px/1.5 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+    }
+    #output .error{color:#f0a48c}
+    #output .success{color:#9fd0b4}
+    #output .muted{color:#7c8584}
+    .error-card{
+      display:block;margin:3px 0 8px;padding:11px 12px 12px;
+      border:1px solid #6c4138;border-radius:10px;background:#251d1b;
+      color:#e8e4df;white-space:normal;font-family:Arial,Helvetica,sans-serif;
+    }
+    .error-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+    .error-badge{color:#f2aa93;font:800 .67rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.05em}
+    .error-line-button{border:1px solid #65443d;background:#30231f;color:#f3c5b5;border-radius:7px;padding:5px 8px;font-size:.66rem;font-weight:800}
+    .error-line-button:hover{background:#3a2924}
+    .error-title{font-size:.87rem;font-weight:850;line-height:1.25;color:#fff;margin-bottom:5px}
+    .error-explanation{font-size:.76rem;line-height:1.45;color:#d7d0cb}
+    .error-source{display:block;margin-top:8px;padding:7px 8px;border-radius:7px;background:#171b1c;color:#f1d4c8;font:650 .72rem/1.45 "JetBrains Mono","SFMono-Regular",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .error-hint{display:block;margin-top:8px;padding:7px 8px;border-radius:7px;background:#e7f2ee;color:#174f48;font-size:.74rem;line-height:1.4;font-weight:750}
+    .error-raw{margin-top:8px;color:#9f9691;font-size:.66rem}
+    .error-raw summary{cursor:pointer;color:#b9aaa4;font-weight:750}
+    .error-raw code{display:block;margin-top:5px;color:#a9a09b;font:500 .65rem/1.4 "JetBrains Mono","SFMono-Regular",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+
+    .world-panel{
+      display:grid;
+      grid-template-rows:43px minmax(420px,1fr) auto var(--output-height,150px);
+      min-height:0;
+    }
+    .world-stage{
+      min-height:0;
+      display:grid;
+      place-items:center;
+      padding:20px;
+      background:
+        radial-gradient(circle at 50% 40%,rgba(23,107,115,.05),transparent 52%),
+        var(--surface);
+      overflow:auto;
+    }
+    .world-wrap{
+      width:404px;height:404px;
+      position:relative;
+      flex:0 0 auto;
+      border:2px solid #b8b4aa;
+      background:white;
+      box-shadow:0 8px 24px rgba(36,42,41,.08);
+      overflow:hidden;
+    }
+    .grid{
+      position:absolute;inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(to right,rgba(32,37,37,.075) 1px,transparent 1px),
+        linear-gradient(to bottom,rgba(32,37,37,.075) 1px,transparent 1px);
+      background-size:20px 20px;
+      z-index:0;
+    }
+    .axis-x,.axis-y{position:absolute;background:rgba(32,37,37,.28);pointer-events:none;z-index:1}
+    .axis-x{left:0;right:0;top:199px;height:1px}
+    .axis-y{top:0;bottom:0;left:199px;width:1px}
+    .axis-label{
+      position:absolute;z-index:1;pointer-events:none;
+      font:600 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:rgba(32,37,37,.48);
+      background:rgba(255,255,255,.78);
+      padding:2px 3px;
+      border-radius:3px;
+    }
+    .axis-label.xneg{left:4px;top:204px}
+    .axis-label.xpos{right:4px;top:204px}
+    .axis-label.ypos{left:204px;top:4px}
+    .axis-label.yneg{left:204px;bottom:4px}
+    #turtle-canvas{
+      position:absolute;inset:0;
+      width:400px;height:400px;
+      z-index:2;
+      pointer-events:none;
+    }
+    #turtle-drawing,#turtle-sprite{
+      position:absolute;
+      inset:0;
+      width:400px;
+      height:400px;
+      display:block;
+    }
+    #turtle-drawing{z-index:2}
+    #turtle-sprite{z-index:3}
+
+    .world-info{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-top:1px solid var(--rule);
+      background:#f8f4ec;
+    }
+    .world-copy{font-size:.77rem;color:var(--mid);line-height:1.4}
+    .world-copy strong{color:var(--ink)}
+    .toggle{
+      display:flex;align-items:center;gap:7px;
+      color:var(--soft);font-size:.72rem;font-weight:700;
+      white-space:nowrap;
+    }
+    .toggle input{accent-color:var(--teal)}
+
+    .command-library{
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto auto auto 1fr;
+      background:var(--surface);
+    }
+    .command-library .panel-head{padding-right:8px}
+    .commands-count{
+      font:700 .65rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--ghost);
+    }
+    .command-search-wrap{
+      padding:10px;
+      border-bottom:1px solid var(--rule);
+      background:#fbf8f2;
+    }
+    .command-search{
+      width:100%;
+      height:36px;
+      border:1px solid var(--rule);
+      border-radius:10px;
+      background:white;
+      color:var(--ink);
+      padding:0 10px;
+      outline:none;
+      font-size:.78rem;
+    }
+    .command-search:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,107,115,.08)}
+    .library-nav{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:4px;
+      padding:8px 8px 7px;
+      border-bottom:1px solid var(--rule);
+      background:#f6f2e9;
+    }
+    .library-tab{
+      min-width:0;
+      border:1px solid transparent;
+      border-radius:8px;
+      background:transparent;
+      color:var(--soft);
+      padding:7px 4px;
+      font-size:.66rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .library-tab:hover{background:white;color:var(--ink)}
+    .library-tab.active{
+      background:var(--teal-light);
+      border-color:#bfdad6;
+      color:var(--teal-dark);
+    }
+    .library-section{display:none}
+    .library-section.active{display:block}
+    .library-section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:8px;
+      margin:8px 2px 10px;
+      padding-bottom:8px;
+      border-bottom:1px solid var(--rule);
+    }
+    .library-section-head strong{font-size:.8rem;color:var(--ink)}
+    .library-section-head span{font-size:.66rem;color:var(--soft)}
+    .library-searching .library-section{display:block}
+    .library-searching .library-section-head{display:none}
+
+    .command-scroll{
+      min-height:0;
+      overflow:auto;
+      padding:6px 10px 16px;
+    }
+    .command-tip{
+      margin:6px 0 12px;
+      color:var(--soft);
+      font-size:.7rem;
+      line-height:1.4;
+    }
+    .command-tip strong{color:var(--teal)}
+    .extra-reference .command-item{padding:7px}
+    .command-category{margin:14px 0 5px}
+    .command-category:first-of-type{margin-top:6px}
+    .command-category-title{
+      font:800 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--teal);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      padding:0 2px 6px;
+    }
+    .command-item{
+      width:100%;
+      display:block;
+      text-align:left;
+      border:1px solid transparent;
+      border-top-color:var(--rule);
+      background:transparent;
+      padding:9px 7px;
+      color:var(--ink);
+      border-radius:8px;
+    }
+    .command-item:hover,
+    .command-item:focus{
+      background:var(--teal-light);
+      border-color:#c6dedb;
+      outline:none;
+    }
+    .command-syntax{
+      display:block;
+      font:700 .73rem/1.35 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+      color:var(--ink);
+      overflow-wrap:anywhere;
+    }
+    .command-desc{
+      display:block;
+      margin-top:4px;
+      color:var(--soft);
+      font-size:.68rem;
+      line-height:1.38;
+    }
+    .command-alias{
+      display:block;
+      margin-top:4px;
+      color:var(--ghost);
+      font:600 .61rem/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .command-empty{
+      display:none;
+      padding:24px 8px;
+      text-align:center;
+      color:var(--soft);
+      font-size:.75rem;
+    }
+    .command-close{
+      display:none;
+      border:0;
+      background:transparent;
+      color:var(--soft);
+      font-size:1.1rem;
+      line-height:1;
+      padding:5px 7px;
+      border-radius:7px;
+    }
+    .command-close:hover{background:rgba(0,0,0,.05)}
+    .commands-toggle{display:none}
+    .commands-overlay{display:none}
+
+    .example-select{
+      height:36px;
+      border:1px solid var(--rule);
+      background:white;
+      color:var(--mid);
+      border-radius:10px;
+      padding:0 30px 0 10px;
+      font-size:.76rem;
+      font-weight:750;
+      outline:none;
+    }
+
+    .loading{
+      position:absolute;inset:0;z-index:8;
+      display:none;place-items:center;
+      background:rgba(255,253,248,.9);
+      color:var(--mid);
+      font-size:.78rem;font-weight:800;
+    }
+    .loading.show{display:grid}
+
+
+    /* A viewport workspace lets each panel scroll independently. */
+    .app{height:100dvh;min-height:0;grid-template-rows:auto auto minmax(0,1fr);overflow:hidden}
+    .layoutbar{
+      display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+      min-height:44px;padding:7px 15px;border-bottom:1px solid var(--rule);
+      background:#eee9df;color:var(--mid);
+    }
+    .layout-group{display:flex;align-items:center;gap:9px;min-width:0}
+    .layout-group label{white-space:nowrap;font-size:.72rem;font-weight:800}
+    .layout-group input[type="range"]{width:114px;accent-color:var(--teal);cursor:ew-resize}
+    .layout-group output{
+      white-space:nowrap;min-width:61px;
+      font:650 .66rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--soft);font-variant-numeric:tabular-nums;
+    }
+    .layout-mobile-editor{display:none}
+    .layout-output input[type="range"]{width:86px}
+    .layout-text-button{
+      border:0;background:transparent;border-radius:7px;color:var(--teal);
+      font-size:.7rem;font-weight:800;padding:5px 6px;white-space:nowrap;
+    }
+    .layout-text-button:hover{background:rgba(23,107,115,.09)}
+    .reset-layout{margin-left:auto}
+    .workspace{
+      --code-fr:53fr;--world-fr:47fr;--library-width:300px;
+      display:grid;
+      grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr)) 10px var(--library-width);
+      gap:5px;padding:9px;
+      min-height:0;height:100%;
+      overflow:hidden;align-items:stretch;
+    }
+    .panel{height:100%;min-width:0}
+    .code-panel{grid-template-rows:47px minmax(0,1fr)}
+    .code-panel .CodeMirror{height:100%}
+    .panel-head{height:47px}
+    .editor-head-start,.world-head-actions{display:flex;align-items:center;gap:9px;min-width:0}
+    .clear-code-btn{
+      height:32px;padding:0 10px;border-color:#bf6047;
+      color:#8c3427;background:#fff4ef;
+      font-size:.73rem;white-space:nowrap;
+    }
+    .clear-code-btn:hover{border-color:#9a4633;background:#ffeae0}
+    .code-panel .panel-head{background:#292f30}
+    .code-panel .clear-code-btn{background:#452d28;color:#ffe0d2;border-color:#a2634d}
+    .code-panel .clear-code-btn:hover{background:#5b352d;border-color:#cc896f}
+    .world-head-actions .panel-mini{white-space:nowrap}
+    .clear-run-btn{height:31px;padding:0 10px;font-size:.72rem;color:var(--teal);white-space:nowrap}
+    .world-panel{grid-template-rows:47px minmax(185px,1fr) auto var(--output-height,150px)}
+    .world-stage{
+      position:relative;min-height:0;display:flex;justify-content:center;align-items:flex-start;
+      padding:12px;overflow:auto;
+    }
+    .motion-status{
+      position:absolute;left:12px;bottom:9px;z-index:5;
+      border-radius:6px;padding:4px 7px;
+      background:rgba(234,246,241,.95);color:var(--teal);
+      font:700 .67rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+      pointer-events:none;
+    }
+    .motion-status:empty{display:none}
+    .world-scale-box{position:relative;flex:none;width:404px;height:404px}
+    .world-wrap{transform-origin:top left}
+    .world-info{padding:7px 12px;gap:8px}
+    .world-copy{font-size:.72rem}
+    .toggle{font-size:.69rem}
+    .resize-divider{
+      min-width:0;position:relative;cursor:col-resize;touch-action:none;
+      align-self:stretch;border-radius:10px;outline:none;
+    }
+    .resize-divider:before{
+      content:"";position:absolute;left:50%;top:calc(50% - 31px);
+      transform:translateX(-50%);width:5px;height:62px;border-radius:8px;
+      background:#bab6ab;transition:background .15s;
+    }
+    .resize-divider:hover:before,.resize-divider:focus-visible:before,.resize-divider.dragging:before{background:var(--teal)}
+    body.is-resizing,body.is-resizing *{cursor:col-resize!important;user-select:none!important}
+    .command-library{grid-template-rows:47px auto auto minmax(0,1fr)}
+    .command-scroll{overscroll-behavior:contain}
+    .recipe-panel{border:1px solid #cfdbd8;border-radius:10px;background:#f3f8f6;margin:4px 0 12px}
+    .recipe-panel summary{cursor:pointer;font-size:.74rem;font-weight:800;color:var(--teal);padding:11px 10px}
+    .recipe-panel summary span{float:right;color:var(--soft);font-size:.62rem;font-weight:650}
+    .recipe-body{padding:0 7px 7px}
+    .recipe-button{display:block;text-align:left;width:100%;padding:8px 7px;border:0;border-top:1px solid #d4e4e1;background:transparent;border-radius:6px;color:var(--ink)}
+    .recipe-button:hover{background:#e2f0ec}
+    .recipe-button strong{display:block;font-size:.7rem;margin-bottom:3px}
+    .recipe-button code{font-size:.65rem;color:var(--soft)}
+    .mobile-output{display:none}
+    @media(min-width:1351px){
+      body.library-hidden .workspace{
+        grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr));
+      }
+      body.library-hidden .library-divider,
+      body.library-hidden .command-library{display:none}
+    }
+    @media(max-width:1350px){
+      .workspace{grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(320px,var(--world-fr))}
+      .layout-library{display:none}
+      .library-divider{display:none}
+      .command-library{
+        display:grid;position:fixed;z-index:42;top:0;right:0;bottom:0;
+        height:100dvh;width:min(360px,90vw);border-radius:0;
+        transform:translateX(105%);transition:transform .2s ease;
+        box-shadow:-18px 0 42px rgba(32,37,37,.18);
+      }
+      body.commands-open .command-library{transform:translateX(0)}
+      .commands-toggle{display:inline-flex}
+      .command-close{display:block}
+      .commands-overlay{
+        position:fixed;inset:0;z-index:41;background:rgba(24,28,28,.4);
+      }
+      body.commands-open .commands-overlay{display:block}
+    }
+    @media(max-width:840px){
+      html,body{height:auto;min-height:100%}
+      body{overflow-x:hidden;overflow-y:auto}
+      .app{height:auto;min-height:100dvh;overflow:visible;display:block}
+      .appbar{
+        position:sticky;top:0;z-index:30;
+        flex-wrap:wrap;
+        padding:7px 9px;
+        gap:6px;
+        background:var(--surface);
+        box-shadow:0 3px 12px rgba(32,37,37,.07);
+      }
+      .appbar-left{flex:1 1 auto}
+      .appbar-right{width:100%;justify-content:space-between;gap:6px}
+      .brand-title{font-size:.78rem}
+      .tool-title{font-size:.84rem}
+      .tool-note{display:none}
+      .site-actions{order:2}
+      .toolbar{order:1;gap:5px}
+      .toolbar .btn,.toolbar .example-select{height:34px;padding-left:8px;padding-right:8px}
+      .mobile-output{display:inline-flex}
+      .world-edit-link{display:inline-block}
+      .layoutbar{gap:8px;padding:8px 10px}
+      .layout-editor{display:none}
+      .layout-mobile-editor{display:flex}
+      .layout-output{display:flex}
+      .layout-group input[type="range"]{width:85px}
+      .layout-group output{min-width:42px}
+      .workspace{display:flex;flex-direction:column;min-height:0;height:auto;gap:9px;padding:9px;overflow:visible}
+      .resize-divider{display:none}
+      .code-panel{height:var(--mobile-editor-height,355px);min-height:220px;flex:none;grid-template-rows:47px minmax(0,1fr)}
+      .world-panel{height:auto;min-height:0;flex:none;grid-template-rows:47px auto auto var(--output-height,150px)}
+      .world-stage{min-height:0;padding:10px;overflow:hidden}
+      .motion-status{bottom:7px;left:9px;font-size:.64rem}
+      .world-scale-box{flex:none}
+      .command-library{height:100dvh}
+      .panel{border-radius:13px}
+    }
+    @media(max-width:560px){
+      .appbar{padding:7px}
+      .brand-title,.site-actions{display:none}
+      .appbar-divider{height:26px}
+      .appbar-left{gap:7px}
+      .title-wrap{min-width:0}
+      .tool-title{font-size:.82rem}
+      .toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:5px}
+      .toolbar .btn,.toolbar .example-select{height:38px;width:100%;min-width:0;font-size:.72rem;padding:0 4px}
+      .toolbar .primary{grid-column:auto}
+      .toolbar #viewWorldBtn{display:inline-flex}
+      .shortcut{display:none}
+      .layoutbar{justify-content:space-between;gap:6px}
+      .layout-output input[type="range"]{width:58px}
+      .layout-group{gap:4px}
+      .layout-group label{font-size:.65rem}
+      .layout-group output{font-size:.61rem}
+      .reset-layout{font-size:.63rem;margin-left:0}
+      .editor-head-start{gap:6px}
+      .clear-code-btn{font-size:.68rem;height:33px;padding:0 8px}
+      .code-panel .panel-label{font-size:.66rem}
+      .code-panel .panel-mini{font-size:.6rem;white-space:nowrap}
+      .editor-head-right{gap:4px}
+      .playback-line-status{font-size:.6rem}
+      .world-panel .panel-mini{display:none}
+      .world-panel{scroll-margin-top:145px}
+      .clear-run-btn{height:33px}
+      .world-info{grid-template-columns:1fr auto}
+      .world-copy{font-size:.68rem}
+      .command-library{width:min(365px,94vw)}
+    }
+
+  
+/* Demo gallery */
+.app.demo-app{grid-template-rows:auto auto auto minmax(0,1fr)}
+.demo-gallery{background:#f7f1e6;border-bottom:1px solid var(--rule);padding:11px 15px 12px;min-width:0}
+.demo-gallery-top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.demo-gallery-title{font-size:1rem;font-weight:850;letter-spacing:-.03em}
+.demo-gallery-sub{font-size:.68rem;color:var(--mid);margin-top:2px}
+.demo-filter-bar{display:flex;align-items:center;gap:5px;overflow:auto;scrollbar-width:thin}
+.demo-filter{border:1px solid #d8d0c0;background:#fffaf1;color:#59605d;border-radius:20px;padding:6px 11px;font-size:.69rem;font-weight:760;white-space:nowrap}
+.demo-filter.active{background:#176b73;color:#fff;border-color:#176b73}
+.demo-search{width:145px;min-width:95px;max-width:145px;background:#fffdf8;border:1px solid #d6cebf;border-radius:8px;font-size:.72rem;padding:7px 9px}
+.demo-gallery-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:5px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.demo-tile{flex:0 0 154px;background:#fffdf8;border:1px solid #d9d2c7;border-radius:12px;overflow:hidden;text-align:left;cursor:pointer;padding:0;scroll-snap-align:start;transition:border-color .15s,transform .15s}
+.demo-tile:hover{border-color:#176b73;transform:translateY(-2px)}
+.demo-tile:focus-visible{outline:3px solid #176b73}
+.demo-tile canvas{display:block;width:100%;height:99px;object-fit:cover}
+.demo-tile-copy{padding:7px 9px 9px}
+.demo-tile-name{font-size:.72rem;font-weight:840;line-height:1.2}
+.demo-tile-desc{font-size:.62rem;color:#69726e;line-height:1.25;margin-top:3px}
+.demo-empty{display:none;padding:16px;color:#59605d;font-size:.8rem}
+@media(max-width:1100px){.demo-gallery-top{align-items:flex-start;flex-wrap:wrap}.demo-tile{flex-basis:139px}.demo-tile canvas{height:85px}}
+@media(max-width:560px){.demo-gallery{padding:9px}.demo-gallery-scroll{gap:7px}.demo-tile{flex-basis:126px}.demo-tile canvas{height:78px}.demo-gallery-sub{display:none}.demo-search{width:110px}}
+</style>
+</head>
+
+<body>
+<div class="app demo-app">
+  <header class="appbar">
+    <div class="appbar-left">
+      <a class="brand" href="../index.html" aria-label="David Steckler home">
+        <span class="brand-mark">&gt;_</span>
+        <span class="brand-title">David Steckler</span>
+      </a>
+
+      <span class="appbar-divider" aria-hidden="true"></span>
+
+      <div class="title-wrap">
+        <div class="turtle-badge" aria-hidden="true">▲</div>
+        <div class="tool-copy">
+          <div class="tool-title">Python Turtle Demo</div>
+          <div class="tool-note">Write it. Run it. Watch it move.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="appbar-right">
+      <nav class="site-actions" aria-label="Site">
+        <a class="site-link" href="../course.html">Course</a>
+        <a class="site-link" href="../index.html">Home</a>
+      </nav>
+
+      <div class="toolbar">
+        <select class="example-select" id="examples" aria-label="Load an example">
+          <option value="">Examples</option>
+          <option value="square">Square</option>
+          <option value="star">Star</option>
+          <option value="spiral">Spiral</option>
+          <option value="colors">Color Wheel</option>
+        </select>
+        <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
+        <button class="btn" id="pauseBtn" type="button" disabled>⏸ Pause</button>
+        <button class="btn" id="stepBtn" type="button" disabled title="Execute one Python statement. You can start with Step without pressing Run first.">↳ Step</button>
+        <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
+        <button class="btn commands-toggle" id="commandsToggle" type="button" aria-controls="commandLibrary" aria-expanded="false">☰ Commands</button>
+        <button class="btn mobile-output" id="viewWorldBtn" type="button">View world ↓</button>
+      </div>
+    </div>
+  </header>
+
+  
+<section class="demo-gallery" aria-label="Python Turtle example programs">
+ <div class="demo-gallery-top">
+  <div><div class="demo-gallery-title">See what Turtle can draw <span id="demoCount" style="font-size:.65rem;color:#69726e;font-weight:700"></span></div><div class="demo-gallery-sub">Pick a picture to load its Python code and watch it draw. Every example is editable.</div></div>
+  <div class="demo-filter-bar" id="demoFilters"><input class="demo-search" id="demoSearch" type="search" aria-label="Search example programs" placeholder="Find an example…"></div>
+ </div>
+ <div class="demo-gallery-scroll" id="demoGallery" aria-label="Example gallery"></div>
+ <div class="demo-empty" id="demoEmpty">No examples found. Try another category.</div>
+</section>
+<section class="layoutbar" aria-label="Workspace layout controls">
+    <div class="layout-group layout-editor">
+      <label for="editorSize">Editor / World</label>
+      <input id="editorSize" type="range" min="30" max="70" value="53" step="1" aria-label="Editor width as a percentage of the editor and world space">
+      <output id="editorSizeValue" for="editorSize">53% editor</output>
+    </div>
+    <div class="layout-group layout-library">
+      <label for="librarySize">Library width</label>
+      <input id="librarySize" type="range" min="250" max="420" value="300" step="10">
+      <output id="librarySizeValue" for="librarySize">300 px</output>
+      <button class="layout-text-button" id="libraryToggle" type="button">Hide library</button>
+    </div>
+    <div class="layout-group layout-mobile-editor">
+      <label for="mobileEditorSize">Editor height</label>
+      <input id="mobileEditorSize" type="range" min="220" max="650" value="355" step="10">
+      <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
+    </div>
+    <div class="layout-group layout-output">
+      <label for="outputSize">Text output</label>
+      <input id="outputSize" type="range" min="100" max="290" value="150" step="10" aria-label="Text output panel height">
+      <output id="outputSizeValue" for="outputSize">150 px</output>
+    </div>
+    <button class="layout-text-button reset-layout" id="resetLayout" type="button">Reset layout</button>
+  </section>
+
+  <main class="workspace" id="workspace">
+    <section class="panel code-panel">
+      <div class="panel-head">
+        <div class="editor-head-start">
+          <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Turtle's output alone">⌫ Clear all code</button>
+          <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
+        </div>
+        <div class="editor-head-right">
+          <span class="playback-line-status" id="playbackLineStatus" aria-live="polite"></span>
+          <div class="panel-mini" id="saveStatus">saved locally</div>
+        </div>
+      </div>
+
+      <textarea id="editor-source" spellcheck="false"># Turtle starts at (0, 0), facing right.
+# Try changing the distance or the number of repeats.
+
+for i in range(4):
+    forward(100)
+    left(90)</textarea>
+
+    </section>
+
+    <div class="resize-divider editor-divider" id="editorDivider" role="separator" tabindex="0" aria-label="Resize code editor and Turtle world" aria-orientation="vertical" aria-valuenow="53" aria-valuemin="30" aria-valuemax="70" title="Drag to resize editor and world"></div>
+
+    <section class="panel world-panel" id="worldPanel">
+      <div class="panel-head">
+        <div class="panel-label">Turtle World</div>
+        <div class="world-head-actions">
+          <span class="panel-mini" id="worldLineStatus">400 × 400</span>
+          <button class="world-edit-link" id="editCodeBtn" type="button">↑ Edit code</button>
+          <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Turtle's drawing and printed output; keep your code">↻ Clear Run</button>
+        </div>
+      </div>
+
+      <div class="world-stage" id="worldStage">
+        <div class="motion-status" id="motionStatus" aria-live="polite"></div>
+        <div class="world-scale-box" id="worldScaleBox">
+          <div class="world-wrap" id="worldWrap">
+          <div class="grid" id="grid"></div>
+          <div class="axis-x" id="axisX"></div>
+          <div class="axis-y" id="axisY"></div>
+          <span class="axis-label xneg">−200</span>
+          <span class="axis-label xpos">200</span>
+          <span class="axis-label ypos">200</span>
+          <span class="axis-label yneg">−200</span>
+          <div id="turtle-canvas" aria-label="Turtle drawing canvas">
+            <canvas id="turtle-drawing" width="400" height="400"></canvas>
+            <canvas id="turtle-sprite" width="400" height="400"></canvas>
+          </div>
+          <div class="loading" id="loading">Loading Python…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="world-info">
+        <div class="world-copy"><strong>Pen starts down.</strong> <code>penup()</code> moves without drawing; <code>pendown()</code> draws again.</div>
+        <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+      </div>
+
+      <div class="console" aria-label="Text output">
+        <div class="console-head">
+          <span>Output · print() & errors</span>
+          <button class="console-clear" id="clearConsole" type="button">clear</button>
+        </div>
+        <div id="output"><span class="muted">print() output will appear here.</span></div>
+      </div>
+    </section>
+
+    <div class="resize-divider library-divider" id="libraryDivider" role="separator" tabindex="0" aria-label="Resize command library" aria-orientation="vertical" aria-valuenow="300" aria-valuemin="250" aria-valuemax="420" title="Drag to resize command library"></div>
+
+    <aside class="panel command-library" id="commandLibrary" aria-label="Turtle command library">
+      <div class="panel-head">
+        <div class="panel-label">Python Turtle Reference</div>
+        <div style="display:flex;align-items:center;gap:3px">
+          <span class="commands-count" id="commandsCount">reference</span>
+          <button class="command-close" id="commandsClose" type="button" aria-label="Close command library">×</button>
+        </div>
+      </div>
+      <div class="command-search-wrap">
+        <input class="command-search" id="commandSearch" type="search" placeholder="Search commands…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="library-nav" id="libraryNav" role="tablist" aria-label="Reference sections">
+        <button class="library-tab active" type="button" data-library-tab="turtle">Turtle</button>
+        <button class="library-tab" type="button" data-library-tab="python">Python</button>
+        <button class="library-tab" type="button" data-library-tab="strings">Strings</button>
+        <button class="library-tab" type="button" data-library-tab="lists">Lists</button>
+        <button class="library-tab" type="button" data-library-tab="extras">Extras</button>
+      </div>
+      <div class="command-scroll" id="commandScroll">
+        <div class="command-tip"><strong>Python Turtle reference.</strong> Pick a section, or search everything. Click an item to insert a runnable example.</div>
+
+        <section class="library-section active" data-library-section="turtle">
+          <div class="library-section-head"><strong>Turtle</strong><span>movement · drawing · interaction</span></div>
+<details class="recipe-panel" open>
+          <summary>Python Turtle commands <span>core syntax</span></summary>
+          <div class="recipe-body">
+            <button class="recipe-button" type="button" data-recipe="turtleSquare"><strong>Square</strong><code>for i in range(4):</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleMove"><strong>Move without drawing</strong><code>penup() → goto()</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleFill"><strong>Filled shape</strong><code>begin_fill() → end_fill()</code></button>
+            <button class="recipe-button" type="button" data-recipe="turtleWrite"><strong>Styled text</strong><code>write(..., font=..., align=...)</code></button>
+          </div>
+        </details>
+
+        
+<div class="command-category" data-category="Python Turtle Movement">
+          <div class="command-category-title">Turtle · Movement & Position</div>
+          <button class="command-item" data-search="forward movement python" data-insert="forward(100)"><span class="command-syntax">forward(100)</span><span class="command-desc">Move Turtle forward by a distance.</span></button>
+          <button class="command-item" data-search="backward movement python" data-insert="backward(100)"><span class="command-syntax">backward(100)</span><span class="command-desc">Move Turtle backward by a distance.</span></button>
+          <button class="command-item" data-search="setposition position coordinate python" data-insert="setposition(100, 50)"><span class="command-syntax">setposition(100, 50)</span><span class="command-desc">Move to an exact (x, y) coordinate.</span></button>
+          <button class="command-item" data-search="goto position coordinate python" data-insert="goto(100, 50)"><span class="command-syntax">goto(100, 50)</span><span class="command-desc">Another way to move to an exact coordinate.</span></button>
+          <button class="command-item" data-search="setx x coordinate python" data-insert="setx(100)"><span class="command-syntax">setx(100)</span><span class="command-desc">Change only the x-coordinate.</span></button>
+          <button class="command-item" data-search="sety y coordinate python" data-insert="sety(100)"><span class="command-syntax">sety(100)</span><span class="command-desc">Change only the y-coordinate.</span></button>
+        </div>
+
+        
+<div class="command-category" data-category="Python Turtle Rotation">
+          <div class="command-category-title">Turtle · Rotation</div>
+          <button class="command-item" data-search="left turn degrees python" data-insert="left(90)"><span class="command-syntax">left(90)</span><span class="command-desc">Turn Turtle left by an angle.</span></button>
+          <button class="command-item" data-search="right turn degrees python" data-insert="right(90)"><span class="command-syntax">right(90)</span><span class="command-desc">Turn Turtle right by an angle.</span></button>
+          <button class="command-item" data-search="setheading seth heading direction python" data-insert="setheading(90)"><span class="command-syntax">setheading(90)</span><span class="command-desc">Face an absolute direction.</span><span class="command-alias">alias: seth()</span></button>
+        </div>
+
+        
+<div class="command-category" data-category="Python Turtle Circles">
+          <div class="command-category-title">Turtle · Circles</div>
+          <button class="command-item" data-search="circle radius python" data-insert="circle(50)"><span class="command-syntax">circle(50)</span><span class="command-desc">Draw a full circle with radius 50.</span></button>
+          <button class="command-item" data-search="circle radius extent semicircle arc python" data-insert="circle(50, 180)"><span class="command-syntax">circle(50, 180)</span><span class="command-desc">Draw part of a circle using an extent.</span></button>
+          <button class="command-item" data-search="circle radius extent steps polygon triangle square python" data-insert="circle(50, 360, 4)"><span class="command-syntax">circle(50, 360, 4)</span><span class="command-desc">Use steps to make a polygon. Example: 4 = square.</span></button>
+        </div>
+
+        
+<div class="command-category" data-category="Python Turtle Pen">
+          <div class="command-category-title">Turtle · Pen, Speed & Color</div>
+          <button class="command-item" data-search="penup lift no draw python" data-insert="penup()"><span class="command-syntax">penup()</span><span class="command-desc">Move without drawing.</span></button>
+          <button class="command-item" data-search="pendown draw python" data-insert="pendown()"><span class="command-syntax">pendown()</span><span class="command-desc">Put the pen down. Turtle starts this way.</span></button>
+          <button class="command-item" data-search="pensize line width thickness python" data-insert="pensize(5)"><span class="command-syntax">pensize(5)</span><span class="command-desc">Set the trail thickness.</span></button>
+          <button class="command-item" data-search="speed animation 0 1 10 python" data-insert="speed(6.5)"><span class="command-syntax">speed(6.5)</span><span class="command-desc">Controls the turtle animation from code. Decimals work; 0 is essentially instant.</span></button>
+          <button class="command-item" data-search="color colour trail turtle hex python" data-insert='color("blue")'><span class="command-syntax">color("blue")</span><span class="command-desc">Change Turtle and the trail color. Hex colors also work.</span></button>
+          <button class="command-item" data-search="bgcolor background color canvas python" data-insert='bgcolor("lightblue")'><span class="command-syntax">bgcolor("lightblue")</span><span class="command-desc">Change the canvas background color.</span></button>
+        </div>
+
+        
+<div class="command-category" data-category="Python Turtle Fill Shape Clear">
+          <div class="command-category-title">Turtle · Fill, Cursor & Clear</div>
+          <button class="command-item" data-search="begin_fill fill start python" data-insert="begin_fill()"><span class="command-syntax">begin_fill()</span><span class="command-desc">Start recording a shape to fill.</span></button>
+          <button class="command-item" data-search="end_fill fill finish python" data-insert="end_fill()"><span class="command-syntax">end_fill()</span><span class="command-desc">Fill the shape drawn since begin_fill().</span></button>
+          <button class="command-item" data-search="shape cursor arrow turtle circle square triangle classic python" data-insert='shape("turtle")'><span class="command-syntax">shape("turtle")</span><span class="command-desc">Cursor options: arrow, turtle, circle, square, triangle, classic.</span></button>
+          <button class="command-item" data-search="clear erase screen python" data-insert="clear()"><span class="command-syntax">clear()</span><span class="command-desc">Erase all markings without changing Turtle’s position.</span></button>
+        </div>
+
+        
+<div class="command-category" data-category="Python Turtle Text Interaction">
+          <div class="command-category-title">Turtle · Text & Interaction</div>
+          <button class="command-item" data-search="write text canvas python" data-insert='write("Hello World!")'><span class="command-syntax">write("Hello World!")</span><span class="command-desc">Write text on the canvas.</span></button>
+          <button class="command-item" data-search="write font Arial size python" data-insert='write("Hi", font=("Arial", 20))'><span class="command-syntax">write("Hi", font=("Arial", 20))</span><span class="command-desc">Write using a chosen font and size.</span></button>
+          <button class="command-item" data-search="write align center left right python" data-insert='write("Turtle", align="center")'><span class="command-syntax">write("Turtle", align="center")</span><span class="command-desc">Align text left, center, or right around Turtle.</span></button>
+          <button class="command-item" data-search="onclick callback click turtle python" data-insert="def turtle_clicked(x, y):&#10;    print(&quot;Turtle clicked at:&quot;, x, y)&#10;&#10;onclick(turtle_clicked)"><span class="command-syntax">onclick(turtle_clicked)</span><span class="command-desc">Run a function when the turtle is clicked. The inserted example defines the callback first.</span></button>
+          <button class="command-item" data-search="getscreen canvas onclick click python" data-insert="def move_to_click(x, y):&#10;    penup()&#10;    goto(x, y)&#10;    pendown()&#10;&#10;canvas = getscreen()&#10;canvas.onclick(move_to_click)"><span class="command-syntax">canvas = getscreen()</span><span class="command-desc">Respond anywhere on the canvas. The inserted example defines move_to_click() first.</span></button>
+        </div>
+
+        
+        </section>
+
+        <section class="library-section" data-library-section="python">
+          <div class="library-section-head"><strong>Python</strong><span>language · built-ins</span></div>
+<details class="recipe-panel">
+          <summary>Python language <span>loops · functions · input</span></summary>
+          <div class="recipe-body">
+            <button class="recipe-button" type="button" data-recipe="forLoop"><strong>for + range</strong><code>for i in range(4):</code></button>
+            <button class="recipe-button" type="button" data-recipe="whileLoop"><strong>while loop</strong><code>while count &lt; 5:</code></button>
+            <button class="recipe-button" type="button" data-recipe="function"><strong>Function + parameter</strong><code>def square(size):</code></button>
+            <button class="recipe-button" type="button" data-recipe="returnValue"><strong>Return a value</strong><code>return num</code></button>
+            <button class="recipe-button" type="button" data-recipe="inputValue"><strong>User input</strong><code>input("Color? ")</code></button>
+            <button class="recipe-button" type="button" data-recipe="ifElse"><strong>if / elif / else</strong><code>if count &lt; 5:</code></button>
+            <button class="recipe-button" type="button" data-recipe="printValue"><strong>Print to Text Output</strong><code>print("Hello")</code></button>
+          </div>
+        </details>
+
+        
+<div class="command-category" data-category="Python Turtle Python Builtins">
+          <div class="command-category-title">Python · Built-ins</div>
+          <button class="command-item" data-search="range for loop python python" data-insert="range(4)"><span class="command-syntax">range(4)</span><span class="command-desc">Numbers 0 through 3 for a loop.</span></button>
+          <button class="command-item" data-search="range start stop step python python" data-insert="range(25, 76, 25)"><span class="command-syntax">range(25, 76, 25)</span><span class="command-desc">range(start, stop, step).</span></button>
+          <button class="command-item" data-search="input user text python python" data-insert='input("Enter a value: ")'><span class="command-syntax">input("Enter a value: ")</span><span class="command-desc">Ask the user for text input.</span></button>
+          <button class="command-item" data-search="print console output python python" data-insert='print("Hello World!")'><span class="command-syntax">print("Hello World!")</span><span class="command-desc">Print to Text Output under Turtle’s world.</span></button>
+          <button class="command-item" data-search="int cast integer python python" data-insert="value = &quot;42&quot;&#10;print(int(value))"><span class="command-syntax">int(value)</span><span class="command-desc">Convert a value to an integer.</span></button>
+          <button class="command-item" data-search="str cast string python python" data-insert="value = 42&#10;print(str(value))"><span class="command-syntax">str(value)</span><span class="command-desc">Convert a value to a string.</span></button>
+          <button class="command-item" data-search="float cast decimal python python" data-insert="value = &quot;3.14&quot;&#10;print(float(value))"><span class="command-syntax">float(value)</span><span class="command-desc">Convert a value to a decimal number.</span></button>
+          <button class="command-item" data-search="type data type python python" data-insert="value = 42&#10;print(type(value))"><span class="command-syntax">type(value)</span><span class="command-desc">Find the data type of a value.</span></button>
+          <button class="command-item" data-search="len list length python python" data-insert="my_list = [1, 2, 3]&#10;print(len(my_list))"><span class="command-syntax">len(my_list)</span><span class="command-desc">Get the number of items in a list.</span></button>
+        </div>
+
+        
+        </section>
+
+        <section class="library-section" data-library-section="strings">
+          <div class="library-section-head"><strong>Strings</strong><span>text methods</span></div>
+<div class="command-category" data-category="Python Turtle String Methods">
+          <div class="command-category-title">Python · String Methods</div>
+          <button class="command-item" data-search="capitalize string python" data-insert="text = &quot;turtle&quot;&#10;print(text.capitalize())"><span class="command-syntax">text.capitalize()</span><span class="command-desc">Capitalize the first character.</span></button>
+          <button class="command-item" data-search="upper string python" data-insert="text = &quot;Turtle&quot;&#10;print(text.upper())"><span class="command-syntax">text.upper()</span><span class="command-desc">Make letters uppercase.</span></button>
+          <button class="command-item" data-search="lower string python" data-insert="text = &quot;Turtle&quot;&#10;print(text.lower())"><span class="command-syntax">text.lower()</span><span class="command-desc">Make letters lowercase.</span></button>
+          <button class="command-item" data-search="strip string whitespace python" data-insert="text = &quot;  Turtle  &quot;&#10;print(text.strip())"><span class="command-syntax">text.strip()</span><span class="command-desc">Remove outside whitespace.</span></button>
+          <button class="command-item" data-search="replace string python" data-insert="text = &quot;old turtle&quot;&#10;print(text.replace(&quot;old&quot;, &quot;new&quot;))"><span class="command-syntax">text.replace("old", "new")</span><span class="command-desc">Replace matching text.</span></button>
+          <button class="command-item" data-search="find string index python" data-insert="text = &quot;banana&quot;&#10;print(text.find(&quot;a&quot;))"><span class="command-syntax">text.find("a")</span><span class="command-desc">Find the first matching index, or -1.</span></button>
+          <button class="command-item" data-search="count string occurrences python" data-insert="text = &quot;banana&quot;&#10;print(text.count(&quot;a&quot;))"><span class="command-syntax">text.count("a")</span><span class="command-desc">Count occurrences.</span></button>
+          <button class="command-item" data-search="isalpha string boolean python" data-insert="text = &quot;Turtle&quot;&#10;print(text.isalpha())"><span class="command-syntax">text.isalpha()</span><span class="command-desc">True when all characters are letters.</span></button>
+          <button class="command-item" data-search="isdigit string boolean python" data-insert="text = &quot;123&quot;&#10;print(text.isdigit())"><span class="command-syntax">text.isdigit()</span><span class="command-desc">True when all characters are digits.</span></button>
+          <button class="command-item" data-search="isnumeric string boolean python" data-insert="text = &quot;123&quot;&#10;print(text.isnumeric())"><span class="command-syntax">text.isnumeric()</span><span class="command-desc">True when all characters are numeric.</span></button>
+          <button class="command-item" data-search="isupper string boolean python" data-insert="text = &quot;TURTLE&quot;&#10;print(text.isupper())"><span class="command-syntax">text.isupper()</span><span class="command-desc">True when all letters are uppercase.</span></button>
+          <button class="command-item" data-search="islower string boolean python" data-insert="text = &quot;turtle&quot;&#10;print(text.islower())"><span class="command-syntax">text.islower()</span><span class="command-desc">True when all letters are lowercase.</span></button>
+          <button class="command-item" data-search="startswith string boolean python" data-insert="text = &quot;Turtle&quot;&#10;print(text.startswith(&quot;T&quot;))"><span class="command-syntax">text.startswith("T")</span><span class="command-desc">Check the beginning of a string.</span></button>
+          <button class="command-item" data-search="endswith string boolean python" data-insert="text = &quot;Turtle-y&quot;&#10;print(text.endswith(&quot;y&quot;))"><span class="command-syntax">text.endswith("y")</span><span class="command-desc">Check the end of a string.</span></button>
+          <button class="command-item" data-search="format string placeholders python" data-insert='message.format(value)'><span class="command-syntax">message.format(value)</span><span class="command-desc">Insert values into {} placeholders.</span></button>
+        </div>
+
+        
+        </section>
+
+        <section class="library-section" data-library-section="lists">
+          <div class="library-section-head"><strong>Lists</strong><span>list methods</span></div>
+<div class="command-category" data-category="Python Turtle List Methods">
+          <div class="command-category-title">Python · Lists</div>
+          <button class="command-item" data-search="list create python python" data-insert='my_list = ["a", "b", "c"]'><span class="command-syntax">my_list = ["a", "b", "c"]</span><span class="command-desc">Create a list.</span></button>
+          <button class="command-item" data-search="list index python python" data-insert="my_list = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]&#10;print(my_list[0])"><span class="command-syntax">my_list[0]</span><span class="command-desc">Access an item by index.</span></button>
+          <button class="command-item" data-search="list slice python python" data-insert="my_list = [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]&#10;print(my_list[1:3])"><span class="command-syntax">my_list[1:3]</span><span class="command-desc">Take a slice of a list.</span></button>
+          <button class="command-item" data-search="append list add python python" data-insert="my_list = [1, 2]&#10;value = 3&#10;my_list.append(value)&#10;print(my_list)"><span class="command-syntax">my_list.append(value)</span><span class="command-desc">Add one item to the end.</span></button>
+          <button class="command-item" data-search="extend list add multiple python python" data-insert="my_list = [1, 2]&#10;other_list = [3, 4]&#10;my_list.extend(other_list)&#10;print(my_list)"><span class="command-syntax">my_list.extend(other_list)</span><span class="command-desc">Add multiple items to the end.</span></button>
+          <button class="command-item" data-search="insert list python python" data-insert="my_list = [1, 3]&#10;value = 2&#10;my_list.insert(1, value)&#10;print(my_list)"><span class="command-syntax">my_list.insert(1, value)</span><span class="command-desc">Insert at an index.</span></button>
+          <button class="command-item" data-search="pop list remove index python python" data-insert="my_list = [1, 2, 3]&#10;print(my_list.pop())&#10;print(my_list)"><span class="command-syntax">my_list.pop()</span><span class="command-desc">Remove and return an item.</span></button>
+          <button class="command-item" data-search="remove list item python python" data-insert="my_list = [1, 2, 3]&#10;value = 2&#10;my_list.remove(value)&#10;print(my_list)"><span class="command-syntax">my_list.remove(value)</span><span class="command-desc">Remove a matching item.</span></button>
+          <button class="command-item" data-search="del list delete keyword python python" data-insert="my_list = [1, 2, 3]&#10;del my_list[0]&#10;print(my_list)"><span class="command-syntax">del my_list[0]</span><span class="command-desc">Delete an item by index.</span></button>
+          <button class="command-item" data-search="sort list python python" data-insert="my_list = [3, 1, 2]&#10;my_list.sort()&#10;print(my_list)"><span class="command-syntax">my_list.sort()</span><span class="command-desc">Sort a list.</span></button>
+          <button class="command-item" data-search="reverse list python python" data-insert="my_list = [1, 2, 3]&#10;my_list.reverse()&#10;print(my_list)"><span class="command-syntax">my_list.reverse()</span><span class="command-desc">Reverse a list in place.</span></button>
+        </div>
+
+        
+        </section>
+
+        <section class="library-section" data-library-section="extras">
+          <div class="library-section-head"><strong>Extras</strong><span>additional turtle helpers</span></div>
+<details class="recipe-panel">
+          <summary>Sandbox extras <span>work here too</span></summary>
+          <div class="recipe-body extra-reference">
+            <button class="command-item" data-search="home extra turtle" data-insert="home()"><span class="command-syntax">home()</span><span class="command-desc">Return to (0, 0) and face right.</span></button>
+            <button class="command-item" data-search="xcor extra turtle" data-insert="xcor()"><span class="command-syntax">xcor()</span><span class="command-desc">Read Turtle’s x-coordinate.</span></button>
+            <button class="command-item" data-search="ycor extra turtle" data-insert="ycor()"><span class="command-syntax">ycor()</span><span class="command-desc">Read Turtle’s y-coordinate.</span></button>
+            <button class="command-item" data-search="position pos extra turtle" data-insert="position()"><span class="command-syntax">position()</span><span class="command-desc">Read Turtle’s (x, y) position.</span></button>
+            <button class="command-item" data-search="heading extra turtle" data-insert="heading()"><span class="command-syntax">heading()</span><span class="command-desc">Read Turtle’s heading.</span></button>
+            <button class="command-item" data-search="dot extra turtle" data-insert="dot(10)"><span class="command-syntax">dot(10)</span><span class="command-desc">Draw a dot.</span></button>
+            <button class="command-item" data-search="stamp extra turtle" data-insert="stamp()"><span class="command-syntax">stamp()</span><span class="command-desc">Stamp the current cursor.</span></button>
+            <button class="command-item" data-search="hide turtle hideturtle extra" data-insert="hideturtle()"><span class="command-syntax">hideturtle()</span><span class="command-desc">Hide the cursor.</span></button>
+            <button class="command-item" data-search="show turtle showturtle extra" data-insert="showturtle()"><span class="command-syntax">showturtle()</span><span class="command-desc">Show the cursor.</span></button>
+            <button class="command-item" data-search="reset extra turtle" data-insert="reset()"><span class="command-syntax">reset()</span><span class="command-desc">Reset drawing and turtle state.</span></button>
+          </div>
+        </details>
+
+
+        </section>
+
+        <div class="command-empty" id="commandEmpty">No reference items match that search.</div>
+      </div>
+    </aside>
+    <div class="commands-overlay" id="commandsOverlay"></div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "dsteckler-turtle-demo-code-v1";
+  var DEFAULT_CODE = [
+    "# Turtle starts at (0, 0), facing right.",
+    "# Try changing the distance or the number of repeats.",
+    "",
+    "for i in range(4):",
+    "    forward(100)",
+    "    left(90)"
+  ].join("\n");
+
+  var examples = {
+    square: [
+      "for i in range(4):",
+      "    forward(100)",
+      "    left(90)"
+    ].join("\n"),
+    star: [
+      "color(\"purple\")",
+      "pensize(3)",
+      "",
+      "for i in range(5):",
+      "    forward(150)",
+      "    right(144)"
+    ].join("\n"),
+    spiral: [
+      "speed(0)",
+      "",
+      "for i in range(55):",
+      "    forward(i * 3)",
+      "    right(91)"
+    ].join("\n"),
+    colors: [
+      "speed(0)",
+      "pensize(3)",
+      "",
+      "colors = [\"red\", \"orange\", \"gold\", \"green\", \"blue\", \"purple\"]",
+      "",
+      "for i in range(72):",
+      "    color(colors[i % len(colors)])",
+      "    forward(120)",
+      "    backward(120)",
+      "    right(5)"
+    ].join("\n")
+  };
+
+  var source = document.getElementById("editor-source");
+  var output = document.getElementById("output");
+  var runBtn = document.getElementById("runBtn");
+  var stopBtn = document.getElementById("stopBtn");
+  var pauseBtn = document.getElementById("pauseBtn");
+  var stepBtn = document.getElementById("stepBtn");
+  var playbackLineStatus = document.getElementById("playbackLineStatus");
+  var worldLineStatus = document.getElementById("worldLineStatus");
+  document.getElementById("editCodeBtn").addEventListener("click",function(){
+    document.querySelector(".code-panel").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  var clearCodeBtn = document.getElementById("clearCodeBtn");
+  var clearRunBtn = document.getElementById("clearRunBtn");
+  var codeStatus = document.getElementById("codeStatus");
+  var saveStatus = document.getElementById("saveStatus");
+  var examplesSelect = document.getElementById("examples");
+  var gridToggle = document.getElementById("gridToggle");
+  var loading = document.getElementById("loading");
+  var worldStage = document.getElementById("worldStage");
+  var worldWrap = document.getElementById("worldWrap");
+  var commandsToggle = document.getElementById("commandsToggle");
+  var commandsClose = document.getElementById("commandsClose");
+  var commandsOverlay = document.getElementById("commandsOverlay");
+  var commandSearch = document.getElementById("commandSearch");
+  var commandEmpty = document.getElementById("commandEmpty");
+  var commandsCount = document.getElementById("commandsCount");
+
+  var workspace = document.getElementById("workspace");
+  var worldScaleBox = document.getElementById("worldScaleBox");
+  var worldPanel = document.getElementById("worldPanel");
+  var viewWorldBtn = document.getElementById("viewWorldBtn");
+  var editorDivider = document.getElementById("editorDivider");
+  var libraryDivider = document.getElementById("libraryDivider");
+  var editorSize = document.getElementById("editorSize");
+  var librarySize = document.getElementById("librarySize");
+  var mobileEditorSize = document.getElementById("mobileEditorSize");
+  var outputSize = document.getElementById("outputSize");
+  var libraryToggle = document.getElementById("libraryToggle");
+  var LAYOUT_KEY = "dsteckler-turtle-layout-v3";
+  var layoutDefaults = { editor:53, library:300, mobile:355, output:150, libraryVisible:true }; // 150px keeps the desktop workspace in one viewport
+  var layoutState = Object.assign({},layoutDefaults);
+  function clamp(n,low,high){ return Math.min(high,Math.max(low,n)); }
+  try{
+    var storedLayout=JSON.parse(localStorage.getItem(LAYOUT_KEY)||"null");
+    if(storedLayout){
+      ["editor","library","mobile","output"].forEach(function(k){
+        if(Number.isFinite(storedLayout[k]))layoutState[k]=storedLayout[k];
+      });
+      if(typeof storedLayout.libraryVisible==="boolean")layoutState.libraryVisible=storedLayout.libraryVisible;
+    }
+  }catch(e){}
+  function applyLayout(save){
+    layoutState.editor=clamp(layoutState.editor,30,70);
+    layoutState.library=clamp(layoutState.library,250,420);
+    layoutState.mobile=clamp(layoutState.mobile,220,650);
+    layoutState.output=clamp(layoutState.output,100,290);
+    workspace.style.setProperty("--code-fr",layoutState.editor+"fr");
+    workspace.style.setProperty("--world-fr",(100-layoutState.editor)+"fr");
+    workspace.style.setProperty("--library-width",layoutState.library+"px");
+    document.documentElement.style.setProperty("--mobile-editor-height",layoutState.mobile+"px");
+    document.documentElement.style.setProperty("--output-height",layoutState.output+"px");
+    document.body.classList.toggle("library-hidden",!layoutState.libraryVisible);
+    editorSize.value=layoutState.editor;
+    librarySize.value=layoutState.library;
+    mobileEditorSize.value=layoutState.mobile;
+    outputSize.value=layoutState.output;
+    document.getElementById("editorSizeValue").textContent=layoutState.editor+"% editor";
+    document.getElementById("librarySizeValue").textContent=layoutState.library+" px";
+    document.getElementById("mobileEditorSizeValue").textContent=layoutState.mobile+" px";
+    document.getElementById("outputSizeValue").textContent=layoutState.output+" px";
+    libraryToggle.textContent=layoutState.libraryVisible?"Hide library":"Show library";
+    editorDivider.setAttribute("aria-valuenow",layoutState.editor);
+    libraryDivider.setAttribute("aria-valuenow",layoutState.library);
+    if(save)try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(layoutState));}catch(e){}
+    if(typeof editor!=="undefined"&&editor)editor.refresh();
+    if(typeof fitWorld==="function")requestAnimationFrame(fitWorld);
+  }
+  [
+    [editorSize,"editor"],
+    [librarySize,"library"],
+    [mobileEditorSize,"mobile"],
+    [outputSize,"output"]
+  ].forEach(function(pair){
+    pair[0].addEventListener("input",function(){
+      layoutState[pair[1]]=Number(this.value);
+      applyLayout(true);
+    });
+  });
+  libraryToggle.addEventListener("click",function(){
+    layoutState.libraryVisible=!layoutState.libraryVisible;
+    applyLayout(true);
+  });
+  document.getElementById("resetLayout").addEventListener("click",function(){
+    layoutState=Object.assign({},layoutDefaults);
+    applyLayout(true);
+  });
+  function enableDivider(divider,field,min,max,compute){
+    var dragging=false;
+    divider.addEventListener("pointerdown",function(e){
+      if(e.button!==0||window.innerWidth<=840||(field==="library"&&window.innerWidth<=1350))return;
+      dragging=true;
+      divider.setPointerCapture(e.pointerId);
+      divider.classList.add("dragging");
+      document.body.classList.add("is-resizing");
+      e.preventDefault();
+    });
+    divider.addEventListener("pointermove",function(e){
+      if(!dragging)return;
+      layoutState[field]=clamp(compute(e),min,max);
+      applyLayout(true);
+    });
+    function stopDrag(){
+      dragging=false;
+      divider.classList.remove("dragging");
+      document.body.classList.remove("is-resizing");
+    }
+    divider.addEventListener("pointerup",stopDrag);
+    divider.addEventListener("pointercancel",stopDrag);
+    divider.addEventListener("lostpointercapture",stopDrag);
+    divider.addEventListener("keydown",function(e){
+      if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+      e.preventDefault();
+      var step=field==="library"?10:2;
+      layoutState[field]=clamp(layoutState[field]+(e.key==="ArrowRight"?(field==="library"?-step:step):(field==="library"?step:-step)),min,max);
+      applyLayout(true);
+    });
+  }
+  enableDivider(editorDivider,"editor",30,70,function(e){
+    var codeRect=document.querySelector(".code-panel").getBoundingClientRect();
+    var worldRect=worldPanel.getBoundingClientRect();
+    var total=codeRect.width+worldRect.width;
+    return Math.round((e.clientX-codeRect.left)/total*100);
+  });
+  enableDivider(libraryDivider,"library",250,420,function(e){
+    return Math.round((workspace.getBoundingClientRect().right-e.clientX-9)/10)*10;
+  });
+  viewWorldBtn.addEventListener("click",function(){
+    worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  applyLayout(false);
+
+  var editor = CodeMirror.fromTextArea(source, {
+    mode: "python",
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    lineWrapping: false,
+    autofocus: true,
+    extraKeys: {
+      "Tab": function(cm){
+        if(cm.somethingSelected()){
+          cm.indentSelection("add");
+        } else {
+          cm.replaceSelection("    ", "end");
+        }
+      },
+      "Shift-Tab": function(cm){ cm.indentSelection("subtract"); },
+      "Ctrl-Enter": function(){ runCode(); },
+      "Cmd-Enter": function(){ runCode(); }
+    }
+  });
+
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if(saved !== null) editor.setValue(saved);
+  } catch(e) {}
+
+  var errorLineMarker=null;
+  var errorTokenMarker=null;
+
+  function clearErrorHighlight(){
+    if(errorLineMarker!==null){
+      try{editor.removeLineClass(errorLineMarker,"background","turtle-error-line");}catch(e){}
+      errorLineMarker=null;
+    }
+    if(errorTokenMarker){
+      try{errorTokenMarker.clear();}catch(e){}
+      errorTokenMarker=null;
+    }
+  }
+
+  function highlightError(line,token){
+    clearErrorHighlight();
+    var n=Number(line);
+    if(!Number.isInteger(n)||n<1||n>editor.lineCount())return;
+    errorLineMarker=editor.addLineClass(n-1,"background","turtle-error-line");
+    var sourceLine=editor.getLine(n-1)||"";
+    if(token){
+      var start=sourceLine.indexOf(token);
+      if(start>=0){
+        errorTokenMarker=editor.markText(
+          {line:n-1,ch:start},
+          {line:n-1,ch:start+token.length},
+          {className:"turtle-error-token"}
+        );
+      }
+    }
+    editor.scrollIntoView({line:n-1,ch:0},80);
+  }
+
+  var saveTimer = null;
+  editor.on("change", function(){
+    clearErrorHighlight();
+    saveStatus.textContent = "saving…";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try {
+        localStorage.setItem(STORAGE_KEY, editor.getValue());
+        saveStatus.textContent = "saved locally";
+      } catch(e) {
+        saveStatus.textContent = "not saved";
+      }
+    }, 250);
+  });
+
+  function setStatus(type){
+    codeStatus.className = "status-dot" + (type ? " " + type : "");
+  }
+
+  function setOutput(html){
+    output.innerHTML = html;
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function appendOutput(text, className){
+    var span = document.createElement("span");
+    if(className) span.className = className;
+    span.textContent = text;
+    output.appendChild(span);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  var TURTLE_ERROR_NAMES=[
+    "forward","backward","left","right","goto","setposition","setx","sety",
+    "penup","pendown","pensize","speed","circle","color","pencolor",
+    "fillcolor","bgcolor","begin_fill","end_fill","shape","clear","reset",
+    "dot","stamp","hideturtle","showturtle","setheading","write","onclick","getscreen"
+  ];
+
+  function editDistance(a,b){
+    a=String(a||"").toLowerCase();
+    b=String(b||"").toLowerCase();
+    var row=[];
+    for(var j=0;j<=b.length;j++)row[j]=j;
+    for(var i=1;i<=a.length;i++){
+      var previous=row[0];
+      row[0]=i;
+      for(var k=1;k<=b.length;k++){
+        var old=row[k];
+        row[k]=Math.min(row[k]+1,row[k-1]+1,previous+(a[i-1]===b[k-1]?0:1));
+        previous=old;
+      }
+    }
+    return row[b.length];
+  }
+
+  function likelyTurtleName(name){
+    if(!name||name.length<3)return null;
+    var best=null;
+    var distance=99;
+    TURTLE_ERROR_NAMES.forEach(function(candidate){
+      var d=editDistance(name,candidate);
+      if(d<distance){distance=d;best=candidate;}
+    });
+    return distance<=(name.length<=5?1:2)?best:null;
+  }
+
+  function getErrorLine(err,raw){
+    if(err&&err.traceback&&err.traceback.length){
+      for(var i=err.traceback.length-1;i>=0;i--){
+        if(err.traceback[i]&&err.traceback[i].lineno){
+          return Math.max(1,Number(err.traceback[i].lineno));
+        }
+      }
+    }
+    var match=String(raw||"").match(/\bline\s+(\d+)\b/i);
+    return match?Math.max(1,Number(match[1])):null;
+  }
+
+  function getErrorMessage(raw,name){
+    var text=String(raw||"").trim();
+    var prefix=String(name||"")+":";
+    if(text.toLowerCase().indexOf(prefix.toLowerCase())===0){
+      text=text.slice(prefix.length).trim();
+    }
+    return text.replace(/\s+on\s+line\s+\d+\s*$/i,"").trim();
+  }
+
+  function analyzeError(err){
+    var name=(err&&(err.tp$name||err.name))||"Error";
+    var raw="";
+    try{raw=err&&err.toString?err.toString():String(err);}
+    catch(e){raw=String(err);}
+
+    var line=getErrorLine(err,raw);
+    var lineText=(line&&line<=editor.lineCount())?(editor.getLine(line-1)||""):"";
+    var message=getErrorMessage(raw,name);
+    var title="Python found an error.";
+    var explanation="Check the highlighted line and the original Python message below.";
+    var hint="";
+    var token=null;
+
+    var nameMatch=message.match(/\bname ['"]([^'"]+)['"] is not defined/i);
+    if(name==="NameError"||nameMatch){
+      token=nameMatch?nameMatch[1]:null;
+      title=token?"Python doesn't know "+token+".":"Python doesn't recognize a name.";
+      explanation=token
+        ? "That name has not been defined yet. It may be misspelled, or it may need to be created before this line runs."
+        : "A variable or function on this line has not been defined yet.";
+      var guess=likelyTurtleName(token);
+      if(guess&&guess!==token)hint="Check the spelling. Did you mean "+guess+"()?";
+    }else if(name==="IndentationError"||/indent/i.test(message)){
+      title="Python is expecting different indentation.";
+      explanation="Indentation shows which lines belong inside a loop, function, or if statement.";
+      hint="Use 4 spaces for each level. Lines in the same block should line up.";
+    }else if(name==="SyntaxError"||name==="ParseError"||/bad input|syntax|unexpected eof|unexpected token/i.test(message)){
+      title="Python can't read this line yet.";
+      explanation="A punctuation or structure problem is stopping Python from understanding the code.";
+      var trimmed=lineText.trim();
+      var block=trimmed.match(/^(for|while|if|elif|else|def)\b/);
+      if(block&&!/:\s*(#.*)?$/.test(trimmed)){
+        hint="Add a colon (:) at the end of this "+block[1]+" line.";
+        token=block[1];
+      }else{
+        var opens=(lineText.match(/\(/g)||[]).length;
+        var closes=(lineText.match(/\)/g)||[]).length;
+        if(opens>closes)hint="There is an opening ( without a matching ).";
+        else if(closes>opens)hint="There is a closing ) without a matching opening (.";
+        else hint="Check this line and the line just above it. Python can notice a missing symbol one line later.";
+      }
+    }else if(name==="TypeError"){
+      title="This operation is using the wrong kind of value.";
+      explanation="Python understood the code, but the values or arguments do not fit this operation.";
+      if(/argument|takes|positional/i.test(message))hint="Check how many values are inside the parentheses.";
+    }else if(name==="ValueError"){
+      title="Python received a value it can't use here.";
+      explanation="The kind of value may be allowed, but this particular value is not valid for the operation.";
+    }else if(name==="IndexError"){
+      title="That list position doesn't exist.";
+      explanation="List indexes start at 0, and this code tried to use a position beyond the available items.";
+      hint="Check the list length and the index used on this line.";
+    }else if(name==="ZeroDivisionError"){
+      title="Python can't divide by zero.";
+      explanation="The value on the right side of /, //, or % became 0.";
+    }else if(name==="AttributeError"){
+      title="That object doesn't have this method or property.";
+      explanation="Check the name after the dot and make sure it belongs to this kind of value.";
+    }
+
+    return {
+      name:name,raw:raw,message:message,line:line,lineText:lineText,
+      title:title,explanation:explanation,hint:hint,token:token
+    };
+  }
+
+  function renderError(err){
+    var info=analyzeError(err);
+    highlightError(info.line,info.token);
+    output.textContent="";
+
+    var card=document.createElement("div");
+    card.className="error-card";
+
+    var top=document.createElement("div");
+    top.className="error-card-top";
+
+    var badge=document.createElement("span");
+    badge.className="error-badge";
+    badge.textContent=info.name+(info.line?" · line "+info.line:"");
+    top.appendChild(badge);
+
+    if(info.line){
+      var jump=document.createElement("button");
+      jump.type="button";
+      jump.className="error-line-button";
+      jump.textContent="Go to line "+info.line;
+      jump.addEventListener("click",function(){
+        editor.focus();
+        editor.setCursor({line:Math.max(0,info.line-1),ch:0});
+        editor.scrollIntoView({line:Math.max(0,info.line-1),ch:0},100);
+      });
+      top.appendChild(jump);
+    }
+
+    card.appendChild(top);
+
+    var title=document.createElement("div");
+    title.className="error-title";
+    title.textContent=info.title;
+    card.appendChild(title);
+
+    var explanation=document.createElement("div");
+    explanation.className="error-explanation";
+    explanation.textContent=info.explanation;
+    card.appendChild(explanation);
+
+    if(info.line&&info.lineText){
+      var source=document.createElement("code");
+      source.className="error-source";
+      source.textContent=info.line+" | "+info.lineText;
+      card.appendChild(source);
+    }
+
+    if(info.hint){
+      var hint=document.createElement("span");
+      hint.className="error-hint";
+      hint.textContent="Try this: "+info.hint;
+      card.appendChild(hint);
+    }
+
+    var details=document.createElement("details");
+    details.className="error-raw";
+    var summary=document.createElement("summary");
+    summary.textContent="Python's original message";
+    details.appendChild(summary);
+
+    var raw=document.createElement("code");
+    raw.textContent=info.raw;
+    details.appendChild(raw);
+    card.appendChild(details);
+
+    output.appendChild(card);
+    output.scrollTop=output.scrollHeight;
+    return info;
+  }
+
+  function outf(text){
+    if(output.querySelector(".muted")) output.textContent = "";
+    appendOutput(text);
+  }
+
+  function builtinRead(x){
+    if(typeof Sk === "undefined" || Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined){
+      throw new Error("File not found: " + x);
+    }
+    return Sk.builtinFiles.files[x];
+  }
+
+  var TurtleRuntime = (function(){
+    var drawCanvas = document.getElementById("turtle-drawing");
+    var spriteCanvas = document.getElementById("turtle-sprite");
+    var ctx = drawCanvas.getContext("2d");
+    var sctx = spriteCanvas.getContext("2d");
+    var world = document.getElementById("worldWrap");
+
+    var state = {
+      x:0, y:0, heading:0,
+      penDown:true,
+      color:"#000000",
+      fillColor:"#000000",
+      size:1,
+      visible:true,
+      speed:6,
+      shape:"turtle",
+      filling:false,
+      fillPoints:[]
+    };
+
+    function px(x){ return 200 + x; }
+    function py(y){ return 200 - y; }
+    function rad(deg){ return deg * Math.PI / 180; }
+    function none(){ return Sk.builtin.none.none$; }
+    function js(v){ return Sk.ffi.remapToJs(v); }
+    function pyNum(v){ return Sk.ffi.remapToPy(v); }
+
+    function configureLine(){
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = Math.max(.5, Number(state.size) || 1);
+      ctx.strokeStyle = state.color;
+    }
+
+    function drawSegment(x1,y1,x2,y2){
+      if(!state.penDown) return;
+      configureLine();
+      ctx.beginPath();
+      ctx.moveTo(px(x1),py(y1));
+      ctx.lineTo(px(x2),py(y2));
+      ctx.stroke();
+    }
+
+    function recordFillPoint(){
+      if(state.filling) state.fillPoints.push([state.x,state.y]);
+    }
+
+    function drawSpriteOn(target, permanent){
+      if(!state.visible && !permanent) return;
+      target.save();
+      target.translate(px(state.x),py(state.y));
+      target.rotate(-rad(state.heading));
+
+      var accent=state.color||"#176b73";
+      var outline="#173b3d";
+      var body="#8fc6ae";
+      var shape=state.shape||"turtle";
+
+      target.lineCap="round";
+      target.lineJoin="round";
+      target.lineWidth=1.35;
+
+      if(shape!=="turtle"){
+        target.fillStyle=accent;
+        target.strokeStyle=outline;
+        target.beginPath();
+        if(shape==="circle"){
+          target.arc(0,0,7,0,Math.PI*2);
+          target.fill();target.stroke();
+        }else if(shape==="square"){
+          target.fillRect(-7,-7,14,14);
+          target.strokeRect(-7,-7,14,14);
+        }else if(shape==="triangle"){
+          target.moveTo(9,0);target.lineTo(-7,-7);target.lineTo(-7,7);target.closePath();
+          target.fill();target.stroke();
+        }else if(shape==="classic"){
+          target.moveTo(10,0);target.lineTo(-7,-5);target.lineTo(-3,0);target.lineTo(-7,5);target.closePath();
+          target.fill();target.stroke();
+        }else{
+          target.moveTo(10,0);target.lineTo(-6,-6);target.lineTo(-2,0);target.lineTo(-6,6);target.closePath();
+          target.fill();target.stroke();
+        }
+        target.restore();
+        return;
+      }
+
+      target.fillStyle=body;
+      target.strokeStyle=outline;
+
+      // Tail.
+      target.beginPath();
+      target.moveTo(-10.5,0);
+      target.lineTo(-14.5,-2.1);
+      target.lineTo(-14.5,2.1);
+      target.closePath();
+      target.fill();target.stroke();
+
+      // Four flippers, spaced away from the shell so they remain distinct.
+      [[-5,-7,-.34],[-5,7,.34],[4,-7,-.52],[4,7,.52]].forEach(function(leg){
+        target.save();
+        target.translate(leg[0],leg[1]);
+        target.rotate(leg[2]);
+        target.beginPath();
+        target.ellipse(0,0,3.7,2,0,0,Math.PI*2);
+        target.fill();target.stroke();
+        target.restore();
+      });
+
+      // Shell.
+      target.fillStyle=accent;
+      target.beginPath();
+      target.ellipse(-1,0,8.8,6.3,0,0,Math.PI*2);
+      target.fill();target.stroke();
+
+      // Subtle shell markings keep the shape readable at small sizes.
+      target.save();
+      target.globalAlpha=.45;
+      target.strokeStyle="#ffffff";
+      target.lineWidth=.9;
+      target.beginPath();
+      target.moveTo(-6.5,-3);target.lineTo(4.5,2.8);
+      target.moveTo(-6.5,3);target.lineTo(4.5,-2.8);
+      target.stroke();
+      target.restore();
+
+      // Head. Its position makes heading immediately obvious.
+      target.fillStyle=body;
+      target.strokeStyle=outline;
+      target.beginPath();
+      target.arc(9.8,0,4,0,Math.PI*2);
+      target.fill();target.stroke();
+
+      // Eye.
+      target.fillStyle=outline;
+      target.beginPath();
+      target.arc(11.2,-1.2,.7,0,Math.PI*2);
+      target.fill();
+
+      target.restore();
+    }
+
+    function refreshSprite(){
+      sctx.clearRect(0,0,400,400);
+      drawSpriteOn(sctx,false);
+    }
+
+    var motion = null;
+    var motionStatus = document.getElementById("motionStatus");
+
+    function durationMs(kind, magnitude){
+      var amount=Math.abs(magnitude)||0;
+      var speed=currentSpeed();
+
+      if(speed===0) return 6;
+
+      var base=kind==="turn"
+        ? Math.max(100,amount*3.0)
+        : Math.max(115,amount*4.0);
+
+      var slowFactor=2.65;
+      var fastFactor=.105;
+      var t=(speed-1)/9;
+      var factor=slowFactor*Math.pow(fastFactor/slowFactor,t);
+
+      return Math.max(38,Math.min(8000,base*factor));
+    }
+
+    function animate(kind,amount,update,label){
+      if(!Number.isFinite(amount) || amount === 0){
+        update(1);
+        return Promise.resolve(none());
+      }
+      if(!playback.active){
+        update(1);
+        return Promise.resolve(none());
+      }
+      return new Promise(function(resolve,reject){
+        var operation = {
+          raf:null, lastTime:null, fraction:0, finished:false,
+          resolve:resolve, reject:reject,
+          start:null, cancel:null
+        };
+        motion=operation;
+        motionStatus.textContent=label||"Moving Turtle";
+        function finish(){
+          operation.finished=true;
+          if(operation.raf!==null)cancelAnimationFrame(operation.raf);
+          if(motion===operation)motion=null;
+          motionStatus.textContent="";
+          resolve(none());
+        }
+        function frame(now){
+          operation.raf=null;
+          if(operation.finished||motion!==operation)return;
+          if(!playback.active){
+            operation.cancel();
+            return;
+          }
+          if(playback.paused&&!playback.stepOnce){
+            operation.lastTime=null;
+            return;
+          }
+          if(operation.lastTime===null)operation.lastTime=now;
+          var dt=Math.min(60,Math.max(0,now-operation.lastTime));
+          operation.lastTime=now;
+          operation.fraction=Math.min(1,operation.fraction+dt/durationMs(kind,amount));
+          update(operation.fraction);
+          if(operation.fraction>=1)finish();
+          else operation.raf=requestAnimationFrame(frame);
+        }
+        operation.start=function(){
+          if(operation.finished||operation.raf!==null)return;
+          if(playback.paused&&!playback.stepOnce)return;
+          operation.lastTime=null;
+          operation.raf=requestAnimationFrame(frame);
+        };
+        operation.cancel=function(){
+          if(operation.finished)return;
+          operation.finished=true;
+          if(operation.raf!==null)cancelAnimationFrame(operation.raf);
+          if(motion===operation)motion=null;
+          motionStatus.textContent="";
+          reject(new Error("Playback stopped"));
+        };
+        operation.start();
+      });
+    }
+
+    function moveTo(x,y){
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y))return;
+      var ox=state.x,oy=state.y;
+      drawSegment(ox,oy,x,y);
+      state.x=x;state.y=y;
+      recordFillPoint();
+      refreshSprite();
+    }
+
+    function animateMoveTo(x,y,label){
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y))
+        return Promise.reject(new Error("Turtle coordinates must be numbers"));
+      var ox=state.x,oy=state.y;
+      var dx=x-ox,dy=y-oy;
+      return animate("move",Math.hypot(dx,dy),function(t){
+        moveTo(ox+dx*t,oy+dy*t);
+      },label||"Moving "+Math.round(Math.hypot(dx,dy))+" px");
+    }
+
+    function animateForward(distance){
+      var d=Number(distance);
+      if(!Number.isFinite(d))return Promise.reject(new Error("Distance must be a number"));
+      var a=rad(state.heading);
+      return animateMoveTo(
+        state.x+Math.cos(a)*d,
+        state.y+Math.sin(a)*d,
+        (d<0?"Backward ":"Forward ")+Math.abs(d)+" px"
+      );
+    }
+
+    function animateTurn(degrees){
+      var angle=Number(degrees);
+      if(!Number.isFinite(angle))return Promise.reject(new Error("Angle must be a number"));
+      var start=state.heading;
+      return animate("turn",angle,function(t){
+        state.heading=start+angle*t;
+        refreshSprite();
+      },(angle<0?"Turning right ":"Turning left ")+Math.abs(angle)+"°");
+    }
+
+    function animateHeading(heading){
+      var target=Number(heading);
+      if(!Number.isFinite(target))return Promise.reject(new Error("Heading must be a number"));
+      var delta=((target-state.heading)%360+540)%360-180;
+      return animateTurn(delta).then(function(){
+        state.heading=target;
+        refreshSprite();
+        return none();
+      });
+    }
+
+    function animateCircle(radius,extent,steps){
+      var r=Number(radius);
+      var angle=extent===undefined?360:Number(extent);
+      var stepCount=steps===undefined||steps===null?null:Math.max(1,Math.floor(Number(steps)));
+      if(!Number.isFinite(r)||!Number.isFinite(angle)||(stepCount!==null&&!Number.isFinite(stepCount)))
+        return Promise.reject(new Error("Circle radius, extent, and steps must be numbers"));
+      if(r===0||angle===0)return Promise.resolve(none());
+      var heading=state.heading;
+      var base=rad(heading);
+      var cx=state.x-r*Math.sin(base);
+      var cy=state.y+r*Math.cos(base);
+      var startAngle=Math.atan2(state.y-cy,state.x-cx);
+      var signedExtent=rad(angle)*(r>=0?1:-1);
+      var arcLength=Math.abs(r*rad(angle));
+
+      if(stepCount!==null){
+        var points=[[state.x,state.y]];
+        for(var s=1;s<=stepCount;s++){
+          var theta=startAngle+signedExtent*(s/stepCount);
+          points.push([cx+Math.abs(r)*Math.cos(theta),cy+Math.abs(r)*Math.sin(theta)]);
+        }
+        var lengths=[],total=0;
+        for(var p=1;p<points.length;p++){
+          var d=Math.hypot(points[p][0]-points[p-1][0],points[p][1]-points[p-1][1]);
+          lengths.push(d);total+=d;
+        }
+        return animate("move",total,function(t){
+          var target=t*total,used=0,index=0;
+          while(index<lengths.length-1&&used+lengths[index]<target){used+=lengths[index];index++;}
+          var local=lengths[index]?Math.max(0,Math.min(1,(target-used)/lengths[index])):1;
+          var a=points[index],b=points[index+1];
+          moveTo(a[0]+(b[0]-a[0])*local,a[1]+(b[1]-a[1])*local);
+          state.heading=heading+angle*(r>=0?1:-1)*t;
+          refreshSprite();
+        },"Drawing "+stepCount+"-step shape");
+      }
+
+      return animate("move",arcLength,function(t){
+        var a=startAngle+signedExtent*t;
+        moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
+        state.heading=heading+angle*(r>=0?1:-1)*t;
+        refreshSprite();
+      },"Drawing arc "+Math.abs(angle)+"°");
+    }
+
+    function syncAnimationPause(){
+      if(!motion)return;
+      if(playback.paused&&!playback.stepOnce){
+        if(motion.raf!==null)cancelAnimationFrame(motion.raf);
+        motion.raf=null;
+        motion.lastTime=null;
+      }else motion.start();
+    }
+
+    function cancelAnimation(){
+      if(motion)motion.cancel();
+      motionStatus.textContent="";
+    }
+
+    function reset(){
+      motionStatus.textContent="";
+      ctx.clearRect(0,0,400,400);
+      sctx.clearRect(0,0,400,400);
+      state.x=0; state.y=0; state.heading=0;
+      state.penDown=true;
+      state.color="#000000";
+      state.fillColor="#000000";
+      state.size=1;
+      state.visible=true;
+      state.speed=6;
+      state.shape="turtle";
+      state.turtleClickCallback=null;
+      state.screenClickCallback=null;
+      state.screenObject=null;
+      state.filling=false;
+      state.fillPoints=[];
+      world.style.backgroundColor="#ffffff";
+      refreshSprite();
+    }
+
+    function clear(){
+      ctx.clearRect(0,0,400,400);
+      state.filling=false;
+      state.fillPoints=[];
+      refreshSprite();
+    }
+
+    function beginFill(){
+      state.filling=true;
+      state.fillPoints=[[state.x,state.y]];
+    }
+
+    function endFill(){
+      if(state.filling && state.fillPoints.length>2){
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(px(state.fillPoints[0][0]),py(state.fillPoints[0][1]));
+        for(var i=1;i<state.fillPoints.length;i++){
+          ctx.lineTo(px(state.fillPoints[i][0]),py(state.fillPoints[i][1]));
+        }
+        ctx.closePath();
+        ctx.globalCompositeOperation="destination-over";
+        ctx.fillStyle=state.fillColor;
+        ctx.fill();
+        ctx.restore();
+      }
+      state.filling=false;
+      state.fillPoints=[];
+      refreshSprite();
+    }
+
+    function setColor(value){
+      if(value===undefined || value===null) return;
+      state.color=String(value);
+      refreshSprite();
+    }
+
+    function setFillColor(value){
+      if(value===undefined || value===null) return;
+      state.fillColor=String(value);
+    }
+
+    function dot(size,color){
+      size=Number(size)||6;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px(state.x),py(state.y),Math.abs(size)/2,0,Math.PI*2);
+      ctx.fillStyle=color ? String(color) : state.color;
+      ctx.fill();
+      ctx.restore();
+      refreshSprite();
+    }
+
+    function writeText(message,font,align){
+      var family="Arial",size=14;
+      if(Array.isArray(font)&&font.length){
+        family=String(font[0]||family);
+        if(font.length>1&&Number.isFinite(Number(font[1])))size=Number(font[1]);
+      }
+      var alignment=String(align||"left").toLowerCase();
+      if(["left","center","right"].indexOf(alignment)<0)alignment="left";
+      ctx.save();
+      ctx.fillStyle=state.color;
+      ctx.font=size+"px "+JSON.stringify(family);
+      ctx.textBaseline="middle";
+      ctx.textAlign=alignment;
+      ctx.fillText(String(message),px(state.x),py(state.y));
+      ctx.restore();
+    }
+
+    function setShape(name){
+      var allowed=["arrow","turtle","circle","square","triangle","classic"];
+      var next=String(name);
+      if(allowed.indexOf(next)<0)throw new Error("Unknown turtle shape: "+next);
+      state.shape=next;
+      refreshSprite();
+    }
+
+
+    function pyNameToJs(pyName){
+      if(pyName&&typeof pyName.$jsstr==="function")return pyName.$jsstr();
+      return pyName&&pyName.v!==undefined?String(pyName.v):String(pyName);
+    }
+
+    function callClickCallback(callback,x,y){
+      if(!callback||playback.active)return;
+      playback.active=true;
+      playback.paused=false;
+      playback.stepOnce=false;
+      playback.speed=state.speed;
+      syncPlaybackButtons();
+      Sk.misceval.asyncToPromise(function(){
+        return Sk.misceval.callsimOrSuspend(callback,pyNum(x),pyNum(y));
+      }).catch(function(err){
+        renderError(err);
+        setStatus("bad");
+      }).finally(function(){
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        playback.autoStepOnFirstPause=false;
+        syncPlaybackButtons();
+      });
+    }
+
+    world.addEventListener("click",function(event){
+      var rect=world.getBoundingClientRect();
+      var localX=(event.clientX-rect.left)/rect.width*400;
+      var localY=(event.clientY-rect.top)/rect.height*400;
+      var x=localX-200,y=200-localY;
+      if(state.turtleClickCallback&&Math.hypot(x-state.x,y-state.y)<=20){
+        callClickCallback(state.turtleClickCallback,x,y);
+      }else if(state.screenClickCallback){
+        callClickCallback(state.screenClickCallback,x,y);
+      }
+    });
+
+    function getScreenObject(){
+      if(state.screenObject)return state.screenObject;
+      var obj=new Sk.builtin.object();
+      obj.tp$name="Screen";
+      obj.$attrs={};
+      var onclickFn=new Sk.builtin.func(function(callback){
+        state.screenClickCallback=callback;
+        return none();
+      });
+      obj.tp$getattr=function(pyName){
+        var name=pyNameToJs(pyName);
+        if(name==="onclick")return onclickFn;
+        return this.$attrs[name];
+      };
+      obj.tp$setattr=function(pyName,value){
+        this.$attrs[pyNameToJs(pyName)]=value;
+        return none();
+      };
+      state.screenObject=obj;
+      return obj;
+    }
+
+    function installBuiltins(){
+      function fn0(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(){cb();return none();});
+      }
+      function fn1(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a){return cb(js(a));});
+      }
+      function fn2(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){return cb(js(a),js(b));});
+      }
+      function anim1(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a){
+          return Sk.misceval.promiseToSuspension(cb(js(a)));
+        });
+      }
+      function anim2(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){
+          return Sk.misceval.promiseToSuspension(cb(js(a),js(b)));
+        });
+      }
+      anim1("forward",animateForward);
+      Sk.builtins.fd=Sk.builtins.forward;
+      anim1("backward",function(d){return animateForward(-Number(d));});
+      Sk.builtins.back=Sk.builtins.backward;Sk.builtins.bk=Sk.builtins.backward;
+      anim1("left",animateTurn);
+      Sk.builtins.lt=Sk.builtins.left;
+      anim1("right",function(a){return animateTurn(-Number(a));});
+      Sk.builtins.rt=Sk.builtins.right;
+
+      anim2("goto",function(x,y){return animateMoveTo(x,y);});
+      // Skulpt rewrites the JavaScript-reserved identifier goto.
+      Sk.builtins["goto_$rw$"]=Sk.builtins.goto;
+      Sk.builtins.setpos=Sk.builtins.goto;Sk.builtins.setposition=Sk.builtins.goto;
+      anim1("setx",function(x){return animateMoveTo(x,state.y);});
+      anim1("sety",function(y){return animateMoveTo(state.x,y);});
+      Sk.builtins.home=new Sk.builtin.func(function(){
+        return Sk.misceval.promiseToSuspension(
+          animateMoveTo(0,0,"Returning home").then(function(){return animateHeading(0);})
+        );
+      });
+
+      fn0("penup",function(){state.penDown=false;});
+      Sk.builtins.up=Sk.builtins.penup;Sk.builtins.pu=Sk.builtins.penup;
+      fn0("pendown",function(){state.penDown=true;});
+      Sk.builtins.down=Sk.builtins.pendown;Sk.builtins.pd=Sk.builtins.pendown;
+      Sk.builtins.isdown=new Sk.builtin.func(function(){return Sk.ffi.remapToPy(state.penDown);});
+
+      fn1("speed",function(v){
+        var next=Number(v);
+        if(!Number.isFinite(next)) throw new Error("speed() needs a number from 0 to 10");
+        next=clamp(next,0,10);
+        state.speed=next;
+        playback.speed=next;
+        schedulePlayback();
+        return none();
+      });
+      var circleFn=function(radius,extent,steps){
+        return Sk.misceval.promiseToSuspension(
+          animateCircle(
+            js(radius),
+            extent===Sk.builtin.none.none$?undefined:js(extent),
+            steps===Sk.builtin.none.none$?undefined:js(steps)
+          )
+        );
+      };
+      circleFn.co_varnames=["radius","extent","steps"];
+      circleFn.co_argcount=3;
+      circleFn.$defaults=[new Sk.builtin.int_(360),Sk.builtin.none.none$];
+      Sk.builtins.circle=new Sk.builtin.func(circleFn);
+
+      fn1("color",function(c){setColor(c);state.fillColor=String(c);return none();});
+      fn1("pencolor",function(c){setColor(c);return none();});
+      fn1("fillcolor",function(c){setFillColor(c);return none();});
+      fn1("pensize",function(v){state.size=Math.max(.5,Number(v)||1);return none();});
+      Sk.builtins.width=Sk.builtins.pensize;
+      fn0("begin_fill",beginFill);
+      fn0("end_fill",endFill);
+      fn0("clear",clear);
+      fn1("shape",function(name){setShape(name);return none();});
+      fn0("reset",reset);
+      fn1("dot",function(v){dot(v);return none();});
+      fn0("stamp",function(){drawSpriteOn(ctx,true);});
+      fn0("hideturtle",function(){state.visible=false;refreshSprite();});
+      Sk.builtins.ht=Sk.builtins.hideturtle;
+      fn0("showturtle",function(){state.visible=true;refreshSprite();});
+      Sk.builtins.st=Sk.builtins.showturtle;
+
+      Sk.builtins.heading=new Sk.builtin.func(function(){return pyNum(state.heading);});
+      anim1("setheading",animateHeading);
+      Sk.builtins.seth=Sk.builtins.setheading;
+      Sk.builtins.xcor=new Sk.builtin.func(function(){return pyNum(state.x);});
+      Sk.builtins.ycor=new Sk.builtin.func(function(){return pyNum(state.y);});
+      Sk.builtins.position=new Sk.builtin.func(function(){
+        return new Sk.builtin.tuple([pyNum(state.x),pyNum(state.y)]);
+      });
+      Sk.builtins.pos=Sk.builtins.position;
+
+      fn1("bgcolor",function(c){world.style.backgroundColor=String(c);return none();});
+
+      var writeFn=function(message,move,align,font){
+        writeText(
+          js(message),
+          font===Sk.builtin.none.none$?null:js(font),
+          align===Sk.builtin.none.none$?"left":js(align)
+        );
+        return none();
+      };
+      writeFn.co_varnames=["message","move","align","font"];
+      writeFn.co_argcount=4;
+      writeFn.$defaults=[
+        Sk.builtin.bool.false$,
+        new Sk.builtin.str("left"),
+        Sk.builtin.none.none$
+      ];
+      Sk.builtins.write=new Sk.builtin.func(writeFn);
+
+      fn1("onclick",function(callback){state.turtleClickCallback=callback;return none();});
+      Sk.builtins.getscreen=new Sk.builtin.func(function(){return getScreenObject();});
+    }
+
+    return {
+      reset:reset,
+      clear:clear,
+      installBuiltins:installBuiltins,
+      syncAnimationPause:syncAnimationPause,
+      cancelAnimation:cancelAnimation
+    };
+  })();
+
+  function clearWorld(){
+    TurtleRuntime.reset();
+  }
+
+  var runToken = 0;
+  var playback = {
+    active:false, paused:false, stepOnce:false,
+    autoStepOnFirstPause:false,
+    pending:null, timer:null,
+    speed:6,
+    marker:null
+  };
+
+  function currentSpeed(){
+    return clamp(Number(playback.speed)||0,0,10);
+  }
+
+  // Skulpt pauses before each real Python statement, including loop bodies
+  // and statements inside user-defined functions. Rendering remains immediate
+  // when a statement executes; the next statement waits for the speed timer.
+  function lineDelay(){
+    var speed=currentSpeed();
+    if(speed===0) return 0;
+
+    var t=(speed-1)/9;
+    var codeDelay=230*Math.pow(18/230,t);
+    return Math.max(8,Math.min(1200,Math.round(codeDelay)));
+  }
+  function showExecutingLine(line){
+    if(playback.marker!==null){
+      try{editor.removeLineClass(playback.marker,"background","turtle-current-line");}catch(e){}
+      playback.marker=null;
+    }
+    var n=Number(line);
+    if(Number.isInteger(n)&&n>0&&n<=editor.lineCount()){
+      playback.marker=editor.addLineClass(n-1,"background","turtle-current-line");
+      playbackLineStatus.textContent="Line "+n;
+      worldLineStatus.textContent="Line "+n+" · "+(editor.getLine(n-1)||"").trim().slice(0,32);
+      editor.scrollIntoView({line:n-1,ch:0},60);
+    }else{
+      playbackLineStatus.textContent="";
+      worldLineStatus.textContent="400 × 400";
+    }
+  }
+  function syncPlaybackButtons(){
+    runBtn.disabled=playback.active;
+    stopBtn.disabled=!playback.active;
+    pauseBtn.disabled=!playback.active;
+    // Step is available before a run starts. During a run, it becomes
+    // available whenever execution is paused on a real Python statement.
+    stepBtn.disabled=playback.active ? (!playback.paused||!playback.pending) : false;
+    pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
+  }
+  function schedulePlayback(){
+    if(playback.timer!==null){
+      clearTimeout(playback.timer);
+      playback.timer=null;
+    }
+    if(!playback.active||playback.paused||!playback.pending)return;
+    var pending=playback.pending;
+    playback.timer=setTimeout(function(){
+      playback.timer=null;
+      if(!playback.active||playback.paused||playback.pending!==pending)return;
+      playback.pending=null;
+      try{pending.resolve(pending.susp.resume());}
+      catch(e){pending.reject(e);}
+    },lineDelay());
+  }
+  function cancelPlayback(){
+    if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+    var pending=playback.pending;
+    playback.pending=null;
+    playback.active=false;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.autoStepOnFirstPause=false;
+    TurtleRuntime.cancelAnimation();
+    if(pending)pending.reject(new Error("Playback stopped"));
+    syncPlaybackButtons();
+    showExecutingLine(null);
+  }
+  function debugStatement(susp,token,line){
+    return new Promise(function(resolve,reject){
+      if(token!==runToken||!playback.active){
+        reject(new Error("Playback stopped"));
+        return;
+      }
+
+      showExecutingLine(line);
+      var autoFirstStep=playback.autoStepOnFirstPause;
+      if(autoFirstStep) playback.autoStepOnFirstPause=false;
+
+      playback.pending={susp:susp,resolve:resolve,reject:reject};
+
+      // A Step click from the stopped state should execute the first
+      // statement immediately, then pause on the next statement.
+      if(autoFirstStep){
+        var first=playback.pending;
+        playback.pending=null;
+        playback.stepOnce=true;
+        syncPlaybackButtons();
+        try{first.resolve(first.susp.resume());}
+        catch(e){first.reject(e);}
+        return;
+      }
+
+      // After executing one statement, stop at the next executable line.
+      if(playback.stepOnce){
+        playback.stepOnce=false;
+        playback.paused=true;
+      }
+
+      syncPlaybackButtons();
+      schedulePlayback();
+    });
+  }
+  pauseBtn.addEventListener("click",function(){
+    if(!playback.active)return;
+    playback.paused=!playback.paused;
+    playback.stepOnce=false;
+    syncPlaybackButtons();
+    TurtleRuntime.syncAnimationPause();
+    schedulePlayback();
+  });
+  stepBtn.addEventListener("click",function(){
+    // From a stopped program, Step starts fresh, executes the first
+    // statement, and pauses on the next one.
+    if(!playback.active){
+      runCode(true);
+      return;
+    }
+
+    if(!playback.paused||!playback.pending)return;
+    var pending=playback.pending;
+    playback.pending=null;
+    if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+    playback.stepOnce=true;
+    playback.paused=false;
+    syncPlaybackButtons();
+    TurtleRuntime.syncAnimationPause();
+    try{pending.resolve(pending.susp.resume());}
+    catch(e){pending.reject(e);}
+  });
+
+  async function runCode(startWithStep){
+    if(playback.active)return;
+    if(typeof Sk==="undefined"){
+      setStatus("bad");
+      setOutput('<span class="error">Python did not load. Check the internet connection and refresh the page.</span>');
+      return;
+    }
+    runToken++;
+    var token=runToken, userCode=editor.getValue(), debugLine=0;
+    clearErrorHighlight();
+    clearWorld();
+    setOutput("");
+    setStatus("running");
+    playback.active=true;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.autoStepOnFirstPause=!!startWithStep;
+    playback.pending=null;
+    playback.speed=6;
+    showExecutingLine(null);
+    syncPlaybackButtons();
+    if(window.innerWidth<=560){
+      requestAnimationFrame(function(){worldPanel.scrollIntoView({behavior:"smooth",block:"start"});});
+    }
+
+    Sk.configure({
+      output:outf,
+      read:builtinRead,
+      __future__:Sk.python3,
+      debugging:true,
+      breakpoints:function(filename,lineno){
+        if(token!==runToken)return false;
+        // Don't stop in modules imported by the student's code.
+        if(String(filename).indexOf("<stdin>")<0)return false;
+        debugLine=lineno;
+        return true;
+      },
+      // Stepping may legitimately take several minutes; Stop can interrupt it.
+      execLimit:null,
+      yieldLimit:100,
+      inputfun:function(promptText){
+        var value=window.prompt(promptText||"");
+        return Promise.resolve(value===null?"":value);
+      },
+      inputfunTakesPrompt:true
+    });
+
+    TurtleRuntime.installBuiltins();
+    try{
+      await Sk.misceval.asyncToPromise(function(){
+        return Sk.importMainWithBody("<stdin>",false,userCode,true);
+      },{
+        "Sk.debug":function(susp){
+          return debugStatement(susp,token,debugLine);
+        }
+      });
+      if(token!==runToken)return;
+      if(!output.textContent.trim()){
+        appendOutput("Program finished. No text was printed.\n","muted");
+      }else{
+        appendOutput("\nProgram finished.\n","success");
+      }
+      setStatus("good");
+    }catch(err){
+      if(token!==runToken)return;
+      renderError(err);
+      setStatus("bad");
+    }finally{
+      if(token===runToken){
+        if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+        playback.pending=null;
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        syncPlaybackButtons();
+        showExecutingLine(null);
+        if(window.innerWidth<=560){
+          requestAnimationFrame(function(){
+            worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
+          });
+        }
+      }
+    }
+  }
+
+  function formatError(err){
+    var info=analyzeError(err);
+    return info.name+(info.line?" on line "+info.line:"")+": "+info.message;
+  }
+
+  function stopCode(){
+    if(!playback.active)return;
+    runToken++;
+    cancelPlayback();
+    setStatus("");
+    appendOutput("\nStopped.\n","muted");
+  }
+
+  function clearRun(){
+    runToken++;
+    cancelPlayback();
+    clearErrorHighlight();
+    setStatus("");
+    clearWorld();
+    setOutput('<span class="muted">Run cleared. Your code is still here.</span>');
+  }
+
+  function clearCode(){
+    if(playback.active)stopCode();
+    if(!editor.getValue())return;
+    if(!window.confirm("Clear all code from the editor? Turtle's drawing and text output will stay."))return;
+    editor.setValue("");
+    editor.focus();
+    try {
+      localStorage.setItem(STORAGE_KEY, "");
+      saveStatus.textContent = "saved locally";
+    } catch(e) {}
+  }
+
+  runBtn.addEventListener("click",function(){runCode(false);});
+  stopBtn.addEventListener("click", stopCode);
+  clearCodeBtn.addEventListener("click", clearCode);
+  clearRunBtn.addEventListener("click", clearRun);
+
+  document.getElementById("clearConsole").addEventListener("click", function(){
+    clearErrorHighlight();
+    setOutput('<span class="muted">Output cleared.</span>');
+  });
+
+  examplesSelect.addEventListener("change", function(){
+    if(!this.value || !examples[this.value]) return;
+    clearErrorHighlight();
+    editor.setValue(examples[this.value]);
+    editor.focus();
+    this.value = "";
+  });
+
+
+  var DEMO_PROGRAMS=[{"id":"gallery0","title":"Rainbow Spirograph","category":"Art","desc":"Radial overlapping circles","code":"speed(0)\ncolors = [\"#e85d75\",\"#f7ad45\",\"#ffd95c\",\"#48bba6\",\"#4788dc\",\"#995ddd\"]\npensize(2)\nfor i in range(72):\n    color(colors[i % 6])\n    circle(108)\n    right(5)","art":"rings"},{"id":"gallery1","title":"Neon Starburst","category":"Art","desc":"Layered neon geometry","code":"speed(0)\nbgcolor(\"#101627\")\ncolors = [\"#ff4f9a\",\"#ffe274\",\"#61e7e1\",\"#a89bff\"]\nfor i in range(96):\n    color(colors[i % 4])\n    pensize(1 + i % 3)\n    forward(155)\n    backward(155)\n    right(137.5)","art":"rays"},{"id":"gallery2","title":"Sunflower","category":"Nature","desc":"Petals made from circles","code":"speed(0)\nbgcolor(\"#fff9e9\")\ncolor(\"#df9b20\")\nfor i in range(18):\n    begin_fill()\n    circle(75, 60)\n    left(120)\n    circle(75, 60)\n    left(160)\n    end_fill()\npenup()\ngoto(0, -31)\npendown()\ncolor(\"#6a4227\")\nbegin_fill()\ncircle(31)\nend_fill()","art":"flower"},{"id":"gallery3","title":"Galaxy Spiral","category":"Art","desc":"A galaxy of colored lines","code":"speed(0)\nbgcolor(\"#101528\")\ncolors = [\"#52e2d0\",\"#88a9ff\",\"#fba1dc\",\"#f8d57e\"]\nfor i in range(180):\n    color(colors[i % 4])\n    pensize(1 + i / 75)\n    forward(i * 0.85)\n    right(137.5)","art":"spiral"},{"id":"gallery4","title":"Geometric Mandala","category":"Art","desc":"A repeating circular pattern","code":"speed(0)\nbgcolor(\"#faf5ec\")\ncolors = [\"#006d77\",\"#e29578\",\"#83c5be\",\"#b56576\"]\nfor i in range(36):\n    color(colors[i % 4])\n    pensize(2)\n    for j in range(6):\n        forward(74)\n        right(60)\n    right(10)","art":"mandala"},{"id":"gallery5","title":"Colorful Rosette","category":"Art","desc":"Many circles, one flower","code":"speed(0)\ncolors = [\"#ee6c4d\",\"#3d5a80\",\"#98c1d9\",\"#d6a1db\"]\nfor i in range(36):\n    color(colors[i % 4])\n    pensize(2)\n    circle(90)\n    right(10)","art":"rings"},{"id":"gallery6","title":"Turtle Race Track","category":"Games","desc":"Loops and lanes","code":"speed(0)\nbgcolor(\"#e2efe4\")\npensize(4)\nfor lane in range(3):\n    penup()\n    goto(-165, -110 + lane * 95)\n    pendown()\n    color([\"#408f65\",\"#4c83c5\",\"#e79955\"][lane])\n    for i in range(2):\n        forward(320)\n        left(90)\n        forward(60)\n        left(90)\npenup()\ngoto(-151,-150)\ncolor(\"#263e3b\")\nwrite(\"START\",font=(\"Arial\",16,\"bold\"))","art":"track"},{"id":"gallery7","title":"Pixel Heart","category":"Pixel Art","desc":"Build art one square at a time","code":"speed(0)\nbgcolor(\"#fff0ef\")\npixels = [\"01100110\",\"11111111\",\"11111111\",\"01111110\",\"00111100\",\"00011000\"]\nsize = 29\nfor row in range(len(pixels)):\n    for col in range(len(pixels[row])):\n        if pixels[row][col] == \"1\":\n            penup()\n            goto(-116 + col*size, 75 - row*size)\n            setheading(0)\n            color(\"#eb5272\")\n            begin_fill()\n            for side in range(4):\n                forward(size - 2)\n                right(90)\n            end_fill()","art":"heart"},{"id":"gallery8","title":"Snowflake","category":"Nature","desc":"Symmetry from six branches","code":"speed(0)\nbgcolor(\"#112b47\")\ncolor(\"#b4e9ff\")\npensize(3)\nfor arm in range(6):\n    for branch in range(3):\n        forward(36)\n        left(45)\n        forward(18)\n        backward(18)\n        right(90)\n        forward(18)\n        backward(18)\n        left(45)\n    backward(108)\n    right(60)","art":"snow"},{"id":"gallery9","title":"Night Sky","category":"Nature","desc":"A moon and tiny stars","code":"speed(0)\nbgcolor(\"#101f3c\")\npenup()\ngoto(70, 40)\npendown()\ncolor(\"#ffefbc\")\nbegin_fill()\ncircle(55)\nend_fill()\npenup()\ngoto(94, 58)\npendown()\ncolor(\"#101f3c\")\nbegin_fill()\ncircle(51)\nend_fill()\ncolor(\"#f7d989\")\nfor x,y in [(-140,120),(-65,65),(10,145),(145,-75),(-125,-95),(20,-120)]:\n    penup()\n    goto(x,y)\n    pendown()\n    for i in range(5):\n        forward(14)\n        right(144)","art":"sky"},{"id":"gallery10","title":"City Skyline","category":"Scenes","desc":"A city using rectangles","code":"speed(0)\nbgcolor(\"#16263b\")\nheights = [80,145,105,175,120,155,90]\nfor i in range(7):\n    x = -175 + i*50\n    h = heights[i]\n    penup()\n    goto(x,-170)\n    setheading(0)\n    color(\"#3a5977\")\n    begin_fill()\n    for width,height in [(43,0),(0,h),(-43,0),(0,-h)]:\n        goto(x+width if height == 0 else x+43, -170+height if height else -170)\n    end_fill()\n    for row in range(2, h//22):\n        for col in range(2):\n            penup()\n            goto(x+12+col*18,-170+row*20)\n            dot(5,\"#ffd67c\")","art":"skyline"},{"id":"gallery11","title":"Mountain Sunset","category":"Scenes","desc":"Build a landscape with polygons","code":"speed(0)\nbgcolor(\"#f9c78c\")\npenup()\ngoto(90,65)\ncolor(\"#f7e5a3\")\ndot(95)\nfor points, shade in [([(-200,-80),(-80,125),(30,-80)],\"#8e819a\"),([(-80,-110),(65,110),(200,-110)],\"#696d87\"),([(-200,-170),(-60,10),(65,-170)],\"#425e70\")]:\n    penup()\n    goto(points[0][0],points[0][1])\n    pendown()\n    color(shade)\n    begin_fill()\n    for x,y in points[1:]:\n        goto(x,y)\n    goto(points[0][0],points[0][1])\n    end_fill()","art":"mountain"},{"id":"gallery12","title":"Optical Illusion","category":"Art","desc":"Rotating squares","code":"speed(0)\nbgcolor(\"#fcf9f3\")\ncolors = [\"#174b57\",\"#e27b5d\",\"#dab75b\"]\nfor i in range(54):\n    color(colors[i % 3])\n    pensize(2)\n    for side in range(4):\n        forward(45 + i*2)\n        right(90)\n    right(7)","art":"squares"},{"id":"gallery13","title":"Nested Stars","category":"Shapes","desc":"Stars within stars","code":"speed(0)\nbgcolor(\"#172433\")\ncolors = [\"#f1ba62\",\"#f26a75\",\"#72c5cf\"]\nfor n in range(10):\n    color(colors[n % 3])\n    pensize(2)\n    penup()\n    goto(-15-n*12,20-n*10)\n    pendown()\n    for i in range(5):\n        forward(25+n*25)\n        right(144)","art":"star"},{"id":"gallery14","title":"Flower Garden","category":"Nature","desc":"Functions with parameters","code":"speed(0)\nbgcolor(\"#f1f7e9\")\ndef flower(x,y,petal,shade):\n    penup()\n    goto(x,y)\n    setheading(0)\n    color(shade)\n    for i in range(8):\n        begin_fill()\n        circle(petal,60)\n        left(120)\n        circle(petal,60)\n        end_fill()\n        right(45)\n    dot(petal,\"#efbc4a\")\nflower(-95,55,35,\"#e97f82\")\nflower(75,55,31,\"#8f88d6\")\nflower(0,-75,40,\"#f6b84b\")","art":"flower"},{"id":"gallery15","title":"Checkerboard","category":"Pixel Art","desc":"Nested loops and coordinates","code":"speed(0)\nbgcolor(\"#f6eee3\")\nfor row in range(8):\n    for col in range(8):\n        x = -160 + col*40\n        y = 160 - row*40\n        penup()\n        goto(x,y)\n        setheading(0)\n        color(\"#204e53\" if (row+col)%2 == 0 else \"#f3d6a7\")\n        begin_fill()\n        for side in range(4):\n            forward(40)\n            right(90)\n        end_fill()","art":"checker"},{"id":"gallery16","title":"Concentric Circles","category":"Shapes","desc":"One loop, growing radii","code":"speed(0)\ncolors = [\"#176b73\",\"#e88967\",\"#eab957\",\"#8766a5\"]\nfor radius in range(18,177,13):\n    penup()\n    goto(0,-radius)\n    pendown()\n    color(colors[(radius//13)%4])\n    pensize(3)\n    circle(radius)","art":"rings"},{"id":"gallery17","title":"Hexagon Hive","category":"Shapes","desc":"Repeated hexagons","code":"speed(0)\nbgcolor(\"#fff3d7\")\nfor row in range(4):\n    for col in range(4):\n        x = -132 + col*80 + (row%2)*40\n        y = 105-row*70\n        penup()\n        goto(x,y)\n        setheading(0)\n        color(\"#d59c31\")\n        pensize(3)\n        for side in range(6):\n            forward(38)\n            right(60)","art":"hex"},{"id":"gallery18","title":"Wave Machine","category":"Math","desc":"Sine waves made from points","code":"import math\nspeed(0)\nbgcolor(\"#11283c\")\ncolors = [\"#44ceb1\",\"#f2c06a\",\"#ea7892\"]\nfor wave in range(3):\n    color(colors[wave])\n    pensize(3)\n    penup()\n    for x in range(-185,186,3):\n        y = math.sin(x/27 + wave)*40 + (wave-1)*72\n        goto(x,y)\n        pendown()","art":"waves"},{"id":"gallery19","title":"Fibonacci Spiral","category":"Math","desc":"Growing quarter-circles","code":"speed(0)\nbgcolor(\"#f8f1df\")\ncolor(\"#24717b\")\npensize(4)\na = 1\nb = 1\nfor i in range(10):\n    circle(a*2,90)\n    a,b = b,a+b","art":"spiral"},{"id":"gallery20","title":"Random Walk","category":"Math","desc":"Controlled randomness","code":"import random\nspeed(0)\nbgcolor(\"#112d36\")\ncolors = [\"#68dbc6\",\"#f5d36b\",\"#e48d9a\"]\npensize(2)\nfor i in range(180):\n    color(colors[i%3])\n    forward(16)\n    right(random.choice([0,90,180,270]))","art":"walk"},{"id":"gallery21","title":"Bouncing Geometry","category":"Math","desc":"Growing angle experiment","code":"speed(0)\nbgcolor(\"#faf5eb\")\npensize(2)\nfor i in range(120):\n    color(\"#176b73\" if i%2==0 else \"#cb7353\")\n    forward(i*1.5)\n    right(121)","art":"spiral"},{"id":"gallery22","title":"Smiley Face","category":"Characters","desc":"Draw a face with circles","code":"speed(0)\nbgcolor(\"#e9f5f3\")\npenup()\ngoto(0,-135)\ncolor(\"#f2be55\")\nbegin_fill()\ncircle(135)\nend_fill()\nfor x in [-52,52]:\n    penup()\n    goto(x,40)\n    color(\"#243e4b\")\n    dot(23)\npenup()\ngoto(-63,-40)\nsetheading(-65)\npendown()\npensize(6)\ncolor(\"#243e4b\")\ncircle(70,130)","art":"face"},{"id":"gallery23","title":"Robot Face","category":"Characters","desc":"Filled shapes and details","code":"speed(0)\nbgcolor(\"#e6efef\")\npenup()\ngoto(-115,-115)\npendown()\ncolor(\"#397c88\")\nbegin_fill()\nfor i in range(4):\n    forward(230)\n    left(90)\nend_fill()\nfor x in [-65,65]:\n    penup()\n    goto(x,30)\n    dot(48,\"#fbda77\")\n    dot(18,\"#263a48\")\npenup()\ngoto(-62,-47)\npendown()\ncolor(\"#f4f1dd\")\npensize(9)\nforward(124)\npenup()\ngoto(0,117)\npendown()\ncolor(\"#263a48\")\npensize(8)\nsetheading(90)\nforward(38)\ndot(23,\"#f08c72\")","art":"robot"},{"id":"gallery24","title":"3D Cube","category":"Shapes","desc":"A wireframe illusion","code":"speed(0)\nbgcolor(\"#f8f2e8\")\ncolor(\"#2b6873\")\npensize(4)\nfor x,y in [(-100,-70),(-28,-22)]:\n    penup()\n    goto(x,y)\n    setheading(0)\n    pendown()\n    for i in range(4):\n        forward(130)\n        left(90)\nfor x,y in [(-100,-70),(30,-70),(30,60),(-100,60)]:\n    penup()\n    goto(x,y)\n    pendown()\n    goto(x+72,y+48)","art":"cube"},{"id":"gallery25","title":"Turtle Typography","category":"Scenes","desc":"Write a little poster","code":"speed(0)\nbgcolor(\"#173e44\")\npenup()\ngoto(0,85)\ncolor(\"#edc77c\")\nwrite(\"HELLO\", align=\"center\", font=(\"Arial\",45,\"bold\"))\ngoto(0,17)\ncolor(\"#b0e6dc\")\nwrite(\"WORLD\", align=\"center\", font=(\"Arial\",38,\"bold\"))\ngoto(-125,-48)\npendown()\npensize(4)\nforward(250)\npenup()\ngoto(0,-102)\ncolor(\"#f6f1e6\")\nwrite(\"made with Python Turtle\",align=\"center\",font=(\"Arial\",14))","art":"type"},{"id":"gallery26","title":"Polka Dot Field","category":"Art","desc":"Dots in a grid","code":"speed(0)\nbgcolor(\"#faf4e9\")\ncolors = [\"#dc785f\",\"#378d92\",\"#e6b74e\",\"#7d76af\"]\nfor row in range(8):\n    for col in range(8):\n        penup()\n        goto(-145 + col*42,135-row*42)\n        dot(12 + (row*col)%18,colors[(row+col)%4])","art":"dots"},{"id":"gallery27","title":"Daisy Chain","category":"Nature","desc":"A border of flowers","code":"speed(0)\nbgcolor(\"#f0f7ed\")\nfor x,y in [(-100,90),(0,90),(100,90),(-100,-35),(0,-35),(100,-35)]:\n    penup()\n    goto(x,y)\n    color(\"#f3f3e8\")\n    for angle in range(0,360,45):\n        setheading(angle)\n        forward(23)\n        dot(41,\"#fffefd\")\n        backward(23)\n    dot(30,\"#ecbd45\")","art":"flower"},{"id":"gallery28","title":"Recursive Tree","category":"Nature","desc":"Branches made with functions","code":"speed(0)\nbgcolor(\"#edf5ef\")\npenup()\ngoto(0,-185)\nsetheading(90)\npendown()\ncolor(\"#47745c\")\npensize(2)\ndef branch(length):\n    if length < 9:\n        dot(5,\"#82b48a\")\n        return\n    forward(length)\n    left(27)\n    branch(length*0.72)\n    right(54)\n    branch(length*0.72)\n    left(27)\n    backward(length)\nbranch(65)","art":"tree"},{"id":"gallery29","title":"Maze Paths","category":"Games","desc":"Trace an angular maze","code":"speed(0)\nbgcolor(\"#102932\")\ncolors = [\"#69d6c3\",\"#f1cb70\",\"#f08b8b\"]\nfor path in range(3):\n    penup()\n    goto(-155,-120+path*85)\n    setheading(0)\n    pendown()\n    color(colors[path])\n    pensize(5)\n    for i in range(9):\n        forward(32)\n        left(90 if i%2==0 else -90)\n        forward(18)\n        right(90 if i%2==0 else -90)","art":"maze"},{"id":"gallery30","title":"Kaleidoscope","category":"Art","desc":"Rotated, repeated polygons","code":"speed(0)\nbgcolor(\"#13202d\")\ncolors = [\"#f2ac74\",\"#e97fa0\",\"#82c9c8\",\"#b1a2e0\"]\nfor petal in range(24):\n    color(colors[petal%4])\n    pensize(2)\n    for edge in range(3):\n        forward(145)\n        right(120)\n    right(15)","art":"mandala"},{"id":"gallery31","title":"Ocean Ripples","category":"Scenes","desc":"Overlapping waves","code":"import math\nspeed(0)\nbgcolor(\"#eaf6f4\")\nfor row in range(8):\n    penup()\n    color([\"#137b86\",\"#3b9ba3\",\"#8ac8c7\"][row%3])\n    pensize(2)\n    for x in range(-195,196,4):\n        y = -140+row*40 + math.sin(x/20+row)*13\n        goto(x,y)\n        pendown()","art":"waves"},{"id":"gallery32","title":"Color Spectrum","category":"Art","desc":"A rainbow of 180 lines","code":"speed(0)\nbgcolor(\"#fdf7f1\")\ncolors = [\"#ee5d67\",\"#ee985b\",\"#efd56a\",\"#68b77e\",\"#55acc6\",\"#7866ad\"]\nfor i in range(180):\n    color(colors[(i//30)%6])\n    pensize(2)\n    forward(155)\n    backward(155)\n    right(2)","art":"rays"}];
+  examplesSelect.insertAdjacentHTML("afterbegin",'<option value="" disabled>──────── GALLERY ────────</option>');
+  DEMO_PROGRAMS.forEach(function(d){examples[d.id]=d.code;var opt=document.createElement("option");opt.value=d.id;opt.textContent=d.title;examplesSelect.appendChild(opt);});
+  var demoGallery=document.getElementById("demoGallery");
+  var demoFilters=document.getElementById("demoFilters");
+  var demoSearch=document.getElementById("demoSearch");
+  var currentDemoFilter="All";
+  ["All","Art","Nature","Scenes","Shapes","Math","Pixel Art","Characters","Games"].forEach(function(cat){
+    var btn=document.createElement("button");btn.className="demo-filter"+(cat==="All"?" active":"");btn.textContent=cat;btn.type="button";
+    btn.addEventListener("click",function(){currentDemoFilter=cat;demoFilters.querySelectorAll(".demo-filter").forEach(function(b){b.classList.toggle("active",b===btn);});renderDemoGallery();});demoFilters.appendChild(btn);
+  });
+  function previewDemo(canvas,d,index){
+    var c=canvas.getContext("2d");if(!c)return;
+    var w=308,h=198;canvas.width=w;canvas.height=h;
+    var dark=["rays","sky","skyline","maze","tree"].indexOf(d.art)!==-1 || (index%7===1);
+    c.fillStyle=dark?"#142939":"#faf4e9";c.fillRect(0,0,w,h);
+    var colors=dark?["#75d7ca","#f1cd79","#f48fa8","#a2b1ec"]:["#176b73","#d8815b","#e4ba5c","#9179b1"];
+    c.save();c.translate(w/2,h/2);
+    function line(x,y,xx,yy,color,width){c.strokeStyle=color;c.lineWidth=width||2;c.beginPath();c.moveTo(x,y);c.lineTo(xx,yy);c.stroke();}
+    function circ(x,y,r,color,width){c.strokeStyle=color;c.lineWidth=width||2;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();}
+    if(d.art==="rings"||d.art==="mandala"||d.art==="flower"){
+      for(var i=0;i<36;i++){c.save();c.rotate(i*Math.PI/18);c.strokeStyle=colors[i%4];c.lineWidth=2;c.beginPath();c.ellipse(0,32,25+(index%4)*5,49,0,0,Math.PI*2);c.stroke();c.restore();}
+      if(d.art==="flower"){c.fillStyle="#c28a37";c.beginPath();c.arc(0,0,15,0,Math.PI*2);c.fill();}
+    }else if(d.art==="rays"||d.art==="snow"||d.art==="star"){
+      for(var i=0;i<64;i++){var a=i*Math.PI/32,r=43+(i%5)*9;line(Math.cos(a)*11,Math.sin(a)*11,Math.cos(a)*r*1.6,Math.sin(a)*r*1.1,colors[i%4],i%3===0?3:1);}
+    }else if(d.art==="spiral"||d.art==="walk"){
+      c.beginPath();for(var i=0;i<700;i++){var a=i*.105,r=i*.15;var x=Math.cos(a)*r,y=Math.sin(a)*r*.72;if(!i)c.moveTo(x,y);else c.lineTo(x,y);}c.strokeStyle=colors[index%4];c.lineWidth=3;c.stroke();
+    }else if(d.art==="waves"){
+      for(var j=0;j<6;j++){c.beginPath();for(var x=-154;x<=154;x+=3){var y=Math.sin(x/17+j)*13+(j-2.5)*26;if(x===-154)c.moveTo(x,y);else c.lineTo(x,y);}c.strokeStyle=colors[j%4];c.lineWidth=3;c.stroke();}
+    }else if(d.art==="heart"){
+      for(var y=0;y<8;y++)for(var x=0;x<9;x++){var dx=x-4,dy=y-2.4;if(Math.pow(dx*dx+dy*dy-11,3)-dx*dx*dy*dy*20<0){c.fillStyle="#e95b75";c.fillRect(dx*22-9,dy*19-9,18,16);}}
+    }else if(d.art==="checker"||d.art==="dots"||d.art==="hex"){
+      for(var y=0;y<6;y++)for(var x=0;x<9;x++){c.fillStyle=colors[(x+y)%4];if(d.art==="dots"){c.beginPath();c.arc(-127+x*31,-79+y*31,4+(x*y)%10,0,7);c.fill();}else if(d.art==="hex"){circ(-125+x*30+(y%2)*15,-75+y*29,16,colors[(x+y)%4],2);}else c.fillRect(-135+x*30,-89+y*30,30,30);}
+    }else if(d.art==="face"||d.art==="robot"){
+      c.fillStyle="#edbd5d";c.beginPath();c.arc(0,0,68,0,7);c.fill();c.fillStyle="#263d49";for(var x of [-25,25]){c.beginPath();c.arc(x,-15,8,0,7);c.fill();}c.strokeStyle="#263d49";c.lineWidth=5;c.beginPath();c.arc(0,4,35,.15,Math.PI-.15);c.stroke();
+    }else if(d.art==="type"){c.fillStyle="#176b73";c.fillRect(-154,-99,308,198);c.fillStyle="#f1cc82";c.font="bold 49px Arial";c.textAlign="center";c.fillText("HELLO",0,-8);c.font="bold 40px Arial";c.fillText("WORLD",0,40);
+    }else if(d.art==="skyline"||d.art==="mountain"||d.art==="tree"){
+      for(var i=0;i<7;i++){c.fillStyle=colors[i%4];if(d.art==="mountain"){c.beginPath();c.moveTo(-160+i*55,100);c.lineTo(-100+i*50,-70+i%3*23);c.lineTo(-36+i*55,100);c.fill();}else c.fillRect(-155+i*45,95-(i*41)%145,40,160);}
+    }else{
+      for(var i=0;i<24;i++){c.save();c.rotate(i*Math.PI/12);c.strokeStyle=colors[i%4];c.lineWidth=2;c.strokeRect(-30,-58,60+i*.9,60+i*.9);c.restore();}
+    }
+    c.restore();
+  }
+  function renderDemoGallery(){
+    var query=(demoSearch.value||"").trim().toLowerCase();
+    var visible=DEMO_PROGRAMS.filter(function(d){return (currentDemoFilter==="All"||d.category===currentDemoFilter) && (d.title+" "+d.category+" "+d.desc).toLowerCase().indexOf(query)!==-1;});
+    demoGallery.replaceChildren();
+    document.getElementById("demoCount").textContent=visible.length+" examples";
+    document.getElementById("demoEmpty").style.display=visible.length?"none":"block";
+    visible.forEach(function(d){
+      var button=document.createElement("button");button.type="button";button.className="demo-tile";button.title="Load and run "+d.title;
+      var canvas=document.createElement("canvas");canvas.setAttribute("aria-hidden","true");button.appendChild(canvas);
+      var body=document.createElement("div");body.className="demo-tile-copy";
+      var name=document.createElement("div");name.className="demo-tile-name";name.textContent=d.title;
+      var desc=document.createElement("div");desc.className="demo-tile-desc";desc.textContent=d.desc;
+      body.appendChild(name);body.appendChild(desc);button.appendChild(body);
+      button.addEventListener("click",function(){
+        if(playback.active)stopCode();
+        clearErrorHighlight();editor.setValue(d.code);
+        demoGallery.querySelectorAll(".demo-tile").forEach(function(el){el.style.borderColor="";});
+        button.style.borderColor="#176b73";
+        runCode(false);
+        if(window.innerWidth<=840)document.getElementById("worldPanel").scrollIntoView({behavior:"smooth",block:"start"});
+      });demoGallery.appendChild(button);previewDemo(canvas,d,Number(d.id.slice(7)));
+    });
+  }
+  demoSearch.addEventListener("input",renderDemoGallery);
+  renderDemoGallery();
+  function openCommands(){
+    document.body.classList.add("commands-open");
+    if(commandsToggle)commandsToggle.setAttribute("aria-expanded","true");
+    if(commandSearch && window.innerWidth <= 1350){
+      setTimeout(function(){ commandSearch.focus(); }, 180);
+    }
+  }
+
+  function closeCommands(){
+    document.body.classList.remove("commands-open");
+    if(commandsToggle)commandsToggle.setAttribute("aria-expanded","false");
+  }
+
+  if(commandsToggle) commandsToggle.addEventListener("click", openCommands);
+  if(commandsClose) commandsClose.addEventListener("click", closeCommands);
+  if(commandsOverlay) commandsOverlay.addEventListener("click", closeCommands);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeCommands();
+  });
+
+  var recipes = {
+    turtleSquare:"for i in range(4):\n    forward(100)\n    right(90)",
+    turtleMove:"penup()\ngoto(100, 50)\npendown()\nforward(50)",
+    turtleFill:'color("navy")\nbegin_fill()\nfor i in range(4):\n    forward(100)\n    right(90)\nend_fill()',
+    turtleWrite:'write("Hello", font=("Arial", 20), align="center")',
+    forLoop:"for i in range(4):\n    forward(50)\n    left(90)",
+    whileLoop:"count = 0\nwhile count < 5:\n    forward(20)\n    count += 1",
+    function:"def square(size):\n    for i in range(4):\n        forward(size)\n        right(90)\n\nsquare(80)",
+    returnValue:"def increase(num):\n    num += 100\n    return num\n\ncircle(increase(50))",
+    inputValue:'circle_color = input("What color? ")\ncolor(circle_color)\ncircle(50)',
+    ifElse:'count = 3\nif count < 5:\n    color("blue")\nelif count > 5:\n    color("red")\nelse:\n    color("green")',
+    printValue:'print("Hello World!")'
+  };
+  document.querySelectorAll(".recipe-button").forEach(function(button){
+    button.addEventListener("click",function(){
+      var snippet=recipes[button.getAttribute("data-recipe")];
+      if(!snippet)return;
+      var doc=editor.getDoc();
+      doc.replaceRange(snippet,doc.getCursor());
+      editor.focus();
+      if(window.innerWidth<=1350)closeCommands();
+    });
+  });
+  var commandItems = Array.prototype.slice.call(document.querySelectorAll(".command-item"));
+
+  commandItems.forEach(function(item){
+    item.addEventListener("click", function(){
+      var snippet = item.getAttribute("data-insert") || "";
+      var doc = editor.getDoc();
+      var cursor = doc.getCursor();
+      doc.replaceRange(snippet, cursor);
+      doc.setCursor({line:cursor.line, ch:cursor.ch + snippet.length});
+      editor.focus();
+      if(window.innerWidth <= 1350) closeCommands();
+    });
+  });
+
+  var activeLibrarySection="turtle";
+  var libraryTabs=Array.prototype.slice.call(document.querySelectorAll(".library-tab"));
+  var librarySections=Array.prototype.slice.call(document.querySelectorAll(".library-section"));
+
+  function selectLibrarySection(name){
+    activeLibrarySection=name;
+    libraryTabs.forEach(function(tab){
+      var selected=tab.getAttribute("data-library-tab")===name;
+      tab.classList.toggle("active",selected);
+      tab.setAttribute("aria-selected",selected?"true":"false");
+    });
+    filterCommands();
+    var scroll=document.getElementById("commandScroll");
+    if(scroll)scroll.scrollTop=0;
+  }
+
+  libraryTabs.forEach(function(tab){
+    tab.addEventListener("click",function(){
+      commandSearch.value="";
+      selectLibrarySection(tab.getAttribute("data-library-tab"));
+    });
+  });
+
+  function filterCommands(){
+    var query=(commandSearch.value||"").trim().toLowerCase();
+    var searching=!!query;
+    var visibleCount=0;
+    var library=document.getElementById("commandLibrary");
+    library.classList.toggle("library-searching",searching);
+
+    librarySections.forEach(function(section){
+      var sectionName=section.getAttribute("data-library-section");
+      var sectionMatches=0;
+
+      section.querySelectorAll(".command-item,.recipe-button").forEach(function(item){
+        var haystack=(
+          (item.getAttribute("data-search")||"")+" "+
+          (item.getAttribute("data-insert")||"")+" "+
+          item.textContent
+        ).toLowerCase();
+        var show=!searching||haystack.indexOf(query)!==-1;
+        item.style.display=show?"":"none";
+        if(show)sectionMatches++;
+      });
+
+      section.querySelectorAll(".command-category").forEach(function(category){
+        var any=Array.prototype.some.call(
+          category.querySelectorAll(".command-item"),
+          function(item){return item.style.display!=="none";}
+        );
+        category.style.display=any?"":"none";
+      });
+
+      section.querySelectorAll(".recipe-panel").forEach(function(panel){
+        var any=Array.prototype.some.call(
+          panel.querySelectorAll(".recipe-button,.command-item"),
+          function(item){return item.style.display!=="none";}
+        );
+        panel.style.display=any?"":"none";
+        if(searching&&any)panel.open=true;
+      });
+
+      if(searching){
+        section.style.display=sectionMatches?"block":"none";
+        visibleCount+=sectionMatches;
+      }else{
+        var active=sectionName===activeLibrarySection;
+        section.style.display=active?"block":"none";
+        if(active)visibleCount=sectionMatches;
+      }
+    });
+
+    commandEmpty.style.display=visibleCount?"none":"block";
+    commandsCount.textContent=visibleCount+(visibleCount===1?" item":" items");
+  }
+
+  if(commandSearch) commandSearch.addEventListener("input", filterCommands);
+  filterCommands();
+
+  gridToggle.addEventListener("change", function(){
+    var show = this.checked;
+    ["grid","axisX","axisY"].forEach(function(id){
+      document.getElementById(id).style.display = show ? "" : "none";
+    });
+    document.querySelectorAll(".axis-label").forEach(function(el){
+      el.style.display = show ? "" : "none";
+    });
+  });
+
+  function fitWorld(){
+    var mobile=window.innerWidth<=840;
+    var stageWidth=worldStage.clientWidth;
+    var stageHeight=worldStage.clientHeight;
+    var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
+    var usableHeight=mobile?404:Math.max(180,stageHeight-24);
+    var scale=Math.min(1,usableWidth/404,usableHeight/404);
+    worldWrap.style.transform="scale("+scale+")";
+    worldScaleBox.style.width=(404*scale)+"px";
+    worldScaleBox.style.height=(404*scale)+"px";
+  }
+  window.addEventListener("resize",fitWorld);
+  if(typeof ResizeObserver!=="undefined"){
+    var layoutObserver=new ResizeObserver(function(){
+      if(typeof editor!=="undefined"&&editor)editor.refresh();
+      fitWorld();
+    });
+    layoutObserver.observe(worldStage);
+    layoutObserver.observe(document.querySelector(".code-panel"));
+  }
+  requestAnimationFrame(fitWorld);
+
+  if(typeof Sk === "undefined"){
+    loading.classList.add("show");
+    setTimeout(function(){
+      if(typeof Sk === "undefined"){
+        loading.textContent = "Python could not load";
+      } else {
+        loading.classList.remove("show");
+      }
+    }, 1200);
+  }
+
+  clearWorld();
+  setOutput('<span class="muted">print() output will appear here.</span>');
+  editor.focus();
+})();
+</script>
+</body>
+</html>
