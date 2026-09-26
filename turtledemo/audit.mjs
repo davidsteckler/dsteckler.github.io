@@ -1,5 +1,6 @@
 /**
  * Render real Turtle programs inside Chromium, inspect pixel metrics,
+ * Visual review pass 2: validate revised drawings and complete gallery.
  * and create labeled contact sheets for human review.
  */
 import fs from "node:fs";
