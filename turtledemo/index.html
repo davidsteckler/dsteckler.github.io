@@ -247,7 +247,9 @@
     }
     .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
     .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
-    .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
+    .editor-head-right{display:flex;align-items:center;gap:9px;min-width:0}
+.follow-code-btn{font-size:.67rem;padding:6px 8px;border:1px solid #677c78;background:transparent;color:#d9e8e3;white-space:nowrap;min-height:28px}
+.follow-code-btn[aria-pressed="false"]{border-color:#4c6462;color:#afc6be}
     #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
     .CodeMirror-selected{background:#374243 !important}
     .cm-s-default .cm-keyword{color:#d7a7df}
@@ -869,6 +871,7 @@
           <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
         </div>
         <div class="editor-head-right">
+          <button id="followCodeBtn" type="button" class="btn follow-code-btn" aria-pressed="true" title="Choose whether the editor follows every executing line">Follow code: On</button>
           <span class="playback-line-status" id="playbackLineStatus" aria-live="polite"></span>
           <div class="panel-mini" id="saveStatus">saved locally</div>
         </div>
@@ -1133,12 +1136,12 @@ for i in range(4):
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 
-<script src="curated-a.js?v=4"></script>
-<script src="curated-b.js?v=4"></script>
-<script src="curated-c.js?v=4"></script>
-<script src="curated-d.js?v=4"></script>
-<script src="curated-e.js?v=4"></script>
-<script src="curated-f.js?v=4"></script>
+<script src="curated-a.js?v=5"></script>
+<script src="curated-b.js?v=5"></script>
+<script src="curated-c.js?v=5"></script>
+<script src="curated-d.js?v=5"></script>
+<script src="curated-e.js?v=5"></script>
+<script src="curated-f.js?v=5"></script>
 <script>
 (function(){
   "use strict";
@@ -2285,8 +2288,16 @@ for i in range(4):
     autoStepOnFirstPause:false,
     pending:null, timer:null,
     speed:6,
-    marker:null
+    marker:null,
+    followCode:true
   };
+  var followCodeBtn=document.getElementById("followCodeBtn");
+  function setFollowCode(value){
+    playback.followCode=!!value;
+    followCodeBtn.textContent="Follow code: "+(playback.followCode?"On":"Off");
+    followCodeBtn.setAttribute("aria-pressed",String(playback.followCode));
+  }
+  followCodeBtn.addEventListener("click",function(){setFollowCode(!playback.followCode);});
 
   function currentSpeed(){
     return clamp(Number(playback.speed)||0,0,10);
@@ -2313,7 +2324,7 @@ for i in range(4):
       playback.marker=editor.addLineClass(n-1,"background","turtle-current-line");
       playbackLineStatus.textContent="Line "+n;
       worldLineStatus.textContent="Line "+n+" · "+(editor.getLine(n-1)||"").trim().slice(0,32);
-      editor.scrollIntoView({line:n-1,ch:0},60);
+      if(playback.followCode && !PREVIEW_MODE)editor.scrollIntoView({line:n-1,ch:0},60);
     }else{
       playbackLineStatus.textContent="";
       worldLineStatus.textContent="400 × 400";
@@ -2555,6 +2566,7 @@ for i in range(4):
     if(!this.value || !examples[this.value]) return;
     clearErrorHighlight();
     editor.setValue(examples[this.value]);
+    setFollowCode(true);
     editor.focus();
     this.value = "";
   });
@@ -2716,6 +2728,8 @@ for i in range(4):
       button.addEventListener("click",function(){
         if(playback.active)stopCode();
         clearErrorHighlight();editor.setValue(d.code);
+        setFollowCode(false);
+        editor.scrollTo(null,0);
         demoGallery.querySelectorAll(".demo-tile").forEach(function(el){el.style.borderColor="";});
         button.style.borderColor="#176b73";
         runCode(false);
