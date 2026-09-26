@@ -775,7 +775,11 @@
 .demo-gallery.expanded .demo-gallery-scroll .demo-tile canvas{height:95px}
 @media(max-width:600px){.demo-gallery.expanded .demo-gallery-scroll{grid-template-columns:repeat(2,minmax(0,1fr));max-height:45vh}.demo-expand-btn{padding:7px 8px}}
 @media(max-width:1100px){.demo-gallery-top{align-items:flex-start;flex-wrap:wrap}.demo-tile{flex-basis:139px}.demo-tile canvas{height:85px}}
-@media(max-width:560px){.demo-gallery{padding:9px}.demo-gallery-scroll{gap:7px}.demo-tile{flex-basis:126px}.demo-tile canvas{height:78px}.demo-gallery-sub{display:none}.demo-search{width:110px}}
+@media(max-width:560px){.demo-gallery{padding:9px}.demo-gallery-scroll{gap:7px}.demo-tile{flex-basis:126px}.demo-gallery-sub{display:none}.demo-search{width:110px}}
+/* The world and its thumbnails both use a square 400 x 400 canvas. */
+.demo-tile canvas,.demo-gallery.expanded .demo-gallery-scroll .demo-tile canvas{height:auto;aspect-ratio:1/1;object-fit:contain}
+.demo-gallery-title{white-space:normal}
+.demo-filter-bar{max-width:100%;scrollbar-width:thin}
 </style>
 </head>
 
@@ -2571,6 +2575,7 @@ for i in range(4):
   // Real thumbnails: run each Python program through our existing Turtle engine
   // in one isolated renderer, then capture its actual canvas.
   var previewCache={}, previewQueue=[], previewFrame=null, previewReady=false, previewBusy=false;
+  var previewTimeout=null;
   // Put genuinely different example subjects first instead of 20 palette swaps.
   var featuredTitles=["Rocket Launch","Cat Portrait","City Skyline","Jellyfish",
     "Pizza Slice","DNA Double Helix","Sailboat","Sunflower","Dragon",
@@ -2649,11 +2654,29 @@ for i in range(4):
     }
     if(!previewReady)return;
     var job=previewQueue.shift();previewBusy=true;
+    var activeFrame=previewFrame;
+    previewTimeout=setTimeout(function(){
+      if(!previewBusy||previewFrame!==activeFrame)return;
+      previewBusy=false;
+      previewReady=false;
+      previewFrame.remove();
+      previewFrame=null;
+      demoGallery.querySelectorAll(".demo-tile").forEach(function(tile){
+        if(tile.dataset.demoId!==job.id)return;
+        var canvas=tile.querySelector("canvas"),ctx=canvas.getContext("2d");
+        ctx.clearRect(0,0,400,400);
+        ctx.fillStyle="#fff5e9";ctx.fillRect(0,0,400,400);
+        ctx.fillStyle="#8b5447";ctx.font="18px Arial";ctx.textAlign="center";
+        ctx.fillText("Preview timed out",200,200);
+      });
+      pumpPreviews();
+    },18000);
     previewFrame.contentWindow.postMessage({kind:"turtle-render",id:job.id,code:job.code},location.origin);
   }
   if(!PREVIEW_MODE)window.addEventListener("message",function(event){
     if(event.origin!==location.origin||!previewFrame||event.source!==previewFrame.contentWindow)return;
     if(!event.data||event.data.kind!=="turtle-rendered")return;
+    if(previewTimeout!==null){clearTimeout(previewTimeout);previewTimeout=null;}
     previewBusy=false;
     if(event.data.image){previewCache[event.data.id]=event.data.image;paintPreview(event.data.id);}
     pumpPreviews();
