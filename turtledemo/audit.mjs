@@ -125,6 +125,14 @@ for(let start=0;start<images.length;start+=30){
   }
   const sheet=await sharp({create:{width:1440,height:1325,channels:3,background:"#eeeae1"}}).composite(composite).png().toBuffer();
   fs.writeFileSync(path.join(outDir,"contact-"+(Math.floor(start/30)+1)+".png"),sheet);
+  // Low-resolution review copies in CI logs let us inspect actual rendered
+  // outputs without depending on a separate artifact download integration.
+  const review=await sharp(sheet).resize(1050).jpeg({quality:66}).toBuffer();
+  const encoded=review.toString("base64");
+  const sheetIndex=Math.floor(start/30)+1;
+  for(let part=0;part<encoded.length;part+=4500){
+    console.log("REVIEW_"+SHARD+"_"+sheetIndex+"_"+Math.floor(part/4500)+":"+encoded.slice(part,part+4500));
+  }
   // A compact JPEG in the job log lets the artwork be inspected without manually downloading artifacts.
   const thumb=await sharp(sheet).resize({width:1080}).jpeg({quality:70}).toBuffer();
   console.log("AUDIT_CONTACT_SHEET "+JSON.stringify({shard:SHARD,index:Math.floor(start/30)+1,image:thumb.toString("base64")}));
