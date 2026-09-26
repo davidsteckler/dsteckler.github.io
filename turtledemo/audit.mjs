@@ -1,6 +1,6 @@
 /**
  * Render real Turtle programs inside Chromium, inspect pixel metrics,
- * Visual review pass 3: verify final dragon, ball and Koch geometry alongside all 333.
+ * Final review pass 4: validate corrected logic gates with all 333 programs.
  * and create labeled contact sheets for human review.
  */
 import fs from "node:fs";
