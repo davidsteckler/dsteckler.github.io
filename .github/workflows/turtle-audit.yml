@@ -10,6 +10,39 @@ permissions:
   contents: read
 
 jobs:
+  focused-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium and renderer
+        run: |
+          npm install --no-save playwright sharp
+          npx playwright install --with-deps chromium
+      - name: Start local website
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/turtle-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sSf http://127.0.0.1:8765/turtledemo/ >/dev/null && break
+            sleep 1
+          done
+      - name: Render corrected examples
+        env:
+          TURTLE_SHARD: '0'
+          TURTLE_SHARDS: '1'
+          TURTLE_TITLES: 'Dragon;Magic Wand;Parabolic Fountain;Pythagorean Tree;Volleyball;Sea Turtle;Turtle in a Pond;Computer Mouse;Satellite Dish;Seahorse;Giraffe;Moon Phases;Hilbert Curve;Koch Snowflake'
+        run: node turtledemo/audit.mjs
+      - name: Upload focused contact sheet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: turtle-corrected-examples
+          path: turtledemo/audit-output/0
+          if-no-files-found: warn
+          retention-days: 30
   visual-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 45
