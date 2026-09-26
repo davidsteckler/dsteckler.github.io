@@ -1,0 +1,48 @@
+name: Turtle visual audit
+on:
+  push:
+    paths:
+      - '.github/workflows/turtle-audit.yml'
+      - 'turtledemo/audit.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser and image tooling
+        run: |
+          npm install --no-save playwright sharp
+          npx playwright install --with-deps chromium
+      - name: Start local website
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/turtle-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sSf http://127.0.0.1:8765/turtledemo/ >/dev/null && break
+            sleep 1
+          done
+      - name: Render and inspect each program
+        env:
+          TURTLE_SHARD: ${{ matrix.shard }}
+          TURTLE_SHARDS: '4'
+        run: node turtledemo/audit.mjs
+      - name: Upload visual report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: turtle-audit-${{ matrix.shard }}
+          path: turtledemo/audit-output/${{ matrix.shard }}
+          if-no-files-found: warn
+          retention-days: 30
