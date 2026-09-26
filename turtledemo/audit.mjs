@@ -27,7 +27,13 @@ for(const letter of "abcdef"){
   vm.runInContext(fs.readFileSync(file,"utf8"),sandbox,{filename:file});
 }
 const all=[...originals,...sandbox.window.CURATED_EXAMPLES];
-const selected=all.filter((_,i)=>i%SHARDS===SHARD);
+const requestedTitles=new Set((process.env.TURTLE_TITLES||"").split(";").map(x=>x.trim()).filter(Boolean));
+const selected=all.filter((item,i)=>i%SHARDS===SHARD
+  &&(!requestedTitles.size||requestedTitles.has(item.title)));
+if(requestedTitles.size&&selected.length!==requestedTitles.size){
+  const missing=[...requestedTitles].filter(t=>!selected.some(x=>x.title===t));
+  throw Error("Requested audit examples were not found: "+missing.join(", "));
+}
 console.log("Shard "+SHARD+": "+selected.length+" of "+all.length);
 const browser=await chromium.launch({headless:true,args:["--no-sandbox"]});
 const context=await browser.newContext({viewport:{width:1320,height:850},reducedMotion:"reduce"});
