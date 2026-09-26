@@ -1129,8 +1129,12 @@ for i in range(4):
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 
-<script src="curated-a.js?v=2"></script>
-<script src="curated-b.js?v=2"></script>
+<script src="curated-a.js?v=4"></script>
+<script src="curated-b.js?v=4"></script>
+<script src="curated-c.js?v=4"></script>
+<script src="curated-d.js?v=4"></script>
+<script src="curated-e.js?v=4"></script>
+<script src="curated-f.js?v=4"></script>
 <script>
 (function(){
   "use strict";
@@ -2475,10 +2479,12 @@ for i in range(4):
         appendOutput("\nProgram finished.\n","success");
       }
       setStatus("good");
+      return true;
     }catch(err){
       if(token!==runToken)return;
       renderError(err);
       setStatus("bad");
+      return false;
     }finally{
       if(token===runToken){
         if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
@@ -2557,7 +2563,7 @@ for i in range(4):
   var demoFilters=document.getElementById("demoFilters");
   var demoSearch=document.getElementById("demoSearch");
   var currentDemoFilter="All";
-  ["All","Animals","Scenes","Nature","Math","Art","Vehicles","Food","Architecture","Science","Games","Sports","Holiday","Shapes","Pixel Art","Characters","Typography","Tech"].forEach(function(cat){
+  ["All","Animals","Scenes","Nature","Math","Art","Vehicles","Food","Architecture","Science","Games","Sports","Holiday","Shapes","Pixel Art","Characters","Typography","Tech","Music","Fantasy","Space","Home"].forEach(function(cat){
     var btn=document.createElement("button");btn.className="demo-filter"+(cat==="All"?" active":"");btn.textContent=cat;btn.type="button";
     btn.addEventListener("click",function(){currentDemoFilter=cat;demoFilters.querySelectorAll(".demo-filter").forEach(function(b){b.classList.toggle("active",b===btn);});renderDemoGallery();});demoFilters.appendChild(btn);
   });
@@ -2566,11 +2572,17 @@ for i in range(4):
   // in one isolated renderer, then capture its actual canvas.
   var previewCache={}, previewQueue=[], previewFrame=null, previewReady=false, previewBusy=false;
   // Put genuinely different example subjects first instead of 20 palette swaps.
-  var featuredTitles=["Rocket Launch","Cat Portrait","City Skyline","Jellyfish","Pizza Slice",
-    "Sunflower","Sailboat","DNA Double Helix","Koch Snowflake","Whale at Sea",
-    "Tic Tac Toe","Mountain Sunset","Panda","Rainbow Spirograph","Solar System Diagram",
-    "Castle","Butterfly","Chocolate Donut","Lighthouse","Tetris Stack","Cactus at Sunset",
-    "Turtle Race Track","Moon Phases","Penguin on Ice","Ocean Ripples","Soccer Ball"];
+  var featuredTitles=["Rocket Launch","Cat Portrait","City Skyline","Jellyfish",
+    "Pizza Slice","DNA Double Helix","Sailboat","Sunflower","Dragon",
+    "Panda","Tetris Stack","Mechanical Keyboard",
+    "Koch Snowflake","Moon Phases","Rain Umbrella","Fire Truck","Solar System Diagram",
+    "Unicorn","Butterfly","Halftone Sphere","Lighthouse","Chemistry Flask",
+    "Mountain Sunset","Violin","Soccer Ball","Rainbow Prism","Whale at Sea",
+    "Glass Skyscraper","Volcano Eruption","3D Printer","Sierpinski Carpet",
+    "Penguin on Ice","Holiday Tree","Turtle Race Track","Game Controller",
+    "Parabolic Fountain","Bicycle","Castle","Mandelbrot Set","Fireworks Over Water",
+    "Gingerbread House","Isometric Dice","Aquarium","Globe Latitudes",
+    "Fractal Fern","Coffee Mug","Tic Tac Toe","Space Invader"];
   var featuredSet=new Set(featuredTitles);
   DEMO_PROGRAMS.sort(function(a,b){
     var ia=featuredTitles.indexOf(a.title),ib=featuredTitles.indexOf(b.title);
@@ -2631,7 +2643,7 @@ for i in range(4):
       previewFrame.setAttribute("aria-hidden","true");
       previewFrame.style.cssText="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-2000px";
       previewFrame.onload=function(){previewReady=true;pumpPreviews();};
-      previewFrame.src=location.pathname+"?renderPreview=1";
+      previewFrame.src=location.pathname+"?renderPreview=1&v=4";
       document.body.appendChild(previewFrame);
       return;
     }
@@ -2651,7 +2663,8 @@ for i in range(4):
     var task=event.data,image=null;
     try{
       editor.setValue(task.code);
-      await runCode(false);
+      var renderSucceeded=await runCode(false);
+      if(!renderSucceeded)throw Error("Example failed to render");
       var snapshot=document.createElement("canvas");snapshot.width=400;snapshot.height=400;
       var brush=snapshot.getContext("2d");
       brush.fillStyle=document.getElementById("worldWrap").style.backgroundColor||"#fff";
