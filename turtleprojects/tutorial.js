@@ -104,7 +104,7 @@
   const workspace=document.querySelector('.tutorial-workspace');
   const lessonPanel=$('lessonPanel'),lessonDivider=$('lessonDivider');
   const lessonWidthKey='dsteckler-turtle-lesson-width-v1';
-  let desiredLessonWidth=null,draggingLesson=false;
+  let desiredLessonWidth=null,draggingLesson=false,lessonPointerId=null;
   try{
     const saved=Number(localStorage.getItem(lessonWidthKey));
     if(Number.isFinite(saved)&&saved>=240&&saved<=950)desiredLessonWidth=saved;
@@ -140,21 +140,27 @@
   lessonDivider.addEventListener('pointerdown',event=>{
     if(event.button!==0||matchMedia('(max-width:760px)').matches)return;
     draggingLesson=true;
+    lessonPointerId=event.pointerId;
     lessonDivider.setPointerCapture(event.pointerId);
     lessonDivider.classList.add('dragging');
     workspace.classList.add('is-resizing');
     event.preventDefault();
   });
-  lessonDivider.addEventListener('pointermove',event=>{
-    if(!draggingLesson)return;
+  // Track the whole document; a native iframe would otherwise swallow mouse moves
+  // as soon as the handle is dragged into the code editor.
+  document.addEventListener('pointermove',event=>{
+    if(!draggingLesson||event.pointerId!==lessonPointerId)return;
     setLessonWidth(event.clientX-lessonPanel.getBoundingClientRect().left,true);
-  });
-  function stopLessonDrag(){
+  },true);
+  function stopLessonDrag(event){
+    if(!draggingLesson||(event?.pointerId!==undefined&&event.pointerId!==lessonPointerId))return;
     draggingLesson=false;
+    lessonPointerId=null;
     lessonDivider.classList.remove('dragging');
     workspace.classList.remove('is-resizing');
   }
-  for(const event of ['pointerup','pointercancel','lostpointercapture'])lessonDivider.addEventListener(event,stopLessonDrag);
+  for(const type of ['pointerup','pointercancel'])document.addEventListener(type,stopLessonDrag,true);
+  lessonDivider.addEventListener('lostpointercapture',stopLessonDrag);
   lessonDivider.addEventListener('keydown',event=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
     event.preventDefault();
