@@ -3,14 +3,17 @@ on:
   push:
     paths:
       - '.github/workflows/turtle-tutorial-tests.yml'
-      - 'turtledemo/tutorial.js'
-      - 'turtledemo/tutorial.css'
-      - 'turtledemo/tutorial-route.js'
+      - 'turtleprojects/tutorial.js'
+      - 'turtleprojects/tutorial.css'
+      - 'turtleprojects/tutorial-route.js'
+      - 'turtleprojects/project.html'
+      - 'turtleprojects/tutorial-slugs.js'
+      - 'turtleprojects/base-catalog.js'
+      - 'turtleprojects/curated-*.js'
+      - 'turtleprojects/test-tutorial.mjs'
+      - 'turtledemo/index.html'
       - 'turtledemo/project.html'
-      - 'turtledemo/tutorial-slugs.js'
-      - 'turtledemo/base-catalog.js'
-      - 'turtledemo/curated-*.js'
-      - 'turtledemo/test-tutorial.mjs'
+      - 'turtledemo/tutorial-route.js'
   workflow_dispatch:
 
 permissions:
@@ -33,18 +36,18 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/turtle-server.log 2>&1 &
           for i in $(seq 1 30); do
-            curl -sSf http://127.0.0.1:8765/turtledemo/project.html >/dev/null && break
+            curl -sSf http://127.0.0.1:8765/turtleprojects/project.html >/dev/null && break
             sleep 1
           done
       - name: Test all URLs and rendered previews
-        run: node turtledemo/test-tutorial.mjs
+        run: node turtleprojects/test-tutorial.mjs
       - name: Save browser screenshot
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: turtle-tutorial-browser-proof
           path: |
-            turtledemo/tutorial-preview-proof.png
-            turtledemo/tutorial-preview-failure.png
+            turtleprojects/tutorial-preview-proof.png
+            turtleprojects/tutorial-preview-failure.png
           if-no-files-found: warn
           retention-days: 7

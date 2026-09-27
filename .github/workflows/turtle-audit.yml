@@ -3,9 +3,9 @@ on:
   push:
     paths:
       - '.github/workflows/turtle-audit.yml'
-      - 'turtledemo/audit.mjs'
-      - 'turtledemo/index.html'
-      - 'turtledemo/curated-*.js'
+      - 'turtleprojects/audit.mjs'
+      - 'turtleprojects/index.html'
+      - 'turtleprojects/curated-*.js'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,7 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/turtle-server.log 2>&1 &
           for i in $(seq 1 30); do
-            curl -sSf http://127.0.0.1:8765/turtledemo/ >/dev/null && break
+            curl -sSf http://127.0.0.1:8765/turtleprojects/ >/dev/null && break
             sleep 1
           done
       - name: Render corrected examples
@@ -36,13 +36,13 @@ jobs:
           TURTLE_SHARD: '0'
           TURTLE_SHARDS: '1'
           TURTLE_TITLES: 'Dragon;Magic Wand;Parabolic Fountain;Pythagorean Tree;Volleyball;Sea Turtle;Turtle in a Pond;Computer Mouse;Satellite Dish;Seahorse;Giraffe;Moon Phases;Hilbert Curve;Koch Snowflake;Honeybee;Fire Truck'
-        run: node turtledemo/audit.mjs
+        run: node turtleprojects/audit.mjs
       - name: Upload focused contact sheet
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: turtle-corrected-examples
-          path: turtledemo/audit-output/0
+          path: turtleprojects/audit-output/0
           if-no-files-found: warn
           retention-days: 30
   visual-audit:
@@ -65,19 +65,19 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/turtle-server.log 2>&1 &
           for i in $(seq 1 30); do
-            curl -sSf http://127.0.0.1:8765/turtledemo/ >/dev/null && break
+            curl -sSf http://127.0.0.1:8765/turtleprojects/ >/dev/null && break
             sleep 1
           done
       - name: Render and inspect each program
         env:
           TURTLE_SHARD: ${{ matrix.shard }}
           TURTLE_SHARDS: '4'
-        run: node turtledemo/audit.mjs
+        run: node turtleprojects/audit.mjs
       - name: Upload visual report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: turtle-audit-${{ matrix.shard }}
-          path: turtledemo/audit-output/${{ matrix.shard }}
+          path: turtleprojects/audit-output/${{ matrix.shard }}
           if-no-files-found: warn
           retention-days: 30
