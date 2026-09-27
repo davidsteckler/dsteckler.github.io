@@ -60,6 +60,27 @@
   if(/^#step-\d+$/.test(location.hash)&&hashStep>=1&&hashStep<=steps.length)current=hashStep-1;
   document.title=project.title+' · Turtle Tutorial | David Steckler';
   $('projectTitle').textContent=project.title;
+  // Show the same shareable address even when an old ?id= link is opened.
+  const shortSlug=window.TURTLE_TUTORIAL_SLUGS?.[project.id];
+  const tutorialUrl=shortSlug ? new URL(shortSlug+'/',new URL('./',document.baseURI)).href : location.href.split('#')[0];
+  $('tutorialUrl').href=tutorialUrl;
+  $('tutorialUrl').textContent=tutorialUrl.replace(/^https?:\/\//,'').replace(/\/$/,'');
+  $('copyTutorialLink').onclick=async()=>{
+    const button=$('copyTutorialLink');
+    let copied=false;
+    try {
+      if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(tutorialUrl);copied=true;}
+    } catch {}
+    if(!copied){
+      const field=document.createElement('textarea');
+      field.value=tutorialUrl;field.setAttribute('readonly','');field.style.position='fixed';field.style.opacity='0';
+      document.body.append(field);field.select();
+      try {copied=document.execCommand('copy');} catch {}
+      field.remove();
+    }
+    button.textContent=copied?'Copied!':'Copy failed';
+    setTimeout(()=>{button.textContent='Copy link';},1800);
+  };
   const frame=$('editorFrame');
   const send=(kind,extra={})=>frame.contentWindow?.postMessage({kind,...extra},location.origin);
   const escape=text=>text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
