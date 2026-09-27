@@ -76,7 +76,8 @@ try {
   await page.keyboard.press('ArrowRight');
   assert(Math.abs((await lesson.evaluate(el=>el.getBoundingClientRect().width))-expandedLessonWidth)<5);
   // Long Python lines must retain their original structure, with horizontal scrolling.
-  await page.goto(base+'/pizza/#step-8',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.locator('#steps .step-button').nth(7).click();
+  assert.equal(await page.locator('#stepCount').textContent(),'STEP 8 OF 12');
   await page.waitForFunction(()=>document.querySelectorAll('#newCode .code-line').length>=5);
   const longCode=await page.locator('#newCode').evaluate(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,whiteSpace:getComputedStyle(el).whiteSpace}));
   assert.equal(longCode.whiteSpace,'pre');
