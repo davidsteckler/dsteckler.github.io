@@ -77,6 +77,8 @@ try {
   assert(longCode.scrollWidth>longCode.clientWidth,'Long instruction lines should scroll horizontally, not wrap');
   assert.equal(await page.locator('#lessonDivider').getAttribute('aria-valuenow'),String(Math.round(expandedLessonWidth)),'Resized lesson width should survive a new URL');
   console.log('Orange drag handle, keyboard resizing, persistent widths and no-wrapping code passed.');
+  await page.locator('#steps .step-button').first().click();
+  assert.equal(new URL(page.url()).hash,'#step-1','Return to step one for subsequent preview tests.');
   assert.equal(await editorFrame.locator('#tutorialCodeWidth').evaluate(el=>localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')),'72');
   console.log('Tutorial code width slider, soft wrapping and saved layout passed.');
 
