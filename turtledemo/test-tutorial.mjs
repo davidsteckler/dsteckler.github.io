@@ -28,13 +28,13 @@ try {
   assert.equal(await page.locator('#finishedTitle').textContent(),'Pizza Slice');
   assert.equal(new URL(page.url()).pathname,'/turtledemo/pizza/');
   assert.equal(new URL(page.url()).hash,'#step-1');
-  assert.equal(new URL(await page.locator('.back-link').getAttribute('href'),page.url()).pathname,'/turtledemo/');
+  assert.equal(await page.locator('.back-link').evaluate(link=>new URL(link.href).pathname),'/turtledemo/');
 
   // The final image is rendered from the actual project code, on the page.
   await page.waitForFunction(()=>{
     const image=document.getElementById('finishedImage');
     return image&&!image.hidden&&image.src.startsWith('data:image/png;base64,');
-  },{timeout:75000});
+  },null,{timeout:75000});
   assert.equal(await page.locator('#finishedExpand').isEnabled(),true);
   await page.screenshot({path:path.join(root,'tutorial-preview-proof.png'),fullPage:false});
 
@@ -51,7 +51,7 @@ try {
   await page.waitForFunction(()=>{
     const image=document.getElementById('expectedImage');
     return image&&!image.hidden&&image.src.startsWith('data:image/png;base64,');
-  },{timeout:60000});
+  },null,{timeout:60000});
   console.log('Pizza short URL, step changes, full-project image and step preview passed.');
 
   // Previously shared long URLs must resolve to the short route and preserve steps.
@@ -71,7 +71,7 @@ try {
   await page.waitForFunction(()=>{
     const image=document.getElementById('finishedImage');
     return image&&!image.hidden&&image.src.startsWith('data:image/png;base64,');
-  },{timeout:60000});
+  },null,{timeout:60000});
   assert.equal(new URL(page.url()).pathname,'/turtledemo/robot/');
   assert.equal(await page.locator('#finishedTitle').textContent(),'Robot roll call');
   assert.deepEqual(errors,[],'No uncaught browser errors');
