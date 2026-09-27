@@ -1,0 +1,50 @@
+name: Turtle tutorial links and previews
+on:
+  push:
+    paths:
+      - '.github/workflows/turtle-tutorial-tests.yml'
+      - 'turtledemo/tutorial.js'
+      - 'turtledemo/tutorial.css'
+      - 'turtledemo/tutorial-route.js'
+      - 'turtledemo/project.html'
+      - 'turtledemo/tutorial-slugs.js'
+      - 'turtledemo/base-catalog.js'
+      - 'turtledemo/curated-*.js'
+      - 'turtledemo/test-tutorial.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Serve the site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/turtle-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sSf http://127.0.0.1:8765/turtledemo/project.html >/dev/null && break
+            sleep 1
+          done
+      - name: Test all URLs and rendered previews
+        run: node turtledemo/test-tutorial.mjs
+      - name: Save browser screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: turtle-tutorial-browser-proof
+          path: |
+            turtledemo/tutorial-preview-proof.png
+            turtledemo/tutorial-preview-failure.png
+          if-no-files-found: warn
+          retention-days: 7
