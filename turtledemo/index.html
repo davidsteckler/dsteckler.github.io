@@ -783,6 +783,41 @@
 .demo-gallery-title{white-space:normal}
 .demo-filter-bar{max-width:100%;scrollbar-width:thin}
 </style>
+
+<style id="turtle-tutorial-embed-css">
+.demo-project-card{display:flex;flex:0 0 154px;flex-direction:column;min-width:0;scroll-snap-align:start}
+.demo-project-card .demo-tile{flex:1 0 auto;width:100%;scroll-snap-align:none;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.demo-tutorial-link{display:block;text-align:center;background:#e3f0eb;color:#155e65;font-weight:850;font-size:.69rem;text-decoration:none;padding:8px 5px;border:1px solid #cadad4;border-top:0;border-radius:0 0 11px 11px}
+.demo-tutorial-link:hover,.demo-tutorial-link:focus-visible{background:#bde0d7;outline-offset:2px}
+.demo-projects-cta{font-size:.72rem;white-space:nowrap;border-radius:8px;background:#176b73;color:white;text-decoration:none;padding:8px 10px;font-weight:830}
+.demo-projects-cta:hover{background:#11565d}
+.demo-gallery.expanded .demo-project-card{width:100%;min-width:0}
+@media(max-width:1100px){.demo-project-card{flex-basis:139px}}
+@media(max-width:560px){.demo-project-card{flex-basis:126px}.demo-tutorial-link{font-size:.62rem;padding:8px 2px}}
+html,body{min-height:100%}
+body.tutorial-embed{height:100vh;overflow:hidden;background:#fffdf8}
+body.tutorial-embed .app{height:100vh!important;min-height:0!important;grid-template-rows:minmax(0,1fr)!important}
+body.tutorial-embed .appbar,
+body.tutorial-embed .demo-gallery,
+body.tutorial-embed .layoutbar,
+body.tutorial-embed .reference-panel,
+body.tutorial-embed .resize-divider,
+body.tutorial-embed .editor-head-right .panel-mini,
+body.tutorial-embed #editCodeBtn{display:none!important}
+body.tutorial-embed .workspace{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(210px,1.12fr) minmax(265px,.88fr)!important;height:100vh!important;padding:0!important;gap:0!important;overflow:auto!important}
+body.tutorial-embed .panel{border-radius:0!important;box-shadow:none!important}
+body.tutorial-embed .code-panel{grid-row:1!important;grid-column:1!important;min-height:200px!important;grid-template-rows:40px minmax(150px,1fr)!important}
+body.tutorial-embed .world-panel{grid-row:2!important;grid-column:1!important;min-height:265px!important;display:grid!important;grid-template-rows:38px minmax(170px,1fr) auto auto!important}
+body.tutorial-embed .world-panel .panel-head{height:38px!important}
+body.tutorial-embed .world-stage{min-height:160px!important}
+body.tutorial-embed .world-info{font-size:11px!important}
+body.tutorial-embed .output-panel{min-height:50px!important;max-height:96px!important}
+body.tutorial-embed .CodeMirror{font-size:13px!important;line-height:1.5!important}
+body.tutorial-embed .editor-head-start{gap:8px}
+body.tutorial-embed .clear-code-btn{padding:0 9px;font-size:.7rem}
+body.tutorial-embed .world-copy{font-size:.65rem}
+@media(max-height:700px){body.tutorial-embed .workspace{grid-template-rows:minmax(190px,1fr) minmax(230px,1fr)!important}}
+</style>
 </head>
 
 <body>
@@ -833,7 +868,7 @@
 <section class="demo-gallery" aria-label="Python Turtle example programs">
  <div class="demo-gallery-top">
   <div><div class="demo-gallery-title">See what Turtle can draw <span id="demoCount" style="font-size:.65rem;color:#69726e;font-weight:700"></span></div><div class="demo-gallery-sub">Pick a picture to load its Python code and watch it draw. Every example is editable.</div></div>
-  <div class="demo-filter-bar" id="demoFilters"><button class="demo-expand-btn" type="button" id="demoExpand" aria-expanded="false">Browse all examples ↓</button><input class="demo-search" id="demoSearch" type="search" aria-label="Search example programs" placeholder="Find an example…"></div>
+  <div class="demo-filter-bar" id="demoFilters"><a class="demo-projects-cta" href="projects.html">Guided projects ↗</a><button class="demo-expand-btn" type="button" id="demoExpand" aria-expanded="false">Browse all examples ↓</button><input class="demo-search" id="demoSearch" type="search" aria-label="Search example programs" placeholder="Find an example…"></div>
  </div>
  <div class="demo-gallery-scroll" id="demoGallery" aria-label="Example gallery"></div>
  <div class="demo-empty" id="demoEmpty">No examples found. Try another category.</div>
@@ -1147,7 +1182,10 @@ for i in range(4):
   "use strict";
 
   var PREVIEW_MODE = new URLSearchParams(location.search).has("renderPreview");
-  var STORAGE_KEY = "dsteckler-turtle-demo-code-v1";
+  var TUTORIAL_EMBED = new URLSearchParams(location.search).has("tutorialEmbed");
+  var TUTORIAL_PROJECT = new URLSearchParams(location.search).get("project") || "sample";
+  var STORAGE_KEY = TUTORIAL_EMBED ? "dsteckler-turtle-tutorial-editor-"+TUTORIAL_PROJECT : "dsteckler-turtle-demo-code-v1";
+  if(TUTORIAL_EMBED)document.body.classList.add("tutorial-embed");
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
     "# Try changing the distance or the number of repeats.",
@@ -2734,11 +2772,21 @@ for i in range(4):
         button.style.borderColor="#176b73";
         runCode(false);
         if(window.innerWidth<=840)document.getElementById("worldPanel").scrollIntoView({behavior:"smooth",block:"start"});
-      });demoGallery.appendChild(button);queueVisiblePreview(button,d);
+      });
+      var wrapper=document.createElement("div");wrapper.className="demo-project-card";
+      wrapper.appendChild(button);
+      var tutorialLink=document.createElement("a");
+      tutorialLink.className="demo-tutorial-link";
+      tutorialLink.href="project.html?id="+encodeURIComponent(d.id);
+      tutorialLink.textContent="Open tutorial →";
+      tutorialLink.setAttribute("aria-label","Open step-by-step tutorial for "+d.title);
+      wrapper.appendChild(tutorialLink);
+      demoGallery.appendChild(wrapper);
+      queueVisiblePreview(button,d);
     });
   }
   demoSearch.addEventListener("input",renderDemoGallery);
-  if(!PREVIEW_MODE)renderDemoGallery();
+  if(!PREVIEW_MODE && !TUTORIAL_EMBED)renderDemoGallery();
   function openCommands(){
     document.body.classList.add("commands-open");
     if(commandsToggle)commandsToggle.setAttribute("aria-expanded","true");
@@ -2921,7 +2969,43 @@ for i in range(4):
 
   clearWorld();
   setOutput('<span class="muted">print() output will appear here.</span>');
-  editor.focus();
+  if(TUTORIAL_EMBED){
+    setFollowCode(false);
+    window.addEventListener("message",async function(event){
+      if(event.origin!==location.origin||event.source!==window.parent||!event.data)return;
+      var task=event.data;
+      if(task.kind==="turtle-tutorial-hello"){
+        window.parent.postMessage({kind:"turtle-tutorial-ready",project:TUTORIAL_PROJECT},event.origin);
+      }else if(task.kind==="turtle-tutorial-set-code"&&typeof task.code==="string"){
+        if(playback.active)stopCode();
+        clearErrorHighlight();
+        editor.setValue(task.code);
+        editor.scrollTo(null,0);
+        if(task.clear!==false)clearRun();
+        editor.refresh();
+        window.parent.postMessage({kind:"turtle-tutorial-applied",project:TUTORIAL_PROJECT,code:editor.getValue(),requestId:task.requestId||null},event.origin);
+        if(task.run)await runCode(false);
+      }else if(task.kind==="turtle-tutorial-run"){
+        if(!playback.active)await runCode(false);
+      }else if(task.kind==="turtle-tutorial-stop"){
+        if(playback.active)stopCode();
+      }else if(task.kind==="turtle-tutorial-clear"){
+        clearRun();
+      }else if(task.kind==="turtle-tutorial-get-code"){
+        window.parent.postMessage({kind:"turtle-tutorial-code",project:TUTORIAL_PROJECT,code:editor.getValue()},event.origin);
+      }
+    });
+    var notifyTimer=null;
+    editor.on("change",function(){
+      clearTimeout(notifyTimer);
+      notifyTimer=setTimeout(function(){
+        window.parent.postMessage({kind:"turtle-tutorial-code",project:TUTORIAL_PROJECT,code:editor.getValue()},location.origin);
+      },180);
+    });
+    window.parent.postMessage({kind:"turtle-tutorial-ready",project:TUTORIAL_PROJECT},location.origin);
+  }else{
+    editor.focus();
+  }
 })();
 </script>
 </body>
