@@ -46,8 +46,37 @@ try {
   const worldAfter=await editorFrame.locator('.world-panel').evaluate(el=>el.getBoundingClientRect().width);
   assert(codeAfter>codeBefore+40,'Code editor should visibly widen');
   assert(worldAfter<worldBefore-40,'World should yield space to the editor');
-  assert.equal(await editorFrame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getOption('lineWrapping')),true);
-  assert.equal(await page.locator('#newCode').evaluate(el=>getComputedStyle(el).whiteSpace),'pre-wrap');
+  assert.equal(await editorFrame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getOption('lineWrapping')),false);
+  assert.equal(await page.locator('#newCode').evaluate(el=>getComputedStyle(el).whiteSpace),'pre');
+  // Drag the orange handle: the instruction panel widens and the editor shrinks.
+  const divider=page.locator('#lessonDivider'),lesson=page.locator('#lessonPanel'),workspace=page.locator('.tutorial-workspace');
+  await divider.waitFor({state:'visible'});
+  const originalLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
+  const originalEditorWidth=await page.locator('#editorPanel').evaluate(el=>el.getBoundingClientRect().width);
+  const handle=await divider.boundingBox();
+  assert(handle,'The orange drag handle should be on-screen');
+  await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);
+  await page.mouse.down();
+  await page.mouse.move(handle.x+handle.width/2+145,handle.y+handle.height/2,{steps:8});
+  await page.mouse.up();
+  const expandedLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
+  const narrowedEditorWidth=await page.locator('#editorPanel').evaluate(el=>el.getBoundingClientRect().width);
+  assert(expandedLessonWidth>originalLessonWidth+90,'Orange handle should widen the instructions');
+  assert(narrowedEditorWidth<originalEditorWidth-90,'Editor should yield width to instructions');
+  await divider.focus();
+  await page.keyboard.press('ArrowLeft');
+  const keyboardWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
+  assert(keyboardWidth<expandedLessonWidth,'Left arrow should shrink instructions');
+  await page.keyboard.press('ArrowRight');
+  assert(Math.abs((await lesson.evaluate(el=>el.getBoundingClientRect().width))-expandedLessonWidth)<5);
+  // Long Python lines must retain their original structure, with horizontal scrolling.
+  await page.goto(base+'/pizza/#step-8',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.waitForFunction(()=>document.querySelectorAll('#newCode .code-line').length>=5);
+  const longCode=await page.locator('#newCode').evaluate(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,whiteSpace:getComputedStyle(el).whiteSpace}));
+  assert.equal(longCode.whiteSpace,'pre');
+  assert(longCode.scrollWidth>longCode.clientWidth,'Long instruction lines should scroll horizontally, not wrap');
+  assert.equal(await page.locator('#lessonDivider').getAttribute('aria-valuenow'),String(Math.round(expandedLessonWidth)),'Resized lesson width should survive a new URL');
+  console.log('Orange drag handle, keyboard resizing, persistent widths and no-wrapping code passed.');
   assert.equal(await editorFrame.locator('#tutorialCodeWidth').evaluate(el=>localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')),'72');
   console.log('Tutorial code width slider, soft wrapping and saved layout passed.');
 
@@ -80,6 +109,8 @@ try {
   await restoredWidth.waitFor({state:'visible',timeout:30000});
   assert.equal(await restoredWidth.inputValue(),'72','Code width should persist after reloading.');
   console.log('Code width persists after reloading.');
+  const expectedLessonWidth=await page.locator('#lessonPanel').evaluate(el=>el.getBoundingClientRect().width);
+  assert(expectedLessonWidth>originalLessonWidth+50,'Instruction width persists after refresh.');
 
   // Previously shared long URLs must resolve to the short route and preserve steps.
   await page.goto(origin+'/turtledemo/project.html?id=curatedA25#step-3',{waitUntil:'domcontentloaded',timeout:45000});

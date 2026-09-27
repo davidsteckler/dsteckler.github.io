@@ -99,6 +99,73 @@
     button.textContent=copied?'Copied!':'Copy failed';
     setTimeout(()=>{button.textContent='Copy link';},1800);
   };
+  // Raspberry Pi-style draggable divider between instructions and editor.
+  // Width is shared by all tutorials; the currently open project stays in place.
+  const workspace=document.querySelector('.tutorial-workspace');
+  const lessonPanel=$('lessonPanel'),lessonDivider=$('lessonDivider');
+  const lessonWidthKey='dsteckler-turtle-lesson-width-v1';
+  let desiredLessonWidth=null,draggingLesson=false;
+  try{
+    const saved=Number(localStorage.getItem(lessonWidthKey));
+    if(Number.isFinite(saved)&&saved>=240&&saved<=950)desiredLessonWidth=saved;
+  }catch{}
+  function lessonLimits(){
+    const style=getComputedStyle(workspace),rect=workspace.getBoundingClientRect();
+    const nav=document.querySelector('.steps-panel').getBoundingClientRect().width;
+    const free=rect.width-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight)-nav-
+      3*parseFloat(style.columnGap||style.gap||'8')-lessonDivider.getBoundingClientRect().width;
+    return {min:Math.min(285,Math.max(240,free-325)),
+      max:Math.max(240,Math.min(950,free-330)),free};
+  }
+  function setLessonWidth(width,save=false){
+    if(matchMedia('(max-width:760px)').matches)return;
+    const {min,max}=lessonLimits();
+    const pixels=Math.round(Math.max(min,Math.min(max,width)));
+    workspace.style.setProperty('--lesson-width',pixels+'px');
+    lessonDivider.setAttribute('aria-valuemin',String(Math.round(min)));
+    lessonDivider.setAttribute('aria-valuemax',String(Math.round(max)));
+    lessonDivider.setAttribute('aria-valuenow',String(pixels));
+    lessonDivider.setAttribute('aria-valuetext',pixels+' pixels wide');
+    if(save){
+      desiredLessonWidth=pixels;
+      try{localStorage.setItem(lessonWidthKey,String(pixels));}catch{}
+    }
+    return pixels;
+  }
+  function initialLessonWidth(){
+    if(matchMedia('(max-width:760px)').matches)return;
+    const {max}=lessonLimits();
+    setLessonWidth(desiredLessonWidth??Math.min(max,window.innerWidth>=1700?380:window.innerWidth>=1200?360:300));
+  }
+  lessonDivider.addEventListener('pointerdown',event=>{
+    if(event.button!==0||matchMedia('(max-width:760px)').matches)return;
+    draggingLesson=true;
+    lessonDivider.setPointerCapture(event.pointerId);
+    lessonDivider.classList.add('dragging');
+    workspace.classList.add('is-resizing');
+    event.preventDefault();
+  });
+  lessonDivider.addEventListener('pointermove',event=>{
+    if(!draggingLesson)return;
+    setLessonWidth(event.clientX-lessonPanel.getBoundingClientRect().left,true);
+  });
+  function stopLessonDrag(){
+    draggingLesson=false;
+    lessonDivider.classList.remove('dragging');
+    workspace.classList.remove('is-resizing');
+  }
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])lessonDivider.addEventListener(event,stopLessonDrag);
+  lessonDivider.addEventListener('keydown',event=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    event.preventDefault();
+    const currentWidth=lessonPanel.getBoundingClientRect().width,limit=lessonLimits();
+    const next=event.key==='Home'?limit.min:event.key==='End'?limit.max:
+      currentWidth+(event.key==='ArrowRight'?1:-1)*(event.shiftKey?50:20);
+    setLessonWidth(next,true);
+  });
+  window.addEventListener('resize',initialLessonWidth);
+  initialLessonWidth();
+
   const frame=$('editorFrame');
   const send=(kind,extra={})=>frame.contentWindow?.postMessage({kind,...extra},location.origin);
   const escape=text=>text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
