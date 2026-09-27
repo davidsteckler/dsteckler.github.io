@@ -63,6 +63,11 @@
   // Show the same shareable address even when an old ?id= link is opened.
   const shortSlug=window.TURTLE_TUTORIAL_SLUGS?.[project.id];
   const tutorialUrl=shortSlug ? new URL(shortSlug+'/',new URL('./',document.baseURI)).href : location.href.split('#')[0];
+  // Keep legacy ?id= addresses usable while showing their friendly URLs
+  // in the address bar. The fixed <base> keeps editor/assets and Gallery links stable.
+  if (shortSlug && /\/project\.html$/.test(location.pathname)) {
+    history.replaceState(history.state, '', tutorialUrl + location.hash);
+  }
   $('tutorialUrl').href=tutorialUrl;
   $('tutorialUrl').textContent=tutorialUrl.replace(/^https?:\/\//,'').replace(/\/$/,'');
   $('copyTutorialLink').onclick=async()=>{
