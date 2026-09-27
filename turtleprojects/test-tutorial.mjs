@@ -61,6 +61,12 @@ try {
   await page.mouse.up();
   const expandedLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
   const narrowedEditorWidth=await page.locator('#editorPanel').evaluate(el=>el.getBoundingClientRect().width);
+  const dragDebug=await page.evaluate(()=>{
+    const w=document.querySelector('.tutorial-workspace'),d=document.querySelector('#lessonDivider');
+    return {grid:getComputedStyle(w).gridTemplateColumns,cssWidth:w.style.getPropertyValue('--lesson-width'),now:d.getAttribute('aria-valuenow'),classes:d.className,viewport:innerWidth,
+      panel:document.querySelector('#lessonPanel').getBoundingClientRect().toJSON(),handle:d.getBoundingClientRect().toJSON()};
+  });
+  console.log('DRAG DIAGNOSTICS',JSON.stringify({originalLessonWidth,expandedLessonWidth,originalEditorWidth,narrowedEditorWidth,dragDebug}));
   assert(expandedLessonWidth>originalLessonWidth+90,'Orange handle should widen the instructions');
   assert(narrowedEditorWidth<originalEditorWidth-90,'Editor should yield width to instructions');
   await divider.focus();
