@@ -894,7 +894,7 @@ body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-te
 <section class="demo-gallery" aria-label="Python Turtle example programs">
  <div class="demo-gallery-top">
   <div><div class="demo-gallery-title">See what Turtle can draw <span id="demoCount" style="font-size:.65rem;color:#69726e;font-weight:700"></span></div><div class="demo-gallery-sub">Pick a picture to load its Python code and watch it draw. Every example is editable.</div></div>
-  <div class="demo-filter-bar" id="demoFilters"><a class="demo-projects-cta" href="project.html?id=robot-roll-call">Try the robot tutorial →</a><a class="demo-projects-cta" href="projects.html">All projects</a><button class="demo-expand-btn" type="button" id="demoExpand" aria-expanded="false">Browse all examples ↓</button><input class="demo-search" id="demoSearch" type="search" aria-label="Search example programs" placeholder="Find an example…"></div>
+  <div class="demo-filter-bar" id="demoFilters"><a class="demo-projects-cta" href="robot/">Try the robot tutorial →</a><a class="demo-projects-cta" href="projects.html">All projects</a><button class="demo-expand-btn" type="button" id="demoExpand" aria-expanded="false">Browse all examples ↓</button><input class="demo-search" id="demoSearch" type="search" aria-label="Search example programs" placeholder="Find an example…"></div>
  </div>
  <div class="demo-gallery-scroll" id="demoGallery" aria-label="Example gallery"></div>
  <div class="demo-empty" id="demoEmpty">No examples found. Try another category.</div>
@@ -1203,6 +1203,7 @@ for i in range(4):
 <script src="curated-d.js?v=6"></script>
 <script src="curated-e.js?v=food-20260926c"></script>
 <script src="curated-f.js?v=6"></script>
+<script src="tutorial-slugs.js?v=1"></script>
 <script>
 (function(){
   "use strict";
@@ -2821,7 +2822,7 @@ for i in range(4):
       wrapper.appendChild(button);
       var tutorialLink=document.createElement("a");
       tutorialLink.className="demo-tutorial-link";
-      tutorialLink.href="project.html?id="+encodeURIComponent(d.id);
+      tutorialLink.href=window.TURTLE_TUTORIAL_SLUGS?.[d.id] ? "./"+window.TURTLE_TUTORIAL_SLUGS[d.id]+"/" : "project.html?id="+encodeURIComponent(d.id);
       tutorialLink.textContent="Open tutorial →";
       tutorialLink.setAttribute("aria-label","Open step-by-step tutorial for "+d.title);
       wrapper.appendChild(tutorialLink);
@@ -2833,7 +2834,7 @@ for i in range(4):
   if(!PREVIEW_MODE && !TUTORIAL_EMBED)renderDemoGallery();
   if(PROJECTS_MODE)demoGallery.addEventListener("click",function(event){
     var tile=event.target.closest(".demo-tile");
-    if(tile){event.stopImmediatePropagation();location.href="project.html?id="+encodeURIComponent(tile.dataset.demoId);}
+    if(tile){event.stopImmediatePropagation();location.href=window.TURTLE_TUTORIAL_SLUGS?.[tile.dataset.demoId] ? "./"+window.TURTLE_TUTORIAL_SLUGS[tile.dataset.demoId]+"/" : "project.html?id="+encodeURIComponent(tile.dataset.demoId);}
   },true);
   function openCommands(){
     document.body.classList.add("commands-open");

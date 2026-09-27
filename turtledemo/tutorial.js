@@ -17,7 +17,7 @@
     {nav:'Make it yours',title:'Make your robot your own.',instruction:'Change two details in your code: its color, eye positions, or antenna length. Run after each change.',explain:'Change a number or a color in a command you already typed. Leave the other commands in place so you can see what your edit changes.',expected:'Your own version of the robot. Give it a name and show a partner what you changed.',question:'What does penup() do? Which command changed your robot?',answer:'penup() lets the turtle move without leaving a line. Point to one edit and explain what changed in your drawing.',help:'Try changing both royalblue values to forestgreen, the eye x-coordinates from −40 and 40 to −50 and 50, or the antenna length from 45 to 65.',remix:true}
   ];
   const catalog = [...(window.TURTLE_BASE_CATALOG || []), ...(window.CURATED_EXAMPLES || [])];
-  const requested = new URLSearchParams(location.search).get('id') || 'robot-roll-call';
+  const requested = window.TURTLE_TUTORIAL_ID || new URLSearchParams(location.search).get('id') || 'robot-roll-call';
   let project, steps;
   if (requested === 'robot-roll-call') {
     project = {id:requested,title:'Robot roll call',code:robotBlocks.join('\n\n')};
