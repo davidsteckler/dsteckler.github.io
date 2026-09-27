@@ -797,9 +797,14 @@
 body.tutorial-embed{height:100dvh;overflow:hidden;background:var(--surface)}
 body.tutorial-embed .app{height:100dvh!important;min-height:0!important;display:block!important}
 body.tutorial-embed .appbar,body.tutorial-embed .demo-gallery,body.tutorial-embed .layoutbar,body.tutorial-embed .resize-divider,body.tutorial-embed #editCodeBtn{display:none!important}
-body.tutorial-embed .workspace{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:48px minmax(0,1fr)!important;height:100dvh!important;padding:0!important;gap:0!important;overflow:hidden!important}
+body.tutorial-embed .workspace{display:grid!important;grid-template-columns:minmax(0,var(--tutorial-code-width,60%)) minmax(0,1fr)!important;grid-template-rows:48px minmax(0,1fr)!important;height:100dvh!important;padding:0!important;gap:0!important;overflow:hidden!important}
 body.tutorial-embed .embed-toolbar{grid-column:1/-1;grid-row:1;display:flex;align-items:center;justify-content:flex-start;padding:7px 10px;gap:7px;border-bottom:1px solid var(--rule);background:var(--paper)}
 body.tutorial-embed .embed-toolbar .btn{width:auto;min-width:0;height:33px;font-size:13px;padding:0 10px}
+.tutorial-width-control{display:none}
+body.tutorial-embed .tutorial-width-control{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:750;color:var(--teal-dark);white-space:nowrap;margin-left:10px}
+body.tutorial-embed .tutorial-width-control input{width:110px;min-width:72px;accent-color:var(--teal);cursor:ew-resize}
+body.tutorial-embed .tutorial-width-control output{font:700 12px ui-monospace,SFMono-Regular,Consolas,monospace;min-width:32px}
+@media(max-width:750px){body.tutorial-embed .tutorial-width-control{gap:4px;margin-left:2px;font-size:11px}body.tutorial-embed .tutorial-width-control input{width:75px}}
 body.tutorial-embed .embed-toolbar #examples,body.tutorial-embed .embed-toolbar #stepBtn,body.tutorial-embed .embed-toolbar #viewWorldBtn{display:none!important}
 body.tutorial-embed .embed-toolbar .commands-toggle{display:inline-flex;margin-left:auto}
 body.tutorial-embed .panel{border:0!important;border-radius:0!important;box-shadow:none!important;height:100%!important}
@@ -830,6 +835,7 @@ body.projects-view .app{display:flex;flex-direction:column}
 body.projects-view .demo-gallery{flex:1;min-height:0;display:flex;flex-direction:column;padding:20px}
 body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))!important}
 @media(max-width:650px){
+ body.tutorial-embed .tutorial-width-control{display:none!important}
  body.tutorial-embed .workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:48px minmax(180px,.9fr) minmax(245px,1.1fr)!important;overflow:auto!important}
  body.tutorial-embed .code-panel{grid-column:1!important;grid-row:2!important}
  body.tutorial-embed .world-panel{grid-column:1!important;grid-row:3!important;grid-template-rows:38px minmax(130px,1fr) auto 70px!important}
@@ -884,6 +890,11 @@ body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-te
         <button class="btn" id="pauseBtn" type="button" disabled>⏸ Pause</button>
         <button class="btn" id="stepBtn" type="button" disabled title="Execute one Python statement. You can start with Step without pressing Run first.">↳ Step</button>
         <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
+        <label class="tutorial-width-control" for="tutorialCodeWidth">
+          <span>Code width</span>
+          <input id="tutorialCodeWidth" type="range" min="40" max="75" step="1" value="60" aria-label="Code editor width">
+          <output id="tutorialWidthValue" for="tutorialCodeWidth">60%</output>
+        </label>
         <button class="btn commands-toggle" id="commandsToggle" type="button" aria-controls="commandLibrary" aria-expanded="false">☰ Commands</button>
         <button class="btn mobile-output" id="viewWorldBtn" type="button">View world ↓</button>
       </div>
@@ -1414,7 +1425,7 @@ for i in range(4):
     indentUnit: 4,
     tabSize: 4,
     indentWithTabs: false,
-    lineWrapping: false,
+    lineWrapping: TUTORIAL_EMBED,
     autofocus: !TUTORIAL_EMBED,
     extraKeys: {
       "Tab": function(cm){
@@ -1429,6 +1440,28 @@ for i in range(4):
       "Cmd-Enter": function(){ runCode(); }
     }
   });
+
+  // Tutorial-only width control. Keep CodeMirror wrapped and refresh both panels as it moves.
+  if(TUTORIAL_EMBED){
+    var widthSlider=document.getElementById("tutorialCodeWidth");
+    var widthOutput=document.getElementById("tutorialWidthValue");
+    var widthKey="dsteckler-turtle-tutorial-code-width-v1";
+    var initialWidth=60;
+    try {
+      var storedWidth=Number(localStorage.getItem(widthKey));
+      if(Number.isFinite(storedWidth)&&storedWidth>=40&&storedWidth<=75)initialWidth=storedWidth;
+    } catch(e){}
+    function setTutorialWidth(raw,save){
+      var pct=clamp(Number(raw)||60,40,75);
+      workspace.style.setProperty("--tutorial-code-width",pct+"%");
+      widthSlider.value=String(pct);
+      widthOutput.value=pct+"%";
+      if(save)try{localStorage.setItem(widthKey,String(pct));}catch(e){}
+      requestAnimationFrame(function(){editor.refresh();fitWorld();});
+    }
+    widthSlider.addEventListener("input",function(){setTutorialWidth(this.value,true);});
+    setTutorialWidth(initialWidth,false);
+  }
 
   try {
     var saved = localStorage.getItem(STORAGE_KEY);

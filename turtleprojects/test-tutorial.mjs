@@ -30,6 +30,27 @@ try {
   assert.equal(new URL(page.url()).hash,'#step-1');
   assert.equal(await page.locator('.back-link').evaluate(link=>new URL(link.href).pathname),'/turtleprojects/');
 
+  // The tutorial editor can be widened without hiding code or altering the drawing.
+  const editorFrame=page.frameLocator('#editorFrame');
+  const widthSlider=editorFrame.locator('#tutorialCodeWidth');
+  await widthSlider.waitFor({state:'visible',timeout:30000});
+  assert.equal(await widthSlider.inputValue(),'60');
+  const codeBefore=await editorFrame.locator('.code-panel').evaluate(el=>el.getBoundingClientRect().width);
+  const worldBefore=await editorFrame.locator('.world-panel').evaluate(el=>el.getBoundingClientRect().width);
+  await widthSlider.evaluate(el=>{el.value='72';el.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.waitForFunction(()=>{
+    const doc=document.getElementById('editorFrame')?.contentDocument;
+    return doc?.getElementById('tutorialWidthValue')?.value==='72%';
+  });
+  const codeAfter=await editorFrame.locator('.code-panel').evaluate(el=>el.getBoundingClientRect().width);
+  const worldAfter=await editorFrame.locator('.world-panel').evaluate(el=>el.getBoundingClientRect().width);
+  assert(codeAfter>codeBefore+40,'Code editor should visibly widen');
+  assert(worldAfter<worldBefore-40,'World should yield space to the editor');
+  assert.equal(await editorFrame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getOption('lineWrapping')),true);
+  assert.equal(await page.locator('#newCode').evaluate(el=>getComputedStyle(el).whiteSpace),'pre-wrap');
+  assert.equal(await editorFrame.locator('#tutorialCodeWidth').evaluate(el=>localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')),'72');
+  console.log('Tutorial code width slider, soft wrapping and saved layout passed.');
+
   // The final image is rendered from the actual project code, on the page.
   await page.waitForFunction(()=>{
     const image=document.getElementById('finishedImage');
@@ -53,6 +74,12 @@ try {
     return image&&!image.hidden&&image.src.startsWith('data:image/png;base64,');
   },null,{timeout:60000});
   console.log('Pizza short URL, step changes, full-project image and step preview passed.');
+
+  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+  const restoredWidth=page.frameLocator('#editorFrame').locator('#tutorialCodeWidth');
+  await restoredWidth.waitFor({state:'visible',timeout:30000});
+  assert.equal(await restoredWidth.inputValue(),'72','Code width should persist after reloading.');
+  console.log('Code width persists after reloading.');
 
   // Previously shared long URLs must resolve to the short route and preserve steps.
   await page.goto(origin+'/turtledemo/project.html?id=curatedA25#step-3',{waitUntil:'domcontentloaded',timeout:45000});
