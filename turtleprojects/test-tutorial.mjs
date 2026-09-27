@@ -61,12 +61,6 @@ try {
   await page.mouse.up();
   const expandedLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
   const narrowedEditorWidth=await page.locator('#editorPanel').evaluate(el=>el.getBoundingClientRect().width);
-  const dragDebug=await page.evaluate(()=>{
-    const w=document.querySelector('.tutorial-workspace'),d=document.querySelector('#lessonDivider');
-    return {grid:getComputedStyle(w).gridTemplateColumns,cssWidth:w.style.getPropertyValue('--lesson-width'),now:d.getAttribute('aria-valuenow'),classes:d.className,viewport:innerWidth,
-      panel:document.querySelector('#lessonPanel').getBoundingClientRect().toJSON(),handle:d.getBoundingClientRect().toJSON()};
-  });
-  console.log('DRAG DIAGNOSTICS',JSON.stringify({originalLessonWidth,expandedLessonWidth,originalEditorWidth,narrowedEditorWidth,dragDebug}));
   assert(expandedLessonWidth>originalLessonWidth+90,'Orange handle should widen the instructions');
   assert(narrowedEditorWidth<originalEditorWidth-90,'Editor should yield width to instructions');
   await divider.focus();
@@ -87,7 +81,7 @@ try {
   await page.locator('#steps .step-button').first().click();
   assert.equal(new URL(page.url()).hash,'#step-1','Return to step one for subsequent preview tests.');
   assert.equal(await editorFrame.locator('#tutorialCodeWidth').evaluate(el=>localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')),'72');
-  console.log('Tutorial code width slider, soft wrapping and saved layout passed.');
+  console.log('Editor/drawing slider, single-line code and saved layout passed.');
 
   // The final image is rendered from the actual project code, on the page.
   await page.waitForFunction(()=>{
