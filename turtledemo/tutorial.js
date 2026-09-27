@@ -60,6 +60,19 @@
   if(/^#step-\d+$/.test(location.hash)&&hashStep>=1&&hashStep<=steps.length)current=hashStep-1;
   document.title=project.title+' · Turtle Tutorial | David Steckler';
   $('projectTitle').textContent=project.title;
+  $('finishedTitle').textContent=project.title;
+  $('finishedImage').alt='Finished Python Turtle drawing: '+project.title;
+  $('finishedDialogTitle').textContent=project.title;
+  $('finishedDialogImage').alt='Finished Python Turtle drawing: '+project.title;
+  $('finishedExpand').onclick=()=>{
+    if($('finishedImage').hidden)return;
+    $('finishedDialogImage').src=$('finishedImage').src;
+    if(!$('finishedDialog').open)$('finishedDialog').showModal();
+  };
+  $('finishedClose').onclick=()=>$('finishedDialog').close();
+  $('finishedDialog').addEventListener('click',event=>{
+    if(event.target===$('finishedDialog'))$('finishedDialog').close();
+  });
   // Show the same shareable address even when an old ?id= link is opened.
   const shortSlug=window.TURTLE_TUTORIAL_SLUGS?.[project.id];
   const tutorialUrl=shortSlug ? new URL(shortSlug+'/',new URL('./',document.baseURI)).href : location.href.split('#')[0];
@@ -135,7 +148,7 @@
     $('lessonScroll').scrollTop=0;
     if(focus)$('stepTitle').focus({preventScroll:true});
     try{localStorage.setItem(stateKey,String(current));}catch{}
-    history.replaceState(null,'','#step-'+(current+1));
+    history.replaceState(null,'',tutorialUrl+'#step-'+(current+1));
   }
   function go(index){current=index;render(true);}
   $('previousStep').onclick=()=>{if(current>0)go(current-1)};
@@ -172,35 +185,115 @@
     const blob=new Blob([code+'\n'],{type:'text/x-python'}),url=URL.createObjectURL(blob);
     const a=document.createElement('a');a.href=url;a.download=project.title.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.py';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   };
-  let previewFrame=null,previewReady=false,previewBusy=false,previewRequest=0,previewTimer=null;
-  const previewCache=new Map();
+  // One reference renderer produces both the finished project and individual step drawings.
+  // It runs in a hidden iframe so the student's editor and saved code are untouched.
+  let previewFrame=null,previewReady=false,previewBusy=false,previewRequest=0;
+  let previewTimer=null,previewLoadTimer=null,previewPending=null,finishedFailed=false;
+  const previewCache=new Map(),failedSteps=new Set();
+  function showFinished(image) {
+    $('finishedImage').src=image;
+    $('finishedImage').hidden=false;
+    $('finishedStatus').hidden=true;
+    $('finishedExpand').disabled=false;
+    $('finishedRetry').hidden=true;
+  }
+  function finishedError(message) {
+    finishedFailed=true;
+    $('finishedImage').hidden=true;
+    $('finishedStatus').hidden=false;
+    $('finishedStatus').textContent=message;
+    $('finishedRetry').hidden=false;
+  }
+  function ensurePreviewFrame() {
+    if(previewFrame)return;
+    const iframe=document.createElement('iframe');
+    iframe.hidden=true;iframe.title='Turtle drawing renderer';
+    previewFrame=iframe;previewReady=false;
+    iframe.onload=()=>{
+      if(previewFrame!==iframe)return;
+      clearTimeout(previewLoadTimer);previewLoadTimer=null;
+      previewReady=true;pumpPreview();
+    };
+    iframe.src='./?renderPreview=1&v=tutorial-2';
+    document.body.append(iframe);
+    previewLoadTimer=setTimeout(()=>{
+      if(previewFrame!==iframe||previewReady)return;
+      iframe.remove();previewFrame=null;
+      finishedError('Preview did not load.');
+      if($('previewDetails').open)$('previewStatus').textContent='The example could not load. Close and reopen this section to retry.';
+    },20000);
+  }
+  function pumpPreview() {
+    if(!previewFrame||!previewReady||previewBusy)return;
+    let key,code;
+    if(!previewCache.has('finished')&&!finishedFailed){
+      key='finished';code=project.code;
+    }else if($('previewDetails').open&&!previewCache.has(current)&&!failedSteps.has(current)){
+      key=current;code=steps[current].code;
+    }else return;
+    previewBusy=true;
+    const id='tutorial-'+(++previewRequest);
+    previewPending={id,key};
+    // The reference draws instantly; student playback retains its selected speed.
+    code=code.replace(/^speed\([^\n]*\)$/gm,'speed(0)');
+    previewFrame.contentWindow.postMessage({kind:'turtle-render',id,code},location.origin);
+    previewTimer=setTimeout(()=>{
+      const pending=previewPending;
+      if(!pending||pending.id!==id)return;
+      previewPending=null;previewBusy=false;previewReady=false;
+      previewFrame?.remove();previewFrame=null;
+      if(pending.key==='finished')finishedError('Preview is taking longer than expected.');
+      else{
+        failedSteps.add(pending.key);
+        if($('previewDetails').open)$('previewStatus').textContent='The example could not load. Close and reopen this section to retry.';
+      }
+      if($('previewDetails').open&&pending.key==='finished')ensurePreviewFrame();
+    },40000);
+  }
   function requestPreview() {
     if(!$('previewDetails').open)return;
     const cached=previewCache.get(current);
-    if(cached){$('expectedImage').src=cached;$('expectedImage').hidden=false;$('previewStatus').hidden=true;return;}
-    $('expectedImage').hidden=true;$('previewStatus').hidden=false;$('previewStatus').textContent='Loading drawing…';
-    if(!previewFrame){
-      previewFrame=document.createElement('iframe');previewFrame.hidden=true;previewFrame.title='Tutorial reference renderer';
-      previewFrame.onload=()=>{previewReady=true;requestPreview();};
-      previewFrame.src='./?renderPreview=1&v=tutorial-1';document.body.append(previewFrame);return;
+    if(cached){
+      $('expectedImage').src=cached;$('expectedImage').hidden=false;$('previewStatus').hidden=true;
+      return;
     }
-    if(!previewReady||previewBusy)return;
-    previewBusy=true;const id='step-'+current+'-'+(++previewRequest);
-    previewFrame.dataset.pending=id;previewFrame.dataset.step=String(current);
-    // Reference drawings render instantly; student code retains its chosen speed.
-    const code=steps[current].code.replace(/^speed\([^\n]*\)$/gm,'speed(0)');
-    previewFrame.contentWindow.postMessage({kind:'turtle-render',id,code},location.origin);
-    previewTimer=setTimeout(()=>{
-      previewBusy=false;previewReady=false;previewFrame.remove();previewFrame=null;
-      $('previewStatus').textContent='The example could not load. Close this section and open it to try again.';
-    },20000);
+    $('expectedImage').hidden=true;$('previewStatus').hidden=false;
+    $('previewStatus').textContent='Creating this step’s drawing…';
+    ensurePreviewFrame();pumpPreview();
   }
   window.addEventListener('message',event=>{
-    if(event.origin!==location.origin||event.source!==previewFrame?.contentWindow||event.data?.kind!=='turtle-rendered'||event.data.id!==previewFrame.dataset.pending)return;
-    clearTimeout(previewTimer);previewBusy=false;const step=Number(previewFrame.dataset.step);
-    if(event.data.image){previewCache.set(step,event.data.image);if(step===current)requestPreview();else if($('previewDetails').open)requestPreview();}
-    else {$('previewStatus').textContent='The example could not load. Close this section and open it to try again.';}
+    if(event.origin!==location.origin||event.source!==previewFrame?.contentWindow||
+       event.data?.kind!=='turtle-rendered'||event.data.id!==previewPending?.id)return;
+    clearTimeout(previewTimer);previewTimer=null;
+    const key=previewPending.key, image=event.data.image;
+    previewPending=null;previewBusy=false;
+    if(image){
+      previewCache.set(key,image);
+      if(key==='finished'){
+        showFinished(image);
+        // The last step is the completed program: reuse the exact same image.
+        if(steps[steps.length-1].code===project.code)previewCache.set(steps.length-1,image);
+      }else if(key===current&&$('previewDetails').open){
+        $('expectedImage').src=image;$('expectedImage').hidden=false;$('previewStatus').hidden=true;
+      }
+    }else if(key==='finished'){
+      finishedError('Drawing preview unavailable.');
+    }else{
+      failedSteps.add(key);
+      if(key===current&&$('previewDetails').open)$('previewStatus').textContent='The example could not load. Close and reopen this section to retry.';
+    }
+    if($('previewDetails').open)requestPreview();
+    pumpPreview();
   });
-  $('previewDetails').addEventListener('toggle',()=>{if($('previewDetails').open)requestPreview()});
+  $('previewDetails').addEventListener('toggle',()=>{
+    if($('previewDetails').open){failedSteps.delete(current);requestPreview();}
+  });
+  $('finishedRetry').onclick=()=>{
+    finishedFailed=false;$('finishedRetry').hidden=true;
+    $('finishedStatus').textContent='Creating the finished drawing…';
+    ensurePreviewFrame();pumpPreview();
+  };
   render();
+  // Always display the completed artwork, including when the tutorial opens at step 1.
+  ensurePreviewFrame();
 })();
