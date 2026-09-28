@@ -147,7 +147,12 @@ try {
   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
   const restoredWidth=page.frameLocator('#editorFrame').locator('#editorDivider');
   await restoredWidth.waitFor({state:'visible',timeout:30000});
-  assert.equal(Number(await restoredWidth.getAttribute('aria-valuenow')),savedCodeWidth,'Middle grip width should persist after reloading.');
+  const restoredSavedWidth=await restoredWidth.evaluate(el=>Number(localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')));
+  assert.equal(restoredSavedWidth,savedCodeWidth,'The preferred code width is retained after reloading.');
+  const restoredCodeWidth=Number(await restoredWidth.getAttribute('aria-valuenow'));
+  const restoredMaxWidth=Number(await restoredWidth.getAttribute('aria-valuemax'));
+  assert.equal(restoredCodeWidth,Math.min(savedCodeWidth,restoredMaxWidth),
+    'Code width should use the saved preference or the available space, whichever is smaller.');
   console.log('Code width persists after reloading.');
   const outputAfterReload=await page.frameLocator('#editorFrame').locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height);
   assert(Math.abs(outputAfterReload-savedOutputHeight)<4,'Output height must persist after reload.');
