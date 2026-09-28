@@ -60,6 +60,20 @@ button.b.main{background:var(--btn);color:var(--btnfg);border-color:var(--btn)}
 button.b:disabled{opacity:.4;cursor:default}
 button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.flip svg,.enter,.cap.in{animation:none}}
+
+.progressWrap{margin:0 0 14px}
+.progressMeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:13px}
+.progressPill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.progressBar{height:8px;margin-top:8px;background:var(--off);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.progressFill{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.extra{max-width:700px;margin:8px auto 0}
+.challenge{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 20%,var(--line));border-radius:12px;padding:10px 12px;color:var(--fg);font-size:15px}
+.asciiCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:10px}
+.asciiCard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.asciiCard .binary{font-size:13px;color:var(--muted);letter-spacing:.06em}
+.asciiCard .char{font-size:34px;font-weight:800;color:var(--accent);line-height:1.1;margin-top:4px}
+.asciiCard .decimal{font-size:13px;color:var(--muted)}
+button.b.action{border-color:var(--accent);color:var(--accent)}
 </style>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
@@ -73,6 +87,13 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <body>
 <main>
 <h1>Binary Bulbs: one small step at a time</h1>
+<div class="progressWrap">
+  <div class="progressMeta">
+    <span class="progressPill" id="sectionTag">Bits</span>
+    <span class="progressPill" id="stepTag">Step 1</span>
+  </div>
+  <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+</div>
 <h2 id="title"></h2>
 <p class="cap" id="cap" aria-live="polite"></p>
 <div class="stage"><div class="scroll"><div id="bulbs"></div></div></div>
@@ -81,33 +102,40 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="eq" id="eq"></div>
 <div class="meta">Binary <b id="bin"></b></div>
 <div class="msg" id="msg"></div>
+<div class="extra" id="extra"></div>
 </div>
-<div class="dots" id="dots"></div>
 <div class="ctl">
 <button class="b" id="back">Back</button>
 <button class="b" id="replay">Replay</button>
+<button class="b action" id="act" hidden>Do it</button>
 <button class="b main" id="next">Next</button>
 </div>
-</main>
-<script>
+</main><script>
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let bits=0,val=0,cur=0,tok=0,free=false,pv=false,last='';
+let bits=0,val=0,cur=0,tok=0,free=false,pv=false,last='',target=null,conceal=false,actionDone=false;
 const bulbSVG='<svg viewBox="0 0 60 90" aria-hidden="true"><path class="glass" d="M30 4C14 4 6 16 6 29c0 10 6 16 11 22 3 4 4 7 4 11h18c0-4 1-7 4-11 5-6 11-12 11-22C54 16 46 4 30 4z"/><path class="fil" d="M24 62L27 44L30 54L33 44L36 62"/><rect class="base" x="20" y="64" width="20" height="6" rx="2"/><rect class="base" x="22" y="72" width="16" height="6" rx="2"/></svg>';
-function say(h){if(h===last)return;last=h;const c=$('cap');c.innerHTML=h;c.classList.remove('in');void c.offsetWidth;c.classList.add('in')}
+
+function say(h){
+  if(h===last)return;last=h;
+  const c=$('cap');c.innerHTML=h;c.classList.remove('in');void c.offsetWidth;c.classList.add('in');
+}
 async function w(ms){const t=tok;await sleep(ms);if(t!==tok)throw 0}
 function hl(i){document.querySelectorAll('.cell').forEach(c=>c.classList.toggle('hl',+c.dataset.i===i))}
-function set(v){const o=val;val=v;render(o^v)}
+function setVal(v){const o=val;val=v;render(o^v)}
 function build(n){
-  const prev=bits;bits=n;val=0;
+  const previousBits=bits;bits=n;val=0;
   const box=$('bulbs');box.innerHTML='';
   for(let i=n-1;i>=0;i--){
-    const c=document.createElement('div');c.className='cell'+(i>=prev?' enter':'');c.dataset.i=i;
-    c.innerHTML='<div class="pv">'+(2**i)+'</div><button class="bulb" aria-label="Bulb worth '+(2**i)+'">'+bulbSVG+'</button><div class="bit">0</div><div class="pw">2<sup>'+i+'</sup></div>';
-    c.querySelector('.bulb').onclick=()=>{if(free)set(val^(1<<i))};
+    const c=document.createElement('div');c.className='cell'+(i>=previousBits?' enter':'');c.dataset.i=i;
+    c.innerHTML='<div class="pv">'+(2**i)+'</div><button class="bulb" aria-label="Bit worth '+(2**i)+'">'+bulbSVG+'</button><div class="bit">0</div><div class="pw">2<sup>'+i+'</sup></div>';
+    c.querySelector('.bulb').onclick=()=>{if(free)setVal(val^(1<<i))};
     box.appendChild(c);
   }
   render(0);
+}
+function ensureBits(n){
+  if(bits!==n) build(n);
 }
 function render(m){
   const on=[];
@@ -118,131 +146,103 @@ function render(m){
     if(o)on.push(2**i);
     if((m>>i)&1){c.classList.remove('flip');void c.offsetWidth;c.classList.add('flip')}
   });
-  $('dec').textContent=val;
-  $('eq').textContent=!pv?'':on.length>1?on.join(' + ')+' = '+val:on.length?'only the '+val+' bulb is lit':'no bulbs lit';
+  const solved=target===null||val===target;
+  $('dec').textContent=conceal&&!solved?'?':val;
+  $('eq').textContent=!pv?'':conceal&&!solved?'Build the target before revealing the total.':on.length>1?on.join(' + ')+' = '+val:on.length?'only the '+val+' bit is on':'no bits on';
   $('bin').textContent=val.toString(2).padStart(bits,'0');
-  if(free)say(val===42?'That is <b>32 + 8 + 2 = 42</b>. You just spoke binary.':'Your turn. Tap the bulbs to make any number from 0 to 255. Can you make <b>42</b>?');
+  if(free&&target!==null){
+    if(solved){
+      $('msg').textContent='✓';
+      say('Yes. You made <b>'+target+'</b>.');
+      $('next').disabled=false;
+    }else{
+      $('msg').textContent='';
+      $('next').disabled=true;
+    }
+  }
+}
+async function animateIncrement(){
+  for(let i=0;i<bits;i++){
+    hl(i);await w(260);
+    if((val>>i)&1){
+      setVal(val&~(1<<i));
+      await w(430);
+    }else{
+      setVal(val|(1<<i));
+      await w(430);
+      hl(-1);
+      return;
+    }
+  }
+  hl(-1);
+}
+function asciiCards(items){
+  return '<div class="asciiCards">'+items.map(x=>'<div class="asciiCard"><div class="decimal">decimal '+x.d+'</div><div class="binary">'+x.b+'</div><div class="char">'+x.c+'</div></div>').join('')+'</div>';
+}
+function progress(){
+  const s=S[cur];
+  $('sectionTag').textContent=s.sec;
+  $('stepTag').textContent='Step '+(cur+1)+' of '+S.length;
+  $('progressFill').style.width=((cur+1)/S.length*100)+'%';
 }
 const S=[
-{t:'A switch has two states',n:1,go:async()=>{
-  set(0);hl(-1);
-  say('A computer is built from tiny switches. A switch has only two states: <b>off</b> or <b>on</b>.');
-}},
-{t:'Off means 0',n:1,go:async()=>{
-  set(0);hl(0);
-  say('When the switch is <b>off</b>, we write a <b>0</b>.');
-}},
-{t:'On means 1',n:1,go:async()=>{
-  set(1);hl(0);
-  say('When the switch is <b>on</b>, we write a <b>1</b>.');
-}},
-{t:'Add one more switch',n:2,go:async()=>{
-  set(0);hl(-1);
-  say('Add a second switch. Now we can arrange the two switches in more than one way.');
-}},
-{t:'Pattern 1: 00',n:2,go:async()=>{
-  set(0);hl(-1);
-  say('First pattern: <b>00</b>. Both switches are off.');
-}},
-{t:'Pattern 2: 01',n:2,go:async()=>{
-  set(1);hl(0);
-  say('Next pattern: <b>01</b>. Only the right switch is on.');
-}},
-{t:'Pattern 3: 10',n:2,go:async()=>{
-  set(2);hl(1);
-  say('Next pattern: <b>10</b>. Only the left switch is on.');
-}},
-{t:'Pattern 4: 11',n:2,go:async()=>{
-  set(3);hl(-1);
-  say('Last pattern: <b>11</b>. Both switches are on.');
-}},
-{t:'Two switches make four patterns',n:2,go:async()=>{
-  set(3);hl(-1);
-  say('With two switches we can make <b>4 patterns</b>: 00, 01, 10, and 11.');
-}},
-{t:'The right place is worth 1',n:2,pv:1,go:async()=>{
-  set(1);hl(0);
-  say('To turn a binary pattern into a number, give each place a value. Start on the right: it is worth <b>1</b>.');
-}},
-{t:'The next place is worth 2',n:2,pv:1,go:async()=>{
-  set(2);hl(1);
-  say('Move one place left. Its value doubles, so this place is worth <b>2</b>.');
-}},
-{t:'Read 11',n:2,pv:1,go:async()=>{
-  set(3);hl(-1);
-  say('Both bulbs are lit, so add their values: <b>2 + 1 = 3</b>. Binary 11 means 3.');
-}},
-{t:'Add a third place',n:3,pv:1,go:async()=>{
-  set(4);hl(2);
-  say('Add one more place on the left. The values keep doubling: 1, 2, then <b>4</b>.');
-}},
-{t:'Read 101',n:3,pv:1,go:async()=>{
-  set(5);hl(-1);
-  say('Binary <b>101</b> has the 4 and 1 places lit. <b>4 + 1 = 5</b>.');
-}},
-{t:'Count from 0 to 1',n:3,pv:1,go:async()=>{
-  set(1);hl(0);
-  say('Start at 000. Add 1 and the right bulb turns on: <b>001 = 1</b>.');
-}},
-{t:'Count from 1 to 2',n:3,pv:1,go:async()=>{
-  set(2);hl(1);
-  say('Add 1 again. The 1 place resets to 0 and the 2 place turns on: <b>010 = 2</b>. This is a carry.');
-}},
-{t:'Count from 3 to 4',n:3,pv:1,go:async()=>{
-  set(4);hl(2);
-  say('At 011, both lower places are full. Add 1 and they reset while the 4 place turns on: <b>100 = 4</b>.');
-}},
-{t:'Three places stop at 7',n:3,pv:1,go:async()=>{
-  set(7);hl(-1);
-  say('With three places, the largest value is <b>111 = 7</b>. Every place is on.');
-}},
-{t:'Eight bits make a byte',n:8,pv:1,go:async()=>{
-  set(0);hl(-1);
-  say('Computers often group <b>8 bits</b> together. Eight bits are called a <b>byte</b>. The place values keep doubling.');
-}},
-{t:'Look at 127',n:8,pv:1,go:async()=>{
-  set(127);hl(-1);
-  say('Binary <b>01111111</b> is 127. The seven smaller places are all on.');
-}},
-{t:'Add 1 to make 128',n:8,pv:1,go:async()=>{
-  set(128);hl(7);
-  say('Add 1 to 127. The seven lower places reset and the 128 place turns on: <b>10000000 = 128</b>.');
-}},
-{t:'A byte can reach 255',n:8,pv:1,go:async()=>{
-  set(255);hl(-1);
-  say('Turn on every place and you get <b>11111111 = 255</b>, the largest number one byte can show.');
-}},
-{t:'Numbers can stand for characters',n:8,pv:1,go:async()=>{
-  set(0);hl(-1);
-  say('A byte is still just a number. People created agreements that let numbers stand for characters. One of those agreements is <b>ASCII</b>.');
-}},
-{t:'72 means H',n:8,pv:1,go:async()=>{
-  set(72);hl(-1);$('msg').textContent='H';
-  say('In ASCII, decimal <b>72</b> stands for the capital letter <b>H</b>.');
-}},
-{t:'73 means I',n:8,pv:1,go:async()=>{
-  set(73);hl(-1);$('msg').textContent='HI';
-  say('Decimal <b>73</b> stands for <b>I</b>. Now the bytes spell HI.');
-}},
-{t:'33 means !',n:8,pv:1,go:async()=>{
-  set(33);hl(-1);$('msg').textContent='HI!';
-  say('Decimal <b>33</b> stands for <b>!</b>. Three byte values can spell <b>HI!</b>.');
-}},
-{t:'Your turn',n:8,pv:1,free:1,go:async()=>{
-  set(0);hl(-1);
-}}
+{sec:'Bits',t:'A bit has two states',n:1,init:0,go:async()=>{hl(-1);say('We will use bulbs to model <b>bits</b>. A bit can be <b>off</b> or <b>on</b>.')}},
+{sec:'Bits',t:'Off means 0',n:1,init:0,go:async()=>{hl(0);say('When the bulb is <b>off</b>, the bit is <b>0</b>.')}},
+{sec:'Bits',t:'On means 1',n:1,init:1,go:async()=>{hl(0);say('When the bulb is <b>on</b>, the bit is <b>1</b>.')}},
+
+{sec:'Patterns',t:'Add a second bit',n:2,init:0,go:async()=>{hl(-1);say('Add a second bit. Two bits can make more patterns.');$('extra').innerHTML='<div class="challenge"><b>00 · 01 · 10 · 11</b></div>'}},
+{sec:'Patterns',t:'Two bits make four patterns',n:2,init:3,go:async()=>{hl(-1);say('Two bits make <b>4 possible patterns</b>. Every extra bit doubles the number of patterns.')}},
+
+{sec:'Values',t:'Each place has a value',n:2,pv:1,init:3,go:async()=>{hl(-1);say('Now give each place a value. Start on the right with <b>1</b>. Move left and double to <b>2</b>.')}},
+{sec:'Values',t:'Read 11',n:2,pv:1,init:3,go:async()=>{say('Both places are on: <b>2 + 1 = 3</b>. So binary 11 means 3.')}}, 
+{sec:'Values',t:'Add a third bit',n:3,pv:1,init:4,go:async()=>{hl(2);say('Add another place on the left. The values keep doubling: <b>1, 2, 4</b>.')}},
+{sec:'Values',t:'Read 101',n:3,pv:1,init:5,go:async()=>{hl(-1);say('Binary <b>101</b> has the 4 and 1 places on. <b>4 + 1 = 5</b>.')}},
+{sec:'Try it',t:'Make 5',n:3,pv:1,init:0,free:1,target:5,conceal:1,go:async()=>{say('Tap the bulbs to make <b>5</b>.');$('extra').innerHTML='<div class="challenge">Which two place values add to 5?</div>'}},
+
+{sec:'Counting',t:'What comes after 001?',n:3,pv:1,init:1,act:'Add 1',go:async()=>{say('Predict first. We are at <b>001 = 1</b>. What changes when we add 1?');$('extra').innerHTML='<div class="challenge">Press <b>Add 1</b> when you have a prediction.</div>'},run:async()=>{await animateIncrement();say('The 1 place was on, so it reset and carried left. Now <b>010 = 2</b>.')}},
+{sec:'Counting',t:'What comes after 010?',n:3,pv:1,init:2,act:'Add 1',go:async()=>{say('Now we are at <b>010 = 2</b>. Predict the next pattern.');$('extra').innerHTML='<div class="challenge">This one does not need a carry.</div>'},run:async()=>{await animateIncrement();say('The 1 place simply turns on: <b>011 = 3</b>.')}},
+{sec:'Counting',t:'Watch a bigger carry',n:3,pv:1,init:3,act:'Add 1',go:async()=>{say('We are at <b>011 = 3</b>. Both lower places are full. What happens when we add 1?');$('extra').innerHTML='<div class="challenge">Watch the carry move across both lower bits.</div>'},run:async()=>{await animateIncrement();say('The two lower bits reset, then the 4 place turns on: <b>100 = 4</b>.')}},
+{sec:'Counting',t:'Three bits stop at 7',n:3,pv:1,init:7,go:async()=>{say('With three bits, the largest number is <b>111 = 7</b>. Every place is on.')}},
+
+{sec:'Bigger values',t:'Add a fourth bit',n:4,pv:1,init:8,go:async()=>{hl(3);say('Add one more bit and the next place is worth <b>8</b>. Now the values are 1, 2, 4, 8.')}},
+{sec:'Try it',t:'Make 10',n:4,pv:1,init:0,free:1,target:10,conceal:1,go:async()=>{say('Use four bits to make <b>10</b>.');$('extra').innerHTML='<div class="challenge">Which place values add to 10?</div>'}},
+
+{sec:'Byte',t:'Eight bits make a byte',n:8,pv:1,init:0,go:async()=>{say('Computers often group <b>8 bits</b> together. Eight bits are called a <b>byte</b>.')}},
+{sec:'Byte',t:'Watch 127 become 128',n:8,pv:1,init:127,act:'Add 1',go:async()=>{say('This is <b>01111111 = 127</b>. Predict what happens when we add 1.');$('extra').innerHTML='<div class="challenge">The same carry idea will ripple across seven bits.</div>'},run:async()=>{await animateIncrement();say('The carry rippled all the way to the 128 place: <b>10000000 = 128</b>.')}},
+{sec:'Byte',t:'A full byte is 255',n:8,pv:1,init:255,go:async()=>{say('Turn on every bit in one byte and you get <b>11111111 = 255</b>.')}},
+
+{sec:'Text',t:'Numbers can stand for characters',n:8,pv:1,init:0,go:async()=>{say('A byte is still a number. In <b>ASCII</b>, people agreed that certain numbers stand for characters.')}}, 
+{sec:'Text',t:'72 means H',n:8,pv:1,init:72,go:async()=>{$('msg').textContent='H';say('In ASCII, decimal <b>72</b> stands for <b>H</b>.');$('extra').innerHTML=asciiCards([{d:72,b:'01001000',c:'H'}])}},
+{sec:'Text',t:'73 means I',n:8,pv:1,init:73,go:async()=>{$('msg').textContent='HI';say('Decimal <b>73</b> stands for <b>I</b>. Keep the first byte visible and add the second.');$('extra').innerHTML=asciiCards([{d:72,b:'01001000',c:'H'},{d:73,b:'01001001',c:'I'}])}},
+{sec:'Text',t:'33 means !',n:8,pv:1,init:33,go:async()=>{$('msg').textContent='HI!';say('Decimal <b>33</b> stands for <b>!</b>. Three byte values now spell <b>HI!</b>.');$('extra').innerHTML=asciiCards([{d:72,b:'01001000',c:'H'},{d:73,b:'01001001',c:'I'},{d:33,b:'00100001',c:'!'}])}},
+
+{sec:'Final challenge',t:'Make 42',n:8,pv:1,init:0,free:1,target:42,conceal:1,go:async()=>{say('Final challenge. Tap the bulbs to make <b>42</b>.');$('extra').innerHTML='<div class="challenge">Hint: 42 uses three place values.</div>'}}
 ];
+
 async function show(i){
-  cur=i;tok++;last='';free=!!S[i].free;pv=!!S[i].pv;
-  $('msg').textContent='';$('title').textContent=S[i].t;
+  cur=i;tok++;last='';actionDone=false;
+  const s=S[i];
+  free=!!s.free;pv=!!s.pv;target=s.target??null;conceal=!!s.conceal;
+  $('msg').textContent='';$('extra').innerHTML='';
+  $('title').textContent=s.t;
   $('bulbs').className=(pv?'':'nopv ')+(free?'free':'');
-  document.querySelectorAll('.dot').forEach((d,j)=>d.setAttribute('aria-current',j===i));
   $('back').disabled=i===0;
   $('next').textContent=i===S.length-1?'Start over':'Next';
-  build(S[i].n);
-  try{await S[i].go()}catch(e){}
+  $('act').hidden=!s.act;$('act').textContent=s.act||'Do it';$('act').disabled=false;
+  $('next').disabled=!!s.act||(free&&target!==null);
+  ensureBits(s.n);
+  setVal(s.init??0);
+  hl(-1);
+  progress();
+  try{await s.go()}catch(e){}
 }
-S.forEach((s,j)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Step '+(j+1)+': '+s.t);b.onclick=()=>show(j);$('dots').appendChild(b)});
+$('act').onclick=async()=>{
+  const s=S[cur];
+  if(!s.run||actionDone)return;
+  actionDone=true;$('act').disabled=true;$('next').disabled=true;
+  try{await s.run()}catch(e){}
+  $('act').disabled=false;$('next').disabled=false;
+};
 $('back').onclick=()=>show(cur-1);
 $('replay').onclick=()=>show(cur);
 $('next').onclick=()=>show(cur<S.length-1?cur+1:0);
