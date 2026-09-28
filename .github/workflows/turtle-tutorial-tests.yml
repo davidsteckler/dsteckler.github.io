@@ -12,6 +12,12 @@ on:
       - 'turtleprojects/base-catalog.js'
       - 'turtleprojects/curated-*.js'
       - 'turtleprojects/test-tutorial.mjs'
+      - 'turtleprojects/test-learning.*'
+      - 'turtleprojects/lesson_*.py'
+      - 'turtleprojects/lessons_authored.py'
+      - 'turtleprojects/build-tutorial-steps.py'
+      - 'turtleprojects/tutorial-steps.js'
+      - 'turtleprojects/lessons/**'
       - 'turtledemo/index.html'
       - 'turtledemo/project.html'
       - 'turtledemo/tutorial-route.js'
@@ -23,7 +29,7 @@ permissions:
 jobs:
   browser-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,6 +48,10 @@ jobs:
           done
       - name: Test all URLs and rendered previews
         run: node turtleprojects/test-tutorial.mjs
+      - name: Validate every learning checkpoint
+        run: python3 turtleprojects/test-learning.py
+      - name: Run every checkpoint in the browser
+        run: node turtleprojects/test-learning.mjs
       - name: Save browser screenshot
         if: always()
         uses: actions/upload-artifact@v4
