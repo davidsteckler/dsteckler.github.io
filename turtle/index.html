@@ -653,6 +653,24 @@
     .recipe-button strong{display:block;font-size:.7rem;margin-bottom:3px}
     .recipe-button code{font-size:.65rem;color:var(--soft)}
     .mobile-output{display:none}
+    body.trace-embed .appbar,
+    body.trace-embed .layoutbar,
+    body.trace-embed .command-library,
+    body.trace-embed .library-divider,
+    body.trace-embed .commands-overlay{display:none!important}
+    body.trace-embed .app{grid-template-rows:minmax(0,1fr);height:100dvh}
+    body.trace-embed .workspace{
+      grid-template-columns:minmax(300px,1fr) 10px minmax(360px,1fr)!important;
+      gap:5px;padding:8px;height:100dvh
+    }
+    body.trace-embed .clear-code-btn,
+    body.trace-embed .clear-run-btn,
+    body.trace-embed .world-edit-link{display:none!important}
+    body.trace-embed .code-panel,
+    body.trace-embed .world-panel{height:100%}
+    body.trace-embed .code-panel .CodeMirror{font-size:16px}
+    body.trace-embed .world-panel{grid-template-rows:47px minmax(250px,1fr) auto 78px}
+    body.trace-embed #output{font-size:11px}
     @media(min-width:1351px){
       body.library-hidden .workspace{
         grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr));
@@ -1097,6 +1115,16 @@ for i in range(4):
   "use strict";
 
   var STORAGE_KEY = "dsteckler-turtle-code-v1";
+  var TRACE_EMBED = new URLSearchParams(window.location.search).get("embed") === "trace";
+  var TRACE_CODE = [
+    "forward(100)",
+    "circle(10)",
+    "forward(10)",
+    "circle(20)",
+    "circle(30)",
+    "forward(30)"
+  ].join("\n");
+  if(TRACE_EMBED) document.body.classList.add("trace-embed");
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
     "# Try changing the distance or the number of repeats.",
@@ -1304,10 +1332,16 @@ for i in range(4):
     }
   });
 
-  try {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if(saved !== null) editor.setValue(saved);
-  } catch(e) {}
+  if(TRACE_EMBED){
+    editor.setValue(TRACE_CODE);
+    editor.setOption("readOnly","nocursor");
+    saveStatus.textContent = "trace example";
+  }else{
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if(saved !== null) editor.setValue(saved);
+    } catch(e) {}
+  }
 
   var errorLineMarker=null;
   var errorTokenMarker=null;
@@ -1345,6 +1379,10 @@ for i in range(4):
   var saveTimer = null;
   editor.on("change", function(){
     clearErrorHighlight();
+    if(TRACE_EMBED){
+      saveStatus.textContent = "trace example";
+      return;
+    }
     saveStatus.textContent = "saving…";
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function(){
@@ -2670,9 +2708,27 @@ for i in range(4):
     }, 1200);
   }
 
+  if(TRACE_EMBED){
+    window.TraceTurtleEmbed={
+      step:function(){
+        if(!playback.active){ runCode(true); }
+        else if(playback.paused && playback.pending){ stepBtn.click(); }
+      },
+      reset:function(){
+        if(playback.active) stopCode();
+        clearWorld();
+        setOutput('<span class="muted">Trace example ready.</span>');
+        showExecutingLine(1);
+      },
+      highlight:function(line){ showExecutingLine(line); },
+      isPaused:function(){ return !!(playback.active && playback.paused && playback.pending); },
+      isActive:function(){ return !!playback.active; }
+    };
+  }
   clearWorld();
-  setOutput('<span class="muted">print() output will appear here.</span>');
-  editor.focus();
+  setOutput(TRACE_EMBED?'<span class="muted">Trace example ready.</span>':'<span class="muted">print() output will appear here.</span>');
+  if(TRACE_EMBED) showExecutingLine(1);
+  else editor.focus();
 })();
 </script>
 </body>
