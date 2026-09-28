@@ -51,8 +51,8 @@ h2{font-size:clamp(26px,6vw,40px);font-weight:800;letter-spacing:-.02em;line-hei
 .meta{color:var(--muted);margin-top:2px}
 .meta b{color:var(--fg)}
 .msg{font-size:clamp(34px,10vw,60px);font-weight:800;letter-spacing:.12em;color:var(--accent);min-height:1.2em}
-.dots{display:flex;gap:10px;justify-content:center;margin:12px 0 16px}
-.dot{width:14px;height:14px;padding:0;border-radius:50%;border:2px solid var(--offs);background:none;cursor:pointer}
+.dots{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap;max-width:430px;margin:12px auto 16px}
+.dot{width:10px;height:10px;padding:0;border-radius:50%;border:1.5px solid var(--offs);background:none;cursor:pointer}
 .dot[aria-current="true"]{background:var(--accent);border-color:var(--accent)}
 .ctl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 button.b{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:10px 20px;border-radius:10px;cursor:pointer}
@@ -72,7 +72,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </head>
 <body>
 <main>
-<h1>Binary Bulbs: a story in seven parts</h1>
+<h1>Binary Bulbs: one small step at a time</h1>
 <h2 id="title"></h2>
 <p class="cap" id="cap" aria-live="polite"></p>
 <div class="stage"><div class="scroll"><div id="bulbs"></div></div></div>
@@ -124,52 +124,113 @@ function render(m){
   if(free)say(val===42?'That is <b>32 + 8 + 2 = 42</b>. You just spoke binary.':'Your turn. Tap the bulbs to make any number from 0 to 255. Can you make <b>42</b>?');
 }
 const S=[
-{t:'Everything starts with a switch',n:1,go:async()=>{
-  say('A computer is built from tiny switches. A switch can be <b>off</b> or <b>on</b>, and that is all it knows.');
-  await w(3000);say('Off means <b>0</b>. On means <b>1</b>. One bulb, two possibilities.');
-  for(let k=0;k<3;k++){set(1);await w(1000);set(0);await w(1000)}
-  set(1);
+{t:'A switch has two states',n:1,go:async()=>{
+  set(0);hl(-1);
+  say('A computer is built from tiny switches. A switch has only two states: <b>off</b> or <b>on</b>.');
 }},
-{t:'Add a second bulb',n:2,go:async()=>{
-  say('Add a second bulb, and there are more ways to arrange them.');await w(2200);
-  const nm=['neither bulb lit','only the right bulb lit','only the left bulb lit','both bulbs lit'];
-  for(let v=0;v<4;v++){set(v);say('Pattern '+(v+1)+' of 4: '+nm[v]+'.');await w(1800)}
-  say('Two bulbs make <b>4</b> patterns. Every bulb you add doubles the count.');
+{t:'Off means 0',n:1,go:async()=>{
+  set(0);hl(0);
+  say('When the switch is <b>off</b>, we write a <b>0</b>.');
 }},
-{t:'Give each bulb a value',n:3,pv:1,go:async()=>{
-  say('Three bulbs make <b>8</b> patterns. To read them, give each bulb a value. The right bulb is worth <b>1</b>.');hl(0);await w(3200);
-  say('The next bulb is worth <b>2</b>, double the last.');hl(1);await w(2400);
-  say('The next is worth <b>4</b>, double again.');hl(2);await w(2400);
-  hl(-1);say('To read a pattern, add up the values of the lit bulbs.');await w(2000);
-  set(5);say('Lit bulbs: 4 and 1. That is <b>4 + 1 = 5</b>.');
+{t:'On means 1',n:1,go:async()=>{
+  set(1);hl(0);
+  say('When the switch is <b>on</b>, we write a <b>1</b>.');
 }},
-{t:'Counting and carrying',n:3,pv:1,go:async()=>{
-  say('Now count. Watch what happens each time we add 1.');await w(2200);
-  for(let v=1;v<=8;v++){
-    let t=0;while(((v-1)>>t)&1)t++;
-    set(v%8);
-    say(t===0?'The right bulb was off, so it simply turns on.':t<3?'The lowest '+t+(t>1?' bulbs were':' bulb was')+' full, so they reset to off and the next bulb lights. That is a <b>carry</b>, just like 9 + 1 = 10.':'All three bulbs were full, so everything resets to <b>0</b>. Three bulbs can only count to 7.');
-    await w(2600);
-  }
+{t:'Add one more switch',n:2,go:async()=>{
+  set(0);hl(-1);
+  say('Add a second switch. Now we can arrange the two switches in more than one way.');
 }},
-{t:'Eight bulbs make a byte',n:8,pv:1,go:async()=>{
-  say('Computers group bulbs in eights. Eight bulbs is called a <b>byte</b>, and the values keep doubling up to <b>128</b>.');await w(3600);
-  say('Counting up looks familiar, just with more bulbs.');
-  for(let v=1;v<=8;v++){set(v);await w(450)}
-  await w(800);set(127);say('Skip ahead to 127: seven bulbs lit, one short of a full row.');await w(3000);
-  set(128);say('Add 1 and a huge carry ripples through: <b>127 + 1 = 128</b>.');await w(3200);
-  set(255);say('The biggest number eight bulbs can show is <b>255</b>, every bulb lit.');await w(3000);
-  set(0);say('Add 1 more and it rolls over to 0. Eight bulbs make <b>256</b> patterns in all.');
+{t:'Pattern 1: 00',n:2,go:async()=>{
+  set(0);hl(-1);
+  say('First pattern: <b>00</b>. Both switches are off.');
 }},
-{t:'Numbers can be letters',n:8,pv:1,go:async()=>{
-  say('Bulbs only make numbers. But people agreed that each number can stand for a letter. The agreement is called <b>ASCII</b>.');await w(4200);
-  for(const [v,c] of [[72,'H'],[73,'I'],[33,'!']]){
-    set(v);say('<b>'+v+'</b> is the letter <b>'+c+'</b>.');await w(1600);
-    $('msg').textContent+=c;await w(1600);
-  }
-  say('Three rows of eight bulbs just spelled a message: <b>HI!</b>');
+{t:'Pattern 2: 01',n:2,go:async()=>{
+  set(1);hl(0);
+  say('Next pattern: <b>01</b>. Only the right switch is on.');
 }},
-{t:'Your turn',n:8,pv:1,free:1,go:async()=>{}}
+{t:'Pattern 3: 10',n:2,go:async()=>{
+  set(2);hl(1);
+  say('Next pattern: <b>10</b>. Only the left switch is on.');
+}},
+{t:'Pattern 4: 11',n:2,go:async()=>{
+  set(3);hl(-1);
+  say('Last pattern: <b>11</b>. Both switches are on.');
+}},
+{t:'Two switches make four patterns',n:2,go:async()=>{
+  set(3);hl(-1);
+  say('With two switches we can make <b>4 patterns</b>: 00, 01, 10, and 11.');
+}},
+{t:'The right place is worth 1',n:2,pv:1,go:async()=>{
+  set(1);hl(0);
+  say('To turn a binary pattern into a number, give each place a value. Start on the right: it is worth <b>1</b>.');
+}},
+{t:'The next place is worth 2',n:2,pv:1,go:async()=>{
+  set(2);hl(1);
+  say('Move one place left. Its value doubles, so this place is worth <b>2</b>.');
+}},
+{t:'Read 11',n:2,pv:1,go:async()=>{
+  set(3);hl(-1);
+  say('Both bulbs are lit, so add their values: <b>2 + 1 = 3</b>. Binary 11 means 3.');
+}},
+{t:'Add a third place',n:3,pv:1,go:async()=>{
+  set(4);hl(2);
+  say('Add one more place on the left. The values keep doubling: 1, 2, then <b>4</b>.');
+}},
+{t:'Read 101',n:3,pv:1,go:async()=>{
+  set(5);hl(-1);
+  say('Binary <b>101</b> has the 4 and 1 places lit. <b>4 + 1 = 5</b>.');
+}},
+{t:'Count from 0 to 1',n:3,pv:1,go:async()=>{
+  set(1);hl(0);
+  say('Start at 000. Add 1 and the right bulb turns on: <b>001 = 1</b>.');
+}},
+{t:'Count from 1 to 2',n:3,pv:1,go:async()=>{
+  set(2);hl(1);
+  say('Add 1 again. The 1 place resets to 0 and the 2 place turns on: <b>010 = 2</b>. This is a carry.');
+}},
+{t:'Count from 3 to 4',n:3,pv:1,go:async()=>{
+  set(4);hl(2);
+  say('At 011, both lower places are full. Add 1 and they reset while the 4 place turns on: <b>100 = 4</b>.');
+}},
+{t:'Three places stop at 7',n:3,pv:1,go:async()=>{
+  set(7);hl(-1);
+  say('With three places, the largest value is <b>111 = 7</b>. Every place is on.');
+}},
+{t:'Eight bits make a byte',n:8,pv:1,go:async()=>{
+  set(0);hl(-1);
+  say('Computers often group <b>8 bits</b> together. Eight bits are called a <b>byte</b>. The place values keep doubling.');
+}},
+{t:'Look at 127',n:8,pv:1,go:async()=>{
+  set(127);hl(-1);
+  say('Binary <b>01111111</b> is 127. The seven smaller places are all on.');
+}},
+{t:'Add 1 to make 128',n:8,pv:1,go:async()=>{
+  set(128);hl(7);
+  say('Add 1 to 127. The seven lower places reset and the 128 place turns on: <b>10000000 = 128</b>.');
+}},
+{t:'A byte can reach 255',n:8,pv:1,go:async()=>{
+  set(255);hl(-1);
+  say('Turn on every place and you get <b>11111111 = 255</b>, the largest number one byte can show.');
+}},
+{t:'Numbers can stand for characters',n:8,pv:1,go:async()=>{
+  set(0);hl(-1);
+  say('A byte is still just a number. People created agreements that let numbers stand for characters. One of those agreements is <b>ASCII</b>.');
+}},
+{t:'72 means H',n:8,pv:1,go:async()=>{
+  set(72);hl(-1);$('msg').textContent='H';
+  say('In ASCII, decimal <b>72</b> stands for the capital letter <b>H</b>.');
+}},
+{t:'73 means I',n:8,pv:1,go:async()=>{
+  set(73);hl(-1);$('msg').textContent='HI';
+  say('Decimal <b>73</b> stands for <b>I</b>. Now the bytes spell HI.');
+}},
+{t:'33 means !',n:8,pv:1,go:async()=>{
+  set(33);hl(-1);$('msg').textContent='HI!';
+  say('Decimal <b>33</b> stands for <b>!</b>. Three byte values can spell <b>HI!</b>.');
+}},
+{t:'Your turn',n:8,pv:1,free:1,go:async()=>{
+  set(0);hl(-1);
+}}
 ];
 async function show(i){
   cur=i;tok++;last='';free=!!S[i].free;pv=!!S[i].pv;
@@ -181,7 +242,7 @@ async function show(i){
   build(S[i].n);
   try{await S[i].go()}catch(e){}
 }
-S.forEach((s,j)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Part '+(j+1)+': '+s.t);b.onclick=()=>show(j);$('dots').appendChild(b)});
+S.forEach((s,j)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Step '+(j+1)+': '+s.t);b.onclick=()=>show(j);$('dots').appendChild(b)});
 $('back').onclick=()=>show(cur-1);
 $('replay').onclick=()=>show(cur);
 $('next').onclick=()=>show(cur<S.length-1?cur+1:0);
