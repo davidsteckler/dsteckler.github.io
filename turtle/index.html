@@ -1936,11 +1936,21 @@ for i in range(4):
         },"Drawing "+stepCount+"-step shape");
       }
 
+      // Keep normal circle() visually smooth even when a fast animation only
+      // receives a handful of browser frames. We still animate over time, but
+      // subdivide the distance between frames into small arc segments.
+      var lastT=0;
       return animate("move",arcLength,function(t){
-        var a=startAngle+signedExtent*t;
-        moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
-        state.heading=heading+angle*(r>=0?1:-1)*t;
-        refreshSprite();
+        var delta=Math.max(0,t-lastT);
+        var degreesThisFrame=Math.abs(angle)*delta;
+        var substeps=Math.max(1,Math.ceil(degreesThisFrame/3));
+        for(var i=1;i<=substeps;i++){
+          var tt=lastT+delta*(i/substeps);
+          var a=startAngle+signedExtent*tt;
+          state.heading=heading+angle*(r>=0?1:-1)*tt;
+          moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
+        }
+        lastT=t;
       },"Drawing arc "+Math.abs(angle)+"°");
     }
 
