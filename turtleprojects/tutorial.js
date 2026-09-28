@@ -250,7 +250,7 @@
     }
   });
   frame.addEventListener('load',()=>send('turtle-tutorial-hello'));
-  frame.src='./?tutorialEmbed=1&project='+encodeURIComponent(project.id)+'&v=tutorial-1';
+  frame.src='./?tutorialEmbed=1&project='+encodeURIComponent(project.id)+'&v=tutorial-3';
   $('downloadCode').onclick=()=>{
     // Same-origin access gets the latest keystroke, including before autosave.
     const cm=frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;

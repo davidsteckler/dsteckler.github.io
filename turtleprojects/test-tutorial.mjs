@@ -30,24 +30,36 @@ try {
   assert.equal(new URL(page.url()).hash,'#step-1');
   assert.equal(await page.locator('.back-link').evaluate(link=>new URL(link.href).pathname),'/turtleprojects/');
 
-  // The tutorial editor can be widened without hiding code or altering the drawing.
+  // Three matching drag grips: the old top slider must be gone.
   const editorFrame=page.frameLocator('#editorFrame');
-  const widthSlider=editorFrame.locator('#tutorialCodeWidth');
-  await widthSlider.waitFor({state:'visible',timeout:30000});
-  assert.equal(await widthSlider.inputValue(),'60');
+  const middleDivider=editorFrame.locator('#editorDivider');
+  await middleDivider.waitFor({state:'visible',timeout:30000});
+  assert.equal(await editorFrame.locator('#tutorialCodeWidth').count(),0,'Remove toolbar slider entirely');
+  const defaultMiddle=await middleDivider.getAttribute('aria-valuenow');
+  assert.equal(defaultMiddle,'60','Default split should give code 60%');
   const codeBefore=await editorFrame.locator('.code-panel').evaluate(el=>el.getBoundingClientRect().width);
   const worldBefore=await editorFrame.locator('.world-panel').evaluate(el=>el.getBoundingClientRect().width);
-  await widthSlider.evaluate(el=>{el.value='72';el.dispatchEvent(new Event('input',{bubbles:true}));});
-  await page.waitForFunction(()=>{
-    const doc=document.getElementById('editorFrame')?.contentDocument;
-    return doc?.getElementById('tutorialWidthValue')?.value==='72%';
-  });
+  const middleRect=await middleDivider.boundingBox();
+  assert(middleRect&&middleRect.width>=10,'A visible gray grip belongs between code and drawing');
+  await page.mouse.move(middleRect.x+middleRect.width/2,middleRect.y+middleRect.height/2);
+  await page.mouse.down();
+  await page.mouse.move(middleRect.x+middleRect.width/2+75,middleRect.y+middleRect.height/2,{steps:8});
+  await page.mouse.up();
   const codeAfter=await editorFrame.locator('.code-panel').evaluate(el=>el.getBoundingClientRect().width);
   const worldAfter=await editorFrame.locator('.world-panel').evaluate(el=>el.getBoundingClientRect().width);
-  assert(codeAfter>codeBefore+40,'Code editor should visibly widen');
-  assert(worldAfter<worldBefore-40,'World should yield space to the editor');
+  assert(codeAfter>codeBefore+40,'Middle handle should visibly widen the code editor');
+  assert(worldAfter<worldBefore-40,'Middle handle should make the drawing narrower');
+  const savedCodeWidth=await middleDivider.evaluate(el=>Number(localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')));
+  assert(savedCodeWidth>=65,'Middle grip should save a wider code setting');
+  await middleDivider.focus();
+  await page.keyboard.press('ArrowLeft');
+  assert((await middleDivider.getAttribute('aria-valuenow'))<savedCodeWidth,'Left arrow narrows code');
+  await page.keyboard.press('ArrowRight');
+  assert.equal(Number(await middleDivider.getAttribute('aria-valuenow')),savedCodeWidth,'Right arrow restores code width');
   assert.equal(await editorFrame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getOption('lineWrapping')),false);
   assert.equal(await page.locator('#newCode').evaluate(el=>getComputedStyle(el).whiteSpace),'pre');
+  console.log('Gray middle divider drag, keyboard resizing, and removed top slider passed.');
+
   // A slim horizontal grip resizes print()/errors output without replacing the drawing.
   const outputHandle=editorFrame.locator('#outputDivider');
   await outputHandle.waitFor({state:'visible'});
@@ -105,8 +117,8 @@ try {
   console.log('Neutral instruction divider, keyboard resizing, persistent widths and no-wrapping code passed.');
   await page.locator('#steps .step-button').first().click();
   assert.equal(new URL(page.url()).hash,'#step-1','Return to step one for subsequent preview tests.');
-  assert.equal(await editorFrame.locator('#tutorialCodeWidth').evaluate(el=>localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')),'72');
-  console.log('Editor/drawing slider, single-line code and saved layout passed.');
+  assert.equal(await middleDivider.evaluate(el=>Number(localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1'))),savedCodeWidth);
+  console.log('Middle drag handle, single-line code and saved layout passed.');
 
   // The final image is rendered from the actual project code, on the page.
   await page.waitForFunction(()=>{
@@ -133,9 +145,9 @@ try {
   console.log('Pizza short URL, step changes, full-project image and step preview passed.');
 
   await page.reload({waitUntil:'domcontentloaded',timeout:45000});
-  const restoredWidth=page.frameLocator('#editorFrame').locator('#tutorialCodeWidth');
+  const restoredWidth=page.frameLocator('#editorFrame').locator('#editorDivider');
   await restoredWidth.waitFor({state:'visible',timeout:30000});
-  assert.equal(await restoredWidth.inputValue(),'72','Code width should persist after reloading.');
+  assert.equal(Number(await restoredWidth.getAttribute('aria-valuenow')),savedCodeWidth,'Middle grip width should persist after reloading.');
   console.log('Code width persists after reloading.');
   const outputAfterReload=await page.frameLocator('#editorFrame').locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height);
   assert(Math.abs(outputAfterReload-savedOutputHeight)<4,'Output height must persist after reload.');
