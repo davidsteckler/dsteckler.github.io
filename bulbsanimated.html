@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binary Bulbs: a story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#eef2f7;--card:#fff;--fg:#14213a;--muted:#5d6b85;--line:#cfd8e6;--off:#d9dfea;--offs:#b5c0d3;--on:#ffc93c;--glow:#ff9d00;--accent:#a51c30;--btn:#14213a;--btnfg:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1526;--card:#15203a;--fg:#eaf0fb;--muted:#93a2c0;--line:#2a3757;--off:#26324f;--offs:#3b4a6e;--btn:#eaf0fb;--btnfg:#0d1526;--accent:#ff6b7f}}
+:root[data-theme="dark"]{--bg:#0d1526;--card:#15203a;--fg:#eaf0fb;--muted:#93a2c0;--line:#2a3757;--off:#26324f;--offs:#3b4a6e;--btn:#eaf0fb;--btnfg:#0d1526;--accent:#ff6b7f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.45}
+main{max-width:760px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:15px;font-weight:600;color:var(--muted);margin:0 0 14px}
+h2{font-size:clamp(26px,6vw,40px);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0 0 10px}
+.cap{font-size:clamp(17px,3.8vw,21px);min-height:5.6em;margin:0 0 14px;max-width:60ch}
+.cap.in{animation:cap .45s ease-out}
+@keyframes cap{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.cap b{color:var(--accent)}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 10px 14px}
+.scroll{overflow-x:auto}
+#bulbs{display:flex;gap:4px;justify-content:center;min-width:300px}
+.cell{flex:1 1 0;min-width:34px;max-width:96px;text-align:center}
+.pv{font-weight:800;font-size:clamp(14px,3.4vw,22px);transition:color .2s}
+.pw{color:var(--muted);font-size:13px}
+.nopv .pv,.nopv .pw{visibility:hidden}
+.bulb{all:unset;display:block;width:100%;max-width:74px;margin:4px auto}
+.free .bulb{cursor:pointer}
+.bulb:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:12px}
+.bulb svg{width:100%;height:auto;display:block;overflow:visible;transition:transform .25s}
+.glass{fill:var(--off);stroke:var(--offs);stroke-width:2;transition:fill .25s}
+.base{fill:var(--offs)}
+.fil{fill:none;stroke:var(--offs);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.on .glass{fill:var(--on);stroke:var(--glow);filter:drop-shadow(0 0 12px var(--glow))}
+.on .fil{stroke:#fff}
+.bit{font-weight:800;font-size:clamp(18px,4.5vw,28px)}
+.on .bit{color:var(--accent)}
+.flip svg{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.82)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.enter{animation:enter .6s ease-out both}
+@keyframes enter{from{opacity:0;transform:translateY(-16px) scale(.8)}to{opacity:1;transform:none}}
+.hl .pv{color:var(--accent)}
+.hl svg{transform:scale(1.12)}
+.read{margin:16px 0 8px;text-align:center}
+.dec{font-size:clamp(56px,16vw,96px);font-weight:800;line-height:1;letter-spacing:-.03em}
+.eq{color:var(--muted);font-size:clamp(15px,3.6vw,20px);min-height:1.5em;margin-top:6px;overflow-wrap:anywhere}
+.meta{color:var(--muted);margin-top:2px}
+.meta b{color:var(--fg)}
+.msg{font-size:clamp(34px,10vw,60px);font-weight:800;letter-spacing:.12em;color:var(--accent);min-height:1.2em}
+.dots{display:flex;gap:10px;justify-content:center;margin:12px 0 16px}
+.dot{width:14px;height:14px;padding:0;border-radius:50%;border:2px solid var(--offs);background:none;cursor:pointer}
+.dot[aria-current="true"]{background:var(--accent);border-color:var(--accent)}
+.ctl{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+button.b{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:10px 20px;border-radius:10px;cursor:pointer}
+button.b.main{background:var(--btn);color:var(--btnfg);border-color:var(--btn)}
+button.b:disabled{opacity:.4;cursor:default}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.flip svg,.enter,.cap.in{animation:none}}
+</style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+</head>
+<body>
+<main>
+<h1>Binary Bulbs: a story in seven parts</h1>
+<h2 id="title"></h2>
+<p class="cap" id="cap" aria-live="polite"></p>
+<div class="stage"><div class="scroll"><div id="bulbs"></div></div></div>
+<div class="read">
+<div class="dec" id="dec">0</div>
+<div class="eq" id="eq"></div>
+<div class="meta">Binary <b id="bin"></b></div>
+<div class="msg" id="msg"></div>
+</div>
+<div class="dots" id="dots"></div>
+<div class="ctl">
+<button class="b" id="back">Back</button>
+<button class="b" id="replay">Replay</button>
+<button class="b main" id="next">Next</button>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let bits=0,val=0,cur=0,tok=0,free=false,pv=false,last='';
+const bulbSVG='<svg viewBox="0 0 60 90" aria-hidden="true"><path class="glass" d="M30 4C14 4 6 16 6 29c0 10 6 16 11 22 3 4 4 7 4 11h18c0-4 1-7 4-11 5-6 11-12 11-22C54 16 46 4 30 4z"/><path class="fil" d="M24 62L27 44L30 54L33 44L36 62"/><rect class="base" x="20" y="64" width="20" height="6" rx="2"/><rect class="base" x="22" y="72" width="16" height="6" rx="2"/></svg>';
+function say(h){if(h===last)return;last=h;const c=$('cap');c.innerHTML=h;c.classList.remove('in');void c.offsetWidth;c.classList.add('in')}
+async function w(ms){const t=tok;await sleep(ms);if(t!==tok)throw 0}
+function hl(i){document.querySelectorAll('.cell').forEach(c=>c.classList.toggle('hl',+c.dataset.i===i))}
+function set(v){const o=val;val=v;render(o^v)}
+function build(n){
+  const prev=bits;bits=n;val=0;
+  const box=$('bulbs');box.innerHTML='';
+  for(let i=n-1;i>=0;i--){
+    const c=document.createElement('div');c.className='cell'+(i>=prev?' enter':'');c.dataset.i=i;
+    c.innerHTML='<div class="pv">'+(2**i)+'</div><button class="bulb" aria-label="Bulb worth '+(2**i)+'">'+bulbSVG+'</button><div class="bit">0</div><div class="pw">2<sup>'+i+'</sup></div>';
+    c.querySelector('.bulb').onclick=()=>{if(free)set(val^(1<<i))};
+    box.appendChild(c);
+  }
+  render(0);
+}
+function render(m){
+  const on=[];
+  document.querySelectorAll('.cell').forEach(c=>{
+    const i=+c.dataset.i,o=(val>>i)&1;
+    c.classList.toggle('on',!!o);
+    c.querySelector('.bit').textContent=o;
+    if(o)on.push(2**i);
+    if((m>>i)&1){c.classList.remove('flip');void c.offsetWidth;c.classList.add('flip')}
+  });
+  $('dec').textContent=val;
+  $('eq').textContent=!pv?'':on.length>1?on.join(' + ')+' = '+val:on.length?'only the '+val+' bulb is lit':'no bulbs lit';
+  $('bin').textContent=val.toString(2).padStart(bits,'0');
+  if(free)say(val===42?'That is <b>32 + 8 + 2 = 42</b>. You just spoke binary.':'Your turn. Tap the bulbs to make any number from 0 to 255. Can you make <b>42</b>?');
+}
+const S=[
+{t:'Everything starts with a switch',n:1,go:async()=>{
+  say('A computer is built from tiny switches. A switch can be <b>off</b> or <b>on</b>, and that is all it knows.');
+  await w(3000);say('Off means <b>0</b>. On means <b>1</b>. One bulb, two possibilities.');
+  for(let k=0;k<3;k++){set(1);await w(1000);set(0);await w(1000)}
+  set(1);
+}},
+{t:'Add a second bulb',n:2,go:async()=>{
+  say('Add a second bulb, and there are more ways to arrange them.');await w(2200);
+  const nm=['neither bulb lit','only the right bulb lit','only the left bulb lit','both bulbs lit'];
+  for(let v=0;v<4;v++){set(v);say('Pattern '+(v+1)+' of 4: '+nm[v]+'.');await w(1800)}
+  say('Two bulbs make <b>4</b> patterns. Every bulb you add doubles the count.');
+}},
+{t:'Give each bulb a value',n:3,pv:1,go:async()=>{
+  say('Three bulbs make <b>8</b> patterns. To read them, give each bulb a value. The right bulb is worth <b>1</b>.');hl(0);await w(3200);
+  say('The next bulb is worth <b>2</b>, double the last.');hl(1);await w(2400);
+  say('The next is worth <b>4</b>, double again.');hl(2);await w(2400);
+  hl(-1);say('To read a pattern, add up the values of the lit bulbs.');await w(2000);
+  set(5);say('Lit bulbs: 4 and 1. That is <b>4 + 1 = 5</b>.');
+}},
+{t:'Counting and carrying',n:3,pv:1,go:async()=>{
+  say('Now count. Watch what happens each time we add 1.');await w(2200);
+  for(let v=1;v<=8;v++){
+    let t=0;while(((v-1)>>t)&1)t++;
+    set(v%8);
+    say(t===0?'The right bulb was off, so it simply turns on.':t<3?'The lowest '+t+(t>1?' bulbs were':' bulb was')+' full, so they reset to off and the next bulb lights. That is a <b>carry</b>, just like 9 + 1 = 10.':'All three bulbs were full, so everything resets to <b>0</b>. Three bulbs can only count to 7.');
+    await w(2600);
+  }
+}},
+{t:'Eight bulbs make a byte',n:8,pv:1,go:async()=>{
+  say('Computers group bulbs in eights. Eight bulbs is called a <b>byte</b>, and the values keep doubling up to <b>128</b>.');await w(3600);
+  say('Counting up looks familiar, just with more bulbs.');
+  for(let v=1;v<=8;v++){set(v);await w(450)}
+  await w(800);set(127);say('Skip ahead to 127: seven bulbs lit, one short of a full row.');await w(3000);
+  set(128);say('Add 1 and a huge carry ripples through: <b>127 + 1 = 128</b>.');await w(3200);
+  set(255);say('The biggest number eight bulbs can show is <b>255</b>, every bulb lit.');await w(3000);
+  set(0);say('Add 1 more and it rolls over to 0. Eight bulbs make <b>256</b> patterns in all.');
+}},
+{t:'Numbers can be letters',n:8,pv:1,go:async()=>{
+  say('Bulbs only make numbers. But people agreed that each number can stand for a letter. The agreement is called <b>ASCII</b>.');await w(4200);
+  for(const [v,c] of [[72,'H'],[73,'I'],[33,'!']]){
+    set(v);say('<b>'+v+'</b> is the letter <b>'+c+'</b>.');await w(1600);
+    $('msg').textContent+=c;await w(1600);
+  }
+  say('Three rows of eight bulbs just spelled a message: <b>HI!</b>');
+}},
+{t:'Your turn',n:8,pv:1,free:1,go:async()=>{}}
+];
+async function show(i){
+  cur=i;tok++;last='';free=!!S[i].free;pv=!!S[i].pv;
+  $('msg').textContent='';$('title').textContent=S[i].t;
+  $('bulbs').className=(pv?'':'nopv ')+(free?'free':'');
+  document.querySelectorAll('.dot').forEach((d,j)=>d.setAttribute('aria-current',j===i));
+  $('back').disabled=i===0;
+  $('next').textContent=i===S.length-1?'Start over':'Next';
+  build(S[i].n);
+  try{await S[i].go()}catch(e){}
+}
+S.forEach((s,j)=>{const b=document.createElement('button');b.className='dot';b.setAttribute('aria-label','Part '+(j+1)+': '+s.t);b.onclick=()=>show(j);$('dots').appendChild(b)});
+$('back').onclick=()=>show(cur-1);
+$('replay').onclick=()=>show(cur);
+$('next').onclick=()=>show(cur<S.length-1?cur+1:0);
+show(0);
+</script>
+</body>
+</html>
