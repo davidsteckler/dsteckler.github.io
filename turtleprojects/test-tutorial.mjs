@@ -48,7 +48,32 @@ try {
   assert(worldAfter<worldBefore-40,'World should yield space to the editor');
   assert.equal(await editorFrame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getOption('lineWrapping')),false);
   assert.equal(await page.locator('#newCode').evaluate(el=>getComputedStyle(el).whiteSpace),'pre');
-  // Drag the orange handle: the instruction panel widens and the editor shrinks.
+  // A slim horizontal grip resizes print()/errors output without replacing the drawing.
+  const outputHandle=editorFrame.locator('#outputDivider');
+  await outputHandle.waitFor({state:'visible'});
+  const outputBefore=await editorFrame.locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height);
+  const drawingBefore=await editorFrame.locator('#worldStage').evaluate(el=>el.getBoundingClientRect().height);
+  const outputBox=await outputHandle.boundingBox();
+  assert(outputBox,'Output resize grip must be visible inside the editor');
+  await page.mouse.move(outputBox.x+outputBox.width/2,outputBox.y+outputBox.height/2);
+  await page.mouse.down();
+  await page.mouse.move(outputBox.x+outputBox.width/2,outputBox.y+outputBox.height/2-94,{steps:8});
+  await page.mouse.up();
+  const outputAfter=await editorFrame.locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height);
+  const drawingAfter=await editorFrame.locator('#worldStage').evaluate(el=>el.getBoundingClientRect().height);
+  assert(outputAfter>outputBefore+65,'Drag up should enlarge the print output');
+  assert(drawingAfter<drawingBefore-65,'Drawing should make room for taller output');
+  await outputHandle.focus();
+  await page.keyboard.press('ArrowDown');
+  const keyboardOutputHeight=await editorFrame.locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height);
+  assert(keyboardOutputHeight<outputAfter,'Down arrow should reduce output height');
+  await page.keyboard.press('ArrowUp');
+  assert(Math.abs((await editorFrame.locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height))-outputAfter)<5);
+  const savedOutputHeight=await outputHandle.evaluate(el=>Number(localStorage.getItem('dsteckler-turtle-output-height-v1')));
+  assert(savedOutputHeight>200,'Resized output height should persist');
+  console.log('Subtle output drag grip, keyboard resizing and saved height passed.');
+
+  // Drag the neutral divider: the instruction panel widens and the editor shrinks.
   const divider=page.locator('#lessonDivider'),lesson=page.locator('#lessonPanel'),workspace=page.locator('.tutorial-workspace');
   await divider.waitFor({state:'visible'});
   const originalLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
@@ -77,7 +102,7 @@ try {
   assert.equal(longCode.whiteSpace,'pre');
   assert(longCode.scrollWidth>longCode.clientWidth,'Long instruction lines should scroll horizontally, not wrap');
   assert.equal(await page.locator('#lessonDivider').getAttribute('aria-valuenow'),String(Math.round(expandedLessonWidth)),'Resized lesson width should survive a new URL');
-  console.log('Orange drag handle, keyboard resizing, persistent widths and no-wrapping code passed.');
+  console.log('Neutral instruction divider, keyboard resizing, persistent widths and no-wrapping code passed.');
   await page.locator('#steps .step-button').first().click();
   assert.equal(new URL(page.url()).hash,'#step-1','Return to step one for subsequent preview tests.');
   assert.equal(await editorFrame.locator('#tutorialCodeWidth').evaluate(el=>localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1')),'72');
@@ -112,6 +137,9 @@ try {
   await restoredWidth.waitFor({state:'visible',timeout:30000});
   assert.equal(await restoredWidth.inputValue(),'72','Code width should persist after reloading.');
   console.log('Code width persists after reloading.');
+  const outputAfterReload=await page.frameLocator('#editorFrame').locator('.world-panel .console').evaluate(el=>el.getBoundingClientRect().height);
+  assert(Math.abs(outputAfterReload-savedOutputHeight)<4,'Output height must persist after reload.');
+  console.log('Output height persists after reloading.');
   const expectedLessonWidth=await page.locator('#lessonPanel').evaluate(el=>el.getBoundingClientRect().width);
   assert(expectedLessonWidth>originalLessonWidth+50,'Instruction width persists after refresh.');
 

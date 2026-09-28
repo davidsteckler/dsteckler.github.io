@@ -814,7 +814,15 @@ body.tutorial-embed .editor-head-start{gap:8px}
 body.tutorial-embed .clear-code-btn{font-size:12px;padding:0 7px;height:27px}
 body.tutorial-embed .editor-head-right .panel-mini,body.tutorial-embed #followCodeBtn,body.tutorial-embed #playbackLineStatus{display:none!important}
 body.tutorial-embed .panel-label{font-size:12px;letter-spacing:.015em}
-body.tutorial-embed .world-panel{grid-row:2!important;grid-column:2!important;min-height:0!important;grid-template-rows:43px minmax(100px,1fr) auto 140px!important;border-left:1px solid var(--rule)!important}
+body.tutorial-embed .world-panel{grid-row:2!important;grid-column:2!important;min-height:0!important;grid-template-rows:43px minmax(180px,1fr) auto 12px minmax(90px,var(--tutorial-output-height,140px))!important;border-left:1px solid var(--rule)!important}
+.output-divider{display:none}
+body.tutorial-embed .output-divider{position:relative;display:flex;align-items:center;justify-content:center;min-height:12px;cursor:row-resize;touch-action:none;background:#eef1ed;border-top:1px solid #dae2dd;border-bottom:1px solid #d6ded9;outline:none;user-select:none}
+body.tutorial-embed .output-grip{width:42px;height:4px;border-radius:4px;background:#97a7a0;transition:background .15s}
+body.tutorial-embed .output-divider:hover .output-grip,body.tutorial-embed .output-divider.dragging .output-grip,body.tutorial-embed .output-divider:focus-visible .output-grip{background:#176b73}
+body.tutorial-embed .output-divider:focus-visible{outline:2px solid #176b73;outline-offset:-2px}
+body.tutorial-embed .world-panel.output-resizing{position:relative}
+body.tutorial-embed .world-panel.output-resizing::after{content:"";position:absolute;inset:0;z-index:24;cursor:row-resize;background:transparent}
+body.tutorial-embed .world-panel.output-resizing .output-divider{z-index:25}
 body.tutorial-embed .world-panel .panel-head{height:43px;padding:0 10px;gap:4px}
 body.tutorial-embed .world-stage{min-height:0!important;padding:10px!important;align-items:center;overflow:hidden!important}
 body.tutorial-embed .world-copy{display:none}
@@ -838,6 +846,7 @@ body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-te
  body.tutorial-embed .tutorial-width-control{display:none!important}
  body.tutorial-embed .workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:48px minmax(180px,.9fr) minmax(245px,1.1fr)!important;overflow:auto!important}
  body.tutorial-embed .code-panel{grid-column:1!important;grid-row:2!important}
+ body.tutorial-embed .output-divider{display:none!important}
  body.tutorial-embed .world-panel{grid-column:1!important;grid-row:3!important;grid-template-rows:38px minmax(130px,1fr) auto 70px!important}
  body.tutorial-embed .world-panel .panel-head{height:38px}
  body.tutorial-embed .embed-toolbar{gap:5px;padding:7px}
@@ -995,6 +1004,7 @@ for i in range(4):
         <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
       </div>
 
+      <div class="output-divider" id="outputDivider" role="separator" tabindex="0" aria-label="Resize output and Turtle drawing" aria-controls="output" aria-orientation="horizontal" aria-valuemin="90" aria-valuemax="520" aria-valuenow="140" title="Drag up to expand output, down to expand the drawing. Use arrow keys to resize."><span aria-hidden="true" class="output-grip"></span></div>
       <div class="console" aria-label="Text output">
         <div class="console-head">
           <span>Output · print() & errors</span>
@@ -1418,6 +1428,72 @@ for i in range(4):
     worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
   });
   applyLayout(false);
+
+  // Small horizontal grip between Turtle World and print()/error output.
+  // Independent of the code-width slider and saved across all tutorials.
+  if(TUTORIAL_EMBED){
+    var outputGrip=document.getElementById("outputDivider");
+    var outputPanel=worldPanel.querySelector(".console");
+    var outputHeightKey="dsteckler-turtle-output-height-v1";
+    var preferredOutputHeight=140,draggingOutput=false,outputPointerId=null;
+    var outputStartY=0,outputStartHeight=140;
+    try{
+      var rememberedHeight=Number(localStorage.getItem(outputHeightKey));
+      if(Number.isFinite(rememberedHeight)&&rememberedHeight>=90&&rememberedHeight<=520)preferredOutputHeight=rememberedHeight;
+    }catch(e){}
+    function outputLimits(){
+      var panelHeight=worldPanel.getBoundingClientRect().height;
+      var infoHeight=worldPanel.querySelector(".world-info").getBoundingClientRect().height;
+      var upper=Math.max(90,Math.min(520,panelHeight-43-infoHeight-12-190));
+      return {min:90,max:upper};
+    }
+    function setOutputHeight(height,save){
+      if(matchMedia("(max-width:650px)").matches)return;
+      var bounds=outputLimits();
+      var pixels=Math.round(clamp(Number(height)||140,bounds.min,bounds.max));
+      worldPanel.style.setProperty("--tutorial-output-height",pixels+"px");
+      outputGrip.setAttribute("aria-valuemin",String(bounds.min));
+      outputGrip.setAttribute("aria-valuemax",String(Math.round(bounds.max)));
+      outputGrip.setAttribute("aria-valuenow",String(pixels));
+      outputGrip.setAttribute("aria-valuetext",pixels+" pixels tall");
+      if(save){
+        preferredOutputHeight=pixels;
+        try{localStorage.setItem(outputHeightKey,String(pixels));}catch(e){}
+      }
+      requestAnimationFrame(fitWorld);
+    }
+    outputGrip.addEventListener("pointerdown",function(event){
+      if(event.button!==0||matchMedia("(max-width:650px)").matches)return;
+      draggingOutput=true;outputPointerId=event.pointerId;
+      outputStartY=event.clientY;outputStartHeight=outputPanel.getBoundingClientRect().height;
+      outputGrip.setPointerCapture(event.pointerId);
+      outputGrip.classList.add("dragging");
+      worldPanel.classList.add("output-resizing");
+      event.preventDefault();
+    });
+    document.addEventListener("pointermove",function(event){
+      if(!draggingOutput||event.pointerId!==outputPointerId)return;
+      setOutputHeight(outputStartHeight+outputStartY-event.clientY,true);
+    },true);
+    function stopOutputDrag(event){
+      if(!draggingOutput||(event?.pointerId!==undefined&&event.pointerId!==outputPointerId))return;
+      draggingOutput=false;outputPointerId=null;
+      outputGrip.classList.remove("dragging");
+      worldPanel.classList.remove("output-resizing");
+    }
+    ["pointerup","pointercancel"].forEach(function(type){document.addEventListener(type,stopOutputDrag,true);});
+    outputGrip.addEventListener("lostpointercapture",stopOutputDrag);
+    outputGrip.addEventListener("keydown",function(event){
+      if(!["ArrowUp","ArrowDown","Home","End"].includes(event.key))return;
+      event.preventDefault();
+      var limits=outputLimits();
+      var pixels=event.key==="Home"?limits.min:event.key==="End"?limits.max:
+        outputPanel.getBoundingClientRect().height+(event.key==="ArrowUp"?1:-1)*(event.shiftKey?50:20);
+      setOutputHeight(pixels,true);
+    });
+    window.addEventListener("resize",function(){setOutputHeight(preferredOutputHeight,false);});
+    requestAnimationFrame(function(){setOutputHeight(preferredOutputHeight,false);});
+  }
 
   var editor = CodeMirror.fromTextArea(source, {
     mode: "python",
