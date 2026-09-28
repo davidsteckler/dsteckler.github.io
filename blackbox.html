@@ -516,8 +516,17 @@
 
       function checkGate(){
         const student = gateMessage.value;
-        const expected = decodedTransmission();
-        const score = similarity(student, expected);
+        const acceptedTransmissions = [
+          decodedTransmission(),
+          `CONGRATS.
+YOU JUST TRANSLATED ELECTRICITY INTO THOUGHT.
+A LOT OF FUTURES START WITH ONE LUCKY BREAK.
+THIS CAN BE YOUS, IF YOU KEEP GOING.
+NOW GO BUILD.`
+        ];
+        const score = Math.max(
+          ...acceptedTransmissions.map(expected => similarity(student, expected))
+        );
 
         if(score >= 0.95){
           gateMsg.textContent = "transmission accepted. opening...";
