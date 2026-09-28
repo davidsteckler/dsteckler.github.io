@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trace Tables | David Steckler</title>
+<meta name="description" content="An interactive, click-through introduction to trace tables using Python Turtle.">
+<link rel="canonical" href="https://dsteckler.com/tracetable/">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+:root{
+  --bg:#f0ebe1;--paper:#faf7f0;--surface:#fffdf8;--ink:#202525;--mid:#4f5858;--soft:#737b79;
+  --rule:#d8d2c6;--rule-strong:#bdb5a7;--teal:#176b73;--teal-dark:#0f5057;--teal-light:#e1efed;
+  --terra:#b85d3f;--gold:#d49b37;--green:#2c7a58;--editor:#202526;--editor-2:#292f30;
+  --editor-rule:#3a4142;--editor-text:#e7eceb;--shadow:0 12px 35px rgba(37,43,42,.09);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button{font:inherit;cursor:pointer}
+a{color:inherit}
+.appbar{
+  min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 16px;
+  border-bottom:1px solid var(--rule);background:rgba(250,247,240,.97);position:sticky;top:0;z-index:20;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:850}
+.brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;background:var(--teal);font:800 14px/1 ui-monospace,monospace}
+.toplinks{display:flex;gap:8px;align-items:center}
+.toplinks a{text-decoration:none;color:var(--mid);font-size:.76rem;font-weight:750;padding:8px 10px;border-radius:9px}
+.toplinks a:hover{background:#fff}
+.hero{max-width:1220px;margin:0 auto;padding:34px 24px 18px}
+.eyebrow{font:800 .72rem/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.09em;color:var(--teal);margin-bottom:10px}
+h1{font-size:clamp(2rem,5vw,4.2rem);letter-spacing:-.055em;line-height:.95;margin:0;max-width:840px}
+.hero p{max-width:760px;font-size:1.05rem;line-height:1.55;color:var(--mid);margin:18px 0 0}
+.lesson{max-width:1220px;margin:0 auto;padding:12px 24px 40px}
+.explainer{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.8fr);gap:14px;margin-bottom:14px
+}
+.card{border:1px solid var(--rule);border-radius:18px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+.explain-card{padding:20px 22px}
+.step-kicker{display:flex;align-items:center;gap:9px;font:800 .72rem/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.07em;color:var(--teal)}
+.step-dot{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+#stepTitle{font-size:1.5rem;letter-spacing:-.03em;margin:10px 0 6px}
+#stepText{font-size:.98rem;line-height:1.55;color:var(--mid);margin:0;min-height:72px}
+.rule-card{padding:18px 20px;background:#f8f4ec}
+.rule-card strong{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);margin-bottom:10px}
+.rule-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rule-item{padding:12px;border:1px solid var(--rule);border-radius:12px;background:#fff}
+.rule-item b{display:block;font:800 .8rem/1.2 ui-monospace,monospace;color:var(--teal);margin-bottom:5px}
+.rule-item span{font-size:.75rem;line-height:1.35;color:var(--mid)}
+.workspace{display:grid;grid-template-columns:minmax(420px,1fr) minmax(360px,.86fr);gap:14px;align-items:stretch}
+.panel-head{
+  height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;
+  border-bottom:1px solid var(--rule);background:#f8f4ec
+}
+.panel-label{display:flex;align-items:center;gap:8px;font:800 .72rem/1 ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--mid)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#9da3a0}
+.status-dot.running{background:var(--gold);box-shadow:0 0 0 4px rgba(212,155,55,.14)}
+.status-dot.good{background:var(--green);box-shadow:0 0 0 4px rgba(44,122,88,.12)}
+.panel-mini{color:#8a918f;font-size:.69rem;font-weight:700}
+.editor-card{background:var(--editor);border-color:#343a3b}
+.editor-card .panel-head{background:var(--editor-2);border-color:var(--editor-rule)}
+.editor-card .panel-label{color:#bac2c1}.editor-card .panel-mini{color:#818a89}
+#source{display:none}
+.CodeMirror{height:310px;font:500 16px/1.72 "JetBrains Mono","SFMono-Regular",Consolas,Monaco,monospace;background:var(--editor);color:var(--editor-text)}
+.CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}.CodeMirror-linenumber{color:#697271}
+.cm-s-default .cm-number{color:#e4bd66}.cm-s-default .cm-comment{color:#7f9187;font-style:italic}.cm-s-default .cm-builtin{color:#85c7c0}
+.CodeMirror .trace-current{background:rgba(30,169,154,.22)!important;box-shadow:inset 4px 0 #35bdad}
+.CodeMirror .trace-complete{background:rgba(44,122,88,.09)!important}
+.editor-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;background:#181c1d;border-top:1px solid var(--editor-rule);color:#aeb7b5}
+.editor-footer .run-state{font:700 .72rem/1.3 ui-monospace,monospace}
+.world{display:grid;grid-template-rows:48px 1fr auto;min-height:430px}
+.world-stage{
+  min-height:355px;display:grid;place-items:center;padding:18px;background:radial-gradient(circle at 50% 40%,rgba(23,107,115,.06),transparent 55%),var(--surface)
+}
+.world-wrap{width:322px;height:322px;position:relative;border:2px solid #b8b4aa;background:white;box-shadow:0 8px 24px rgba(36,42,41,.08);overflow:hidden}
+.grid{position:absolute;inset:0;background-image:linear-gradient(to right,rgba(32,37,37,.075) 1px,transparent 1px),linear-gradient(to bottom,rgba(32,37,37,.075) 1px,transparent 1px);background-size:20px 20px}
+.axis-x,.axis-y{position:absolute;background:rgba(32,37,37,.25);z-index:1}.axis-x{left:0;right:0;top:159px;height:1px}.axis-y{top:0;bottom:0;left:159px;width:1px}
+#turtleCanvas{position:absolute;inset:0;width:320px;height:320px;z-index:2}
+.world-note{padding:10px 14px;border-top:1px solid var(--rule);font-size:.77rem;color:var(--mid);background:#f8f4ec}
+.world-note strong{color:var(--ink)}
+.table-card{grid-column:1/-1}
+.trace-wrap{padding:18px;overflow-x:auto}
+.trace-table{width:100%;border-collapse:separate;border-spacing:0;min-width:650px;font-family:"JetBrains Mono","SFMono-Regular",Consolas,monospace}
+.trace-table th{padding:11px 12px;text-align:left;background:#f2eee6;color:var(--mid);font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.trace-table th:first-child{border-left:1px solid var(--rule);border-radius:10px 0 0 0}.trace-table th:last-child{border-right:1px solid var(--rule);border-radius:0 10px 0 0}
+.trace-table td{height:48px;padding:9px 12px;border-bottom:1px solid var(--rule);background:#fff;font-size:.9rem}
+.trace-table td:first-child{border-left:1px solid var(--rule);width:90px}.trace-table td:nth-child(2){width:150px}.trace-table td:last-child{border-right:1px solid var(--rule)}
+.trace-table tr:last-child td:first-child{border-radius:0 0 0 10px}.trace-table tr:last-child td:last-child{border-radius:0 0 10px 0}
+.trace-table tr.active td{background:#edf7f5}.trace-table tr.done td{background:#f5faf7}
+.trace-table .blank{color:#b0b5b3}.trace-table .filled{animation:pop .28s ease}
+@keyframes pop{0%{transform:scale(.96);opacity:.2}100%{transform:scale(1);opacity:1}}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px 18px;flex-wrap:wrap}
+.progress{display:flex;align-items:center;gap:7px}
+.pip{width:9px;height:9px;border-radius:50%;background:#d5d1c8}.pip.done{background:var(--teal)}.pip.current{background:var(--gold);box-shadow:0 0 0 4px rgba(212,155,55,.13)}
+.buttons{display:flex;gap:8px;flex-wrap:wrap}
+.btn{height:40px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:10px;padding:0 14px;font-weight:800;font-size:.8rem}
+.btn:hover{border-color:var(--rule-strong)}.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}.btn.primary:hover{background:var(--teal-dark)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.callout{grid-column:1/-1;padding:17px 19px;border:1px solid #c6dedb;border-radius:15px;background:var(--teal-light);font-size:.9rem;line-height:1.5;color:#254d4c}
+.callout strong{color:var(--teal-dark)}
+@media(max-width:860px){
+  .explainer,.workspace{grid-template-columns:1fr}.hero{padding-top:24px}.lesson,.hero{padding-left:14px;padding-right:14px}
+  .rule-grid{grid-template-columns:1fr}.world-stage{min-height:340px}.table-card{grid-column:auto}.callout{grid-column:auto}
+  .toplinks a:not(:first-child){display:none}.CodeMirror{height:270px}
+}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">&gt;_</span>
+    <span>David Steckler</span>
+  </a>
+  <nav class="toplinks">
+    <a href="/turtle/">Turtle Sandbox</a>
+    <a href="/turtleprojects/">Projects</a>
+    <a href="/course.html">Course</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Trace tables · click-through demo</div>
+  <h1>Watch Python run one line at a time.</h1>
+  <p>A trace table is a written record of what the program does. Click through the program below. Each click runs one command, highlights the line that ran, and adds that command to the trace table.</p>
+</section>
+
+<main class="lesson">
+  <section class="explainer">
+    <div class="card explain-card">
+      <div class="step-kicker"><span class="step-dot"></span><span id="stepCount">Before step 1</span></div>
+      <h2 id="stepTitle">Start with the code.</h2>
+      <p id="stepText">Do not try to solve the whole table at once. Start at the top of the program and ask: <strong>what is the first line Python actually runs?</strong></p>
+    </div>
+    <div class="card rule-card">
+      <strong>What each column means</strong>
+      <div class="rule-grid">
+        <div class="rule-item"><b>STEP</b><span>The order commands run.</span></div>
+        <div class="rule-item"><b>LINE NUMBER</b><span>Where that command lives in the code.</span></div>
+        <div class="rule-item"><b>COMMAND</b><span>The instruction Python executes.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="workspace">
+    <div class="card editor-card">
+      <div class="panel-head">
+        <div class="panel-label"><span class="status-dot" id="codeDot"></span> Python editor</div>
+        <div class="panel-mini">read the highlighted line</div>
+      </div>
+      <textarea id="source"># Python reads from top to bottom
+circle(30)
+forward(50)
+
+circle(20)
+forward(50)
+circle(10)
+forward(50)</textarea>
+      <div class="editor-footer">
+        <span class="run-state" id="runState">Ready — no lines have run yet.</span>
+        <span class="panel-mini">blank lines + comments do not run</span>
+      </div>
+    </div>
+
+    <div class="card world">
+      <div class="panel-head">
+        <div class="panel-label"><span class="status-dot" id="worldDot"></span> Turtle output</div>
+        <div class="panel-mini" id="worldStatus">waiting</div>
+      </div>
+      <div class="world-stage">
+        <div class="world-wrap">
+          <div class="grid"></div><div class="axis-x"></div><div class="axis-y"></div>
+          <canvas id="turtleCanvas" width="320" height="320"></canvas>
+        </div>
+      </div>
+      <div class="world-note">The drawing changes <strong>only when an executable command runs.</strong></div>
+    </div>
+
+    <div class="card table-card">
+      <div class="panel-head">
+        <div class="panel-label"><span class="status-dot" id="tableDot"></span> Trace table</div>
+        <div class="panel-mini">fill it in as the program runs</div>
+      </div>
+      <div class="trace-wrap">
+        <table class="trace-table" aria-label="Trace table">
+          <thead><tr><th>Step</th><th>Line Number</th><th>Command</th></tr></thead>
+          <tbody id="traceBody"></tbody>
+        </table>
+      </div>
+      <div class="controls">
+        <div class="progress" id="progress" aria-label="lesson progress"></div>
+        <div class="buttons">
+          <button class="btn" id="resetBtn">Reset</button>
+          <button class="btn" id="backBtn">← Back</button>
+          <button class="btn primary" id="nextBtn">Run next line →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout"><strong>The important idea:</strong> “step” and “line number” are not always the same. A comment or blank line still has a line number, but Python skips it when the program runs.</div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script>
+const program = [
+  {step:1,line:2,command:'circle(30)',kind:'circle',value:30,
+   title:'Step 1: Python skips the comment.',
+   text:'Line 1 begins with #, so it is a comment. The first executable instruction is on <strong>line 2</strong>: <code>circle(30)</code>. That becomes step 1.'},
+  {step:2,line:3,command:'forward(50)',kind:'forward',value:50,
+   title:'Step 2: move to the next command.',
+   text:'After line 2 finishes, Python continues downward. <strong>Line 3</strong> runs next, so the second row gets <code>forward(50)</code>.'},
+  {step:3,line:5,command:'circle(20)',kind:'circle',value:20,
+   title:'Step 3: the blank line is skipped.',
+   text:'Line 4 is blank. Nothing runs there. Python keeps going until it reaches <strong>line 5</strong>: <code>circle(20)</code>.'},
+  {step:4,line:6,command:'forward(50)',kind:'forward',value:50,
+   title:'Step 4: keep following the program downward.',
+   text:'The next instruction is <strong>line 6</strong>. The step number is 4 even though the line number is 6.'},
+  {step:5,line:7,command:'circle(10)',kind:'circle',value:10,
+   title:'Step 5: record exactly what runs.',
+   text:'Python reaches <strong>line 7</strong> and draws the smaller circle. The trace table records the command exactly as it appears in the code.'},
+  {step:6,line:8,command:'forward(50)',kind:'forward',value:50,
+   title:'Step 6: the program finishes.',
+   text:'The final executable instruction is <strong>line 8</strong>. Once it runs, the trace table contains the complete execution order.'}
+];
+
+const editor = CodeMirror.fromTextArea(document.getElementById('source'),{
+  mode:'python',lineNumbers:true,readOnly:'nocursor',viewportMargin:Infinity
+});
+let marker=null;
+const body=document.getElementById('traceBody');
+const progress=document.getElementById('progress');
+const ctx=document.getElementById('turtleCanvas').getContext('2d');
+const stepCount=document.getElementById('stepCount');
+const stepTitle=document.getElementById('stepTitle');
+const stepText=document.getElementById('stepText');
+const runState=document.getElementById('runState');
+const worldStatus=document.getElementById('worldStatus');
+const nextBtn=document.getElementById('nextBtn');
+const backBtn=document.getElementById('backBtn');
+const resetBtn=document.getElementById('resetBtn');
+const codeDot=document.getElementById('codeDot');
+const worldDot=document.getElementById('worldDot');
+const tableDot=document.getElementById('tableDot');
+let current=0;
+
+program.forEach((p,i)=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td>'+(i+1)+'</td><td class="linecell blank">—</td><td class="cmdcell blank">waiting…</td>';
+  body.appendChild(tr);
+  const pip=document.createElement('span');pip.className='pip';progress.appendChild(pip);
+});
+
+function drawTurtle(x,y,angle){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle);
+  ctx.fillStyle='#176b73';ctx.strokeStyle='#0f5057';ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(-7,-6);ctx.lineTo(-4,0);ctx.lineTo(-7,6);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.restore();
+}
+function drawState(n){
+  ctx.clearRect(0,0,320,320);
+  const scale=.72, ox=60, oy=160;
+  let x=ox,y=oy,angle=0;
+  ctx.strokeStyle='#176b73';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';
+  for(let i=0;i<n;i++){
+    const p=program[i];
+    if(p.kind==='circle'){
+      const r=p.value*scale;
+      ctx.beginPath();ctx.arc(x,y-r,r,0,Math.PI*2);ctx.stroke();
+    }else if(p.kind==='forward'){
+      const nx=x+Math.cos(angle)*p.value*scale;
+      const ny=y+Math.sin(angle)*p.value*scale;
+      ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(nx,ny);ctx.stroke();
+      x=nx;y=ny;
+    }
+  }
+  drawTurtle(x,y,angle);
+}
+function clearMarks(){
+  for(let i=0;i<editor.lineCount();i++){
+    editor.removeLineClass(i,'background','trace-current');
+    editor.removeLineClass(i,'background','trace-complete');
+  }
+}
+function render(){
+  clearMarks();
+  const rows=[...body.querySelectorAll('tr')];
+  const pips=[...progress.children];
+  rows.forEach((tr,i)=>{
+    tr.className='';
+    const lc=tr.querySelector('.linecell'),cc=tr.querySelector('.cmdcell');
+    if(i<current){
+      lc.textContent=program[i].line;cc.textContent=program[i].command;
+      lc.className='linecell filled';cc.className='cmdcell filled';tr.classList.add('done');
+      editor.addLineClass(program[i].line-1,'background','trace-complete');
+    }else{
+      lc.textContent='—';cc.textContent='waiting…';
+      lc.className='linecell blank';cc.className='cmdcell blank';
+    }
+    if(i===current && current<program.length) tr.classList.add('active');
+    pips[i].className='pip'+(i<current?' done':i===current&&current<program.length?' current':'');
+  });
+
+  if(current===0){
+    stepCount.textContent='Before step 1';stepTitle.textContent='Start with the code.';
+    stepText.innerHTML='Do not try to solve the whole table at once. Start at the top of the program and ask: <strong>what is the first line Python actually runs?</strong>';
+    runState.textContent='Ready — no lines have run yet.';worldStatus.textContent='waiting';
+    codeDot.className='status-dot';worldDot.className='status-dot';tableDot.className='status-dot';
+    editor.addLineClass(1,'background','trace-current');
+  }else if(current<program.length){
+    const last=program[current-1], next=program[current];
+    stepCount.textContent='Step '+last.step+' of '+program.length;stepTitle.textContent=last.title;stepText.innerHTML=last.text;
+    runState.textContent='Ran line '+last.line+': '+last.command;
+    worldStatus.textContent='step '+last.step+' complete';
+    codeDot.className='status-dot running';worldDot.className='status-dot running';tableDot.className='status-dot running';
+    editor.addLineClass(next.line-1,'background','trace-current');
+  }else{
+    const last=program[program.length-1];
+    stepCount.textContent='Complete';stepTitle.textContent='Now read the trace table from top to bottom.';
+    stepText.innerHTML='The table shows the <strong>execution order</strong>: lines 2, 3, 5, 6, 7, and 8. Line 1 was a comment and line 4 was blank, so neither became a step.';
+    runState.textContent='Program finished after line '+last.line+'.';worldStatus.textContent='finished';
+    codeDot.className='status-dot good';worldDot.className='status-dot good';tableDot.className='status-dot good';
+  }
+  drawState(current);
+  nextBtn.disabled=current>=program.length;
+  nextBtn.textContent=current>=program.length?'Finished ✓':'Run next line →';
+  backBtn.disabled=current===0;
+}
+function next(){if(current<program.length){current++;render();}}
+function back(){if(current>0){current--;render();}}
+function reset(){current=0;render();}
+nextBtn.addEventListener('click',next);backBtn.addEventListener('click',back);resetBtn.addEventListener('click',reset);
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  if(e.key==='ArrowLeft'){e.preventDefault();back();}
+});
+render();
+</script>
+</body>
+</html>
