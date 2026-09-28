@@ -16,14 +16,22 @@ for(const slug of routes){
 }
 console.log('Verified '+routes.length+' unique tutorial pages.');
 
-const origin='http://127.0.0.1:8765';
+const origin=process.env.TURTLE_TEST_ORIGIN||'http://127.0.0.1:8765';
+const pizzaLesson=JSON.parse(fs.readFileSync(path.join(root,'lessons/curatedA25.json'),'utf8'));
+const count=pizzaLesson.steps.length;
 const base=origin+'/turtleprojects';
-const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
 const page=await browser.newPage({viewport:{width:1440,height:900}});
 const errors=[];
+if(process.env.TURTLE_TEST_DEPS){
+  for(const [pattern,file] of [['**/codemirror.min.css','codemirror.css'],['**/codemirror.min.js','codemirror.js'],['**/mode/python/python.min.js','python.js'],['**/skulpt.min.js','skulpt.js'],['**/skulpt-stdlib.js','skulpt-stdlib.js']])
+    await page.context().route(pattern,route=>route.fulfill({path:path.join(process.env.TURTLE_TEST_DEPS,file),contentType:file.endsWith('.css')?'text/css':'application/javascript'}));
+}
+
 page.on('pageerror',error=>errors.push(String(error)));
 try {
   await page.goto(base+'/pizza/',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.waitForFunction(()=>document.body.dataset.lessonReady==='true');
   await page.locator('#finishedTitle').waitFor({state:'visible',timeout:20000});
   assert.equal(await page.locator('#finishedTitle').textContent(),'Pizza Slice');
   assert.equal(new URL(page.url()).pathname,'/turtleprojects/pizza/');
@@ -91,14 +99,14 @@ try {
   const originalLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
   const originalEditorWidth=await page.locator('#editorPanel').evaluate(el=>el.getBoundingClientRect().width);
   const handle=await divider.boundingBox();
-  assert(handle,'The orange drag handle should be on-screen');
+  assert(handle,'The gray drag handle should be on-screen');
   await page.mouse.move(handle.x+handle.width/2,handle.y+handle.height/2);
   await page.mouse.down();
   await page.mouse.move(handle.x+handle.width/2+145,handle.y+handle.height/2,{steps:8});
   await page.mouse.up();
   const expandedLessonWidth=await lesson.evaluate(el=>el.getBoundingClientRect().width);
   const narrowedEditorWidth=await page.locator('#editorPanel').evaluate(el=>el.getBoundingClientRect().width);
-  assert(expandedLessonWidth>originalLessonWidth+90,'Orange handle should widen the instructions');
+  assert(expandedLessonWidth>originalLessonWidth+90,'Gray handle should widen the instructions');
   assert(narrowedEditorWidth<originalEditorWidth-90,'Editor should yield width to instructions');
   await divider.focus();
   await page.keyboard.press('ArrowLeft');
@@ -107,10 +115,13 @@ try {
   await page.keyboard.press('ArrowRight');
   assert(Math.abs((await lesson.evaluate(el=>el.getBoundingClientRect().width))-expandedLessonWidth)<5);
   // Long Python lines must retain their original structure, with horizontal scrolling.
-  await page.locator('#steps .step-button').nth(7).click();
-  assert.equal(await page.locator('#stepCount').textContent(),'STEP 8 OF 12');
-  await page.waitForFunction(()=>document.querySelectorAll('#newCode .code-line').length>=5);
-  const longCode=await page.locator('#newCode').evaluate(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,whiteSpace:getComputedStyle(el).whiteSpace}));
+  const longest=pizzaLesson.steps.map(step=>Math.max(0,...step.edits.flatMap(edit=>edit.lines.map(line=>line.length))));
+  const longStep=longest.indexOf(Math.max(...longest));
+  assert(longStep>=0,'A real lesson includes a long unwrapped Python line');
+  await page.locator('#steps .step-button').nth(longStep).click();
+  assert.equal(await page.locator('#stepCount').textContent(),'STEP '+(longStep+1)+' OF '+count);
+  await page.waitForFunction(()=>document.querySelectorAll('#newCode .code-line').length>0);
+  const longCode=await page.locator('.new-code').evaluateAll(elements=>elements.map(el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,whiteSpace:getComputedStyle(el).whiteSpace})).sort((a,b)=>(b.scrollWidth-b.clientWidth)-(a.scrollWidth-a.clientWidth))[0]);
   assert.equal(longCode.whiteSpace,'pre');
   assert(longCode.scrollWidth>longCode.clientWidth,'Long instruction lines should scroll horizontally, not wrap');
   assert.equal(await page.locator('#lessonDivider').getAttribute('aria-valuenow'),String(Math.round(expandedLessonWidth)),'Resized lesson width should survive a new URL');
@@ -119,6 +130,18 @@ try {
   assert.equal(new URL(page.url()).hash,'#step-1','Return to step one for subsequent preview tests.');
   assert.equal(await middleDivider.evaluate(el=>Number(localStorage.getItem('dsteckler-turtle-tutorial-code-width-v1'))),savedCodeWidth);
   console.log('Middle drag handle, single-line code and saved layout passed.');
+
+  // Editing instructions must support replacements without overwriting student work.
+  const frame=page.frames().find(f=>f.url().includes('tutorialEmbed=1'));
+  await frame.evaluate(()=>document.querySelector('.CodeMirror').CodeMirror.setValue('forward(73)\n# my work'));
+  await page.locator('#steps .step-button').nth(7).click();
+  assert((await page.locator('#codeEdits').innerText()).includes('REPLACE'));
+  await page.locator('#completeProgram > summary').click();
+  assert((await page.locator('#completeCode').innerText()).includes('def pepperoni'));
+  assert.equal(await frame.evaluate(()=>document.querySelector('.CodeMirror').CodeMirror.getValue()),'forward(73)\n# my work');
+  assert.equal(await page.locator('#sameDrawing').isVisible(),true);
+  await page.locator('#steps .step-button').first().click();
+  console.log('Replacement instructions, full reference, unchanged output note and student-code preservation passed.');
 
   // The final image is rendered from the actual project code, on the page.
   await page.waitForFunction(()=>{
@@ -135,7 +158,7 @@ try {
   await page.locator('#nextStep').click();
   assert.equal(new URL(page.url()).pathname,'/turtleprojects/pizza/');
   assert.equal(new URL(page.url()).hash,'#step-2');
-  assert.equal((await page.locator('#stepCount').textContent()).trim(),'STEP 2 OF 12');
+  assert.equal((await page.locator('#stepCount').textContent()).trim(),'STEP 2 OF '+count);
 
   await page.locator('#previewDetails > summary').click();
   await page.waitForFunction(()=>{
@@ -163,7 +186,7 @@ try {
   // Previously shared long URLs must resolve to the short route and preserve steps.
   await page.goto(origin+'/turtledemo/project.html?id=curatedA25#step-3',{waitUntil:'domcontentloaded',timeout:45000});
   await page.locator('#stepCount').waitFor({state:'visible',timeout:20000});
-  await page.waitForFunction(()=>document.getElementById('stepCount')?.textContent==='STEP 3 OF 12');
+  await page.waitForFunction(count=>document.getElementById('stepCount')?.textContent==='STEP 3 OF '+count,count);
   assert.equal(new URL(page.url()).pathname,'/turtleprojects/pizza/');
   assert.equal(new URL(page.url()).hash,'#step-3');
   await page.locator('#nextStep').click();
@@ -188,6 +211,12 @@ try {
   },null,{timeout:60000});
   assert.equal(new URL(page.url()).pathname,'/turtleprojects/robot/');
   assert.equal(await page.locator('#finishedTitle').textContent(),'Robot roll call');
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('[data-view="editor"]').click();
+  assert.equal(await page.locator('#editorPanel').isVisible(),true);
+  await page.locator('[data-view="lesson"]').click();
+  assert.equal(await page.locator('#lessonPanel').isVisible(),true);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'No horizontal page overflow on mobile');
   assert.deepEqual(errors,[],'No uncaught browser errors');
   console.log('Robot preview passed. All browser checks passed.');
 } catch(error) {

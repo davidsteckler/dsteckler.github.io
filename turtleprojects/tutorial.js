@@ -1,59 +1,30 @@
-(() => {
+(async () => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const robotBlocks = [
-    'speed(5)\npensize(5)',
-    '# The head\ncolor("royalblue")\npenup()\ngoto(-80, -80)\npendown()\nforward(160)\nleft(90)\nforward(160)\nleft(90)\nforward(160)\nleft(90)\nforward(160)\nleft(90)',
-    '# Two eyes\ncolor("black")\npenup()\ngoto(-40, 20)\npendown()\ncircle(12)\npenup()\ngoto(40, 20)\npendown()\ncircle(12)',
-    '# The mouth\npenup()\ngoto(-30, -35)\npendown()\nforward(60)',
-    '# The antenna\ncolor("royalblue")\npenup()\ngoto(0, 80)\npendown()\nleft(90)\nforward(45)\nright(90)\ncircle(8)'
-  ];
-  const robotSteps = [
-    {nav:'Get ready',title:'Meet your drawing pen.',instruction:'Type these two lines in the editor, then press Run.',explain:'Python follows your instructions from top to bottom. speed(5) sets the drawing speed. pensize(5) sets the line thickness.',expected:'A blank grid. The turtle starts in the center, facing right. These lines set up your pen.',question:'What will change if you use pensize(10)?',answer:'Your next lines will be thicker. The turtle will move the same distance.',help:'Use lowercase letters and a pair of parentheses on each line. Start both commands at the left edge.'},
-    {nav:'Draw the head',title:'Draw the robot’s head.',instruction:'Keep your setup lines. Add the new lines below them. Trace the four sides with your finger before you run.',explain:'penup() lifts the pen for the move to (−80, −80). pendown() starts drawing again. Each left(90) turns one square corner.',expected:'A blue square around the center of the grid. Each side is 160 units long.',question:'What if you change only the first forward(160) to forward(100)?',answer:'The bottom side becomes shorter, so the four sides will no longer close into a square.',help:'For a diagonal through the square, check penup() before goto(). For a crooked head, check all four distances and turns.'},
-    {nav:'Add the eyes',title:'Give it two eyes.',instruction:'Add this block below the head. Run the whole program again.',explain:'goto(x, y) moves to a coordinate. circle(12) draws an eye with a radius of 12. The turtle starts at the bottom of each circle.',expected:'Two black circular eyes inside the head.',question:'Why lift the pen before moving to the second eye?',answer:'With the pen down, the turtle draws a line as it moves between the eyes.',help:'Check penup() before each goto(), and pendown() before each circle(). Keep the comma between the two coordinates.'},
-    {nav:'Give it a mouth',title:'Add a straight mouth.',instruction:'Add the mouth below the eyes. The turtle is still facing right.',explain:'The mouth begins at x = −30 and ends at x = 30. The negative y-coordinate puts it below the middle of the head.',expected:'A short black mouth below the two eyes.',question:'Which moves the mouth lower: goto(-30, -55) or goto(-30, 55)?',answer:'goto(-30, -55). Negative y-coordinates are below the center.',help:'If the mouth touches an eye, check penup() before goto(). If it points up, check the turns in your head block.'},
-    {nav:'Build an antenna',title:'Finish with an antenna.',instruction:'Add these lines at the bottom of your program, then run it.',explain:'The top of the head is at y = 80. left(90) points up for the antenna. right(90) points right again so the circular tip sits on top.',expected:'A blue antenna with a small round tip above the head.',question:'What happens if forward(45) becomes forward(65)?',answer:'The antenna becomes 20 units taller. The head stays the same size.',help:'If the antenna goes sideways, check left(90). If the tip sits to one side, check right(90) before circle(8).'},
-    {nav:'Make it yours',title:'Make your robot your own.',instruction:'Change two details in your code: its color, eye positions, or antenna length. Run after each change.',explain:'Change a number or a color in a command you already typed. Leave the other commands in place so you can see what your edit changes.',expected:'Your own version of the robot. Give it a name and show a partner what you changed.',question:'What does penup() do? Which command changed your robot?',answer:'penup() lets the turtle move without leaving a line. Point to one edit and explain what changed in your drawing.',help:'Try changing both royalblue values to forestgreen, the eye x-coordinates from −40 and 40 to −50 and 50, or the antenna length from 45 to 65.',remix:true}
-  ];
   const catalog = [...(window.TURTLE_BASE_CATALOG || []), ...(window.CURATED_EXAMPLES || [])];
   const requested = window.TURTLE_TUTORIAL_ID || new URLSearchParams(location.search).get('id') || 'robot-roll-call';
   let project, steps;
-  if (requested === 'robot-roll-call') {
-    project = {id:requested,title:'Robot roll call',code:robotBlocks.join('\n\n')};
-    steps = robotSteps.map((step,i) => ({...step,code:robotBlocks.slice(0,Math.min(i+1,5)).join('\n\n')}));
-  } else {
-    project = catalog.find(item => item.id === requested);
-    if (!project || !window.TURTLE_STEP_PLANS[requested]) {
-      $('projectTitle').textContent='Project not found';
-      $('editorLoading').textContent='Choose a project from the gallery to open its tutorial.';
-      $('stepTitle').textContent='Choose a Turtle project.';
-      $('instruction').innerHTML='<a href="./?projects=1">Back to all projects →</a>';
-      $('nextStep').disabled=true;$('previousStep').disabled=true;
-      return;
-    }
-    const lines = project.code.split('\n');
-    steps = window.TURTLE_STEP_PLANS[requested].map((part,i) => {
-      const code = lines.slice(0,part.end).join('\n');
-      const block = lines.slice(i ? window.TURTLE_STEP_PLANS[requested][i-1].end : 0,part.end).join('\n');
-      const functionStep=part.kind==='function', setup=part.kind==='setup';
-      let explain=functionStep?'A function stores a set of instructions under a name. Keep the spaces at the start of its lines. Later code calls this function to draw.':setup?'These commands prepare the pen, colors, and values used in the drawing. Python will use these settings in the steps that follow.':explainBlock(block);
-      return {nav:part.title,title:part.title,instruction:i?'Keep your earlier code. Add these lines at the bottom, then run your program.':'Type these lines in the editor, then press Run.',explain,code,
-        expected:functionStep?'Function definitions do not draw until they are called. The picture may stay the same in this step.':setup?'The pen and background settings are ready. Open the step’s drawing below to compare.':'Compare your drawing with this step’s example below. Look for the shapes added by your new lines.',
-        question:functionStep?'Which name will you use to call this function?':'Choose one number or color in this block. What do you predict would change if you edited it?',
-        answer:functionStep?'Use the name after def, followed by parentheses containing the inputs listed in its definition.':'Try your edit and run again. Use the command name to explain the change: movement changes position, turns change direction, and colors change the pen or background.',
-        help:'Check spelling, parentheses, commas, and quotation marks. Keep indentation exactly as shown. If shapes connect unexpectedly, check penup(). Read the error message under the drawing for the line to check.'};
+  try {
+    if (!Object.prototype.hasOwnProperty.call(window.TURTLE_STEP_PLANS, requested)) throw Error('Unknown project');
+    const response = await fetch('lessons/' + encodeURIComponent(requested) + '.json?v=' + window.TURTLE_LESSON_VERSION);
+    if (!response.ok) throw Error('Lesson unavailable');
+    const lesson = await response.json();
+    if (lesson.id !== requested || !lesson.steps?.length) throw Error('Invalid lesson');
+    let lines = [];
+    steps = lesson.steps.map(step => {
+      for (const edit of [...step.edits].reverse()) lines.splice(edit.start, edit.remove, ...edit.lines);
+      return {...step, code:lines.join('\n')};
     });
-    steps.push({nav:'Make it yours',title:'Make it yours.',instruction:'Change two details in your program. Try a color first, then a size or position.',explain:'Run after each edit and compare the result. You can return to earlier steps to check a command.',expected:'Your own version of '+project.title+'.',question:'Which command made the biggest change to your drawing?',answer:'Point to the command and describe what you saw change when you ran it.',help:'Look for a quoted color or a number passed to a drawing command. Change one value at a time.',code:project.code,remix:true});
+    project = {...catalog.find(item => item.id === requested), id:requested, title:lesson.title, code:steps[steps.length-1].code};
+  } catch (error) {
+    $('projectTitle').textContent='Tutorial could not load';
+    $('editorLoading').textContent='Reload the page to try again.';
+    $('stepTitle').textContent='The lesson is not available yet.';
+    $('instruction').textContent='Reload this page, or return to the gallery and choose a project.';
+    $('nextStep').disabled=true; $('previousStep').disabled=true;
+    return;
   }
-  function explainBlock(block) {
-    if(/begin_fill\(/.test(block))return 'begin_fill() starts a filled shape. The turtle follows your movement commands, then end_fill() fills the shape. Keep the whole block together.';
-    if(/^\s*for .+ in /m.test(block))return 'The for loop repeats its indented commands. Lines outside the indentation run after the loop. Keep each line’s spaces as shown.';
-    if(/\bcircle\(/.test(block))return 'circle() draws a curve from the turtle’s current position and direction. The first number is its radius; a second number limits how far around it draws.';
-    if(/\b(?:goto|penup|pendown)\(/.test(block))return 'penup() moves without drawing. goto(x, y) chooses the position, and pendown() starts drawing again. Negative coordinates are left of or below the center.';
-    return 'Python runs these lines in order. Check each command’s inputs to see which positions, sizes, and colors it uses.';
-  }
-  const stateKey='dsteckler-turtle-tutorial-step-'+project.id;
+  const stateKey='dsteckler-turtle-tutorial-learning-v2-'+project.id;
   let current=0, currentCode='', editorReady=false, saveFailed=false;
   try { current=Math.max(0,Math.min(steps.length-1,Number(localStorage.getItem(stateKey))||0)); } catch {}
   const hashStep=Number(location.hash.replace('#step-',''));
@@ -202,20 +173,48 @@
     $('progress').max=steps.length;$('progress').value=current+1;
     for(const [id,key] of [['stepTitle','title'],['instruction','instruction'],['explanation','explain'],['expected','expected'],['question','question'],['answer','answer'],['help','help']])$(id).textContent=step[key];
     const previous=current?steps[current-1].code:'';
-    const oldLines=previous?previous.split('\n').length:0;
-    const allLines=step.code.split('\n');let first=step.remix?0:oldLines;
-    while(!step.remix&&first<allLines.length&&!allLines[first].trim())first++;
-    paintCode($('newCode'),allLines.slice(first).join('\n'),first+1);
-    paintCode($('previousCode'),previous);
-    $('earlierCode').hidden=!previous||!!step.remix;$('earlierCode').open=false;
-    $('earlierRange').textContent=previous?'1–'+oldLines:'';
-    $('codeCaption').textContent=step.remix?'REFERENCE · Your complete program':'NEW · Type '+(allLines.length-first===1?'line '+(first+1):'lines '+(first+1)+'–'+allLines.length);
-    $('placement').textContent=step.remix?'Make changes in your editor. This example stays here for reference.':current?'Keep your earlier lines. Add this block underneath them.':'Start at line 1. Leave out the line numbers shown here.';
+    const oldLines=previous?previous.split('\n'):[];
+    const editHost=$('codeEdits');
+    editHost.replaceChildren();
+    let offset=0;
+    const edits=step.edits.map(edit=>{
+      const item={...edit,newStart:edit.start+offset};
+      offset+=edit.lines.length-edit.remove;
+      return item;
+    });
+    // Bottom-to-top keeps the old line numbers stable while students apply edits.
+    [...edits].reverse().forEach((edit,i)=>{
+      const block=document.createElement('div');block.className='lesson-code';
+      const caption=document.createElement('div');caption.className='code-caption';
+      const range=edit.remove===1 ? 'line '+(edit.start+1) : 'lines '+(edit.start+1)+'–'+(edit.start+edit.remove);
+      caption.textContent=edit.remove ? (edit.lines.length?'REPLACE ':'REMOVE ')+range : edit.start ? 'ADD after line '+edit.start : 'START at line 1';
+      if(edit.remove){
+        const old=document.createElement('details');old.className='old-code';
+        const label=document.createElement('summary');label.textContent='Find this code in your editor';
+        const snippet=document.createElement('pre');paintCode(snippet,oldLines.slice(edit.start,edit.start+edit.remove).join('\n'),edit.start+1);
+        old.append(label,snippet);block.append(old);
+      }
+      block.append(caption);
+      if(edit.lines.length){
+        const snippet=document.createElement('pre');snippet.className='new-code';
+        if(i===0)snippet.id='newCode';
+        paintCode(snippet,edit.lines.join('\n'),edit.newStart+1);block.append(snippet);
+      }
+      editHost.append(block);
+    });
+    $('codeEdits').hidden=!edits.length;
+    paintCode($('completeCode'),step.code);
+    $('completeProgram').open=false;
+    $('placement').textContent=step.remix ? 'Experiment in your editor. Your working example is below.' :
+      edits.length>1 ? 'Apply these edits from top to bottom in the order shown. The replacement locations refer to the previous step’s example.' :
+      current ? 'Keep the rest of your code. Use the old-code reference to locate this edit if your line numbers differ.' :
+      'Type the code into your editor. Leave out the line numbers.';
+    $('sameDrawing').hidden=!step.sameDrawing||step.remix;
     $('previousStep').disabled=current===0;$('nextStep').disabled=current===steps.length-1;
     $('nextStep').textContent=current===steps.length-1?'Final step':'Next step →';
     $('remixNote').hidden=!step.remix;
-    $('questionTitle').textContent=step.remix?'Explain your changes':'Think about it';
-    for(const id of ['previewDetails','questionDetails','helpDetails'])$(id).open=false;
+    $('questionTitle').textContent=step.remix?'Explain your changes':'Pause and predict';
+    for(const id of ['previewDetails','helpDetails'])$(id).open=false;
     $('questionDetails').querySelector('.answer').open=false;
     $('expectedImage').hidden=true;
     $('lessonScroll').scrollTop=0;
@@ -223,7 +222,7 @@
     try{localStorage.setItem(stateKey,String(current));}catch{}
     history.replaceState(null,'',tutorialUrl+'#step-'+(current+1));
   }
-  function go(index){current=index;render(true);}
+  function go(index){current=index;render(true);$('steps').querySelector('[aria-current=step]')?.scrollIntoView({block:'nearest',inline:'nearest'});}
   $('previousStep').onclick=()=>{if(current>0)go(current-1)};
   $('nextStep').onclick=()=>{if(current<steps.length-1)go(current+1)};
   document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{
@@ -250,7 +249,7 @@
     }
   });
   frame.addEventListener('load',()=>send('turtle-tutorial-hello'));
-  frame.src='./?tutorialEmbed=1&project='+encodeURIComponent(project.id)+'&v=tutorial-3';
+  frame.src='./?tutorialEmbed=1&project='+encodeURIComponent(project.id)+'&v=learning-1';
   $('downloadCode').onclick=()=>{
     // Same-origin access gets the latest keystroke, including before autosave.
     const cm=frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;
@@ -367,6 +366,7 @@
     ensurePreviewFrame();pumpPreview();
   };
   render();
+  document.body.dataset.lessonReady='true';
   // Always display the completed artwork, including when the tutorial opens at step 1.
   ensurePreviewFrame();
 })();
