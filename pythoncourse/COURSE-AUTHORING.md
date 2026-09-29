@@ -28,6 +28,18 @@ A lesson step should usually have:
 
 Avoid steps where students type a large block of code before anything changes on screen.
 
+## Learning pattern: Make → Solve → Create
+
+New concepts should usually appear as a three-activity cycle.
+
+**Make** is the most scaffolded. Start with working code, change one thing at a time, run constantly, and reveal what each command controls.
+
+**Solve** removes instructions. Give a clear target, constraints, or a broken/unfinished program. Students should have to decide which command or value to change. Hints stay optional and hidden until opened.
+
+**Create** gives requirements instead of a recipe. Start with a blank or minimal file, define what the final program must include, and let the student choose the code and visual result.
+
+The amount of scaffolding should deliberately decrease from Make to Solve to Create. A challenge should not simply restate the solution as a sequence of steps.
+
 ## Adding lessons
 
 Course structure and lesson text are stored in `pythoncourse/course-data.js`.
