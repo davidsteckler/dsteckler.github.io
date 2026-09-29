@@ -30,7 +30,9 @@ for file in sorted((root/'lessons').glob('*.json')):
         except Exception as e:
             errors.append(label+': '+repr(e))
     print(data['id']+': '+str(len(data['steps']))+' checked',flush=True)
-assert len(list((root/'lessons').glob('*.json')))==334,'Expected all 334 routes'
+mapping=(root/'tutorial-slugs.js').read_text()
+routes=json.loads(mapping.split('Object.freeze(')[1].rsplit(');',1)[0])
+assert len(list((root/'lessons').glob('*.json')))==len(routes),'Every route needs a lesson'
 if errors:
     raise AssertionError('\n'.join(errors))
 print(f'PASS: {total} executable checkpoints; every new function called in its introducing step.')

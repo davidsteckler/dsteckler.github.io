@@ -1,7 +1,7 @@
 (async () => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const catalog = [...(window.TURTLE_BASE_CATALOG || []), ...(window.CURATED_EXAMPLES || [])];
+  const catalog = [...(window.TURTLE_BASE_CATALOG || []), ...(window.CURATED_EXAMPLES || []), ...(window.TURTLE_STARTER_CATALOG || [])];
   const requested = window.TURTLE_TUTORIAL_ID || new URLSearchParams(location.search).get('id') || 'robot-roll-call';
   let project, steps;
   try {
@@ -31,6 +31,18 @@
   if(/^#step-\d+$/.test(location.hash)&&hashStep>=1&&hashStep<=steps.length)current=hashStep-1;
   document.title=project.title+' · Turtle Tutorial | David Steckler';
   $('projectTitle').textContent=project.title;
+  const projectLevel=window.TURTLE_PROJECT_LEVELS[project.id];
+  $('projectLevel').textContent=projectLevel.level;
+  $('projectLevel').className='level-badge level-'+projectLevel.level.toLowerCase();
+  $('projectSkills').textContent=projectLevel.skills.join(' · ');
+  $('drawingApproach').textContent=projectLevel.level==='Beginner'
+    ? 'Use movement commands and choose your own distances and colors. No coordinate lists.'
+    : projectLevel.style==='Coordinate drawing'
+    ? 'This project places shapes with coordinates. Start with the example, then try nearby whole numbers to change a shape or position.'
+    : projectLevel.style==='Math & patterns'
+    ? 'This pattern uses formulas or recursion. Try a small number of repeats before increasing the detail.'
+    : 'Build with shapes, loops, and functions. Sizes and colors are choices you can change.';
+  document.querySelector('.back-link').href='./?level='+projectLevel.level;
   $('finishedTitle').textContent=project.title;
   $('finishedImage').alt='Finished Python Turtle drawing: '+project.title;
   $('finishedDialogTitle').textContent=project.title;
@@ -249,7 +261,7 @@
     }
   });
   frame.addEventListener('load',()=>send('turtle-tutorial-hello'));
-  frame.src='./?tutorialEmbed=1&project='+encodeURIComponent(project.id)+'&v=learning-1';
+  frame.src='./?tutorialEmbed=1&project='+encodeURIComponent(project.id)+'&v=art-levels-1';
   $('downloadCode').onclick=()=>{
     // Same-origin access gets the latest keystroke, including before autosave.
     const cm=frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;

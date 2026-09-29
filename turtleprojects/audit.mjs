@@ -14,19 +14,11 @@ const SHARD=Number(process.env.TURTLE_SHARD||0);
 const dir=process.cwd();
 const outDir=path.join(dir,"turtleprojects","audit-output",String(SHARD));
 fs.mkdirSync(outDir,{recursive:true});
-const html=fs.readFileSync(path.join(dir,"turtleprojects","index.html"),"utf8");
-const prefix="var DEMO_PROGRAMS=";
-const first=html.indexOf(prefix)+prefix.length;
-const last=html.indexOf(".concat(window.CURATED_EXAMPLES",first);
-if(first<prefix.length||last<0)throw Error("Gallery dataset not found");
-const originals=JSON.parse(html.slice(first,last));
-const sandbox={window:{CURATED_EXAMPLES:[]}};
+const sandbox={window:{}};
 vm.createContext(sandbox);
-for(const letter of "abcdef"){
-  const file=path.join(dir,"turtleprojects","curated-"+letter+".js");
-  vm.runInContext(fs.readFileSync(file,"utf8"),sandbox,{filename:file});
-}
-const all=[...originals,...sandbox.window.CURATED_EXAMPLES];
+for(const file of ['base-catalog.js',...'abcdef'.split('').map(x=>'curated-'+x+'.js'),'starter-catalog.js'])
+  vm.runInContext(fs.readFileSync(path.join(dir,'turtleprojects',file),'utf8'),sandbox,{filename:file});
+const all=[...sandbox.window.TURTLE_BASE_CATALOG,...sandbox.window.CURATED_EXAMPLES,...sandbox.window.TURTLE_STARTER_CATALOG];
 const requestedTitles=new Set((process.env.TURTLE_TITLES||"").split(";").map(x=>x.trim()).filter(Boolean));
 const selected=all.filter((item,i)=>i%SHARDS===SHARD
   &&(!requestedTitles.size||requestedTitles.has(item.title)));
