@@ -766,7 +766,50 @@
       .command-library{width:min(365px,94vw)}
     }
 
-  </style>
+  
+    /* Compact editable workspace for lessons embedded in /pythoncourse/. */
+    body.course-embed .appbar-left,
+    body.course-embed .site-actions,
+    body.course-embed .layoutbar,
+    body.course-embed .command-library,
+    body.course-embed .library-divider,
+    body.course-embed .commands-overlay,
+    body.course-embed .example-select,
+    body.course-embed .commands-toggle,
+    body.course-embed .mobile-output{display:none!important}
+    body.course-embed{overflow:hidden}
+    body.course-embed .app{
+      height:100dvh;min-height:0;overflow:hidden;
+      grid-template-rows:52px minmax(0,1fr)
+    }
+    body.course-embed .appbar{
+      min-height:52px;padding:7px 10px;justify-content:flex-end;
+      border-bottom:1px solid var(--rule);background:#f8f4ec
+    }
+    body.course-embed .appbar-right{width:100%;justify-content:flex-end}
+    body.course-embed .toolbar{display:flex;width:auto;gap:6px}
+    body.course-embed .toolbar .btn{height:36px}
+    body.course-embed .workspace{
+      height:100%;min-height:0;overflow:hidden;
+      grid-template-columns:minmax(260px,1fr) 10px minmax(330px,1fr)!important;
+      gap:5px;padding:8px
+    }
+    body.course-embed .code-panel,
+    body.course-embed .world-panel{height:100%;min-height:0}
+    body.course-embed .code-panel .CodeMirror{font-size:15px}
+    body.course-embed .world-panel{grid-template-rows:47px minmax(210px,1fr) auto 105px}
+    body.course-embed .world-edit-link{display:none!important}
+    @media(max-width:840px){
+      body.course-embed{overflow:auto}
+      body.course-embed .app{height:auto;min-height:100dvh;overflow:visible;display:block}
+      body.course-embed .appbar{position:sticky;top:0}
+      body.course-embed .appbar-right{width:100%}
+      body.course-embed .toolbar{display:grid;width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}
+      body.course-embed .workspace{display:flex;height:auto;overflow:visible}
+      body.course-embed .code-panel{height:340px}
+      body.course-embed .world-panel{height:auto}
+    }
+</style>
 </head>
 
 <body>
@@ -1115,7 +1158,13 @@ for i in range(4):
   "use strict";
 
   var STORAGE_KEY = "dsteckler-turtle-code-v1";
-  var TRACE_EMBED = new URLSearchParams(window.location.search).get("embed") === "trace";
+  var QUERY_PARAMS = new URLSearchParams(window.location.search);
+  var EMBED_MODE = QUERY_PARAMS.get("embed") || "";
+  var TRACE_EMBED = EMBED_MODE === "trace";
+  var COURSE_EMBED = EMBED_MODE === "course";
+  var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
+  var COURSE_CODE = QUERY_PARAMS.get("code");
+  var COURSE_STORAGE_KEY = "dsteckler-pythoncourse-" + COURSE_LESSON;
   var TRACE_CODE = [
     "forward(100)",
     "circle(10)",
@@ -1125,6 +1174,7 @@ for i in range(4):
     "forward(30)"
   ].join("\n");
   if(TRACE_EMBED) document.body.classList.add("trace-embed");
+  if(COURSE_EMBED) document.body.classList.add("course-embed");
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
     "# Try changing the distance or the number of repeats.",
@@ -1336,6 +1386,18 @@ for i in range(4):
     editor.setValue(TRACE_CODE);
     editor.setOption("readOnly","nocursor");
     saveStatus.textContent = "trace example";
+  }else if(COURSE_EMBED){
+    try {
+      var courseSaved = localStorage.getItem(COURSE_STORAGE_KEY);
+      if(courseSaved !== null){
+        editor.setValue(courseSaved);
+      }else if(COURSE_CODE !== null){
+        editor.setValue(COURSE_CODE);
+      }
+      saveStatus.textContent = "saved for this lesson";
+    } catch(e) {
+      if(COURSE_CODE !== null) editor.setValue(COURSE_CODE);
+    }
   }else{
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
@@ -1387,8 +1449,8 @@ for i in range(4):
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function(){
       try {
-        localStorage.setItem(STORAGE_KEY, editor.getValue());
-        saveStatus.textContent = "saved locally";
+        localStorage.setItem(COURSE_EMBED ? COURSE_STORAGE_KEY : STORAGE_KEY, editor.getValue());
+        saveStatus.textContent = COURSE_EMBED ? "saved for this lesson" : "saved locally";
       } catch(e) {
         saveStatus.textContent = "not saved";
       }
