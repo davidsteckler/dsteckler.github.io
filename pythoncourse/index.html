@@ -257,9 +257,15 @@
       .shell{height:auto;min-height:100dvh;display:block}
       .topbar{position:sticky;top:0;height:58px}
       .course-grid{display:block;overflow:visible}
-      .sidebar{display:none}
+      .sidebar{
+        display:none;
+        min-height:calc(100dvh - 100px);
+        border-right:0;
+        padding:14px 10px 28px;
+        background:#f2ede4
+      }
       .mobile-tabs{
-        display:grid;grid-template-columns:1fr 1fr;position:sticky;top:58px;z-index:4;
+        display:grid;grid-template-columns:repeat(3,1fr);position:sticky;top:58px;z-index:4;
         background:var(--surface);border-bottom:1px solid var(--rule)
       }
       .mobile-tabs button{
@@ -270,6 +276,9 @@
       .editor-pane{height:calc(100dvh - 100px)}
       .course-grid.show-editor .lesson-pane{display:none}
       .course-grid:not(.show-editor) .editor-pane{display:none}
+      .course-grid.show-lessons .sidebar{display:block}
+      .course-grid.show-lessons .lesson-pane,
+      .course-grid.show-lessons .editor-pane{display:none}
       .top-link.projects{display:none}
     }
     @media(max-width:540px){
@@ -290,12 +299,13 @@
     <span class="top-divider" aria-hidden="true"></span>
     <div class="course-name"><strong>Python Turtle Course</strong><span>Make → Solve → Create</span></div>
     <div class="top-spacer"></div>
-    <div class="progress-wrap"><span id="progressText">0 / 4 complete</span><span class="progress-track"><span class="progress-fill" id="progressFill"></span></span></div>
+    <div class="progress-wrap"><span id="progressText">0 / 12 complete</span><span class="progress-track"><span class="progress-fill" id="progressFill"></span></span></div>
     <a class="top-link projects" href="/turtleprojects/">Projects</a>
     <a class="top-link" href="/turtle/">Sandbox</a>
   </header>
 
   <div class="mobile-tabs" aria-label="Mobile view">
+    <button id="lessonsTab" type="button">Lessons</button>
     <button id="lessonTab" class="active" type="button">Lesson</button>
     <button id="editorTab" type="button">Editor + Output</button>
   </div>
@@ -437,6 +447,11 @@
     updateProgress();
   }
 
+  function getNextAvailableLesson(){
+    var i=available.findIndex(function(l){return l.id===current.id;});
+    return i>=0 && i<available.length-1 ? available[i+1] : null;
+  }
+
   function renderStep(){
     var step=current.steps[stepIndex];
     document.getElementById("stepLabel").textContent="Step "+(stepIndex+1)+" of "+current.steps.length;
@@ -465,9 +480,20 @@
     document.getElementById("backBtn").disabled=stepIndex===0;
     var next=document.getElementById("nextBtn");
     if(stepIndex===current.steps.length-1){
-      next.textContent=progress[current.id]?"Completed ✓":"Mark complete";
-      next.classList.toggle("complete",!!progress[current.id]);
-      next.classList.toggle("primary",!progress[current.id]);
+      var following=getNextAvailableLesson();
+      if(progress[current.id] && following){
+        next.textContent="Next lesson →";
+        next.classList.add("primary");
+        next.classList.remove("complete");
+      }else if(progress[current.id]){
+        next.textContent="Completed ✓";
+        next.classList.add("complete");
+        next.classList.remove("primary");
+      }else{
+        next.textContent="Mark complete";
+        next.classList.add("primary");
+        next.classList.remove("complete");
+      }
     }else{
       next.textContent="Next →";
       next.classList.add("primary");
@@ -493,6 +519,7 @@
     history.replaceState(null,"",u.pathname+"?"+u.searchParams.toString());
     loadEditor();
     renderLesson();
+    setMobileView("lesson");
   }
 
   function updateProgress(){
@@ -509,6 +536,11 @@
     if(stepIndex<current.steps.length-1){
       stepIndex++;saveStep();renderStep();return;
     }
+    if(progress[current.id]){
+      var following=getNextAvailableLesson();
+      if(following)selectLesson(following.id);
+      return;
+    }
     progress[current.id]=true;
     try{localStorage.setItem(progressKey,JSON.stringify(progress));}catch(e){}
     renderLesson();
@@ -522,16 +554,18 @@
 
   frame.addEventListener("load",function(){editorPane.classList.add("ready");});
 
-  document.getElementById("lessonTab").addEventListener("click",function(){
-    courseGrid.classList.remove("show-editor");
-    this.classList.add("active");
-    document.getElementById("editorTab").classList.remove("active");
-  });
-  document.getElementById("editorTab").addEventListener("click",function(){
-    courseGrid.classList.add("show-editor");
-    this.classList.add("active");
-    document.getElementById("lessonTab").classList.remove("active");
-  });
+  function setMobileView(view){
+    courseGrid.classList.toggle("show-editor",view==="editor");
+    courseGrid.classList.toggle("show-lessons",view==="lessons");
+    document.getElementById("lessonsTab").classList.toggle("active",view==="lessons");
+    document.getElementById("lessonTab").classList.toggle("active",view==="lesson");
+    document.getElementById("editorTab").classList.toggle("active",view==="editor");
+    if(window.innerWidth<=820)window.scrollTo({top:0,behavior:"instant"});
+  }
+
+  document.getElementById("lessonsTab").addEventListener("click",function(){setMobileView("lessons");});
+  document.getElementById("lessonTab").addEventListener("click",function(){setMobileView("lesson");});
+  document.getElementById("editorTab").addEventListener("click",function(){setMobileView("editor");});
 
   loadEditor();
   renderLesson();
