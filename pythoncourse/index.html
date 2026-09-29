@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Python Turtle Course | David Steckler</title>
+  <meta name="description" content="Interactive Python Turtle lessons with a live editor and drawing output.">
+  <link rel="canonical" href="https://dsteckler.com/pythoncourse/">
+  <style>
+    :root{
+      --ink:#202525;
+      --mid:#4d5755;
+      --soft:#747d79;
+      --ghost:#9aa09d;
+      --paper:#f6f1e8;
+      --surface:#fffdf8;
+      --panel:#ffffff;
+      --rule:#ddd7cc;
+      --teal:#176b73;
+      --teal-dark:#0f5056;
+      --teal-light:#e8f2ef;
+      --orange:#d56b3f;
+      --shadow:0 10px 30px rgba(35,40,39,.08);
+      --sidebar:270px;
+      --lesson:350px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:var(--paper);
+      overflow:hidden;
+    }
+    button,a{font:inherit}
+    button{cursor:pointer}
+    .shell{
+      height:100dvh;
+      display:grid;
+      grid-template-rows:58px minmax(0,1fr);
+      overflow:hidden;
+    }
+    .topbar{
+      min-width:0;
+      display:flex;
+      align-items:center;
+      gap:18px;
+      padding:0 16px;
+      border-bottom:1px solid var(--rule);
+      background:rgba(255,253,248,.97);
+      box-shadow:0 2px 10px rgba(32,37,37,.04);
+      z-index:5;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      text-decoration:none;
+      color:var(--ink);
+      font-weight:850;
+      white-space:nowrap;
+    }
+    .brand-mark{
+      display:grid;
+      place-items:center;
+      width:30px;height:30px;
+      border-radius:8px;
+      background:var(--ink);
+      color:white;
+      font:800 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .top-divider{width:1px;height:26px;background:var(--rule)}
+    .course-name{min-width:0}
+    .course-name strong{display:block;font-size:.88rem;line-height:1.1}
+    .course-name span{display:block;margin-top:3px;color:var(--soft);font-size:.68rem}
+    .top-spacer{flex:1}
+    .progress-wrap{
+      display:flex;align-items:center;gap:8px;
+      color:var(--soft);font-size:.7rem;font-weight:750;
+      white-space:nowrap;
+    }
+    .progress-track{width:110px;height:7px;border-radius:99px;background:#e6e0d6;overflow:hidden}
+    .progress-fill{height:100%;width:0;background:var(--teal);transition:width .2s}
+    .top-link{
+      text-decoration:none;color:var(--teal);font-size:.72rem;font-weight:800;
+      padding:8px 10px;border-radius:8px
+    }
+    .top-link:hover{background:var(--teal-light)}
+    .course-grid{
+      min-height:0;
+      display:grid;
+      grid-template-columns:var(--sidebar) var(--lesson) minmax(0,1fr);
+      overflow:hidden;
+    }
+    .sidebar{
+      min-height:0;
+      overflow:auto;
+      border-right:1px solid var(--rule);
+      background:#f2ede4;
+      padding:12px 10px 24px;
+    }
+    .sidebar-head{padding:4px 6px 12px}
+    .sidebar-head .kicker{
+      color:var(--teal);font:850 .62rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.09em;text-transform:uppercase
+    }
+    .sidebar-head h1{font-size:1.02rem;margin:7px 0 4px}
+    .sidebar-head p{margin:0;color:var(--soft);font-size:.72rem;line-height:1.4}
+    .unit{margin-top:9px;border:1px solid var(--rule);border-radius:12px;background:rgba(255,255,255,.55);overflow:hidden}
+    .unit-head{
+      width:100%;border:0;background:transparent;color:var(--ink);
+      display:grid;grid-template-columns:31px 1fr auto;gap:8px;align-items:center;
+      padding:10px;text-align:left
+    }
+    .unit-head:hover{background:rgba(255,255,255,.55)}
+    .unit-no{
+      display:grid;place-items:center;width:29px;height:29px;border-radius:8px;
+      background:#e5dfd4;color:var(--mid);font-weight:900;font-size:.74rem
+    }
+    .unit-title{font-size:.76rem;font-weight:850;line-height:1.25}
+    .unit-meta{display:block;color:var(--soft);font-size:.62rem;font-weight:650;margin-top:2px}
+    .chev{color:var(--ghost);font-size:.76rem;transition:transform .15s}
+    .unit.closed .chev{transform:rotate(-90deg)}
+    .lesson-list{padding:0 6px 7px}
+    .unit.closed .lesson-list{display:none}
+    .lesson-item{
+      width:100%;display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;
+      align-items:center;border:0;border-radius:9px;background:transparent;color:var(--mid);
+      padding:8px 7px;text-align:left
+    }
+    .lesson-item:hover:not(:disabled){background:white}
+    .lesson-item.active{background:white;box-shadow:0 2px 9px rgba(36,42,41,.06);color:var(--ink)}
+    .lesson-item:disabled{cursor:default;opacity:.5}
+    .status{
+      display:grid;place-items:center;width:20px;height:20px;border-radius:50%;
+      border:1.5px solid #b9b5ab;color:white;font-size:.62rem;font-weight:900
+    }
+    .lesson-item.complete .status{background:var(--teal);border-color:var(--teal)}
+    .lesson-item.active:not(.complete) .status{border-color:var(--orange);box-shadow:inset 0 0 0 4px white;background:var(--orange)}
+    .lesson-label{min-width:0}
+    .lesson-label strong{display:block;font-size:.71rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .lesson-label span{display:block;margin-top:2px;color:var(--soft);font-size:.59rem}
+    .time{font-size:.58rem;color:var(--ghost);white-space:nowrap}
+    .lesson-pane{
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto;
+      border-right:1px solid var(--rule);
+      background:var(--surface);
+      box-shadow:6px 0 22px rgba(32,37,37,.04);
+      z-index:2;
+    }
+    .lesson-head{padding:15px 18px 13px;border-bottom:1px solid var(--rule)}
+    .lesson-eyebrow{display:flex;align-items:center;gap:8px;color:var(--teal);font-size:.65rem;font-weight:850}
+    .type-pill{
+      padding:4px 7px;border-radius:99px;background:var(--teal-light);
+      color:var(--teal-dark);font-size:.58rem
+    }
+    .lesson-head h2{font-size:1.28rem;margin:7px 0 4px;letter-spacing:-.02em}
+    .lesson-sub{color:var(--soft);font-size:.7rem}
+    .step-strip{display:flex;gap:5px;margin-top:12px}
+    .step-dot{
+      flex:1;height:4px;border-radius:99px;border:0;background:#e4ded4;padding:0
+    }
+    .step-dot.active,.step-dot.past{background:var(--teal)}
+    .step-content{min-height:0;overflow:auto;padding:22px 20px}
+    .step-label{
+      color:var(--orange);font:850 .63rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.1em;text-transform:uppercase
+    }
+    .step-content h3{font-size:1.45rem;line-height:1.12;margin:10px 0 12px;letter-spacing:-.025em}
+    .step-content p{font-size:.84rem;line-height:1.58;color:var(--mid);margin:0 0 16px}
+    .task{
+      border-left:4px solid var(--teal);background:var(--teal-light);
+      border-radius:0 10px 10px 0;padding:13px 14px;margin:18px 0
+    }
+    .task strong{display:block;color:var(--teal-dark);font-size:.69rem;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+    .task div{font-size:.82rem;line-height:1.45;font-weight:750;color:var(--ink)}
+    .example{
+      margin:15px 0;padding:12px 13px;border-radius:10px;background:#22292a;color:#f7f2e8;
+      font:650 .76rem/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre;overflow:auto
+    }
+    .tip{
+      margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);
+      color:var(--soft);font-size:.72rem;line-height:1.45
+    }
+    .tip strong{color:var(--mid)}
+    .lesson-actions{
+      display:grid;grid-template-columns:auto 1fr auto;gap:8px;
+      padding:11px 12px;border-top:1px solid var(--rule);background:#fbf8f2
+    }
+    .btn{
+      min-height:38px;border:1px solid var(--rule);border-radius:9px;background:white;
+      color:var(--mid);padding:0 12px;font-size:.71rem;font-weight:800
+    }
+    .btn:hover:not(:disabled){border-color:#b7b1a6;background:#fff}
+    .btn:disabled{opacity:.38;cursor:default}
+    .btn.primary{background:var(--teal);border-color:var(--teal);color:white}
+    .btn.complete{background:#eef5f2;color:var(--teal-dark);border-color:#c6dbd6}
+    .btn.reset{padding:0 9px;color:var(--soft)}
+    .editor-pane{min-width:0;min-height:0;position:relative;background:#e9e5dc}
+    .editor-frame{display:block;width:100%;height:100%;border:0;background:white}
+    .editor-loading{
+      position:absolute;inset:0;display:grid;place-items:center;background:#f4f0e8;color:var(--soft);
+      font-size:.76rem;font-weight:750;pointer-events:none;transition:opacity .2s
+    }
+    .editor-pane.ready .editor-loading{opacity:0}
+    .mobile-tabs{display:none}
+    @media(max-width:1050px){
+      :root{--sidebar:230px;--lesson:320px}
+      .progress-wrap{display:none}
+    }
+    @media(max-width:820px){
+      body{overflow:auto}
+      .shell{height:auto;min-height:100dvh;display:block}
+      .topbar{position:sticky;top:0;height:58px}
+      .course-grid{display:block;overflow:visible}
+      .sidebar{display:none}
+      .mobile-tabs{
+        display:grid;grid-template-columns:1fr 1fr;position:sticky;top:58px;z-index:4;
+        background:var(--surface);border-bottom:1px solid var(--rule)
+      }
+      .mobile-tabs button{
+        height:42px;border:0;background:transparent;color:var(--soft);font-size:.72rem;font-weight:850
+      }
+      .mobile-tabs button.active{color:var(--teal);box-shadow:inset 0 -3px 0 var(--teal)}
+      .lesson-pane{border-right:0;box-shadow:none;min-height:calc(100dvh - 100px)}
+      .editor-pane{height:calc(100dvh - 100px)}
+      .course-grid.show-editor .lesson-pane{display:none}
+      .course-grid:not(.show-editor) .editor-pane{display:none}
+      .top-link.projects{display:none}
+    }
+    @media(max-width:540px){
+      .brand span:last-child,.top-divider,.course-name span{display:none}
+      .topbar{gap:10px;padding:0 9px}
+      .course-name strong{font-size:.8rem}
+      .top-link{padding:7px 5px;font-size:.68rem}
+      .lesson-head{padding:13px 14px}
+      .step-content{padding:18px 16px}
+      .step-content h3{font-size:1.28rem}
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="David Steckler home"><span class="brand-mark">&gt;_</span><span>David Steckler</span></a>
+    <span class="top-divider" aria-hidden="true"></span>
+    <div class="course-name"><strong>Python Turtle Course</strong><span>Interactive lessons</span></div>
+    <div class="top-spacer"></div>
+    <div class="progress-wrap"><span id="progressText">0 / 4 complete</span><span class="progress-track"><span class="progress-fill" id="progressFill"></span></span></div>
+    <a class="top-link projects" href="/turtleprojects/">Projects</a>
+    <a class="top-link" href="/turtle/">Sandbox</a>
+  </header>
+
+  <div class="mobile-tabs" aria-label="Mobile view">
+    <button id="lessonTab" class="active" type="button">Lesson</button>
+    <button id="editorTab" type="button">Editor + Output</button>
+  </div>
+
+  <main class="course-grid" id="courseGrid">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <div class="kicker">Course map</div>
+        <h1>Python Turtle</h1>
+        <p>Short steps. Run code constantly. Build from something that already works.</p>
+      </div>
+      <div id="unitList"></div>
+    </aside>
+
+    <section class="lesson-pane">
+      <header class="lesson-head">
+        <div class="lesson-eyebrow"><span id="lessonNumber">1.1</span><span class="type-pill" id="lessonType">Lesson</span></div>
+        <h2 id="lessonTitle">First Moves</h2>
+        <div class="lesson-sub" id="lessonMeta">About 8 minutes</div>
+        <div class="step-strip" id="stepStrip" aria-label="Lesson steps"></div>
+      </header>
+
+      <article class="step-content" id="stepContent">
+        <div class="step-label" id="stepLabel">Run</div>
+        <h3 id="stepTitle">See what the code already does.</h3>
+        <p id="stepBody"></p>
+        <div class="task"><strong>Do this</strong><div id="stepTask"></div></div>
+        <pre class="example" id="stepExample" hidden></pre>
+        <div class="tip"><strong>Notice:</strong> <span id="stepTip"></span></div>
+      </article>
+
+      <footer class="lesson-actions">
+        <button class="btn" id="backBtn" type="button">← Back</button>
+        <button class="btn reset" id="resetBtn" type="button" title="Restore this lesson's starter code">Reset code</button>
+        <button class="btn primary" id="nextBtn" type="button">Next →</button>
+      </footer>
+    </section>
+
+    <section class="editor-pane" id="editorPane" aria-label="Python editor and Turtle output">
+      <div class="editor-loading">Loading editor…</div>
+      <iframe class="editor-frame" id="editorFrame" title="Python Turtle editor"></iframe>
+    </section>
+  </main>
+</div>
+
+<script src="/pythoncourse/course-data.js"></script>
+<script>
+(function(){
+  "use strict";
+  var course=window.PYTHON_COURSE;
+  var unitList=document.getElementById("unitList");
+  var frame=document.getElementById("editorFrame");
+  var editorPane=document.getElementById("editorPane");
+  var courseGrid=document.getElementById("courseGrid");
+  var progressKey="dsteckler-pythoncourse-progress-v1";
+  var stepKeyPrefix="dsteckler-pythoncourse-step-";
+  var progress={};
+  try{ progress=JSON.parse(localStorage.getItem(progressKey)||"{}")||{}; }catch(e){ progress={}; }
+
+  var lessons=[];
+  course.units.forEach(function(unit){
+    unit.lessons.forEach(function(lesson){
+      lesson.unit=unit;
+      lessons.push(lesson);
+    });
+  });
+  var available=lessons.filter(function(l){return l.available;});
+  var params=new URLSearchParams(location.search);
+  var current=available.find(function(l){return l.id===params.get("lesson");}) || available[0];
+  var stepIndex=0;
+  try{
+    var savedStep=Number(localStorage.getItem(stepKeyPrefix+current.id));
+    if(Number.isInteger(savedStep)&&savedStep>=0&&savedStep<current.steps.length)stepIndex=savedStep;
+  }catch(e){}
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function renderNav(){
+    unitList.innerHTML="";
+    course.units.forEach(function(unit,unitIndex){
+      var wrap=document.createElement("section");
+      wrap.className="unit"+(unitIndex>0?" closed":"");
+      var head=document.createElement("button");
+      head.className="unit-head";
+      head.type="button";
+      head.innerHTML='<span class="unit-no">'+esc(unit.number)+'</span><span><span class="unit-title">'+esc(unit.title)+'</span><span class="unit-meta">'+unit.lessons.length+' activities</span></span><span class="chev">▾</span>';
+      head.addEventListener("click",function(){wrap.classList.toggle("closed");});
+      wrap.appendChild(head);
+
+      var list=document.createElement("div");
+      list.className="lesson-list";
+      unit.lessons.forEach(function(lesson){
+        var b=document.createElement("button");
+        b.type="button";
+        b.className="lesson-item";
+        if(lesson.id===current.id)b.classList.add("active");
+        if(progress[lesson.id])b.classList.add("complete");
+        if(!lesson.available)b.disabled=true;
+        b.innerHTML='<span class="status">'+(progress[lesson.id]?"✓":"")+'</span><span class="lesson-label"><strong>'+esc(lesson.number+" "+lesson.title)+'</strong><span>'+esc(lesson.type)+(lesson.available?"":" · Coming next")+'</span></span><span class="time">'+esc(lesson.minutes)+"m</span>";
+        if(lesson.available)b.addEventListener("click",function(){selectLesson(lesson.id);});
+        list.appendChild(b);
+      });
+      wrap.appendChild(list);
+      unitList.appendChild(wrap);
+    });
+  }
+
+  function loadEditor(){
+    editorPane.classList.remove("ready");
+    var src="/turtle/?embed=course&lesson="+encodeURIComponent(current.id)+"&code="+encodeURIComponent(current.starter||"");
+    frame.src=src;
+  }
+
+  function renderLesson(){
+    document.getElementById("lessonNumber").textContent=current.number;
+    document.getElementById("lessonType").textContent=current.type;
+    document.getElementById("lessonTitle").textContent=current.title;
+    document.getElementById("lessonMeta").textContent="About "+current.minutes+" minutes";
+    var strip=document.getElementById("stepStrip");
+    strip.innerHTML="";
+    current.steps.forEach(function(_,i){
+      var d=document.createElement("button");
+      d.type="button";
+      d.className="step-dot"+(i===stepIndex?" active":(i<stepIndex?" past":""));
+      d.setAttribute("aria-label","Go to step "+(i+1));
+      d.addEventListener("click",function(){stepIndex=i;saveStep();renderStep();});
+      strip.appendChild(d);
+    });
+    renderStep();
+    renderNav();
+    updateProgress();
+  }
+
+  function renderStep(){
+    var step=current.steps[stepIndex];
+    document.getElementById("stepLabel").textContent=step.label;
+    document.getElementById("stepTitle").textContent=step.title;
+    document.getElementById("stepBody").textContent=step.body;
+    document.getElementById("stepTask").textContent=step.task;
+    document.getElementById("stepTip").textContent=step.tip;
+    var example=document.getElementById("stepExample");
+    if(step.example){
+      example.hidden=false;
+      example.textContent=step.example;
+    }else{
+      example.hidden=true;
+      example.textContent="";
+    }
+    var dots=document.querySelectorAll(".step-dot");
+    dots.forEach(function(d,i){d.classList.toggle("active",i===stepIndex);d.classList.toggle("past",i<stepIndex);});
+    document.getElementById("backBtn").disabled=stepIndex===0;
+    var next=document.getElementById("nextBtn");
+    if(stepIndex===current.steps.length-1){
+      next.textContent=progress[current.id]?"Completed ✓":"Mark complete";
+      next.classList.toggle("complete",!!progress[current.id]);
+      next.classList.toggle("primary",!progress[current.id]);
+    }else{
+      next.textContent="Next →";
+      next.classList.add("primary");
+      next.classList.remove("complete");
+    }
+  }
+
+  function saveStep(){
+    try{localStorage.setItem(stepKeyPrefix+current.id,String(stepIndex));}catch(e){}
+  }
+
+  function selectLesson(id){
+    var nextLesson=available.find(function(l){return l.id===id;});
+    if(!nextLesson)return;
+    current=nextLesson;
+    stepIndex=0;
+    try{
+      var saved=Number(localStorage.getItem(stepKeyPrefix+current.id));
+      if(Number.isInteger(saved)&&saved>=0&&saved<current.steps.length)stepIndex=saved;
+    }catch(e){}
+    var u=new URL(location.href);
+    u.searchParams.set("lesson",current.id);
+    history.replaceState(null,"",u.pathname+"?"+u.searchParams.toString());
+    loadEditor();
+    renderLesson();
+  }
+
+  function updateProgress(){
+    var completeCount=available.filter(function(l){return progress[l.id];}).length;
+    document.getElementById("progressText").textContent=completeCount+" / "+available.length+" complete";
+    document.getElementById("progressFill").style.width=(available.length?completeCount/available.length*100:0)+"%";
+  }
+
+  document.getElementById("backBtn").addEventListener("click",function(){
+    if(stepIndex>0){stepIndex--;saveStep();renderStep();}
+  });
+
+  document.getElementById("nextBtn").addEventListener("click",function(){
+    if(stepIndex<current.steps.length-1){
+      stepIndex++;saveStep();renderStep();return;
+    }
+    progress[current.id]=true;
+    try{localStorage.setItem(progressKey,JSON.stringify(progress));}catch(e){}
+    renderLesson();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click",function(){
+    if(!confirm("Reset this lesson back to its starter code?"))return;
+    try{localStorage.removeItem("dsteckler-pythoncourse-"+current.id);}catch(e){}
+    loadEditor();
+  });
+
+  frame.addEventListener("load",function(){editorPane.classList.add("ready");});
+
+  document.getElementById("lessonTab").addEventListener("click",function(){
+    courseGrid.classList.remove("show-editor");
+    this.classList.add("active");
+    document.getElementById("editorTab").classList.remove("active");
+  });
+  document.getElementById("editorTab").addEventListener("click",function(){
+    courseGrid.classList.add("show-editor");
+    this.classList.add("active");
+    document.getElementById("lessonTab").classList.remove("active");
+  });
+
+  loadEditor();
+  renderLesson();
+})();
+</script>
+</body>
+</html>
