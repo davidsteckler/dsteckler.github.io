@@ -204,10 +204,29 @@
       font:650 .76rem/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre;overflow:auto
     }
     .tip{
-      margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);
-      color:var(--soft);font-size:.72rem;line-height:1.45
+      margin-top:18px;
+      padding-top:14px;
+      border-top:1px solid var(--rule);
+      color:var(--soft);
+      font-size:.72rem;
+      line-height:1.45
     }
-    .tip strong{color:var(--mid)}
+    .tip summary{
+      width:max-content;
+      cursor:pointer;
+      color:var(--teal);
+      font-weight:850;
+      list-style:none;
+      border-radius:7px;
+      padding:5px 7px;
+      margin-left:-7px
+    }
+    .tip summary::-webkit-details-marker{display:none}
+    .tip summary:before{content:"＋ ";font-weight:900}
+    .tip[open] summary:before{content:"− "}
+    .tip summary:hover{background:var(--teal-light)}
+    .tip-body{padding:7px 0 0;color:var(--soft)}
+    .tip-body strong{color:var(--mid)}
     .lesson-actions{
       display:grid;grid-template-columns:auto 1fr auto;gap:8px;
       padding:11px 12px;border-top:1px solid var(--rule);background:#fbf8f2
@@ -269,7 +288,7 @@
   <header class="topbar">
     <a class="brand" href="/" aria-label="David Steckler home"><span class="brand-mark">&gt;_</span><span>David Steckler</span></a>
     <span class="top-divider" aria-hidden="true"></span>
-    <div class="course-name"><strong>Python Turtle Course</strong><span>Interactive lessons</span></div>
+    <div class="course-name"><strong>Python Turtle Course</strong><span>Make → Solve → Create</span></div>
     <div class="top-spacer"></div>
     <div class="progress-wrap"><span id="progressText">0 / 4 complete</span><span class="progress-track"><span class="progress-fill" id="progressFill"></span></span></div>
     <a class="top-link projects" href="/turtleprojects/">Projects</a>
@@ -286,7 +305,7 @@
       <div class="sidebar-head">
         <div class="kicker">Course map</div>
         <h1>Python Turtle</h1>
-        <p>Short steps. Run code constantly. Build from something that already works.</p>
+        <p>Make one with guidance. Solve one with less help. Create one of your own.</p>
       </div>
       <div id="unitList"></div>
     </aside>
@@ -305,7 +324,10 @@
         <p id="stepBody"></p>
         <div class="task"><strong>Do this</strong><div id="stepTask"></div></div>
         <pre class="example" id="stepExample" hidden></pre>
-        <div class="tip"><strong>Notice:</strong> <span id="stepTip"></span></div>
+        <details class="tip" id="stepHint">
+          <summary>Need a hint?</summary>
+          <div class="tip-body"><span id="stepTip"></span></div>
+        </details>
       </article>
 
       <footer class="lesson-actions">
@@ -331,8 +353,8 @@
   var frame=document.getElementById("editorFrame");
   var editorPane=document.getElementById("editorPane");
   var courseGrid=document.getElementById("courseGrid");
-  var progressKey="dsteckler-pythoncourse-progress-v1";
-  var stepKeyPrefix="dsteckler-pythoncourse-step-";
+  var progressKey="dsteckler-pythoncourse-progress-v2";
+  var stepKeyPrefix="dsteckler-pythoncourse-step-v2-";
   var progress={};
   try{ progress=JSON.parse(localStorage.getItem(progressKey)||"{}")||{}; }catch(e){ progress={}; }
 
@@ -421,7 +443,10 @@
     document.getElementById("stepTitle").textContent=step.title;
     document.getElementById("stepBody").textContent=step.body;
     document.getElementById("stepTask").textContent=step.task;
-    document.getElementById("stepTip").textContent=step.tip;
+    document.getElementById("stepTip").textContent=step.tip||"";
+    var hint=document.getElementById("stepHint");
+    hint.open=false;
+    hint.hidden=!step.tip;
     var example=document.getElementById("stepExample");
     if(step.example){
       example.hidden=false;
