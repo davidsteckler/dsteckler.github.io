@@ -124,7 +124,7 @@
     .lesson-list{padding:0 6px 7px}
     .unit.closed .lesson-list{display:none}
     .lesson-item{
-      width:100%;display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;
+      width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;
       align-items:center;border:0;border-radius:9px;background:transparent;color:var(--mid);
       padding:8px 7px;text-align:left
     }
@@ -140,7 +140,6 @@
     .lesson-label{min-width:0}
     .lesson-label strong{display:block;font-size:.71rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .lesson-label span{display:block;margin-top:2px;color:var(--soft);font-size:.59rem}
-    .time{font-size:.58rem;color:var(--ghost);white-space:nowrap}
     .lesson-pane{
       min-height:0;
       display:grid;
@@ -159,54 +158,34 @@
     .lesson-head h2{font-size:1.28rem;margin:7px 0 4px;letter-spacing:-.02em}
     .lesson-sub{color:var(--soft);font-size:.7rem}
     .step-strip{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
+      display:flex;
       gap:6px;
-      margin-top:12px
+      margin-top:12px;
+      flex-wrap:wrap
     }
     .step-dot{
-      min-width:0;
-      min-height:35px;
-      display:flex;
-      align-items:center;
-      gap:7px;
+      width:31px;height:31px;
+      display:grid;
+      place-items:center;
       border:1px solid var(--rule);
-      border-radius:9px;
+      border-radius:50%;
       background:#f3efe7;
       color:var(--soft);
-      padding:5px 7px;
-      text-align:left;
-      overflow:hidden
-    }
-    .step-dot:hover{border-color:#bdb6aa;background:white}
-    .step-dot .step-num{
-      flex:0 0 auto;
-      width:22px;height:22px;
-      display:grid;place-items:center;
-      border-radius:50%;
-      background:#ded8ce;
-      color:var(--mid);
-      font-size:.62rem;
+      padding:0;
+      font-size:.65rem;
       font-weight:900
     }
-    .step-dot .step-name{
-      min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      font-size:.61rem;
-      font-weight:850;
-      line-height:1.1
-    }
+    .step-dot:hover{border-color:#a9a297;background:white}
     .step-dot.active{
-      border-color:#8ab8b3;
-      background:var(--teal-light);
-      color:var(--teal-dark);
-      box-shadow:0 0 0 1px rgba(23,107,115,.06)
+      border-color:var(--teal);
+      background:var(--teal);
+      color:white
     }
-    .step-dot.active .step-num{background:var(--teal);color:white}
-    .step-dot.past{background:white;color:var(--mid)}
-    .step-dot.past .step-num{background:#d9ebe7;color:var(--teal-dark)}
+    .step-dot.past{
+      border-color:#b9d7d2;
+      background:#dfeeea;
+      color:var(--teal-dark)
+    }
     .step-content{min-height:0;overflow:auto;padding:22px 20px}
     .step-label{
       color:var(--orange);font:850 .63rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -316,12 +295,12 @@
       <header class="lesson-head">
         <div class="lesson-eyebrow"><span id="lessonNumber">1.1</span><span class="type-pill" id="lessonType">Lesson</span></div>
         <h2 id="lessonTitle">First Moves</h2>
-        <div class="lesson-sub" id="lessonMeta">About 8 minutes · Step 1 of 5</div>
+        <div class="lesson-sub" id="lessonMeta">Step 1 of 8</div>
         <div class="step-strip" id="stepStrip" aria-label="Lesson steps"></div>
       </header>
 
       <article class="step-content" id="stepContent">
-        <div class="step-label" id="stepLabel">Run</div>
+        <div class="step-label" id="stepLabel">Step 1 of 8</div>
         <h3 id="stepTitle">See what the code already does.</h3>
         <p id="stepBody"></p>
         <div class="task"><strong>Do this</strong><div id="stepTask"></div></div>
@@ -400,7 +379,7 @@
         if(lesson.id===current.id)b.classList.add("active");
         if(progress[lesson.id])b.classList.add("complete");
         if(!lesson.available)b.disabled=true;
-        b.innerHTML='<span class="status">'+(progress[lesson.id]?"✓":"")+'</span><span class="lesson-label"><strong>'+esc(lesson.number+" "+lesson.title)+'</strong><span>'+esc(lesson.type)+(lesson.available?"":" · Coming next")+'</span></span><span class="time">'+esc(lesson.minutes)+"m</span>";
+        b.innerHTML='<span class="status">'+(progress[lesson.id]?"✓":"")+'</span><span class="lesson-label"><strong>'+esc(lesson.number+" "+lesson.title)+'</strong><span>'+esc(lesson.type)+(lesson.available?"":" · Coming next")+'</span></span>';
         if(lesson.available)b.addEventListener("click",function(){selectLesson(lesson.id);});
         list.appendChild(b);
       });
@@ -419,15 +398,15 @@
     document.getElementById("lessonNumber").textContent=current.number;
     document.getElementById("lessonType").textContent=current.type;
     document.getElementById("lessonTitle").textContent=current.title;
-    document.getElementById("lessonMeta").textContent="About "+current.minutes+" minutes · Step "+(stepIndex+1)+" of "+current.steps.length;
+    document.getElementById("lessonMeta").textContent="Step "+(stepIndex+1)+" of "+current.steps.length;
     var strip=document.getElementById("stepStrip");
     strip.innerHTML="";
     current.steps.forEach(function(step,i){
       var d=document.createElement("button");
       d.type="button";
       d.className="step-dot"+(i===stepIndex?" active":(i<stepIndex?" past":""));
-      d.setAttribute("aria-label","Go to step "+(i+1)+": "+step.label);
-      d.innerHTML='<span class="step-num">'+(i<stepIndex?"✓":(i+1))+'</span><span class="step-name">'+esc(step.label)+'</span>';
+      d.setAttribute("aria-label","Go to step "+(i+1));
+      d.textContent=i<stepIndex?"✓":String(i+1);
       d.addEventListener("click",function(){stepIndex=i;saveStep();renderStep();});
       strip.appendChild(d);
     });
@@ -438,7 +417,7 @@
 
   function renderStep(){
     var step=current.steps[stepIndex];
-    document.getElementById("stepLabel").textContent=step.label;
+    document.getElementById("stepLabel").textContent="Step "+(stepIndex+1)+" of "+current.steps.length;
     document.getElementById("stepTitle").textContent=step.title;
     document.getElementById("stepBody").textContent=step.body;
     document.getElementById("stepTask").textContent=step.task;
@@ -451,13 +430,12 @@
       example.hidden=true;
       example.textContent="";
     }
-    document.getElementById("lessonMeta").textContent="About "+current.minutes+" minutes · Step "+(stepIndex+1)+" of "+current.steps.length;
+    document.getElementById("lessonMeta").textContent="Step "+(stepIndex+1)+" of "+current.steps.length;
     var dots=document.querySelectorAll(".step-dot");
     dots.forEach(function(d,i){
       d.classList.toggle("active",i===stepIndex);
       d.classList.toggle("past",i<stepIndex);
-      var num=d.querySelector(".step-num");
-      if(num)num.textContent=i<stepIndex?"✓":String(i+1);
+      d.textContent=i<stepIndex?"✓":String(i+1);
     });
     document.getElementById("backBtn").disabled=stepIndex===0;
     var next=document.getElementById("nextBtn");
