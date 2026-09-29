@@ -23,3 +23,21 @@ node turtleprojects/test-learning.mjs
 ```
 
 The Python check executes every checkpoint and verifies that every newly introduced function is called immediately. The browser check executes every distinct checkpoint in the actual Skulpt/canvas runtime and rejects errors and drawings without ink. `test-tutorial.mjs` checks navigation, references, student-code preservation, previews, and the resizing handles.
+
+## Difficulty and drawing design
+
+The gallery opens on the 12 movement-first Beginner projects in `lessons_starters.py`. These deliberately use named colors, whole numbers, and short lines. They introduce a visible example before its loop. There are no coordinate lists in this sequence. Their order is part of the authored curriculum.
+
+Medium projects combine loops, functions, and positioned shapes. Hard projects include detailed coordinate work, nested loops, mathematical curves, or recursion. `build-project-catalog.py` derives the other labels and skill descriptions from the programs. Review these labels when a project changes substantially. The original robot tutorial remains available as a first function lesson.
+
+`project_art.py` keeps readable sources for repaired drawings. Use whole-number dimensions, shared centers, connected silhouettes, and arcs wherever practical. Review the actual Turtle output at thumbnail size. The gallery and lesson must produce the same finished drawing; both now read the shared catalog.
+
+Rebuild after editing art or a starter lesson:
+
+```
+python turtleprojects/build-project-catalog.py
+node turtleprojects/build-tutorial-routes.cjs
+python turtleprojects/build-tutorial-steps.py
+```
+
+For a drawing iteration, `build-tutorial-steps.py --only curatedE17,starter-first-square` rebuilds those lessons and preserves the rest. Before publishing, also run `test-project-catalog.py` and `test-project-levels.mjs`. They check gallery/tutorial agreement, Beginner code constraints, difficulty and search filters, labels, and mobile loading without involuntary scrolling.

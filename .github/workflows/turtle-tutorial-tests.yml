@@ -10,6 +10,13 @@ on:
       - 'turtleprojects/project.html'
       - 'turtleprojects/tutorial-slugs.js'
       - 'turtleprojects/base-catalog.js'
+      - 'turtleprojects/starter-catalog.js'
+      - 'turtleprojects/project-levels.js'
+      - 'turtleprojects/project_art.py'
+      - 'turtleprojects/build-project-catalog.py'
+      - 'turtleprojects/lessons_starters.py'
+      - 'turtleprojects/test-project-levels.mjs'
+      - 'turtleprojects/test-project-catalog.py'
       - 'turtleprojects/curated-*.js'
       - 'turtleprojects/test-tutorial.mjs'
       - 'turtleprojects/test-learning.*'
@@ -48,6 +55,10 @@ jobs:
           done
       - name: Test all URLs and rendered previews
         run: node turtleprojects/test-tutorial.mjs
+      - name: Check difficulty filters and beginner tutorials
+        run: node turtleprojects/test-project-levels.mjs
+      - name: Check catalog and beginner constraints
+        run: python3 turtleprojects/test-project-catalog.py
       - name: Validate every learning checkpoint
         run: python3 turtleprojects/test-learning.py
       - name: Run every checkpoint in the browser

@@ -9,7 +9,8 @@ const mapping=fs.readFileSync(path.join(root,'tutorial-slugs.js'),'utf8');
 const marker='Object.freeze(';
 const slugs=JSON.parse(mapping.slice(mapping.indexOf(marker)+marker.length,mapping.lastIndexOf(');')));
 const routes=Object.values(slugs);
-assert.equal(routes.length,334,'All 333 gallery tutorials and the robot tutorial have short URLs');
+const lessonCount=fs.readdirSync(path.join(root,'lessons')).filter(f=>f.endsWith('.json')).length;
+assert.equal(routes.length,lessonCount,'Every lesson has a friendly route');
 assert.equal(new Set(routes).size,routes.length,'Short URLs must be unique');
 for(const slug of routes){
   assert(fs.existsSync(path.join(root,slug,'index.html')),'Missing route: '+slug);

@@ -12,12 +12,29 @@ from pathlib import Path
 from lesson_runtime import run
 
 ROOT = Path(__file__).resolve().parent
-VERSION = 'learn-20260928-1'
+VERSION = 'art-levels-20260928-1'
+
+def readable(source):
+    """Put long coordinate lists on separate lines without changing Python."""
+    lines=source.splitlines()
+    offsets=[];offset=0
+    for line in lines: offsets.append(offset);offset+=len(line)+1
+    changes=[]
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node,ast.List) or node.lineno!=node.end_lineno or len(node.elts)<3:continue
+        if not all(isinstance(e,ast.Tuple) for e in node.elts):continue
+        line=lines[node.lineno-1]
+        if len(line)<=88:continue
+        indent=' '*(len(line)-len(line.lstrip()))
+        value='[\n'+''.join(indent+'    '+ast.unparse(e)+',\n' for e in node.elts)+indent+']'
+        changes.append((offsets[node.lineno-1]+node.col_offset,offsets[node.end_lineno-1]+node.end_col_offset,value))
+    for a,b,value in sorted(changes,reverse=True):source=source[:a]+value+source[b:]
+    return source
 
 def text(nodes):
     if isinstance(nodes, str): return nodes.strip()
     if not isinstance(nodes, list): nodes = [nodes]
-    return ast.unparse(ast.fix_missing_locations(ast.Module(body=nodes, type_ignores=[]))).strip()
+    return readable(ast.unparse(ast.fix_missing_locations(ast.Module(body=nodes, type_ignores=[]))).strip())
 
 def join(*parts):
     return '\n\n'.join(text(p) for p in parts if text(p))
@@ -462,12 +479,26 @@ def pack(steps):
     return result
 
 def main():
+    import argparse
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--only',help='Comma-separated project IDs to rebuild during artwork iteration')
+    requested=set((parser.parse_args().only or '').split(','))-{''}
     from lessons_authored import authored_lessons
+    from lessons_starters import starter_projects
     source="""const fs=require('fs'),vm=require('vm');const c={window:{}};vm.createContext(c);for(const f of ['base-catalog.js',...'abcdef'.split('').map(x=>'curated-'+x+'.js')])vm.runInContext(fs.readFileSync(f,'utf8'),c);process.stdout.write(JSON.stringify([...c.window.TURTLE_BASE_CATALOG,...c.window.CURATED_EXAMPLES]));"""
     catalog=json.loads(subprocess.check_output(['node','-e',source],cwd=ROOT)); authored=authored_lessons()
+    starters=starter_projects()
+    catalog.extend({k:v for k,v in p.items() if k!='steps'} for p in starters)
+    authored.update({p['id']:p['steps'] for p in starters})
     catalog.append({'id':'robot-roll-call','title':'Robot roll call','code':authored['robot-roll-call'][-1]['code'],'desc':'A robot built from shapes.'})
     manifest={}; total=0
     for p in catalog:
+        existing=ROOT/'lessons'/f'{p["id"]}.json'
+        if requested and p['id'] not in requested and existing.exists():
+            steps=json.loads(existing.read_text())['steps']
+            manifest[p['id']]={'steps':len(steps),'concepts':list(dict.fromkeys(s['kind'] for s in steps if s['kind'] not in {'draw','remix'}))}
+            total+=len(steps)
+            continue
         steps=authored[p['id']] if p['id'] in authored else Lesson(p).build()
         assert steps,p['id']
         for i,s in enumerate(steps): assert run(s['code'])['ink'],(p['id'],i,'blank')
