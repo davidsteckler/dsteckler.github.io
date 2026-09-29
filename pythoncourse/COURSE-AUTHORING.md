@@ -14,6 +14,9 @@ Build lessons around visible checkpoints.
 6. When a function is introduced, call it in the same step.
 7. Use coordinates when they solve a real placement problem. Do not make beginners type long coordinate lists just to reproduce a drawing.
 8. Keep instructions short enough that the student can look back at the editor without losing the task.
+9. Do not ask students to "describe," "explain," "say," "write," or "point to" an answer unless the page provides a real place to submit it.
+10. Prediction activities need a real interaction: use Step, a selectable answer, or a response field. Do not leave an unrecorded thinking prompt as the main task.
+11. Every visible "Do this" instruction should result in an action the student can complete on the page: edit code, run code, step through code, reset, or use a purpose-built question control.
 
 A lesson step should usually have:
 - a short action label
