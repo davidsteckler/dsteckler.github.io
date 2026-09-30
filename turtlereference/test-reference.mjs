@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -15,9 +16,23 @@ const originalCount=scope.window.TURTLE_REFERENCE.length;
 vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference/reference-more.js'),'utf8'),scope);
 const referenceCount=scope.window.TURTLE_REFERENCE.length;
 vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference/reference-trails.js'),'utf8'),scope);
+for(const file of ['reference-examples.js','reference-trail-examples.js','example-previews.js'])vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference',file),'utf8'),scope);
 const entries=scope.window.TURTLE_REFERENCE;
+const examples=entries.flatMap(entry=>entry.examples.map(example=>({...example,topicId:entry.id,variantId:example.id,id:entry.id+'/'+example.id})));
 assert.equal(new Set(entries.map(entry=>entry.id)).size,entries.length,'Every topic needs a unique link');
 for(const entry of entries)for(const related of entry.related||[])assert(entries.some(e=>e.id===related),'Missing related topic: '+related);
+for(const entry of entries){
+  assert(entry.examples.length>=2,entry.id+' needs multiple examples');
+  assert.equal(new Set(entry.examples.map(e=>e.id)).size,entry.examples.length,entry.id+' needs unique example links');
+  assert.equal(entry.examples[0].code,entry.code,'Keep the existing draft compatible: '+entry.id);
+  assert.equal(new Set(entry.examples.map(e=>e.code)).size,entry.examples.length,'Repeated code: '+entry.id);
+}
+for(const example of examples){
+  for(const text of example.focus||[])assert(example.code.includes(text),example.id+' has a missing highlight');
+  const preview=scope.window.REFERENCE_PREVIEWS.examples[example.id];
+  assert(preview,'Missing preview: '+example.id);
+  assert.equal(preview.hash,createHash('sha256').update(example.code+'\n'+(example.previewCall||'')).digest('hex'),'Rebuild changed preview: '+example.id);
+}
 let browser;
 try{
   for(let i=0;i<60;i++){try{await fetch(origin+'/');break;}catch{await new Promise(r=>setTimeout(r,100));}}
@@ -85,10 +100,63 @@ try{
   assert.equal(Number(await page.locator('#referenceDivider').getAttribute('aria-valuenow')),Number(before)+10);
   console.log('PASS search, deep link, editable drafts, reload, reset, and resizing');
 
+  await page.locator('.command-link[data-id="circle"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle');
+  assert.equal(await page.locator('.example-card').count(),6);
+  assert.equal(await page.locator('#exampleCount').innerText(),'1 / 6');
+  await page.locator('.example-card[data-example="half"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/half');
+  assert((await page.locator('#topicSummary').innerText()).includes('180'));
+  assert.equal(await page.locator('#topicSyntax mark').innerText(),'180');
+  assert((await page.locator('.active-parameter').innerText()).startsWith('extent'));
+  assert(await editor.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getAllMarks().some(mark=>{const range=mark.find();return range&&el.CodeMirror.getRange(range.from,range.to)==='180';})));
+  const halfDraft='pensize(3)\ncolor("teal")\ncircle(60, 150)';
+  await editor.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),halfDraft);
+  await page.locator('.example-card[data-example="quarter"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/quarter');
+  const quarterDraft='pensize(3)\ncolor("teal")\ncircle(40, 90)';
+  await editor.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),quarterDraft);
+  await page.locator('.example-card[data-example="half"]').click();
+  await editor.waitForFunction(code=>document.querySelector('.CodeMirror').CodeMirror.getValue()===code,halfDraft);
+  await page.reload();await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  await editor.waitForFunction(code=>document.querySelector('.CodeMirror').CodeMirror.getValue()===code,halfDraft);
+  assert(page.url().endsWith('#circle/half'));
+  await page.locator('#resetExample').click();
+  await editor.waitForFunction(()=>document.querySelector('.CodeMirror').CodeMirror.getValue().includes('circle(60, 180)'));
+  await page.locator('.example-card[data-example="quarter"]').click();
+  await editor.waitForFunction(code=>document.querySelector('.CodeMirror').CodeMirror.getValue()===code,quarterDraft);
+  await page.goBack();await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/half');
+  await page.goForward();await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/quarter');
+  await editor.waitForFunction(code=>document.querySelector('.CodeMirror').CodeMirror.getValue()===code,quarterDraft);
+  await page.locator('.example-card[data-example="original"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle');
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/smaller');
+  assert.equal(await page.evaluate(()=>document.activeElement.dataset.example),'smaller');
+  await page.keyboard.press('Home');
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle');
+  await page.locator('#nextExample').click();await page.locator('#nextExample').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/half');
+  await editor.waitForSelector('#codeStatus.good',{timeout:30000});
+  await page.screenshot({path:path.join(proof,'example-choices-desktop.png')});
+  await page.locator('#referenceSearch').fill('curve the other way');
+  await page.locator('.command-link[data-id="circle"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/reverse');
+  await page.locator('#referenceSearch').fill('');
+  await page.locator('.command-link[data-id="print"]').click();
+  await page.locator('.example-card[data-example="art"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='print/art');
+  assert(!(await editor.locator('.world-stage').isVisible()));
+  await page.locator('.example-card[data-example="original"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='print');
+  assert(await editor.locator('.world-stage').isVisible());
+  console.log('PASS example choices, parameter highlights, independent drafts, reset, deep links, history, keyboard controls, and output switching');
+
   const render=await context.newPage();await render.goto(origin+'/turtleprojects/?renderPreview=1');
   await render.waitForFunction(()=>window.Sk&&document.querySelector('.CodeMirror')?.CodeMirror);
-  for(const entry of entries){
-    const code='speed(0)\n'+entry.code.replace(/^speed\([^\n]*\)$/gm,'speed(0)');
+  for(const entry of examples){
+    const code='speed(0)\n'+entry.code.replace(/^speed\([^\n]*\)$/gm,'speed(0)')+(entry.previewCall?'\n'+entry.previewCall:'');
     const result=await render.evaluate(({id,code})=>new Promise(resolve=>{
       const timeout=setTimeout(()=>resolve({ok:false,output:'timeout'}),15000);
       function listener(event){if(event.data?.kind!=='turtle-rendered'||event.data.id!==id)return;clearTimeout(timeout);removeEventListener('message',listener);resolve({ok:!!event.data.image,image:event.data.image,output:document.getElementById('output').textContent});}
@@ -96,13 +164,13 @@ try{
     }),{id:entry.id,code});
     assert(result.ok,entry.id+': '+result.output);
     for(const expected of entry.assertOutput||[])assert(result.output.includes(expected),entry.id+' missing output '+JSON.stringify(expected)+': '+result.output);
-    if(entries.indexOf(entry)>=originalCount)fs.writeFileSync(path.join(proof,entry.id+'.png'),Buffer.from(result.image.split(',')[1],'base64'));
+    if(entry.variantId==='original'&&entries.findIndex(e=>e.id===entry.topicId)>=originalCount)fs.writeFileSync(path.join(proof,entry.topicId+'.png'),Buffer.from(result.image.split(',')[1],'base64'));
   }
   if(process.env.BUILD_TRAIL_PREVIEWS){
     fs.mkdirSync(path.join(root,'turtlereference/trail-previews'),{recursive:true});
     for(const [id,name] of [['grove-night','firefly-grove'],['potion-shop','pixel-potion']])fs.copyFileSync(path.join(proof,id+'.png'),path.join(root,'turtlereference/trail-previews',name+'.png'));
   }
-  await render.close();console.log(`PASS all ${entries.length} reference examples in the real Python/canvas runtime`);
+  await render.close();console.log(`PASS all ${examples.length} examples across ${entries.length} topics in the real Python/canvas runtime`);
   await page.locator('.command-link[data-id="triangle"]').click();
   await page.waitForFunction(()=>document.body.dataset.exampleId==='triangle');
   await page.locator('#nextTopic').click();
@@ -169,6 +237,24 @@ try{
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight));
   assert(!(await page.locator('#referenceNav').isVisible()),'Closed command list must be hidden on mobile');
   await page.screenshot({path:path.join(proof,'reference-mobile.png')});
+  assert(await page.locator('#examplePicker').isVisible());
+  assert.equal(await page.locator('#examplePicker').evaluate(el=>el.parentElement.id),'mobileExampleSlot');
+  for(let i=0;i<5;i++)await page.locator('#nextExample').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/hexagon');
+  assert(await page.locator('#nextExample').isDisabled());
+  await page.reload();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle/hexagon');
+  const selected=await page.locator('.example-card[aria-pressed="true"]').boundingBox();
+  const choices=await page.locator('#exampleChoices').boundingBox();
+  assert(selected.x>=choices.x&&selected.x+selected.width<=choices.x+choices.width,'Chosen preview must fit inside the chooser, including after loading a shared link');
+  await page.locator('#runExample').click();
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  await editor.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert(await page.locator('#examplePicker').isVisible());
+  assert(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight&&document.documentElement.scrollWidth<=innerWidth));
+  await page.screenshot({path:path.join(proof,'example-choices-mobile-editor.png')});
+  await page.locator('[data-view="reference"]').click();
+  await page.screenshot({path:path.join(proof,'example-choices-mobile-reference.png')});
   await page.locator('#nextTopic').click();
   await page.waitForFunction(()=>document.body.dataset.exampleId==='dot');
   assert((await page.locator('#nextTopic').boundingBox()).y<844);
