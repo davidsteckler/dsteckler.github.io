@@ -17,7 +17,7 @@ window.PYTHON_COURSE = {
           notes: "Introduce forward/backward and left/right. Conference by asking students to point to the line causing a visible change. Keep emphasis on run-after-small-change.",
           check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":4,"fail":"Use at least four movement commands.","label":"4+ movement commands"},{"type":"minCalls","commands":["left","right"],"count":2,"fail":"Use at least two turns.","label":"2+ turns"},{"type":"minCalls","commands":["backward"],"count":1,"fail":"Use backward() at least once.","label":"Use backward()"},{"type":"minDistinctNumbers","commands":["forward","backward"],"count":2,"fail":"Use at least two different movement distances.","label":"2 different distances"}]},
           starter: "forward(80)\nleft(90)\nforward(80)",
-          visuals: [{"label":"Stair","bg":"#fbfaf6","paths":[{"points":[[12,78],[52,78],[52,54],[92,54],[92,30],[142,30]]}]},{"label":"Lightning","bg":"#fbfaf6","paths":[{"points":[[18,18],[78,18],[52,48],[112,48],[72,82],[145,82]]}]},{"label":"Crooked","bg":"#fbfaf6","paths":[{"points":[[14,76],[58,76],[40,48],[92,48],[78,22],[145,22]]}]}],
+          visuals: [{"label":"Tiny maze","bg":"#fbfaf6","paths":[{"points":[[12,78],[54,78],[54,56],[94,56],[94,32],[70,32],[70,14],[142,14]]}]},{"label":"Mountain route","bg":"#fbfaf6","paths":[{"points":[[12,78],[48,42],[72,64],[106,24],[146,66]]}]},{"label":"Robot arm","bg":"#fbfaf6","paths":[{"points":[[18,78],[18,42],[62,42],[62,22],[106,22],[106,54],[146,54]]}]}],
           steps: [
             {title:"Run the working starter.",body:"Start by seeing the whole program work before changing anything.",task:"Press Run once.",tip:"The turtle starts in the center facing right."},
             {title:"Test the first distance.",body:"Change only the first forward(80) to forward(140).",task:"Run again and watch which segment becomes longer.",tip:"Only one number changed, so only one part of the drawing should change."},
@@ -55,7 +55,7 @@ window.PYTHON_COURSE = {
           notes: "Check requirements rather than appearance. Students should choose the route. Encourage clean runs and explain only when conferencing.",
           check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":5,"fail":"Your route needs at least five visible movement segments.","label":"5+ visible movement segments"},{"type":"requiresCommands","commands":["left","right"],"fail":"Use at least one left turn and one right turn.","label":"Use both left() and right()"},{"type":"minDistinctNumbers","commands":["forward","backward"],"count":2,"fail":"Use at least two different movement distances.","label":"2 different movement distances"}]},
           starter: "# Build your route below\n",
-          visuals: [{"label":"Stair route","bg":"#fbfaf6","paths":[{"points":[[10,82],[48,82],[48,61],[86,61],[86,40],[124,40],[124,18],[150,18]]}]},{"label":"Switchback","bg":"#fbfaf6","paths":[{"points":[[12,80],[62,80],[40,58],[94,58],[72,36],[128,36],[106,15],[150,15]]}]},{"label":"Boxy route","bg":"#fbfaf6","paths":[{"points":[[16,78],[74,78],[74,28],[128,28],[128,62],[100,62],[100,12]]}]}],
+          visuals: [{"label":"Mini maze","bg":"#fbfaf6","paths":[{"points":[[12,82],[52,82],[52,60],[94,60],[94,36],[68,36],[68,16],[144,16]]}]},{"label":"Mountain trail","bg":"#fbfaf6","paths":[{"points":[[10,78],[42,46],[68,68],[98,30],[124,50],[150,20]]}]},{"label":"Robot arm","bg":"#fbfaf6","paths":[{"points":[[20,82],[20,48],[62,48],[62,24],[104,24],[104,62],[142,62],[142,34]]}]}],
           steps: [
             {title:"Meet the requirements.",body:"Your route needs at least five visible segments, at least one left turn, at least one right turn, and two different movement distances.",task:"Write the first two commands and run them.",tip:"Start small. You do not need to know the final picture yet."},
             {title:"Keep building.",body:"Add commands until you have at least five visible segments.",task:"Run after every one or two new lines.",tip:"If the path leaves the screen, shorten a distance rather than starting over."},
@@ -235,7 +235,61 @@ window.PYTHON_COURSE = {
             {title:"Final clean run.",body:"Leave only the code you want in the finished project.",task:"Press Clear Run, then Run once and make sure there are no errors.",tip:"The final drawing should be yours. There is no reference picture to match."}
           ]
         }
-      ]
+,
+        {
+          id: "1-13-make-ascii",
+          number: "1.13",
+          title: "Make Block Art",
+          type: "Make",
+          available: true,
+          notes: "Introduce print() as visible output. Keep the focus on one printed line at a time and on spacing. Unicode block characters are intentional; students should see that text can be used as a visual medium.",
+          check: {"rules":[{"type":"minCalls","commands":["print"],"count":5,"fail":"Print at least five lines.","label":"5+ printed lines"},{"type":"minDistinctStrings","commands":["print"],"count":3,"fail":"Use at least three different printed lines.","label":"3 different lines"},{"type":"requiresAnyCharacter","commands":["print"],"characters":["█","▓","░","#","*","|","/","\\","_"],"fail":"Use at least one visual character such as █, #, *, |, /, or _.","label":"Use visual characters"}]},
+          starter: "print(\"  ███  \")\nprint(\" █░░░█ \")\n",
+          visuals: [{"label":"Block face","ascii":" █████ \n██ ░ ██\n█  ▄  █\n █████ "},{"label":"Mini tower","ascii":"  ██  \n ████ \n██████\n  ██  "},{"label":"Signal bars","ascii":"█      \n██     \n████   \n██████ "}],
+          steps: [
+            {title:"Run two printed lines.",body:"print() sends text to the output panel instead of the Turtle world.",task:"Press Run and look at the two lines in OUTPUT · PRINT() & ERRORS.",tip:"Spaces count. They are part of the picture."},
+            {title:"Add the middle of the face.",body:"Add a third print() line below the starter.",task:"Print a line that uses blocks or another symbol to make the center different.",tip:"Example characters: █ ▓ ░ # * | _"},
+            {title:"Add another row.",body:"ASCII art is built one row at a time.",task:"Add a fourth print() line and run again.",tip:"Keep the opening and closing quotation marks around every row."},
+            {title:"Change the width.",body:"Add or remove spaces and symbols inside one string.",task:"Run and watch how spacing changes the shape.",tip:"Python prints the characters exactly in the order you type them."},
+            {title:"Challenge: Finish a tiny block picture.",body:"Make a face, tower, signal, creature, or symbol.",task:"Use 5+ printed lines, at least 3 different rows, and at least one visual character such as █, #, *, |, /, \\, or _.",tip:"The examples are ideas only. Your rows can be completely different."}
+          ]
+        },
+        {
+          id: "1-14-solve-ascii",
+          number: "1.14",
+          title: "ASCII Repair",
+          type: "Solve",
+          available: true,
+          notes: "This is a spacing and sequencing puzzle. Students should use the output as feedback. Do not provide the completed strings unless needed for accessibility support.",
+          check: {"rules":[{"type":"minCalls","commands":["print"],"count":5,"fail":"Keep all five printed rows.","label":"5 printed rows"},{"type":"requiresPrintString","value":"  ███  ","fail":"Repair the top row.","label":"Top row repaired"},{"type":"requiresPrintString","value":" █   █ ","fail":"Repair the matching side row.","label":"Side row repaired"},{"type":"requiresPrintString","value":"  ███  ","min":2,"fail":"The top and bottom rows should match.","label":"Top and bottom match"}]},
+          starter: "print(\"  ███\")\nprint(\" █   █ \")\nprint(\"█  █  █\")\nprint(\" █   █\")\nprint(\" ███   \")",
+          visuals: [{"label":"Target silhouette","ascii":"  ███  \n █   █ \n█  █  █\n █   █ \n  ███  "}],
+          steps: [
+            {title:"Run the broken picture.",body:"The five rows are meant to form a centered badge, but several spaces are wrong.",task:"Press Run and look for rows that do not line up.",tip:"Do not change the symbols yet. Fix spacing first."},
+            {title:"Repair the top and bottom.",body:"The first and last rows should be identical.",task:"Edit spaces until those two rows match.",tip:"Count spaces inside the quotation marks."},
+            {title:"Repair the side rows.",body:"Rows 2 and 4 should also match.",task:"Edit spaces until the left and right sides line up.",tip:"A monospace font makes every character the same width."},
+            {title:"Keep the center row.",body:"The middle row is already the widest row.",task:"Run again and make the five rows look centered around it.",tip:"Use the target silhouette only as a visual check."},
+            {title:"Final check.",body:"The badge should be centered and symmetrical.",task:"Leave all five print() lines in the program and check your code.",tip:"The checker looks at the exact repaired rows."}
+          ]
+        },
+        {
+          id: "1-15-create-ascii",
+          number: "1.15",
+          title: "ASCII Badge",
+          type: "Create",
+          available: true,
+          notes: "Open-ended text-art challenge. Celebrate variation. Students can use Unicode block characters or ordinary keyboard symbols. The checker should enforce structure, not an exact image.",
+          check: {"rules":[{"type":"minCalls","commands":["print"],"count":6,"fail":"Print at least six rows.","label":"6+ printed rows"},{"type":"minDistinctStrings","commands":["print"],"count":4,"fail":"Use at least four different rows.","label":"4 different rows"},{"type":"requiresAnyCharacter","commands":["print"],"characters":["█","▓","░","#","*","|","/","\\","_","-"],"fail":"Use visual characters in the badge.","label":"Use visual characters"},{"type":"minLiteralCharacters","commands":["print"],"count":30,"fail":"Build a larger design with at least 30 printed characters total.","label":"30+ printed characters"}]},
+          starter: "# Build an ASCII badge in the output panel\n",
+          visuals: [{"label":"Pixel heart","ascii":" ██ ██ \n███████\n █████ \n  ███  \n   █   "},{"label":"Space badge","ascii":" /\\_/\\ \n|  o o  |\n|   ^   |\n \\_____/"},{"label":"Power bars","ascii":"█░░░░░\n██░░░░\n████░░\n██████"}],
+          steps: [
+            {title:"Choose a shape.",body:"A badge can be a symbol, creature, logo-like mark, meter, or tiny scene.",task:"Write one print() row and run it.",tip:"Try █ ▓ ░ # * / \\ | _ - and spaces."},
+            {title:"Build downward.",body:"Add rows one at a time instead of typing the whole picture first.",task:"Reach at least three printed rows and run again.",tip:"If alignment looks wrong, change spaces before changing the whole design."},
+            {title:"Make the silhouette clearer.",body:"Use wider and narrower rows to shape the outside edge.",task:"Reach at least six rows.",tip:"Repeating a character can create strong visual blocks."},
+            {title:"Add one detail.",body:"Change the inside of one or two rows to create eyes, a stripe, a gap, or another feature.",task:"Run and keep the overall shape readable.",tip:"Small changes inside the silhouette are usually enough."},
+            {title:"Challenge: Finish an original ASCII badge.",body:"It should look intentional in the output panel.",task:"Use 6+ rows, 4 different rows, visual characters, and at least 30 printed characters total.",tip:"A heart, creature, battery meter, tiny building, initials, or invented symbol all work."}
+          ]
+        }      ]
     },
 
     {
