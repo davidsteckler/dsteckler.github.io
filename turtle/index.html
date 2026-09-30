@@ -796,6 +796,11 @@
     }
     body.course-embed .code-panel,
     body.course-embed .world-panel{height:100%;min-height:0}
+    body.course-embed .editor-divider:before{
+      width:4px;
+      height:72px;
+      background:#9e9a92
+    }
     body.course-embed .code-panel .CodeMirror{font-size:15px}
     body.course-embed .world-panel{grid-template-rows:47px minmax(210px,1fr) auto 105px}
     body.course-embed .world-edit-link{display:none!important}
@@ -2683,6 +2688,15 @@ for i in range(4):
     window.addEventListener("message",async function(event){
       if(event.origin!==window.location.origin)return;
       var data=event.data||{};
+      if(data.type==="pythoncourse-insert-text"){
+        var insertText=String(data.text||"");
+        if(insertText){
+          editor.replaceSelection(insertText,"end");
+          editor.focus();
+          saveStatus.textContent="saving…";
+        }
+        return;
+      }
       if(data.type!=="pythoncourse-check-request")return;
       var requestId=String(data.requestId||"");
       var code=editor.getValue();
