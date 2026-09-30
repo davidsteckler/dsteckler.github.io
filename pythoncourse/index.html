@@ -191,14 +191,15 @@
       color:var(--orange);font:850 .63rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.1em;text-transform:uppercase
     }
-    .step-content h3{font-size:1.45rem;line-height:1.12;margin:10px 0 12px;letter-spacing:-.025em}
-    .step-content p{font-size:.84rem;line-height:1.58;color:var(--mid);margin:0 0 16px}
-    .task{
-      border-left:4px solid var(--teal);background:var(--teal-light);
-      border-radius:0 10px 10px 0;padding:13px 14px;margin:18px 0
+    .step-content h3{font-size:1.45rem;line-height:1.12;margin:0 0 12px;letter-spacing:-.025em}
+    .step-content p{font-size:.84rem;line-height:1.55;color:var(--mid);margin:0 0 12px}
+    .step-action{
+      margin:8px 0 0;
+      color:var(--ink);
+      font-size:.86rem;
+      line-height:1.5;
+      font-weight:800
     }
-    .task strong{display:block;color:var(--teal-dark);font-size:.69rem;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
-    .task div{font-size:.82rem;line-height:1.45;font-weight:750;color:var(--ink)}
     .example{
       margin:15px 0;padding:12px 13px;border-radius:10px;background:#22292a;color:#f7f2e8;
       font:650 .76rem/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre;overflow:auto
@@ -227,6 +228,20 @@
     .tip summary:hover{background:var(--teal-light)}
     .tip-body{padding:7px 0 0;color:var(--soft)}
     .tip-body strong{color:var(--mid)}
+    .teacher-notes{
+      margin-top:22px;
+      border-top:1px dashed #cfc7b9;
+      padding-top:12px;
+      color:var(--soft);
+      font-size:.72rem;
+      line-height:1.5
+    }
+    .teacher-notes summary{
+      cursor:pointer;
+      color:#7a7066;
+      font-weight:850
+    }
+    .teacher-notes-body{margin-top:8px}
     .lesson-actions{
       display:grid;grid-template-columns:auto 1fr auto;gap:8px;
       padding:11px 12px;border-top:1px solid var(--rule);background:#fbf8f2
@@ -329,14 +344,17 @@
       </header>
 
       <article class="step-content" id="stepContent">
-        <div class="step-label" id="stepLabel">Step 1 of 8</div>
         <h3 id="stepTitle">See what the code already does.</h3>
         <p id="stepBody"></p>
-        <div class="task"><strong>Do this</strong><div id="stepTask"></div></div>
+        <div class="step-action" id="stepTask"></div>
         <pre class="example" id="stepExample" hidden></pre>
         <details class="tip" id="stepHint">
           <summary>Need a hint?</summary>
           <div class="tip-body"><span id="stepTip"></span></div>
+        </details>
+        <details class="teacher-notes" id="teacherNotes" hidden>
+          <summary>Teacher notes</summary>
+          <div class="teacher-notes-body" id="teacherNotesBody"></div>
         </details>
       </article>
 
@@ -377,6 +395,7 @@
   });
   var available=lessons.filter(function(l){return l.available;});
   var params=new URLSearchParams(location.search);
+  var teacherMode=params.get("teacher")==="1";
   var current=available.find(function(l){return l.id===params.get("lesson");}) || available[0];
   var stepIndex=0;
   try{
@@ -454,7 +473,6 @@
 
   function renderStep(){
     var step=current.steps[stepIndex];
-    document.getElementById("stepLabel").textContent="Step "+(stepIndex+1)+" of "+current.steps.length;
     document.getElementById("stepTitle").textContent=step.title;
     document.getElementById("stepBody").textContent=step.body;
     document.getElementById("stepTask").textContent=step.task;
@@ -462,6 +480,11 @@
     var hint=document.getElementById("stepHint");
     hint.open=false;
     hint.hidden=!step.tip;
+    var teacherNotes=document.getElementById("teacherNotes");
+    var teacherNotesBody=document.getElementById("teacherNotesBody");
+    teacherNotes.hidden=!(teacherMode&&current.notes);
+    teacherNotes.open=false;
+    teacherNotesBody.textContent=current.notes||"";
     var example=document.getElementById("stepExample");
     if(step.example){
       example.hidden=false;
