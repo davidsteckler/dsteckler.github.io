@@ -46,6 +46,16 @@ For a drawing iteration, `build-tutorial-steps.py --only curatedE17,starter-firs
 
 Clicking a gallery picture or its Quick run button opens the finished program in the same page and runs it. Keep that action separate from the Open tutorial link. Gallery / Quick run switches preserve the editor, difficulty, subject, and search. A shared quick-run URL can use `?view=run&project=starter-first-square&level=Beginner`.
 
-`/turtlereference/` uses the same editor through the tutorial embed protocol. Its authored topics live in `turtlereference/reference-data.js`. Every topic has a complete runnable program, expected result, suggested change, and relevant help. Keep examples compatible with the site's actual Turtle API. Document desktop-only behavior in the desktop topic. Drafts are saved separately for each reference topic.
+`/turtlereference/` uses the same editor through the tutorial embed protocol. Its authored topics live in `turtlereference/reference-data.js` and `reference-more.js`. Every topic has a complete runnable program, expected result, suggested change, and relevant help. Keep examples compatible with the site's actual Turtle API. Document desktop-only behavior in the desktop topic. Drafts are saved separately for each reference topic. Previous/Next follows the sidebar's group order. Diagram markers should identify the turtle or a labeled point rather than resemble an interactive play control.
 
 Run `node turtlereference/test-reference.mjs` after changing quick run or the reference. It checks the editor workflow, example execution, callbacks, saved drafts, navigation, resizing, and mobile layouts.
+
+## Creative trails and the pleasure of making things
+
+`turtlereference/reference-trails.js` holds the short, cumulative trails linked from `/turtlereference/trails/`. Every stop is a standalone runnable program, with a visible result, a specific observation, and an experiment. Give a trail as many stops as its ideas need. A pixel project should test one square and one row before rendering the full map. Introduce a function only after its body has produced a working result.
+
+Treat the journey and small details as part of the teaching. A character can wink; a found item can have a name; a collected coin should stay collected. Choose details that reveal code behavior, such as state, branching, layering, or reuse. Keep enough room for students to invent their own details. Do not add timers, streaks, or artificial urgency.
+
+ASCII and text art are a recurring medium, not a one-off novelty. Use creatures, inventories, maps, signs, meters, borders, and little scenes to make strings, loops, lists, and state visible. Monospace output must preserve spaces and remain readable on phones. True ASCII uses ordinary keyboard characters; identify Unicode blocks as an optional variation. The reference expands Text Output for ASCII stops and restores the canvas for drawing stops. Avoid hand-entered coordinate grids when relative movement, a small character map, or one spacing rule can express the idea.
+
+Trail difficulty labels are Beginner, Medium, and Hard. Completion is a learner-controlled checklist, stored separately from code drafts; opening or running an example never claims mastery. Previous/Next stays inside the current trail. The hub resumes at the first unchecked stop. Runtime tests verify the expected printed art as well as code execution. Build the two drawing previews from actual runtime output with `BUILD_TRAIL_PREVIEWS=1 node turtlereference/test-reference.mjs` when their finished drawings change.
