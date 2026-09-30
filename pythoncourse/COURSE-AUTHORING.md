@@ -33,7 +33,7 @@ Teacher-only notes belong on the lesson object as a `notes` field. They can incl
 
 New concepts should usually appear as a three-activity cycle.
 
-**Make** is the most scaffolded. Start with working code, change one thing at a time, run constantly, and reveal what each command controls. End each Make lesson with a concrete mini-challenge: name the thing to build, give 3–5 objective requirements, and offer an example of the kind of result without giving the solution code.
+**Make** is the most scaffolded. Start with working code, change one thing at a time, run constantly, and reveal what each command controls. End each Make lesson with a concrete mini-challenge: name the thing to build, give 3–5 objective requirements, and show 2–3 small visual examples of the kind of result without giving the solution code. Visuals are inspiration, not a reference image students must copy.
 
 **Solve** removes instructions. Give a clear target, constraints, or a broken/unfinished program. Students should have to decide which command or value to change. Hints stay optional and hidden until opened.
 
@@ -78,7 +78,7 @@ Checks should validate the lesson requirements without demanding one exact solut
 
 Do not check subjective qualities such as whether a drawing is "good," "balanced," or "interesting." Convert those into objective requirements only when that serves the learning goal.
 
-A failed check should tell the student what requirement is still missing without supplying the exact code.
+A failed check should tell the student what requirement is still missing without supplying the exact code. Each rule should also have a short student-facing `label` so the checker can render a live requirements checklist with the student's current value and the target. The checker should show progress visually (for example, 3 of 4 requirements met) and a clear success state when every requirement passes.
 
 ## Editor integration
 
