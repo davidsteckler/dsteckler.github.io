@@ -1298,10 +1298,10 @@ window.PYTHON_COURSE = {
         {
           "id": "1-10-make-color",
           "number": "1.10",
-          "title": "Make a Color Study",
+          "title": "Make a Neon Lightning Bolt",
           "type": "Make",
           "available": true,
-          "notes": "Teach bgcolor, color, and pensize as state-setting commands. Change one visual property at a time.",
+          "notes": "Concrete style lesson. Students build one recognizable neon bolt while learning that bgcolor(), color(), and pensize() change the appearance of later drawing. Keep each change visible and purposeful.",
           "check": {
             "rules": [
               {
@@ -1311,16 +1311,7 @@ window.PYTHON_COURSE = {
                 ],
                 "count": 1,
                 "fail": "Set a background color.",
-                "label": "Set a background color"
-              },
-              {
-                "type": "minCalls",
-                "commands": [
-                  "pensize"
-                ],
-                "count": 1,
-                "fail": "Set the line thickness with pensize().",
-                "label": "Set line thickness"
+                "label": "Dark background"
               },
               {
                 "type": "minDistinctStrings",
@@ -1328,166 +1319,170 @@ window.PYTHON_COURSE = {
                   "color"
                 ],
                 "count": 3,
-                "fail": "Use at least three different drawing colors.",
+                "fail": "Use at least three drawing colors.",
                 "label": "3 drawing colors"
+              },
+              {
+                "type": "minDistinctNumbers",
+                "commands": [
+                  "pensize"
+                ],
+                "count": 2,
+                "fail": "Use at least two line thicknesses.",
+                "label": "2 line thicknesses"
               },
               {
                 "type": "minCalls",
                 "commands": [
-                  "circle"
+                  "forward",
+                  "backward"
                 ],
-                "count": 1,
-                "fail": "Include a circle in the finished sign.",
-                "label": "Include a circle"
+                "count": 5,
+                "fail": "Draw at least five bolt segments.",
+                "label": "5+ bolt segments"
               },
               {
-                "type": "minDrawElements",
+                "type": "minCalls",
+                "commands": [
+                  "left",
+                  "right"
+                ],
                 "count": 4,
-                "fail": "Draw at least four visible elements.",
-                "label": "4+ visible drawn elements"
+                "fail": "Use at least four turns.",
+                "label": "4+ turns"
               }
             ]
           },
-          "starter": "bgcolor(\"midnightblue\")\ncolor(\"gold\")\npensize(4)\nforward(100)\nleft(90)\nforward(100)",
+          "starter": "bgcolor(\"black\")\ncolor(\"cyan\")\npensize(6)\nforward(70)",
           "visuals": [
             {
-              "label": "Circle + bolt",
-              "bg": "#17253c",
+              "label": "Sharp bolt",
+              "bg": "#111318",
               "paths": [
                 {
                   "points": [
                     [
-                      72,
+                      25,
                       18
+                    ],
+                    [
+                      92,
+                      18
+                    ],
+                    [
+                      63,
+                      46
                     ],
                     [
                       112,
-                      18
+                      46
                     ],
                     [
-                      88,
-                      47
+                      74,
+                      84
                     ],
                     [
-                      132,
-                      47
-                    ],
-                    [
-                      98,
-                      82
+                      145,
+                      84
                     ]
                   ],
-                  "stroke": "#ffcf56",
-                  "width": 5
-                }
-              ],
-              "circles": [
-                {
-                  "cx": 38,
-                  "cy": 50,
-                  "r": 22,
-                  "stroke": "#55d6be",
-                  "width": 5
+                  "stroke": "#5eead4",
+                  "width": 6
                 }
               ]
             },
             {
-              "label": "Neon corner",
-              "bg": "#202033",
+              "label": "Tall bolt",
+              "bg": "#141420",
               "paths": [
                 {
                   "points": [
                     [
-                      20,
-                      78
+                      75,
+                      10
                     ],
                     [
-                      20,
-                      30
+                      122,
+                      10
                     ],
                     [
-                      74,
-                      30
+                      92,
+                      39
+                    ],
+                    [
+                      126,
+                      39
+                    ],
+                    [
+                      65,
+                      90
+                    ],
+                    [
+                      82,
+                      53
+                    ],
+                    [
+                      42,
+                      53
                     ]
                   ],
-                  "stroke": "#ff5d8f",
+                  "stroke": "#fde047",
+                  "width": 7
+                }
+              ]
+            },
+            {
+              "label": "Split-color bolt",
+              "bg": "#151827",
+              "paths": [
+                {
+                  "points": [
+                    [
+                      18,
+                      24
+                    ],
+                    [
+                      78,
+                      24
+                    ],
+                    [
+                      52,
+                      50
+                    ]
+                  ],
+                  "stroke": "#67e8f9",
                   "width": 6
                 },
                 {
                   "points": [
                     [
-                      74,
-                      30
-                    ],
-                    [
-                      122,
-                      30
-                    ],
-                    [
-                      122,
-                      72
-                    ]
-                  ],
-                  "stroke": "#68d8ff",
-                  "width": 4
-                }
-              ],
-              "circles": [
-                {
-                  "cx": 122,
-                  "cy": 72,
-                  "r": 12,
-                  "stroke": "#ffe66d",
-                  "width": 4
-                }
-              ]
-            },
-            {
-              "label": "Orbit sign",
-              "bg": "#141820",
-              "circles": [
-                {
-                  "cx": 78,
-                  "cy": 50,
-                  "r": 28,
-                  "stroke": "#8cf0c8",
-                  "width": 5
-                },
-                {
-                  "cx": 78,
-                  "cy": 50,
-                  "r": 10,
-                  "stroke": "#ff8fab",
-                  "width": 4
-                }
-              ],
-              "paths": [
-                {
-                  "points": [
-                    [
-                      20,
+                      52,
                       50
                     ],
-                    [
-                      48,
-                      50
-                    ]
-                  ],
-                  "stroke": "#ffd166",
-                  "width": 5
-                },
-                {
-                  "points": [
                     [
                       108,
                       50
                     ],
                     [
-                      142,
-                      50
+                      82,
+                      80
                     ]
                   ],
-                  "stroke": "#67d6ff",
+                  "stroke": "#f472b6",
+                  "width": 9
+                },
+                {
+                  "points": [
+                    [
+                      82,
+                      80
+                    ],
+                    [
+                      146,
+                      80
+                    ]
+                  ],
+                  "stroke": "#fde68a",
                   "width": 5
                 }
               ]
@@ -1495,52 +1490,46 @@ window.PYTHON_COURSE = {
           ],
           "steps": [
             {
-              "title": "Run the styled path.",
-              "body": "The first three lines change appearance before the turtle moves.",
-              "task": "Press Run once.",
-              "tip": "bgcolor(), color(), and pensize() affect later drawing."
+              "title": "Run the first neon segment.",
+              "body": "The black background, cyan pen, and thick line are already set.",
+              "task": "Press Run.",
+              "tip": "Style commands change how later drawing looks."
             },
             {
-              "title": "Change only the pen color.",
-              "body": "Replace gold with another named color.",
-              "task": "Run and keep the background and line thickness unchanged.",
-              "tip": "Color names go inside quotation marks."
+              "title": "Make the first corner.",
+              "body": "Add right(60), then forward(35).",
+              "task": "Run and make the path bend down.",
+              "tip": "The turn changes direction; the next forward() draws in that direction."
             },
             {
-              "title": "Change only the background.",
-              "body": "Choose another named color for bgcolor().",
-              "task": "Run and make sure the drawing remains easy to see.",
-              "tip": "Foreground and background need enough contrast."
+              "title": "Change color before the next segment.",
+              "body": "Add color(\"yellow\") before the next movement.",
+              "task": "Add left(120), then forward(60), and Run.",
+              "tip": "color() affects the drawing that comes after it."
             },
             {
-              "title": "Change line thickness.",
-              "body": "Change pensize(4) to another whole number.",
-              "task": "Run and compare the line weight.",
-              "tip": "pensize() changes appearance without changing the route."
+              "title": "Make one segment thicker.",
+              "body": "Add a second pensize() value before the next movement.",
+              "task": "Use pensize(10), add right(60), then forward(35). Run again.",
+              "tip": "Changing thickness midway makes one part stand out."
             },
             {
-              "title": "Use two drawing colors.",
-              "body": "Add another color() command between the two forward commands.",
-              "task": "Run so the two segments have different colors.",
-              "tip": "A setting affects the commands that come after it."
+              "title": "Add a third color.",
+              "body": "Change color again before drawing the next piece.",
+              "task": "Use a new color, add a turn, then another movement.",
+              "tip": "Use a color name inside quotation marks."
             },
             {
-              "title": "Add a colored circle.",
-              "body": "Change color again, then add circle(30).",
-              "task": "Run and keep the circle visible with the existing path.",
-              "tip": "The circle uses the current pen color."
+              "title": "Keep the bolt shape sharp.",
+              "body": "A lightning bolt changes direction several times.",
+              "task": "Add one more turn and movement so the route has at least five visible segments.",
+              "tip": "Shorter middle segments usually make the zigzag easier to read."
             },
             {
-              "title": "Move and draw in another color.",
-              "body": "Add a turn, change color, then add a movement.",
-              "task": "Run and create another visible part of the drawing.",
-              "tip": "Put color() before the movement you want it to affect."
-            },
-            {
-              "title": "Challenge: Make a tiny neon sign.",
-              "body": "It can be abstract—a symbol, path, or simple shape.",
-              "task": "Use a background, 3 drawing colors, pensize(), at least 1 circle, and 4+ visible drawn elements.",
-              "tip": "Example idea: a bright circle with a colored zigzag beside it. Make your own design."
+              "title": "Challenge: finish the neon bolt.",
+              "body": "Make it look like one deliberate lightning bolt on a dark background.",
+              "task": "Use 5+ segments, 4+ turns, 3 drawing colors, and 2 different pensize() values.",
+              "tip": "Your bolt can be tall, wide, or uneven. The examples show different structures."
             }
           ],
           "group": "Color + Style"
@@ -1548,10 +1537,10 @@ window.PYTHON_COURSE = {
         {
           "id": "1-11-solve-style",
           "number": "1.11",
-          "title": "Color Rescue",
+          "title": "Repair the Neon Sign",
           "type": "Solve",
           "available": true,
-          "notes": "Students should diagnose visibility and ordering problems. Avoid naming the exact fix unless they use the hint.",
+          "notes": "Broken-style puzzle. Students should diagnose invisible output, weak line weight, and missing color state. The route itself is already valid; keep focus on appearance and command order.",
           "check": {
             "rules": [
               {
@@ -1561,7 +1550,7 @@ window.PYTHON_COURSE = {
                 ],
                 "count": 1,
                 "fail": "Keep a background color.",
-                "label": "Keep a background color"
+                "label": "Background stays set"
               },
               {
                 "type": "minDistinctStrings",
@@ -1569,7 +1558,7 @@ window.PYTHON_COURSE = {
                   "color"
                 ],
                 "count": 3,
-                "fail": "Use three different visible drawing colors.",
+                "fail": "Use three different drawing colors.",
                 "label": "3 visible drawing colors"
               },
               {
@@ -1577,89 +1566,126 @@ window.PYTHON_COURSE = {
                 "commands": [
                   "pensize"
                 ],
-                "value": 1,
-                "fail": "Increase pensize() above 1.",
-                "label": "pensize() greater than 1"
+                "value": 3,
+                "fail": "Make the neon line thicker than 3.",
+                "label": "pensize() above 3"
               },
               {
                 "type": "minCalls",
                 "commands": [
-                  "circle"
+                  "forward",
+                  "backward"
                 ],
-                "count": 1,
-                "fail": "Keep the circle in the program.",
-                "label": "Keep the circle"
+                "count": 3,
+                "fail": "Keep all three movement segments.",
+                "label": "3 sign segments"
+              },
+              {
+                "type": "minCalls",
+                "commands": [
+                  "left",
+                  "right"
+                ],
+                "count": 2,
+                "fail": "Keep both turns.",
+                "label": "2 turns"
               }
             ]
           },
-          "starter": "bgcolor(\"navy\")\ncolor(\"navy\")\npensize(1)\nforward(100)\nleft(90)\ncolor(\"yellow\")\nforward(100)\ncircle(30)",
+          "starter": "bgcolor(\"black\")\ncolor(\"black\")\npensize(1)\nforward(70)\nright(60)\ncolor(\"cyan\")\nforward(35)\nleft(120)\nforward(60)",
           "steps": [
             {
-              "title": "Find the invisible segment.",
-              "body": "The program runs, but part of the drawing disappears into the background.",
-              "task": "Run it and change one value so the first segment becomes visible.",
-              "tip": "The first pen color currently matches the background."
+              "title": "Run the broken sign.",
+              "body": "The program runs, but the first segment disappears.",
+              "task": "Press Run and find the style command causing it.",
+              "tip": "Compare the first color() with bgcolor()."
             },
             {
-              "title": "Improve the line weight.",
-              "body": "The drawing should be easy to see without becoming extremely thick.",
-              "task": "Choose a new pensize() value and run again.",
-              "tip": "Try a small whole number greater than 1."
+              "title": "Make the first segment visible.",
+              "body": "Do not change the route commands.",
+              "task": "Change only the first drawing color and Run.",
+              "tip": "The pen and background should not be the same color."
             },
             {
-              "title": "Give the circle its own color.",
-              "body": "Keep the two path segments in their current colors.",
-              "task": "Add one color() command so the circle uses a third visible color.",
-              "tip": "Place the color change immediately before the command you want it to affect."
+              "title": "Fix the weak line.",
+              "body": "The sign should look like a thick neon stroke.",
+              "task": "Change pensize() to a value greater than 3 and Run.",
+              "tip": "Keep the movement distances and turn angles unchanged."
             },
             {
-              "title": "Keep every element readable.",
-              "body": "You may change the background once more if needed.",
-              "task": "Run from a clean start with both segments and the circle clearly visible.",
-              "tip": "Solve the visibility problem without changing the movement distances or turn angle."
+              "title": "Give the last segment its own color.",
+              "body": "The final two segments currently share a color.",
+              "task": "Add one color() command so all three segments can use different colors.",
+              "tip": "Put the color change immediately before the segment it should affect."
             },
             {
-              "title": "Make one alternate solution.",
-              "body": "Reset the lesson and solve the same visibility requirements using different colors.",
-              "task": "Leave the alternate version working.",
-              "tip": "The requirements can have many correct visual solutions."
+              "title": "Final repair.",
+              "body": "The route should stay exactly three segments with two turns.",
+              "task": "Run from a clean start with all three segments visible, thick, and differently colored.",
+              "tip": "You are repairing style, not rebuilding the path."
             }
           ],
-          "group": "Color + Style"
+          "group": "Color + Style",
+          "visuals": [
+            {
+              "label": "Goal: all visible",
+              "bg": "#111318",
+              "paths": [
+                {
+                  "points": [
+                    [
+                      24,
+                      30
+                    ],
+                    [
+                      84,
+                      30
+                    ]
+                  ],
+                  "stroke": "#67e8f9",
+                  "width": 7
+                },
+                {
+                  "points": [
+                    [
+                      84,
+                      30
+                    ],
+                    [
+                      62,
+                      53
+                    ]
+                  ],
+                  "stroke": "#f472b6",
+                  "width": 7
+                },
+                {
+                  "points": [
+                    [
+                      62,
+                      53
+                    ],
+                    [
+                      118,
+                      53
+                    ]
+                  ],
+                  "stroke": "#fde047",
+                  "width": 7
+                }
+              ]
+            }
+          ]
         },
         {
           "id": "1-12-create-night",
           "number": "1.12",
-          "title": "Night Signals",
+          "title": "Design an Arcade Badge",
           "type": "Create",
           "available": true,
-          "notes": "Unit project. Conference around requirements, revision, and intentional choices. Final products should vary widely.",
+          "notes": "Open style capstone. Students choose a recognizable badge direction—bolt, maze, signal, or another angular icon. Requirements assess use of style and movement without prescribing one drawing.",
           "check": {
             "rules": [
-              {
-                "type": "minDrawElements",
-                "count": 6,
-                "fail": "Create at least six visible drawn elements.",
-                "label": "6+ visible drawn elements"
-              },
-              {
-                "type": "minCalls",
-                "commands": [
-                  "circle"
-                ],
-                "count": 3,
-                "fail": "Use at least three circles.",
-                "label": "3+ circles"
-              },
-              {
-                "type": "minDistinctStrings",
-                "commands": [
-                  "color"
-                ],
-                "count": 3,
-                "fail": "Use at least three different drawing colors.",
-                "label": "3 drawing colors"
-              },
               {
                 "type": "minCalls",
                 "commands": [
@@ -1667,7 +1693,16 @@ window.PYTHON_COURSE = {
                 ],
                 "count": 1,
                 "fail": "Set a background color.",
-                "label": "Set a background color"
+                "label": "Set a background"
+              },
+              {
+                "type": "minDistinctStrings",
+                "commands": [
+                  "color"
+                ],
+                "count": 3,
+                "fail": "Use at least three drawing colors.",
+                "label": "3 drawing colors"
               },
               {
                 "type": "minDistinctNumbers",
@@ -1675,7 +1710,7 @@ window.PYTHON_COURSE = {
                   "pensize"
                 ],
                 "count": 2,
-                "fail": "Use at least two different line thicknesses.",
+                "fail": "Use at least two line thicknesses.",
                 "label": "2 line thicknesses"
               },
               {
@@ -1684,9 +1719,9 @@ window.PYTHON_COURSE = {
                   "forward",
                   "backward"
                 ],
-                "count": 2,
-                "fail": "Use movement to place parts of the design.",
-                "label": "Use movement"
+                "count": 6,
+                "fail": "Draw at least six visible movement segments.",
+                "label": "6+ visible segments"
               },
               {
                 "type": "minCalls",
@@ -1694,185 +1729,164 @@ window.PYTHON_COURSE = {
                   "left",
                   "right"
                 ],
-                "count": 1,
-                "fail": "Use at least one turn.",
-                "label": "Use a turn"
+                "count": 4,
+                "fail": "Use at least four turns.",
+                "label": "4+ turns"
               }
             ]
           },
-          "starter": "# Unit 1 project\n# Build your Night Signals design below\n",
+          "starter": "# Design an arcade-style badge below\n",
           "visuals": [
             {
-              "label": "Signal cluster",
+              "label": "Bolt badge",
               "bg": "#111827",
-              "circles": [
-                {
-                  "cx": 34,
-                  "cy": 30,
-                  "r": 11,
-                  "stroke": "#53e0d0",
-                  "width": 4
-                },
-                {
-                  "cx": 78,
-                  "cy": 56,
-                  "r": 16,
-                  "stroke": "#ffcf56",
-                  "width": 5
-                },
-                {
-                  "cx": 126,
-                  "cy": 30,
-                  "r": 9,
-                  "stroke": "#ff6b9a",
-                  "width": 4
-                }
-              ],
               "paths": [
                 {
                   "points": [
                     [
-                      20,
+                      22,
+                      18
+                    ],
+                    [
+                      84,
+                      18
+                    ],
+                    [
+                      58,
+                      45
+                    ],
+                    [
+                      108,
+                      45
+                    ],
+                    [
+                      76,
                       82
-                    ],
-                    [
-                      54,
-                      82
-                    ],
-                    [
-                      72,
-                      68
-                    ]
-                  ],
-                  "stroke": "#67d6ff",
-                  "width": 4
-                },
-                {
-                  "points": [
-                    [
-                      94,
-                      72
-                    ],
-                    [
-                      138,
-                      72
-                    ]
-                  ],
-                  "stroke": "#c084fc",
-                  "width": 6
-                }
-              ]
-            },
-            {
-              "label": "Night route",
-              "bg": "#101620",
-              "paths": [
-                {
-                  "points": [
-                    [
-                      16,
-                      78
-                    ],
-                    [
-                      52,
-                      78
-                    ],
-                    [
-                      52,
-                      48
-                    ],
-                    [
-                      92,
-                      48
-                    ],
-                    [
-                      92,
-                      20
                     ],
                     [
                       142,
-                      20
+                      82
                     ]
                   ],
-                  "stroke": "#5eead4",
-                  "width": 5
-                }
-              ],
-              "circles": [
-                {
-                  "cx": 52,
-                  "cy": 48,
-                  "r": 8,
-                  "stroke": "#f9a8d4",
-                  "width": 4
+                  "stroke": "#67e8f9",
+                  "width": 6
                 },
                 {
-                  "cx": 92,
-                  "cy": 20,
-                  "r": 12,
-                  "stroke": "#fde68a",
-                  "width": 4
-                },
-                {
-                  "cx": 142,
-                  "cy": 20,
-                  "r": 8,
-                  "stroke": "#93c5fd",
-                  "width": 4
+                  "points": [
+                    [
+                      58,
+                      45
+                    ],
+                    [
+                      108,
+                      45
+                    ]
+                  ],
+                  "stroke": "#fde047",
+                  "width": 9
                 }
               ]
             },
             {
-              "label": "Beacon line",
+              "label": "Maze badge",
               "bg": "#151827",
               "paths": [
                 {
                   "points": [
                     [
-                      20,
-                      52
+                      22,
+                      78
                     ],
                     [
-                      56,
-                      52
-                    ],
-                    [
-                      78,
+                      22,
                       28
                     ],
                     [
+                      62,
+                      28
+                    ],
+                    [
+                      62,
+                      60
+                    ],
+                    [
                       102,
-                      70
+                      60
+                    ],
+                    [
+                      102,
+                      20
                     ],
                     [
                       140,
-                      70
+                      20
                     ]
                   ],
                   "stroke": "#f472b6",
-                  "width": 5
-                }
-              ],
-              "circles": [
-                {
-                  "cx": 20,
-                  "cy": 52,
-                  "r": 8,
-                  "stroke": "#67e8f9",
-                  "width": 4
+                  "width": 7
                 },
                 {
-                  "cx": 78,
-                  "cy": 28,
-                  "r": 13,
-                  "stroke": "#fde047",
-                  "width": 5
-                },
-                {
-                  "cx": 140,
-                  "cy": 70,
-                  "r": 10,
+                  "points": [
+                    [
+                      62,
+                      28
+                    ],
+                    [
+                      62,
+                      60
+                    ]
+                  ],
                   "stroke": "#86efac",
+                  "width": 4
+                }
+              ]
+            },
+            {
+              "label": "Signal badge",
+              "bg": "#101620",
+              "paths": [
+                {
+                  "points": [
+                    [
+                      24,
+                      76
+                    ],
+                    [
+                      52,
+                      48
+                    ],
+                    [
+                      80,
+                      76
+                    ],
+                    [
+                      108,
+                      48
+                    ],
+                    [
+                      136,
+                      76
+                    ]
+                  ],
+                  "stroke": "#fde047",
+                  "width": 6
+                },
+                {
+                  "points": [
+                    [
+                      52,
+                      48
+                    ],
+                    [
+                      80,
+                      20
+                    ],
+                    [
+                      108,
+                      48
+                    ]
+                  ],
+                  "stroke": "#67e8f9",
                   "width": 4
                 }
               ]
@@ -1880,46 +1894,40 @@ window.PYTHON_COURSE = {
           ],
           "steps": [
             {
-              "title": "Read the project requirements.",
-              "body": "Your finished design needs at least six visible drawn elements, movement and turns, at least three circles, at least three drawing colors, a background color, and more than one pensize().",
-              "task": "Write the first small piece and run it.",
-              "tip": "An element can be a line segment or a circle."
+              "title": "Choose a badge direction.",
+              "body": "Build a bolt, maze, signal icon, or another sharp arcade-style symbol.",
+              "task": "Set a background color, a drawing color, and pensize(), then draw your first segment.",
+              "tip": "Start with one recognizable direction instead of adding random lines."
             },
             {
-              "title": "Build a working foundation.",
-              "body": "Create two or three visible elements before worrying about the whole composition.",
-              "task": "Run after each small addition.",
-              "tip": "A project grows more reliably from working checkpoints."
+              "title": "Build the silhouette.",
+              "body": "The outside shape should become readable before you decorate it.",
+              "task": "Reach at least four visible segments and Run.",
+              "tip": "Use turns and different distances to shape the badge."
             },
             {
-              "title": "Develop the design.",
-              "body": "Continue until you meet the circle, color, and movement requirements.",
-              "task": "Use turns and distances to place elements without copying a target image.",
-              "tip": "You decide whether the design is orderly, scattered, curved, symmetrical, or something else."
+              "title": "Add color changes.",
+              "body": "Different sections can feel like separate neon tubes.",
+              "task": "Use at least three drawing colors.",
+              "tip": "Place each color() before the segment you want it to affect."
             },
             {
-              "title": "Add visual hierarchy.",
-              "body": "Use at least two different line thicknesses and three drawing colors.",
-              "task": "Run and make sure important elements remain visible against the background.",
-              "tip": "Use style changes deliberately rather than changing every line."
+              "title": "Add thickness contrast.",
+              "body": "One part of the badge should stand out more than another.",
+              "task": "Use at least two different pensize() values.",
+              "tip": "A thicker center or edge can create a focal point."
             },
             {
-              "title": "Check every requirement.",
-              "body": "Do not add code just to make the program longer.",
-              "task": "Run from a clean start and verify the six-element, circle, color, background, movement, turn, and pensize requirements.",
-              "tip": "If a requirement is missing, add the smallest change that satisfies it."
+              "title": "Finish the icon.",
+              "body": "Keep developing the same badge instead of starting a second unrelated drawing.",
+              "task": "Reach 6+ visible segments and 4+ turns.",
+              "tip": "The checker looks for the structure and style requirements, not one exact picture."
             },
             {
-              "title": "Revise one part.",
-              "body": "Choose one area that feels crowded, empty, or accidental.",
-              "task": "Change one distance, angle, radius, color, or pensize and run again.",
-              "tip": "Revision should improve something you can actually see."
-            },
-            {
-              "title": "Final clean run.",
-              "body": "Leave only the code you want in the finished project.",
-              "task": "Press Clear Run, then Run once and make sure there are no errors.",
-              "tip": "The final drawing should be yours. There is no reference picture to match."
+              "title": "Final challenge: make it feel intentional.",
+              "body": "Your badge should read as one symbol when you look at the Turtle world.",
+              "task": "Clear Run, run it from the top, and check your code.",
+              "tip": "Bolt, maze, signal, letter-like mark, and invented arcade symbols all work."
             }
           ],
           "group": "Color + Style"
