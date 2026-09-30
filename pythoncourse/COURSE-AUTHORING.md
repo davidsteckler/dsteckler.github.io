@@ -39,6 +39,8 @@ New concepts should usually appear as a three-activity cycle.
 
 **Create** gives requirements instead of a recipe. Start with a blank or minimal file, define what the final program must include, and let the student choose the code and visual result.
 
+Use the text output as a creative medium too. ASCII / block art with `print()` is valuable because students get an immediate visual payoff from very little syntax. Revisit it later when loops, variables, and functions can make the art more powerful; do not treat it as a one-off novelty.
+
 The amount of scaffolding should deliberately decrease from Make to Solve to Create. A challenge should not simply restate the solution as a sequence of steps.
 
 ## Adding lessons
