@@ -2388,7 +2388,20 @@ for i in range(4):
       clear:clear,
       installBuiltins:installBuiltins,
       syncAnimationPause:syncAnimationPause,
-      cancelAnimation:cancelAnimation
+      cancelAnimation:cancelAnimation,
+      snapshot:function(){
+        var heading=((Number(state.heading)||0)%360+360)%360;
+        return {
+          x:Number(state.x)||0,
+          y:Number(state.y)||0,
+          heading:heading,
+          penDown:!!state.penDown,
+          color:String(state.color),
+          fillColor:String(state.fillColor),
+          pensize:Number(state.size)||1,
+          background:String(state.background||"")
+        };
+      }
     };
   })();
 
@@ -2402,10 +2415,12 @@ for i in range(4):
     autoStepOnFirstPause:false,
     pending:null, timer:null,
     speed:6,
+    forceInstant:false,
     marker:null
   };
 
   function currentSpeed(){
+    if(playback.forceInstant)return 0;
     return clamp(Number(playback.speed)||0,0,10);
   }
 
@@ -2536,12 +2551,13 @@ for i in range(4):
     catch(e){pending.reject(e);}
   });
 
-  async function runCode(startWithStep){
-    if(playback.active)return;
+  async function runCode(startWithStep,options){
+    options=options||{};
+    if(playback.active)return {ok:false,error:"The program is already running."};
     if(typeof Sk==="undefined"){
       setStatus("bad");
       setOutput('<span class="error">Python did not load. Check the internet connection and refresh the page.</span>');
-      return;
+      return {ok:false,error:"Python did not load."};
     }
     runToken++;
     var token=runToken, userCode=editor.getValue(), debugLine=0;
@@ -2555,6 +2571,7 @@ for i in range(4):
     playback.autoStepOnFirstPause=!!startWithStep;
     playback.pending=null;
     playback.speed=6;
+    playback.forceInstant=!!options.check;
     showExecutingLine(null);
     syncPlaybackButtons();
     if(window.innerWidth<=560){
@@ -2599,10 +2616,12 @@ for i in range(4):
         appendOutput("\nProgram finished.\n","success");
       }
       setStatus("good");
+      return {ok:true};
     }catch(err){
-      if(token!==runToken)return;
+      if(token!==runToken)return {ok:false,error:"Run stopped."};
       renderError(err);
       setStatus("bad");
+      return {ok:false,error:formatError(err)};
     }finally{
       if(token===runToken){
         if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
@@ -2610,6 +2629,7 @@ for i in range(4):
         playback.active=false;
         playback.paused=false;
         playback.stepOnce=false;
+        playback.forceInstant=false;
         syncPlaybackButtons();
         showExecutingLine(null);
         if(window.innerWidth<=560){
@@ -2653,6 +2673,25 @@ for i in range(4):
       localStorage.setItem(STORAGE_KEY, "");
       saveStatus.textContent = "saved locally";
     } catch(e) {}
+  }
+
+  if(COURSE_EMBED){
+    window.addEventListener("message",async function(event){
+      if(event.origin!==window.location.origin)return;
+      var data=event.data||{};
+      if(data.type!=="pythoncourse-check-request")return;
+      var requestId=String(data.requestId||"");
+      var code=editor.getValue();
+      var runResult=await runCode(false,{check:true});
+      window.parent.postMessage({
+        type:"pythoncourse-check-result",
+        requestId:requestId,
+        lesson:COURSE_LESSON,
+        code:code,
+        run:runResult||{ok:false,error:"The check could not finish."},
+        runtime:TurtleRuntime.snapshot()
+      },window.location.origin);
+    });
   }
 
   runBtn.addEventListener("click",function(){runCode(false);});
