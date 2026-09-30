@@ -375,7 +375,10 @@
     .check-value{
       color:var(--soft);
       font:750 .57rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-      white-space:nowrap
+      white-space:nowrap;
+      max-width:120px;
+      overflow:hidden;
+      text-overflow:ellipsis
     }
     .teacher-notes{
       margin-top:22px;
@@ -894,16 +897,16 @@
         var el=document.createElementNS(svg.namespaceURI,"polyline");
         el.setAttribute("points",(p.points||[]).map(function(pt){return pt[0]+","+pt[1];}).join(" "));
         el.setAttribute("class","preview-path");
-        if(p.stroke)el.setAttribute("stroke",p.stroke);
-        if(p.width)el.setAttribute("stroke-width",p.width);
+        if(p.stroke)el.style.stroke=p.stroke;
+        if(p.width)el.style.strokeWidth=String(p.width);
         svg.appendChild(el);
       });
       (v.circles||[]).forEach(function(c){
         var el=document.createElementNS(svg.namespaceURI,"circle");
         el.setAttribute("cx",c.cx);el.setAttribute("cy",c.cy);el.setAttribute("r",c.r);
         el.setAttribute("class","preview-circle");
-        if(c.stroke)el.setAttribute("stroke",c.stroke);
-        if(c.width)el.setAttribute("stroke-width",c.width);
+        if(c.stroke)el.style.stroke=c.stroke;
+        if(c.width)el.style.strokeWidth=String(c.width);
         svg.appendChild(el);
       });
 
