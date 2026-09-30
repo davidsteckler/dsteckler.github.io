@@ -15,7 +15,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Introduce forward/backward and left/right. Conference by asking students to point to the line causing a visible change. Keep emphasis on run-after-small-change.",
-          check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":4,"fail":"Use at least four movement commands."},{"type":"minCalls","commands":["left","right"],"count":2,"fail":"Use at least two turns."}]},
+          check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":4,"fail":"Use at least four movement commands."},{"type":"minCalls","commands":["left","right"],"count":2,"fail":"Use at least two turns."},{"type":"minCalls","commands":["backward"],"count":1,"fail":"Use backward() at least once."},{"type":"minDistinctNumbers","commands":["forward","backward"],"count":2,"fail":"Use at least two different movement distances."}]},
           starter: "forward(80)\nleft(90)\nforward(80)",
           steps: [
             {title:"Run the working starter.",body:"Start by seeing the whole program work before changing anything.",task:"Press Run once.",tip:"The turtle starts in the center facing right."},
@@ -25,7 +25,7 @@ window.PYTHON_COURSE = {
             {title:"Use the new direction.",body:"Add forward(50) below your new turn.",task:"Run and watch the new segment appear.",tip:"A movement uses whatever direction the turtle is facing at that moment."},
             {title:"Try backward movement.",body:"Add backward(30) on a new line.",task:"Run and see how backward() behaves without changing direction first.",tip:"Backward movement does not automatically turn the turtle around."},
             {title:"Build one more corner.",body:"Add one turn and one movement of your choice.",task:"Run after each new line so the program stays working.",tip:"Small working changes are easier to debug than a large block added all at once."},
-            {title:"Finish your path.",body:"You now have enough commands to make a small route.",task:"Leave a working program with at least four visible segments and at least two turns.",tip:"There is no target picture for this last step."}
+            {title:"Challenge: Make a zigzag route.",body:"Think stair, lightning bolt, or crooked path.",task:"Use 4+ movement commands, 2+ turns, backward() at least once, and 2 different distances.",tip:"Example: a long segment, a turn, a shorter segment, another turn, then back up. Make your version different."}
           ]
         },
         {
@@ -69,7 +69,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Teach circle radius separately from movement distance. Keep placement language concrete: move first, then draw.",
-          check: {"rules":[{"type":"minCalls","commands":["circle"],"count":4,"fail":"Draw at least four circles."},{"type":"minCalls","commands":["forward","backward"],"count":3,"fail":"Move between the bubbles at least three times."}]},
+          check: {"rules":[{"type":"minCalls","commands":["circle"],"count":4,"fail":"Draw at least four circles."},{"type":"monotonicNumbers","commands":["circle"],"min":4,"direction":"up","fail":"Make each circle larger than the one before it."},{"type":"minCalls","commands":["forward","backward"],"count":3,"fail":"Move between the bubbles at least three times."},{"type":"minCalls","commands":["left","right"],"count":1,"fail":"Use a turn so the trail bends."}]},
           starter: "circle(25)\nforward(45)\ncircle(35)",
           steps: [
             {title:"Run two bubbles.",body:"The starter already draws two circles with a move between them.",task:"Press Run once.",tip:"circle() draws from the turtle's current position."},
@@ -79,7 +79,7 @@ window.PYTHON_COURSE = {
             {title:"Add a third bubble.",body:"Add another forward command and another circle command.",task:"Run after the move, then run again after the circle.",tip:"Place first, draw second."},
             {title:"Make the trail bend.",body:"Add a small turn before the move to your third bubble.",task:"Run and make the third bubble leave the straight row.",tip:"The turn has to happen before the movement it should affect."},
             {title:"Add a fourth bubble.",body:"Continue the pattern with one more move and circle.",task:"Use a new radius for the fourth bubble.",tip:"You can repeat the structure while changing the numbers."},
-            {title:"Finish the trail.",body:"Adjust one size, one distance, or one angle.",task:"Leave four visible bubbles arranged in a clear pattern.",tip:"The pattern can grow, shrink, repeat, or curve."}
+            {title:"Challenge: Make a growing bubble curve.",body:"Your bubbles should get bigger as the trail bends.",task:"Use 4 circles, make every circle larger than the last, move between each one, and turn at least once.",tip:"Example shape: four bubbles climbing around a corner. You choose the sizes, gaps, and turn."}
           ]
         },
         {
@@ -134,7 +134,7 @@ window.PYTHON_COURSE = {
             {title:"Compare Step with Run.",body:"Both controls execute the same program.",task:"Press Clear Run, then Run once. The finished drawing should match.",tip:"Step changes how you observe execution, not what the program means."},
             {title:"Change the middle distance.",body:"Change forward(30) to forward(80).",task:"Clear the run and Step until the edited line executes.",tip:"The first two statements should behave exactly as before."},
             {title:"Change the order.",body:"Move right(90) above forward(80).",task:"Press Run and see how changing sequence changes the picture.",tip:"The values stayed the same; their order changed."},
-            {title:"Restore a working sequence.",body:"Arrange the five commands into a version you like.",task:"Run from a clean start and leave a complete visible drawing.",tip:"Sequence determines when each command acts on the turtle's current state."}
+            {title:"Challenge: Make a 3-segment zigzag.",body:"Use exactly the same five commands: 3 movements and 2 turns.",task:"Reorder them so the path changes direction twice and all 3 segments are visible.",tip:"A zigzag could go right → up → right, but yours does not have to."}
           ]
         },
         {
@@ -178,7 +178,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Teach bgcolor, color, and pensize as state-setting commands. Change one visual property at a time.",
-          check: {"rules":[{"type":"minCalls","commands":["bgcolor"],"count":1,"fail":"Set a background color."},{"type":"minCalls","commands":["pensize"],"count":1,"fail":"Set the line thickness with pensize()."},{"type":"minDistinctStrings","commands":["color"],"count":3,"fail":"Use at least three different drawing colors."},{"type":"minCalls","commands":["circle"],"count":1,"fail":"Include a circle in the finished study."}]},
+          check: {"rules":[{"type":"minCalls","commands":["bgcolor"],"count":1,"fail":"Set a background color."},{"type":"minCalls","commands":["pensize"],"count":1,"fail":"Set the line thickness with pensize()."},{"type":"minDistinctStrings","commands":["color"],"count":3,"fail":"Use at least three different drawing colors."},{"type":"minCalls","commands":["circle"],"count":1,"fail":"Include a circle in the finished sign."},{"type":"minDrawElements","count":4,"fail":"Draw at least four visible elements."}]},
           starter: "bgcolor(\"midnightblue\")\ncolor(\"gold\")\npensize(4)\nforward(100)\nleft(90)\nforward(100)",
           steps: [
             {title:"Run the styled path.",body:"The first three lines change appearance before the turtle moves.",task:"Press Run once.",tip:"bgcolor(), color(), and pensize() affect later drawing."},
@@ -188,7 +188,7 @@ window.PYTHON_COURSE = {
             {title:"Use two drawing colors.",body:"Add another color() command between the two forward commands.",task:"Run so the two segments have different colors.",tip:"A setting affects the commands that come after it."},
             {title:"Add a colored circle.",body:"Change color again, then add circle(30).",task:"Run and keep the circle visible with the existing path.",tip:"The circle uses the current pen color."},
             {title:"Move and draw in another color.",body:"Add a turn, change color, then add a movement.",task:"Run and create another visible part of the drawing.",tip:"Put color() before the movement you want it to affect."},
-            {title:"Finish the study.",body:"Choose the background, colors, and line thickness you want to keep.",task:"Run the complete program from a clean start.",tip:"There is no required final image."}
+            {title:"Challenge: Make a tiny neon sign.",body:"It can be abstract—a symbol, path, or simple shape.",task:"Use a background, 3 drawing colors, pensize(), at least 1 circle, and 4+ visible drawn elements.",tip:"Example idea: a bright circle with a colored zigzag beside it. Make your own design."}
           ]
         },
         {
