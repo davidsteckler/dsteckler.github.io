@@ -14,6 +14,7 @@ window.PYTHON_COURSE = {
           title: "Make a Path",
           type: "Make",
           available: true,
+          notes: "Introduce forward/backward and left/right. Conference by asking students to point to the line causing a visible change. Keep emphasis on run-after-small-change.",
           starter: "forward(80)\nleft(90)\nforward(80)",
           steps: [
             {title:"Run the working starter.",body:"Start by seeing the whole program work before changing anything.",task:"Press Run once.",tip:"The turtle starts in the center facing right."},
@@ -32,6 +33,7 @@ window.PYTHON_COURSE = {
           title: "Route Puzzle",
           type: "Solve",
           available: true,
+          notes: "First real reduction in scaffolding. Do not give the closing sequence. If stuck, ask what side is missing and which existing distance matches it.",
           starter: "forward(90)\nleft(90)\nforward(50)\nleft(90)\nforward(90)",
           steps: [
             {title:"Run the route.",body:"The starter draws three sides of a shape.",task:"Press Run and study the unfinished drawing.",tip:"Look at where the turtle is and which direction it faces at the end."},
@@ -47,6 +49,7 @@ window.PYTHON_COURSE = {
           title: "Route Designer",
           type: "Create",
           available: true,
+          notes: "Check requirements rather than appearance. Students should choose the route. Encourage clean runs and explain only when conferencing.",
           starter: "# Build your route below\n",
           steps: [
             {title:"Meet the requirements.",body:"Your route needs at least five visible segments, at least one left turn, at least one right turn, and two different movement distances.",task:"Write the first two commands and run them.",tip:"Start small. You do not need to know the final picture yet."},
@@ -62,6 +65,7 @@ window.PYTHON_COURSE = {
           title: "Make a Bubble Trail",
           type: "Make",
           available: true,
+          notes: "Teach circle radius separately from movement distance. Keep placement language concrete: move first, then draw.",
           starter: "circle(25)\nforward(45)\ncircle(35)",
           steps: [
             {title:"Run two bubbles.",body:"The starter already draws two circles with a move between them.",task:"Press Run once.",tip:"circle() draws from the turtle's current position."},
@@ -80,6 +84,7 @@ window.PYTHON_COURSE = {
           title: "Bubble Pattern Puzzle",
           type: "Solve",
           available: true,
+          notes: "Let students find the broken spacing value before opening the hint. Focus on comparing repeated parameters.",
           starter: "circle(20)\nforward(40)\ncircle(30)\nforward(70)\ncircle(40)\nforward(40)\ncircle(50)",
           steps: [
             {title:"Find what breaks the pattern.",body:"This program is supposed to make bubbles that grow by 10 while the gaps stay equal.",task:"Run it. Fix the one value that breaks the spacing pattern.",tip:"Compare the forward() values, not the circle() values."},
@@ -95,6 +100,7 @@ window.PYTHON_COURSE = {
           title: "Bubble Design",
           type: "Create",
           available: true,
+          notes: "Open-ended application of circle, movement, and turning. Assess whether requirements are met, not whether drawings look alike.",
           starter: "# Make an original bubble design\n",
           steps: [
             {title:"Start with one working bubble.",body:"Your final design needs at least five circles, at least three different radii, and at least one change of direction.",task:"Write code for the first circle and run it.",tip:"A project is still easier when the smallest piece works first."},
@@ -111,6 +117,7 @@ window.PYTHON_COURSE = {
           title: "Make Sense of Sequence",
           type: "Make",
           available: true,
+          notes: "Use Step heavily here. The goal is seeing that each line inherits the turtle's current position and direction.",
           starter: "forward(60)\nleft(90)\nforward(30)\nright(90)\nforward(20)",
           steps: [
             {title:"Use Step for line 1.",body:"Instead of running everything at once, execute the program one statement at a time.",task:"Press Step once.",tip:"The first command should move the turtle to the right."},
@@ -129,6 +136,7 @@ window.PYTHON_COURSE = {
           title: "Debug Challenge",
           type: "Solve",
           available: true,
+          notes: "Have students fix one error at a time and rerun. Distinguish syntax/name errors from a program that runs but does the wrong thing.",
           starter: "forword(70)\nleft(90\nforward(40)\nrite(90)\nforward(70)",
           steps: [
             {title:"Get the program to run.",body:"This five-line program has several typing and syntax mistakes.",task:"Press Run. Fix errors one at a time until the program executes.",tip:"Run again after every fix so the next error becomes easier to isolate."},
@@ -144,6 +152,7 @@ window.PYTHON_COURSE = {
           title: "Five-Line Drawing",
           type: "Create",
           available: true,
+          notes: "Constraint challenge. Do not suggest a target image. The five-command limit forces students to choose commands intentionally.",
           starter: "# You get exactly five drawing commands\n",
           steps: [
             {title:"Read the constraint.",body:"Create a recognizable or interesting mark using exactly five Turtle commands. Comments do not count.",task:"Write your first command and run it.",tip:"You may use movement, turns, or circle()."},
@@ -159,6 +168,7 @@ window.PYTHON_COURSE = {
           title: "Make a Color Study",
           type: "Make",
           available: true,
+          notes: "Teach bgcolor, color, and pensize as state-setting commands. Change one visual property at a time.",
           starter: "bgcolor(\"midnightblue\")\ncolor(\"gold\")\npensize(4)\nforward(100)\nleft(90)\nforward(100)",
           steps: [
             {title:"Run the styled path.",body:"The first three lines change appearance before the turtle moves.",task:"Press Run once.",tip:"bgcolor(), color(), and pensize() affect later drawing."},
@@ -177,6 +187,7 @@ window.PYTHON_COURSE = {
           title: "Color Rescue",
           type: "Solve",
           available: true,
+          notes: "Students should diagnose visibility and ordering problems. Avoid naming the exact fix unless they use the hint.",
           starter: "bgcolor(\"navy\")\ncolor(\"navy\")\npensize(1)\nforward(100)\nleft(90)\ncolor(\"yellow\")\nforward(100)\ncircle(30)",
           steps: [
             {title:"Find the invisible segment.",body:"The program runs, but part of the drawing disappears into the background.",task:"Run it and change one value so the first segment becomes visible.",tip:"The first pen color currently matches the background."},
@@ -192,6 +203,7 @@ window.PYTHON_COURSE = {
           title: "Night Signals",
           type: "Create",
           available: true,
+          notes: "Unit project. Conference around requirements, revision, and intentional choices. Final products should vary widely.",
           starter: "# Unit 1 project\n# Build your Night Signals design below\n",
           steps: [
             {title:"Read the project requirements.",body:"Your finished design needs at least six visible drawn elements, movement and turns, at least three circles, at least three drawing colors, a background color, and more than one pensize().",task:"Write the first small piece and run it.",tip:"An element can be a line segment or a circle."},
