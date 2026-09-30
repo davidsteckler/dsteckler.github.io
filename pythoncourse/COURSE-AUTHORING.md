@@ -33,7 +33,7 @@ Teacher-only notes belong on the lesson object as a `notes` field. They can incl
 
 New concepts should usually appear as a three-activity cycle.
 
-**Make** is the most scaffolded. Start with working code, change one thing at a time, run constantly, and reveal what each command controls.
+**Make** is the most scaffolded. Start with working code, change one thing at a time, run constantly, and reveal what each command controls. End each Make lesson with a concrete mini-challenge: name the thing to build, give 3–5 objective requirements, and offer an example of the kind of result without giving the solution code.
 
 **Solve** removes instructions. Give a clear target, constraints, or a broken/unfinished program. Students should have to decide which command or value to change. Hints stay optional and hidden until opened.
 
