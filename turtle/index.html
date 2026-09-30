@@ -1219,6 +1219,75 @@ for i in range(4):
       "circle(30)",
       "forward(30)"
     ].join("\n"),
+    "for-loops": [
+      "forward(20)",
+      "for i in range(2):",
+      "    circle(10)",
+      "    circle(20)",
+      "    circle(30)",
+      "    left(90)",
+      "forward(100)"
+    ].join("\n"),
+    functions: [
+      "speed(4)",
+      "",
+      "def double_circle():",
+      "    setheading(90)",
+      "    circle(20)",
+      "    setheading(270)",
+      "    circle(20)",
+      "",
+      "bgcolor(\"pink\")",
+      "for i in range(2):",
+      "    double_circle()",
+      "    penup()",
+      "    forward(40)",
+      "    seth(0)",
+      "    pendown()"
+    ].join("\n"),
+    variables: [
+      "def filled_circle():",
+      "    begin_fill()",
+      "    circle(50)",
+      "    end_fill()",
+      "",
+      "circle_color = \"blue\"",
+      "penup()",
+      "backward(25)",
+      "color(circle_color)",
+      "filled_circle()",
+      "forward(50)",
+      "circle_color = \"red\"",
+      "color(circle_color)",
+      "filled_circle()"
+    ].join("\n"),
+    parameters: [
+      "def growing_circles(x, y):",
+      "    penup()",
+      "    goto(x, y)",
+      "    radius = 10",
+      "    pendown()",
+      "    for i in range(3):",
+      "        circle(radius)",
+      "        radius += 10",
+      "",
+      "growing_circles(-50, -50)",
+      "growing_circles(100, 0)"
+    ].join("\n"),
+    "using-i": [
+      "speed(10)",
+      "",
+      "def square(side_length):",
+      "    for i in range(4):",
+      "        forward(side_length)",
+      "        left(90)",
+      "",
+      "square(20)",
+      "penup()",
+      "sety(100)",
+      "pendown()",
+      "square(50)"
+    ].join("\n"),
     "extended-loop": [
       "speed(10)",
       "for i in range(200, 0, -50):",
@@ -2492,6 +2561,7 @@ for i in range(4):
       playback.timer=null;
       if(!playback.active||playback.paused||playback.pending!==pending)return;
       playback.pending=null;
+      playback.lastExecutedLine=pending.line||null;
       try{pending.resolve(pending.susp.resume());}
       catch(e){pending.reject(e);}
     },lineDelay());
@@ -2504,6 +2574,7 @@ for i in range(4):
     playback.paused=false;
     playback.stepOnce=false;
     playback.autoStepOnFirstPause=false;
+    playback.lastExecutedLine=null;
     TurtleRuntime.cancelAnimation();
     if(pending)pending.reject(new Error("Playback stopped"));
     syncPlaybackButtons();
@@ -2520,7 +2591,7 @@ for i in range(4):
       var autoFirstStep=playback.autoStepOnFirstPause;
       if(autoFirstStep) playback.autoStepOnFirstPause=false;
 
-      playback.pending={susp:susp,resolve:resolve,reject:reject};
+      playback.pending={susp:susp,resolve:resolve,reject:reject,line:line};
 
       // A Step click from the stopped state should execute the first
       // statement immediately, then pause on the next statement.
@@ -2528,6 +2599,7 @@ for i in range(4):
         var first=playback.pending;
         playback.pending=null;
         playback.stepOnce=true;
+        playback.lastExecutedLine=first.line||null;
         syncPlaybackButtons();
         try{first.resolve(first.susp.resume());}
         catch(e){first.reject(e);}
@@ -2566,6 +2638,7 @@ for i in range(4):
     if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
     playback.stepOnce=true;
     playback.paused=false;
+    playback.lastExecutedLine=pending.line||null;
     syncPlaybackButtons();
     TurtleRuntime.syncAnimationPause();
     try{pending.resolve(pending.susp.resume());}
@@ -2591,6 +2664,7 @@ for i in range(4):
     playback.stepOnce=false;
     playback.autoStepOnFirstPause=!!startWithStep;
     playback.pending=null;
+    playback.lastExecutedLine=null;
     playback.speed=6;
     playback.forceInstant=!!options.check;
     showExecutingLine(null);
@@ -2928,13 +3002,21 @@ for i in range(4):
         if(!playback.active){ runCode(true); }
         else if(playback.paused && playback.pending){ stepBtn.click(); }
       },
+      run:function(){
+        if(playback.active) return false;
+        runCode(false);
+        return true;
+      },
+      stop:function(){ if(playback.active) stopCode(); },
       reset:function(){
         if(playback.active) stopCode();
+        playback.lastExecutedLine=null;
         clearWorld();
         setOutput('<span class="muted">Trace example ready.</span>');
         showExecutingLine(1);
       },
       highlight:function(line){ showExecutingLine(line); },
+      lastLine:function(){ return playback.lastExecutedLine; },
       isPaused:function(){ return !!(playback.active && playback.paused && playback.pending); },
       isActive:function(){ return !!playback.active; }
     };
