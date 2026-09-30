@@ -19,14 +19,15 @@ Build lessons around visible checkpoints.
 11. Every visible "Do this" instruction should result in an action the student can complete on the page: edit code, run code, step through code, reset, or use a purpose-built question control.
 
 A lesson step should usually have:
-- a short action label
-- one clear title
-- a brief explanation
-- exactly what the student should do
-- one useful observation or debugging hint
-- an optional small code example
 
-Avoid steps where students type a large block of code before anything changes on screen.
+- a short title
+- one brief teaching sentence when the student needs it
+- one direct action
+- an optional hidden hint
+
+Student-facing text should be minimal. Do not restate the title in the body, and do not wrap the action in labels such as "Do this." If the action itself teaches the idea, omit extra explanation.
+
+Teacher-only notes belong on the lesson object as a `notes` field. They can include instructional intent, misconceptions to watch for, conferencing questions, and editing reminders. They are hidden from students and appear only in teacher mode with `?teacher=1`.
 
 ## Learning pattern: Make → Solve → Create
 
