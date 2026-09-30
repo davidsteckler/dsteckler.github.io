@@ -35,8 +35,30 @@ button{font:inherit;cursor:pointer} a{color:inherit}
 .toplinks a{text-decoration:none;color:var(--mid);font-size:.7rem;font-weight:750;padding:7px 8px;border-radius:8px}
 .toplinks a:hover{background:#fff}
 
+.example-strip{
+  height:64px;display:flex;align-items:center;gap:12px;padding:6px 10px;
+  border-bottom:1px solid var(--rule);background:#f7f3ea;overflow:hidden
+}
+.example-meta{display:flex;align-items:baseline;gap:7px;min-width:116px;color:var(--mid)}
+.example-meta strong{font-size:.72rem}.example-meta span{font:750 .65rem/1 ui-monospace,monospace;color:var(--soft)}
+.example-tabs{display:flex;gap:7px;min-width:0}
+.example-tab{
+  height:50px;min-width:190px;display:flex;align-items:center;gap:9px;text-align:left;
+  border:1px solid var(--rule);border-radius:10px;background:var(--surface);padding:6px 10px;color:var(--ink)
+}
+.example-tab:hover{border-color:var(--rule-strong)}
+.example-tab.active{border:2px solid var(--teal);background:#edf6f3;box-shadow:inset 0 0 0 2px rgba(23,107,115,.08)}
+.example-number{
+  width:27px;height:27px;flex:0 0 27px;border-radius:8px;display:grid;place-items:center;
+  background:#eef0eb;color:var(--teal-dark);font:850 .72rem/1 ui-monospace,monospace
+}
+.example-tab.active .example-number{background:var(--teal);color:#fff}
+.example-copy{display:grid;gap:1px;min-width:0}
+.example-copy b{font-size:.72rem;line-height:1.1}
+.example-copy small{font-size:.62rem;line-height:1.1;color:var(--soft);white-space:nowrap}
+
 .lesson-shell{
-  height:calc(100dvh - 50px);
+  height:calc(100dvh - 114px);
   padding:9px;
   display:grid;
   grid-template-columns:minmax(460px,42fr) minmax(670px,58fr);
@@ -68,7 +90,7 @@ button{font:inherit;cursor:pointer} a{color:inherit}
 .mini{font-size:.65rem;color:var(--soft);font-weight:700;white-space:nowrap}
 
 .trace-card{display:grid;grid-template-rows:42px minmax(0,1fr) auto}
-.tablewrap{padding:8px 12px 4px;min-height:0}
+.tablewrap{padding:8px 12px 4px;min-height:0;overflow:auto}
 .trace{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font:650 clamp(.72rem,.83vw,.88rem)/1.18 "JetBrains Mono","SFMono-Regular",Consolas,monospace}
 .trace th{font-size:.68rem;color:var(--mid);text-align:left;padding:7px 8px;border-bottom:2px solid var(--rule-strong);white-space:nowrap}
 .trace td{padding:5px 8px;border-bottom:1px solid var(--rule);vertical-align:middle}
@@ -77,7 +99,9 @@ button{font:inherit;cursor:pointer} a{color:inherit}
 .trace th:nth-child(2),.trace td:nth-child(2){width:25%;text-align:center}
 .trace th:last-child,.trace td:last-child{width:59%}
 .trace tr.current td{background:#fff5df}.trace tr.complete td{background:#f2f8f5}
-.placeholder{color:#b5bab8;font-weight:500}.answer{color:var(--ink);font-weight:800;animation:pop .2s ease}
+.trace.compact td{padding:2px 8px;font-size:.72rem;line-height:1.05}
+.trace.compact th{padding:5px 8px}
+.placeholder{color:#b5bab8;font-weight:500}.answer{color:var(--ink);font-weight:800;animation:pop .2s ease}.nochange{color:#9da3a0;font-weight:650}
 @keyframes pop{from{opacity:.25;transform:translateY(2px)}to{opacity:1;transform:none}}
 .teacher-note{padding:6px 12px 9px;color:var(--soft);font-size:.68rem;line-height:1.3}
 
@@ -101,7 +125,8 @@ button{font:inherit;cursor:pointer} a{color:inherit}
 .loading.hidden{display:none}
 
 @media(max-height:720px) and (min-width:1001px){
-  .lesson-shell{padding:6px;gap:6px}
+  .example-strip{height:54px;padding:4px 8px}.example-tab{height:44px}
+  .lesson-shell{height:calc(100dvh - 104px);padding:6px;gap:6px}
   .left-rail{gap:6px}
   .lesson-intro{padding:8px 12px}
   .lesson-intro h1{font-size:1.18rem}.lesson-intro p{font-size:.68rem}
@@ -113,6 +138,9 @@ button{font:inherit;cursor:pointer} a{color:inherit}
 @media(max-width:1000px){
   html,body{height:auto;min-height:100%}
   body{overflow-y:auto}
+  .example-strip{height:auto;min-height:64px;overflow-x:auto;align-items:stretch}
+  .example-meta{position:sticky;left:0;background:#f7f3ea;z-index:1;padding-right:6px}
+  .example-tab{min-width:180px}
   .lesson-shell{height:auto;display:block;padding:10px}
   .left-rail{display:grid;grid-template-rows:auto auto auto;gap:10px}
   .sandbox-section{height:720px;margin-top:10px}
@@ -127,13 +155,27 @@ button{font:inherit;cursor:pointer} a{color:inherit}
   <nav class="toplinks"><a href="/turtle/">Turtle Sandbox</a><a href="/turtleprojects/">Projects</a><a href="/course.html">Course</a></nav>
 </header>
 
+<section class="example-strip" aria-label="Trace table examples">
+  <div class="example-meta"><strong>Try an example</strong><span id="exampleCounter">1 / 2</span></div>
+  <div class="example-tabs">
+    <button class="example-tab active" data-example="sequence" type="button">
+      <span class="example-number">1</span>
+      <span class="example-copy"><b>Sequencing</b><small>commands in order</small></span>
+    </button>
+    <button class="example-tab" data-example="extended-loop" type="button">
+      <span class="example-number">2</span>
+      <span class="example-copy"><b>For loop + i</b><small>range(200, 0, -50)</small></span>
+    </button>
+  </div>
+</section>
+
 <main class="lesson-shell">
   <section class="left-rail">
     <div class="card lesson-intro">
       <div>
-        <div class="eyebrow">1.1.5 · Sequencing with Trace Tables</div>
-        <h1>Build the trace table as the code runs.</h1>
-        <p>Click one step at a time. Watch the exact command run on the right, then see that row appear in the trace table.</p>
+        <div class="eyebrow" id="lessonEyebrow">1.1.5 · Sequencing with Trace Tables</div>
+        <h1 id="lessonTitle">Build the trace table as the code runs.</h1>
+        <p id="lessonDescription">Click one step at a time. Watch the exact command run on the right, then see that row appear in the trace table.</p>
       </div>
       <div class="progress" id="progress" aria-label="Trace progress"></div>
     </div>
@@ -141,15 +183,15 @@ button{font:inherit;cursor:pointer} a{color:inherit}
     <div class="card trace-card">
       <div class="cardhead">
         <div class="cardtitle"><span class="dot" id="tableDot"></span> Trace table</div>
-        <div class="mini">same six rows as CodeHS</div>
+        <div class="mini" id="tableMini">same six rows as CodeHS</div>
       </div>
       <div class="tablewrap">
-        <table class="trace">
-          <thead><tr><th>Step</th><th>Line Number</th><th>Command</th></tr></thead>
+        <table class="trace" id="traceTable">
+          <thead><tr><th>Step</th><th>Line Number</th><th id="thirdHeader">Command</th></tr></thead>
           <tbody id="traceBody"></tbody>
         </table>
       </div>
-      <div class="teacher-note">The step column is already given. Find which line runs at each step, then copy that command.</div>
+      <div class="teacher-note" id="teacherNote">The step column is already given. Find which line runs at each step, then copy that command.</div>
     </div>
 
     <div class="card explain">
@@ -161,7 +203,7 @@ button{font:inherit;cursor:pointer} a{color:inherit}
         <div class="stepnum" id="stepNum">Before step 1</div>
         <h2 id="stepTitle">Start at the first line.</h2>
         <p id="stepText">Python runs this program from top to bottom. The first command it reaches is <code>forward(100)</code> on line 1. That belongs in the first row.</p>
-        <div class="rule"><strong>For this program:</strong> every line is a command and each command runs once, so step number and line number stay together from 1 through 6.</div>
+        <div class="rule" id="programRule"><strong>For this program:</strong> every line is a command and each command runs once, so step number and line number stay together from 1 through 6.</div>
       </div>
       <div class="controls">
         <button class="btn" id="resetBtn">Reset</button>
@@ -178,20 +220,67 @@ button{font:inherit;cursor:pointer} a{color:inherit}
     </div>
     <div class="editorframe-wrap">
       <div class="loading" id="loading">Loading your Turtle editor…</div>
-      <iframe id="editorFrame" src="/turtle/?embed=trace&v=circle-smooth-3" title="David Steckler Python Turtle editor"></iframe>
+      <iframe id="editorFrame" src="/turtle/?embed=trace&trace=sequence&v=trace-multi-1" title="David Steckler Python Turtle editor"></iframe>
     </div>
   </section>
 </main>
 
 <script>
-const steps=[
-  {line:1,command:'forward(100)',title:'Step 1 runs line 1.',text:'The program begins with <code>forward(100)</code>. The turtle moves forward 100 units. Enter <strong>1</strong> for the line number and <code>forward(100)</code> for the command.'},
-  {line:2,command:'circle(10)',title:'Step 2 runs line 2.',text:'After line 1 finishes, Python moves to <code>circle(10)</code> on line 2. The turtle draws a circle with radius 10.'},
-  {line:3,command:'forward(10)',title:'Step 3 runs line 3.',text:'Next comes <code>forward(10)</code> on line 3. The turtle moves forward 10 units from its current position.'},
-  {line:4,command:'circle(20)',title:'Step 4 runs line 4.',text:'Python continues straight down to <code>circle(20)</code> on line 4. This circle is larger because its radius is 20.'},
-  {line:5,command:'circle(30)',title:'Step 5 runs line 5.',text:'The next command is <code>circle(30)</code> on line 5. Notice that the turtle stays at the same starting point for the circle, but the radius changes.'},
-  {line:6,command:'forward(30)',title:'Step 6 runs line 6.',text:'The final command is <code>forward(30)</code> on line 6. Once it runs, all six rows of the trace table are complete.'}
-];
+const examples={
+  sequence:{
+    eyebrow:'1.1.5 · Sequencing with Trace Tables',
+    title:'Build the trace table as the code runs.',
+    description:'Click one step at a time. Watch the exact command run on the right, then see that row appear in the trace table.',
+    mini:'same six rows as CodeHS',
+    thirdHeader:'Command',
+    teacherNote:'The step column is already given. Find which line runs at each step, then copy that command.',
+    rule:'<strong>For this program:</strong> every line is a command and each command runs once, so step number and line number stay together from 1 through 6.',
+    embed:'/turtle/?embed=trace&trace=sequence&v=trace-multi-1',
+    startTitle:'Start at the first line.',
+    startText:'Python runs this program from top to bottom. The first command it reaches is <code>forward(100)</code> on line 1. That belongs in the first row.',
+    completeTitle:'Read the finished table from top to bottom.',
+    completeText:'The program ran in this order: <code>forward(100)</code>, <code>circle(10)</code>, <code>forward(10)</code>, <code>circle(20)</code>, <code>circle(30)</code>, <code>forward(30)</code>. That is exactly what the trace table records.',
+    steps:[
+      {line:1,third:'forward(100)',title:'Step 1 runs line 1.',text:'The program begins with <code>forward(100)</code>. The turtle moves forward 100 units. Enter <strong>1</strong> for the line number and <code>forward(100)</code> for the command.'},
+      {line:2,third:'circle(10)',title:'Step 2 runs line 2.',text:'After line 1 finishes, Python moves to <code>circle(10)</code> on line 2. The turtle draws a circle with radius 10.'},
+      {line:3,third:'forward(10)',title:'Step 3 runs line 3.',text:'Next comes <code>forward(10)</code> on line 3. The turtle moves forward 10 units from its current position.'},
+      {line:4,third:'circle(20)',title:'Step 4 runs line 4.',text:'Python continues straight down to <code>circle(20)</code> on line 4. This circle is larger because its radius is 20.'},
+      {line:5,third:'circle(30)',title:'Step 5 runs line 5.',text:'The next command is <code>circle(30)</code> on line 5. Notice that the turtle stays at the same starting point for the circle, but the radius changes.'},
+      {line:6,third:'forward(30)',title:'Step 6 runs line 6.',text:'The final command is <code>forward(30)</code> on line 6. Once it runs, all six rows of the trace table are complete.'}
+    ]
+  },
+  'extended-loop':{
+    eyebrow:'5.10.5 · Extended Loop Control and Trace Tables',
+    title:'Trace the loop as i changes.',
+    description:'Watch Python return to the for loop, update i, and use the new value to draw the next side.',
+    mini:'same 15 rows as CodeHS',
+    thirdHeader:'Value of i',
+    teacherNote:'Only write a value when i is initialized or changes. A dash here means leave that CodeHS cell blank.',
+    rule:'<strong>For this program:</strong> line 2 is reached four times. Each time, <code>i</code> takes the next value from the range: <strong>200 → 150 → 100 → 50</strong>. The stop value 0 is not included.',
+    embed:'/turtle/?embed=trace&trace=extended-loop&v=trace-multi-1',
+    startTitle:'Begin before the loop.',
+    startText:'Python first runs <code>speed(10)</code> on line 1. The variable <code>i</code> does not exist yet, so the Value of i cell stays blank.',
+    completeTitle:'The loop changed the order of the line numbers.',
+    completeText:'Line 2 appears four times because Python returns to the loop header for each value of <code>i</code>: <strong>200, 150, 100, 50</strong>. After the fourth pass, Python leaves the loop and runs lines 5 and 6.',
+    steps:[
+      {line:1,third:null,title:'Step 1 runs line 1.',text:'Run <code>speed(10)</code>. This changes the turtle speed. It does not create <code>i</code>, so leave the Value of i cell blank.'},
+      {line:2,third:'200',title:'Step 2 starts the first loop pass.',text:'Python reaches <code>for i in range(200, 0, -50):</code>. The first value is <strong>200</strong>, so this is the first row where you write a value for <code>i</code>.'},
+      {line:3,third:null,title:'Step 3 uses i = 200.',text:'Line 3 runs <code>forward(i)</code>. The turtle moves 200 units. The value of <code>i</code> did not change on this line, so leave the variable cell blank.'},
+      {line:4,third:null,title:'Step 4 finishes the first pass.',text:'Line 4 runs <code>left(90)</code>. The turtle turns left. <code>i</code> is still 200, so nothing is written in the variable column.'},
+      {line:2,third:'150',title:'Step 5 returns to line 2.',text:'The loop starts its second pass. Because the range changes by -50, <code>i</code> becomes <strong>150</strong>. Record line 2 and the new value 150.'},
+      {line:3,third:null,title:'Step 6 uses i = 150.',text:'Line 3 runs again, now as <code>forward(150)</code>. The value was already recorded when it changed on line 2.'},
+      {line:4,third:null,title:'Step 7 turns again.',text:'Line 4 runs <code>left(90)</code>. The variable does not change on this line.'},
+      {line:2,third:'100',title:'Step 8 returns to line 2.',text:'The third loop pass begins. Subtract 50 again: <code>i</code> changes from 150 to <strong>100</strong>.'},
+      {line:3,third:null,title:'Step 9 uses i = 100.',text:'Line 3 runs <code>forward(100)</code>. Leave the Value of i cell blank because the value stays 100.'},
+      {line:4,third:null,title:'Step 10 turns again.',text:'Line 4 runs <code>left(90)</code>. No variable value changes here.'},
+      {line:2,third:'50',title:'Step 11 starts the fourth pass.',text:'Python returns to line 2 one more time. <code>i</code> becomes <strong>50</strong>. The next value would be 0, and range stops before 0.'},
+      {line:3,third:null,title:'Step 12 uses i = 50.',text:'Line 3 runs <code>forward(50)</code>. This is the final forward command inside the loop.'},
+      {line:4,third:null,title:'Step 13 finishes the loop.',text:'Line 4 runs <code>left(90)</code> for the fourth time. After this, there are no more values in the range.'},
+      {line:5,third:null,title:'Step 14 leaves the loop.',text:'Python continues to line 5 and runs <code>penup()</code>. The loop is finished, and <code>i</code> does not change.'},
+      {line:6,third:null,title:'Step 15 runs the final line.',text:'Line 6 runs <code>goto(0, 0)</code>. The turtle returns to the center without drawing because the pen is up.'}
+    ]
+  }
+};
 
 const body=document.getElementById('traceBody');
 const progress=document.getElementById('progress');
@@ -206,46 +295,112 @@ const statusText=document.getElementById('statusText');
 const stepNum=document.getElementById('stepNum');
 const stepTitle=document.getElementById('stepTitle');
 const stepText=document.getElementById('stepText');
-let current=0, editorReady=false, busy=false;
+const lessonEyebrow=document.getElementById('lessonEyebrow');
+const lessonTitle=document.getElementById('lessonTitle');
+const lessonDescription=document.getElementById('lessonDescription');
+const tableMini=document.getElementById('tableMini');
+const thirdHeader=document.getElementById('thirdHeader');
+const teacherNote=document.getElementById('teacherNote');
+const programRule=document.getElementById('programRule');
+const traceTable=document.getElementById('traceTable');
+const exampleCounter=document.getElementById('exampleCounter');
+const tabs=[...document.querySelectorAll('.example-tab')];
 
-steps.forEach((s,i)=>{
-  const tr=document.createElement('tr');
-  tr.innerHTML='<td>'+(i+1)+'</td><td class="line placeholder">?</td><td class="command placeholder">?</td>';
-  body.appendChild(tr);
-  const pip=document.createElement('span');pip.className='pip';progress.appendChild(pip);
-});
+let activeKey='sequence';
+let steps=examples[activeKey].steps;
+let current=0, editorReady=false, busy=false, loadSerial=0;
 
 function api(){
   try{return frame.contentWindow && frame.contentWindow.TraceTurtleEmbed;}catch(e){return null;}
 }
+
+function buildRows(){
+  body.innerHTML='';
+  progress.innerHTML='';
+  steps.forEach((s,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td><td class="line placeholder">?</td><td class="third placeholder">?</td>';
+    body.appendChild(tr);
+    const pip=document.createElement('span');
+    pip.className='pip';
+    progress.appendChild(pip);
+  });
+  traceTable.classList.toggle('compact',steps.length>10);
+}
+
+function applyExampleText(){
+  const cfg=examples[activeKey];
+  lessonEyebrow.textContent=cfg.eyebrow;
+  lessonTitle.textContent=cfg.title;
+  lessonDescription.textContent=cfg.description;
+  tableMini.textContent=cfg.mini;
+  thirdHeader.textContent=cfg.thirdHeader;
+  teacherNote.textContent=cfg.teacherNote;
+  programRule.innerHTML=cfg.rule;
+  const index=Object.keys(examples).indexOf(activeKey);
+  exampleCounter.textContent=(index+1)+' / '+Object.keys(examples).length;
+  tabs.forEach(tab=>{
+    const selected=tab.dataset.example===activeKey;
+    tab.classList.toggle('active',selected);
+    tab.setAttribute('aria-pressed',selected?'true':'false');
+  });
+}
+
 function render(){
+  const cfg=examples[activeKey];
   [...body.rows].forEach((tr,i)=>{
     tr.className=i<current?'complete':(i===current&&current<steps.length?'current':'');
-    const line=tr.querySelector('.line'),cmd=tr.querySelector('.command');
+    const line=tr.querySelector('.line');
+    const third=tr.querySelector('.third');
     if(i<current){
-      line.textContent=steps[i].line;cmd.textContent=steps[i].command;
-      line.className='line answer';cmd.className='command answer';
+      line.textContent=steps[i].line;
+      line.className='line answer';
+      if(steps[i].third===null){
+        third.textContent='—';
+        third.className='third nochange';
+        third.title='Leave this CodeHS cell blank';
+      }else{
+        third.textContent=steps[i].third;
+        third.className='third answer';
+        third.removeAttribute('title');
+      }
     }else{
-      line.textContent='?';cmd.textContent='?';
-      line.className='line placeholder';cmd.className='command placeholder';
+      line.textContent='?';
+      third.textContent='?';
+      line.className='line placeholder';
+      third.className='third placeholder';
+      third.removeAttribute('title');
     }
   });
-  [...progress.children].forEach((p,i)=>p.className='pip'+(i<current?' done':i===current&&current<steps.length?' current':''));
+
+  [...progress.children].forEach((p,i)=>{
+    p.className='pip'+(i<current?' done':i===current&&current<steps.length?' current':'');
+  });
 
   if(current===0){
-    stepNum.textContent='Before step 1';stepTitle.textContent='Start at the first line.';
-    stepText.innerHTML='Python runs this program from top to bottom. The first command it reaches is <code>forward(100)</code> on line 1. That belongs in the first row.';
+    stepNum.textContent='Before step 1';
+    stepTitle.textContent=cfg.startTitle;
+    stepText.innerHTML=cfg.startText;
     statusText.textContent=editorReady?'ready':'loading';
-    tableDot.className='dot';explainDot.className='dot';
+    tableDot.className='dot';
+    explainDot.className='dot';
   }else if(current<steps.length){
     const s=steps[current-1];
-    stepNum.textContent='Step '+current+' of '+steps.length;stepTitle.textContent=s.title;stepText.innerHTML=s.text;
-    statusText.textContent='step '+current+' complete';tableDot.className='dot run';explainDot.className='dot run';
+    stepNum.textContent='Step '+current+' of '+steps.length;
+    stepTitle.textContent=s.title;
+    stepText.innerHTML=s.text;
+    statusText.textContent='step '+current+' complete';
+    tableDot.className='dot run';
+    explainDot.className='dot run';
   }else{
-    stepNum.textContent='Trace complete';stepTitle.textContent='Read the finished table from top to bottom.';
-    stepText.innerHTML='The program ran in this order: <code>forward(100)</code>, <code>circle(10)</code>, <code>forward(10)</code>, <code>circle(20)</code>, <code>circle(30)</code>, <code>forward(30)</code>. That is exactly what the trace table records.';
-    statusText.textContent='finished';tableDot.className='dot done';explainDot.className='dot done';
+    stepNum.textContent='Trace complete';
+    stepTitle.textContent=cfg.completeTitle;
+    stepText.innerHTML=cfg.completeText;
+    statusText.textContent='finished';
+    tableDot.className='dot done';
+    explainDot.className='dot done';
   }
+
   nextBtn.disabled=!editorReady||busy||current>=steps.length;
   nextBtn.textContent=current>=steps.length?'Finished ✓':(busy?'Running…':'Run step '+(current+1)+' →');
   backBtn.disabled=!editorReady||busy||current===0;
@@ -257,8 +412,8 @@ function waitForStep(target){
     function check(){
       const a=api();
       if(!a){resolve();return;}
-      const done = target<steps.length ? a.isPaused() : !a.isActive();
-      if(done || Date.now()-start>4500){resolve();return;}
+      const done=target<steps.length?a.isPaused():!a.isActive();
+      if(done||Date.now()-start>5000){resolve();return;}
       setTimeout(check,60);
     }
     setTimeout(check,80);
@@ -267,7 +422,8 @@ function waitForStep(target){
 
 async function runNext(){
   if(busy||!editorReady||current>=steps.length)return;
-  busy=true;render();
+  busy=true;
+  render();
   const index=current;
   const a=api();
   if(a){
@@ -277,48 +433,89 @@ async function runNext(){
     a.highlight(steps[index].line);
   }
   current=index+1;
-  busy=false;render();
+  busy=false;
+  render();
 }
 
 function resetAll(){
   if(busy)return;
   current=0;
-  const a=api();if(a)a.reset();
+  const a=api();
+  if(a)a.reset();
   render();
 }
+
 function backOne(){
   if(busy||current===0)return;
-  // Rebuild the actual Turtle output from the start so Back is visually honest.
   const target=current-1;
   current=0;
-  const a=api();if(a)a.reset();
+  const a=api();
+  if(a)a.reset();
   render();
   if(target===0)return;
   (async()=>{
-    busy=true;render();
+    busy=true;
+    render();
     for(let i=0;i<target;i++){
-      const b=api();if(!b)break;
-      b.highlight(steps[i].line);b.step();
+      const b=api();
+      if(!b)break;
+      b.highlight(steps[i].line);
+      b.step();
       await waitForStep(i+1);
     }
     current=target;
-    const b=api();if(b)b.highlight(steps[target-1].line);
-    busy=false;render();
+    const b=api();
+    if(b)b.highlight(steps[target-1].line);
+    busy=false;
+    render();
   })();
 }
 
-frame.addEventListener('load',()=>{
+function startEditorPolling(){
+  const serial=++loadSerial;
+  editorReady=false;
+  loading.classList.remove('hidden');
+  loading.textContent='Loading your Turtle editor…';
+  render();
   let tries=0;
   const timer=setInterval(()=>{
+    if(serial!==loadSerial){clearInterval(timer);return;}
     tries++;
     if(api()){
-      clearInterval(timer);editorReady=true;loading.classList.add('hidden');
-      api().reset();render();
+      clearInterval(timer);
+      editorReady=true;
+      loading.classList.add('hidden');
+      api().reset();
+      render();
     }else if(tries>80){
-      clearInterval(timer);loading.textContent='The Turtle editor did not finish loading. Refresh the page.';
+      clearInterval(timer);
+      loading.textContent='The Turtle editor did not finish loading. Refresh the page.';
     }
   },100);
-});
+}
+
+function selectExample(key,reloadEditor=true){
+  if(!examples[key]||key===activeKey&&reloadEditor===false)return;
+  if(busy)return;
+  const oldApi=api();
+  if(oldApi)oldApi.reset();
+  activeKey=key;
+  steps=examples[key].steps;
+  current=0;
+  editorReady=false;
+  busy=false;
+  applyExampleText();
+  buildRows();
+  render();
+  if(reloadEditor){
+    loading.classList.remove('hidden');
+    loading.textContent='Loading your Turtle editor…';
+    frame.src=examples[key].embed;
+  }
+}
+
+frame.addEventListener('load',startEditorPolling);
+tabs.forEach(tab=>tab.addEventListener('click',()=>selectExample(tab.dataset.example,true)));
 nextBtn.addEventListener('click',runNext);
 resetBtn.addEventListener('click',resetAll);
 backBtn.addEventListener('click',backOne);
@@ -326,6 +523,9 @@ document.addEventListener('keydown',e=>{
   if((e.key==='ArrowRight'||e.key===' ')&&!e.repeat){e.preventDefault();runNext();}
   if(e.key==='ArrowLeft'&&!e.repeat){e.preventDefault();backOne();}
 });
+
+applyExampleText();
+buildRows();
 render();
 </script>
 </body>
