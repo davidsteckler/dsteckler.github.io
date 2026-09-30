@@ -11,7 +11,13 @@ const origin='http://127.0.0.1:8781';
 const proof=process.env.TURTLE_REFERENCE_PROOF||'/tmp/turtle-reference-proof';fs.mkdirSync(proof,{recursive:true});
 const server=spawn('python3',['-m','http.server','8781','--bind','127.0.0.1'],{cwd:root,stdio:'ignore'});
 const scope={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference/reference-data.js'),'utf8'),scope);
+const originalCount=scope.window.TURTLE_REFERENCE.length;
+vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference/reference-more.js'),'utf8'),scope);
+const referenceCount=scope.window.TURTLE_REFERENCE.length;
+vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference/reference-trails.js'),'utf8'),scope);
 const entries=scope.window.TURTLE_REFERENCE;
+assert.equal(new Set(entries.map(entry=>entry.id)).size,entries.length,'Every topic needs a unique link');
+for(const entry of entries)for(const related of entry.related||[])assert(entries.some(e=>e.id===related),'Missing related topic: '+related);
 let browser;
 try{
   for(let i=0;i<60;i++){try{await fetch(origin+'/');break;}catch{await new Promise(r=>setTimeout(r,100));}}
@@ -85,12 +91,69 @@ try{
     const code='speed(0)\n'+entry.code.replace(/^speed\([^\n]*\)$/gm,'speed(0)');
     const result=await render.evaluate(({id,code})=>new Promise(resolve=>{
       const timeout=setTimeout(()=>resolve({ok:false,output:'timeout'}),15000);
-      function listener(event){if(event.data?.kind!=='turtle-rendered'||event.data.id!==id)return;clearTimeout(timeout);removeEventListener('message',listener);resolve({ok:!!event.data.image,output:document.getElementById('output').textContent});}
+      function listener(event){if(event.data?.kind!=='turtle-rendered'||event.data.id!==id)return;clearTimeout(timeout);removeEventListener('message',listener);resolve({ok:!!event.data.image,image:event.data.image,output:document.getElementById('output').textContent});}
       addEventListener('message',listener);postMessage({kind:'turtle-render',id,code},location.origin);
     }),{id:entry.id,code});
     assert(result.ok,entry.id+': '+result.output);
+    for(const expected of entry.assertOutput||[])assert(result.output.includes(expected),entry.id+' missing output '+JSON.stringify(expected)+': '+result.output);
+    if(entries.indexOf(entry)>=originalCount)fs.writeFileSync(path.join(proof,entry.id+'.png'),Buffer.from(result.image.split(',')[1],'base64'));
+  }
+  if(process.env.BUILD_TRAIL_PREVIEWS){
+    fs.mkdirSync(path.join(root,'turtlereference/trail-previews'),{recursive:true});
+    for(const [id,name] of [['grove-night','firefly-grove'],['potion-shop','pixel-potion']])fs.copyFileSync(path.join(proof,id+'.png'),path.join(root,'turtlereference/trail-previews',name+'.png'));
   }
   await render.close();console.log(`PASS all ${entries.length} reference examples in the real Python/canvas runtime`);
+  await page.locator('.command-link[data-id="triangle"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='triangle');
+  await page.locator('#nextTopic').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='rectangle');
+  await page.locator('#previousTopic').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='triangle');
+  assert((await page.locator('#topicPage').innerText()).endsWith('/ '+referenceCount));
+  await editor.waitForSelector('#codeStatus.good');
+  await page.screenshot({path:path.join(proof,'expanded-reference-desktop.png')});
+  await page.locator('.command-link[data-id="start"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='start');
+  assert(await page.locator('#previousTopic').isDisabled());
+  assert.equal(await page.locator('.diagram-turtle').count(),1);
+  await page.screenshot({path:path.join(proof,'turtle-marker-desktop.png')});
+  await page.locator('.command-link[data-id="click-mirror"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='click-mirror');
+  assert(await page.locator('#nextTopic').isDisabled());
+  console.log('PASS new topic navigation, first/last pages, and turtle diagram marker');
+  await page.locator('.command-link[data-id="owl-meet"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='owl-meet');
+  await editor.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good')&&document.getElementById('output').textContent.includes('(o,o)'));
+  assert(!(await editor.locator('.world-stage').isVisible()),'ASCII art needs the output area');
+  assert.equal(await page.locator('#topicPage').innerText(),'Stop 1 / 4');
+  assert(await page.locator('#previousTopic').isDisabled());
+  assert.equal(await page.locator('#trailStops a').count(),4);
+  await page.screenshot({path:path.join(proof,'ascii-reference-desktop.png')});
+  await page.locator('#markComplete').click();
+  assert.equal(await page.locator('#markComplete').getAttribute('aria-pressed'),'true');
+  await page.reload();await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  assert.equal(await page.locator('#markComplete').getAttribute('aria-pressed'),'true');
+  await page.locator('#nextTopic').click();await page.waitForFunction(()=>document.body.dataset.exampleId==='owl-name');
+  assert.equal(await page.locator('#topicPage').innerText(),'Stop 2 / 4');
+  await page.locator('#previousTopic').click();await page.waitForFunction(()=>document.body.dataset.exampleId==='owl-meet');
+  await page.goto(origin+'/turtlereference/trails/');
+  assert.equal(await page.locator('.trail-card').count(),6);
+  assert.equal(await page.locator('.trail-card[data-trail="pocket-owl"] .trail-bottom a').getAttribute('href'),'../#owl-name');
+  assert((await page.locator('#totalProgress').innerText()).includes('1 of 29'));
+  for(const level of ['Beginner','Medium','Hard']){
+    await page.locator('.level-filters button[data-level="'+level+'"]').click();
+    assert.equal(await page.locator('.trail-card:visible').count(),scope.window.TURTLE_TRAILS.filter(t=>t.level===level).length);
+  }
+  await page.locator('.level-filters button[data-level="All"]').click();
+  assert(await page.locator('.trail-preview img').evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0)));
+  await page.screenshot({path:path.join(proof,'creative-trails-desktop.png'),fullPage:true});
+  await page.goto(origin+'/turtlereference/#grove-night');await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  await editor.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert(await editor.locator('.world-stage').isVisible(),'Drawing view must return after ASCII');
+  await page.screenshot({path:path.join(proof,'grove-reference-desktop.png')});
+  console.log('PASS creative trails, exact ASCII output, checklist persistence, difficulty filters, and output switching');
   await page.locator('.command-link[data-id="screen-click"]').click();
   await editor.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good')&&document.querySelector('.CodeMirror').CodeMirror.getValue().includes('getscreen().onclick'));
   await editor.locator('#worldWrap').click({position:{x:100,y:100}});
@@ -106,12 +169,29 @@ try{
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight));
   assert(!(await page.locator('#referenceNav').isVisible()),'Closed command list must be hidden on mobile');
   await page.screenshot({path:path.join(proof,'reference-mobile.png')});
+  await page.locator('#nextTopic').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='dot');
+  assert((await page.locator('#nextTopic').boundingBox()).y<844);
+  await page.locator('#previousTopic').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle');
   await page.locator('#browseCommands').click();await page.locator('#referenceSearch').fill('penup');
   await page.locator('.command-link[data-id="penup"]').click();
   assert.equal(await page.locator('#browseCommands').getAttribute('aria-expanded'),'false');
   await page.locator('#runExample').click();
   assert(await page.locator('#referenceEditor').isVisible());
   await page.screenshot({path:path.join(proof,'reference-mobile-editor.png')});
+  await page.goto(origin+'/turtlereference/trails/');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await page.screenshot({path:path.join(proof,'creative-trails-mobile.png'),fullPage:true});
+  await page.locator('.trail-card[data-trail="camp-hud"] .trail-bottom a').click();
+  await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  await page.locator('#runExample').click();
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  await editor.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert(await editor.locator('#output').isVisible());
+  assert(!(await editor.locator('.world-stage').isVisible()));
+  assert(await editor.locator('#output').evaluate(el=>el.scrollWidth<=el.clientWidth),'ASCII bars must fit the phone output');
+  await page.screenshot({path:path.join(proof,'ascii-reference-mobile.png')});
   await page.goto(origin+'/turtleprojects/');
   await page.locator('.demo-quick-run').first().click();await page.waitForSelector('#codeStatus.good',{timeout:30000});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
