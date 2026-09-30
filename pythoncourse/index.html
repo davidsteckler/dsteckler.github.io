@@ -204,6 +204,68 @@
       margin:15px 0;padding:12px 13px;border-radius:10px;background:#22292a;color:#f7f2e8;
       font:650 .76rem/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre;overflow:auto
     }
+    .challenge-visuals{
+      margin-top:18px;
+      padding-top:15px;
+      border-top:1px solid var(--rule)
+    }
+    .challenge-visuals-head{
+      display:flex;
+      align-items:baseline;
+      gap:7px;
+      margin-bottom:9px;
+      color:var(--ink);
+      font-size:.71rem;
+      font-weight:900
+    }
+    .challenge-visuals-head span{
+      color:var(--soft);
+      font-size:.62rem;
+      font-weight:650
+    }
+    .challenge-visual-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px
+    }
+    .challenge-visual-card{
+      min-width:0;
+      overflow:hidden;
+      border:1px solid var(--rule);
+      border-radius:10px;
+      background:white
+    }
+    .challenge-visual-card svg{
+      display:block;
+      width:100%;
+      aspect-ratio:8/5;
+      background:#fbfaf6
+    }
+    .challenge-visual-card .preview-grid-line{
+      stroke:#dedbd3;
+      stroke-width:.65;
+      opacity:.55
+    }
+    .challenge-visual-card .preview-path{
+      fill:none;
+      stroke:#176b73;
+      stroke-width:4;
+      stroke-linecap:round;
+      stroke-linejoin:round
+    }
+    .challenge-visual-card .preview-circle{
+      fill:none;
+      stroke:#176b73;
+      stroke-width:4
+    }
+    .challenge-visual-label{
+      padding:6px 7px 7px;
+      color:var(--mid);
+      font-size:.58rem;
+      line-height:1.2;
+      font-weight:850;
+      text-align:center
+    }
     .tip{
       margin-top:18px;
       padding-top:14px;
@@ -229,24 +291,92 @@
     .tip-body{padding:7px 0 0;color:var(--soft)}
     .tip-body strong{color:var(--mid)}
     .check-feedback{
+      position:relative;
+      overflow:hidden;
       margin-top:16px;
-      padding:11px 12px;
-      border-radius:9px;
-      font-size:.76rem;
-      line-height:1.45;
-      font-weight:750
+      padding:14px;
+      border-radius:12px;
+      font-size:.72rem;
+      line-height:1.4;
+      border:1px solid var(--rule);
+      background:white;
+      box-shadow:0 5px 18px rgba(35,40,39,.07)
     }
     .check-feedback.good{
-      background:#e5f2ec;
-      color:#175744;
-      border:1px solid #b8d9cb
+      border-color:#a9d5c6;
+      background:#f1f8f5;
+      animation:check-pop .26s ease-out
     }
     .check-feedback.bad{
-      background:#fff0e8;
-      color:#743a28;
-      border:1px solid #e5c0af
+      border-color:#e4c2ae;
+      background:#fff8f3
     }
-    .check-feedback .check-item{margin-top:4px;font-weight:650}
+    @keyframes check-pop{
+      0%{transform:scale(.985);opacity:.65}
+      100%{transform:scale(1);opacity:1}
+    }
+    .check-head{
+      display:grid;
+      grid-template-columns:38px minmax(0,1fr);
+      gap:10px;
+      align-items:center
+    }
+    .check-badge{
+      width:38px;height:38px;
+      display:grid;place-items:center;
+      border-radius:50%;
+      background:#efe8dc;
+      color:var(--mid);
+      font-size:.75rem;
+      font-weight:950
+    }
+    .check-feedback.good .check-badge{background:var(--teal);color:white;font-size:1rem}
+    .check-feedback.bad .check-badge{background:#f2ded2;color:#8a4a31}
+    .check-title{font-size:.82rem;font-weight:900;color:var(--ink)}
+    .check-sub{margin-top:2px;color:var(--soft);font-size:.62rem;font-weight:650}
+    .check-meter{
+      height:7px;
+      margin:11px 0 12px;
+      border-radius:99px;
+      overflow:hidden;
+      background:#e7e1d7
+    }
+    .check-meter-fill{
+      height:100%;
+      border-radius:inherit;
+      background:var(--orange);
+      transition:width .25s ease
+    }
+    .check-feedback.good .check-meter-fill{background:var(--teal)}
+    .check-list{display:grid;gap:6px}
+    .check-row{
+      display:grid;
+      grid-template-columns:24px minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+      min-height:34px;
+      padding:6px 8px;
+      border-radius:8px;
+      background:rgba(255,255,255,.75);
+      border:1px solid rgba(215,209,198,.8)
+    }
+    .check-icon{
+      width:21px;height:21px;
+      display:grid;place-items:center;
+      border-radius:50%;
+      font-size:.64rem;
+      font-weight:950;
+      background:#efe8dc;
+      color:#8a8176
+    }
+    .check-row.pass .check-icon{background:#d8eee6;color:#176b57}
+    .check-row.fail .check-icon{background:#f4ddd1;color:#8a452c}
+    .check-label{min-width:0;color:var(--ink);font-size:.66rem;font-weight:800}
+    .check-value{
+      color:var(--soft);
+      font:750 .57rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+      white-space:nowrap
+    }
     .teacher-notes{
       margin-top:22px;
       border-top:1px dashed #cfc7b9;
@@ -323,6 +453,8 @@
       .lesson-head{padding:13px 14px}
       .step-content{padding:18px 16px}
       .step-content h3{font-size:1.28rem}
+      .challenge-visual-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+      .challenge-visual-label{font-size:.55rem;padding:5px}
     }
   </style>
 </head>
@@ -367,6 +499,7 @@
         <p id="stepBody"></p>
         <div class="step-action" id="stepTask"></div>
         <pre class="example" id="stepExample" hidden></pre>
+        <div class="challenge-visuals" id="challengeVisuals" hidden></div>
         <details class="tip" id="stepHint">
           <summary>Need a hint?</summary>
           <div class="tip-body"><span id="stepTip"></span></div>
@@ -475,88 +608,131 @@
     return seen;
   }
 
+  function prettyNumber(n){
+    var v=Math.round(Number(n)*10)/10;
+    return Number.isInteger(v)?String(v):String(v);
+  }
+
   function evaluateRule(rule,calls,runtime){
-    var items,numbers,strings,i,up=true,down=true;
+    var numbers=[],i,up=true,down=true,actual=0,target="",passed=false;
+    var label=rule.label||rule.fail||"Requirement";
     if(rule.type==="minCalls"){
-      return callsNamed(calls,rule.commands).length>=rule.count;
-    }
-    if(rule.type==="exactCalls"){
-      return callsNamed(calls,rule.commands).length===rule.count;
-    }
-    if(rule.type==="requiresCommands"){
-      return rule.commands.every(function(name){return callsNamed(calls,[name]).length>0;});
-    }
-    if(rule.type==="minDistinctNumbers"){
-      return uniqueNumbers(callsNamed(calls,rule.commands)).length>=rule.count;
-    }
-    if(rule.type==="minDistinctStrings"){
-      return uniqueStrings(callsNamed(calls,rule.commands)).length>=rule.count;
-    }
-    if(rule.type==="sameNumbers"){
+      actual=callsNamed(calls,rule.commands).length;
+      target=rule.count+"+";
+      passed=actual>=rule.count;
+    }else if(rule.type==="exactCalls"){
+      actual=callsNamed(calls,rule.commands).length;
+      target=String(rule.count);
+      passed=actual===rule.count;
+    }else if(rule.type==="requiresCommands"){
+      var present=rule.commands.filter(function(name){return callsNamed(calls,[name]).length>0;});
+      actual=present.length+"/"+rule.commands.length;
+      target=rule.commands.join(" + ");
+      passed=present.length===rule.commands.length;
+    }else if(rule.type==="minDistinctNumbers"){
+      actual=uniqueNumbers(callsNamed(calls,rule.commands)).length;
+      target=rule.count+"+ different";
+      passed=actual>=rule.count;
+    }else if(rule.type==="minDistinctStrings"){
+      actual=uniqueStrings(callsNamed(calls,rule.commands)).length;
+      target=rule.count+"+ different";
+      passed=actual>=rule.count;
+    }else if(rule.type==="sameNumbers"){
       numbers=callsNamed(calls,rule.commands).map(function(c){return c.num;}).filter(function(n){return n!==null;});
-      return numbers.length>=rule.min && numbers.every(function(n){return Math.abs(n-numbers[0])<1e-9;});
-    }
-    if(rule.type==="monotonicNumbers"){
+      actual=numbers.length?numbers.map(prettyNumber).join(" · "):"none";
+      target="all equal";
+      passed=numbers.length>=rule.min && numbers.every(function(n){return Math.abs(n-numbers[0])<1e-9;});
+    }else if(rule.type==="monotonicNumbers"){
       numbers=callsNamed(calls,rule.commands).map(function(c){return c.num;}).filter(function(n){return n!==null;});
-      if(numbers.length<rule.min)return false;
       for(i=1;i<numbers.length;i++){
         if(!(numbers[i]>numbers[i-1]))up=false;
         if(!(numbers[i]<numbers[i-1]))down=false;
       }
-      return rule.direction==="up"?up:(rule.direction==="down"?down:(up||down));
-    }
-    if(rule.type==="firstLastSameNumber"){
+      actual=numbers.length?numbers.map(prettyNumber).join(" → "):"none";
+      target=rule.direction==="up"?"increasing":(rule.direction==="down"?"decreasing":"one direction");
+      passed=numbers.length>=rule.min && (rule.direction==="up"?up:(rule.direction==="down"?down:(up||down)));
+    }else if(rule.type==="firstLastSameNumber"){
       numbers=callsNamed(calls,rule.commands).map(function(c){return c.num;}).filter(function(n){return n!==null;});
-      return numbers.length>=2 && Math.abs(numbers[0]-numbers[numbers.length-1])<1e-9;
-    }
-    if(rule.type==="someNumberGreaterThan"){
-      return callsNamed(calls,rule.commands).some(function(c){return c.num!==null&&c.num>rule.value;});
-    }
-    if(rule.type==="exactTurtleCalls"){
-      return calls.filter(function(c){return TURTLE_CALLS.indexOf(c.name)>=0;}).length===rule.count;
-    }
-    if(rule.type==="minDrawElements"){
-      return callsNamed(calls,["forward","backward","circle","dot","write"]).length>=rule.count;
-    }
-    if(rule.type==="finalPosition"){
-      if(!runtime)return false;
-      return Math.abs(Number(runtime.x)-rule.x)<=rule.tolerance &&
+      actual=numbers.length>=2?prettyNumber(numbers[0])+" / "+prettyNumber(numbers[numbers.length-1]):"not enough";
+      target="match";
+      passed=numbers.length>=2 && Math.abs(numbers[0]-numbers[numbers.length-1])<1e-9;
+    }else if(rule.type==="someNumberGreaterThan"){
+      numbers=callsNamed(calls,rule.commands).map(function(c){return c.num;}).filter(function(n){return n!==null;});
+      actual=numbers.length?prettyNumber(Math.max.apply(null,numbers)):"none";
+      target=">"+prettyNumber(rule.value);
+      passed=numbers.some(function(n){return n>rule.value;});
+    }else if(rule.type==="exactTurtleCalls"){
+      actual=calls.filter(function(c){return TURTLE_CALLS.indexOf(c.name)>=0;}).length;
+      target=String(rule.count);
+      passed=actual===rule.count;
+    }else if(rule.type==="minDrawElements"){
+      actual=callsNamed(calls,["forward","backward","circle","dot","write"]).length;
+      target=rule.count+"+";
+      passed=actual>=rule.count;
+    }else if(rule.type==="finalPosition"){
+      actual=runtime?"("+prettyNumber(runtime.x)+", "+prettyNumber(runtime.y)+")":"not run";
+      target="("+prettyNumber(rule.x)+", "+prettyNumber(rule.y)+")";
+      passed=!!runtime && Math.abs(Number(runtime.x)-rule.x)<=rule.tolerance &&
              Math.abs(Number(runtime.y)-rule.y)<=rule.tolerance;
-    }
-    if(rule.type==="finalHeading"){
-      if(!runtime)return false;
-      var a=((Number(runtime.heading)||0)%360+360)%360;
+    }else if(rule.type==="finalHeading"){
+      var a=runtime?((Number(runtime.heading)||0)%360+360)%360:NaN;
       var b=((Number(rule.heading)||0)%360+360)%360;
       var d=Math.abs(a-b); d=Math.min(d,360-d);
-      return d<=rule.tolerance;
+      actual=runtime?prettyNumber(a)+"°":"not run";
+      target=prettyNumber(b)+"°";
+      passed=!!runtime&&d<=rule.tolerance;
+    }else{
+      passed=true;
+      actual="—";
+      target="—";
     }
-    return true;
+    return {label:label,passed:passed,actual:String(actual),target:String(target),fail:rule.fail||""};
   }
 
   function evaluateStudentCode(lesson,payload){
-    if(!payload.run||!payload.run.ok){
-      return {ok:false,failures:[payload.run&&payload.run.error?payload.run.error:"Your code did not run successfully."]};
-    }
+    var runOk=!!(payload.run&&payload.run.ok);
     var calls=codeCalls(payload.code);
-    var rules=(lesson.check&&lesson.check.rules)||[];
-    var failures=[];
-    rules.forEach(function(rule){
-      if(!evaluateRule(rule,calls,payload.runtime))failures.push(rule.fail);
+    var items=[{
+      label:"Code runs without errors",
+      passed:runOk,
+      actual:runOk?"passed":((payload.run&&payload.run.error)||"error"),
+      target:"runs"
+    }];
+    ((lesson.check&&lesson.check.rules)||[]).forEach(function(rule){
+      items.push(evaluateRule(rule,calls,payload.runtime));
     });
-    return {ok:failures.length===0,failures:failures};
+    return {
+      ok:runOk&&items.every(function(item){return item.passed;}),
+      items:items
+    };
   }
 
   function showCheckFeedback(result){
     var box=document.getElementById("checkFeedback");
+    var items=result.items||[];
+    if(!items.length){
+      items=[{label:"Checker",passed:false,actual:"try again",target:"respond"}];
+    }
+    var passed=items.filter(function(item){return item.passed;}).length;
+    var total=items.length;
+    var pct=Math.round(passed/Math.max(1,total)*100);
     box.hidden=false;
     box.className="check-feedback "+(result.ok?"good":"bad");
-    if(result.ok){
-      box.textContent="✓ Your code passed the check.";
-      return;
-    }
-    box.innerHTML="<strong>Not yet.</strong>"+result.failures.slice(0,4).map(function(msg){
-      return '<div class="check-item">• '+esc(msg)+'</div>';
-    }).join("");
+    var title=result.ok?"Challenge passed":passed+" of "+total+" requirements met";
+    var sub=result.ok?"Everything required is working.":"Fix the unchecked items, then check again.";
+    box.innerHTML=
+      '<div class="check-head">'+
+        '<div class="check-badge">'+(result.ok?"✓":passed+"/"+total)+'</div>'+
+        '<div><div class="check-title">'+esc(title)+'</div><div class="check-sub">'+esc(sub)+'</div></div>'+
+      '</div>'+
+      '<div class="check-meter"><div class="check-meter-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="check-list">'+items.map(function(item){
+        return '<div class="check-row '+(item.passed?"pass":"fail")+'">'+
+          '<div class="check-icon">'+(item.passed?"✓":"×")+'</div>'+
+          '<div class="check-label">'+esc(item.label)+'</div>'+
+          '<div class="check-value">'+esc(item.actual)+(item.target&&item.actual!==item.target?' / '+esc(item.target):'')+'</div>'+
+        '</div>';
+      }).join("")+'</div>';
   }
 
   function clearCheckFeedback(){
@@ -586,7 +762,7 @@
       pendingCheck=null;
       next.disabled=false;
       next.textContent="Check my code";
-      showCheckFeedback({ok:false,failures:["The checker did not respond. Try again."]});
+      showCheckFeedback({ok:false,items:[{label:"Checker responded",passed:false,actual:"no response",target:"respond"}]});
     },10000);
   }
 
@@ -674,6 +850,73 @@
     return i>=0 && i<available.length-1 ? available[i+1] : null;
   }
 
+  function renderChallengeVisuals(){
+    var wrap=document.getElementById("challengeVisuals");
+    var isLast=stepIndex===current.steps.length-1;
+    var visuals=isLast&&current.visuals?current.visuals:[];
+    wrap.hidden=!visuals.length;
+    wrap.innerHTML="";
+    if(!visuals.length)return;
+
+    var head=document.createElement("div");
+    head.className="challenge-visuals-head";
+    head.innerHTML='Example ideas <span>not the answer</span>';
+    wrap.appendChild(head);
+
+    var grid=document.createElement("div");
+    grid.className="challenge-visual-grid";
+    visuals.forEach(function(v){
+      var card=document.createElement("div");
+      card.className="challenge-visual-card";
+
+      var svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+      svg.setAttribute("viewBox","0 0 160 100");
+      svg.setAttribute("aria-label",v.label||"Example visual");
+      svg.setAttribute("role","img");
+
+      var bg=document.createElementNS(svg.namespaceURI,"rect");
+      bg.setAttribute("x","0");bg.setAttribute("y","0");bg.setAttribute("width","160");bg.setAttribute("height","100");
+      bg.setAttribute("fill",v.bg||"#fbfaf6");
+      svg.appendChild(bg);
+
+      for(var gx=20;gx<160;gx+=20){
+        var gl=document.createElementNS(svg.namespaceURI,"line");
+        gl.setAttribute("x1",gx);gl.setAttribute("x2",gx);gl.setAttribute("y1","0");gl.setAttribute("y2","100");
+        gl.setAttribute("class","preview-grid-line");svg.appendChild(gl);
+      }
+      for(var gy=20;gy<100;gy+=20){
+        var gh=document.createElementNS(svg.namespaceURI,"line");
+        gh.setAttribute("x1","0");gh.setAttribute("x2","160");gh.setAttribute("y1",gy);gh.setAttribute("y2",gy);
+        gh.setAttribute("class","preview-grid-line");svg.appendChild(gh);
+      }
+
+      (v.paths||[]).forEach(function(p){
+        var el=document.createElementNS(svg.namespaceURI,"polyline");
+        el.setAttribute("points",(p.points||[]).map(function(pt){return pt[0]+","+pt[1];}).join(" "));
+        el.setAttribute("class","preview-path");
+        if(p.stroke)el.setAttribute("stroke",p.stroke);
+        if(p.width)el.setAttribute("stroke-width",p.width);
+        svg.appendChild(el);
+      });
+      (v.circles||[]).forEach(function(c){
+        var el=document.createElementNS(svg.namespaceURI,"circle");
+        el.setAttribute("cx",c.cx);el.setAttribute("cy",c.cy);el.setAttribute("r",c.r);
+        el.setAttribute("class","preview-circle");
+        if(c.stroke)el.setAttribute("stroke",c.stroke);
+        if(c.width)el.setAttribute("stroke-width",c.width);
+        svg.appendChild(el);
+      });
+
+      var label=document.createElement("div");
+      label.className="challenge-visual-label";
+      label.textContent=v.label||"Example";
+      card.appendChild(svg);
+      card.appendChild(label);
+      grid.appendChild(card);
+    });
+    wrap.appendChild(grid);
+  }
+
   function renderStep(){
     var step=current.steps[stepIndex];
     document.getElementById("stepTitle").textContent=step.title;
@@ -688,6 +931,7 @@
     teacherNotes.hidden=!(teacherMode&&current.notes);
     teacherNotes.open=false;
     teacherNotesBody.textContent=current.notes||"";
+    renderChallengeVisuals();
     var example=document.getElementById("stepExample");
     if(step.example){
       example.hidden=false;
