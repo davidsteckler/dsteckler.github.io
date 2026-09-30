@@ -70,6 +70,16 @@ Each available lesson needs:
 
 Set `available: false` for a future lesson that should appear in the course map but cannot be opened yet.
 
+## Final code checks
+
+Every completable lesson should define a lesson-specific `check.rules` array. The final button becomes **Check my code**. The embedded Turtle editor runs the student's actual program first; a program with an error cannot pass.
+
+Checks should validate the lesson requirements without demanding one exact solution. Prefer constraints such as minimum command counts, required command types, distinct values, pattern relationships, or final Turtle state. Create activities should accept many different correct programs.
+
+Do not check subjective qualities such as whether a drawing is "good," "balanced," or "interesting." Convert those into objective requirements only when that serves the learning goal.
+
+A failed check should tell the student what requirement is still missing without supplying the exact code.
+
 ## Editor integration
 
 The course loads the existing editor with:
