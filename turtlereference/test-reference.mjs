@@ -1,0 +1,122 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import {fileURLToPath} from 'node:url';
+import {spawn} from 'node:child_process';
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+
+const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const origin='http://127.0.0.1:8781';
+const proof=process.env.TURTLE_REFERENCE_PROOF||'/tmp/turtle-reference-proof';fs.mkdirSync(proof,{recursive:true});
+const server=spawn('python3',['-m','http.server','8781','--bind','127.0.0.1'],{cwd:root,stdio:'ignore'});
+const scope={window:{}};vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference/reference-data.js'),'utf8'),scope);
+const entries=scope.window.TURTLE_REFERENCE;
+let browser;
+try{
+  for(let i=0;i<60;i++){try{await fetch(origin+'/');break;}catch{await new Promise(r=>setTimeout(r,100));}}
+  browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,args:['--no-sandbox']});
+  const context=await browser.newContext({viewport:{width:1440,height:900}});
+  const deps=process.env.TURTLE_TEST_DEPS;
+  if(deps)for(const [pattern,file] of [['**/codemirror.min.css','codemirror.css'],['**/codemirror.min.js','codemirror.js'],['**/mode/python/python.min.js','python.js'],['**/skulpt.min.js','skulpt.js'],['**/skulpt-stdlib.js','skulpt-stdlib.js']])await context.route(pattern,route=>route.fulfill({path:path.join(deps,file),contentType:file.endsWith('.css')?'text/css':'application/javascript'}));
+  const errors=[];
+  context.on('page',page=>{page.on('pageerror',error=>errors.push(error.message));page.on('dialog',dialog=>dialog.accept('40'));});
+  const page=await context.newPage();
+  await page.goto(origin+'/turtleprojects/');
+  await page.locator('.demo-project-card').first().waitFor();
+  await page.locator('.demo-tile[data-demo-id="starter-first-square"]').click();
+  await page.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert.equal(new URL(page.url()).pathname,'/turtleprojects/');
+  assert(await page.locator('#workspace').isVisible());
+  assert.equal(await page.locator('#quickRunView').getAttribute('aria-pressed'),'true');
+  assert(await page.evaluate(()=>document.querySelector('.CodeMirror').CodeMirror.getValue()===window.TURTLE_STARTER_CATALOG.find(p=>p.id==='starter-first-square').code));
+  await page.locator('.CodeMirror').evaluate(el=>el.CodeMirror.setValue('color("teal")\nforward(37)'));
+  await page.locator('#galleryView').click();
+  await page.locator('#quickRunView').click();
+  assert.equal(await page.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'color("teal")\nforward(37)');
+  await page.locator('#runBtn').click();await page.waitForSelector('#codeStatus.good');
+  await page.reload();await page.waitForSelector('#codeStatus.good');
+  assert.equal(await page.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'color("teal")\nforward(37)','Reload must retain edited quick-run code');
+  await page.screenshot({path:path.join(proof,'quick-run-desktop.png')});
+  await page.locator('.level-filter[data-level="All"]').click();
+  await page.locator('#demoSearch').fill('umbrella');
+  assert.equal(await page.locator('.demo-project-card').count(),1);
+  assert((await page.locator('.demo-tutorial-link').getAttribute('href')).includes('rain-umbrella'));
+  await page.locator('.demo-tile').click();await page.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert((await page.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue())).includes('circle'));
+  console.log('PASS quick run, editable code, preserved view switching, levels, and tutorial links');
+
+  await page.goto(origin+'/turtlereference/#circle');
+  await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  let editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  await editor.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert.equal(await page.locator('#topicTitle').innerText(),'circle()');
+  assert.equal(await page.locator('.command-link').count(),entries.length);
+  await page.locator('#referenceSearch').fill('fd');
+  assert.equal(await page.locator('.command-link').count(),1);
+  await page.locator('.command-link').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='forward');
+  await editor.waitForSelector('#codeStatus.good');
+  await editor.locator('.CodeMirror').evaluate(el=>el.CodeMirror.setValue('forward(37)'));
+  await page.locator('#referenceSearch').fill('');
+  await page.locator('.command-link[data-id="circle"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='circle');
+  await page.locator('.command-link[data-id="forward"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='forward');
+  await editor.waitForFunction(()=>document.querySelector('.CodeMirror').CodeMirror.getValue()==='forward(37)');
+  await page.reload();await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  await editor.waitForFunction(()=>document.querySelector('.CodeMirror').CodeMirror.getValue()==='forward(37)');
+  await page.locator('#resetExample').click();
+  await editor.waitForFunction(()=>document.querySelector('.CodeMirror').CodeMirror.getValue().includes('forward(100)'));
+  await page.locator('#referenceSearch').fill('zzzz-no-match');assert(await page.locator('#emptySearch').isVisible());
+  await page.locator('#referenceSearch').fill('');
+  await page.locator('.command-link[data-id="radius"]').click();await editor.waitForSelector('#codeStatus.good');
+  await page.screenshot({path:path.join(proof,'reference-desktop.png')});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight));
+  const before=await page.locator('#referenceDivider').getAttribute('aria-valuenow');
+  await page.locator('#referenceDivider').focus();await page.keyboard.press('ArrowRight');
+  assert.equal(Number(await page.locator('#referenceDivider').getAttribute('aria-valuenow')),Number(before)+10);
+  console.log('PASS search, deep link, editable drafts, reload, reset, and resizing');
+
+  const render=await context.newPage();await render.goto(origin+'/turtleprojects/?renderPreview=1');
+  await render.waitForFunction(()=>window.Sk&&document.querySelector('.CodeMirror')?.CodeMirror);
+  for(const entry of entries){
+    const code='speed(0)\n'+entry.code.replace(/^speed\([^\n]*\)$/gm,'speed(0)');
+    const result=await render.evaluate(({id,code})=>new Promise(resolve=>{
+      const timeout=setTimeout(()=>resolve({ok:false,output:'timeout'}),15000);
+      function listener(event){if(event.data?.kind!=='turtle-rendered'||event.data.id!==id)return;clearTimeout(timeout);removeEventListener('message',listener);resolve({ok:!!event.data.image,output:document.getElementById('output').textContent});}
+      addEventListener('message',listener);postMessage({kind:'turtle-render',id,code},location.origin);
+    }),{id:entry.id,code});
+    assert(result.ok,entry.id+': '+result.output);
+  }
+  await render.close();console.log(`PASS all ${entries.length} reference examples in the real Python/canvas runtime`);
+  await page.locator('.command-link[data-id="screen-click"]').click();
+  await editor.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good')&&document.querySelector('.CodeMirror').CodeMirror.getValue().includes('getscreen().onclick'));
+  await editor.locator('#worldWrap').click({position:{x:100,y:100}});
+  await editor.waitForFunction(()=>Array.from(document.getElementById('turtle-drawing').getContext('2d').getImageData(0,0,400,400).data).some((n,i)=>i%4===3&&n>0));
+  await page.locator('.command-link[data-id="onclick"]').click();
+  await editor.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good')&&document.querySelector('.CodeMirror').CodeMirror.getValue().includes('onclick(turtle_clicked)'));
+  await editor.locator('#worldWrap').click();
+  await editor.waitForFunction(()=>Array.from(document.getElementById('turtle-drawing').getContext('2d').getImageData(0,0,400,400).data).some((n,i)=>i%4===3&&n>0));
+  console.log('PASS turtle and screen click callbacks');
+
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(origin+'/turtlereference/#circle');await page.waitForFunction(()=>document.body.dataset.editorReady==='true');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight));
+  assert(!(await page.locator('#referenceNav').isVisible()),'Closed command list must be hidden on mobile');
+  await page.screenshot({path:path.join(proof,'reference-mobile.png')});
+  await page.locator('#browseCommands').click();await page.locator('#referenceSearch').fill('penup');
+  await page.locator('.command-link[data-id="penup"]').click();
+  assert.equal(await page.locator('#browseCommands').getAttribute('aria-expanded'),'false');
+  await page.locator('#runExample').click();
+  assert(await page.locator('#referenceEditor').isVisible());
+  await page.screenshot({path:path.join(proof,'reference-mobile-editor.png')});
+  await page.goto(origin+'/turtleprojects/');
+  await page.locator('.demo-quick-run').first().click();await page.waitForSelector('#codeStatus.good',{timeout:30000});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  for(const id of ['runBtn','pauseBtn','stepBtn','stopBtn','commandsToggle','viewWorldBtn']) assert((await page.locator('#'+id).boundingBox()).width>=60,'Mobile toolbar buttons need readable widths');
+  await page.screenshot({path:path.join(proof,'quick-run-mobile.png')});
+  assert.deepEqual(errors,[]);
+  console.log('PASS mobile reference navigation, editor, and quick run');
+}finally{await browser?.close();server.kill();}

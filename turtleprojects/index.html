@@ -890,6 +890,7 @@ body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-te
  body.projects-view .demo-gallery-scroll{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 </style>
+<link rel="stylesheet" href="quick-run.css?v=1">
 </head>
 
 <body>
@@ -914,6 +915,7 @@ body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-te
 
     <div class="appbar-right">
       <nav class="site-actions" aria-label="Site">
+        <a class="site-link" href="../turtlereference/">Turtle Reference</a>
         <a class="site-link" href="../turtle/">Turtle Sandbox</a>
         <a class="site-link" href="../index.html">Home</a>
       </nav>
@@ -939,7 +941,8 @@ body.projects-view .demo-gallery-scroll{max-height:none!important;flex:1;grid-te
   
 <section class="demo-gallery" aria-label="Python Turtle example programs">
  <div class="demo-gallery-top">
-  <div><div class="demo-gallery-title">Choose a Turtle project <span id="demoCount"></span></div><div class="demo-gallery-sub">Every tutorial has instructions, a code editor, and the drawing together.</div></div>
+  <div><div class="demo-gallery-title">Choose a Turtle project <span id="demoCount"></span></div><div class="demo-gallery-sub">Click a drawing to run and edit it. Open a tutorial to build it step by step.</div></div>
+  <div class="gallery-view-switch" role="group" aria-label="Project view"><button id="galleryView" type="button" aria-pressed="true">Gallery</button><button id="quickRunView" type="button" aria-pressed="false">Quick run</button></div>
   <input class="demo-search" id="demoSearch" type="search" aria-label="Search projects" placeholder="Find a project…">
   <button class="demo-expand-btn" type="button" id="demoExpand" aria-expanded="false">Browse all projects ↓</button>
  </div>
@@ -1065,7 +1068,7 @@ for i in range(4):
         <button class="library-tab" type="button" data-library-tab="extras">Extras</button>
       </div>
       <div class="command-scroll" id="commandScroll">
-        <div class="command-tip"><strong>Python Turtle reference.</strong> Pick a section, or search everything. Click an item to insert a runnable example.</div>
+        <div class="command-tip"><a href="../turtlereference/" target="_blank" rel="noopener"><strong>Open the full Turtle Reference ↗</strong></a><br>Pick a section, or search everything. Click an item to insert a runnable example.</div>
 
         <section class="library-section active" data-library-section="turtle">
           <div class="library-section-head"><strong>Turtle</strong><span>movement · drawing · interaction</span></div>
@@ -1264,9 +1267,10 @@ for i in range(4):
   "use strict";
 
   var PREVIEW_MODE = new URLSearchParams(location.search).has("renderPreview");
-  var PROJECTS_MODE = !PREVIEW_MODE && !new URLSearchParams(location.search).has("tutorialEmbed") && !new URLSearchParams(location.search).has("sandbox");
+  var PROJECTS_MODE = !PREVIEW_MODE && !new URLSearchParams(location.search).has("tutorialEmbed") && !new URLSearchParams(location.search).has("sandbox") && new URLSearchParams(location.search).get("view")!=="run";
   if(PROJECTS_MODE)document.body.classList.add("projects-view");
   var TUTORIAL_EMBED = new URLSearchParams(location.search).has("tutorialEmbed");
+  if(!PROJECTS_MODE && !PREVIEW_MODE && !TUTORIAL_EMBED)document.body.classList.add("quick-run-view");
   var TUTORIAL_PROJECT = new URLSearchParams(location.search).get("project") || "sample";
   var STORAGE_KEY = TUTORIAL_EMBED ? "dsteckler-turtle-tutorial-editor-"+TUTORIAL_PROJECT : "dsteckler-turtle-demo-code-v1";
   if(TUTORIAL_EMBED){
@@ -1538,7 +1542,7 @@ for i in range(4):
     tabSize: 4,
     indentWithTabs: false,
     lineWrapping: false,
-    autofocus: !TUTORIAL_EMBED && !PREVIEW_MODE && !PROJECTS_MODE,
+    autofocus: false,
     extraKeys: {
       "Tab": function(cm){
         if(cm.somethingSelected()){
@@ -2527,7 +2531,10 @@ for i in range(4):
       ];
       Sk.builtins.write=new Sk.builtin.func(writeFn);
 
-      fn1("onclick",function(callback){state.turtleClickCallback=callback;return none();});
+      Sk.builtins.onclick=new Sk.builtin.func(function(callback){
+        state.turtleClickCallback=callback;
+        return none();
+      });
       Sk.builtins.getscreen=new Sk.builtin.func(function(){return getScreenObject();});
     }
 
@@ -2911,12 +2918,35 @@ for i in range(4):
     else previewDemo(button.querySelector("canvas"),program);
   }
   var galleryExpanded=PROJECTS_MODE;
-  if(PROJECTS_MODE){
-    document.querySelector(".demo-gallery").classList.add("expanded");
-    document.querySelector(".demo-gallery-title").firstChild.textContent="Choose a Turtle project ";
-    document.querySelector(".demo-gallery-sub").textContent="Every tutorial has instructions, a code editor, and the drawing together.";
-    document.getElementById("demoExpand").hidden=true;
+  var selectedQuickProject=null;
+  var QUICK_SELECTION_KEY="dsteckler-turtle-quick-selection-v1";
+  function setProjectView(gallery,updateUrl){
+    PROJECTS_MODE=gallery;galleryExpanded=gallery;
+    document.body.classList.toggle("projects-view",gallery);
+    document.body.classList.toggle("quick-run-view",!gallery);
+    document.querySelector(".demo-gallery").classList.toggle("expanded",gallery);
+    document.getElementById("galleryView").setAttribute("aria-pressed",String(gallery));
+    document.getElementById("quickRunView").setAttribute("aria-pressed",String(!gallery));
+    if(updateUrl){
+      var url=new URL(location.href);url.searchParams.delete("sandbox");
+      if(gallery)url.searchParams.delete("view");else url.searchParams.set("view","run");
+      history.replaceState(null,"",url);
+    }
+    requestAnimationFrame(function(){editor.refresh();fitWorld();});
   }
+  function quickRunProject(d){
+    if(playback.active)stopCode();
+    selectedQuickProject=d.id;
+    try{localStorage.setItem(QUICK_SELECTION_KEY,d.id);}catch(e){}
+    setProjectView(false,true);
+    var url=new URL(location.href);url.searchParams.set("project",d.id);history.replaceState(null,"",url);
+    clearErrorHighlight();editor.setValue(d.code);setFollowCode(false);editor.scrollTo(null,0);
+    demoGallery.querySelectorAll(".demo-tile").forEach(function(el){el.setAttribute("aria-pressed",String(el.dataset.demoId===d.id));});
+    requestAnimationFrame(function(){runCode(false);});
+  }
+  document.getElementById("galleryView").addEventListener("click",function(){setProjectView(true,true);});
+  document.getElementById("quickRunView").addEventListener("click",function(){setProjectView(false,true);});
+  if(!PREVIEW_MODE&&!TUTORIAL_EMBED)setProjectView(PROJECTS_MODE,false);
   var demoExpand=document.getElementById("demoExpand");
   demoExpand.addEventListener("click",function(){
     galleryExpanded=!galleryExpanded;
@@ -3015,6 +3045,8 @@ for i in range(4):
     visible.forEach(function(d){
       var button=document.createElement("button");button.type="button";button.className="demo-tile";button.title="Load and run "+d.title;
       button.dataset.demoId=d.id;button.dataset.level=levels[d.id].level;
+      button.setAttribute("aria-label","Quick run "+d.title);
+      button.setAttribute("aria-pressed",String(selectedQuickProject===d.id));
       var canvas=document.createElement("canvas");canvas.setAttribute("aria-hidden","true");button.appendChild(canvas);
       var body=document.createElement("div");body.className="demo-tile-copy";
       var name=document.createElement("div");name.className="demo-tile-name";name.textContent=d.title;
@@ -3028,34 +3060,25 @@ for i in range(4):
       var steps=window.TURTLE_STEP_PLANS[d.id]?.steps;
       if(steps)skills.textContent+=" · "+steps+" steps";
       body.append(badges,name,desc,skills);button.appendChild(body);
-      button.addEventListener("click",function(){
-        if(playback.active)stopCode();
-        clearErrorHighlight();editor.setValue(d.code);
-        setFollowCode(false);
-        editor.scrollTo(null,0);
-        demoGallery.querySelectorAll(".demo-tile").forEach(function(el){el.style.borderColor="";});
-        button.style.borderColor="#176b73";
-        runCode(false);
-        if(window.innerWidth<=840)document.getElementById("worldPanel").scrollIntoView({behavior:"smooth",block:"start"});
-      });
+      button.addEventListener("click",function(){quickRunProject(d);});
       var wrapper=document.createElement("div");wrapper.className="demo-project-card";
       wrapper.appendChild(button);
+      var actions=document.createElement("div");actions.className="demo-card-actions";
+      var quickButton=document.createElement("button");quickButton.type="button";quickButton.className="demo-quick-run";quickButton.textContent="▶ Quick run";
+      quickButton.setAttribute("aria-label","Quick run "+d.title);quickButton.addEventListener("click",function(){quickRunProject(d);});
+      actions.appendChild(quickButton);
       var tutorialLink=document.createElement("a");
       tutorialLink.className="demo-tutorial-link";
       tutorialLink.href=window.TURTLE_TUTORIAL_SLUGS?.[d.id] ? "./"+window.TURTLE_TUTORIAL_SLUGS[d.id]+"/" : "project.html?id="+encodeURIComponent(d.id);
       tutorialLink.textContent="Open tutorial →";
       tutorialLink.setAttribute("aria-label","Open step-by-step tutorial for "+d.title);
-      wrapper.appendChild(tutorialLink);
+      actions.appendChild(tutorialLink);wrapper.appendChild(actions);
       demoGallery.appendChild(wrapper);
       queueVisiblePreview(button,d);
     });
   }
   demoSearch.addEventListener("input",renderDemoGallery);
   if(!PREVIEW_MODE && !TUTORIAL_EMBED)renderDemoGallery();
-  if(PROJECTS_MODE)demoGallery.addEventListener("click",function(event){
-    var tile=event.target.closest(".demo-tile");
-    if(tile){event.stopImmediatePropagation();location.href=window.TURTLE_TUTORIAL_SLUGS?.[tile.dataset.demoId] ? "./"+window.TURTLE_TUTORIAL_SLUGS[tile.dataset.demoId]+"/" : "project.html?id="+encodeURIComponent(tile.dataset.demoId);}
-  },true);
   function openCommands(){
     document.body.classList.add("commands-open");
     if(commandsToggle)commandsToggle.setAttribute("aria-expanded","true");
@@ -3273,7 +3296,18 @@ for i in range(4):
     });
     window.parent.postMessage({kind:"turtle-tutorial-ready",project:TUTORIAL_PROJECT,code:editor.getValue()},location.origin);
   }else if(!PROJECTS_MODE && !PREVIEW_MODE){
-    editor.focus();
+    var requestedProject=new URLSearchParams(location.search).get("project");
+    var initialProject=DEMO_PROGRAMS.find(function(d){return d.id===requestedProject;});
+    if(initialProject){
+      var resumeQuickCode=false;
+      try{resumeQuickCode=localStorage.getItem(QUICK_SELECTION_KEY)===initialProject.id&&localStorage.getItem(STORAGE_KEY)!==null;}catch(e){}
+      if(resumeQuickCode){
+        selectedQuickProject=initialProject.id;
+        demoGallery.querySelectorAll(".demo-tile").forEach(function(el){el.setAttribute("aria-pressed",String(el.dataset.demoId===selectedQuickProject));});
+        setFollowCode(false);
+        requestAnimationFrame(function(){runCode(false);});
+      }else quickRunProject(initialProject);
+    }
   }
 })();
 </script>

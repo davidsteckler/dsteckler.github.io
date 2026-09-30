@@ -41,3 +41,11 @@ python turtleprojects/build-tutorial-steps.py
 ```
 
 For a drawing iteration, `build-tutorial-steps.py --only curatedE17,starter-first-square` rebuilds those lessons and preserves the rest. Before publishing, also run `test-project-catalog.py` and `test-project-levels.mjs`. They check gallery/tutorial agreement, Beginner code constraints, difficulty and search filters, labels, and mobile loading without involuntary scrolling.
+
+## Quick run and the command reference
+
+Clicking a gallery picture or its Quick run button opens the finished program in the same page and runs it. Keep that action separate from the Open tutorial link. Gallery / Quick run switches preserve the editor, difficulty, subject, and search. A shared quick-run URL can use `?view=run&project=starter-first-square&level=Beginner`.
+
+`/turtlereference/` uses the same editor through the tutorial embed protocol. Its authored topics live in `turtlereference/reference-data.js`. Every topic has a complete runnable program, expected result, suggested change, and relevant help. Keep examples compatible with the site's actual Turtle API. Document desktop-only behavior in the desktop topic. Drafts are saved separately for each reference topic.
+
+Run `node turtlereference/test-reference.mjs` after changing quick run or the reference. It checks the editor workflow, example execution, callbacks, saved drafts, navigation, resizing, and mobile layouts.
