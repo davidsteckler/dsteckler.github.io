@@ -2104,7 +2104,7 @@ window.PYTHON_COURSE = {
               "name": "star"
             }
           ],
-          "paletteIntro": "These are text characters. Click one to copy it, then paste it inside a print() string."
+          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V."
         },
         {
           "id": "1-14-solve-ascii",
@@ -2251,7 +2251,7 @@ window.PYTHON_COURSE = {
               "name": "star"
             }
           ],
-          "paletteIntro": "These are text characters. Click one to copy it, then paste it inside a print() string."
+          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V."
         },
         {
           "id": "1-15-create-ascii",
@@ -2437,7 +2437,7 @@ window.PYTHON_COURSE = {
               "name": "star"
             }
           ],
-          "paletteIntro": "These are text characters. Click one to copy it, then paste it inside a print() string."
+          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V."
         }
       ]
     },
