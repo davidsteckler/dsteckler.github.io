@@ -15,6 +15,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Introduce forward/backward and left/right. Conference by asking students to point to the line causing a visible change. Keep emphasis on run-after-small-change.",
+          check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":4,"fail":"Use at least four movement commands."},{"type":"minCalls","commands":["left","right"],"count":2,"fail":"Use at least two turns."}]},
           starter: "forward(80)\nleft(90)\nforward(80)",
           steps: [
             {title:"Run the working starter.",body:"Start by seeing the whole program work before changing anything.",task:"Press Run once.",tip:"The turtle starts in the center facing right."},
@@ -34,6 +35,7 @@ window.PYTHON_COURSE = {
           type: "Solve",
           available: true,
           notes: "First real reduction in scaffolding. Do not give the closing sequence. If stuck, ask what side is missing and which existing distance matches it.",
+          check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":4,"fail":"Add a movement that completes the route."},{"type":"finalPosition","x":0,"y":0,"tolerance":1.5,"fail":"The turtle needs to finish back at its starting point."}]},
           starter: "forward(90)\nleft(90)\nforward(50)\nleft(90)\nforward(90)",
           steps: [
             {title:"Run the route.",body:"The starter draws three sides of a shape.",task:"Press Run and study the unfinished drawing.",tip:"Look at where the turtle is and which direction it faces at the end."},
@@ -50,6 +52,7 @@ window.PYTHON_COURSE = {
           type: "Create",
           available: true,
           notes: "Check requirements rather than appearance. Students should choose the route. Encourage clean runs and explain only when conferencing.",
+          check: {"rules":[{"type":"minCalls","commands":["forward","backward"],"count":5,"fail":"Your route needs at least five visible movement segments."},{"type":"requiresCommands","commands":["left","right"],"fail":"Use at least one left turn and one right turn."},{"type":"minDistinctNumbers","commands":["forward","backward"],"count":2,"fail":"Use at least two different movement distances."}]},
           starter: "# Build your route below\n",
           steps: [
             {title:"Meet the requirements.",body:"Your route needs at least five visible segments, at least one left turn, at least one right turn, and two different movement distances.",task:"Write the first two commands and run them.",tip:"Start small. You do not need to know the final picture yet."},
@@ -66,6 +69,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Teach circle radius separately from movement distance. Keep placement language concrete: move first, then draw.",
+          check: {"rules":[{"type":"minCalls","commands":["circle"],"count":4,"fail":"Draw at least four circles."},{"type":"minCalls","commands":["forward","backward"],"count":3,"fail":"Move between the bubbles at least three times."}]},
           starter: "circle(25)\nforward(45)\ncircle(35)",
           steps: [
             {title:"Run two bubbles.",body:"The starter already draws two circles with a move between them.",task:"Press Run once.",tip:"circle() draws from the turtle's current position."},
@@ -85,6 +89,7 @@ window.PYTHON_COURSE = {
           type: "Solve",
           available: true,
           notes: "Let students find the broken spacing value before opening the hint. Focus on comparing repeated parameters.",
+          check: {"rules":[{"type":"minCalls","commands":["circle"],"count":4,"fail":"Keep four circles in the pattern."},{"type":"sameNumbers","commands":["forward"],"min":3,"fail":"Keep the three forward gaps equal."},{"type":"monotonicNumbers","commands":["circle"],"min":4,"direction":"either","fail":"The circle sizes should consistently grow or consistently shrink."},{"type":"minCalls","commands":["left","right"],"count":1,"fail":"Add a turn so the trail is curved."}]},
           starter: "circle(20)\nforward(40)\ncircle(30)\nforward(70)\ncircle(40)\nforward(40)\ncircle(50)",
           steps: [
             {title:"Find what breaks the pattern.",body:"This program is supposed to make bubbles that grow by 10 while the gaps stay equal.",task:"Run it. Fix the one value that breaks the spacing pattern.",tip:"Compare the forward() values, not the circle() values."},
@@ -101,6 +106,7 @@ window.PYTHON_COURSE = {
           type: "Create",
           available: true,
           notes: "Open-ended application of circle, movement, and turning. Assess whether requirements are met, not whether drawings look alike.",
+          check: {"rules":[{"type":"minCalls","commands":["circle"],"count":5,"fail":"Your design needs at least five circles."},{"type":"minDistinctNumbers","commands":["circle"],"count":3,"fail":"Use at least three different circle radii."},{"type":"minCalls","commands":["left","right"],"count":1,"fail":"Change direction at least once."}]},
           starter: "# Make an original bubble design\n",
           steps: [
             {title:"Start with one working bubble.",body:"Your final design needs at least five circles, at least three different radii, and at least one change of direction.",task:"Write code for the first circle and run it.",tip:"A project is still easier when the smallest piece works first."},
@@ -118,6 +124,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Use Step heavily here. The goal is seeing that each line inherits the turtle's current position and direction.",
+          check: {"rules":[{"type":"exactTurtleCalls","count":5,"fail":"Keep exactly five Turtle commands in the final sequence."},{"type":"minCalls","commands":["forward","backward"],"count":3,"fail":"Keep three movement commands in the sequence."},{"type":"minCalls","commands":["left","right"],"count":2,"fail":"Keep two turn commands in the sequence."}]},
           starter: "forward(60)\nleft(90)\nforward(30)\nright(90)\nforward(20)",
           steps: [
             {title:"Use Step for line 1.",body:"Instead of running everything at once, execute the program one statement at a time.",task:"Press Step once.",tip:"The first command should move the turtle to the right."},
@@ -137,6 +144,7 @@ window.PYTHON_COURSE = {
           type: "Solve",
           available: true,
           notes: "Have students fix one error at a time and rerun. Distinguish syntax/name errors from a program that runs but does the wrong thing.",
+          check: {"rules":[{"type":"exactCalls","commands":["forward"],"count":3,"fail":"The repaired program should have three forward() commands."},{"type":"exactCalls","commands":["left"],"count":1,"fail":"The repaired program should have one left() turn."},{"type":"exactCalls","commands":["right"],"count":1,"fail":"The repaired program should have one right() turn."},{"type":"firstLastSameNumber","commands":["forward"],"fail":"The first and last forward distances should match."}]},
           starter: "forword(70)\nleft(90\nforward(40)\nrite(90)\nforward(70)",
           steps: [
             {title:"Get the program to run.",body:"This five-line program has several typing and syntax mistakes.",task:"Press Run. Fix errors one at a time until the program executes.",tip:"Run again after every fix so the next error becomes easier to isolate."},
@@ -153,6 +161,7 @@ window.PYTHON_COURSE = {
           type: "Create",
           available: true,
           notes: "Constraint challenge. Do not suggest a target image. The five-command limit forces students to choose commands intentionally.",
+          check: {"rules":[{"type":"exactTurtleCalls","count":5,"fail":"Use exactly five Turtle commands."},{"type":"minDrawElements","count":2,"fail":"At least two of the five commands need to draw something visible."}]},
           starter: "# You get exactly five drawing commands\n",
           steps: [
             {title:"Read the constraint.",body:"Create a recognizable or interesting mark using exactly five Turtle commands. Comments do not count.",task:"Write your first command and run it.",tip:"You may use movement, turns, or circle()."},
@@ -169,6 +178,7 @@ window.PYTHON_COURSE = {
           type: "Make",
           available: true,
           notes: "Teach bgcolor, color, and pensize as state-setting commands. Change one visual property at a time.",
+          check: {"rules":[{"type":"minCalls","commands":["bgcolor"],"count":1,"fail":"Set a background color."},{"type":"minCalls","commands":["pensize"],"count":1,"fail":"Set the line thickness with pensize()."},{"type":"minDistinctStrings","commands":["color"],"count":3,"fail":"Use at least three different drawing colors."},{"type":"minCalls","commands":["circle"],"count":1,"fail":"Include a circle in the finished study."}]},
           starter: "bgcolor(\"midnightblue\")\ncolor(\"gold\")\npensize(4)\nforward(100)\nleft(90)\nforward(100)",
           steps: [
             {title:"Run the styled path.",body:"The first three lines change appearance before the turtle moves.",task:"Press Run once.",tip:"bgcolor(), color(), and pensize() affect later drawing."},
@@ -177,7 +187,7 @@ window.PYTHON_COURSE = {
             {title:"Change line thickness.",body:"Change pensize(4) to another whole number.",task:"Run and compare the line weight.",tip:"pensize() changes appearance without changing the route."},
             {title:"Use two drawing colors.",body:"Add another color() command between the two forward commands.",task:"Run so the two segments have different colors.",tip:"A setting affects the commands that come after it."},
             {title:"Add a colored circle.",body:"Change color again, then add circle(30).",task:"Run and keep the circle visible with the existing path.",tip:"The circle uses the current pen color."},
-            {title:"Move and draw in a fourth color.",body:"Add a turn, a move, and one more color change.",task:"Run and create another visible part of the drawing.",tip:"You are combining appearance commands with the movement commands from earlier lessons."},
+            {title:"Move and draw in another color.",body:"Add a turn, change color, then add a movement.",task:"Run and create another visible part of the drawing.",tip:"Put color() before the movement you want it to affect."},
             {title:"Finish the study.",body:"Choose the background, colors, and line thickness you want to keep.",task:"Run the complete program from a clean start.",tip:"There is no required final image."}
           ]
         },
@@ -188,6 +198,7 @@ window.PYTHON_COURSE = {
           type: "Solve",
           available: true,
           notes: "Students should diagnose visibility and ordering problems. Avoid naming the exact fix unless they use the hint.",
+          check: {"rules":[{"type":"minCalls","commands":["bgcolor"],"count":1,"fail":"Keep a background color."},{"type":"minDistinctStrings","commands":["color"],"count":3,"fail":"Use three different visible drawing colors."},{"type":"someNumberGreaterThan","commands":["pensize"],"value":1,"fail":"Increase pensize() above 1."},{"type":"minCalls","commands":["circle"],"count":1,"fail":"Keep the circle in the program."}]},
           starter: "bgcolor(\"navy\")\ncolor(\"navy\")\npensize(1)\nforward(100)\nleft(90)\ncolor(\"yellow\")\nforward(100)\ncircle(30)",
           steps: [
             {title:"Find the invisible segment.",body:"The program runs, but part of the drawing disappears into the background.",task:"Run it and change one value so the first segment becomes visible.",tip:"The first pen color currently matches the background."},
@@ -204,6 +215,7 @@ window.PYTHON_COURSE = {
           type: "Create",
           available: true,
           notes: "Unit project. Conference around requirements, revision, and intentional choices. Final products should vary widely.",
+          check: {"rules":[{"type":"minDrawElements","count":6,"fail":"Create at least six visible drawn elements."},{"type":"minCalls","commands":["circle"],"count":3,"fail":"Use at least three circles."},{"type":"minDistinctStrings","commands":["color"],"count":3,"fail":"Use at least three different drawing colors."},{"type":"minCalls","commands":["bgcolor"],"count":1,"fail":"Set a background color."},{"type":"minDistinctNumbers","commands":["pensize"],"count":2,"fail":"Use at least two different line thicknesses."},{"type":"minCalls","commands":["forward","backward"],"count":2,"fail":"Use movement to place parts of the design."},{"type":"minCalls","commands":["left","right"],"count":1,"fail":"Use at least one turn."}]},
           starter: "# Unit 1 project\n# Build your Night Signals design below\n",
           steps: [
             {title:"Read the project requirements.",body:"Your finished design needs at least six visible drawn elements, movement and turns, at least three circles, at least three drawing colors, a background color, and more than one pensize().",task:"Write the first small piece and run it.",tip:"An element can be a line segment or a circle."},
