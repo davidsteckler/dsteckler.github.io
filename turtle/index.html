@@ -1209,14 +1209,26 @@ for i in range(4):
   var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
   var COURSE_CODE = QUERY_PARAMS.get("code");
   var COURSE_STORAGE_KEY = "dsteckler-pythoncourse-" + COURSE_LESSON;
-  var TRACE_CODE = [
-    "forward(100)",
-    "circle(10)",
-    "forward(10)",
-    "circle(20)",
-    "circle(30)",
-    "forward(30)"
-  ].join("\n");
+  var TRACE_EXAMPLE = QUERY_PARAMS.get("trace") || "sequence";
+  var TRACE_PROGRAMS = {
+    sequence: [
+      "forward(100)",
+      "circle(10)",
+      "forward(10)",
+      "circle(20)",
+      "circle(30)",
+      "forward(30)"
+    ].join("\n"),
+    "extended-loop": [
+      "speed(10)",
+      "for i in range(200, 0, -50):",
+      "    forward(i)",
+      "    left(90)",
+      "penup()",
+      "goto(0, 0)"
+    ].join("\n")
+  };
+  var TRACE_CODE = TRACE_PROGRAMS[TRACE_EXAMPLE] || TRACE_PROGRAMS.sequence;
   if(TRACE_EMBED) document.body.classList.add("trace-embed");
   if(COURSE_EMBED) document.body.classList.add("course-embed");
   var DEFAULT_CODE = [
