@@ -122,6 +122,16 @@
     .chev{color:var(--ghost);font-size:.76rem;transition:transform .15s}
     .unit.closed .chev{transform:rotate(-90deg)}
     .lesson-list{padding:0 6px 7px}
+    .lesson-group-label{
+      margin:8px 7px 3px;
+      padding-top:7px;
+      border-top:1px solid rgba(190,183,171,.65);
+      color:var(--teal);
+      font:850 .56rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.075em;
+      text-transform:uppercase
+    }
+    .lesson-group-label:first-child{border-top:0;margin-top:2px;padding-top:3px}
     .unit.closed .lesson-list{display:none}
     .lesson-item{
       width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;
@@ -203,6 +213,58 @@
     .example{
       margin:15px 0;padding:12px 13px;border-radius:10px;background:#22292a;color:#f7f2e8;
       font:650 .76rem/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre;overflow:auto
+    }
+    .symbol-palette{
+      margin-top:16px;
+      padding:12px;
+      border:1px solid var(--rule);
+      border-radius:11px;
+      background:#f7f3eb
+    }
+    .symbol-palette-head{
+      display:flex;
+      align-items:baseline;
+      gap:7px;
+      margin-bottom:8px
+    }
+    .symbol-palette-head strong{font-size:.7rem;color:var(--ink)}
+    .symbol-palette-head span{font-size:.6rem;color:var(--soft)}
+    .symbol-palette-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px
+    }
+    .symbol-button{
+      min-width:0;
+      display:grid;
+      grid-template-columns:30px minmax(0,1fr);
+      gap:6px;
+      align-items:center;
+      min-height:39px;
+      padding:5px 6px;
+      border:1px solid #d8d1c5;
+      border-radius:8px;
+      background:white;
+      color:var(--ink);
+      text-align:left
+    }
+    .symbol-button:hover{border-color:#9bbeba;background:#f7fbfa}
+    .symbol-button.copied{border-color:var(--teal);background:var(--teal-light)}
+    .symbol-char{
+      display:grid;
+      place-items:center;
+      width:28px;height:28px;
+      border-radius:6px;
+      background:#1b2223;
+      color:#f4f4ef;
+      font:850 1rem/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace
+    }
+    .symbol-name{
+      min-width:0;
+      color:var(--mid);
+      font-size:.53rem;
+      line-height:1.1;
+      font-weight:800
     }
     .challenge-visuals{
       margin-top:18px;
@@ -475,6 +537,7 @@
       .step-content h3{font-size:1.28rem}
       .challenge-visual-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
       .challenge-visual-label{font-size:.55rem;padding:5px}
+      .symbol-palette-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
   </style>
 </head>
@@ -519,6 +582,7 @@
         <p id="stepBody"></p>
         <div class="step-action" id="stepTask"></div>
         <pre class="example" id="stepExample" hidden></pre>
+        <div class="symbol-palette" id="symbolPalette" hidden></div>
         <div class="challenge-visuals" id="challengeVisuals" hidden></div>
         <details class="tip" id="stepHint">
           <summary>Need a hint?</summary>
@@ -545,7 +609,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=20260930-0304"></script>
+<script src="/pythoncourse/course-data.js?v=20260930-0312"></script>
 <script>
 (function(){
   "use strict";
@@ -841,7 +905,15 @@
 
       var list=document.createElement("div");
       list.className="lesson-list";
+      var lastGroup="";
       unit.lessons.forEach(function(lesson){
+        if(lesson.group&&lesson.group!==lastGroup){
+          var group=document.createElement("div");
+          group.className="lesson-group-label";
+          group.textContent=lesson.group;
+          list.appendChild(group);
+          lastGroup=lesson.group;
+        }
         var b=document.createElement("button");
         b.type="button";
         b.className="lesson-item";
@@ -888,6 +960,59 @@
   function getNextAvailableLesson(){
     var i=available.findIndex(function(l){return l.id===current.id;});
     return i>=0 && i<available.length-1 ? available[i+1] : null;
+  }
+
+  function copySymbol(text,button){
+    function done(){
+      button.classList.add("copied");
+      var original=button.getAttribute("aria-label");
+      button.setAttribute("aria-label","Copied "+text);
+      setTimeout(function(){
+        button.classList.remove("copied");
+        button.setAttribute("aria-label",original);
+      },700);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){
+        var ta=document.createElement("textarea");
+        ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+        document.body.appendChild(ta);ta.select();
+        try{document.execCommand("copy");}catch(e){}
+        ta.remove();done();
+      });
+    }else{
+      var ta=document.createElement("textarea");
+      ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+      document.body.appendChild(ta);ta.select();
+      try{document.execCommand("copy");}catch(e){}
+      ta.remove();done();
+    }
+  }
+
+  function renderSymbolPalette(){
+    var wrap=document.getElementById("symbolPalette");
+    var items=current.palette||[];
+    wrap.hidden=!items.length;
+    wrap.innerHTML="";
+    if(!items.length)return;
+
+    var head=document.createElement("div");
+    head.className="symbol-palette-head";
+    head.innerHTML="<strong>Copy a symbol</strong><span>"+esc(current.paletteIntro||"Click to copy.")+"</span>";
+    wrap.appendChild(head);
+
+    var grid=document.createElement("div");
+    grid.className="symbol-palette-grid";
+    items.forEach(function(item){
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="symbol-button";
+      b.setAttribute("aria-label","Copy "+item.name+" "+item.char);
+      b.innerHTML='<span class="symbol-char">'+esc(item.char)+'</span><span class="symbol-name">'+esc(item.name)+'</span>';
+      b.addEventListener("click",function(){copySymbol(item.char,b);});
+      grid.appendChild(b);
+    });
+    wrap.appendChild(grid);
   }
 
   function renderChallengeVisuals(){
@@ -980,6 +1105,7 @@
     teacherNotes.hidden=!(teacherMode&&current.notes);
     teacherNotes.open=false;
     teacherNotesBody.textContent=current.notes||"";
+    renderSymbolPalette();
     renderChallengeVisuals();
     var example=document.getElementById("stepExample");
     if(step.example){
