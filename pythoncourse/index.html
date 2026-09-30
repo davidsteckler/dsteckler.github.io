@@ -266,6 +266,23 @@
       font-weight:850;
       text-align:center
     }
+    .challenge-ascii-preview{
+      display:grid;
+      place-items:center;
+      width:100%;
+      aspect-ratio:8/5;
+      margin:0;
+      padding:8px 5px;
+      overflow:hidden;
+      background:#171c1d;
+      color:#eaf4ee;
+      font:800 .62rem/1.15 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:0;
+      white-space:pre;
+      text-align:left;
+    }
+    .challenge-visual-grid.count-1{grid-template-columns:1fr}
+    .challenge-visual-grid.count-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .tip{
       margin-top:18px;
       padding-top:14px;
@@ -468,7 +485,7 @@
     <span class="top-divider" aria-hidden="true"></span>
     <div class="course-name"><strong>Python Turtle Course</strong><span>Make → Solve → Create</span></div>
     <div class="top-spacer"></div>
-    <div class="progress-wrap"><span id="progressText">0 / 12 complete</span><span class="progress-track"><span class="progress-fill" id="progressFill"></span></span></div>
+    <div class="progress-wrap"><span id="progressText">0 / 15 complete</span><span class="progress-track"><span class="progress-fill" id="progressFill"></span></span></div>
     <a class="top-link projects" href="/turtleprojects/">Projects</a>
     <a class="top-link" href="/turtle/">Sandbox</a>
   </header>
@@ -672,6 +689,26 @@
       actual=callsNamed(calls,["forward","backward","circle","dot","write"]).length;
       target=rule.count+"+";
       passed=actual>=rule.count;
+    }else if(rule.type==="requiresAnyCharacter"){
+      var textCalls=callsNamed(calls,rule.commands||["print"]);
+      var combined=textCalls.map(function(c){return c.str===null?"":c.str;}).join("\n");
+      var found=(rule.characters||[]).filter(function(ch){return combined.indexOf(ch)>=0;});
+      actual=found.length?found.slice(0,3).join(" "):"none";
+      target="visual symbol";
+      passed=found.length>0;
+    }else if(rule.type==="requiresPrintString"){
+      var wanted=String(rule.value||"");
+      var matches=callsNamed(calls,["print"]).filter(function(c){return c.str===wanted;}).length;
+      actual=String(matches);
+      target=String(rule.min||1)+"+ match";
+      passed=matches>=(rule.min||1);
+    }else if(rule.type==="minLiteralCharacters"){
+      var literalCount=callsNamed(calls,rule.commands||["print"]).reduce(function(total,c){
+        return total+(c.str===null?0:c.str.length);
+      },0);
+      actual=String(literalCount);
+      target=rule.count+"+";
+      passed=literalCount>=rule.count;
     }else if(rule.type==="finalPosition"){
       actual=runtime?"("+prettyNumber(runtime.x)+", "+prettyNumber(runtime.y)+")":"not run";
       target="("+prettyNumber(rule.x)+", "+prettyNumber(rule.y)+")";
@@ -867,15 +904,23 @@
     wrap.appendChild(head);
 
     var grid=document.createElement("div");
-    grid.className="challenge-visual-grid";
+    grid.className="challenge-visual-grid count-"+Math.min(3,visuals.length);
     visuals.forEach(function(v){
       var card=document.createElement("div");
       card.className="challenge-visual-card";
 
-      var svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-      svg.setAttribute("viewBox","0 0 160 100");
-      svg.setAttribute("aria-label",v.label||"Example visual");
-      svg.setAttribute("role","img");
+      var svg=null;
+      var ascii=null;
+      if(v.ascii){
+        ascii=document.createElement("pre");
+        ascii.className="challenge-ascii-preview";
+        ascii.textContent=v.ascii;
+        ascii.setAttribute("aria-label",v.label||"ASCII example");
+      }else{
+        svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+        svg.setAttribute("viewBox","0 0 160 100");
+        svg.setAttribute("aria-label",v.label||"Example visual");
+        svg.setAttribute("role","img");
 
       var bg=document.createElementNS(svg.namespaceURI,"rect");
       bg.setAttribute("x","0");bg.setAttribute("y","0");bg.setAttribute("width","160");bg.setAttribute("height","100");
@@ -909,11 +954,12 @@
         if(c.width)el.style.strokeWidth=String(c.width);
         svg.appendChild(el);
       });
+      }
 
       var label=document.createElement("div");
       label.className="challenge-visual-label";
       label.textContent=v.label||"Example";
-      card.appendChild(svg);
+      card.appendChild(ascii||svg);
       card.appendChild(label);
       grid.appendChild(card);
     });
