@@ -89,8 +89,39 @@
     .course-grid{
       min-height:0;
       display:grid;
-      grid-template-columns:var(--sidebar) var(--lesson) minmax(0,1fr);
+      grid-template-columns:var(--sidebar) var(--lesson) 9px minmax(0,1fr);
       overflow:hidden;
+    }
+    .course-resize-divider{
+      position:relative;
+      min-width:9px;
+      cursor:col-resize;
+      touch-action:none;
+      background:#eee9df;
+      border-left:1px solid #ddd7cc;
+      border-right:1px solid #ddd7cc;
+      outline:none;
+      z-index:3
+    }
+    .course-resize-divider:after{
+      content:"";
+      position:absolute;
+      left:50%;top:50%;
+      width:3px;height:62px;
+      transform:translate(-50%,-50%);
+      border-radius:99px;
+      background:#aaa69e;
+      transition:height .12s,background .12s
+    }
+    .course-resize-divider:hover:after,
+    .course-resize-divider:focus-visible:after,
+    .course-resize-divider.dragging:after{
+      height:78px;
+      background:var(--teal)
+    }
+    body.course-resizing,body.course-resizing *{
+      cursor:col-resize!important;
+      user-select:none!important
     }
     .sidebar{
       min-height:0;
@@ -229,15 +260,22 @@
     }
     .symbol-palette-head strong{font-size:.7rem;color:var(--ink)}
     .symbol-palette-head span{font-size:.6rem;color:var(--soft)}
+    .symbol-palette-status{
+      min-height:18px;
+      margin-top:7px;
+      color:var(--teal);
+      font-size:.59rem;
+      font-weight:800
+    }
     .symbol-palette-grid{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
       gap:6px
     }
     .symbol-button{
       min-width:0;
       display:grid;
-      grid-template-columns:30px minmax(0,1fr);
+      grid-template-columns:36px minmax(0,1fr);
       gap:6px;
       align-items:center;
       min-height:39px;
@@ -253,7 +291,7 @@
     .symbol-char{
       display:grid;
       place-items:center;
-      width:28px;height:28px;
+      width:34px;height:34px;
       border-radius:6px;
       background:#1b2223;
       color:#f4f4ef;
@@ -262,9 +300,10 @@
     .symbol-name{
       min-width:0;
       color:var(--mid);
-      font-size:.53rem;
-      line-height:1.1;
-      font-weight:800
+      font-size:.58rem;
+      line-height:1.15;
+      font-weight:800;
+      overflow-wrap:anywhere
     }
     .challenge-visuals{
       margin-top:18px;
@@ -503,6 +542,7 @@
       .shell{height:auto;min-height:100dvh;display:block}
       .topbar{position:sticky;top:0;height:58px}
       .course-grid{display:block;overflow:visible}
+      .course-resize-divider{display:none}
       .sidebar{
         display:none;
         min-height:calc(100dvh - 100px);
@@ -537,7 +577,6 @@
       .step-content h3{font-size:1.28rem}
       .challenge-visual-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
       .challenge-visual-label{font-size:.55rem;padding:5px}
-      .symbol-palette-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
   </style>
 </head>
@@ -602,6 +641,8 @@
       </footer>
     </section>
 
+    <div class="course-resize-divider" id="courseResizeDivider" role="separator" tabindex="0" aria-label="Resize lesson instructions and editor" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="540" title="Drag to resize lesson and editor"></div>
+
     <section class="editor-pane" id="editorPane" aria-label="Python editor and Turtle output">
       <div class="editor-loading">Loading editor…</div>
       <iframe class="editor-frame" id="editorFrame" title="Python Turtle editor"></iframe>
@@ -609,7 +650,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=20260930-0312"></script>
+<script src="/pythoncourse/course-data.js?v=20260930-0321"></script>
 <script>
 (function(){
   "use strict";
@@ -624,6 +665,13 @@
   try{ progress=JSON.parse(localStorage.getItem(progressKey)||"{}")||{}; }catch(e){ progress={}; }
   var checkRequestSeq=0;
   var pendingCheck=null;
+  var lessonWidthKey="dsteckler-pythoncourse-lesson-width";
+  var savedLessonWidth=350;
+  try{
+    var storedLessonWidth=Number(localStorage.getItem(lessonWidthKey));
+    if(Number.isFinite(storedLessonWidth))savedLessonWidth=Math.max(280,Math.min(540,storedLessonWidth));
+  }catch(e){}
+  document.documentElement.style.setProperty("--lesson",savedLessonWidth+"px");
 
   var lessons=[];
   course.units.forEach(function(unit){
@@ -963,29 +1011,26 @@
   }
 
   function copySymbol(text,button){
-    function done(){
+    var status=document.getElementById("symbolPaletteStatus");
+    frame.contentWindow.postMessage({type:"pythoncourse-insert-text",text:text},window.location.origin);
+
+    function done(copied){
       button.classList.add("copied");
-      var original=button.getAttribute("aria-label");
-      button.setAttribute("aria-label","Copied "+text);
-      setTimeout(function(){
-        button.classList.remove("copied");
-        button.setAttribute("aria-label",original);
-      },700);
+      if(status)status.textContent=copied
+        ?"Inserted "+text+" at the cursor and copied it. Paste again with Ctrl+V / Cmd+V."
+        :"Inserted "+text+" at the cursor.";
+      setTimeout(function(){button.classList.remove("copied");},700);
     }
+
     if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(done).catch(function(){
-        var ta=document.createElement("textarea");
-        ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
-        document.body.appendChild(ta);ta.select();
-        try{document.execCommand("copy");}catch(e){}
-        ta.remove();done();
-      });
+      navigator.clipboard.writeText(text).then(function(){done(true);}).catch(function(){done(false);});
     }else{
       var ta=document.createElement("textarea");
       ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
       document.body.appendChild(ta);ta.select();
-      try{document.execCommand("copy");}catch(e){}
-      ta.remove();done();
+      var copied=false;
+      try{copied=document.execCommand("copy");}catch(e){}
+      ta.remove();done(copied);
     }
   }
 
@@ -998,7 +1043,7 @@
 
     var head=document.createElement("div");
     head.className="symbol-palette-head";
-    head.innerHTML="<strong>Copy a symbol</strong><span>"+esc(current.paletteIntro||"Click to copy.")+"</span>";
+    head.innerHTML="<strong>Insert a symbol</strong><span>"+esc(current.paletteIntro||"Click a symbol to insert it and copy it.")+"</span>";
     wrap.appendChild(head);
 
     var grid=document.createElement("div");
@@ -1013,6 +1058,11 @@
       grid.appendChild(b);
     });
     wrap.appendChild(grid);
+    var status=document.createElement("div");
+    status.className="symbol-palette-status";
+    status.id="symbolPaletteStatus";
+    status.setAttribute("aria-live","polite");
+    wrap.appendChild(status);
   }
 
   function renderChallengeVisuals(){
@@ -1196,6 +1246,44 @@
   });
 
   frame.addEventListener("load",function(){editorPane.classList.add("ready");});
+
+  (function enableCourseResize(){
+    var divider=document.getElementById("courseResizeDivider");
+    if(!divider)return;
+    var dragging=false,startX=0,startWidth=savedLessonWidth;
+    function setWidth(value){
+      savedLessonWidth=Math.max(280,Math.min(540,Math.round(value)));
+      document.documentElement.style.setProperty("--lesson",savedLessonWidth+"px");
+      divider.setAttribute("aria-valuenow",String(savedLessonWidth));
+      try{localStorage.setItem(lessonWidthKey,String(savedLessonWidth));}catch(e){}
+    }
+    divider.setAttribute("aria-valuenow",String(savedLessonWidth));
+    divider.addEventListener("pointerdown",function(e){
+      if(e.button!==0||window.innerWidth<=820)return;
+      dragging=true;startX=e.clientX;startWidth=savedLessonWidth;
+      divider.classList.add("dragging");
+      document.body.classList.add("course-resizing");
+      try{divider.setPointerCapture(e.pointerId);}catch(err){}
+      e.preventDefault();
+    });
+    divider.addEventListener("pointermove",function(e){
+      if(!dragging)return;
+      setWidth(startWidth+(e.clientX-startX));
+    });
+    function finish(){
+      dragging=false;
+      divider.classList.remove("dragging");
+      document.body.classList.remove("course-resizing");
+    }
+    divider.addEventListener("pointerup",finish);
+    divider.addEventListener("pointercancel",finish);
+    divider.addEventListener("lostpointercapture",finish);
+    divider.addEventListener("keydown",function(e){
+      if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+      e.preventDefault();
+      setWidth(savedLessonWidth+(e.key==="ArrowRight"?15:-15));
+    });
+  })();
 
   function setMobileView(view){
     courseGrid.classList.toggle("show-editor",view==="editor");
