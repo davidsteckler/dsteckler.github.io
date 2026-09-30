@@ -46,7 +46,24 @@ For a drawing iteration, `build-tutorial-steps.py --only curatedE17,starter-firs
 
 Clicking a gallery picture or its Quick run button opens the finished program in the same page and runs it. Keep that action separate from the Open tutorial link. Gallery / Quick run switches preserve the editor, difficulty, subject, and search. A shared quick-run URL can use `?view=run&project=starter-first-square&level=Beginner`.
 
-`/turtlereference/` uses the same editor through the tutorial embed protocol. Its authored topics live in `turtlereference/reference-data.js` and `reference-more.js`. Every topic has a complete runnable program, expected result, suggested change, and relevant help. Keep examples compatible with the site's actual Turtle API. Document desktop-only behavior in the desktop topic. Drafts are saved separately for each reference topic. Previous/Next follows the sidebar's group order. Diagram markers should identify the turtle or a labeled point rather than resemble an interactive play control.
+`/turtlereference/` uses the same editor through the tutorial embed protocol. Its authored topics live in `turtlereference/reference-data.js` and `reference-more.js`. Every topic has a complete runnable program, expected result, suggested change, and relevant help. Keep examples compatible with the site's actual Turtle API. Document desktop-only behavior in the desktop topic. Previous/Next follows the sidebar's group order. Diagram markers should identify the turtle or a labeled point rather than resemble an interactive play control.
+
+### Runnable example choices
+
+Every reference topic and creative trail stop has several choices in the same page. `turtlereference/reference-examples.js` and `reference-trail-examples.js` author these variations. Keep the first program unchanged so existing saved work remains compatible. Each additional choice needs a distinct complete program, a descriptive label, an observation, an expected result, and a small experiment. Change one idea at a time where possible; let the learner see its effect before combining ideas. A circle topic, for example, compares radius, extent, direction, and polygon sides in separate choices.
+
+Use `focus` strings to highlight meaningful changes in the code and syntax, and `focusParam` to identify the relevant parameter description. Supply `syntax`, `visual`, `output`, and `watchFor` overrides when the original explanation no longer fits. Text and ASCII examples use `output:'ascii'`; add `assertOutput` checks for significant printed results. Callback examples may provide a `previewCall` and a preview note to show what happens after interaction. Input examples use `auto:false` so they run when the learner asks.
+
+The first example keeps the existing `#topic` link and draft key. Variations use `#topic/example`; each has independent saved edits and Reset affects only the selected choice. Browser history, direct links, search, arrow keys, and the example navigation buttons all select the same state. Topic Previous/Next still moves between topics or trail stops. On phones, one shared chooser remains visible in both Reference and Code views.
+
+Build preview images and text from actual runtime output after changing any example program:
+
+```
+node turtlereference/build-example-previews.mjs
+node turtlereference/test-reference.mjs
+```
+
+Commit `example-previews.js` and `example-previews.webp` with their sources. The test checks the source hash of every preview, runs every example in the actual Python/canvas runtime, and verifies independent drafts, reset, parameter highlights, shared links, keyboard navigation, and the mobile chooser. Review screenshots as well: passing bounds checks alone does not establish that a selected card or drawing looks complete.
 
 Run `node turtlereference/test-reference.mjs` after changing quick run or the reference. It checks the editor workflow, example execution, callbacks, saved drafts, navigation, resizing, and mobile layouts.
 
