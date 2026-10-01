@@ -155,10 +155,12 @@ button{font:inherit;cursor:pointer} a{color:inherit}
   .trace td{height:42px}
 }
 </style>
+<link rel="stylesheet" href="/learn/student-nav.css?v=2">
+<script defer src="/learn/student-nav.js?v=2"></script>
 </head>
-<body>
+<body data-student-area="reference" data-student-layout="trace">
 <header class="appbar">
-  <a class="brand" href="/"><span class="brand-mark">&gt;_</span><span>David Steckler</span></a>
+  <a class="brand" href="/"><span class="brand-mark">&gt;_</span><span>Trace tables</span></a>
   <nav class="toplinks"><a href="/turtle/">Turtle Sandbox</a><a href="/turtleprojects/">Projects</a><a href="/course.html">Course</a></nav>
 </header>
 
@@ -251,7 +253,7 @@ button{font:inherit;cursor:pointer} a{color:inherit}
     </div>
     <div class="editorframe-wrap">
       <div class="loading" id="loading">Loading your Turtle editor…</div>
-      <iframe id="editorFrame" src="/turtle/?embed=trace&trace=sequence&v=trace-multi-1" title="David Steckler Python Turtle editor"></iframe>
+      <iframe id="editorFrame" title="David Steckler Python Turtle editor"></iframe>
     </div>
   </section>
 </main>
@@ -533,7 +535,7 @@ const traceTable=document.getElementById('traceTable');
 const exampleCounter=document.getElementById('exampleCounter');
 const tabs=[...document.querySelectorAll('.example-tab')];
 
-let activeKey='sequence';
+let activeKey=Object.hasOwn(examples,location.hash.slice(1))?location.hash.slice(1):'sequence';
 let steps=examples[activeKey].steps;
 let current=0;
 let editorReady=false;
@@ -573,6 +575,8 @@ function buildTable(){
 
 function applyExampleText(){
   const cfg=examples[activeKey];
+  window.LEARNING_ACTIVITY={id:'trace:'+activeKey,title:'Trace table · '+cfg.title,url:'/tracetable/#'+activeKey};
+  window.dispatchEvent(new CustomEvent('learning-activity',{detail:window.LEARNING_ACTIVITY}));
   lessonEyebrow.textContent=cfg.eyebrow;
   lessonTitle.textContent=cfg.title;
   lessonDescription.textContent=cfg.description;
@@ -816,6 +820,7 @@ function selectExample(key){
   if(oldApi)oldApi.reset();
 
   activeKey=key;
+  history.replaceState(null,'','#'+key);
   steps=examples[key].steps;
   current=0;
   editorReady=false;
@@ -827,7 +832,7 @@ function selectExample(key){
 
   loading.classList.remove('hidden');
   loading.textContent='Loading your Turtle editor…';
-  frame.src=examples[key].embed;
+  frame.contentWindow.location.replace(new URL(examples[key].embed,location.href).href);
 }
 
 frame.addEventListener('load',startEditorPolling);
@@ -840,6 +845,7 @@ backBtn.addEventListener('click',backOne);
 runCodeBtn.addEventListener('click',runFullCode);
 
 document.addEventListener('keydown',function(e){
+  if(e.target.closest('input,textarea,select,button,a,[contenteditable],dialog'))return;
   if((e.key==='ArrowRight'||e.key===' ')&&!e.repeat){
     e.preventDefault();
     runNext();
@@ -853,6 +859,7 @@ document.addEventListener('keydown',function(e){
 applyExampleText();
 buildTable();
 render();
+frame.contentWindow.location.replace(new URL(examples[activeKey].embed,location.href).href);
 </script>
 </body>
 </html>

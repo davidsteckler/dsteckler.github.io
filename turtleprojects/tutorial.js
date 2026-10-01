@@ -31,6 +31,8 @@
   if(/^#step-\d+$/.test(location.hash)&&hashStep>=1&&hashStep<=steps.length)current=hashStep-1;
   document.title=project.title+' · Turtle Tutorial | David Steckler';
   $('projectTitle').textContent=project.title;
+  window.LEARNING_ACTIVITY={id:'project:'+project.id,title:project.title,url:location.pathname+location.search};
+  window.dispatchEvent(new CustomEvent('learning-activity',{detail:window.LEARNING_ACTIVITY}));
   const projectLevel=window.TURTLE_PROJECT_LEVELS[project.id];
   $('projectLevel').textContent=projectLevel.level;
   $('projectLevel').className='level-badge level-'+projectLevel.level.toLowerCase();
