@@ -65,5 +65,9 @@
   setActivity(window.LEARNING_ACTIVITY || {id:path+location.search+location.hash,title:document.title.split('|')[0].trim(),url:location.href});
   // Keep the selected section visible without scrolling the document or shifting focus.
   const current = bar.querySelector('[aria-current]');
-  if(current)bar.querySelector('.student-links').scrollLeft=Math.max(0,current.offsetLeft-bar.querySelector('.student-links').offsetLeft-20);
+  if(current){
+    const row=bar.querySelector('.student-links');
+    const padding=matchMedia('(max-width:760px)').matches?0:20;
+    row.scrollLeft=Math.max(0,current.offsetLeft-row.offsetLeft-padding);
+  }
 })();
