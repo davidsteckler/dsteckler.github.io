@@ -1,6 +1,6 @@
 # Python course authoring
 
-The course lives at `/pythoncourse/`. Keep the lesson page usable in one desktop viewport: course map on the left, the current instruction in the middle, and the live Turtle editor/output on the right.
+The course lives at `/pythoncourse/`. Keep the lesson page usable in one desktop viewport: a horizontal activity strip above the current instruction and live Turtle editor/output. The complete course map opens with **All lessons**. On mobile, the activity strip stays visible above the Lessons / Lesson / Editor tabs.
 
 ## Teaching sequence
 
@@ -93,8 +93,8 @@ The course loads the existing editor with:
 The Turtle page stores student code separately for each lesson using the lesson ID. It does not overwrite the student's normal `/turtle/` sandbox code.
 
 The course page stores:
-- lesson completion in `dsteckler-pythoncourse-progress-v1`
-- current lesson step in `dsteckler-pythoncourse-step-LESSON_ID`
+- lesson completion in `dsteckler-pythoncourse-progress-v2`
+- current lesson step in `dsteckler-pythoncourse-step-v2-LESSON_ID`
 - lesson code in `dsteckler-pythoncourse-LESSON_ID`
 
 The Reset code button clears only the current lesson's saved code and reloads its starter code.
@@ -108,3 +108,11 @@ Mobile switches between Lesson and Editor + Output so the student is not forced 
 ## Next useful additions
 
 Automatic checks should be added lesson-by-lesson only when the check is meaningful. Good checks include whether required commands exist, whether a loop runs the intended number of times, whether code runs without an error, and whether a student-defined function is called. Do not grade exact coordinates when several drawings can correctly satisfy the task.
+
+## Student home and four habits
+
+The student entry point is `/learn/`; `/learn/python/` opens this course. Include the shared `/learn/student-nav.css` and `/learn/student-nav.js` on new standalone learning pages. Embedded editors automatically omit this navigation. Keep the four principles visible through the shared navigation: focus your energy, guard your time, train your mind, think for yourself.
+
+The **My thinking** notebook provides a place to record a goal, a distraction to put aside, an attempt and observation, and evidence for a decision. It saves per activity in this browser. Course changes dispatch `learning-activity` with a stable `id`, friendly `title`, and same-origin `url`; keep these identities stable when renaming lessons. The home reads existing course completion data and the most recently visited learning activity. It never marks an activity complete from a visit.
+
+Keep activity navigation separate from checkpoint navigation. Changing an activity preserves its code, checkpoint, and notebook. Do not add forced notebook completion before students can use the editor.

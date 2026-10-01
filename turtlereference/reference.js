@@ -275,6 +275,8 @@
     currentExample = entry.examples.find(example => example.id === exampleId) || entry.examples[0];
     if (updateHistory) history.pushState(null, '', '#' + exampleKey());
     document.title = entry.title + (currentExample.id === 'original' ? '' : ' · ' + currentExample.label) + ' · Python Turtle Reference | David Steckler';
+    window.LEARNING_ACTIVITY = {id:'reference:'+exampleKey(),title:entry.title+' · '+currentExample.label,url:'/turtlereference/#'+exampleKey()};
+    window.dispatchEvent(new CustomEvent('learning-activity',{detail:window.LEARNING_ACTIVITY}));
     $('topicGroup').textContent = entry.group;
     $('topicTitle').textContent = entry.title;
     $('topicSummary').textContent = currentExample.summary;
