@@ -579,7 +579,7 @@
       .challenge-visual-label{font-size:.55rem;padding:5px}
     }
   </style>
-  <link rel="stylesheet" href="/pythoncourse/course-navigation.css?v=2">
+  <link rel="stylesheet" href="/pythoncourse/course-navigation.css?v=3">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -620,6 +620,7 @@
         <div class="lesson-eyebrow"><span id="lessonNumber">1.1</span><span class="type-pill" id="lessonType">Lesson</span></div>
         <h2 id="lessonTitle">First Moves</h2>
         <div class="lesson-sub" id="lessonMeta">Step 1 of 8</div>
+        <div class="lesson-sub" id="understandingStatus"></div>
         <div class="step-strip" id="stepStrip" aria-label="Lesson steps"></div>
       </header>
 
@@ -627,7 +628,10 @@
         <h3 id="stepTitle">See what the code already does.</h3>
         <p id="stepBody"></p>
         <div class="step-action" id="stepTask"></div>
+        <p class="experiment-note" id="experimentNote" hidden>Experiment code · saved separately from your project</p>
         <pre class="example" id="stepExample" hidden></pre>
+        <div id="learningInteraction" hidden></div>
+        <button class="btn checkpoint-button" id="checkCheckpoint" type="button" hidden>Check experiment</button>
         <div class="symbol-palette" id="symbolPalette" hidden></div>
         <div class="challenge-visuals" id="challengeVisuals" hidden></div>
         <details class="tip" id="stepHint">
@@ -657,7 +661,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=20260930-0016"></script>
+<script src="/pythoncourse/course-data.js?v=unit1-depth-1"></script>
 <script>
 (function(){
   "use strict";
@@ -672,6 +676,7 @@
   try{ progress=JSON.parse(localStorage.getItem(progressKey)||"{}")||{}; }catch(e){ progress={}; }
   var checkRequestSeq=0;
   var pendingCheck=null;
+  var loadedEditorKey="";
   var lessonWidthKey="dsteckler-pythoncourse-lesson-width";
   var savedLessonWidth=350;
   try{
@@ -832,6 +837,31 @@
       actual=String(literalCount);
       target=rule.count+"+";
       passed=literalCount>=rule.count;
+    }else if(rule.type==="commandSequence"){
+      var executed=calls.filter(function(c){return TURTLE_CALLS.indexOf(c.name)>=0;});
+      passed=executed.length===rule.sequence.length&&executed.every(function(c,i){return rule.sequence[i].indexOf(c.name)>=0&&c.num!==0;});
+      actual=executed.map(function(c){return c.name;}).join(" → ");target="alternating moves and turns";
+    }else if(rule.type==="literalNumbers"){
+      var actualValues=callsNamed(calls,rule.commands).map(function(c){return c.num;});
+      passed=(rule.prefix?actualValues.length>=rule.values.length:actualValues.length===rule.values.length)&&rule.values.every(function(n,i){return actualValues[i]===n;});
+      actual=actualValues.join(" · ");target=rule.values.join(" · ");
+    }else if(rule.type==="drawingStyle"){
+      var pen="black",background="white",width=1,penDown=true,strokes=[];
+      var ctx=document.createElement("canvas").getContext("2d");
+      function normalized(color){ctx.fillStyle="#010203";ctx.fillStyle=color;return ctx.fillStyle;}
+      calls.forEach(function(c){
+        if(c.name==="color"&&c.str!==null)pen=c.str;
+        if(c.name==="bgcolor"&&c.str!==null)background=c.str;
+        if(c.name==="pensize"&&c.num!==null)width=c.num;
+        if(c.name==="clear"||c.name==="reset")strokes=[];
+        if(c.name==="reset"){pen="black";width=1;penDown=true;}
+        if(c.name==="penup")penDown=false;
+        if(c.name==="pendown")penDown=true;
+        if(penDown&&["forward","backward","circle"].indexOf(c.name)>=0&&c.num!==0)strokes.push({color:normalized(pen),bg:normalized(background),width:width});
+      });
+      var colors=strokes.map(function(stroke){return stroke.color;}).filter(function(color,i,all){return all.indexOf(color)===i;});
+      passed=strokes.length>0&&colors.length>=rule.colors&&strokes.every(function(stroke){return stroke.width>=rule.width&&(!rule.contrast||stroke.color!==normalized(background));})&&(!rule.increasingWidth||strokes[strokes.length-1].width>strokes[0].width);
+      actual=colors.length+" colors across "+strokes.length+" strokes";target=rule.colors+" visible colors, width "+rule.width+"+";
     }else if(rule.type==="finalPosition"){
       actual=runtime?"("+prettyNumber(runtime.x)+", "+prettyNumber(runtime.y)+")":"not run";
       target="("+prettyNumber(rule.x)+", "+prettyNumber(rule.y)+")";
@@ -881,8 +911,8 @@
     var pct=Math.round(passed/Math.max(1,total)*100);
     box.hidden=false;
     box.className="check-feedback "+(result.ok?"good":"bad");
-    var title=result.ok?"Challenge passed":passed+" of "+total+" requirements met";
-    var sub=result.ok?"Everything required is working.":"Fix the unchecked items, then check again.";
+    var title=result.ok?(result.checkpoint?"Experiment passed":"Challenge passed"):passed+" of "+total+" requirements met";
+    var sub=result.ok?(result.checkpoint?"Test a second solution, or return to your project with Next.":"Everything required is working."):"Fix the unchecked items, then check again.";
     box.innerHTML=
       '<div class="check-head">'+
         '<div class="check-badge">'+(result.ok?"✓":passed+"/"+total)+'</div>'+
@@ -905,8 +935,17 @@
     box.textContent="";
   }
 
-  function requestCodeCheck(){
+  function requestCodeCheck(checkpoint){
     if(pendingCheck)return;
+    if(!checkpoint&&!understandingComplete()){
+      var saved=readResponses();
+      showCheckFeedback({ok:false,items:current.steps.filter(function(step){return step.question;}).map(function(step){var answer=saved[step.question.id];return {label:step.question.prompt,passed:!!answer&&answer.checked&&answer.choice===step.question.answer,actual:"Understanding check",target:"Answer and check"};})});
+      return;
+    }
+    if(!checkpoint){
+      var responses=readResponses(),missing=current.steps.filter(function(step){return step.check&&!(responses[step.id]&&responses[step.id].passed);});
+      if(missing.length){showCheckFeedback({ok:false,items:missing.map(function(step){return {label:step.title,passed:false,actual:"Experiment",target:"Pass its code check"};})});return;}
+    }
     if(!current.check){
       progress[current.id]=true;
       try{localStorage.setItem(progressKey,JSON.stringify(progress));}catch(e){}
@@ -914,8 +953,8 @@
       return;
     }
     var id="check-"+(++checkRequestSeq)+"-"+current.id;
-    pendingCheck={id:id,lessonId:current.id};
-    var next=document.getElementById("nextBtn");
+    pendingCheck={id:id,lessonId:current.id,stepIndex:stepIndex,checkpoint:!!checkpoint,check:checkpoint?current.steps[stepIndex].check:current.check};
+    var next=document.getElementById(checkpoint?"checkCheckpoint":"nextBtn");
     next.disabled=true;
     next.textContent="Checking…";
     clearCheckFeedback();
@@ -924,7 +963,7 @@
       if(!pendingCheck||pendingCheck.id!==id)return;
       pendingCheck=null;
       next.disabled=false;
-      next.textContent="Check my code";
+      next.textContent=checkpoint?"Check experiment":"Check my code";
       showCheckFeedback({ok:false,items:[{label:"Checker responded",passed:false,actual:"no response",target:"respond"}]});
     },10000);
   }
@@ -933,12 +972,15 @@
     if(event.origin!==window.location.origin||event.source!==frame.contentWindow)return;
     var data=event.data||{};
     if(data.type!=="pythoncourse-check-result"||!pendingCheck||data.requestId!==pendingCheck.id)return;
-    var lessonId=pendingCheck.lessonId;
+    var request=pendingCheck;
+    var lessonId=request.lessonId;
     pendingCheck=null;
-    var next=document.getElementById("nextBtn");
+    var next=document.getElementById(request.checkpoint?"checkCheckpoint":"nextBtn");
     next.disabled=false;
-    if(current.id!==lessonId)return;
-    var result=evaluateStudentCode(current,data);
+    if(current.id!==lessonId||stepIndex!==request.stepIndex)return;
+    var result=evaluateStudentCode({check:request.check},data);
+    result.checkpoint=request.checkpoint;
+    if(request.checkpoint){saveResponse(current.steps[stepIndex].id,{passed:result.ok});next.textContent="Check experiment";showCheckFeedback(result);return;}
     showCheckFeedback(result);
     if(result.ok){
       progress[current.id]=true;
@@ -1016,9 +1058,14 @@
     });
   }
 
-  function loadEditor(){
+  function loadEditor(force){
+    var step=current.steps[stepIndex],key=step.lab?current.id+"-lab-"+step.id:current.id;
+    if(!force&&key===loadedEditorKey)return;
+    if(!force)captureCurrentCode();
+    loadedEditorKey=key;
+    frame.dataset.lessonKey=key;
     editorPane.classList.remove("ready");
-    var src="/turtle/?embed=course&lesson="+encodeURIComponent(current.id)+"&code="+encodeURIComponent(current.starter||"");
+    var src="/turtle/?embed=course&lesson="+encodeURIComponent(key)+"&code="+encodeURIComponent(step.lab||current.starter||"");
     frame.contentWindow.location.replace(new URL(src,location.href).href);
   }
 
@@ -1181,8 +1228,36 @@
     wrap.appendChild(grid);
   }
 
+  function responsesKey(){return "dsteckler-pythoncourse-responses-v1-"+current.id;}
+  function readResponses(){try{return JSON.parse(localStorage.getItem(responsesKey())||"{}")||{};}catch(e){return {};}}
+  function saveResponse(id,value){var saved=readResponses();saved[id]=value;try{localStorage.setItem(responsesKey(),JSON.stringify(saved));return true;}catch(e){return false;}}
+  function understandingComplete(){var saved=readResponses();return current.steps.filter(function(step){return step.question;}).every(function(step){var value=saved[step.question.id];return value&&value.checked&&value.choice===step.question.answer;});}
+  function practiceComplete(){var saved=readResponses();return understandingComplete()&&current.steps.filter(function(step){return step.check;}).every(function(step){return saved[step.id]&&saved[step.id].passed;});}
+  function renderUnderstanding(){var saved=readResponses(),questions=current.steps.filter(function(step){return step.question;}),passed=questions.filter(function(step){var value=saved[step.question.id];return value&&value.checked&&value.choice===step.question.answer;}).length;document.getElementById("understandingStatus").textContent=(current.objective?current.objective+" · ":"")+passed+" / "+questions.length+" understanding checks";}
+  function renderInteraction(step){
+    var panel=document.getElementById("learningInteraction");panel.hidden=!(step.question||step.response);panel.innerHTML="";
+    if(step.question){
+      var q=step.question,value=readResponses()[q.id]||{};
+      panel.innerHTML='<fieldset class="prediction"><legend>'+esc(q.prompt)+'</legend>'+q.choices.map(function(choice,i){return '<label><input type="radio" name="prediction" value="'+i+'" '+(value.choice===i?'checked':'')+'><span>'+esc(choice)+'</span></label>';}).join("")+'</fieldset><button class="btn" id="checkPrediction" type="button">Check prediction</button><p id="predictionFeedback" role="status"></p>';
+      var feedback=document.getElementById("predictionFeedback");
+      function show(){if(value.checked){feedback.textContent=(value.choice===q.answer?"Yes. ":"Try again. ")+q.explanation;feedback.className=value.choice===q.answer?"correct":"retry";}}
+      show();panel.querySelectorAll("input").forEach(function(input){input.addEventListener("change",function(){value={choice:Number(input.value),checked:false};saveResponse(q.id,value);feedback.textContent="";renderUnderstanding();});});
+      document.getElementById("checkPrediction").addEventListener("click",function(){if(!Number.isInteger(value.choice)){feedback.textContent="Choose a prediction first.";return;}value.checked=true;saveResponse(q.id,value);show();renderUnderstanding();});
+    }else if(step.response){
+      var r=step.response,saved=readResponses()[r.id];
+      panel.innerHTML='<label class="evidence-label" for="evidenceResponse">Your evidence</label><textarea id="evidenceResponse" rows="5" maxlength="6000" placeholder="'+esc(r.placeholder)+'"></textarea><p id="responseStatus" role="status">Saved on this device as you type.</p><button class="btn" id="downloadResponse" type="button">Download lesson notes</button>';
+      var field=document.getElementById("evidenceResponse");field.value=typeof saved==="string"?saved:"";
+      field.addEventListener("input",function(){document.getElementById("responseStatus").textContent=saveResponse(r.id,field.value)?"Saved on this device.":"Could not save. Download your notes to keep them.";});
+      document.getElementById("downloadResponse").addEventListener("click",function(){var answers=readResponses();var text=current.title+"\n\n"+current.steps.filter(function(s){return s.question||s.response;}).map(function(s){if(s.response)return s.response.prompt+"\n"+(answers[s.response.id]||"");var a=answers[s.question.id];return s.question.prompt+"\n"+(a?s.question.choices[a.choice]||"Unanswered":"Unanswered");}).join("\n\n");var url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));var link=document.createElement("a");link.href=url;link.download=current.id+"-notes.txt";link.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);});
+    }
+  }
+  document.getElementById("checkCheckpoint").addEventListener("click",function(){requestCodeCheck(true);});
   function renderStep(){
     var step=current.steps[stepIndex];
+    loadEditor();
+    document.getElementById("experimentNote").hidden=!step.lab;
+    document.getElementById("checkCheckpoint").hidden=!step.check;
+    renderInteraction(step);renderUnderstanding();
     document.getElementById("stepTitle").textContent=step.title;
     document.getElementById("stepBody").textContent=step.body;
     document.getElementById("stepTask").textContent=step.task;
@@ -1216,11 +1291,11 @@
     var next=document.getElementById("nextBtn");
     if(stepIndex===current.steps.length-1){
       var following=getNextAvailableLesson();
-      if(progress[current.id] && following){
+      if(progress[current.id] && practiceComplete() && following){
         next.textContent="Next lesson →";
         next.classList.add("primary");
         next.classList.remove("complete");
-      }else if(progress[current.id]){
+      }else if(progress[current.id]&&practiceComplete()){
         next.textContent="Completed ✓";
         next.classList.add("complete");
         next.classList.remove("primary");
@@ -1243,9 +1318,9 @@
   function captureCurrentCode(){
     try{
       var editorUrl=new URL(frame.contentWindow.location.href);
-      if(editorUrl.searchParams.get("lesson")!==current.id)return;
+      if(editorUrl.searchParams.get("lesson")!==loadedEditorKey)return;
       var cm=frame.contentDocument.querySelector(".CodeMirror");
-      if(cm&&cm.CodeMirror)localStorage.setItem("dsteckler-pythoncourse-"+current.id,cm.CodeMirror.getValue());
+      if(cm&&cm.CodeMirror)localStorage.setItem("dsteckler-pythoncourse-"+loadedEditorKey,cm.CodeMirror.getValue());
     }catch(e){}
   }
   window.addEventListener("pagehide",captureCurrentCode);
@@ -1283,7 +1358,7 @@
     if(stepIndex<current.steps.length-1){
       stepIndex++;saveStep();clearCheckFeedback();renderStep();return;
     }
-    if(progress[current.id]){
+    if(progress[current.id]&&practiceComplete()){
       var following=getNextAvailableLesson();
       if(following)selectLesson(following.id);
       return;
@@ -1293,8 +1368,8 @@
 
   document.getElementById("resetBtn").addEventListener("click",function(){
     if(!confirm("Reset this lesson back to its starter code?"))return;
-    try{localStorage.removeItem("dsteckler-pythoncourse-"+current.id);}catch(e){}
-    loadEditor();
+    try{localStorage.removeItem("dsteckler-pythoncourse-"+loadedEditorKey);}catch(e){}
+    loadEditor(true);
   });
 
   frame.addEventListener("load",function(){editorPane.classList.add("ready");});

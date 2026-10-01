@@ -116,3 +116,21 @@ The student entry point is `/learn/`; `/learn/python/` opens this course. Includ
 The **My thinking** notebook provides a place to record a goal, a distraction to put aside, an attempt and observation, and evidence for a decision. It saves per activity in this browser. Course changes dispatch `learning-activity` with a stable `id`, friendly `title`, and same-origin `url`; keep these identities stable when renaming lessons. The home reads existing course completion data and the most recently visited learning activity. It never marks an activity complete from a visit.
 
 Keep activity navigation separate from checkpoint navigation. Changing an activity preserves its code, checkpoint, and notebook. Do not add forced notebook completion before students can use the editor.
+
+## Understanding and independent experiments
+
+Unit 1 keeps its 15 Make / Solve / Create activities. Each now includes two checked predictions, a separate editable experiment with a real code check, and a saved evidence response. The last activity also contains the cumulative signal-beacon repair. The concept checks and experiment checks must pass before final completion. Evidence responses are saved for discussion; the program does not grade an explanation as correct.
+
+Steps can include these fields:
+
+- `id`: stable step identity; required for isolated experiments and saved responses.
+- `lab`: a small starting program loaded in a separate editor draft. Its storage key is `dsteckler-pythoncourse-LESSON_ID-lab-STEP_ID`. Leaving the step restores the main project draft or another experiment draft.
+- `question`: `{id,prompt,choices,answer,explanation}`. `answer` is the zero-based correct choice. Require students to check a selection; changing the selection clears its checked status.
+- `check`: the experiment’s code rules. A successful experiment never marks the whole activity complete.
+- `response`: `{id,prompt,placeholder}` for a saved text response. Make prompts specific to a change, observation, comparison, or error. The student can download the lesson notes.
+
+Responses use `dsteckler-pythoncourse-responses-v1-LESSON_ID`. They are separate from the optional four-step notebook. A successful final code check still validates the student’s own project.
+
+Teach a command before asking students to explain its behavior. Keep working examples short and isolate one property at a time. Use an unfamiliar target to test whether students can transfer the idea. Do not turn experiments into more copy-the-solution steps.
+
+Run `node pythoncourse/test-unit-depth.mjs` to check all predictions, independent experiment solutions, unsuccessful attempts, project restoration, evidence persistence, and mobile interaction.
