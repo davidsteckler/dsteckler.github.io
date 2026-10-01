@@ -938,6 +938,19 @@ window.PYTHON_COURSE = {
                     ],
                     "min": 2,
                     "label": "Keep equal radii"
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "circle"
+                    ],
+                    "values": [
+                      20,
+                      20
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
                   }
                 ]
               },
@@ -1110,6 +1123,19 @@ window.PYTHON_COURSE = {
                     "tolerance": 1.5,
                     "label": "Finish at the target",
                     "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "circle"
+                    ],
+                    "values": [
+                      15,
+                      30
+                    ],
+                    "prefix": true,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
                   }
                 ]
               },
@@ -1357,6 +1383,19 @@ window.PYTHON_COURSE = {
                     ],
                     "count": 2,
                     "label": "Two circles"
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "circle"
+                    ],
+                    "values": [
+                      15,
+                      30
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
                   }
                 ]
               },
@@ -1637,6 +1676,31 @@ window.PYTHON_COURSE = {
                     "type": "exactTurtleCalls",
                     "count": 3,
                     "label": "Keep three commands"
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "forward"
+                    ],
+                    "values": [
+                      40,
+                      30
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "left"
+                    ],
+                    "values": [
+                      90
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
                   }
                 ]
               },
@@ -2487,6 +2551,31 @@ window.PYTHON_COURSE = {
                     "width": 4,
                     "contrast": true,
                     "label": "Both strokes visible and thick"
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "forward"
+                    ],
+                    "values": [
+                      40,
+                      30
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "left"
+                    ],
+                    "values": [
+                      90
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
                   }
                 ]
               },
@@ -2876,7 +2965,33 @@ window.PYTHON_COURSE = {
                     "colors": 2,
                     "width": 6,
                     "contrast": true,
-                    "label": "Two visible colors"
+                    "label": "Two visible colors",
+                    "increasingWidth": true
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "forward"
+                    ],
+                    "values": [
+                      40,
+                      20
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "left"
+                    ],
+                    "values": [
+                      90
+                    ],
+                    "prefix": false,
+                    "label": "Keep the unchanged values",
+                    "fail": "This experiment asks you to change one property while preserving the other values."
                   }
                 ]
               },
@@ -3288,6 +3403,11 @@ window.PYTHON_COURSE = {
                     "value": " ██ ",
                     "min": 2,
                     "label": "Matching four-character edge rows"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": " █  █",
+                    "label": "Keep the middle row unchanged"
                   }
                 ]
               },

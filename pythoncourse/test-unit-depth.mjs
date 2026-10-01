@@ -55,6 +55,15 @@ try{
   await page.reload();await page.waitForSelector('#evidenceResponse');assert((await page.locator('#evidenceResponse').inputValue()).startsWith('I changed one value.'));
   assert((await page.locator('#understandingStatus').innerText()).includes('2 / 2'));
  }
+ for(const [index,code] of [
+  [3,'circle(10)\nforward(60)\ncircle(10)'],
+  [5,'circle(20)\nforward(75)\ncircle(30)'],
+  [11,'bgcolor("black")\ncolor("cyan")\npensize(6)\nforward(40)\nleft(90)\ncolor("pink")\nforward(20)'],
+  [10,'color("black")\npensize(6)\nforward(40)\nleft(90)\ncolor("cyan")\nforward(30)\nbgcolor("black")'],
+  [13,'print(" ██ ")\nprint("wrong middle")\nprint(" ██ ")']
+ ]){
+  const lesson=lessons[index];await page.goto(origin+'/pythoncourse/?lesson='+lesson.id);await editor();const frame=await goStep(lesson.steps.findIndex(s=>s.check));await frame.locator('.CodeMirror').evaluate((el,text)=>el.CodeMirror.setValue(text),code);await page.locator('#checkCheckpoint').click();await page.waitForSelector('#checkFeedback.bad');
+ }
  console.log('PASS all 30 understanding checks, 16 independent experiments, including the cumulative signal-beacon challenge, failure/success grading, lesson completion isolation, project restoration and saved evidence');
  await page.goto(origin+'/pythoncourse/?lesson=1-1-make-path');await editor();
  await page.evaluate(()=>localStorage.removeItem('dsteckler-pythoncourse-responses-v1-1-1-make-path'));await goStep(lessons[0].steps.length-1);await page.locator('#nextBtn').click();await page.waitForSelector('#checkFeedback.bad');assert((await page.locator('#checkFeedback').innerText()).includes('Understanding check'));

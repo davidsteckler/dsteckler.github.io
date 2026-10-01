@@ -841,6 +841,10 @@
       var executed=calls.filter(function(c){return TURTLE_CALLS.indexOf(c.name)>=0;});
       passed=executed.length===rule.sequence.length&&executed.every(function(c,i){return rule.sequence[i].indexOf(c.name)>=0&&c.num!==0;});
       actual=executed.map(function(c){return c.name;}).join(" → ");target="alternating moves and turns";
+    }else if(rule.type==="literalNumbers"){
+      var actualValues=callsNamed(calls,rule.commands).map(function(c){return c.num;});
+      passed=(rule.prefix?actualValues.length>=rule.values.length:actualValues.length===rule.values.length)&&rule.values.every(function(n,i){return actualValues[i]===n;});
+      actual=actualValues.join(" · ");target=rule.values.join(" · ");
     }else if(rule.type==="drawingStyle"){
       var pen="black",background="white",width=1,penDown=true,strokes=[];
       var ctx=document.createElement("canvas").getContext("2d");
@@ -849,12 +853,14 @@
         if(c.name==="color"&&c.str!==null)pen=c.str;
         if(c.name==="bgcolor"&&c.str!==null)background=c.str;
         if(c.name==="pensize"&&c.num!==null)width=c.num;
+        if(c.name==="clear"||c.name==="reset")strokes=[];
+        if(c.name==="reset"){pen="black";width=1;penDown=true;}
         if(c.name==="penup")penDown=false;
         if(c.name==="pendown")penDown=true;
         if(penDown&&["forward","backward","circle"].indexOf(c.name)>=0&&c.num!==0)strokes.push({color:normalized(pen),bg:normalized(background),width:width});
       });
       var colors=strokes.map(function(stroke){return stroke.color;}).filter(function(color,i,all){return all.indexOf(color)===i;});
-      passed=strokes.length>0&&colors.length>=rule.colors&&strokes.every(function(stroke){return stroke.width>=rule.width&&(!rule.contrast||stroke.color!==stroke.bg);});
+      passed=strokes.length>0&&colors.length>=rule.colors&&strokes.every(function(stroke){return stroke.width>=rule.width&&(!rule.contrast||stroke.color!==normalized(background));})&&(!rule.increasingWidth||strokes[strokes.length-1].width>strokes[0].width);
       actual=colors.length+" colors across "+strokes.length+" strokes";target=rule.colors+" visible colors, width "+rule.width+"+";
     }else if(rule.type==="finalPosition"){
       actual=runtime?"("+prettyNumber(runtime.x)+", "+prettyNumber(runtime.y)+")":"not run";
