@@ -20,6 +20,9 @@ The home connects David's four principles with existing lessons: **Focus your en
 | `/learn/create/` | `/turtle/` |
 | `/learn/blackbox/` | `/blackboxintro.html` |
 | `/learn/ascii/` | `/asciiart.html` |
+| `/learn/timeline/` | `/timeline/` |
+| `/learn/languages/` | `/TIOBE.html` |
+| `/learn/code/` | `/python/` |
 | `/learn/habits/` | `/learn/#habits` |
 | `/learn/challenges/` | `/learn/#challenges` |
 

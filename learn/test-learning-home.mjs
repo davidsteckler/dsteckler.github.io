@@ -13,7 +13,7 @@ let browser;
 try {
   for(let i=0;i<60;i++){try{await fetch(origin+'/learn/');break;}catch{await new Promise(r=>setTimeout(r,100));}}
   browser=await chromium.launch({executablePath:process.env.BROWSER_EXECUTABLE||undefined,headless:true,args:['--no-sandbox']});
-  const context=await browser.newContext({viewport:{width:1440,height:900}});
+  const context=await browser.newContext({viewport:{width:1440,height:900},reducedMotion:'reduce'});
   const deps=process.env.TURTLE_TEST_DEPS;
   if(deps)for(const [pattern,file] of [['**/codemirror.min.css','codemirror.css'],['**/codemirror.min.js','codemirror.js'],['**/mode/python/python.min.js','python.js'],['**/skulpt.min.js','skulpt.js'],['**/skulpt-stdlib.js','skulpt-stdlib.js']])await context.route(pattern,route=>route.fulfill({path:path.join(deps,file),contentType:file.endsWith('.css')?'text/css':'application/javascript'}));
   await context.route('**/www.googletagmanager.com/**',route=>route.abort());
@@ -21,7 +21,7 @@ try {
   const page=await context.newPage();
   await page.goto(origin+'/learn/');
   assert.equal(await page.locator('.habit-card').count(),4);
-  assert.equal(await page.locator('.activity-card').count(),14);
+  assert.equal(await page.locator('.activity-card').count(),17);
   await page.locator('#learningSearch').fill('ASCII');assert.equal(await page.locator('.activity-card').count(),5);
   await page.locator('[data-filter="tool"]').click();assert.equal(await page.locator('.activity-card').count(),1);
   await page.locator('#learningSearch').fill('no-matches');assert(await page.locator('#noResults').isVisible());
@@ -32,7 +32,6 @@ try {
   await page.locator('#openThinking').click();assert.equal(await page.locator('#thinking-focus').inputValue(),'Build one thing I can explain.');
   await page.keyboard.press('Escape');assert(!(await page.locator('#thinkingDialog').isVisible()));
   await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';window.scrollTo({top:0,behavior:'instant'});});
-  await page.waitForFunction(()=>scrollY===0);
   await page.screenshot({path:path.join(proof,'student-home-desktop.png'),fullPage:true});
   const targets=await page.locator('a[href^="/"]').evaluateAll(links=>[...new Set(links.map(a=>a.getAttribute('href')))]);
   for(const target of targets){const response=await context.request.get(origin+target);assert(response.ok(),target+' should exist');}
@@ -93,4 +92,8 @@ try {
   assert(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight&&document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:path.join(proof,'reference-mobile.png')});
   console.log('PASS shared navigation on all learning layouts and mobile course/notes/reference');
   assert.deepEqual(errors,[],'No browser errors');
+} catch(error) {
+  const failurePage=browser?.contexts()[0]?.pages()[0];
+  if(failurePage)await failurePage.screenshot({path:path.join(proof,'learning-flow-failure.png')}).catch(()=>{});
+  throw error;
 } finally {await browser?.close();server.kill();}

@@ -30,6 +30,8 @@
     if (!item || typeof item.id !== 'string' || typeof item.title !== 'string') return;
     const url = new URL(item.url || location.href, location.origin);
     if (url.origin !== location.origin) return;
+    const studentAddresses = {'/pythoncourse/':'/learn/python/','/turtle/':'/learn/create/','/python/':'/learn/code/','/turtleprojects/':'/learn/projects/','/turtlereference/':'/learn/reference/','/turtlereference/trails/':'/learn/trails/','/tracetable/':'/learn/trace/','/binary1.html':'/learn/binary/','/class2.html':'/learn/think/','/blackboxintro.html':'/learn/blackbox/','/asciiart.html':'/learn/ascii/','/timeline/':'/learn/timeline/','/TIOBE.html':'/learn/languages/'};
+    if (studentAddresses[url.pathname]) url.pathname = studentAddresses[url.pathname];
     activity = {id:item.id,title:item.title,url:url.pathname+url.search+url.hash};
     try { notes = JSON.parse(localStorage.getItem(keyFor(activity)) || '{}') || {}; } catch { notes = {}; }
     fields.forEach(field => { field.value = typeof notes[field.dataset.habit] === 'string' ? notes[field.dataset.habit] : ''; });

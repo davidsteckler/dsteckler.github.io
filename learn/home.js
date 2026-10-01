@@ -14,7 +14,10 @@
     ['Hex color viewer','Discover a color and use its hex code in a running drawing.','All levels','tool','color() · hex codes','/learn/colors/'],
     ['Trace tables','Follow variables and output as a program runs, line by line.','Beginner → Medium','tool','Variables · loops · execution','/learn/trace/'],
     ['Create with Python','Open the editor and build an idea of your own.','All levels','tool','Turtle · ASCII · sandbox','/learn/create/'],
-    ['ASCII art & its history','Explore how a small collection of characters can become a picture.','Beginner','creative','Text · art · early games','/learn/ascii/']
+    ['ASCII art & its history','Explore how a small collection of characters can become a picture.','Beginner','creative','Text · art · early games','/learn/ascii/'],
+    ['Programming timeline','Explore the ideas that led to different programming languages.','Beginner','creative','History · languages · experiments','/learn/timeline/'],
+    ['Programming languages','Explore how programming languages are compared.','All levels','tool','Languages · evidence','/learn/languages/'],
+    ['Python text editor','Write and run Python with a text console.','All levels','tool','print() · variables · functions','/learn/code/']
   ];
   const escape = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let filter = 'all';
