@@ -21,6 +21,86 @@
     const cm = frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;
     if (cm) { drafts[exampleKey()] = cm.getValue(); persist(); }
   }
+  function normalizedHex(value) {
+    const digits = value.trim().replace(/^#/, '');
+    if (/^[0-9a-f]{6}$/i.test(digits)) return '#' + digits.toLowerCase();
+    if (/^[0-9a-f]{3}$/i.test(digits)) return '#' + [...digits].map(digit => digit + digit).join('').toLowerCase();
+    return null;
+  }
+  function updateColorViewer(value, normalize = false) {
+    const hex = normalizedHex(value);
+    $('colorHex').setAttribute('aria-invalid', String(!hex));
+    $('colorHexError').hidden = !!hex;
+    $('useColor').disabled = !hex || !ready || pending;
+    $('colorCommand').textContent = hex ? 'color("' + hex + '")' : 'Enter a hex color above.';
+    if (hex) {
+      $('colorPicker').value = hex;
+      if (normalize) $('colorHex').value = hex;
+    }
+    for (const button of $('colorSwatches').children) button.setAttribute('aria-pressed', String(button.dataset.hex === hex));
+    return hex;
+  }
+  function firstColorCall(cm) {
+    // Use Python tokens so comments, strings, and nested arguments stay intact.
+    const tokens = [];
+    for (let line = 0; line < cm.lineCount(); line++) {
+      for (const token of cm.getLineTokens(line)) {
+        if (token.string.trim() && !/(comment|string)/.test(token.type || '')) tokens.push({...token, line});
+      }
+    }
+    for (let index = 0; index < tokens.length - 1; index++) {
+      if (tokens[index].string !== 'color' || ['def','class'].includes(tokens[index - 1]?.string) || tokens[index + 1].string !== '(') continue;
+      const open = tokens[index + 1]; let depth = 1;
+      for (let next = index + 2; next < tokens.length; next++) {
+        if (tokens[next].string === '(') depth++;
+        if (tokens[next].string === ')' && --depth === 0) {
+          return {from:{line:open.line,ch:open.end}, to:{line:tokens[next].line,ch:tokens[next].start}};
+        }
+      }
+    }
+    return null;
+  }
+  function syncColorViewer() {
+    if (current?.id !== 'color') return;
+    const cm = frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;
+    if (!cm) return;
+    const call = firstColorCall(cm);
+    const literal = call && cm.getRange(call.from, call.to).trim().match(/^(["'])([^"']+)\1$/);
+    if (literal && CSS.supports('color', literal[2])) {
+      const context = document.createElement('canvas').getContext('2d');
+      context.fillStyle = literal[2];
+      if (normalizedHex(context.fillStyle)) updateColorViewer(context.fillStyle, true);
+    }
+    updateColorViewer($('colorHex').value);
+    $('colorTarget').textContent = call ? 'Changes the first color() command.' : 'Adds color() at the start of your code.';
+  }
+  for (const [name, hex] of [['Coral','#ff7f50'],['Gold','#e9c46a'],['Mint','#2a9d8f'],['Blue','#457b9d'],['Purple','#8b5fbf'],['Rose','#e76f91']]) {
+    const button = document.createElement('button'); button.type = 'button'; button.dataset.hex = hex;
+    button.style.backgroundColor = hex; button.title = name + ' · ' + hex;
+    button.setAttribute('aria-label', name + ', ' + hex); button.setAttribute('aria-pressed','false');
+    button.addEventListener('click', () => updateColorViewer(hex, true));
+    $('colorSwatches').append(button);
+  }
+  $('colorPicker').addEventListener('input', event => updateColorViewer(event.target.value, true));
+  $('colorHex').addEventListener('input', event => updateColorViewer(event.target.value));
+  $('colorHex').addEventListener('blur', event => updateColorViewer(event.target.value, true));
+  $('useColor').addEventListener('click', () => {
+    const hex = updateColorViewer($('colorHex').value, true);
+    if (!hex || !ready || pending || current?.id !== 'color') return;
+    const cm = frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;
+    if (!cm) return;
+    const call = firstColorCall(cm), from = call?.from || {line:0,ch:0};
+    const inserted = call ? '"' + hex + '"' : 'color("' + hex + '")\n';
+    const at = cm.indexFromPos(from);
+    cm.replaceRange(inserted, from, call?.to || from, '+color-picker');
+    cm.setSelection(from, cm.posFromIndex(at + inserted.trimEnd().length));
+    captureDraft();
+    if (innerWidth < 1000) setMobileView('editor');
+    cm.scrollIntoView(from, 40);
+    send({kind:'turtle-tutorial-stop'});
+    send({kind:'turtle-tutorial-run'});
+    $('colorTarget').textContent = 'Using ' + hex + ' in the first color() command.';
+  });
   function send(task) { frame.contentWindow.postMessage({...task, project:'turtle-reference'}, location.origin); }
   function setOutputView() {
     const doc = frame.contentDocument;
@@ -150,6 +230,7 @@
     if (!ready || !current) return;
     setOutputView();
     pending = true; appliedId = null;
+    $('useColor').disabled = true;
     document.body.dataset.exampleId = '';
     $('runExample').disabled = true; $('resetExample').disabled = true;
     const code = typeof drafts[exampleKey()] === 'string' ? drafts[exampleKey()] : currentExample.code;
@@ -197,6 +278,7 @@
     $('topicGroup').textContent = entry.group;
     $('topicTitle').textContent = entry.title;
     $('topicSummary').textContent = currentExample.summary;
+    $('colorViewer').hidden = entry.id !== 'color';
     renderTrail();
     renderExampleChoices(); writeSyntax();
     $('topicAliases').hidden = !entry.aliases?.length;
@@ -281,6 +363,7 @@
       pending = false; appliedId = exampleKey();
       document.body.dataset.exampleId = exampleKey();
       highlightExample();
+      syncColorViewer();
       $('runExample').disabled = false; $('resetExample').disabled = false;
     } else if (message.kind === 'turtle-tutorial-code' && !pending && appliedId === exampleKey()) {
       drafts[exampleKey()] = message.code; persist();

@@ -56,6 +56,8 @@ Use `focus` strings to highlight meaningful changes in the code and syntax, and 
 
 The first example keeps the existing `#topic` link and draft key. Variations use `#topic/example`; each has independent saved edits and Reset affects only the selected choice. Browser history, direct links, search, arrow keys, and the example navigation buttons all select the same state. Topic Previous/Next still moves between topics or trail stops. On phones, one shared chooser remains visible in both Reference and Code views.
 
+The `color()` topic includes a hex color viewer. Exploring the picker or entering a hex value changes its preview; **Use color & run** updates the first actual `color()` call and runs the student's program. Preserve other code, later color calls, undo history, and the example's saved draft. If the program has no color call, insert one at the start. The short addresses `/colors/` and `/reference/` lead to the color example and full reference; both are linked from the homepage.
+
 Build preview images and text from actual runtime output after changing any example program:
 
 ```
