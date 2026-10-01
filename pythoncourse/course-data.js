@@ -6,7 +6,7 @@ window.PYTHON_COURSE = {
       "id": "unit-1",
       "number": "1",
       "title": "Turtle Basics",
-      "description": "Five skill sets. Each one follows Make → Solve → Create: movement, patterns, sequencing, style, and text art.",
+      "description": "Movement and heading, circle geometry, execution and debugging, drawing state, and text representation. Each skill set includes predictions, an independent experiment, a saved explanation, and a Make → Solve → Create challenge.",
       "lessons": [
         {
           "id": "1-1-make-path",
@@ -14,7 +14,7 @@ window.PYTHON_COURSE = {
           "title": "Make a Path",
           "type": "Make",
           "available": true,
-          "notes": "Introduce forward/backward and left/right. Conference by asking students to point to the line causing a visible change. Keep emphasis on run-after-small-change.",
+          "notes": "Introduce forward/backward and left/right. Conference by asking students to point to the line causing a visible change. Keep emphasis on run-after-small-change. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -211,13 +211,91 @@ window.PYTHON_COURSE = {
               "tip": "Small working changes are easier to debug than a large block added all at once."
             },
             {
+              "id": "1-1-make-path-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(60)\nleft(90)\nbackward(20)",
+              "question": {
+                "id": "1-1-make-path-predict",
+                "prompt": "Where does the last command move?",
+                "choices": [
+                  "Up",
+                  "Down",
+                  "Right"
+                ],
+                "answer": 1,
+                "explanation": "The turtle faces up after left(90). backward(20) moves down while it keeps facing up."
+              },
+              "lab": "forward(60)\nleft(90)\nbackward(20)"
+            },
+            {
+              "id": "1-1-make-path-transfer",
+              "title": "Reach the target without changing the turn.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Change only the two movement distances. Finish 90 to the right and 30 above the start.",
+              "lab": "forward(60)\nleft(90)\nforward(40)",
+              "example": "forward(60)\nleft(90)\nforward(40)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 90,
+                    "y": 30,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 90,
+                    "tolerance": 1,
+                    "label": "Finish facing 90°",
+                    "fail": "Check the direction left by the final turn."
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-1-make-path-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "left(90)\nright(90)\nforward(25)",
+              "question": {
+                "id": "1-1-make-path-reason",
+                "prompt": "What do the two turns do together?",
+                "choices": [
+                  "Move the turtle in a corner",
+                  "Cancel each other; the move goes right",
+                  "Make the move go left"
+                ],
+                "answer": 1,
+                "explanation": "Turns change heading. Equal turns in opposite directions cancel; neither turn moves the turtle."
+              },
+              "lab": "left(90)\nright(90)\nforward(25)"
+            },
+            {
+              "id": "1-1-make-path-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Which movement distance did you change? Record the old value, new value, and the segment that changed.",
+              "response": {
+                "id": "1-1-make-path-evidence",
+                "prompt": "Which movement distance did you change? Record the old value, new value, and the segment that changed.",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Challenge: Make a zigzag route.",
               "body": "Think stair, lightning bolt, or crooked path.",
               "task": "Use 4+ movement commands, 2+ turns, backward() at least once, and 2 different distances.",
               "tip": "Example: a long segment, a turn, a shorter segment, another turn, then back up. Make your version different."
             }
           ],
-          "group": "Movement"
+          "group": "Movement",
+          "objective": "Track position and heading separately"
         },
         {
           "id": "1-2-solve-route",
@@ -225,7 +303,7 @@ window.PYTHON_COURSE = {
           "title": "Route Puzzle",
           "type": "Solve",
           "available": true,
-          "notes": "First real reduction in scaffolding. Do not give the closing sequence. If stuck, ask what side is missing and which existing distance matches it.",
+          "notes": "First real reduction in scaffolding. Do not give the closing sequence. If stuck, ask what side is missing and which existing distance matches it. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -245,6 +323,13 @@ window.PYTHON_COURSE = {
                 "tolerance": 1.5,
                 "fail": "The turtle needs to finish back at its starting point.",
                 "label": "Finish at the starting point"
+              },
+              {
+                "type": "finalHeading",
+                "heading": 0,
+                "tolerance": 1,
+                "label": "Finish facing 0°",
+                "fail": "Check the direction left by the final turn."
               }
             ]
           },
@@ -255,6 +340,25 @@ window.PYTHON_COURSE = {
               "body": "The starter draws three sides of a shape.",
               "task": "Press Run and study the unfinished drawing.",
               "tip": "Look at where the turtle is and which direction it faces at the end."
+            },
+            {
+              "id": "1-2-solve-route-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
+              "question": {
+                "id": "1-2-solve-route-predict",
+                "prompt": "Which side is missing?",
+                "choices": [
+                  "A 70-unit horizontal side",
+                  "A 30-unit vertical side",
+                  "Another 90-degree turn only"
+                ],
+                "answer": 1,
+                "explanation": "The two horizontal movements cancel. The turtle is still 30 units above the start."
+              },
+              "lab": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)"
             },
             {
               "title": "Close the shape.",
@@ -275,13 +379,80 @@ window.PYTHON_COURSE = {
               "tip": "A turn at the end changes direction without changing the drawing."
             },
             {
+              "id": "1-2-solve-route-transfer",
+              "title": "Close a different route.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep the five lines. Add commands that return to the start and finish facing right.",
+              "lab": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
+              "example": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 0,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 0,
+                    "tolerance": 1,
+                    "label": "Finish facing 0°",
+                    "fail": "Check the direction left by the final turn."
+                  },
+                  {
+                    "type": "minCalls",
+                    "commands": [
+                      "forward",
+                      "backward"
+                    ],
+                    "count": 4,
+                    "label": "Complete the missing side"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-2-solve-route-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(50)\nbackward(50)",
+              "question": {
+                "id": "1-2-solve-route-reason",
+                "prompt": "Is returning to the start enough to make a closed shape?",
+                "choices": [
+                  "Yes, every return creates a shape",
+                  "No; this retraces one line"
+                ],
+                "answer": 1,
+                "explanation": "The endpoint returns to the start, but the path has no enclosed area. Inspect the drawing as well as its endpoint."
+              },
+              "lab": "forward(50)\nbackward(50)"
+            },
+            {
+              "id": "1-2-solve-route-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record both ways you closed the route. Which commands changed, and which result stayed the same?",
+              "response": {
+                "id": "1-2-solve-route-evidence",
+                "prompt": "Record both ways you closed the route. Which commands changed, and which result stayed the same?",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Solve it a different way.",
               "body": "Reset the lesson, then try the original puzzle again.",
               "task": "Find a second working solution that still closes the shape.",
               "tip": "More than one sequence of turns and movements can reach the same final state."
             }
           ],
-          "group": "Movement"
+          "group": "Movement",
+          "objective": "Track position and heading separately"
         },
         {
           "id": "1-3-create-route",
@@ -289,7 +460,7 @@ window.PYTHON_COURSE = {
           "title": "Route Designer",
           "type": "Create",
           "available": true,
-          "notes": "Check requirements rather than appearance. Students should choose the route. Encourage clean runs and explain only when conferencing.",
+          "notes": "Check requirements rather than appearance. Students should choose the route. Encourage clean runs and explain only when conferencing. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -444,6 +615,25 @@ window.PYTHON_COURSE = {
               "tip": "Start small. You do not need to know the final picture yet."
             },
             {
+              "id": "1-3-create-route-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(40)\nleft(90)\nforward(20)",
+              "question": {
+                "id": "1-3-create-route-predict",
+                "prompt": "If both movement distances double, what changes?",
+                "choices": [
+                  "Size doubles; the corner stays 90°",
+                  "The turn doubles too",
+                  "Only the last segment changes"
+                ],
+                "answer": 0,
+                "explanation": "Distances control length. Changing their numbers does not change the angle in left(90)."
+              },
+              "lab": "forward(40)\nleft(90)\nforward(20)"
+            },
+            {
               "title": "Keep building.",
               "body": "Add commands until you have at least five visible segments.",
               "task": "Run after every one or two new lines.",
@@ -456,13 +646,80 @@ window.PYTHON_COURSE = {
               "tip": "The requirements describe what the code must contain, not what the final picture must look like."
             },
             {
+              "id": "1-3-create-route-transfer",
+              "title": "Plan a route before typing.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep three movements and two turns. Reach a point 100 right and 40 below the start. Choose the two horizontal distances yourself.",
+              "lab": "forward(40)\nright(90)\nforward(20)\nleft(90)\nforward(30)",
+              "example": "forward(40)\nright(90)\nforward(20)\nleft(90)\nforward(30)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 100,
+                    "y": -40,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 0,
+                    "tolerance": 1,
+                    "label": "Finish facing 0°",
+                    "fail": "Check the direction left by the final turn."
+                  },
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "forward"
+                    ],
+                    "count": 3,
+                    "label": "Three movements"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-3-create-route-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(20)\nleft(90)\nforward(20)\nleft(90)\nforward(20)",
+              "question": {
+                "id": "1-3-create-route-reason",
+                "prompt": "What information would you need to add a fourth side?",
+                "choices": [
+                  "The current position and direction",
+                  "The number of lines only",
+                  "The pen color"
+                ],
+                "answer": 0,
+                "explanation": "A movement starts from the position and heading left by earlier commands."
+              },
+              "lab": "forward(20)\nleft(90)\nforward(20)\nleft(90)\nforward(20)"
+            },
+            {
+              "id": "1-3-create-route-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Name one intentional feature of your route. Which two commands create that feature?",
+              "response": {
+                "id": "1-3-create-route-evidence",
+                "prompt": "Name one intentional feature of your route. Which two commands create that feature?",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Test from a clean start.",
               "body": "A finished program should work when run from the beginning.",
               "task": "Press Clear Run, then Run once.",
               "tip": "If the clean run looks different from what you expected, inspect the first place the route goes wrong."
             }
           ],
-          "group": "Movement"
+          "group": "Movement",
+          "objective": "Track position and heading separately"
         },
         {
           "id": "1-4-make-bubbles",
@@ -470,7 +727,7 @@ window.PYTHON_COURSE = {
           "title": "Make a Bubble Trail",
           "type": "Make",
           "available": true,
-          "notes": "Teach circle radius separately from movement distance. Keep placement language concrete: move first, then draw.",
+          "notes": "Teach circle radius separately from movement distance. Keep placement language concrete: move first, then draw. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -639,13 +896,92 @@ window.PYTHON_COURSE = {
               "tip": "You can repeat the structure while changing the numbers."
             },
             {
+              "id": "1-4-make-bubbles-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "circle(20)",
+              "question": {
+                "id": "1-4-make-bubbles-predict",
+                "prompt": "How wide is the circle?",
+                "choices": [
+                  "20 units",
+                  "40 units",
+                  "80 units"
+                ],
+                "answer": 1,
+                "explanation": "The argument is the radius: center to edge. The diameter is twice that distance."
+              },
+              "lab": "circle(20)"
+            },
+            {
+              "id": "1-4-make-bubbles-transfer",
+              "title": "Make two equal, separated circles.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Change the move to leave a 20-unit gap between these circles. Keep both radii 20.",
+              "lab": "circle(20)\nforward(40)\ncircle(20)",
+              "example": "circle(20)\nforward(40)\ncircle(20)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 60,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "sameNumbers",
+                    "commands": [
+                      "circle"
+                    ],
+                    "min": 2,
+                    "label": "Keep equal radii"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-4-make-bubbles-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "circle(20)\ncircle(40)",
+              "question": {
+                "id": "1-4-make-bubbles-reason",
+                "prompt": "Where do the circles start?",
+                "choices": [
+                  "At two different positions",
+                  "At the same turtle position",
+                  "At their centers"
+                ],
+                "answer": 1,
+                "explanation": "circle() starts on the edge at the current turtle position. With no move between calls, the circles share that starting point."
+              },
+              "lab": "circle(20)\ncircle(40)"
+            },
+            {
+              "id": "1-4-make-bubbles-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record a radius, its diameter, and one spacing value you tested. What happened to the gap?",
+              "response": {
+                "id": "1-4-make-bubbles-evidence",
+                "prompt": "Record a radius, its diameter, and one spacing value you tested. What happened to the gap?",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Challenge: Make a growing bubble curve.",
               "body": "Your bubbles should get bigger as the trail bends.",
               "task": "Use 4 circles, make every circle larger than the last, move between each one, and turn at least once.",
               "tip": "Example shape: four bubbles climbing around a corner. You choose the sizes, gaps, and turn."
             }
           ],
-          "group": "Circles + Patterns"
+          "group": "Circles + Patterns",
+          "objective": "Use radius and spacing deliberately"
         },
         {
           "id": "1-5-solve-bubbles",
@@ -653,7 +989,7 @@ window.PYTHON_COURSE = {
           "title": "Bubble Pattern Puzzle",
           "type": "Solve",
           "available": true,
-          "notes": "Let students find the broken spacing value before opening the hint. Focus on comparing repeated parameters.",
+          "notes": "Let students find the broken spacing value before opening the hint. Focus on comparing repeated parameters. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -705,6 +1041,25 @@ window.PYTHON_COURSE = {
               "tip": "Compare the forward() values, not the circle() values."
             },
             {
+              "id": "1-5-solve-bubbles-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "circle(15)\nforward(50)\ncircle(30)\nforward(50)\ncircle(45)",
+              "question": {
+                "id": "1-5-solve-bubbles-predict",
+                "prompt": "Which list describes the diameters?",
+                "choices": [
+                  "15, 30, 45",
+                  "30, 60, 90",
+                  "50, 50, 50"
+                ],
+                "answer": 1,
+                "explanation": "Each diameter is twice the corresponding radius. Movement values set placement, not diameter."
+              },
+              "lab": "circle(15)\nforward(50)\ncircle(30)\nforward(50)\ncircle(45)"
+            },
+            {
               "title": "Make the bubbles shrink instead.",
               "body": "Keep all four gaps equal.",
               "task": "Change only the circle radii so the bubbles go from largest to smallest.",
@@ -723,13 +1078,81 @@ window.PYTHON_COURSE = {
               "tip": "A good solution changes the lines that have the most effect."
             },
             {
+              "id": "1-5-solve-bubbles-transfer",
+              "title": "Repair only one radius.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep the first two circles and both moves. Change the final radius so all three sizes increase.",
+              "lab": "circle(15)\nforward(55)\ncircle(30)\nforward(55)\ncircle(25)",
+              "example": "circle(15)\nforward(55)\ncircle(30)\nforward(55)\ncircle(25)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "circle"
+                    ],
+                    "count": 3,
+                    "label": "Three circles"
+                  },
+                  {
+                    "type": "monotonicNumbers",
+                    "commands": [
+                      "circle"
+                    ],
+                    "min": 3,
+                    "direction": "up",
+                    "label": "Radii increase"
+                  },
+                  {
+                    "type": "finalPosition",
+                    "x": 110,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-5-solve-bubbles-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "circle(15)\nforward(55)\nleft(30)\ncircle(30)",
+              "question": {
+                "id": "1-5-solve-bubbles-reason",
+                "prompt": "Does the turn move the next circle’s starting point?",
+                "choices": [
+                  "Yes, it moves 30 units",
+                  "No; it changes heading at the same point"
+                ],
+                "answer": 1,
+                "explanation": "A turn changes heading at the current position. To move the starting point, a movement must follow the turn."
+              },
+              "lab": "circle(15)\nforward(55)\nleft(30)\ncircle(30)"
+            },
+            {
+              "id": "1-5-solve-bubbles-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Which radius broke the original pattern? Explain the relationship you used to repair it.",
+              "response": {
+                "id": "1-5-solve-bubbles-evidence",
+                "prompt": "Which radius broke the original pattern? Explain the relationship you used to repair it.",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Leave one clean solution.",
               "body": "Choose whichever version you prefer.",
               "task": "Run from a clean start and keep all four bubbles visible.",
               "tip": "The final code should satisfy the pattern without needing an exact target image."
             }
           ],
-          "group": "Circles + Patterns"
+          "group": "Circles + Patterns",
+          "objective": "Use radius and spacing deliberately"
         },
         {
           "id": "1-6-create-bubbles",
@@ -737,7 +1160,7 @@ window.PYTHON_COURSE = {
           "title": "Bubble Design",
           "type": "Create",
           "available": true,
-          "notes": "Open-ended application of circle, movement, and turning. Assess whether requirements are met, not whether drawings look alike.",
+          "notes": "Open-ended application of circle, movement, and turning. Assess whether requirements are met, not whether drawings look alike. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -874,6 +1297,25 @@ window.PYTHON_COURSE = {
               "tip": "A project is still easier when the smallest piece works first."
             },
             {
+              "id": "1-6-create-bubbles-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "circle(15)\nforward(45)\ncircle(30)",
+              "question": {
+                "id": "1-6-create-bubbles-predict",
+                "prompt": "What changes if only forward(45) becomes forward(80)?",
+                "choices": [
+                  "Both circles grow",
+                  "The second circle starts farther away",
+                  "The first circle moves"
+                ],
+                "answer": 1,
+                "explanation": "Movement between circles changes the next starting point. It does not change either radius."
+              },
+              "lab": "circle(15)\nforward(45)\ncircle(30)"
+            },
+            {
               "title": "Build the structure.",
               "body": "Add movement and more circles until you have at least three visible bubbles.",
               "task": "Run often enough that you always know which new lines caused a change.",
@@ -892,13 +1334,73 @@ window.PYTHON_COURSE = {
               "tip": "Revision should have a visible reason."
             },
             {
+              "id": "1-6-create-bubbles-transfer",
+              "title": "Compare size with spacing.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep both circles unchanged. Move the second circle’s starting point to 75 units right of the first.",
+              "lab": "circle(15)\nforward(45)\ncircle(30)",
+              "example": "circle(15)\nforward(45)\ncircle(30)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 75,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "circle"
+                    ],
+                    "count": 2,
+                    "label": "Two circles"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-6-create-bubbles-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "left(90)\ncircle(20)",
+              "question": {
+                "id": "1-6-create-bubbles-reason",
+                "prompt": "Where is the center relative to the turtle?",
+                "choices": [
+                  "To the turtle’s left as it faces up",
+                  "Always directly above the screen origin",
+                  "Exactly at the turtle"
+                ],
+                "answer": 0,
+                "explanation": "A positive-radius circle has its center to the turtle’s left. The turtle’s heading changes which screen direction that means."
+              },
+              "lab": "left(90)\ncircle(20)"
+            },
+            {
+              "id": "1-6-create-bubbles-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Choose two neighboring bubbles. Record their radii and starting-point spacing. Explain one revision you made.",
+              "response": {
+                "id": "1-6-create-bubbles-evidence",
+                "prompt": "Choose two neighboring bubbles. Record their radii and starting-point spacing. Explain one revision you made.",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Test the finished design.",
               "body": "The program should work from the top without manual setup.",
               "task": "Press Clear Run, then Run once.",
               "tip": "Keep the version that produces your intended design from a clean start."
             }
           ],
-          "group": "Circles + Patterns"
+          "group": "Circles + Patterns",
+          "objective": "Use radius and spacing deliberately"
         },
         {
           "id": "1-7-make-sequence",
@@ -906,7 +1408,7 @@ window.PYTHON_COURSE = {
           "title": "Make Sense of Sequence",
           "type": "Make",
           "available": true,
-          "notes": "Use Step heavily here. The goal is seeing that each line inherits the turtle's current position and direction.",
+          "notes": "Use Step heavily here. The goal is seeing that each line inherits the turtle's current position and direction. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -934,6 +1436,33 @@ window.PYTHON_COURSE = {
                 "count": 2,
                 "fail": "Keep two turn commands in the sequence.",
                 "label": "2 turn commands"
+              },
+              {
+                "type": "commandSequence",
+                "sequence": [
+                  [
+                    "forward",
+                    "backward"
+                  ],
+                  [
+                    "left",
+                    "right"
+                  ],
+                  [
+                    "forward",
+                    "backward"
+                  ],
+                  [
+                    "left",
+                    "right"
+                  ],
+                  [
+                    "forward",
+                    "backward"
+                  ]
+                ],
+                "label": "Movement and turns alternate",
+                "fail": "A zigzag needs a turn between its movement segments."
               }
             ]
           },
@@ -1062,13 +1591,96 @@ window.PYTHON_COURSE = {
               "tip": "The values stayed the same; their order changed."
             },
             {
+              "id": "1-7-make-sequence-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(30)\nleft(90)\nforward(20)",
+              "question": {
+                "id": "1-7-make-sequence-predict",
+                "prompt": "After line 2, what has changed?",
+                "choices": [
+                  "Position only",
+                  "Heading only",
+                  "Both position and heading"
+                ],
+                "answer": 1,
+                "explanation": "Line 2 is a turn. The first movement changed position; the turn changes heading at that position."
+              },
+              "lab": "forward(30)\nleft(90)\nforward(20)"
+            },
+            {
+              "id": "1-7-make-sequence-transfer",
+              "title": "Same commands, different result.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Reorder these three lines without changing any numbers. Finish 40 right and 30 above the start.",
+              "lab": "forward(40)\nforward(30)\nleft(90)",
+              "example": "forward(40)\nforward(30)\nleft(90)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 40,
+                    "y": 30,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 90,
+                    "tolerance": 1,
+                    "label": "Finish facing 90°",
+                    "fail": "Check the direction left by the final turn."
+                  },
+                  {
+                    "type": "exactTurtleCalls",
+                    "count": 3,
+                    "label": "Keep three commands"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-7-make-sequence-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "left(90)\nforward(30)\nright(90)",
+              "question": {
+                "id": "1-7-make-sequence-reason",
+                "prompt": "Why does forward(30) move up?",
+                "choices": [
+                  "forward always means screen-up",
+                  "The previous turn left the turtle facing up",
+                  "The number 30 is positive"
+                ],
+                "answer": 1,
+                "explanation": "forward() uses the current heading. It does not mean one fixed screen direction."
+              },
+              "lab": "left(90)\nforward(30)\nright(90)"
+            },
+            {
+              "id": "1-7-make-sequence-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record the original order and your new order. Which line first makes their execution differ?",
+              "response": {
+                "id": "1-7-make-sequence-evidence",
+                "prompt": "Record the original order and your new order. Which line first makes their execution differ?",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Challenge: Make a 3-segment zigzag.",
               "body": "Use exactly the same five commands: 3 movements and 2 turns.",
               "task": "Reorder them so the path changes direction twice and all 3 segments are visible.",
               "tip": "A zigzag could go right → up → right, but yours does not have to."
             }
           ],
-          "group": "Sequence + Debugging"
+          "group": "Sequence + Debugging",
+          "objective": "Trace order and isolate errors"
         },
         {
           "id": "1-8-solve-debug",
@@ -1076,7 +1688,7 @@ window.PYTHON_COURSE = {
           "title": "Debug Challenge",
           "type": "Solve",
           "available": true,
-          "notes": "Have students fix one error at a time and rerun. Distinguish syntax/name errors from a program that runs but does the wrong thing.",
+          "notes": "Have students fix one error at a time and rerun. Distinguish syntax/name errors from a program that runs but does the wrong thing. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -1125,6 +1737,25 @@ window.PYTHON_COURSE = {
               "tip": "Run again after every fix so the next error becomes easier to isolate."
             },
             {
+              "id": "1-8-solve-debug-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forwad(30)",
+              "question": {
+                "id": "1-8-solve-debug-predict",
+                "prompt": "What kind of repair is needed?",
+                "choices": [
+                  "Change the distance",
+                  "Correct the command’s spelling",
+                  "Add a turn"
+                ],
+                "answer": 1,
+                "explanation": "Python cannot find a command named forwad. Correcting the distance would leave the same NameError."
+              },
+              "lab": "forwad(30)"
+            },
+            {
               "title": "Make the route symmetric.",
               "body": "Once the code runs, look at the three visible segments.",
               "task": "Change one distance so the first and last segments are the same length.",
@@ -1143,13 +1774,69 @@ window.PYTHON_COURSE = {
               "tip": "Recognizing an error is easier after you have created the same kind deliberately."
             },
             {
+              "id": "1-8-solve-debug-transfer",
+              "title": "A program can run and still be wrong.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Make the first and last segments equal without adding or removing commands.",
+              "lab": "forward(60)\nleft(90)\nforward(30)\nright(90)\nforward(20)",
+              "example": "forward(60)\nleft(90)\nforward(30)\nright(90)\nforward(20)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "firstLastSameNumber",
+                    "commands": [
+                      "forward"
+                    ],
+                    "label": "Matching outer distances"
+                  },
+                  {
+                    "type": "exactTurtleCalls",
+                    "count": 5,
+                    "label": "Keep five commands"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-8-solve-debug-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(30\nleft(90)",
+              "question": {
+                "id": "1-8-solve-debug-reason",
+                "prompt": "Where should you look first?",
+                "choices": [
+                  "Only the line the error highlights",
+                  "The unclosed parenthesis on the previous line",
+                  "The color settings"
+                ],
+                "answer": 1,
+                "explanation": "An unclosed command can cause the parser to report the following line. Inspect the line just before the reported location too."
+              },
+              "lab": "forward(30\nleft(90)"
+            },
+            {
+              "id": "1-8-solve-debug-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record one exact error message, its cause, the single change you made, and what the next run showed.",
+              "response": {
+                "id": "1-8-solve-debug-evidence",
+                "prompt": "Record one exact error message, its cause, the single change you made, and what the next run showed.",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Leave a clean solution.",
               "body": "All five lines should be valid and the drawing should be symmetric.",
               "task": "Clear Run, then Run once.",
               "tip": "The final test should produce no error message."
             }
           ],
-          "group": "Sequence + Debugging"
+          "group": "Sequence + Debugging",
+          "objective": "Trace order and isolate errors"
         },
         {
           "id": "1-9-create-five-lines",
@@ -1157,7 +1844,7 @@ window.PYTHON_COURSE = {
           "title": "Five-Line Drawing",
           "type": "Create",
           "available": true,
-          "notes": "Constraint challenge. Do not suggest a target image. The five-command limit forces students to choose commands intentionally.",
+          "notes": "Constraint challenge. Do not suggest a target image. The five-command limit forces students to choose commands intentionally. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -1275,6 +1962,25 @@ window.PYTHON_COURSE = {
               "tip": "You may use movement, turns, or circle()."
             },
             {
+              "id": "1-9-create-five-lines-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(20)\nforward(20)\nleft(90)\nleft(90)\nleft(90)",
+              "question": {
+                "id": "1-9-create-five-lines-predict",
+                "prompt": "How many separate straight segments are visible?",
+                "choices": [
+                  "Five",
+                  "Two",
+                  "One"
+                ],
+                "answer": 2,
+                "explanation": "Two consecutive forward movements extend the same straight segment. Three turns at the endpoint draw nothing."
+              },
+              "lab": "forward(20)\nforward(20)\nleft(90)\nleft(90)\nleft(90)"
+            },
+            {
               "title": "Build within the limit.",
               "body": "You only get five commands total.",
               "task": "Add commands until you reach five. Run after each addition.",
@@ -1287,13 +1993,70 @@ window.PYTHON_COURSE = {
               "tip": "Constraints force you to make stronger choices."
             },
             {
+              "id": "1-9-create-five-lines-transfer",
+              "title": "Design within a constraint.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep exactly five commands. Change distances so the endpoint is 90 right and 35 above the start.",
+              "lab": "forward(40)\nleft(90)\nforward(20)\nright(90)\nforward(30)",
+              "example": "forward(40)\nleft(90)\nforward(20)\nright(90)\nforward(30)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 90,
+                    "y": 35,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "exactTurtleCalls",
+                    "count": 5,
+                    "label": "Exactly five commands"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-9-create-five-lines-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(20)\nleft(90)\nforward(20)\nright(90)\nforward(20)",
+              "question": {
+                "id": "1-9-create-five-lines-reason",
+                "prompt": "Which revision keeps the five-command constraint?",
+                "choices": [
+                  "Add another forward()",
+                  "Replace a distance with a different number",
+                  "Append a color() command"
+                ],
+                "answer": 1,
+                "explanation": "Changing a value revises a command that already exists. Adding another Turtle command breaks the constraint."
+              },
+              "lab": "forward(20)\nleft(90)\nforward(20)\nright(90)\nforward(20)"
+            },
+            {
+              "id": "1-9-create-five-lines-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Which command matters most to your design? Predict what would change if it were removed.",
+              "response": {
+                "id": "1-9-create-five-lines-evidence",
+                "prompt": "Which command matters most to your design? Predict what would change if it were removed.",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Test the final five lines.",
               "body": "The drawing should work from a clean start.",
               "task": "Press Clear Run, then Run once.",
               "tip": "Keep exactly five executable Turtle commands."
             }
           ],
-          "group": "Sequence + Debugging"
+          "group": "Sequence + Debugging",
+          "objective": "Trace order and isolate errors"
         },
         {
           "id": "1-10-make-color",
@@ -1301,7 +2064,7 @@ window.PYTHON_COURSE = {
           "title": "Make a Neon Lightning Bolt",
           "type": "Make",
           "available": true,
-          "notes": "Concrete style lesson. Students build one recognizable neon bolt while learning that bgcolor(), color(), and pensize() change the appearance of later drawing. Keep each change visible and purposeful.",
+          "notes": "Concrete style lesson. Students build one recognizable neon bolt while learning that bgcolor(), color(), and pensize() change the appearance of later drawing. Keep each change visible and purposeful. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -1526,13 +2289,91 @@ window.PYTHON_COURSE = {
               "tip": "Shorter middle segments usually make the zigzag easier to read."
             },
             {
+              "id": "1-10-make-color-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "color(\"cyan\")\nforward(40)\ncolor(\"yellow\")",
+              "question": {
+                "id": "1-10-make-color-predict",
+                "prompt": "What color is the line already drawn?",
+                "choices": [
+                  "Yellow",
+                  "Cyan",
+                  "A mixture"
+                ],
+                "answer": 1,
+                "explanation": "color() controls future drawing. Changing it afterward does not repaint an earlier segment."
+              },
+              "lab": "color(\"cyan\")\nforward(40)\ncolor(\"yellow\")"
+            },
+            {
+              "id": "1-10-make-color-transfer",
+              "title": "Control each stroke.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep two movements. Make both visible on black, with different colors and line widths of at least 6.",
+              "lab": "bgcolor(\"black\")\ncolor(\"cyan\")\npensize(2)\nforward(40)\ncolor(\"yellow\")\nforward(40)",
+              "example": "bgcolor(\"black\")\ncolor(\"cyan\")\npensize(2)\nforward(40)\ncolor(\"yellow\")\nforward(40)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "drawingStyle",
+                    "colors": 2,
+                    "width": 6,
+                    "contrast": true,
+                    "label": "Two visible colors, both thick"
+                  },
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "forward"
+                    ],
+                    "count": 2,
+                    "label": "Two strokes"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-10-make-color-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "pensize(10)\nforward(30)\npensize(2)\nforward(30)",
+              "question": {
+                "id": "1-10-make-color-reason",
+                "prompt": "What changes in the second segment?",
+                "choices": [
+                  "Its length",
+                  "Its thickness",
+                  "Its direction"
+                ],
+                "answer": 1,
+                "explanation": "pensize() changes stroke width. Both movements still use the same distance and heading."
+              },
+              "lab": "pensize(10)\nforward(30)\npensize(2)\nforward(30)"
+            },
+            {
+              "id": "1-10-make-color-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Pick one color or thickness change. Which later segment did it affect, and which earlier segment stayed unchanged?",
+              "response": {
+                "id": "1-10-make-color-evidence",
+                "prompt": "Pick one color or thickness change. Which later segment did it affect, and which earlier segment stayed unchanged?",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Challenge: finish the neon bolt.",
               "body": "Make it look like one deliberate lightning bolt on a dark background.",
               "task": "Use 5+ segments, 4+ turns, 3 drawing colors, and 2 different pensize() values.",
               "tip": "Your bolt can be tall, wide, or uneven. The examples show different structures."
             }
           ],
-          "group": "Color + Style"
+          "group": "Color + Style",
+          "objective": "Control style before drawing"
         },
         {
           "id": "1-11-solve-style",
@@ -1540,55 +2381,34 @@ window.PYTHON_COURSE = {
           "title": "Repair the Neon Sign",
           "type": "Solve",
           "available": true,
-          "notes": "Broken-style puzzle. Students should diagnose invisible output, weak line weight, and missing color state. The route itself is already valid; keep focus on appearance and command order.",
+          "notes": "Broken-style puzzle. Students should diagnose invisible output, weak line weight, and missing color state. The route itself is already valid; keep focus on appearance and command order. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
-                "type": "minCalls",
-                "commands": [
-                  "bgcolor"
-                ],
-                "count": 1,
-                "fail": "Keep a background color.",
-                "label": "Background stays set"
-              },
-              {
-                "type": "minDistinctStrings",
-                "commands": [
-                  "color"
-                ],
-                "count": 3,
-                "fail": "Use three different drawing colors.",
-                "label": "3 visible drawing colors"
-              },
-              {
-                "type": "someNumberGreaterThan",
-                "commands": [
-                  "pensize"
-                ],
-                "value": 3,
-                "fail": "Make the neon line thicker than 3.",
-                "label": "pensize() above 3"
-              },
-              {
-                "type": "minCalls",
+                "type": "exactCalls",
                 "commands": [
                   "forward",
                   "backward"
                 ],
                 "count": 3,
-                "fail": "Keep all three movement segments.",
-                "label": "3 sign segments"
+                "label": "Keep exactly three segments"
               },
               {
-                "type": "minCalls",
+                "type": "exactCalls",
                 "commands": [
                   "left",
                   "right"
                 ],
                 "count": 2,
-                "fail": "Keep both turns.",
-                "label": "2 turns"
+                "label": "Keep exactly two turns"
+              },
+              {
+                "type": "drawingStyle",
+                "colors": 3,
+                "width": 4,
+                "contrast": true,
+                "label": "Three visible, thick, differently colored strokes",
+                "fail": "Set each stroke’s style before drawing it. Every stroke must contrast with the background."
               }
             ]
           },
@@ -1599,6 +2419,25 @@ window.PYTHON_COURSE = {
               "body": "The program runs, but the first segment disappears.",
               "task": "Press Run and find the style command causing it.",
               "tip": "Compare the first color() with bgcolor()."
+            },
+            {
+              "id": "1-11-solve-style-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "bgcolor(\"black\")\ncolor(\"black\")\nforward(40)",
+              "question": {
+                "id": "1-11-solve-style-predict",
+                "prompt": "Why can a successful run look empty?",
+                "choices": [
+                  "The pen matches the background",
+                  "forward() cannot draw on black",
+                  "A turn is required before moving"
+                ],
+                "answer": 0,
+                "explanation": "The stroke is drawn in the same color as the background. A successful run does not guarantee a visible result."
+              },
+              "lab": "bgcolor(\"black\")\ncolor(\"black\")\nforward(40)"
             },
             {
               "title": "Make the first segment visible.",
@@ -1617,6 +2456,71 @@ window.PYTHON_COURSE = {
               "body": "The final two segments currently share a color.",
               "task": "Add one color() command so all three segments can use different colors.",
               "tip": "Put the color change immediately before the segment it should affect."
+            },
+            {
+              "id": "1-11-solve-style-transfer",
+              "title": "Repair appearance without changing geometry.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep movements and turn unchanged. Make both segments visible, differently colored, and thicker than 3.",
+              "lab": "bgcolor(\"black\")\ncolor(\"black\")\npensize(2)\nforward(40)\nleft(90)\ncolor(\"cyan\")\nforward(30)",
+              "example": "bgcolor(\"black\")\ncolor(\"black\")\npensize(2)\nforward(40)\nleft(90)\ncolor(\"cyan\")\nforward(30)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 40,
+                    "y": 30,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 90,
+                    "tolerance": 1,
+                    "label": "Finish facing 90°",
+                    "fail": "Check the direction left by the final turn."
+                  },
+                  {
+                    "type": "drawingStyle",
+                    "colors": 2,
+                    "width": 4,
+                    "contrast": true,
+                    "label": "Both strokes visible and thick"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-11-solve-style-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "forward(40)\ncolor(\"red\")",
+              "question": {
+                "id": "1-11-solve-style-reason",
+                "prompt": "Where must the color change move to color that line red?",
+                "choices": [
+                  "Before forward(40)",
+                  "After another turn",
+                  "At the end of the program"
+                ],
+                "answer": 0,
+                "explanation": "A style must be set before the drawing command it should affect."
+              },
+              "lab": "forward(40)\ncolor(\"red\")"
+            },
+            {
+              "id": "1-11-solve-style-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record a style-only repair. How did you verify the route itself stayed the same?",
+              "response": {
+                "id": "1-11-solve-style-evidence",
+                "prompt": "Record a style-only repair. How did you verify the route itself stayed the same?",
+                "placeholder": "Before… After… I observed…"
+              }
             },
             {
               "title": "Final repair.",
@@ -1675,7 +2579,8 @@ window.PYTHON_COURSE = {
                 }
               ]
             }
-          ]
+          ],
+          "objective": "Control style before drawing"
         },
         {
           "id": "1-12-create-night",
@@ -1683,7 +2588,7 @@ window.PYTHON_COURSE = {
           "title": "Design an Arcade Badge",
           "type": "Create",
           "available": true,
-          "notes": "Open style capstone. Students choose a recognizable badge direction—bolt, maze, signal, or another angular icon. Requirements assess use of style and movement without prescribing one drawing.",
+          "notes": "Open style capstone. Students choose a recognizable badge direction—bolt, maze, signal, or another angular icon. Requirements assess use of style and movement without prescribing one drawing. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -1900,6 +2805,25 @@ window.PYTHON_COURSE = {
               "tip": "Start with one recognizable direction instead of adding random lines."
             },
             {
+              "id": "1-12-create-night-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "color(\"red\")\nforward(30)\ncolor(\"blue\")\nforward(30)",
+              "question": {
+                "id": "1-12-create-night-predict",
+                "prompt": "Which choice creates a visible corner?",
+                "choices": [
+                  "Change blue to green",
+                  "Insert a turn between the movements",
+                  "Increase pensize()"
+                ],
+                "answer": 1,
+                "explanation": "Color and width alter appearance. A turn between movements changes the path’s geometry."
+              },
+              "lab": "color(\"red\")\nforward(30)\ncolor(\"blue\")\nforward(30)"
+            },
+            {
               "title": "Build the silhouette.",
               "body": "The outside shape should become readable before you decorate it.",
               "task": "Reach at least four visible segments and Run.",
@@ -1924,13 +2848,79 @@ window.PYTHON_COURSE = {
               "tip": "The checker looks for the structure and style requirements, not one exact picture."
             },
             {
+              "id": "1-12-create-night-transfer",
+              "title": "Change style; keep structure.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep both moves and the turn. Give the second segment a contrasting new color and a thicker stroke.",
+              "lab": "bgcolor(\"black\")\ncolor(\"cyan\")\npensize(6)\nforward(40)\nleft(90)\nforward(20)",
+              "example": "bgcolor(\"black\")\ncolor(\"cyan\")\npensize(6)\nforward(40)\nleft(90)\nforward(20)",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 40,
+                    "y": 20,
+                    "tolerance": 1.5,
+                    "label": "Finish at the target",
+                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 90,
+                    "tolerance": 1,
+                    "label": "Finish facing 90°",
+                    "fail": "Check the direction left by the final turn."
+                  },
+                  {
+                    "type": "drawingStyle",
+                    "colors": 2,
+                    "width": 6,
+                    "contrast": true,
+                    "label": "Two visible colors"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-12-create-night-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "bgcolor(\"black\")\ncolor(\"cyan\")\nforward(30)\ncolor(\"yellow\")\nforward(30)",
+              "question": {
+                "id": "1-12-create-night-reason",
+                "prompt": "Which commands would you change to make the entire badge longer?",
+                "choices": [
+                  "The movement distances",
+                  "Only the color names",
+                  "Only bgcolor()"
+                ],
+                "answer": 0,
+                "explanation": "Appearance and geometry use different commands. Decide which property you intend to revise first."
+              },
+              "lab": "bgcolor(\"black\")\ncolor(\"cyan\")\nforward(30)\ncolor(\"yellow\")\nforward(30)"
+            },
+            {
+              "id": "1-12-create-night-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Name your badge’s feature. Explain one geometry choice and one style choice that support it.",
+              "response": {
+                "id": "1-12-create-night-evidence",
+                "prompt": "Name your badge’s feature. Explain one geometry choice and one style choice that support it.",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Final challenge: make it feel intentional.",
               "body": "Your badge should read as one symbol when you look at the Turtle world.",
               "task": "Clear Run, run it from the top, and check your code.",
               "tip": "Bolt, maze, signal, letter-like mark, and invented arcade symbols all work."
             }
           ],
-          "group": "Color + Style"
+          "group": "Color + Style",
+          "objective": "Control style before drawing"
         },
         {
           "id": "1-13-make-ascii",
@@ -1938,7 +2928,7 @@ window.PYTHON_COURSE = {
           "title": "Make Block Art",
           "type": "Make",
           "available": true,
-          "notes": "Introduce print() as visible output. Keep the focus on one printed line at a time and on spacing. Unicode block characters are intentional; students should see that text can be used as a visual medium.",
+          "notes": "Introduce print() as visible output. Keep the focus on one printed line at a time and on spacing. Unicode block characters are intentional; students should see that text can be used as a visual medium. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -2039,6 +3029,80 @@ window.PYTHON_COURSE = {
               "tip": "Python prints the characters exactly in the order you type them."
             },
             {
+              "id": "1-13-make-ascii-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "print(\"█ █\")\nprint(\"███\")",
+              "question": {
+                "id": "1-13-make-ascii-predict",
+                "prompt": "Does the space in the first row disappear?",
+                "choices": [
+                  "Yes, Python ignores spaces in quotes",
+                  "No, it is one printed character"
+                ],
+                "answer": 1,
+                "explanation": "Spaces inside a string are part of the printed text. They contribute to its width and alignment."
+              },
+              "lab": "print(\"█ █\")\nprint(\"███\")"
+            },
+            {
+              "id": "1-13-make-ascii-transfer",
+              "title": "Repair a hollow tile.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep three print() calls. Make all three rows five characters wide, with a three-space opening in the middle row.",
+              "lab": "print(\"█████\")\nprint(\"█ █\")\nprint(\"█████\")",
+              "example": "print(\"█████\")\nprint(\"█ █\")\nprint(\"█████\")",
+              "check": {
+                "rules": [
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "print"
+                    ],
+                    "count": 3,
+                    "label": "Three rows"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": "█   █",
+                    "label": "Three-space opening"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-13-make-ascii-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "print(\"  █  \")",
+              "question": {
+                "id": "1-13-make-ascii-reason",
+                "prompt": "How many characters are printed before the newline?",
+                "choices": [
+                  "One",
+                  "Three",
+                  "Five"
+                ],
+                "answer": 2,
+                "explanation": "Two spaces, a block, and two more spaces make five characters. The quotes delimit the string and are not printed."
+              },
+              "lab": "print(\"  █  \")"
+            },
+            {
+              "id": "1-13-make-ascii-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record a row before and after changing its spaces. How many characters wide is each version?",
+              "response": {
+                "id": "1-13-make-ascii-evidence",
+                "prompt": "Record a row before and after changing its spaces. How many characters wide is each version?",
+                "placeholder": "Before… After… I observed…"
+              }
+            },
+            {
               "title": "Challenge: Finish a tiny block picture.",
               "body": "Make a face, tower, signal, creature, or symbol.",
               "task": "Use 5+ printed lines, at least 3 different rows, and at least one visual character such as █, #, *, |, /, \\, or _.",
@@ -2112,7 +3176,8 @@ window.PYTHON_COURSE = {
               "name": "star"
             }
           ],
-          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V."
+          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V.",
+          "objective": "Use strings and spaces to communicate"
         },
         {
           "id": "1-14-solve-ascii",
@@ -2120,36 +3185,33 @@ window.PYTHON_COURSE = {
           "title": "ASCII Repair",
           "type": "Solve",
           "available": true,
-          "notes": "This is a spacing and sequencing puzzle. Students should use the output as feedback. Do not provide the completed strings unless needed for accessibility support.",
+          "notes": "This is a spacing and sequencing puzzle. Students should use the output as feedback. Do not provide the completed strings unless needed for accessibility support. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
-                "type": "minCalls",
+                "type": "exactCalls",
                 "commands": [
                   "print"
                 ],
                 "count": 5,
-                "fail": "Keep all five printed rows.",
-                "label": "5 printed rows"
-              },
-              {
-                "type": "requiresPrintString",
-                "value": "  ███  ",
-                "fail": "Repair the top row.",
-                "label": "Top row repaired"
-              },
-              {
-                "type": "requiresPrintString",
-                "value": " █   █ ",
-                "fail": "Repair the matching side row.",
-                "label": "Side row repaired"
+                "label": "Exactly five rows"
               },
               {
                 "type": "requiresPrintString",
                 "value": "  ███  ",
                 "min": 2,
-                "fail": "The top and bottom rows should match.",
-                "label": "Top and bottom match"
+                "label": "Matching top and bottom"
+              },
+              {
+                "type": "requiresPrintString",
+                "value": " █   █ ",
+                "min": 2,
+                "label": "Matching side rows"
+              },
+              {
+                "type": "requiresPrintString",
+                "value": "█  █  █",
+                "label": "Keep the center row"
               }
             ]
           },
@@ -2168,6 +3230,25 @@ window.PYTHON_COURSE = {
               "tip": "Do not change the symbols yet. Fix spacing first."
             },
             {
+              "id": "1-14-solve-ascii-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "print(\"  ███  \")\nprint(\" █   █ \")",
+              "question": {
+                "id": "1-14-solve-ascii-predict",
+                "prompt": "Why do these rows align?",
+                "choices": [
+                  "Their strings both have seven character positions",
+                  "Python centers strings automatically",
+                  "Their quotation marks line up"
+                ],
+                "answer": 0,
+                "explanation": "A monospace output gives each character position the same width. Spaces inside the strings place the visible blocks."
+              },
+              "lab": "print(\"  ███  \")\nprint(\" █   █ \")"
+            },
+            {
               "title": "Repair the top and bottom.",
               "body": "The first and last rows should be identical.",
               "task": "Edit spaces until those two rows match.",
@@ -2184,6 +3265,63 @@ window.PYTHON_COURSE = {
               "body": "The middle row is already the widest row.",
               "task": "Run again and make the five rows look centered around it.",
               "tip": "Use the target silhouette only as a visual check."
+            },
+            {
+              "id": "1-14-solve-ascii-transfer",
+              "title": "Transfer the spacing idea.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Make top and bottom equal, four characters wide, with one leading space. Keep the middle row unchanged.",
+              "lab": "print(\"  ██\")\nprint(\" █  █\")\nprint(\"  ██\")",
+              "example": "print(\"  ██\")\nprint(\" █  █\")\nprint(\"  ██\")",
+              "check": {
+                "rules": [
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "print"
+                    ],
+                    "count": 3,
+                    "label": "Keep three rows"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": " ██ ",
+                    "min": 2,
+                    "label": "Matching four-character edge rows"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-14-solve-ascii-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "print(\" █ \")\nprint(\"█ █\")\nprint(\" █ \")",
+              "question": {
+                "id": "1-14-solve-ascii-reason",
+                "prompt": "Which edits make the middle row wider without moving the edge rows?",
+                "choices": [
+                  "Add spaces inside the middle string",
+                  "Add spaces before print()",
+                  "Change the quote marks"
+                ],
+                "answer": 0,
+                "explanation": "Leading indentation is Python syntax. Spaces inside the quoted string are the characters printed in the picture."
+              },
+              "lab": "print(\" █ \")\nprint(\"█ █\")\nprint(\" █ \")"
+            },
+            {
+              "id": "1-14-solve-ascii-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Choose a misaligned row. Record its old and repaired text, then identify the spaces that changed.",
+              "response": {
+                "id": "1-14-solve-ascii-evidence",
+                "prompt": "Choose a misaligned row. Record its old and repaired text, then identify the spaces that changed.",
+                "placeholder": "Before… After… I observed…"
+              }
             },
             {
               "title": "Final check.",
@@ -2259,7 +3397,8 @@ window.PYTHON_COURSE = {
               "name": "star"
             }
           ],
-          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V."
+          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V.",
+          "objective": "Use strings and spaces to communicate"
         },
         {
           "id": "1-15-create-ascii",
@@ -2267,7 +3406,7 @@ window.PYTHON_COURSE = {
           "title": "ASCII Badge",
           "type": "Create",
           "available": true,
-          "notes": "Open-ended text-art challenge. Celebrate variation. Students can use Unicode block characters or ordinary keyboard symbols. The checker should enforce structure, not an exact image.",
+          "notes": "Open-ended text-art challenge. Celebrate variation. Students can use Unicode block characters or ordinary keyboard symbols. The checker should enforce structure, not an exact image. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
           "check": {
             "rules": [
               {
@@ -2354,6 +3493,25 @@ window.PYTHON_COURSE = {
               "tip": "Try █ ▓ ░ # * / \\ | _ - and spaces."
             },
             {
+              "id": "1-15-create-ascii-predict",
+              "title": "Predict before running.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "print(\"[██░░]\")",
+              "question": {
+                "id": "1-15-create-ascii-predict",
+                "prompt": "Which part changes a bar’s filled amount?",
+                "choices": [
+                  "Spaces before print()",
+                  "The characters between the brackets",
+                  "The name print"
+                ],
+                "answer": 1,
+                "explanation": "The content of the string makes the meter. Keeping the brackets and replacing fill characters changes its state."
+              },
+              "lab": "print(\"[██░░]\")"
+            },
+            {
               "title": "Build downward.",
               "body": "Add rows one at a time instead of typing the whole picture first.",
               "task": "Reach at least three printed rows and run again.",
@@ -2370,6 +3528,112 @@ window.PYTHON_COURSE = {
               "body": "Change the inside of one or two rows to create eyes, a stripe, a gap, or another feature.",
               "task": "Run and keep the overall shape readable.",
               "tip": "Small changes inside the silhouette are usually enough."
+            },
+            {
+              "id": "1-15-create-ascii-transfer",
+              "title": "Make the meter tell the truth.",
+              "body": "This experiment has its own saved code. Your project will return when you leave this step.",
+              "task": "Keep three rows. Show three full blocks and one shaded block, and update the numeric label to 3 / 4.",
+              "lab": "print(\"READY\")\nprint(\"[██░░]\")\nprint(\"2 / 4\")",
+              "example": "print(\"READY\")\nprint(\"[██░░]\")\nprint(\"2 / 4\")",
+              "check": {
+                "rules": [
+                  {
+                    "type": "exactCalls",
+                    "commands": [
+                      "print"
+                    ],
+                    "count": 3,
+                    "label": "Three rows"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": "[███░]",
+                    "label": "Three of four blocks filled"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": "3 / 4",
+                    "label": "Label matches the bar"
+                  }
+                ]
+              },
+              "tip": "Use Step to find the first command whose result differs from your prediction."
+            },
+            {
+              "id": "1-15-create-ascii-reason",
+              "title": "Check your understanding.",
+              "body": "Read the code before running it.",
+              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
+              "example": "print(\"[██░░]\")\nprint(\"4 / 4\")",
+              "question": {
+                "id": "1-15-create-ascii-reason",
+                "prompt": "Why is this output misleading?",
+                "choices": [
+                  "It has two print() calls",
+                  "The numeric label disagrees with the bar",
+                  "It uses square brackets"
+                ],
+                "answer": 1,
+                "explanation": "A program can run while communicating contradictory information. Compare the meaning of the two outputs."
+              },
+              "lab": "print(\"[██░░]\")\nprint(\"4 / 4\")"
+            },
+            {
+              "id": "unit-1-beacon",
+              "title": "Unit 1 challenge: repair the signal beacon.",
+              "body": "This program runs, but its drawing and printed meter need repairs. Use what you learned about order, movement, circles, style, and strings.",
+              "task": "Keep the endpoint 60 right and 40 above the start. Draw a circle and two differently colored strokes, all visible on black with width 4+. Print a bar and label that both show 3 / 4.",
+              "lab": "bgcolor(\"black\")\ncolor(\"black\")\npensize(2)\nforward(60)\nleft(90)\nforward(40)\ncircle(15)\nprint(\"[██░░]\")\nprint(\"3 / 4\")",
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 60,
+                    "y": 40,
+                    "tolerance": 1.5,
+                    "label": "Keep the endpoint",
+                    "fail": "Keep the geometry while repairing the appearance."
+                  },
+                  {
+                    "type": "minCalls",
+                    "commands": [
+                      "circle"
+                    ],
+                    "count": 1,
+                    "label": "Include a circle"
+                  },
+                  {
+                    "type": "drawingStyle",
+                    "colors": 2,
+                    "width": 4,
+                    "contrast": true,
+                    "label": "Visible contrasting strokes, width 4+"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": "[███░]",
+                    "label": "Meter shows three of four"
+                  },
+                  {
+                    "type": "requiresPrintString",
+                    "value": "3 / 4",
+                    "label": "Label agrees with meter"
+                  }
+                ]
+              },
+              "tip": "Repair one property at a time. Keep a working version between changes."
+            },
+            {
+              "id": "1-15-create-ascii-evidence",
+              "title": "Keep evidence of your thinking.",
+              "body": "Use a specific change from your project. Your answer saves on this device.",
+              "task": "Record one repair from the signal beacon and one revision from your own ASCII badge. What evidence showed each change worked?",
+              "response": {
+                "id": "1-15-create-ascii-evidence",
+                "prompt": "Record one repair from the signal beacon and one revision from your own ASCII badge. What evidence showed each change worked?",
+                "placeholder": "Before… After… I observed…"
+              }
             },
             {
               "title": "Challenge: Finish an original ASCII badge.",
@@ -2445,7 +3709,8 @@ window.PYTHON_COURSE = {
               "name": "star"
             }
           ],
-          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V."
+          "paletteIntro": "Click a symbol to insert it at your code cursor and copy it too. Paste it again with Ctrl+V / Cmd+V.",
+          "objective": "Use strings and spaces to communicate"
         }
       ]
     },
