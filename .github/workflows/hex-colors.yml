@@ -1,0 +1,24 @@
+name: Hex color tool
+on:
+  push:
+    paths:
+      - 'hex/**'
+      - '.github/workflows/hex-colors.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  color-tool:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Check palette selection and copying
+        run: node hex/test-hex.mjs
