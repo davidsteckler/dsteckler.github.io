@@ -935,6 +935,7 @@
       <div class="panel-head">
         <div class="editor-head-start">
           <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Turtle's output alone">⌫ Clear all code</button>
+          <button class="btn" id="codeHistoryBtn" type="button">History</button>
           <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
         </div>
         <div class="editor-head-right">
@@ -1605,6 +1606,58 @@ for i in range(4):
     editor.scrollIntoView({line:n-1,ch:0},80);
   }
 
+  var codeSaveKey = COURSE_EMBED ? COURSE_STORAGE_KEY : STORAGE_KEY;
+  var codeHistoryKey = codeSaveKey + "-history-v1";
+  function readCodeHistory(){
+    try{var entries=JSON.parse(localStorage.getItem(codeHistoryKey)||"[]");return Array.isArray(entries)?entries.filter(function(e){return typeof e.code==="string"&&Number.isFinite(e.time);}):[];}catch(e){return [];}
+  }
+  function saveCodeVersion(code,label){
+    if(TRACE_EMBED)return;
+    try{
+      var entries=readCodeHistory();
+      if(!entries.length||entries[0].code!==code){
+        entries.unshift({time:Date.now(),code:code,label:label||"Autosave"});
+        // Bound both count and storage size, keeping the newest versions.
+        entries=entries.slice(0,80);
+        while(entries.length>1&&JSON.stringify(entries).length>500000)entries.pop();
+        localStorage.setItem(codeHistoryKey,JSON.stringify(entries));
+      }
+    }catch(e){saveStatus.textContent="History could not be saved";}
+  }
+  function flushCodeSave(){
+    if(TRACE_EMBED)return;
+    clearTimeout(saveTimer);saveTimer=null;
+    try{localStorage.setItem(codeSaveKey,editor.getValue());saveCodeVersion(editor.getValue());saveStatus.textContent="Saved on this device";}catch(e){saveStatus.textContent="not saved";}
+  }
+  // Also callable by the containing course before a step or lesson changes.
+  window.saveTurtleCode=flushCodeSave;
+  window.replaceTurtleCode=function(code,label){
+    saveCodeVersion(editor.getValue(),"Before "+(label||"loading code"));
+    editor.setValue(String(code));flushCodeSave();editor.focus();
+  };
+  saveCodeVersion(editor.getValue(),"Opened editor");
+  editor.on("beforeChange",function(cm){if(!saveTimer)saveCodeVersion(cm.getValue());});
+  window.addEventListener("pagehide",flushCodeSave);
+  document.addEventListener("visibilitychange",function(){if(document.hidden)flushCodeSave();});
+  var historyDialog=document.createElement("dialog");
+  historyDialog.style.cssText="width:min(640px,90vw);max-height:85vh;padding:20px;border:1px solid #888;border-radius:12px;background:#fff;color:#222";
+  historyDialog.innerHTML='<h2 style="margin-top:0">Code history</h2><p>Autosaved on this device. Choose a time to preview and restore. Restoring keeps your current code in history.</p><select aria-label="Saved version" style="width:100%;padding:8px"></select><pre style="max-height:40vh;overflow:auto;padding:12px;background:#f3f3f3;white-space:pre"></pre><p role="status"></p><button type="button">Restore this version</button> <button type="button">Close</button>';
+  document.body.appendChild(historyDialog);
+  var historySelect=historyDialog.querySelector("select"),historyPreview=historyDialog.querySelector("pre"),historyEntries=[];
+  historySelect.addEventListener("change",function(){historyPreview.textContent=historyEntries[Number(historySelect.value)].code||"(Empty code)";});
+  historyDialog.querySelectorAll("button")[0].addEventListener("click",function(){
+    var entry=historyEntries[Number(historySelect.value)];if(!entry)return;
+    window.replaceTurtleCode(entry.code,"restoring a version");historyDialog.close();
+  });
+  historyDialog.querySelectorAll("button")[1].addEventListener("click",function(){historyDialog.close();});
+  document.getElementById("codeHistoryBtn").addEventListener("click",function(){
+    flushCodeSave();historyEntries=readCodeHistory();historySelect.innerHTML="";
+    historyEntries.forEach(function(entry,i){var option=document.createElement("option");option.value=i;option.textContent=new Date(entry.time).toLocaleString()+" · "+entry.label+" · "+entry.code.split("\n").length+" lines";historySelect.appendChild(option);});
+    historyPreview.textContent=historyEntries.length?(historyEntries[0].code||"(Empty code)"):"No saved versions yet.";
+    historyDialog.querySelectorAll("button")[0].disabled=!historyEntries.length;
+    historyDialog.showModal();
+  });
+  if(TRACE_EMBED)document.getElementById("codeHistoryBtn").hidden=true;
   var saveTimer = null;
   editor.on("change", function(){
     clearErrorHighlight();
@@ -1614,14 +1667,7 @@ for i in range(4):
     }
     saveStatus.textContent = "saving…";
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(function(){
-      try {
-        localStorage.setItem(COURSE_EMBED ? COURSE_STORAGE_KEY : STORAGE_KEY, editor.getValue());
-        saveStatus.textContent = COURSE_EMBED ? "saved for this lesson" : "saved locally";
-      } catch(e) {
-        saveStatus.textContent = "not saved";
-      }
-    }, 250);
+    saveTimer = setTimeout(flushCodeSave, 750);
   });
 
   function setStatus(type){
@@ -2769,12 +2815,7 @@ for i in range(4):
     if(playback.active)stopCode();
     if(!editor.getValue())return;
     if(!window.confirm("Clear all code from the editor? Turtle's drawing and text output will stay."))return;
-    editor.setValue("");
-    editor.focus();
-    try {
-      localStorage.setItem(STORAGE_KEY, "");
-      saveStatus.textContent = "saved locally";
-    } catch(e) {}
+    window.replaceTurtleCode("", "clearing code");
   }
 
   if(COURSE_EMBED){

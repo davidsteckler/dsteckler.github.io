@@ -647,7 +647,7 @@
 
       <footer class="lesson-actions">
         <button class="btn" id="backBtn" type="button">← Back</button>
-        <button class="btn reset" id="resetBtn" type="button" title="Restore this lesson's starter code">Reset code</button>
+        <button class="btn reset" id="resetBtn" type="button" title="Reload the starting code for this lesson or experiment">Load starting code</button>
         <button class="btn primary" id="nextBtn" type="button">Next →</button>
       </footer>
     </section>
@@ -1060,6 +1060,7 @@
 
   function loadEditor(force){
     var step=current.steps[stepIndex],key=step.lab?current.id+"-lab-"+step.id:current.id;
+    document.getElementById("resetBtn").textContent=step.lab?"Load experiment code":"Load lesson starter";
     if(!force&&key===loadedEditorKey)return;
     if(!force)captureCurrentCode();
     loadedEditorKey=key;
@@ -1319,6 +1320,7 @@
     try{
       var editorUrl=new URL(frame.contentWindow.location.href);
       if(editorUrl.searchParams.get("lesson")!==loadedEditorKey)return;
+      if(frame.contentWindow.saveTurtleCode)frame.contentWindow.saveTurtleCode();
       var cm=frame.contentDocument.querySelector(".CodeMirror");
       if(cm&&cm.CodeMirror)localStorage.setItem("dsteckler-pythoncourse-"+loadedEditorKey,cm.CodeMirror.getValue());
     }catch(e){}
@@ -1367,9 +1369,10 @@
   });
 
   document.getElementById("resetBtn").addEventListener("click",function(){
-    if(!confirm("Reset this lesson back to its starter code?"))return;
-    try{localStorage.removeItem("dsteckler-pythoncourse-"+loadedEditorKey);}catch(e){}
-    loadEditor(true);
+    var step=current.steps[stepIndex],code=step.lab||current.starter||"";
+    if(frame.contentWindow.replaceTurtleCode){
+      frame.contentWindow.replaceTurtleCode(code,"loading starting code");
+    }
   });
 
   frame.addEventListener("load",function(){editorPane.classList.add("ready");});
