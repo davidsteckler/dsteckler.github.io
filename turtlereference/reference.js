@@ -196,8 +196,8 @@
       const preview = previewAtlas.examples[current.id + '/' + example.id];
       if (typeof preview?.tile === 'number') {
         art.classList.add('drawing-preview');
-        art.style.backgroundSize = (previewAtlas.columns * 54) + 'px ' + (previewAtlas.rows * 54) + 'px';
-        art.style.backgroundPosition = -(preview.tile % previewAtlas.columns * 54) + 'px ' + (-Math.floor(preview.tile / previewAtlas.columns) * 54) + 'px';
+        art.style.backgroundSize = (previewAtlas.columns * 68) + 'px ' + (previewAtlas.rows * 68) + 'px';
+        art.style.backgroundPosition = -(preview.tile % previewAtlas.columns * 68) + 'px ' + (-Math.floor(preview.tile / previewAtlas.columns) * 68) + 'px';
       } else {
         art.classList.add('text-preview'); art.textContent = preview?.text || 'Run';
       }
