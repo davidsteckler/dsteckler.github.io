@@ -1,0 +1,29 @@
+name: Code editor typing
+on:
+  push:
+    paths:
+      - '.github/workflows/editor-typing.yml'
+      - 'assets/vendor/codemirror/**'
+      - 'turtle/index.html'
+      - 'turtleprojects/index.html'
+      - 'turtlecourse/lesson1/index.html'
+      - 'python/index.html'
+      - 'pythoncourse/test-parentheses.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  typing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Check parenthesis pairing in every editor
+        run: node pythoncourse/test-parentheses.mjs
