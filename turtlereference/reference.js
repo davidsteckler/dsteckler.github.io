@@ -8,6 +8,17 @@
   const trails = new Map(window.TURTLE_TRAILS.map(trail => [trail.id, trail]));
   const $ = id => document.getElementById(id);
   const frame = $('referenceEditor');
+  let classroomSettings={code:14,drawing:100};
+  try{const saved=JSON.parse(localStorage.getItem('dsteckler-reference-display-v1')||'null');if(saved){classroomSettings.code=Math.max(14,Math.min(40,Number(saved.code)||14));classroomSettings.drawing=Math.max(50,Math.min(300,Number(saved.drawing)||100));}}catch{}
+  function applyClassroomDisplay(){
+    $('classCodeSize').value=classroomSettings.code;$('classDrawingZoom').value=classroomSettings.drawing;
+    $('classCodeSizeValue').textContent=classroomSettings.code+' px';$('classDrawingZoomValue').textContent=classroomSettings.drawing+'%';
+    try{frame.contentWindow.setClassroomDisplay?.(classroomSettings.code,classroomSettings.drawing);}catch{}
+  }
+  for(const [id,key] of [['classCodeSize','code'],['classDrawingZoom','drawing']])$(id).addEventListener('input',()=>{classroomSettings[key]=Number($(id).value);applyClassroomDisplay();try{localStorage.setItem('dsteckler-reference-display-v1',JSON.stringify(classroomSettings));}catch{}});
+  $('resetClassZoom').addEventListener('click',()=>{classroomSettings={code:14,drawing:100};applyClassroomDisplay();try{localStorage.removeItem('dsteckler-reference-display-v1');}catch{}});
+  $('classView').addEventListener('click',()=>{const active=document.body.classList.toggle('class-view');$('classView').setAttribute('aria-pressed',String(active));$('classView').textContent=active?'Exit class view':'Class view';requestAnimationFrame(applyClassroomDisplay);});
+  applyClassroomDisplay();
   const storageKey = 'dsteckler-turtle-reference-drafts-v1';
   let drafts = {}, current, currentExample, ready = false, pending = false, requestId = 0, appliedId = null;
   const exampleTotal = entries.reduce((count, entry) => count + entry.examples.length, 0);
@@ -357,7 +368,7 @@
     const message = event.data;
     if (message.kind === 'turtle-tutorial-ready') {
       if (ready) return;
-      ready = true; $('editorLoading').hidden = true;
+      ready = true; applyClassroomDisplay(); $('editorLoading').hidden = true;
       $('runExample').disabled = false; $('resetExample').disabled = false;
       $('referenceStatus').textContent = currentExample.auto === false ? 'Press Run to try the input dialog.' : 'Edits are saved for this example.';
       document.body.dataset.editorReady = 'true'; applyExample(currentExample.auto !== false);
