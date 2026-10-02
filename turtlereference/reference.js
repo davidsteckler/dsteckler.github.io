@@ -13,9 +13,11 @@
   function applyClassroomDisplay(){
     $('classCodeSize').value=classroomSettings.code;$('classDrawingZoom').value=classroomSettings.drawing;
     $('classCodeSizeValue').textContent=classroomSettings.code+' px';$('classDrawingZoomValue').textContent=classroomSettings.drawing+'%';
+    document.querySelectorAll('[data-zoom]').forEach(button=>{const slider=$(button.dataset.zoom);button.disabled=Number(button.dataset.direction)<0?Number(slider.value)<=Number(slider.min):Number(slider.value)>=Number(slider.max);});
     try{frame.contentWindow.setClassroomDisplay?.(classroomSettings.code,classroomSettings.drawing);}catch{}
   }
   for(const [id,key] of [['classCodeSize','code'],['classDrawingZoom','drawing']])$(id).addEventListener('input',()=>{classroomSettings[key]=Number($(id).value);applyClassroomDisplay();try{localStorage.setItem('dsteckler-reference-display-v1',JSON.stringify(classroomSettings));}catch{}});
+  document.querySelectorAll('[data-zoom]').forEach(button=>button.addEventListener('click',()=>{const slider=$(button.dataset.zoom);if(Number(button.dataset.direction)<0)slider.stepDown();else slider.stepUp();slider.dispatchEvent(new Event('input',{bubbles:true}));}));
   $('resetClassZoom').addEventListener('click',()=>{classroomSettings={code:14,drawing:100};applyClassroomDisplay();try{localStorage.removeItem('dsteckler-reference-display-v1');}catch{}});
   $('classView').addEventListener('click',()=>{const active=document.body.classList.toggle('class-view');$('classView').setAttribute('aria-pressed',String(active));$('classView').textContent=active?'Exit class view':'Class view';requestAnimationFrame(applyClassroomDisplay);});
   applyClassroomDisplay();
