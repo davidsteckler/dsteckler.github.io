@@ -163,6 +163,8 @@ try{
   editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
   assert(await page.locator('#colorViewer').isVisible());
   assert.equal(await page.locator('#colorHex').inputValue(),'#8b5fbf');
+  assert.equal(await page.locator('.example-card').count(),8);
+  assert.equal(await page.locator('.example-art').first().evaluate(el=>el.getBoundingClientRect().width),68);
   const originalColorCode=await editor.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue());
   await page.locator('#colorHex').fill('abc');
   assert.equal(await page.locator('#colorPicker').inputValue(),'#aabbcc');
