@@ -859,7 +859,7 @@ body.tutorial-embed .world-stage{min-height:0!important;padding:10px!important;a
 body.tutorial-embed .world-copy{display:none}
 body.tutorial-embed .world-info{display:flex;justify-content:flex-end;padding:8px 10px}
 body.tutorial-embed .toggle{font-size:13px}
-body.tutorial-embed .CodeMirror{font-size:14px!important;line-height:1.65!important;height:100%!important}
+body.tutorial-embed .CodeMirror{font-size:var(--class-code-size,14px)!important;line-height:1.65!important;height:100%!important}
 body.tutorial-embed .console-head{font-size:11px}
 body.tutorial-embed #output{font-size:13px}
 body.tutorial-embed #worldLineStatus{display:none}
@@ -3228,16 +3228,29 @@ for i in range(4):
     });
   });
 
+  var classroomDrawingZoom=1;
+  window.setClassroomDisplay=function(codeSize,drawingZoom){
+    document.documentElement.style.setProperty("--class-code-size",Math.max(14,Math.min(40,Number(codeSize)||14))+"px");
+    classroomDrawingZoom=Math.max(.5,Math.min(3,Number(drawingZoom)/100||1));
+    worldStage.style.setProperty("overflow","auto","important");
+    worldStage.style.setProperty("align-items","flex-start","important");
+    worldStage.style.justifyContent="safe center";
+    if(editor)editor.refresh();fitWorld();
+  };
   function fitWorld(){
     var mobile=!TUTORIAL_EMBED && window.innerWidth<=840;
     var stageWidth=worldStage.clientWidth;
     var stageHeight=worldStage.clientHeight;
     var usableWidth=Math.max(60,stageWidth-(mobile?20:24));
     var usableHeight=mobile?404:Math.max(60,stageHeight-24);
-    var scale=Math.min(1,usableWidth/404,usableHeight/404);
+    var scale=Math.min(1,usableWidth/404,usableHeight/404)*classroomDrawingZoom;
     worldWrap.style.transform="scale("+scale+")";
     worldScaleBox.style.width=(404*scale)+"px";
     worldScaleBox.style.height=(404*scale)+"px";
+    if(TUTORIAL_EMBED&&typeof classroomDrawingZoom!=="undefined"){
+      worldStage.scrollLeft=Math.max(0,(worldStage.scrollWidth-worldStage.clientWidth)/2);
+      worldStage.scrollTop=Math.max(0,(worldStage.scrollHeight-worldStage.clientHeight)/2);
+    }
   }
   window.addEventListener("resize",fitWorld);
   if(typeof ResizeObserver!=="undefined"){
