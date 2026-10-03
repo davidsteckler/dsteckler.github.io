@@ -385,27 +385,39 @@ window.PYTHON_COURSE = {
           "title": "Route Puzzle",
           "type": "Solve",
           "available": true,
-          "notes": "First real reduction in scaffolding. Do not give the closing sequence. If stuck, ask what side is missing and which existing distance matches it. Check understanding through the two prediction questions, independent experiment, and saved evidence response. Conference by asking the student to explain the first differing line. A saved explanation is evidence to discuss, not an automatically graded claim.",
+          "notes": "1.1 introduces individual movement and turn commands. 1.2 applies them to relationships across an entire sequence: opposite sides, closure, and final heading. Do not supply the missing commands during repair. Point to the turtle's direction and the gap. The final drawing must enclose an area, return to the origin, and face right. This prepares repeated shape code and later functions.",
           "check": {
             "rules": [
+              {
+                "type": "finalPosition",
+                "x": 0,
+                "y": 0,
+                "tolerance": 1.5,
+                "label": "Return to the starting point",
+                "fail": "The outline is still open. Trace which movement leaves a gap."
+              },
+              {
+                "type": "finalHeading",
+                "heading": 0,
+                "tolerance": 1,
+                "label": "Finish facing right",
+                "fail": "The shape closes, but the turtle needs one final turn to face right."
+              },
+              {
+                "type": "closedOutline",
+                "minArea": 100,
+                "label": "Enclose an area",
+                "fail": "Draw a closed outline with space inside. Retracing one line does not make an outline."
+              },
               {
                 "type": "minCalls",
                 "commands": [
                   "forward",
                   "backward"
                 ],
-                "count": 5,
-                "fail": "Your route needs at least five visible movement segments.",
-                "label": "5+ visible movement segments"
-              },
-              {
-                "type": "requiresCommands",
-                "commands": [
-                  "left",
-                  "right"
-                ],
-                "fail": "Use at least one left turn and one right turn.",
-                "label": "Use both left() and right()"
+                "count": 4,
+                "label": "4+ movements",
+                "fail": "Use at least four movements to build the outline."
               },
               {
                 "type": "minDistinctNumbers",
@@ -414,8 +426,8 @@ window.PYTHON_COURSE = {
                   "backward"
                 ],
                 "count": 2,
-                "fail": "Use at least two different movement distances.",
-                "label": "2 different movement distances"
+                "label": "2 different distances",
+                "fail": "Use two different distances to shape your design."
               }
             ]
           },
@@ -423,9 +435,10 @@ window.PYTHON_COURSE = {
           "steps": [
             {
               "id": "1-2-solve-route-type-example",
-              "title": "Type the example, one line at a time.",
-              "body": "Start on line 1. Use the line numbers below and Run after each command.",
-              "task": "Type each command on its numbered line. Keep the editor free of blank lines above the first command.",
+              "phase": "Type the example",
+              "title": "Draw three sides of a rectangle.",
+              "body": "The turtle starts in the center facing right. This example leaves one side open.",
+              "task": "Type lines 1–5 exactly as shown. Run after each movement. Find the gap between the turtle and the start.",
               "example": "forward(90)\nleft(90)\nforward(50)\nleft(90)\nforward(90)",
               "numbered": true,
               "focusLines": [
@@ -434,77 +447,38 @@ window.PYTHON_COURSE = {
                 3,
                 4,
                 5
-              ],
-              "phase": "Type the example"
+              ]
             },
             {
-              "id": "1-2-solve-route-edit",
-              "title": "Close the route.",
-              "body": "Change one property, then compare the output.",
-              "task": "Keep lines 1–5. On line 6 type left(90), then on line 7 type forward(50). Run to return to the start.",
+              "id": "1-2-solve-route-predict",
+              "phase": "Check understanding",
+              "title": "Predict the missing side.",
+              "body": "Follow the three movements. The turtle finishes above its starting point, facing left.",
+              "task": "Choose the length of the missing side, then Check prediction to watch the route.",
+              "example": "forward(90)\nleft(90)\nforward(50)\nleft(90)\nforward(90)",
+              "lab": "forward(90)\nleft(90)\nforward(50)\nleft(90)\nforward(90)",
+              "question": {
+                "id": "1-2-solve-route-predict",
+                "prompt": "How long must the missing vertical side be?",
+                "choices": [
+                  "50 units",
+                  "90 units",
+                  "140 units"
+                ],
+                "answer": 0,
+                "explanation": "The two 90-unit horizontal sides cancel. The turtle is 50 units above its start, so the missing vertical side must be 50 units long."
+              }
+            },
+            {
+              "id": "1-2-solve-route-close-example",
+              "phase": "Change specific lines",
+              "title": "Close the rectangle.",
+              "body": "The turtle is facing left. It needs to face the gap before it can move along it.",
+              "task": "Keep lines 1–5. Add one turn on line 6 and one movement on line 7 to return to the starting point. Run, then Check assignment.",
               "focusLines": [
                 6,
                 7
               ],
-              "phase": "Change specific lines"
-            },
-            {
-              "id": "1-2-solve-route-predict",
-              "title": "Predict before running.",
-              "body": "Read the code before running it.",
-              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
-              "example": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
-              "question": {
-                "id": "1-2-solve-route-predict",
-                "prompt": "Which side is missing?",
-                "choices": [
-                  "A 70-unit horizontal side",
-                  "A 30-unit vertical side",
-                  "Another 90-degree turn only"
-                ],
-                "answer": 1,
-                "explanation": "The two horizontal movements cancel. The turtle is still 30 units above the start."
-              },
-              "lab": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
-              "phase": "Check understanding"
-            },
-            {
-              "id": "1-2-solve-route-reason",
-              "title": "Check your understanding.",
-              "body": "Read the code before running it.",
-              "task": "Choose a prediction, then check it. Use Run or Step to test your reasoning.",
-              "example": "forward(50)\nbackward(50)",
-              "question": {
-                "id": "1-2-solve-route-reason",
-                "prompt": "Is returning to the start enough to make a closed shape?",
-                "choices": [
-                  "Yes, every return creates a shape",
-                  "No; this retraces one line"
-                ],
-                "answer": 1,
-                "explanation": "The endpoint returns to the start, but the path has no enclosed area. Inspect the drawing as well as its endpoint."
-              },
-              "lab": "forward(50)\nbackward(50)",
-              "phase": "Check understanding"
-            },
-            {
-              "id": "1-2-solve-route-evidence",
-              "title": "Keep evidence of your thinking.",
-              "body": "Use a specific change from your project. Your answer saves on this device.",
-              "task": "Record both ways you closed the route. Which commands changed, and which result stayed the same?",
-              "response": {
-                "id": "1-2-solve-route-evidence",
-                "prompt": "Record both ways you closed the route. Which commands changed, and which result stayed the same?",
-                "placeholder": "Before… After… I observed…"
-              }
-            },
-            {
-              "id": "1-2-solve-route-transfer",
-              "title": "Required: Close a different route.",
-              "body": "Complete this fixed target and pass Check assignment before starting your own design. This assignment has its own saved code. First type the numbered starting program below, then make the required changes.",
-              "task": "Keep the five lines. Add commands that return to the start and finish facing right.",
-              "lab": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
-              "example": "forward(70)\nleft(90)\nforward(30)\nleft(90)\nforward(70)",
               "check": {
                 "rules": [
                   {
@@ -512,85 +486,299 @@ window.PYTHON_COURSE = {
                     "x": 0,
                     "y": 0,
                     "tolerance": 1.5,
-                    "label": "Finish at the target",
-                    "fail": "Trace each move and turn. The endpoint does not reach the target yet."
+                    "label": "Return to the starting point",
+                    "fail": "The outline is still open. Trace which movement leaves a gap."
+                  },
+                  {
+                    "type": "closedOutline",
+                    "minArea": 100,
+                    "label": "Enclose an area",
+                    "fail": "Draw a closed outline with space inside. Retracing one line does not make an outline."
+                  }
+                ]
+              },
+              "tip": "Use a 90-degree turn to face downward. Match the distance of the opposite vertical side."
+            },
+            {
+              "id": "1-2-solve-route-widen",
+              "phase": "Change specific lines",
+              "title": "Make one side wider.",
+              "body": "A rectangle closes when its opposite sides have matching lengths.",
+              "task": "On line 1, change forward(90) to forward(130). Leave every other line unchanged. Run and look for the new gap.",
+              "focusLines": [
+                1
+              ]
+            },
+            {
+              "id": "1-2-solve-route-repair-width",
+              "phase": "Change specific lines",
+              "title": "Find the side that must match.",
+              "body": "The first side changed. The opposite side still has its old length.",
+              "task": "Change one other movement distance so the wider rectangle closes again. Keep the two vertical sides at 50. Run, then Check assignment.",
+              "focusLines": [
+                3,
+                5,
+                7
+              ],
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 0,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Return to the starting point",
+                    "fail": "The outline is still open. Trace which movement leaves a gap."
+                  },
+                  {
+                    "type": "closedOutline",
+                    "minArea": 100,
+                    "label": "Enclose an area",
+                    "fail": "Draw a closed outline with space inside. Retracing one line does not make an outline."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "forward"
+                    ],
+                    "values": [
+                      130,
+                      50,
+                      130,
+                      50
+                    ],
+                    "prefix": false,
+                    "label": "Keep a 130 × 50 rectangle",
+                    "fail": "Keep the widened side and match the opposite side. Leave the two vertical sides at 50."
+                  }
+                ]
+              },
+              "tip": "Line 5 draws the side opposite line 1."
+            },
+            {
+              "id": "1-2-solve-route-restore-direction",
+              "phase": "Change specific lines",
+              "title": "Close the shape and face right.",
+              "body": "The turtle has returned to the start facing down. A turn can change its direction while the drawing stays the same.",
+              "task": "Add one turn on line 8 so the turtle finishes facing right. Run, then Check assignment.",
+              "focusLines": [
+                8
+              ],
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 0,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Return to the starting point",
+                    "fail": "The outline is still open. Trace which movement leaves a gap."
                   },
                   {
                     "type": "finalHeading",
                     "heading": 0,
                     "tolerance": 1,
-                    "label": "Finish facing 0°",
-                    "fail": "Check the direction left by the final turn."
+                    "label": "Finish facing right",
+                    "fail": "The shape closes, but the turtle needs one final turn to face right."
                   },
                   {
-                    "type": "minCalls",
-                    "commands": [
-                      "forward",
-                      "backward"
-                    ],
-                    "count": 4,
-                    "label": "Complete the missing side"
+                    "type": "closedOutline",
+                    "minArea": 100,
+                    "label": "Enclose an area",
+                    "fail": "Draw a closed outline with space inside. Retracing one line does not make an outline."
                   }
                 ]
               },
-              "tip": "Use Step to find the first command whose result differs from your prediction.",
-              "phase": "Required assignment",
-              "focusLines": [
-                1,
-                2,
-                3,
-                4,
-                5
-              ],
-              "typed": true,
-              "numbered": true
+              "tip": "The turtle faces down. Which 90-degree turn points it toward the right?"
             },
             {
-              "title": "Choice: build your own drawing.",
-              "body": "Choose your own design using the skills from this lesson. The visual examples are inspiration; the requirements below are what gets checked.",
-              "task": "Build from a blank editor. Requirements: 5+ visible movement segments; Use both left() and right(); 2 different movement distances. Run, then Check my code.",
-              "phase": "Create your own",
+              "id": "1-2-solve-route-reason",
+              "phase": "Check understanding",
+              "title": "Check position and direction separately.",
+              "body": "Returning to the starting point tells you where the turtle is. Its last turn tells you which way it faces.",
+              "task": "Choose what the last command changes, then Check prediction to watch it.",
+              "example": "forward(30)\nleft(90)\nforward(20)\nleft(90)\nforward(30)\nleft(90)\nforward(20)\nleft(90)",
+              "lab": "forward(30)\nleft(90)\nforward(20)\nleft(90)\nforward(30)\nleft(90)\nforward(20)\nleft(90)",
+              "question": {
+                "id": "1-2-solve-route-reason",
+                "prompt": "What does the final left(90) change?",
+                "choices": [
+                  "Only the turtle’s direction",
+                  "Its position and the rectangle’s size",
+                  "The length of the last side"
+                ],
+                "answer": 0,
+                "explanation": "The fourth movement already returns to the start. The final turn makes the turtle face right without moving or adding a line."
+              }
+            },
+            {
+              "id": "1-2-solve-route-transfer",
+              "phase": "Required assignment",
+              "title": "Required: repair a different rectangle.",
+              "body": "This program should draw a 110 × 40 rectangle, but one movement distance is wrong. The target marks the start.",
+              "task": "Type the numbered program. Find and repair the incorrect distance. Keep four movements and four left(90) turns. Finish at the start facing right, then Check assignment.",
+              "lab": "forward(110)\nleft(90)\nforward(40)\nleft(90)\nforward(80)\nleft(90)\nforward(40)\nleft(90)",
+              "typed": true,
+              "example": "forward(110)\nleft(90)\nforward(40)\nleft(90)\nforward(80)\nleft(90)\nforward(40)\nleft(90)",
+              "numbered": true,
+              "focusLines": [
+                1,
+                3,
+                5,
+                7
+              ],
+              "check": {
+                "rules": [
+                  {
+                    "type": "finalPosition",
+                    "x": 0,
+                    "y": 0,
+                    "tolerance": 1.5,
+                    "label": "Return to the starting point",
+                    "fail": "The outline is still open. Trace which movement leaves a gap."
+                  },
+                  {
+                    "type": "finalHeading",
+                    "heading": 0,
+                    "tolerance": 1,
+                    "label": "Finish facing right",
+                    "fail": "The shape closes, but the turtle needs one final turn to face right."
+                  },
+                  {
+                    "type": "closedOutline",
+                    "minArea": 100,
+                    "label": "Enclose an area",
+                    "fail": "Draw a closed outline with space inside. Retracing one line does not make an outline."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "forward"
+                    ],
+                    "values": [
+                      110,
+                      40,
+                      110,
+                      40
+                    ],
+                    "prefix": false,
+                    "label": "Draw the required 110 × 40 rectangle",
+                    "fail": "The horizontal sides must both be 110 and the vertical sides must both be 40."
+                  },
+                  {
+                    "type": "literalNumbers",
+                    "commands": [
+                      "left"
+                    ],
+                    "values": [
+                      90,
+                      90,
+                      90,
+                      90
+                    ],
+                    "prefix": false,
+                    "label": "Keep four 90° left turns",
+                    "fail": "Keep the four original turns."
+                  }
+                ]
+              },
+              "tip": "Compare opposite sides. Find the horizontal movement that disagrees with the required width."
+            },
+            {
+              "id": "1-2-solve-route-evidence",
+              "phase": "Lesson notes",
+              "title": "Which line repaired the rectangle?",
+              "body": "Use the required 110 × 40 repair you just completed.",
+              "task": "Write the line number you changed and its old and new distances. Why did that distance need to match the opposite side?",
+              "response": {
+                "id": "1-2-solve-route-evidence",
+                "prompt": "Which line did you repair, what changed, and why?",
+                "placeholder": "I changed line ___ from ___ to ___. It needed to match line ___ because ___."
+              }
+            },
+            {
               "id": "1-2-solve-route-choice",
+              "phase": "Create your own",
+              "title": "Create your own closed outline.",
+              "body": "Choose a house, an arcade shield, a castle outline, or your own idea. The previews show possible designs; choose your own dimensions.",
+              "task": "Start from a blank editor. Draw a closed outline with space inside, use at least 4 movements and 2 different distances, return to the start, and finish facing right. Run, then Check my code.",
               "lab": "\n",
-              "typed": true
+              "typed": true,
+              "tip": "Plan the outside edge first. A final turn can restore direction after the outline closes. The starting point can be any corner of your shape."
             }
           ],
           "group": "Movement",
-          "objective": "Track position and heading separately",
-          "purpose": "Track where each command leaves the turtle so you can close shapes and later build reusable shape functions.",
+          "objective": "Close shapes and restore direction",
+          "purpose": "Track position and direction across a sequence. Use matching distances to close an outline, then restore the direction so another shape can start predictably.",
           "visuals": [
             {
-              "label": "Stair route",
-              "bg": "#fbfaf6",
+              "label": "House outline",
               "paths": [
                 {
                   "points": [
                     [
-                      14,
-                      82
+                      38,
+                      84
                     ],
                     [
-                      58,
-                      82
+                      122,
+                      84
                     ],
                     [
-                      58,
-                      62
+                      122,
+                      46
                     ],
                     [
-                      94,
-                      62
+                      80,
+                      13
                     ],
                     [
-                      94,
-                      40
+                      38,
+                      46
                     ],
                     [
-                      130,
-                      40
+                      38,
+                      84
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "label": "Arcade shield",
+              "paths": [
+                {
+                  "points": [
+                    [
+                      37,
+                      18
                     ],
                     [
-                      130,
+                      123,
+                      18
+                    ],
+                    [
+                      123,
+                      56
+                    ],
+                    [
+                      105,
+                      76
+                    ],
+                    [
+                      80,
+                      91
+                    ],
+                    [
+                      55,
+                      76
+                    ],
+                    [
+                      37,
+                      56
+                    ],
+                    [
+                      37,
                       18
                     ]
                   ]
@@ -598,72 +786,69 @@ window.PYTHON_COURSE = {
               ]
             },
             {
-              "label": "Mountain route",
-              "bg": "#fbfaf6",
+              "label": "Castle outline",
               "paths": [
                 {
                   "points": [
                     [
-                      12,
-                      78
+                      27,
+                      87
                     ],
                     [
-                      42,
-                      48
+                      133,
+                      87
                     ],
                     [
-                      68,
-                      68
-                    ],
-                    [
-                      98,
-                      30
-                    ],
-                    [
-                      124,
-                      50
-                    ],
-                    [
-                      150,
+                      133,
                       20
-                    ]
-                  ]
-                }
-              ]
-            },
-            {
-              "label": "Box route",
-              "bg": "#fbfaf6",
-              "paths": [
-                {
-                  "points": [
-                    [
-                      18,
-                      80
                     ],
                     [
-                      78,
-                      80
+                      115,
+                      20
                     ],
                     [
-                      78,
-                      30
-                    ],
-                    [
-                      128,
-                      30
-                    ],
-                    [
-                      128,
-                      62
+                      115,
+                      36
                     ],
                     [
                       98,
-                      62
+                      36
                     ],
                     [
                       98,
-                      14
+                      20
+                    ],
+                    [
+                      81,
+                      20
+                    ],
+                    [
+                      81,
+                      36
+                    ],
+                    [
+                      64,
+                      36
+                    ],
+                    [
+                      64,
+                      20
+                    ],
+                    [
+                      47,
+                      20
+                    ],
+                    [
+                      47,
+                      36
+                    ],
+                    [
+                      27,
+                      36
+                    ],
+                    [
+                      27,
+                      87
                     ]
                   ]
                 }
