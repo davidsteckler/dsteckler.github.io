@@ -134,3 +134,12 @@ Responses use `dsteckler-pythoncourse-responses-v1-LESSON_ID`. They are separate
 Teach a command before asking students to explain its behavior. Keep working examples short and isolate one property at a time. Use an unfamiliar target to test whether students can transfer the idea. Do not turn experiments into more copy-the-solution steps.
 
 Run `node pythoncourse/test-unit-depth.mjs` to check all predictions, independent experiment solutions, unsuccessful attempts, project restoration, evidence persistence, and mobile interaction.
+
+
+## Typed examples and assignment order
+
+Every available lesson opens with a blank example editor. Students type the numbered example and run after each command. Give exact line numbers for edits and additions, and set `focusLines` on guided steps to highlight those lines in the live editor. Keep command line numbers accurate against the current example; identify insertions before a command when preceding edits can shift its line.
+
+Each lesson needs a student-facing `purpose` explaining the command understanding and its connection to later loops, variables, functions, or parameters. Follow the typed example with controlled changes and checked predictions. Finish with a fixed required assignment (`check` on a separate draft), then a choice assignment with objective requirements. Visual examples belong to the choice assignment and supply inspiration only. `typed: true` starts an isolated draft empty; `example` and `numbered: true` display starting code to type. Preserve student drafts when navigating. Final completion requires the required assignment and understanding checks to pass.
+
+This order supersedes earlier guidance to begin with prefilled code or offer choice during the guided example.
