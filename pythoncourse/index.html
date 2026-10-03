@@ -1236,15 +1236,31 @@
   function understandingComplete(){var saved=readResponses();return current.steps.filter(function(step){return step.question;}).every(function(step){var value=saved[step.question.id];return value&&value.checked&&value.choice===step.question.answer;});}
   function practiceComplete(){var saved=readResponses();return understandingComplete()&&current.steps.filter(function(step){return step.check;}).every(function(step){return saved[step.id]&&saved[step.id].passed;});}
   function renderUnderstanding(){var saved=readResponses(),questions=current.steps.filter(function(step){return step.question;}),passed=questions.filter(function(step){var value=saved[step.question.id];return value&&value.checked&&value.choice===step.question.answer;}).length;document.getElementById("understandingStatus").textContent=(current.objective?current.objective+" · ":"")+passed+" / "+questions.length+" understanding checks";}
+  function playPredictionExample(step){
+    var status=document.getElementById("predictionPlayback");
+    try{
+      var win=frame.contentWindow,doc=frame.contentDocument;
+      var cm=doc.querySelector(".CodeMirror");
+      if(!cm||!win.replaceTurtleCode){if(status)status.textContent="The editor is still loading. Try Replay example in a moment.";return;}
+      var stop=doc.getElementById("stopBtn");
+      if(stop&&!stop.disabled)stop.click();
+      win.replaceTurtleCode(step.lab||step.example||"","replaying prediction example");
+      var run=doc.getElementById("runBtn");
+      if(!run||run.disabled){if(status)status.textContent="Use Run in the editor to watch the example.";return;}
+      run.click();
+      if(status)status.textContent="Watch the turtle and the highlighted code line as the example runs.";
+    }catch(e){if(status)status.textContent="Use Run in the editor to watch the example.";}
+  }
   function renderInteraction(step){
     var panel=document.getElementById("learningInteraction");panel.hidden=!(step.question||step.response);panel.innerHTML="";
     if(step.question){
       var q=step.question,value=readResponses()[q.id]||{};
-      panel.innerHTML='<fieldset class="prediction"><legend>'+esc(q.prompt)+'</legend>'+q.choices.map(function(choice,i){return '<label><input type="radio" name="prediction" value="'+i+'" '+(value.choice===i?'checked':'')+'><span>'+esc(choice)+'</span></label>';}).join("")+'</fieldset><button class="btn" id="checkPrediction" type="button">Check prediction</button><p id="predictionFeedback" role="status"></p>';
+      panel.innerHTML='<fieldset class="prediction"><legend>'+esc(q.prompt)+'</legend>'+q.choices.map(function(choice,i){return '<label><input type="radio" name="prediction" value="'+i+'" '+(value.choice===i?'checked':'')+'><span>'+esc(choice)+'</span></label>';}).join("")+'</fieldset><button class="btn" id="checkPrediction" type="button">Check prediction</button><button class="btn" id="replayPrediction" type="button">Replay example</button><p id="predictionPlayback" role="status"></p><p id="predictionFeedback" role="status"></p>';
       var feedback=document.getElementById("predictionFeedback");
       function show(){if(value.checked){feedback.textContent=(value.choice===q.answer?"Yes. ":"Try again. ")+q.explanation;feedback.className=value.choice===q.answer?"correct":"retry";}}
       show();panel.querySelectorAll("input").forEach(function(input){input.addEventListener("change",function(){value={choice:Number(input.value),checked:false};saveResponse(q.id,value);feedback.textContent="";renderUnderstanding();});});
-      document.getElementById("checkPrediction").addEventListener("click",function(){if(!Number.isInteger(value.choice)){feedback.textContent="Choose a prediction first.";return;}value.checked=true;saveResponse(q.id,value);show();renderUnderstanding();});
+      document.getElementById("checkPrediction").addEventListener("click",function(){if(!Number.isInteger(value.choice)){feedback.textContent="Choose a prediction first.";return;}value.checked=true;saveResponse(q.id,value);show();renderUnderstanding();playPredictionExample(step);});
+      document.getElementById("replayPrediction").addEventListener("click",function(){playPredictionExample(step);});
     }else if(step.response){
       var r=step.response,saved=readResponses()[r.id];
       panel.innerHTML='<label class="evidence-label" for="evidenceResponse">Your evidence</label><textarea id="evidenceResponse" rows="5" maxlength="6000" placeholder="'+esc(r.placeholder)+'"></textarea><p id="responseStatus" role="status">Saved on this device as you type.</p><button class="btn" id="downloadResponse" type="button">Download lesson notes</button>';
