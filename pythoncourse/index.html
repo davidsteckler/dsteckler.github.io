@@ -1255,17 +1255,25 @@
   }
   document.getElementById("checkCheckpoint").addEventListener("click",function(){requestCodeCheck(true);});
   var guidedEditor=null,guidedLines=[],guidedWidget=null,highlightTimer=null;
+  function scheduleLessonHighlight(){
+    clearTimeout(highlightTimer);
+    highlightTimer=setTimeout(highlightLessonLines,0);
+  }
   function highlightLessonLines(){
     clearTimeout(highlightTimer);
     try{
       var cmNode=frame.contentDocument.querySelector(".CodeMirror"),cm=cmNode&&cmNode.CodeMirror;
       if(!cm){highlightTimer=setTimeout(highlightLessonLines,150);return;}
-      if(guidedEditor){guidedLines.forEach(function(n){guidedEditor.removeLineClass(n,"background","course-command-target");});if(guidedWidget)guidedWidget.clear();}
+      if(guidedEditor){guidedLines.forEach(function(handle){guidedEditor.removeLineClass(handle,"background","course-command-target");});if(guidedWidget)guidedWidget.clear();}
+      if(guidedEditor!==cm){
+        if(guidedEditor)guidedEditor.off("change",scheduleLessonHighlight);
+        cm.on("change",scheduleLessonHighlight);
+      }
       guidedEditor=cm;guidedLines=[];guidedWidget=null;
       var doc=frame.contentDocument;
       if(!doc.getElementById("courseGuidanceStyle")){var style=doc.createElement("style");style.id="courseGuidanceStyle";style.textContent=".course-command-target{background:rgba(255,211,93,.18)!important;box-shadow:inset 4px 0 #ffd35d}.course-line-guide{padding:8px 12px;background:#fff1bf;color:#393323;font:14px/1.4 sans-serif;}";doc.head.appendChild(style);}
       var step=current.steps[stepIndex],lines=step.focusLines||[];
-      lines.forEach(function(n){if(n<=cm.lineCount()){cm.addLineClass(n-1,"background","course-command-target");guidedLines.push(n-1);}});
+      lines.forEach(function(n){if(n<=cm.lineCount()){guidedLines.push(cm.addLineClass(n-1,"background","course-command-target"));}});
       if(lines.length){var note=doc.createElement("div");note.className="course-line-guide";note.textContent="Work on line"+(lines.length>1?"s ":" ")+lines.join(", ")+". "+(Math.max.apply(null,lines)>cm.lineCount()?"Add the missing lines below your code.":"Highlighted in yellow.");guidedWidget=cm.addLineWidget(Math.min(lines[0]-1,cm.lineCount()-1),note,{above:true});}
     }catch(e){}
   }
