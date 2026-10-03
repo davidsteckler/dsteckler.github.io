@@ -61,106 +61,163 @@ window.PYTHON_COURSE = {
           "starter": "",
           "visuals": [
             {
-              "label": "Stair route",
-              "bg": "#fbfaf6",
+              "label": "Pixel sword",
               "paths": [
                 {
                   "points": [
                     [
-                      18,
-                      82
+                      72,
+                      91
+                    ],
+                    [
+                      88,
+                      91
+                    ],
+                    [
+                      88,
+                      75
+                    ],
+                    [
+                      105,
+                      75
+                    ],
+                    [
+                      105,
+                      64
+                    ],
+                    [
+                      88,
+                      64
+                    ],
+                    [
+                      88,
+                      23
+                    ],
+                    [
+                      80,
+                      9
                     ],
                     [
                       72,
-                      82
+                      23
                     ],
                     [
                       72,
-                      58
+                      64
                     ],
                     [
-                      48,
-                      58
+                      55,
+                      64
                     ],
                     [
-                      48,
-                      24
+                      55,
+                      75
                     ],
                     [
-                      118,
-                      24
+                      72,
+                      75
+                    ],
+                    [
+                      72,
+                      91
                     ]
                   ]
                 }
               ]
             },
             {
-              "label": "Lightning route",
-              "bg": "#fbfaf6",
+              "label": "Three-point crown",
               "paths": [
                 {
                   "points": [
                     [
-                      18,
-                      24
+                      30,
+                      80
                     ],
                     [
-                      76,
-                      24
+                      130,
+                      80
                     ],
                     [
-                      52,
-                      52
+                      140,
+                      25
                     ],
                     [
-                      106,
-                      52
+                      110,
+                      49
                     ],
                     [
-                      82,
-                      82
+                      80,
+                      15
                     ],
                     [
-                      146,
-                      82
+                      50,
+                      49
+                    ],
+                    [
+                      20,
+                      25
+                    ],
+                    [
+                      30,
+                      80
                     ]
                   ]
                 }
               ]
             },
             {
-              "label": "Switchback route",
-              "bg": "#fbfaf6",
+              "label": "Rocket",
               "paths": [
                 {
                   "points": [
                     [
-                      16,
-                      80
+                      64,
+                      65
                     ],
                     [
-                      68,
-                      80
+                      64,
+                      32
                     ],
                     [
-                      68,
-                      54
+                      80,
+                      10
                     ],
                     [
-                      34,
-                      54
+                      96,
+                      32
                     ],
                     [
-                      34,
-                      28
+                      96,
+                      65
                     ],
                     [
-                      106,
-                      28
+                      113,
+                      82
                     ],
                     [
-                      106,
-                      14
+                      96,
+                      78
+                    ],
+                    [
+                      96,
+                      88
+                    ],
+                    [
+                      64,
+                      88
+                    ],
+                    [
+                      64,
+                      78
+                    ],
+                    [
+                      47,
+                      82
+                    ],
+                    [
+                      64,
+                      65
                     ]
                   ]
                 }
@@ -308,13 +365,14 @@ window.PYTHON_COURSE = {
               "numbered": true
             },
             {
-              "title": "Choice: build your own drawing.",
-              "body": "Choose your own design using the skills from this lesson. The visual examples are inspiration; the requirements below are what gets checked.",
-              "task": "Build from a blank editor. Requirements: 4+ movement commands; 2+ turns; Use backward(); 2 different distances. Run, then Check my code.",
+              "title": "Create a symbol you recognize.",
+              "body": "A pixel sword, a crown, or a rocket can be drawn with straight lines and turns. Choose one of these ideas or invent another symbol.",
+              "task": "Build your own design from a blank editor. Use at least 4 movement commands, 2 turns, backward() once, and 2 different distances. You choose the shape and dimensions.",
               "phase": "Create your own",
               "id": "1-1-make-path-choice",
               "lab": "\n",
-              "typed": true
+              "typed": true,
+              "tip": "Make the sword blade longer, give the crown taller points, or widen the rocket’s fins. Use backward() to retrace a line before drawing a new branch. The previews are inspiration; you do not need to copy them."
             }
           ],
           "group": "Movement",
