@@ -260,14 +260,16 @@ window.PYTHON_COURSE = {
             },
             {
               "id": "1-1-make-path-evidence",
-              "title": "Keep evidence of your thinking.",
-              "body": "Use a specific change from your project. Your answer saves on this device.",
-              "task": "Which movement distance did you change? Record the old value, new value, and the segment that changed.",
+              "title": "What changed when you changed line 1?",
+              "body": "In step 2, you changed line 1 from forward(80) to forward(140). The other two lines stayed the same.",
+              "task": "Which part of the path became longer: the first horizontal line or the line after the turn? Did the turtle turn by a different amount? Write both answers below.",
               "response": {
                 "id": "1-1-make-path-evidence",
-                "prompt": "Which movement distance did you change? Record the old value, new value, and the segment that changed.",
-                "placeholder": "Before… After… I observed…"
-              }
+                "prompt": "Which part of the path became longer: the first horizontal line or the line after the turn? Did the turtle turn by a different amount? Write both answers below.",
+                "placeholder": "The ______ line became longer. The turn ______ because ______."
+              },
+              "phase": "Lesson notes",
+              "example": "Before: forward(80)\nAfter:  forward(140)\n\nUnchanged:\nleft(90)\nforward(80)"
             },
             {
               "id": "1-1-make-path-transfer",
