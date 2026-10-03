@@ -664,7 +664,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=notes-clarity-3"></script>
+<script src="/pythoncourse/course-data.js?v=route-purpose-4"></script>
 <script>
 (function(){
   "use strict";
@@ -865,6 +865,23 @@
       var colors=strokes.map(function(stroke){return stroke.color;}).filter(function(color,i,all){return all.indexOf(color)===i;});
       passed=strokes.length>0&&colors.length>=rule.colors&&strokes.every(function(stroke){return stroke.width>=rule.width&&(!rule.contrast||stroke.color!==normalized(background));})&&(!rule.increasingWidth||strokes[strokes.length-1].width>strokes[0].width);
       actual=colors.length+" colors across "+strokes.length+" strokes";target=rule.colors+" visible colors, width "+rule.width+"+";
+    }else if(rule.type==="closedOutline"){
+      var x=0,y=0,h=0,twiceArea=0,valid=true,moves=0;
+      calls.forEach(function(c){
+        if(["forward","backward","left","right"].indexOf(c.name)<0){valid=false;return;}
+        if(!Number.isFinite(c.num)){valid=false;return;}
+        if(c.name==="left")h+=c.num;
+        else if(c.name==="right")h-=c.num;
+        else{
+          var distance=c.name==="backward"?-c.num:c.num;
+          var nx=x+distance*Math.cos(h*Math.PI/180),ny=y+distance*Math.sin(h*Math.PI/180);
+          twiceArea+=x*ny-nx*y;x=nx;y=ny;moves++;
+        }
+      });
+      var enclosed=Math.abs(twiceArea)/2;
+      passed=valid&&moves>=3&&Math.hypot(x,y)<=1.5&&enclosed>=(rule.minArea||1);
+      actual=passed?"Closed outline":(Math.hypot(x,y)>1.5?"Still open":enclosed<1?"Retraced line":"No enclosed outline");
+      target="Closed shape with space inside";
     }else if(rule.type==="finalPosition"){
       actual=runtime?"("+prettyNumber(runtime.x)+", "+prettyNumber(runtime.y)+")":"not run";
       target="("+prettyNumber(rule.x)+", "+prettyNumber(rule.y)+")";
