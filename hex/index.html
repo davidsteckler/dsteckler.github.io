@@ -6,7 +6,7 @@
 <meta name="description" content="Pick a color and copy its hex code, including the #, into Python Turtle. Explore ready-made palettes or choose your own shade.">
 <link rel="canonical" href="https://dsteckler.com/hex/">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2"><script defer src="/learn/student-nav.js?v=2"></script>
-<link rel="stylesheet" href="hex.css?v=1"><script defer src="hex.js?v=1"></script>
+<link rel="stylesheet" href="hex.css?v=2"><script defer src="hex.js?v=2"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-V55DVP2SHR');</script>
 </head>
@@ -19,10 +19,23 @@
 <label for="colorPicker">Choose any shade<input type="color" id="colorPicker" value="#008080"></label>
 <label for="hexInput">Hex code<input type="text" id="hexInput" value="#008080" autocomplete="off" spellcheck="false" maxlength="7" aria-describedby="hexHint hexError"></label>
 <p id="hexHint">Use # and six digits: 0–9 or A–F. Short codes such as #abc work too.</p><p id="hexError" role="status" hidden>Enter a color such as #008080.</p>
+<button type="button" id="eyedropper" class="eyedropper">Pick a color from your screen</button>
+<p id="eyedropperHint">Use the color picker above to choose a shade.</p>
+<p id="rgbReadout"></p>
 <button type="button" id="copyHex" class="primary">Copy #008080</button>
 <p id="copyStatus" role="status" aria-live="polite">The # is included when you copy.</p>
 <div class="turtle-command"><code id="turtleCode">color("#008080")</code><button type="button" id="copyCommand">Copy command</button></div>
 </div>
+</section>
+<section class="pixel-lab" aria-labelledby="pixelHeading">
+<div class="section-heading"><h2 id="pixelHeading">Why does a solid-colored word have so many colors?</h2><p>The eyedropper reads one displayed pixel. A letter’s edge can have a different color from its center.</p></div>
+<div class="pixel-explanation"><p><strong>Letters cut across a square grid.</strong> When an edge covers part of a pixel, the computer blends the letter’s color with the background. This smoothing is called <strong>antialiasing</strong>.</p><p><strong>Some screens use another trick.</strong> Many LCD pixels contain red, green, and blue parts. Text rendering such as Windows ClearType can control those parts separately. Zooming in can reveal colored fringes, even around black letters.</p><p>The colors you see depend on the browser, operating system, display, and scaling. The magnifier shows the rendered pixels; it doesn’t show the screen’s physical parts.</p></div>
+<div class="pixel-controls"><fieldset><legend>Compare the edges</legend><button type="button" data-pixel-mode="hard" aria-pressed="false">Sharp pixels</button><button type="button" data-pixel-mode="smooth" aria-pressed="true">Smooth edges</button><button type="button" data-pixel-mode="subpixel" aria-pressed="false">RGB smoothing</button></fieldset><label for="pixelZoom">Zoom <input id="pixelZoom" type="range" min="3" max="14" value="8"><output id="pixelZoomValue">8×</output></label></div>
+<p class="pixel-note" id="pixelModeNote">Smooth edges blend your selected color with white. Look for lighter shades around the letters.</p>
+<div class="pixel-comparison"><div><span class="pixel-label">Original size</span><canvas id="pixelOriginal" width="88" height="32" aria-label="Turtle word at original pixel size"></canvas></div><div class="pixel-large"><span class="pixel-label">Magnified · click or tap a pixel</span><div class="pixel-scroll"><canvas id="pixelMagnified" width="88" height="32" tabindex="0" aria-label="Magnified word. Click to inspect a pixel; use arrow keys to move and Enter to select."></canvas></div></div></div>
+<div class="pixel-inspector"><span id="pixelSwatch" aria-hidden="true"></span><code id="pixelReadout">Choose a pixel to inspect its hex code.</code><button id="usePixel" type="button" disabled>Use this color</button></div>
+<p class="pixel-note">This is a simplified model of text smoothing. It lets you compare the same letter shapes; your browser may render real text differently.</p>
+<details><summary>Try it with the eyedropper</summary><p>Sample the center of a letter in the page heading, then its edge, then the background. Compare the three hex codes. To copy a solid shape’s original color, sample well inside it.</p><p><a href="https://learn.microsoft.com/en-us/typography/cleartype/">Microsoft: how ClearType works</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/EyeDropper_API">About the browser eyedropper</a></p></details>
 </section>
 <section class="palettes" aria-labelledby="paletteHeading"><div class="section-heading"><h2 id="paletteHeading">Start with a palette</h2><p>Click a color to select it, then copy.</p></div><div id="paletteList"></div></section>
 <footer><p>A hex code tells Turtle how much red, green, and blue to use. Keep the # and put the whole code inside quotes: <code>color("#ff6b6b")</code>.</p><nav aria-label="Color tools"><a href="/turtle/">Turtle editor</a><a href="/turtlereference/#bgcolor">Background colors</a><a href="/learn/">Student home</a></nav></footer>
