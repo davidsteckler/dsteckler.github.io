@@ -914,7 +914,7 @@
     var pct=Math.round(passed/Math.max(1,total)*100);
     box.hidden=false;
     var visibleStatus=document.getElementById("visibleCheckStatus");visibleStatus.hidden=false;visibleStatus.textContent=result.ok?"✓ You did it! All requirements passed.":passed+" of "+total+" requirements met. See the result above.";visibleStatus.style.color=result.ok?"var(--teal)":"#8a452c";
-    requestAnimationFrame(function(){box.scrollIntoView({behavior:"smooth",block:"nearest"});});
+    requestAnimationFrame(function(){if(!box.hidden)box.scrollIntoView({behavior:"smooth",block:"nearest"});});
     box.className="check-feedback "+(result.ok?"good":"bad");
     var title=result.ok?(result.checkpoint?"Assignment passed":"Challenge passed"):passed+" of "+total+" requirements met";
     var sub=result.ok?(result.checkpoint?"Test a second solution, or return to your project with Next.":"Everything required is working."):"Fix the unchecked items, then check again.";
@@ -1339,6 +1339,12 @@
     else{var doc=frame.contentDocument,banner=doc.getElementById("courseTargetSuccess"),marker=doc.getElementById("courseTarget");if(banner)banner.remove();if(marker)marker.style.borderColor="";}
   });
   function renderStep(){
+    clearCheckFeedback();
+    pendingCheck=null;
+    document.getElementById("checkCheckpoint").disabled=false;
+    document.getElementById("checkCheckpoint").textContent="Check assignment";
+    document.getElementById("nextBtn").disabled=false;
+    document.getElementById("stepContent").scrollTop=0;
     var step=current.steps[stepIndex];
     loadEditor();
     document.getElementById("experimentNote").hidden=!step.lab;
