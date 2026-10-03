@@ -854,7 +854,8 @@ window.PYTHON_COURSE = {
                 }
               ]
             }
-          ]
+          ],
+          "draftVersion": "closure-v2"
         },
         {
           "id": "1-3-create-route",
