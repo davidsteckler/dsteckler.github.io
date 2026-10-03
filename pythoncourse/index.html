@@ -664,7 +664,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=typed-flow-2"></script>
+<script src="/pythoncourse/course-data.js?v=notes-clarity-3"></script>
 <script>
 (function(){
   "use strict";
@@ -1269,10 +1269,9 @@
       document.getElementById("replayPrediction").addEventListener("click",function(){playPredictionExample(step);});
     }else if(step.response){
       var r=step.response,saved=readResponses()[r.id];
-      panel.innerHTML='<label class="evidence-label" for="evidenceResponse">Your evidence</label><textarea id="evidenceResponse" rows="5" maxlength="6000" placeholder="'+esc(r.placeholder)+'"></textarea><p id="responseStatus" role="status">Saved on this device as you type.</p><button class="btn" id="downloadResponse" type="button">Download lesson notes</button>';
+      panel.innerHTML='<label class="evidence-label" for="evidenceResponse">Lesson notes</label><textarea id="evidenceResponse" rows="5" maxlength="6000" placeholder="'+esc(r.placeholder)+'"></textarea><p id="responseStatus" role="status">Saved on this device as you type.</p>';
       var field=document.getElementById("evidenceResponse");field.value=typeof saved==="string"?saved:"";
-      field.addEventListener("input",function(){document.getElementById("responseStatus").textContent=saveResponse(r.id,field.value)?"Saved on this device.":"Could not save. Download your notes to keep them.";});
-      document.getElementById("downloadResponse").addEventListener("click",function(){var answers=readResponses();var text=current.title+"\n\n"+current.steps.filter(function(s){return s.question||s.response;}).map(function(s){if(s.response)return s.response.prompt+"\n"+(answers[s.response.id]||"");var a=answers[s.question.id];return s.question.prompt+"\n"+(a?s.question.choices[a.choice]||"Unanswered":"Unanswered");}).join("\n\n");var url=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));var link=document.createElement("a");link.href=url;link.download=current.id+"-notes.txt";link.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);});
+      field.addEventListener("input",function(){document.getElementById("responseStatus").textContent=saveResponse(r.id,field.value)?"Saved on this device.":"Could not save your notes. Keep this tab open and try typing again.";});
     }
   }
   document.getElementById("checkCheckpoint").addEventListener("click",function(){requestCodeCheck(true);});
