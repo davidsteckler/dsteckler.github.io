@@ -1292,7 +1292,7 @@
     }
   }
   document.getElementById("checkCheckpoint").addEventListener("click",function(){requestCodeCheck(true);});
-  var guidedEditor=null,guidedLines=[],guidedWidget=null,highlightTimer=null;
+  var guidedEditor=null,guidedLines=[],highlightTimer=null;
   function scheduleLessonHighlight(){
     clearTimeout(highlightTimer);
     highlightTimer=setTimeout(highlightLessonLines,0);
@@ -1302,18 +1302,22 @@
     try{
       var cmNode=frame.contentDocument.querySelector(".CodeMirror"),cm=cmNode&&cmNode.CodeMirror;
       if(!cm){highlightTimer=setTimeout(highlightLessonLines,150);return;}
-      if(guidedEditor){guidedLines.forEach(function(handle){guidedEditor.removeLineClass(handle,"background","course-command-target");});if(guidedWidget)guidedWidget.clear();}
+      if(guidedEditor){guidedLines.forEach(function(handle){guidedEditor.removeLineClass(handle,"background","course-command-target");});}
       if(guidedEditor!==cm){
         if(guidedEditor)guidedEditor.off("change",scheduleLessonHighlight);
         cm.on("change",scheduleLessonHighlight);
       }
-      guidedEditor=cm;guidedLines=[];guidedWidget=null;
+      guidedEditor=cm;guidedLines=[];
       var doc=frame.contentDocument;
-      if(!doc.getElementById("courseGuidanceStyle")){var style=doc.createElement("style");style.id="courseGuidanceStyle";style.textContent=".course-command-target{background:rgba(255,211,93,.18)!important;box-shadow:inset 4px 0 #ffd35d}.course-line-guide{padding:8px 12px;background:#fff1bf;color:#393323;font:14px/1.4 sans-serif;}";doc.head.appendChild(style);}
+      if(!doc.getElementById("courseGuidanceStyle")){var style=doc.createElement("style");style.id="courseGuidanceStyle";style.textContent=".course-command-target{background:rgba(255,211,93,.18)!important;box-shadow:inset 4px 0 #ffd35d}.code-panel.course-has-guide{grid-template-rows:47px auto minmax(0,1fr)}.course-line-guide{padding:8px 12px;background:#fff1bf;color:#393323;font:14px/1.4 sans-serif;}.course-line-guide[hidden]{display:none}";doc.head.appendChild(style);}
       syncTargetMarker();
       var step=current.steps[stepIndex],lines=step.focusLines||[];
       lines.forEach(function(n){if(n<=cm.lineCount()){guidedLines.push(cm.addLineClass(n-1,"background","course-command-target"));}});
-      if(lines.length){var note=doc.createElement("div");note.className="course-line-guide";note.textContent="Work on line"+(lines.length>1?"s ":" ")+lines.join(", ")+". "+(Math.max.apply(null,lines)>cm.lineCount()?"Add the missing lines below your code.":"Highlighted in yellow.");guidedWidget=cm.addLineWidget(Math.min(lines[0]-1,cm.lineCount()-1),note,{above:true});}
+      var panel=cmNode.closest(".code-panel"),note=doc.getElementById("courseLineGuide");
+      if(!note){note=doc.createElement("div");note.id="courseLineGuide";note.className="course-line-guide";panel.insertBefore(note,cmNode);}
+      note.hidden=!lines.length;panel.classList.toggle("course-has-guide",!!lines.length);
+      note.textContent=lines.length?"Work on line"+(lines.length>1?"s ":" ")+lines.join(", ")+". "+(Math.max.apply(null,lines)>cm.lineCount()?"Add the missing lines below your code.":"Highlighted in yellow."):"";
+      cm.refresh();
     }catch(e){}
   }
   function syncTargetMarker(){
@@ -1322,14 +1326,17 @@
       var doc=frame.contentDocument,world=doc.getElementById("worldWrap");
       if(!world)return;
       var marker=doc.getElementById("courseTarget"),banner=doc.getElementById("courseTargetSuccess");
-      if(!rule){if(marker)marker.remove();if(banner)banner.remove();return;}
+      var label=doc.getElementById("courseTargetLabel");
+      if(!rule){if(marker)marker.remove();if(banner)banner.remove();if(label)label.remove();return;}
       if(!doc.getElementById("courseTargetStyle")){
         var style=doc.createElement("style");style.id="courseTargetStyle";
-        style.textContent=".course-target{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%);border:3px solid #d34c24;border-radius:50%;background:#fff5dc;box-shadow:0 0 0 5px #d34c242b;z-index:6;pointer-events:none}.course-target:after{content:'';position:absolute;width:6px;height:6px;background:#d34c24;border-radius:50%;left:5px;top:5px}.course-target-label{position:absolute;bottom:29px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff5dc;color:#71361b;border-radius:5px;padding:4px 7px;font:700 12px sans-serif}.course-target-success{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:9;background:#176b57;color:white;padding:12px 16px;border-radius:10px;font:800 16px sans-serif;box-shadow:0 5px 20px #0002;white-space:nowrap}.course-confetti{position:absolute;left:50%;top:45%;width:8px;height:13px;z-index:8;pointer-events:none;animation:course-target-pop 1.2s ease-out forwards}@keyframes course-target-pop{to{transform:translate(var(--dx),var(--dy)) rotate(var(--spin));opacity:0}}@media(prefers-reduced-motion:reduce){.course-confetti{display:none}}";doc.head.appendChild(style);
+        style.textContent=".course-target{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%);border:3px solid #d34c24;border-radius:50%;background:transparent;box-shadow:0 0 0 5px #d34c242b;z-index:6;pointer-events:none}.course-target:after{content:'';position:absolute;width:6px;height:6px;background:#d34c24;border-radius:50%;left:5px;top:5px}.course-target-label{display:block;color:#71361b;font:700 12px/1.5 sans-serif}.course-target-success{display:block;color:#176b57;font:800 14px/1.5 sans-serif}.world-info:has(.course-target-label){flex-wrap:wrap}.course-target-label,.course-target-success{flex-basis:100%}.course-confetti{position:absolute;left:50%;top:45%;width:8px;height:13px;z-index:8;pointer-events:none;animation:course-target-pop 1.2s ease-out forwards}@keyframes course-target-pop{to{transform:translate(var(--dx),var(--dy)) rotate(var(--spin));opacity:0}}@media(prefers-reduced-motion:reduce){.course-confetti{display:none}}";doc.head.appendChild(style);
       }
       var key=loadedEditorKey+":"+rule.x+":"+rule.y;
       if(marker&&marker.dataset.targetKey!==key){marker.remove();marker=null;if(banner)banner.remove();}
-      if(!marker){marker=doc.createElement("div");marker.id="courseTarget";marker.className="course-target";marker.dataset.targetKey=key;marker.style.left=((200+rule.x)/4)+"%";marker.style.top=((200-rule.y)/4)+"%";marker.setAttribute("role","img");marker.setAttribute("aria-label","Target at "+rule.x+", "+rule.y);var label=doc.createElement("span");label.className="course-target-label";label.textContent="Target ("+rule.x+", "+rule.y+")";marker.appendChild(label);world.appendChild(marker);}
+      if(!marker){marker=doc.createElement("div");marker.id="courseTarget";marker.className="course-target";marker.dataset.targetKey=key;marker.style.left=((200+rule.x)/4)+"%";marker.style.top=((200-rule.y)/4)+"%";marker.setAttribute("role","img");marker.setAttribute("aria-label","Target at "+rule.x+", "+rule.y);world.appendChild(marker);}
+      if(!label){label=doc.createElement("span");label.id="courseTargetLabel";label.className="course-target-label";doc.querySelector(".world-info").appendChild(label);}
+      label.textContent="Target ("+rule.x+", "+rule.y+")";
     }catch(e){}
   }
   function celebrateTarget(passed){
@@ -1338,7 +1345,7 @@
       if(!world||!marker)return;
       var banner=doc.getElementById("courseTargetSuccess");
       if(banner)banner.remove();
-      banner=doc.createElement("div");banner.id="courseTargetSuccess";banner.className="course-target-success";banner.setAttribute("role","status");banner.textContent=passed?"You did it! Assignment complete ✓":"Target reached!";world.appendChild(banner);
+      banner=doc.createElement("div");banner.id="courseTargetSuccess";banner.className="course-target-success";banner.setAttribute("role","status");banner.textContent=passed?"You did it! Assignment complete ✓":"Target reached!";doc.querySelector(".world-info").appendChild(banner);
       marker.style.borderColor="#176b57";
       for(var i=0;i<24;i++){var piece=doc.createElement("span");piece.className="course-confetti";piece.style.background=["#ffd35d","#ec6945","#31bca0","#7397fa"][i%4];piece.style.setProperty("--dx",Math.round(Math.cos(i*2.4)*(70+i*4))+"px");piece.style.setProperty("--dy",Math.round(Math.sin(i*2.4)*100+100)+"px");piece.style.setProperty("--spin",(i*71)+"deg");world.appendChild(piece);setTimeout((function(el){return function(){el.remove();};})(piece),1300);}
     }catch(e){}
