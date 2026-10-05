@@ -37,7 +37,7 @@ try {
   for(const target of targets){const response=await context.request.get(origin+target);assert(response.ok(),target+' should exist');}
   await page.goto(origin+'/learn/python/?lesson=1-1-make-path&teacher=1');
   await page.waitForURL('**/pythoncourse/?lesson=1-1-make-path&teacher=1');
-  assert.equal(await page.locator('.activity-tab').count(),15);
+  assert.equal(await page.locator('.activity-tab').count(),21);
   let editor=page.frames().find(f=>f.url().includes('embed=course'));
   await editor.waitForSelector('.CodeMirror');
   assert.equal(await editor.locator('#studentNav').count(),0,'Embedded editors must not add navigation');
@@ -57,10 +57,10 @@ try {
   await page.locator('#courseMapButton').click();assert(await page.locator('.sidebar').isVisible());await page.keyboard.press('Escape');assert(!(await page.locator('.sidebar').isVisible()));
   const width=Number(await page.locator('#courseResizeDivider').getAttribute('aria-valuenow'));await page.locator('#courseResizeDivider').focus();await page.keyboard.press('ArrowRight');assert.equal(Number(await page.locator('#courseResizeDivider').getAttribute('aria-valuenow')),width+15);
   await page.screenshot({path:path.join(proof,'python-course-desktop.png')});
-  await page.locator('.activity-tab[data-lesson="1-15-create-ascii"]').click();assert(await page.locator('#nextActivity').isDisabled());await page.reload();assert.equal(await page.locator('#lessonTitle').innerText(),'ASCII Dashboard');
+  await page.locator('.activity-tab[data-lesson="1-15-create-ascii"]').click();assert(await page.locator('#nextActivity').isEnabled());await page.locator('#nextActivity').click();assert.equal(await page.locator('#lessonTitle').innerText(),'Make a Loop');await page.locator('.activity-tab[data-lesson="2-6-create-pattern"]').click();assert(await page.locator('#nextActivity').isDisabled());await page.locator('.activity-tab[data-lesson="1-15-create-ascii"]').click();await page.reload();assert.equal(await page.locator('#lessonTitle').innerText(),'ASCII Dashboard');
   await page.goto(origin+'/learn/');assert((await page.locator('#continueLink').getAttribute('href')).includes('1-15-create-ascii'));
   await page.evaluate(()=>localStorage.setItem('dsteckler-pythoncourse-progress-v3-unit1',JSON.stringify({'1-1-make-path':true,'not-a-lesson':true})));
-  await page.reload();assert.equal(await page.locator('#pythonProgress').innerText(),'1 / 15 complete');
+  await page.reload();assert.equal(await page.locator('#pythonProgress').innerText(),'1 / 21 complete');
   console.log('PASS home, search, aliases, four habits, notebook isolation/download, code drafts, course history/resume, progress and resizing');
 
   for(const [route,name] of [['/learn/reference/#color/hex','reference'],['/learn/trace/','trace'],['/turtleprojects/first-square/','tutorial'],['/learn/binary/','binary'],['/learn/think/','thinking'],['/learn/blackbox/','blackbox'],['/learn/create/','create'],['/learn/projects/','projects']]) {

@@ -23,7 +23,7 @@ jobs:
           node-version: '22'
       - name: Install browser
         run: |
-          npm install --no-save playwright
+          npm install --no-save playwright codemirror@5 skulpt
           npx playwright install --with-deps chromium
       - name: Check home, course, saved work, notes, and mobile layouts
         env:
@@ -33,6 +33,8 @@ jobs:
         env:
           UNIT_DEPTH_PROOF: learning-navigation-proof/unit-1
         run: node pythoncourse/test-unit-depth.mjs
+      - name: Check Unit 2 loops and output
+        run: node pythoncourse/test-unit-two.mjs
       - name: Check code autosave and recovery
         run: node pythoncourse/test-code-history.mjs
       - name: Save desktop and mobile screenshots
