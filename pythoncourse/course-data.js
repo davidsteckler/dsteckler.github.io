@@ -1349,6 +1349,12 @@ window.PYTHON_COURSE = {
                 "label": "Keep the drawing inside the grid",
                 "limit": 190,
                 "fail": "A line or circle extends beyond the grid. Reduce a distance or radius, or change the route."
+              },
+              {
+                "type": "visibleCorners",
+                "count": 2,
+                "label": "2+ visible corners",
+                "fail": "Place a turn before a later movement so it changes the drawn route. A turn after the final drawing does not add a corner."
               }
             ]
           },
@@ -1732,7 +1738,8 @@ window.PYTHON_COURSE = {
                 "At least 5 visible movements.",
                 "Use both left() and right().",
                 "Use at least 2 different movement distances.",
-                "Keep the drawing inside the grid."
+                "Keep the drawing inside the grid.",
+                "Make at least 2 visible corners in the route."
               ],
               "tip": "Start with three segments, then add the next corner. Check the direction before every move.",
               "visuals": [
@@ -1923,6 +1930,12 @@ window.PYTHON_COURSE = {
                 "label": "Keep the drawing inside the grid",
                 "limit": 190,
                 "fail": "A line or circle extends beyond the grid. Reduce a distance or radius, or change the route."
+              },
+              {
+                "type": "trailBend",
+                "count": 1,
+                "label": "A visible bend between circle starting points",
+                "fail": "Place a turn before a later movement so it changes the drawn route. A turn after the final drawing does not add a corner."
               }
             ]
           },
@@ -2424,7 +2437,8 @@ window.PYTHON_COURSE = {
                 "At least 4 circles, each radius larger than the last.",
                 "Move between every pair of circles.",
                 "Use at least 1 turn to bend the trail.",
-                "Keep every circle and line inside the grid."
+                "Keep every circle and line inside the grid.",
+                "The circle trail must visibly bend."
               ],
               "tip": "Plan small radii first. A radius of 25 makes a circle 50 units across.",
               "visuals": [
@@ -2737,6 +2751,12 @@ window.PYTHON_COURSE = {
                 "label": "Keep the drawing inside the grid",
                 "limit": 190,
                 "fail": "A line or circle extends beyond the grid. Reduce a distance or radius, or change the route."
+              },
+              {
+                "type": "trailBend",
+                "count": 1,
+                "label": "A visible bend between circle starting points",
+                "fail": "Place a turn before a later movement so it changes the drawn route. A turn after the final drawing does not add a corner."
               }
             ]
           },
@@ -3012,7 +3032,8 @@ window.PYTHON_COURSE = {
                 "Exactly 5 circles using 2 different radii.",
                 "Alternate A–B–A–B–A.",
                 "Move between every circle and use at least 1 turn.",
-                "Keep the drawing inside the grid."
+                "Keep the drawing inside the grid.",
+                "The circle trail must visibly bend."
               ],
               "tip": "Reuse the two radius values consistently. Decide the sizes separately from the route.",
               "visuals": [
@@ -4692,6 +4713,12 @@ window.PYTHON_COURSE = {
                 "label": "Keep the drawing inside the grid",
                 "limit": 190,
                 "fail": "A line or circle extends beyond the grid. Reduce a distance or radius, or change the route."
+              },
+              {
+                "type": "visibleCorners",
+                "count": 2,
+                "label": "2+ visible corners",
+                "fail": "Place a turn before a later movement so it changes the drawn route. A turn after the final drawing does not add a corner."
               }
             ]
           },
@@ -5051,7 +5078,8 @@ window.PYTHON_COURSE = {
               "requirements": [
                 "Exactly 5 Turtle commands.",
                 "3 nonzero movements and 2 nonzero turns, alternating.",
-                "Keep the route inside the grid."
+                "Keep the route inside the grid.",
+                "Make at least 2 visible corners in the route."
               ],
               "tip": "A turn on the final line changes the turtle’s direction but adds no new segment. Put turns between movements.",
               "visuals": [
@@ -5215,6 +5243,12 @@ window.PYTHON_COURSE = {
                 "label": "Keep the drawing inside the grid",
                 "limit": 190,
                 "fail": "A line or circle extends beyond the grid. Reduce a distance or radius, or change the route."
+              },
+              {
+                "type": "visibleCorners",
+                "count": 2,
+                "label": "2+ visible corners",
+                "fail": "Place a turn before a later movement so it changes the drawn route. A turn after the final drawing does not add a corner."
               }
             ]
           },
@@ -5468,7 +5502,8 @@ window.PYTHON_COURSE = {
               "requirements": [
                 "Exactly 5 Turtle commands in move → turn → move → turn → move order.",
                 "Every movement and turn is nonzero.",
-                "The final version runs and stays inside the grid."
+                "The final version runs and stays inside the grid.",
+                "Make at least 2 visible corners in the route."
               ],
               "tip": "For the debugging test, change one letter in a movement command. The error should name that unknown command.",
               "visuals": [
@@ -6311,6 +6346,12 @@ window.PYTHON_COURSE = {
                 "label": "Keep the drawing inside the grid",
                 "limit": 190,
                 "fail": "A line or circle extends beyond the grid. Reduce a distance or radius, or change the route."
+              },
+              {
+                "type": "visibleCorners",
+                "count": 2,
+                "label": "2+ visible corners",
+                "fail": "Place a turn before a later movement so it changes the drawn route. A turn after the final drawing does not add a corner."
               }
             ]
           },
@@ -6734,7 +6775,8 @@ window.PYTHON_COURSE = {
                 "Black background.",
                 "At least 3 colors used on visible strokes.",
                 "At least 2 widths used on strokes; every stroke width 4 or more.",
-                "At least 4 visible movements and 2 turns; stay inside the grid."
+                "At least 4 visible movements and 2 turns; stay inside the grid.",
+                "Make at least 2 visible corners in the route."
               ],
               "tip": "An unused color() or pensize() does not change the drawing. Put a drawing command after each style you want to use.",
               "visuals": [

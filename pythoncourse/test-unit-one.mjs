@@ -57,6 +57,9 @@ try{
   }
   // The checker must reject executable programs that violate the actual task.
   const badPrograms=[
+    [2,'forward(20)\nforward(25)\nforward(30)\nforward(25)\nforward(20)\nleft(90)\nright(90)',false],
+    [3,'circle(8)\nforward(35)\ncircle(12)\nforward(40)\ncircle(18)\nforward(45)\ncircle(25)\nleft(90)',false],
+    [6,'forward(30)\nleft(360)\nforward(20)\nright(360)\nforward(30)',false],
     [0,'forward(90)\nleft(90)\nforward(30)\nleft(0)',true],
     [1,'forward(110)\nbackward(110)',false],
     [3,'circle(20)\nforward(60)\ncircle(30)',true],

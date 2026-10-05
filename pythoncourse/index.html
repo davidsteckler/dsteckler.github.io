@@ -695,7 +695,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=unit1-v4"></script>
+<script src="/pythoncourse/course-data.js?v=unit1-v4b"></script>
 <script>
 (function(){
   "use strict";
@@ -972,6 +972,16 @@
       actual=drawingTrace(calls).strokes.filter(function(stroke){return stroke.name==="forward"||stroke.name==="backward";}).length;passed=actual>=rule.count;target=rule.count+"+";
     }else if(rule.type==="drawnCircles"){
       actual=drawingTrace(calls).circles.length;passed=actual>=rule.count;target=rule.count+"+ visible";
+    }else if(rule.type==="visibleCorners"||rule.type==="trailBend"){
+      var trace=drawingTrace(calls),corners=0;
+      function bends(ax,ay,bx,by){return Math.abs(ax*by-ay*bx)>1e-6*Math.max(1,Math.hypot(ax,ay)*Math.hypot(bx,by));}
+      if(rule.type==="trailBend"){
+        trace.circles.forEach(function(c,i,all){if(i<2)return;var a=all[i-2],b=all[i-1];if(bends(b.x-a.x,b.y-a.y,c.x-b.x,c.y-b.y))corners++;});
+      }else{
+        var straight=trace.strokes.filter(function(stroke){return stroke.name==="forward"||stroke.name==="backward";});
+        straight.forEach(function(b,i){if(!i)return;var a=straight[i-1];if(Math.hypot(b.x-a.nx,b.y-a.ny)<1e-6&&bends(a.nx-a.x,a.ny-a.y,b.nx-b.x,b.ny-b.y))corners++;});
+      }
+      actual=corners;target=rule.count+"+ visible bends";passed=corners>=rule.count;
     }else if(rule.type==="circleTrail"){
       var trail=drawingTrace(calls).circles;
       passed=trail.length>=rule.min&&trail.every(function(c,i){return !i||Math.hypot(c.x-trail[i-1].x,c.y-trail[i-1].y)>1;});actual=trail.length+" circles";target="Different neighboring starts";
