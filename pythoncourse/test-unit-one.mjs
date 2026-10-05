@@ -145,7 +145,7 @@ try{
       console.log('PASS complete lesson through controls '+lesson.number);
     }
     await page.goto(origin+'/learn/');await page.waitForSelector('#pythonProgress');
-    assert.equal(await page.locator('#pythonProgress').innerText(),'15 / 15 complete');
+    assert.equal(await page.locator('#pythonProgress').innerText(),'15 / 21 complete');
     console.log('PASS student home reports the revised unit completion');
   }
   assert.deepEqual(errors,[],'No browser errors');
