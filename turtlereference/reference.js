@@ -364,7 +364,13 @@
     $('referenceStatus').textContent = saved ? (done ? 'Added to your trail checklist.' : 'Removed from your trail checklist.') : 'Checklist updated for this open page.';
   });
   $('runExample').addEventListener('click', () => { send({kind:'turtle-tutorial-run'}); if (innerWidth < 1000) setMobileView('editor'); });
-  $('resetExample').addEventListener('click', () => { drafts[exampleKey()] = currentExample.code; persist(); applyExample(currentExample.auto !== false); $('referenceStatus').textContent = 'This example has been reset.'; });
+  function resetCurrentExample() {
+    drafts[exampleKey()] = currentExample.code;
+    persist();
+    applyExample(currentExample.auto !== false);
+    $('referenceStatus').textContent = 'Original code restored.';
+  }
+  $('resetExample').addEventListener('click', resetCurrentExample);
   window.addEventListener('message', event => {
     if (event.origin !== location.origin || event.source !== frame.contentWindow || event.data?.project !== 'turtle-reference') return;
     const message = event.data;
@@ -382,6 +388,8 @@
       $('runExample').disabled = false; $('resetExample').disabled = false;
     } else if (message.kind === 'turtle-tutorial-code' && !pending && appliedId === exampleKey()) {
       drafts[exampleKey()] = message.code; persist();
+    } else if (message.kind === 'turtle-tutorial-reset-code') {
+      resetCurrentExample();
     } else if (message.kind === 'turtle-tutorial-save-failed') {
       $('referenceStatus').textContent = 'Edits stay in this open page.';
     }
