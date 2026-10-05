@@ -160,3 +160,11 @@ Line instructions belong in a separate strip above CodeMirror. Only line backgro
 Validate visible effects, not unused command names. Style rules inspect the color and width used by actual strokes. Circle-placement rules inspect their starting points. Text rules compare the actual Python output, including spaces and row order. The first unit uses one literal command per line, with comments allowed; that constraint makes its simple trace reliable. Loops, variables, and functions will need execution-based checks when introduced.
 
 This order supersedes earlier guidance to begin with prefilled code or offer choice during the guided example.
+
+## Unit 2: loops and repetition
+
+`unit-two-data.js` fills the six reserved Unit 2 slots after `course-data.js` loads. It keeps stable lesson IDs and isolated `loops-v1` drafts. Lessons cover block repetition, indentation, ASCII textures, polygon closure, nested rosettes, and an independent pattern project. Each opens empty, has two checked predictions, a saved observation, a required result, and a blank creative draft with exact program-backed previews.
+
+Unit 2 checks set `execution: true`: the course editor reports the commands actually executed by the Turtle runtime, including repeated calls. Unit 1 continues to use its existing literal-source checks. Loop syntax checks accept literal `range()` counts of 2–60 and direct literal commands; later units will extend this language for variables and functions. Drawing checks use executed strokes and final state, while text checks use actual Python output. Required rosettes also check distinct shape orientations; circle flowers check distinct centers.
+
+Run `node pythoncourse/test-unit-two.mjs` with `UNIT_TEST_MODULES` pointing to dependencies containing Skulpt. This command-line check executes assignment solutions, creative preview programs, and predictions with real Python semantics and checks incorrect outputs, indentation errors, unrolled solutions, and JavaScript syntax. It does not replace browser layout QA.
