@@ -1883,7 +1883,9 @@ for i in range(4):
     return info;
   }
 
+  var coursePrintedText="";
   function outf(text){
+    coursePrintedText+=text;
     if(output.querySelector(".muted")) output.textContent = "";
     appendOutput(text);
   }
@@ -2544,7 +2546,8 @@ for i in range(4):
           color:String(state.color),
           fillColor:String(state.fillColor),
           pensize:Number(state.size)||1,
-          background:String(state.background||"")
+          background:String(state.background||""),
+          printed:coursePrintedText
         };
       }
     };
@@ -2713,6 +2716,7 @@ for i in range(4):
     clearErrorHighlight();
     clearWorld();
     setOutput("");
+    coursePrintedText="";
     setStatus("running");
     playback.active=true;
     playback.paused=false;
@@ -2772,6 +2776,7 @@ for i in range(4):
       if(token!==runToken)return {ok:false,error:"Run stopped."};
       renderError(err);
       setStatus("bad");
+      if(COURSE_EMBED)window.parent.postMessage({type:"pythoncourse-run-complete",lesson:COURSE_LESSON,code:userCode,run:{ok:false,error:formatError(err)},runtime:TurtleRuntime.snapshot()},window.location.origin);
       return {ok:false,error:formatError(err)};
     }finally{
       if(token===runToken){
@@ -2837,6 +2842,7 @@ for i in range(4):
       if(data.type!=="pythoncourse-check-request")return;
       var requestId=String(data.requestId||"");
       var code=editor.getValue();
+      if(playback.active){stopCode();await Promise.resolve();}
       var runResult=await runCode(false,{check:true});
       window.parent.postMessage({
         type:"pythoncourse-check-result",

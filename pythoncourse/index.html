@@ -587,8 +587,29 @@
     .prediction label.prediction-correct{border:2px solid #247446;background:#e7f4e9}
     .prediction-result-mark{font-weight:800;color:#174d2c;margin-left:auto}
     #checkPrediction.prediction-passed{background:#247446;color:white;border-color:#247446}
+
+    .step-requirements{margin:14px 0;padding:14px 16px;border:1px solid #cbd5c7;border-radius:10px;background:#f3f7ed;font-size:14px;line-height:1.5}
+    .step-requirements ul{margin:8px 0 0;padding-left:19px}.step-requirements li+li{margin-top:6px}
+    .example-tools{display:flex;gap:10px;align-items:center;margin-top:14px;font-size:12px;color:var(--mid);line-height:1.4}.example-tools .btn{padding:6px 9px;min-height:30px;font-size:12px;flex:none}
+    .prediction-actions{display:flex;gap:8px;flex-wrap:wrap}.prediction-actions .btn{flex:1 1 120px}.prediction-actions .btn:disabled{opacity:.5;cursor:default}
+    .check-repair{display:block;font-size:12px;font-weight:500;line-height:1.5;margin-top:5px;color:#793c24}
+    .challenge-caption{padding:0 10px 10px;font-size:12px;line-height:1.4;color:var(--mid)}
+    .challenge-visual-grid.count-1{grid-template-columns:1fr}.challenge-visual-grid.count-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .challenge-visual-card svg{width:100%;height:auto;min-height:105px}.challenge-ascii-preview{font-size:14px!important;line-height:1.25!important;padding:16px 10px!important;white-space:pre;overflow:auto}
+    .challenge-visuals-head{flex-wrap:wrap}.challenge-visuals-head span{line-height:1.4}
+    #stepVisuals .challenge-visual-card{max-width:360px}.example-tools[hidden],.step-requirements[hidden]{display:none}
+    body #learningInteraction #predictionFeedback{padding:18px 20px;color:#743918}
+    body #learningInteraction #predictionFeedback.correct{color:#174d2c;border-color:#247446;background:#e7f4e9}
+    body #learningInteraction #predictionFeedback p{color:inherit}
+    .check-title{font-size:18px}.check-sub{font-size:13px;line-height:1.4}.check-label{font-size:14px;line-height:1.4}
+    .check-row{grid-template-columns:24px minmax(0,1fr);align-items:start;gap:4px 8px}.check-icon{grid-row:1/3}.check-value{grid-column:2;font-size:12px;text-align:left;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+    .challenge-ascii-preview{aspect-ratio:auto;min-height:95px;font-size:16px!important}
+    .symbol-palette-head{display:block}.symbol-palette-head strong{font-size:14px}.symbol-palette-head span{display:block;font-size:12px;line-height:1.4;margin-top:4px}
+    .symbol-palette-grid.primary-symbols{grid-template-columns:repeat(4,minmax(0,1fr))}.primary-symbols .symbol-button{display:flex;flex-direction:column;padding:6px 3px}.primary-symbols .symbol-name{font-size:10px;text-align:center}
+    .more-symbols{margin-top:9px;font-size:12px}.more-symbols summary{cursor:pointer;font-weight:700}.more-symbols .symbol-palette-grid{margin-top:8px}.symbol-palette-status:empty{display:none}
+    @media(max-width:1100px){.challenge-visual-grid.count-3{grid-template-columns:1fr}.challenge-visual-card{display:block}}
   </style>
-  <link rel="stylesheet" href="/pythoncourse/course-navigation.css?v=3">
+  <link rel="stylesheet" href="/pythoncourse/course-navigation.css?v=unit1-v4">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -637,8 +658,10 @@
         <div id="stepPhase" class="flow-phase"></div><h3 id="stepTitle">See what the code already does.</h3>
         <p id="stepBody"></p>
         <div class="step-action" id="stepTask"></div>
-        <p class="experiment-note" id="experimentNote" hidden>Experiment code · saved separately from your project</p>
-        <pre class="example" id="stepExample" hidden></pre>
+        <p class="experiment-note" id="experimentNote" hidden></p>
+        <section id="stepRequirements" class="step-requirements" hidden aria-label="Assignment requirements"></section>
+        <div id="exampleTools" class="example-tools" hidden><span>Type the commands using these line numbers.</span><button type="button" class="btn" id="showSpaces" aria-pressed="false">Show spaces</button></div><pre class="example" id="stepExample" hidden></pre>
+        <div class="challenge-visuals" id="stepVisuals" hidden></div>
         <div id="learningInteraction" hidden></div>
         <button class="btn checkpoint-button" id="checkCheckpoint" type="button" hidden>Check assignment</button>
         <div class="check-feedback" id="checkFeedback" hidden aria-live="polite" tabindex="-1"></div>
@@ -672,7 +695,7 @@
   </main>
 </div>
 
-<script src="/pythoncourse/course-data.js?v=route-empty-start-5"></script>
+<script src="/pythoncourse/course-data.js?v=unit1-v4"></script>
 <script>
 (function(){
   "use strict";
@@ -681,10 +704,11 @@
   var frame=document.getElementById("editorFrame");
   var editorPane=document.getElementById("editorPane");
   var courseGrid=document.getElementById("courseGrid");
-  var progressKey="dsteckler-pythoncourse-progress-v2";
-  var stepKeyPrefix="dsteckler-pythoncourse-step-v2-";
+  var progressKey="dsteckler-pythoncourse-progress-v3-unit1";
+  var stepKeyPrefix="dsteckler-pythoncourse-step-unit1-v4-";
   var progress={};
   try{ progress=JSON.parse(localStorage.getItem(progressKey)||"{}")||{}; }catch(e){ progress={}; }
+  try{if(localStorage.getItem(progressKey)===null)localStorage.setItem(progressKey,"{}");}catch(e){}
   var checkRequestSeq=0;
   var pendingCheck=null;
   var loadedEditorKey="";
@@ -730,19 +754,71 @@
   ];
 
   function codeCalls(code){
-    var calls=[];
-    String(code||"").split(/\n/).forEach(function(line){
-      if(/^\s*#/.test(line))return;
-      var re=/\b([A-Za-z_]\w*)\s*\(([^()]*)\)/g,m;
-      while((m=re.exec(line))){
-        var raw=(m[2]||"").trim();
-        var num=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)?Number(raw):null;
-        var sm=raw.match(/^["']([^"']*)["']$/);
-        calls.push({name:m[1],raw:raw,num:num,str:sm?sm[1]:null});
+    var calls=[];calls.invalid=[];
+    function literal(raw){
+      if(!/^["']/.test(raw))return null;
+      var quote=raw[0];if(raw[raw.length-1]!==quote)return null;
+      var out="";
+      for(var i=1;i<raw.length-1;i++){
+        var ch=raw[i];
+        if(ch===quote)return null;
+        if(ch==="\\"){
+          var next=raw[++i];if(next===undefined)return null;
+          out+=next==="n"?"\n":next==="t"?"\t":next==="r"?"\r":next==="\\"||next===quote?next:"\\"+next;
+        }else out+=ch;
       }
+      return out;
+    }
+    String(code||"").split(/\n/).forEach(function(line,index){
+      var clean="",quote="",escaped=false;
+      for(var i=0;i<line.length;i++){
+        var ch=line[i];
+        if(!quote&&ch==="#")break;
+        clean+=ch;
+        if(escaped){escaped=false;continue;}
+        if(quote&&ch==="\\"){escaped=true;continue;}
+        if(quote){if(ch===quote)quote="";}else if(ch==='"'||ch==="'")quote=ch;
+      }
+      clean=clean.trim();if(!clean)return;
+      var m=clean.match(/^([A-Za-z_]\w*)\s*\(([\s\S]*)\)$/);
+      if(!m||quote){calls.invalid.push(index+1);return;}
+      var raw=m[2].trim(),num=/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)?Number(raw):null,str=literal(raw);
+      if(raw!==""&&num===null&&str===null){calls.invalid.push(index+1);return;}
+      calls.push({name:m[1],raw:raw,num:num,str:str,line:index+1});
     });
     return calls;
   }
+
+  function drawingTrace(calls){
+    var x=0,y=0,h=0,pen=true,color="black",background="white",width=1,strokes=[],travel=0,parts=0,newPart=true,maxCoordinate=0,points=[[0,0]],circles=[];
+    calls.forEach(function(c){
+      if(c.name==="bgcolor"&&c.str!==null)background=c.str;
+      if(c.name==="color"&&c.str!==null)color=c.str;
+      if(c.name==="pensize"&&c.num!==null)width=c.num;
+      if(c.name==="left")h+=c.num;
+      if(c.name==="right")h-=c.num;
+      if(c.name==="penup")pen=false;
+      if(c.name==="pendown")pen=true;
+      if(c.name==="forward"||c.name==="backward"){
+        var d=c.name==="backward"?-c.num:c.num,nx=x+d*Math.cos(h*Math.PI/180),ny=y+d*Math.sin(h*Math.PI/180);
+        if(!pen&&Math.abs(d)>0){travel+=Math.abs(d);newPart=true;}
+        if(pen&&Math.abs(d)>0){if(newPart){parts++;newPart=false;}strokes.push({name:c.name,color:color,width:width,x:x,y:y,nx:nx,ny:ny});points.push([nx,ny]);maxCoordinate=Math.max(maxCoordinate,Math.abs(x),Math.abs(y),Math.abs(nx),Math.abs(ny));}
+        x=nx;y=ny;
+      }
+      if(c.name==="circle"&&pen&&c.num!==0){
+        var r=Math.abs(c.num),cx=x-c.num*Math.sin(h*Math.PI/180),cy=y+c.num*Math.cos(h*Math.PI/180);
+        if(newPart){parts++;newPart=false;}strokes.push({name:'circle',color:color,width:width,x:x,y:y,cx:cx,cy:cy,r:r});circles.push({x:x,y:y,r:c.num});
+        maxCoordinate=Math.max(maxCoordinate,Math.abs(cx)+r,Math.abs(cy)+r);
+      }
+    });
+    return {x:x,y:y,heading:h,strokes:strokes,background:background,travel:travel,parts:parts,maxCoordinate:maxCoordinate,points:points,circles:circles,penDown:pen};
+  }
+  function colorValue(value){var ctx=document.createElement("canvas").getContext("2d");ctx.fillStyle="#010203";ctx.fillStyle=value;return ctx.fillStyle.toLowerCase();}
+  function contrastRatio(a,b){
+    function luminance(v){v=colorValue(v);var m=v.match(/^#([0-9a-f]{6})$/);if(!m)return 1;var n=parseInt(m[1],16),rgb=[(n>>16)&255,(n>>8)&255,n&255].map(function(c){c/=255;return c<=.04045?c/12.92:Math.pow((c+.055)/1.055,2.4);});return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];}
+    var x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+  }
+  function printedRows(runtime){var text=String(runtime&&runtime.printed||"");return text?text.replace(/\n$/,"").split("\n"):[];}
 
   function callsNamed(calls,names){
     return calls.filter(function(c){return names.indexOf(c.name)>=0;});
@@ -776,7 +852,7 @@
     var numbers=[],i,up=true,down=true,actual=0,target="",passed=false;
     var label=rule.label||rule.fail||"Requirement";
     if(rule.type==="minCalls"){
-      actual=callsNamed(calls,rule.commands).length;
+      actual=callsNamed(calls,rule.commands).filter(function(c){return c.num!==0;}).length;
       target=rule.count+"+";
       passed=actual>=rule.count;
     }else if(rule.type==="exactCalls"){
@@ -789,7 +865,7 @@
       target=rule.commands.join(" + ");
       passed=present.length===rule.commands.length;
     }else if(rule.type==="minDistinctNumbers"){
-      actual=uniqueNumbers(callsNamed(calls,rule.commands)).length;
+      actual=uniqueNumbers(callsNamed(calls,rule.commands).map(function(c){return {num:c.num===null?null:Math.abs(c.num)};})).length;
       target=rule.count+"+ different";
       passed=actual>=rule.count;
     }else if(rule.type==="minDistinctStrings"){
@@ -803,6 +879,7 @@
       passed=numbers.length>=rule.min && numbers.every(function(n){return Math.abs(n-numbers[0])<1e-9;});
     }else if(rule.type==="monotonicNumbers"){
       numbers=callsNamed(calls,rule.commands).map(function(c){return c.num;}).filter(function(n){return n!==null;});
+      if(rule.commands.length===1&&rule.commands[0]==="circle")numbers=numbers.map(Math.abs);
       for(i=1;i<numbers.length;i++){
         if(!(numbers[i]>numbers[i-1]))up=false;
         if(!(numbers[i]<numbers[i-1]))down=false;
@@ -856,26 +933,21 @@
       var actualValues=callsNamed(calls,rule.commands).map(function(c){return c.num;});
       passed=(rule.prefix?actualValues.length>=rule.values.length:actualValues.length===rule.values.length)&&rule.values.every(function(n,i){return actualValues[i]===n;});
       actual=actualValues.join(" · ");target=rule.values.join(" · ");
-    }else if(rule.type==="drawingStyle"){
-      var pen="black",background="white",width=1,penDown=true,strokes=[];
-      var ctx=document.createElement("canvas").getContext("2d");
-      function normalized(color){ctx.fillStyle="#010203";ctx.fillStyle=color;return ctx.fillStyle;}
-      calls.forEach(function(c){
-        if(c.name==="color"&&c.str!==null)pen=c.str;
-        if(c.name==="bgcolor"&&c.str!==null)background=c.str;
-        if(c.name==="pensize"&&c.num!==null)width=c.num;
-        if(c.name==="clear"||c.name==="reset")strokes=[];
-        if(c.name==="reset"){pen="black";width=1;penDown=true;}
-        if(c.name==="penup")penDown=false;
-        if(c.name==="pendown")penDown=true;
-        if(penDown&&["forward","backward","circle"].indexOf(c.name)>=0&&c.num!==0)strokes.push({color:normalized(pen),bg:normalized(background),width:width});
-      });
-      var colors=strokes.map(function(stroke){return stroke.color;}).filter(function(color,i,all){return all.indexOf(color)===i;});
-      passed=strokes.length>0&&colors.length>=rule.colors&&strokes.every(function(stroke){return stroke.width>=rule.width&&(!rule.contrast||stroke.color!==normalized(background));})&&(!rule.increasingWidth||strokes[strokes.length-1].width>strokes[0].width);
-      actual=colors.length+" colors across "+strokes.length+" strokes";target=rule.colors+" visible colors, width "+rule.width+"+";
+    }else if(rule.type==="drawingStyle"||rule.type==="strokeStyles"){
+      var trace=drawingTrace(calls),strokes=trace.strokes;
+      var colors=strokes.map(function(stroke){return colorValue(stroke.color);}).filter(function(color,i,all){return all.indexOf(color)===i;});
+      var widths=strokes.map(function(stroke){return stroke.width;}).filter(function(n,i,all){return all.indexOf(n)===i;});
+      if(rule.type==="strokeStyles"){
+        passed=strokes.length===rule.strokes.length&&strokes.every(function(stroke,i){return colorValue(stroke.color)===colorValue(rule.strokes[i].color)&&stroke.width===rule.strokes[i].width;});
+        actual=strokes.map(function(stroke){return stroke.color+" "+stroke.width;}).join(" → ");target=rule.strokes.map(function(stroke){return stroke.color+" "+stroke.width;}).join(" → ");
+      }else{
+        passed=strokes.length>0&&colors.length>=rule.colors&&widths.length>=(rule.distinctWidths||1)&&strokes.every(function(stroke){return stroke.width>=rule.width&&(!rule.contrast||contrastRatio(stroke.color,trace.background)>=3);})&&(!rule.increasingWidth||strokes[strokes.length-1].width>strokes[0].width);
+        actual=colors.length+" colors; "+widths.length+" widths on "+strokes.length+" strokes";target=rule.colors+"+ colors; widths "+rule.width+"+";
+      }
     }else if(rule.type==="closedOutline"){
       var x=0,y=0,h=0,twiceArea=0,valid=true,moves=0;
       calls.forEach(function(c){
+        if(["color","bgcolor","pensize"].indexOf(c.name)>=0)return;
         if(["forward","backward","left","right"].indexOf(c.name)<0){valid=false;return;}
         if(!Number.isFinite(c.num)){valid=false;return;}
         if(c.name==="left")h+=c.num;
@@ -890,6 +962,42 @@
       passed=valid&&moves>=3&&Math.hypot(x,y)<=1.5&&enclosed>=(rule.minArea||1);
       actual=passed?"Closed outline":(Math.hypot(x,y)>1.5?"Still open":enclosed<1?"Retraced line":"No enclosed outline");
       target="Closed shape with space inside";
+    }else if(rule.type==="allowedCommands"){
+      var invalid=calls.invalid||[],unknown=calls.filter(function(c){return rule.commands.indexOf(c.name)<0;});
+      passed=calls.length>0&&!invalid.length&&!unknown.length;
+      actual=invalid.length?"Check line "+invalid[0]:unknown.length?"Unexpected "+unknown[0].name:"One command per line";target=rule.commands.join(", ");
+    }else if(rule.type==="drawingBounds"){
+      var edge=drawingTrace(calls).maxCoordinate;passed=edge<=rule.limit;actual=prettyNumber(edge)+" units from center";target="Within ±"+rule.limit;
+    }else if(rule.type==="drawnMoves"){
+      actual=drawingTrace(calls).strokes.filter(function(stroke){return stroke.name==="forward"||stroke.name==="backward";}).length;passed=actual>=rule.count;target=rule.count+"+";
+    }else if(rule.type==="drawnCircles"){
+      actual=drawingTrace(calls).circles.length;passed=actual>=rule.count;target=rule.count+"+ visible";
+    }else if(rule.type==="circleTrail"){
+      var trail=drawingTrace(calls).circles;
+      passed=trail.length>=rule.min&&trail.every(function(c,i){return !i||Math.hypot(c.x-trail[i-1].x,c.y-trail[i-1].y)>1;});actual=trail.length+" circles";target="Different neighboring starts";
+    }else if(rule.type==="alternatingNumbers"){
+      numbers=callsNamed(calls,rule.commands).map(function(c){return c.num;});passed=numbers.length===rule.count&&numbers[0]>0&&numbers[1]>numbers[0]&&numbers.every(function(n,i){return n===numbers[i%2];});actual=numbers.join(" → ");target="Small → large → small → large → small";
+    }else if(rule.type==="backgroundColor"){
+      actual=runtime&&runtime.background||drawingTrace(calls).background;target=rule.value;passed=colorValue(actual)===colorValue(rule.value);
+    }else if(rule.type==="penTravel"){
+      var travel=drawingTrace(calls).travel;actual=prettyNumber(travel);target=rule.minDistance+"+ with pen up";passed=travel>=rule.minDistance;
+    }else if(rule.type==="drawingParts"){
+      actual=drawingTrace(calls).parts;target=rule.count+"+";passed=actual>=rule.count;
+    }else if(rule.type==="penState"){
+      actual=runtime&&runtime.penDown?"down":"up";target=rule.down?"down":"up";passed=!!runtime&&runtime.penDown===rule.down;
+    }else if(["outputRows","printedRows","differentRows","printedCharacters","sameRowWidth","textSymmetry","meters"].indexOf(rule.type)>=0){
+      var rows=printedRows(runtime),widths=rows.map(function(row){return Array.from(row).length;});
+      if(rule.type==="outputRows"){passed=rows.length===rule.rows.length&&rows.every(function(row,i){return row===rule.rows[i];});actual=rows.length+" rows";target=rule.rows.length+" exact rows";}
+      if(rule.type==="printedRows"){actual=rows.length;target=rule.min+"+";passed=actual>=rule.min;}
+      if(rule.type==="differentRows"){actual=rows.filter(function(row,i,all){return all.indexOf(row)===i;}).length;target=rule.min+"+";passed=actual>=rule.min;}
+      if(rule.type==="printedCharacters"){actual=widths.reduce(function(a,b){return a+b;},0);target=rule.min+"+";passed=actual>=rule.min;}
+      if(rule.type==="sameRowWidth"){actual=widths.join(" · ");target=rule.minWidth+"–"+rule.maxWidth+" each, same width";passed=rows.length>=rule.min&&widths[0]>=rule.minWidth&&widths[0]<=rule.maxWidth&&widths.every(function(n){return n===widths[0];});}
+      if(rule.type==="textSymmetry"){passed=rows.length>0&&rows.every(function(row){return Array.from(row).reverse().join("")===row;});actual=passed?"All rows mirrored":"A row is asymmetric";target="Each row mirrors";}
+      if(rule.type==="meters"){
+        var meters=[],allMatch=true;
+        rows.forEach(function(row,i){var m=row.match(/^\[(█*░*)\]$/);if(!m)return;var slots=Array.from(m[1]),filled=slots.filter(function(c){return c==="█";}).length,total=slots.length,fraction=(rows[i+1]||"").match(/^(\d+)\s*\/\s*(\d+)$/);meters.push(filled+"/"+total);if(total<rule.minSlots||!fraction||Number(fraction[1])!==filled||Number(fraction[2])!==total)allMatch=false;});
+        passed=meters.length>=rule.min&&allMatch&&(!rule.different||new Set(meters).size>=2);actual=meters.join(" · ")||"No meters";target=rule.min+"+ matching meter/fraction pairs";
+      }
     }else if(rule.type==="finalPosition"){
       actual=runtime?"("+prettyNumber(runtime.x)+", "+prettyNumber(runtime.y)+")":"not run";
       target="("+prettyNumber(rule.x)+", "+prettyNumber(rule.y)+")";
@@ -903,9 +1011,9 @@
       target=prettyNumber(b)+"°";
       passed=!!runtime&&d<=rule.tolerance;
     }else{
-      passed=true;
-      actual="—";
-      target="—";
+      passed=false;
+      actual="Check unavailable";
+      target="Supported requirement";
     }
     return {label:label,passed:passed,actual:String(actual),target:String(target),fail:rule.fail||""};
   }
@@ -942,7 +1050,7 @@
     requestAnimationFrame(function(){if(!box.hidden)box.scrollIntoView({behavior:"smooth",block:"nearest"});});
     box.className="check-feedback "+(result.ok?"good":"bad");
     var title=result.ok?(result.checkpoint?"Assignment passed":"Challenge passed"):passed+" of "+total+" requirements met";
-    var sub=result.ok?(result.checkpoint?"Test a second solution, or return to your project with Next.":"Everything required is working."):"Fix the unchecked items, then check again.";
+    var sub=result.ok?(result.checkpoint?"All requirements passed. Continue with Next.":"Your project meets every requirement."):"Repair the unchecked requirements, then run the check again.";
     box.innerHTML=
       '<div class="check-head">'+
         '<div class="check-badge">'+(result.ok?"✓":passed+"/"+total)+'</div>'+
@@ -952,7 +1060,7 @@
       '<div class="check-list">'+items.map(function(item){
         return '<div class="check-row '+(item.passed?"pass":"fail")+'">'+
           '<div class="check-icon">'+(item.passed?"✓":"×")+'</div>'+
-          '<div class="check-label">'+esc(item.label)+'</div>'+
+          '<div class="check-label">'+esc(item.label)+(!item.passed&&item.fail?'<small class="check-repair">'+esc(item.fail)+'</small>':'')+'</div>'+
           '<div class="check-value">'+esc(item.actual)+(item.target&&item.actual!==item.target?' / '+esc(item.target):'')+'</div>'+
         '</div>';
       }).join("")+'</div>';
@@ -975,7 +1083,7 @@
     }
     if(!checkpoint){
       var responses=readResponses(),missing=current.steps.filter(function(step){return step.check&&!(responses[step.id]&&responses[step.id].passed);});
-      if(missing.length){showCheckFeedback({ok:false,items:missing.map(function(step){return {label:step.title,passed:false,actual:"Experiment",target:"Pass its code check"};})});return;}
+      if(missing.length){showCheckFeedback({ok:false,items:missing.map(function(step){return {label:step.title,passed:false,actual:"Assignment incomplete",target:"Pass Check assignment"};})});return;}
     }
     if(!current.check){
       progress[current.id]=true;
@@ -984,7 +1092,7 @@
       return;
     }
     var id="check-"+(++checkRequestSeq)+"-"+current.id;
-    pendingCheck={id:id,lessonId:current.id,stepIndex:stepIndex,checkpoint:!!checkpoint,check:checkpoint?current.steps[stepIndex].check:current.check};
+    pendingCheck={id:id,lessonId:current.id,stepIndex:stepIndex,checkpoint:!!checkpoint,check:checkpoint?current.steps[stepIndex].check:current.check,editorKey:loadedEditorKey};
     var next=document.getElementById(checkpoint?"checkCheckpoint":"nextBtn");
     next.disabled=true;
     next.textContent="Checking…";
@@ -1009,16 +1117,18 @@
     pendingCheck=null;
     var next=document.getElementById(request.checkpoint?"checkCheckpoint":"nextBtn");
     next.disabled=false;
-    if(current.id!==lessonId||stepIndex!==request.stepIndex)return;
+    if(current.id!==lessonId||stepIndex!==request.stepIndex||data.lesson!==request.editorKey)return;
+    var live=frame.contentDocument.querySelector(".CodeMirror");
+    if(live&&live.CodeMirror&&live.CodeMirror.getValue()!==data.code){next.textContent=request.checkpoint?"Check assignment":"Check my code";showCheckFeedback({ok:false,items:[{label:"Code changed during the check",passed:false,actual:"Run the latest version",target:"Check again"}]});return;}
     var result=evaluateStudentCode({check:request.check},data);
     result.checkpoint=request.checkpoint;
-    if(request.checkpoint){saveResponse(current.steps[stepIndex].id,{passed:result.ok});next.textContent="Check assignment";showCheckFeedback(result);return;}
+    if(request.checkpoint){saveResponse(current.steps[stepIndex].id,{passed:result.ok,code:data.code});next.textContent=result.ok?"✓ Assignment passed":"Check assignment";showCheckFeedback(result);if(result.ok)celebrateTarget(true);return;}
     showCheckFeedback(result);
     if(result.ok){
       progress[current.id]=true;
       try{localStorage.setItem(progressKey,JSON.stringify(progress));}catch(e){}
       renderLesson();
-      showCheckFeedback(result);
+      showCheckFeedback(result);celebrateTarget(true);
     }else{
       next.textContent="Check my code";
     }
@@ -1091,8 +1201,8 @@
   }
 
   function loadEditor(force){
-    var step=current.steps[stepIndex],draft=current.id+(current.draftVersion?"-"+current.draftVersion:""),key=step.lab?draft+"-lab-"+step.id:draft;
-    document.getElementById("resetBtn").textContent=step.typed?"Clear assignment code":(step.lab?"Load assignment code":"Clear example code");
+    var step=current.steps[stepIndex],draft=current.id+(current.draftVersion?"-"+current.draftVersion:""),key=step.draftId?draft+"-"+step.draftId:(step.lab?draft+"-lab-"+step.id:draft);
+    document.getElementById("resetBtn").textContent=step.question?"Reset prediction example":step.draftId==="project"?"Clear project code":step.check&&step.typed?"Clear assignment code":"Clear example code";
     if(!force&&key===loadedEditorKey)return;
     if(!force)captureCurrentCode();
     loadedEditorKey=key;
@@ -1104,6 +1214,7 @@
 
   function renderLesson(){
     clearCheckFeedback();
+    if(current.steps[stepIndex].phase==="Create your own"){var missing=firstMissingAssignment();if(missing>=0){stepIndex=missing;saveStep();}}
     document.getElementById("lessonNumber").textContent=current.number;
     document.getElementById("lessonType").textContent=current.type;
     document.getElementById("lessonTitle").textContent=current.title;
@@ -1114,9 +1225,9 @@
       var d=document.createElement("button");
       d.type="button";
       d.className="step-dot"+(i===stepIndex?" active":(i<stepIndex?" past":""));
-      d.setAttribute("aria-label","Go to step "+(i+1));
-      d.textContent=i<stepIndex?"✓":String(i+1);
-      d.addEventListener("click",function(){stepIndex=i;saveStep();renderStep();});
+      d.setAttribute("aria-label","Step "+(i+1)+": "+step.title);d.title=step.title;
+      d.textContent=String(i+1);
+      d.addEventListener("click",function(){navigateStep(i);});
       strip.appendChild(d);
     });
     renderStep();
@@ -1167,17 +1278,20 @@
     wrap.appendChild(head);
 
     var grid=document.createElement("div");
-    grid.className="symbol-palette-grid";
-    items.forEach(function(item){
+    grid.className="symbol-palette-grid primary-symbols";
+    var more=document.createElement("details");more.className="more-symbols";var summary=document.createElement("summary");summary.textContent="More symbols";more.appendChild(summary);
+    var moreGrid=document.createElement("div");moreGrid.className="symbol-palette-grid";more.appendChild(moreGrid);
+    items.forEach(function(item,i){
       var b=document.createElement("button");
       b.type="button";
       b.className="symbol-button";
-      b.setAttribute("aria-label","Copy "+item.name+" "+item.char);
+      b.setAttribute("aria-label","Insert and copy "+item.name+" "+item.char);b.title=item.name;
       b.innerHTML='<span class="symbol-char">'+esc(item.char)+'</span><span class="symbol-name">'+esc(item.name)+'</span>';
       b.addEventListener("click",function(){copySymbol(item.char,b);});
-      grid.appendChild(b);
+      (i<4?grid:moreGrid).appendChild(b);
     });
     wrap.appendChild(grid);
+    if(items.length>4)wrap.appendChild(more);
     var status=document.createElement("div");
     status.className="symbol-palette-status";
     status.id="symbolPaletteStatus";
@@ -1185,83 +1299,45 @@
     wrap.appendChild(status);
   }
 
-  function renderChallengeVisuals(){
-    var wrap=document.getElementById("challengeVisuals");
-    var isLast=stepIndex===current.steps.length-1;
-    var visuals=isLast&&current.visuals?current.visuals:[];
-    wrap.hidden=!visuals.length;
-    wrap.innerHTML="";
-    if(!visuals.length)return;
-
-    var head=document.createElement("div");
-    head.className="challenge-visuals-head";
-    head.innerHTML='Example ideas <span>not the answer</span>';
-    wrap.appendChild(head);
-
-    var grid=document.createElement("div");
-    grid.className="challenge-visual-grid count-"+Math.min(3,visuals.length);
+  function renderVisuals(wrap,visuals,title,subtitle){
+    wrap.hidden=!visuals.length;wrap.innerHTML="";if(!visuals.length)return;
+    var head=document.createElement("div");head.className="challenge-visuals-head";head.innerHTML=esc(title)+' <span>'+esc(subtitle||'')+'</span>';wrap.appendChild(head);
+    var grid=document.createElement("div");grid.className="challenge-visual-grid count-"+Math.min(3,visuals.length);
     visuals.forEach(function(v){
-      var card=document.createElement("div");
-      card.className="challenge-visual-card";
-
-      var svg=null;
-      var ascii=null;
-      if(v.ascii){
-        ascii=document.createElement("pre");
-        ascii.className="challenge-ascii-preview";
-        ascii.textContent=v.ascii;
-        ascii.setAttribute("aria-label",v.label||"ASCII example");
-      }else{
-        svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
-        svg.setAttribute("viewBox","0 0 160 100");
-        svg.setAttribute("aria-label",v.label||"Example visual");
-        svg.setAttribute("role","img");
-
-      var bg=document.createElementNS(svg.namespaceURI,"rect");
-      bg.setAttribute("x","0");bg.setAttribute("y","0");bg.setAttribute("width","160");bg.setAttribute("height","100");
-      bg.setAttribute("fill",v.bg||"#fbfaf6");
-      svg.appendChild(bg);
-
-      for(var gx=20;gx<160;gx+=20){
-        var gl=document.createElementNS(svg.namespaceURI,"line");
-        gl.setAttribute("x1",gx);gl.setAttribute("x2",gx);gl.setAttribute("y1","0");gl.setAttribute("y2","100");
-        gl.setAttribute("class","preview-grid-line");svg.appendChild(gl);
+      var card=document.createElement("div");card.className="challenge-visual-card";
+      if(v.ascii){var ascii=document.createElement("pre");ascii.className="challenge-ascii-preview";ascii.textContent=v.ascii;ascii.setAttribute("aria-label",v.label);card.appendChild(ascii);}
+      else{
+        var svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 160 100");svg.setAttribute("role","img");svg.setAttribute("aria-label",v.label);
+        function shape(tag,attrs){var el=document.createElementNS(svg.namespaceURI,tag);Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k]);});svg.appendChild(el);return el;}
+        shape('rect',{x:0,y:0,width:160,height:100,fill:v.bg||'#fbfaf6'});
+        (v.paths||[]).forEach(function(p){shape('polyline',{points:p.points.map(function(pt){return pt.join(',');}).join(' '),fill:'none',stroke:p.stroke||'#202525','stroke-width':p.width||2,'stroke-linecap':'round','stroke-linejoin':'round'});});
+        (v.circles||[]).forEach(function(c){shape('circle',{cx:c.cx,cy:c.cy,r:c.r,fill:'none',stroke:c.stroke||'#202525','stroke-width':c.width||2});});card.appendChild(svg);
       }
-      for(var gy=20;gy<100;gy+=20){
-        var gh=document.createElementNS(svg.namespaceURI,"line");
-        gh.setAttribute("x1","0");gh.setAttribute("x2","160");gh.setAttribute("y1",gy);gh.setAttribute("y2",gy);
-        gh.setAttribute("class","preview-grid-line");svg.appendChild(gh);
-      }
-
-      (v.paths||[]).forEach(function(p){
-        var el=document.createElementNS(svg.namespaceURI,"polyline");
-        el.setAttribute("points",(p.points||[]).map(function(pt){return pt[0]+","+pt[1];}).join(" "));
-        el.setAttribute("class","preview-path");
-        if(p.stroke)el.style.stroke=p.stroke;
-        if(p.width)el.style.strokeWidth=String(p.width);
-        svg.appendChild(el);
-      });
-      (v.circles||[]).forEach(function(c){
-        var el=document.createElementNS(svg.namespaceURI,"circle");
-        el.setAttribute("cx",c.cx);el.setAttribute("cy",c.cy);el.setAttribute("r",c.r);
-        el.setAttribute("class","preview-circle");
-        if(c.stroke)el.style.stroke=c.stroke;
-        if(c.width)el.style.strokeWidth=String(c.width);
-        svg.appendChild(el);
-      });
-      }
-
-      var label=document.createElement("div");
-      label.className="challenge-visual-label";
-      label.textContent=v.label||"Example";
-      card.appendChild(ascii||svg);
-      card.appendChild(label);
+      var label=document.createElement("div");label.className="challenge-visual-label";label.textContent=v.label;card.appendChild(label);
+      if(v.caption){var caption=document.createElement("div");caption.className="challenge-caption";caption.textContent=v.caption;card.appendChild(caption);}
       grid.appendChild(card);
-    });
-    wrap.appendChild(grid);
+    });wrap.appendChild(grid);
   }
+  function renderChallengeVisuals(){
+    var step=current.steps[stepIndex],creative=step.phase==="Create your own";
+    renderVisuals(document.getElementById("stepVisuals"),!creative&&step.visuals||[],step.visualsTitle||"Required result","");
+    renderVisuals(document.getElementById("challengeVisuals"),creative?step.visuals||current.visuals||[]:[],"Example ideas","Choose your design; the requirements are above.");
+  }
+  var showExampleSpaces=false;
+  function renderExample(){
+    var step=current.steps[stepIndex],example=document.getElementById("stepExample"),tools=document.getElementById("exampleTools"),toggle=document.getElementById("showSpaces");
+    example.hidden=!step.example;tools.hidden=!step.example;toggle.hidden=!step.example||step.example.indexOf("print(")<0;
+    toggle.textContent=showExampleSpaces?"Hide space markers":"Show spaces";toggle.setAttribute("aria-pressed",String(showExampleSpaces));
+    if(!step.example){example.textContent="";return;}
+    example.textContent=step.example.split("\n").map(function(line,i){
+      if(showExampleSpaces){var quote="",escaped=false;line=Array.from(line).map(function(ch){if(escaped){escaped=false;return ch;}if(quote&&ch==="\\"){escaped=true;return ch;}if(ch==='"'||ch==="'"){if(ch===quote)quote="";else if(!quote)quote=ch;return ch;}return quote&&ch===" "?"·":ch;}).join("");}
+      return (step.numbered?(i+1)+"  ":"")+line;
+    }).join("\n");
+    tools.querySelector("span").textContent=showExampleSpaces&&!toggle.hidden?"Each · marks one space inside quotes. Type a space there.":step.question?"Read the numbered code before running.":"Type the commands using these line numbers.";
+  }
+  document.getElementById("showSpaces").addEventListener("click",function(){showExampleSpaces=!showExampleSpaces;renderExample();});
 
-  function responsesKey(){return "dsteckler-pythoncourse-responses-v1-"+current.id;}
+  function responsesKey(){return "dsteckler-pythoncourse-responses-v1-"+current.id+(current.contentVersion?"-"+current.contentVersion:"");}
   function readResponses(){try{return JSON.parse(localStorage.getItem(responsesKey())||"{}")||{};}catch(e){return {};}}
   function saveResponse(id,value){var saved=readResponses();saved[id]=value;try{localStorage.setItem(responsesKey(),JSON.stringify(saved));return true;}catch(e){return false;}}
   function understandingComplete(){var saved=readResponses();return current.steps.filter(function(step){return step.question;}).every(function(step){var value=saved[step.question.id];return value&&value.checked&&value.choice===step.question.answer;});}
@@ -1279,18 +1355,19 @@
       var run=doc.getElementById("runBtn");
       if(!run||run.disabled){if(status)status.textContent="Use Run in the editor to watch the example.";return;}
       run.click();
-      if(status)status.textContent="Watch the turtle and the highlighted code line as the example runs.";
+      if(status)status.textContent=(current.outputMode==="text"?"Watch Output":"Watch the turtle")+" and the highlighted code line as the example runs.";
     }catch(e){if(status)status.textContent="Use Run in the editor to watch the example.";}
   }
   function renderInteraction(step){
     var panel=document.getElementById("learningInteraction");panel.hidden=!(step.question||step.response);panel.innerHTML="";
     if(step.question){
       var q=step.question,value=readResponses()[q.id]||{};
-      panel.innerHTML='<fieldset class="prediction"><legend>'+esc(q.prompt)+'</legend>'+q.choices.map(function(choice,i){return '<label><input type="radio" name="prediction" value="'+i+'" '+(value.choice===i?'checked':'')+'><span>'+esc(choice)+'</span></label>';}).join("")+'</fieldset><button class="btn" id="checkPrediction" type="button">Check prediction</button><button class="btn" id="replayPrediction" type="button">Replay example</button><div id="predictionFeedback" role="status" aria-live="polite" aria-atomic="true"></div><p id="predictionPlayback" role="status"></p>';
+      panel.innerHTML='<fieldset class="prediction"><legend>'+esc(q.prompt)+'</legend>'+q.choices.map(function(choice,i){return '<label><input type="radio" name="prediction" value="'+i+'" '+(value.choice===i?'checked':'')+'><span>'+esc(choice)+'</span></label>';}).join("")+'</fieldset><div class="prediction-actions"><button class="btn" id="checkPrediction" type="button">Check prediction &amp; run</button><button class="btn" id="replayPrediction" type="button">Watch again</button></div><div id="predictionFeedback" role="status" aria-live="polite" aria-atomic="true"></div><p id="predictionPlayback" role="status"></p>';
       var feedback=document.getElementById("predictionFeedback");
       function show(){
-        var passed=value.checked&&value.choice===q.answer,button=document.getElementById("checkPrediction");
-        button.textContent=passed?"✓ Correct prediction":"Check prediction";
+        var passed=value.checked&&value.choice===q.answer,corrected=passed&&value.firstChoice!==undefined&&value.firstChoice!==q.answer,button=document.getElementById("checkPrediction");
+        document.getElementById("replayPrediction").disabled=!value.checked;
+        button.textContent=passed?(corrected?"✓ Corrected prediction":"✓ Correct prediction"):"Check prediction & run";
         button.classList.toggle("prediction-passed",!!passed);
         panel.querySelectorAll(".prediction label").forEach(function(label,i){
           label.classList.toggle("prediction-correct",!!passed&&i===value.choice);
@@ -1298,11 +1375,11 @@
           if(passed&&i===value.choice){mark=document.createElement("span");mark.className="prediction-result-mark";mark.textContent="✓";label.appendChild(mark);}
         });
         feedback.className=value.checked?(passed?"correct":"retry"):"";
-        feedback.innerHTML=value.checked?"<strong>"+(passed?"✓ Correct prediction":"Incorrect prediction")+"</strong>"+(passed?"":"<p><b>Correct outcome:</b> "+esc(q.choices[q.answer])+".</p>")+"<p>"+esc(q.explanation)+"</p>"+(passed?"":"<p class=\"prediction-compare\">Watch the example. Where does the result differ from your prediction?</p>"):"";
+        feedback.innerHTML=value.checked?"<strong>"+(passed?(corrected?"✓ Corrected prediction":"✓ Correct prediction"):"Incorrect prediction")+"</strong>"+(passed?"":"<p><b>Correct outcome:</b> "+esc(q.choices[q.answer])+".</p>")+"<p>"+esc(q.explanation)+"</p>"+(corrected?"<p class=\"prediction-compare\">Your first prediction was: "+esc(q.choices[value.firstChoice])+". Compare it with the result you observed.</p>":passed?"":"<p class=\"prediction-compare\">Watch the example. Where does the result differ from your prediction?</p>"):"";
       }
-      show();panel.querySelectorAll("input").forEach(function(input){input.addEventListener("change",function(){value={choice:Number(input.value),checked:false};saveResponse(q.id,value);show();renderUnderstanding();});});
-      document.getElementById("checkPrediction").addEventListener("click",function(){if(!Number.isInteger(value.choice)){feedback.className="retry";feedback.textContent="Choose a prediction first.";feedback.scrollIntoView({block:"nearest",behavior:"smooth"});return;}value.checked=true;saveResponse(q.id,value);show();renderUnderstanding();playPredictionExample(step);feedback.scrollIntoView({block:"nearest",behavior:"smooth"});});
-      document.getElementById("replayPrediction").addEventListener("click",function(){playPredictionExample(step);});
+      show();panel.querySelectorAll("input").forEach(function(input){input.addEventListener("change",function(){value={choice:Number(input.value),checked:false,firstChoice:value.firstChoice};saveResponse(q.id,value);show();renderUnderstanding();});});
+      document.getElementById("checkPrediction").addEventListener("click",function(){if(!Number.isInteger(value.choice)){feedback.className="retry";feedback.textContent="Choose a prediction first.";feedback.scrollIntoView({block:"nearest",behavior:"smooth"});return;}if(value.firstChoice===undefined)value.firstChoice=value.choice;value.checked=true;saveResponse(q.id,value);show();renderUnderstanding();playPredictionExample(step);feedback.scrollIntoView({block:"nearest",behavior:"smooth"});});
+      document.getElementById("replayPrediction").addEventListener("click",function(){if(window.innerWidth<=820)setMobileView("editor");playPredictionExample(step);});
     }else if(step.response){
       var r=step.response,saved=readResponses()[r.id];
       panel.innerHTML='<label class="evidence-label" for="evidenceResponse">Lesson notes</label><textarea id="evidenceResponse" rows="5" maxlength="6000" placeholder="'+esc(r.placeholder)+'"></textarea><p id="responseStatus" role="status">Saved on this device as you type.</p>';
@@ -1312,6 +1389,7 @@
   }
   document.getElementById("checkCheckpoint").addEventListener("click",function(){requestCodeCheck(true);});
   var guidedEditor=null,guidedLines=[],highlightTimer=null;
+  function lessonCodeChanged(){clearCheckFeedback();try{var doc=frame.contentDocument,banner=doc.getElementById("courseTargetSuccess"),marker=doc.getElementById("courseTarget");if(banner)banner.remove();if(marker)marker.style.borderColor="";var step=current.steps[stepIndex],saved=readResponses()[step.id];if(step.check&&saved&&saved.passed){saveResponse(step.id,{passed:false});document.getElementById("checkCheckpoint").textContent="Check assignment";}}catch(e){}scheduleLessonHighlight();}
   function scheduleLessonHighlight(){
     clearTimeout(highlightTimer);
     highlightTimer=setTimeout(highlightLessonLines,0);
@@ -1323,19 +1401,19 @@
       if(!cm){highlightTimer=setTimeout(highlightLessonLines,150);return;}
       if(guidedEditor){guidedLines.forEach(function(handle){guidedEditor.removeLineClass(handle,"background","course-command-target");});}
       if(guidedEditor!==cm){
-        if(guidedEditor)guidedEditor.off("change",scheduleLessonHighlight);
-        cm.on("change",scheduleLessonHighlight);
+        if(guidedEditor)guidedEditor.off("change",lessonCodeChanged);
+        cm.on("change",lessonCodeChanged);
       }
       guidedEditor=cm;guidedLines=[];
       var doc=frame.contentDocument;
       if(!doc.getElementById("courseGuidanceStyle")){var style=doc.createElement("style");style.id="courseGuidanceStyle";style.textContent=".course-command-target{background:rgba(255,211,93,.18)!important;box-shadow:inset 4px 0 #ffd35d}.code-panel.course-has-guide{grid-template-rows:47px auto minmax(0,1fr)}.course-line-guide{padding:8px 12px;background:#fff1bf;color:#393323;font:14px/1.4 sans-serif;}.course-line-guide[hidden]{display:none}";doc.head.appendChild(style);}
-      syncTargetMarker();
+      syncEditorMode();syncTargetMarker();
       var step=current.steps[stepIndex],lines=step.focusLines||[];
       lines.forEach(function(n){if(n<=cm.lineCount()){guidedLines.push(cm.addLineClass(n-1,"background","course-command-target"));}});
       var panel=cmNode.closest(".code-panel"),note=doc.getElementById("courseLineGuide");
       if(!note){note=doc.createElement("div");note.id="courseLineGuide";note.className="course-line-guide";panel.insertBefore(note,cmNode);}
       note.hidden=!lines.length;panel.classList.toggle("course-has-guide",!!lines.length);
-      note.textContent=lines.length?"Work on line"+(lines.length>1?"s ":" ")+lines.join(", ")+". "+(Math.max.apply(null,lines)>cm.lineCount()?"Add the missing lines below your code.":"Highlighted in yellow."):"";
+      note.textContent=lines.length?(!cm.getValue().trim()?"Start on line 1. Type the numbered example. ":"")+"Work on line"+(lines.length>1?"s ":" ")+lines.join(", ")+". "+(Math.max.apply(null,lines)>cm.lineCount()?"Add the missing lines below your code.":"Highlighted in yellow."):"";
       cm.refresh();
     }catch(e){}
   }
@@ -1349,9 +1427,9 @@
       if(!rule){if(marker)marker.remove();if(banner)banner.remove();if(label)label.remove();return;}
       if(!doc.getElementById("courseTargetStyle")){
         var style=doc.createElement("style");style.id="courseTargetStyle";
-        style.textContent=".course-target{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%);border:3px solid #d34c24;border-radius:50%;background:transparent;box-shadow:0 0 0 5px #d34c242b;z-index:6;pointer-events:none}.course-target:after{content:'';position:absolute;width:6px;height:6px;background:#d34c24;border-radius:50%;left:5px;top:5px}.course-target-label{display:block;color:#71361b;font:700 12px/1.5 sans-serif}.course-target-success{display:block;color:#176b57;font:800 14px/1.5 sans-serif}.world-info:has(.course-target-label){flex-wrap:wrap}.course-target-label,.course-target-success{flex-basis:100%}.course-confetti{position:absolute;left:50%;top:45%;width:8px;height:13px;z-index:8;pointer-events:none;animation:course-target-pop 1.2s ease-out forwards}@keyframes course-target-pop{to{transform:translate(var(--dx),var(--dy)) rotate(var(--spin));opacity:0}}@media(prefers-reduced-motion:reduce){.course-confetti{display:none}}";doc.head.appendChild(style);
+        style.textContent=".course-target{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%);border:3px solid #d34c24;border-radius:50%;background:transparent;box-shadow:0 0 0 5px #d34c242b;z-index:6;pointer-events:none}.course-target:after{content:'';position:absolute;width:6px;height:6px;background:#d34c24;border-radius:50%;left:5px;top:5px}.course-target-label{display:block;color:#71361b;font:700 14px/1.5 sans-serif}.course-target-success{display:block;color:#176b57;font:800 16px/1.5 sans-serif}.world-info:has(.course-target-label){flex-wrap:wrap}.course-target-label,.course-target-success{flex-basis:100%;grid-column:1/-1;white-space:normal}.course-confetti{position:absolute;left:50%;top:45%;width:8px;height:13px;z-index:8;pointer-events:none;animation:course-target-pop 1.2s ease-out forwards}@keyframes course-target-pop{to{transform:translate(var(--dx),var(--dy)) rotate(var(--spin));opacity:0}}@media(prefers-reduced-motion:reduce){.course-confetti{display:none}}";doc.head.appendChild(style);
       }
-      var key=loadedEditorKey+":"+rule.x+":"+rule.y;
+      var key=loadedEditorKey+":"+step.id+":"+rule.x+":"+rule.y;
       if(marker&&marker.dataset.targetKey!==key){marker.remove();marker=null;if(banner)banner.remove();}
       if(!marker){marker=doc.createElement("div");marker.id="courseTarget";marker.className="course-target";marker.dataset.targetKey=key;marker.style.left=((200+rule.x)/4)+"%";marker.style.top=((200-rule.y)/4)+"%";marker.setAttribute("role","img");marker.setAttribute("aria-label","Target at "+rule.x+", "+rule.y);world.appendChild(marker);}
       if(!label){label=doc.createElement("span");label.id="courseTargetLabel";label.className="course-target-label";doc.querySelector(".world-info").appendChild(label);}
@@ -1361,35 +1439,50 @@
   function celebrateTarget(passed){
     try{
       var doc=frame.contentDocument,world=doc.getElementById("worldWrap"),marker=doc.getElementById("courseTarget");
-      if(!world||!marker)return;
+      if(!world)return;
       var banner=doc.getElementById("courseTargetSuccess");
       if(banner)banner.remove();
       banner=doc.createElement("div");banner.id="courseTargetSuccess";banner.className="course-target-success";banner.setAttribute("role","status");banner.textContent=passed?"You did it! Assignment complete ✓":"Target reached!";doc.querySelector(".world-info").appendChild(banner);
-      marker.style.borderColor="#176b57";
-      for(var i=0;i<24;i++){var piece=doc.createElement("span");piece.className="course-confetti";piece.style.background=["#ffd35d","#ec6945","#31bca0","#7397fa"][i%4];piece.style.setProperty("--dx",Math.round(Math.cos(i*2.4)*(70+i*4))+"px");piece.style.setProperty("--dy",Math.round(Math.sin(i*2.4)*100+100)+"px");piece.style.setProperty("--spin",(i*71)+"deg");world.appendChild(piece);setTimeout((function(el){return function(){el.remove();};})(piece),1300);}
+      if(marker)marker.style.borderColor="#176b57";
+      for(var i=0;i<24;i++){var piece=doc.createElement("span");piece.className="course-confetti";piece.style.background=["#ffd35d","#ec6945","#31bca0","#7397fa"][i%4];piece.style.setProperty("--dx",Math.round(Math.cos(i*2.4)*(70+i*4))+"px");piece.style.setProperty("--dy",Math.round(Math.sin(i*2.4)*100+100)+"px");piece.style.setProperty("--spin",(i*71)+"deg");(doc.body.classList.contains("course-text-output")?doc.getElementById("worldPanel"):world).appendChild(piece);setTimeout((function(el){return function(){el.remove();};})(piece),1300);}
+    }catch(e){}
+  }
+  function syncEditorMode(){
+    try{
+      var doc=frame.contentDocument,text=(current.steps[stepIndex].editorOutput||current.outputMode)==="text";
+      doc.body.classList.toggle("course-text-output",text);
+      if(!doc.getElementById("courseOutputModeStyle")){var style=doc.createElement("style");style.id="courseOutputModeStyle";style.textContent="body.course-embed.course-text-output .world-stage,body.course-embed.course-text-output .world-info,body.course-embed.course-text-output .output-resize-handle{display:none}body.course-embed.course-text-output .world-panel{grid-template-rows:47px minmax(0,1fr)}body.course-embed.course-text-output .console{height:100%;min-height:260px}body.course-embed.course-text-output #output{font-size:17px;line-height:1.45}body.course-embed .world-panel{grid-template-rows:47px minmax(210px,1fr) auto 9px 105px}body.course-embed .course-target-success{padding:8px 10px;border:2px solid #247446;border-radius:8px;background:#e7f4e9}body.course-embed.course-text-output .world-panel{grid-template-rows:47px minmax(0,1fr)}";doc.head.appendChild(style);}
+      doc.querySelector("#worldPanel .panel-label").textContent=text?"Text output":"Turtle World";
     }catch(e){}
   }
   window.addEventListener("message",function(event){
     if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
     var data=event.data||{},step=current.steps[stepIndex];
-    if(data.type!=="pythoncourse-run-complete"||data.lesson!==loadedEditorKey||!step.check)return;
-    var rule=step.check.rules.find(function(r){return r.type==="finalPosition";});
-    if(!rule)return;
-    var result=evaluateStudentCode({check:step.check},data);
-    var item=result.items.find(function(it){return it.label===rule.label;});
-    if(item&&item.passed){celebrateTarget(result.ok);if(result.ok){saveResponse(step.id,{passed:true});result.checkpoint=true;showCheckFeedback(result);}}
+    if(data.type!=="pythoncourse-run-complete"||data.lesson!==loadedEditorKey||pendingCheck)return;
+    if(step.question){var status=document.getElementById("predictionPlayback");if(status)status.textContent=data.run&&data.run.ok?"Example finished. Compare the result with your prediction.":"Example stopped with an error. Read its name and line in Output.";return;}
+    if(!step.check)return;
+    var result=evaluateStudentCode({check:step.check},data);result.checkpoint=true;
+    if(result.ok){saveResponse(step.id,{passed:true,code:data.code});document.getElementById("checkCheckpoint").textContent="✓ Assignment passed";celebrateTarget(true);showCheckFeedback(result);}
     else{var doc=frame.contentDocument,banner=doc.getElementById("courseTargetSuccess"),marker=doc.getElementById("courseTarget");if(banner)banner.remove();if(marker)marker.style.borderColor="";}
   });
+  function firstMissingAssignment(){var saved=readResponses();return current.steps.findIndex(function(step){return step.check&&!(saved[step.id]&&saved[step.id].passed);});}
+  function navigateStep(index){
+    var target=current.steps[index],missing=firstMissingAssignment(),blocked=target.phase==="Create your own"&&missing>=0;
+    stepIndex=blocked?missing:index;saveStep();renderStep();
+    if(blocked){var status=document.getElementById("visibleCheckStatus");status.hidden=false;status.textContent="Pass this assignment before starting your own design.";status.style.color="#8a452c";}
+  }
   function renderStep(){
     clearCheckFeedback();
     pendingCheck=null;
     document.getElementById("checkCheckpoint").disabled=false;
-    document.getElementById("checkCheckpoint").textContent="Check assignment";
+    var savedStep=readResponses()[current.steps[stepIndex].id];
+    document.getElementById("checkCheckpoint").textContent=savedStep&&savedStep.passed?"✓ Assignment passed":"Check assignment";
     document.getElementById("nextBtn").disabled=false;
     document.getElementById("stepContent").scrollTop=0;
     var step=current.steps[stepIndex];
     loadEditor();
-    document.getElementById("experimentNote").hidden=!step.lab;
+    var draftNote=document.getElementById("experimentNote");draftNote.hidden=false;draftNote.textContent=step.question?"Prediction example · your typed draft is saved separately.":step.draftId==="project"?"Project draft · starts blank and saves here.":step.check&&step.typed?"Assignment draft · starts blank and saves here.":"Example draft · saves here.";
+    var requirements=document.getElementById("stepRequirements");requirements.hidden=!step.requirements;requirements.innerHTML=step.requirements?"<strong>Requirements</strong><ul>"+step.requirements.map(function(item){return "<li>"+esc(item)+"</li>";}).join("")+"</ul>":"";
     document.getElementById("checkCheckpoint").hidden=!step.check;
     renderInteraction(step);renderUnderstanding();
     document.getElementById("stepTitle").textContent=step.title;
@@ -1408,21 +1501,15 @@
     teacherNotes.open=false;
     teacherNotesBody.textContent=current.notes||"";
     renderSymbolPalette();
+    document.getElementById("stepContent").insertBefore(document.getElementById("symbolPalette"),document.getElementById("exampleTools"));
     renderChallengeVisuals();
-    var example=document.getElementById("stepExample");
-    if(step.example){
-      example.hidden=false;
-      example.textContent=step.numbered?step.example.split("\n").map(function(line,i){return (i+1)+"  "+line;}).join("\n"):step.example;
-    }else{
-      example.hidden=true;
-      example.textContent="";
-    }
+    showExampleSpaces=false;renderExample();
     document.getElementById("lessonMeta").textContent="Step "+(stepIndex+1)+" of "+current.steps.length;
     var dots=document.querySelectorAll(".step-dot");
     dots.forEach(function(d,i){
       d.classList.toggle("active",i===stepIndex);
       d.classList.toggle("past",i<stepIndex);
-      d.textContent=i<stepIndex?"✓":String(i+1);
+      var answer=readResponses()[current.steps[i].question?current.steps[i].question.id:current.steps[i].id],done=current.steps[i].question?answer&&answer.checked&&answer.choice===current.steps[i].question.answer:current.steps[i].check&&answer&&answer.passed;d.textContent=done?"✓":String(i+1);if(i===stepIndex)d.setAttribute("aria-current","step");else d.removeAttribute("aria-current");
     });
     document.getElementById("backBtn").disabled=stepIndex===0;
     var next=document.getElementById("nextBtn");
@@ -1489,12 +1576,12 @@
   }
 
   document.getElementById("backBtn").addEventListener("click",function(){
-    if(stepIndex>0){stepIndex--;saveStep();clearCheckFeedback();renderStep();}
+    if(stepIndex>0)navigateStep(stepIndex-1);
   });
 
   document.getElementById("nextBtn").addEventListener("click",function(){
     if(stepIndex<current.steps.length-1){
-      stepIndex++;saveStep();clearCheckFeedback();renderStep();return;
+      navigateStep(stepIndex+1);return;
     }
     if(progress[current.id]&&practiceComplete()){
       var following=getNextAvailableLesson();

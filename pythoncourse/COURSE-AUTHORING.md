@@ -6,8 +6,8 @@ The course lives at `/pythoncourse/`. Keep the lesson page usable in one desktop
 
 Build lessons around visible checkpoints.
 
-1. Start from code that already runs and makes a visible mark.
-2. Ask the student to run it before editing.
+1. Open a blank editor and show a short numbered example that the student types. Working examples should make a visible mark or printed result; a debugging lesson can deliberately begin with an error.
+2. Ask the student to run after each new drawing or movement command before editing the example.
 3. Change one thing and run again.
 4. Repeat working code before introducing a loop.
 5. Turn working drawing code into a function only after the student has seen that code work.
@@ -55,16 +55,22 @@ Each available lesson needs:
   number: "1.5",
   title: "Example",
   type: "Lesson",
-  minutes: 10,
   available: true,
-  starter: "forward(80)",
+  starter: "",
+  draftVersion: "unit1-v4",
+  contentVersion: "unit1-v4",
+  purpose: "Separate distance from direction before planning repeated routes.",
   steps: [
     {
-      label: "Run",
-      title: "Run the working version.",
-      body: "Run it before changing anything.",
-      task: "Press Run and watch the turtle.",
-      tip: "Notice where the turtle starts."
+      id: "1-5-example-type",
+      phase: "Type the example",
+      draftId: "example",
+      title: "Type the example.",
+      body: "The turtle starts facing right.",
+      task: "Type line 1 and Run.",
+      example: "forward(80)",
+      numbered: true,
+      focusLines: [1]
     }
   ]
 }
@@ -92,10 +98,13 @@ The course loads the existing editor with:
 
 The Turtle page stores student code separately for each lesson using the lesson ID. It does not overwrite the student's normal `/turtle/` sandbox code.
 
-The course page stores:
-- lesson completion in `dsteckler-pythoncourse-progress-v2`
-- current lesson step in `dsteckler-pythoncourse-step-v2-LESSON_ID`
-- lesson code in `dsteckler-pythoncourse-LESSON_ID`
+The revised unit stores:
+- lesson completion in `dsteckler-pythoncourse-progress-v3-unit1`
+- current lesson step in `dsteckler-pythoncourse-step-unit1-v4-LESSON_ID`
+- each draft in `dsteckler-pythoncourse-LESSON_ID-unit1-v4-DRAFT_ID`
+- responses in `dsteckler-pythoncourse-responses-v1-LESSON_ID-unit1-v4`
+
+Earlier drafts, response records, and completion records stay in their original keys. A curriculum revision uses new version keys so an obsolete starter or passed requirement cannot be confused with the revised assignment. The student home reads the revised progress key when it exists, falling back to the earlier records before the revised course has been opened.
 
 The Reset code button clears only the current lesson's saved code and reloads its starter code.
 
@@ -119,27 +128,35 @@ Keep activity navigation separate from checkpoint navigation. Changing an activi
 
 ## Understanding and independent experiments
 
-Unit 1 keeps its 15 Make / Solve / Create activities. Each now includes two checked predictions, a separate editable experiment with a real code check, and a saved evidence response. The last activity also contains the cumulative signal-beacon repair. The concept checks and experiment checks must pass before final completion. Evidence responses are saved for discussion; the program does not grade an explanation as correct.
+Unit 1 keeps its 15 Make / Solve / Create activities. Each includes two checked predictions, a fixed assignment, a saved observation, and a creative project. Route Puzzle also has two guided checks; ASCII Dashboard includes a cumulative signal-beacon repair. All code checkpoints must pass before the creative draft opens. Understanding checks must pass before final completion. Evidence responses save for discussion and remain ungraded.
 
 Steps can include these fields:
 
 - `id`: stable step identity; required for isolated experiments and saved responses.
-- `lab`: a small starting program loaded in a separate editor draft. Its storage key is `dsteckler-pythoncourse-LESSON_ID-lab-STEP_ID`. Leaving the step restores the main project draft or another experiment draft.
-- `question`: `{id,prompt,choices,answer,explanation}`. `answer` is the zero-based correct choice. Require students to check a selection; changing the selection clears its checked status.
-- `check`: the experiment’s code rules. A successful experiment never marks the whole activity complete.
-- `response`: `{id,prompt,placeholder}` for a saved text response. Make prompts specific to a change, observation, comparison, or error. The student can download the lesson notes.
+- `draftId`: `example` for controlled edits, `prediction-SLUG` for an isolated running example, `assignment-SLUG` for a required task, and `project` for the blank creative draft. Navigation restores each draft.
+- `lab`: the prediction program or the numbered starting program for an assignment. `typed: true` makes the assignment start empty even when `lab` contains code.
+- `question`: `{id,prompt,choices,answer,explanation}`. `answer` is the zero-based correct choice. Checking saves the first prediction and runs the example. A revised, correct answer is labeled “Corrected prediction.” The first answer remains available for comparison. Changing a selection clears its checked status.
+- `check`: the step’s code rules. Passing a step never completes the whole lesson.
+- `requirements`: short, visible descriptions of every graded condition.
+- `visuals`: previews for a fixed assignment or an independent project. Fixed previews represent the required result; creative previews give possible designs. Drawing previews with `previewCode` must match that program and pass the corresponding project rules.
+- `response`: `{id,prompt,placeholder}` for a saved observation. Give the student a precise change, comparison, or error to record. Keep notes in the lesson tab.
+- `outputMode: "text"` on a lesson enlarges printed output and hides the unused Turtle grid. `editorOutput: "drawing"` on a mixed step restores the grid.
 
-Responses use `dsteckler-pythoncourse-responses-v1-LESSON_ID`. They are separate from the optional four-step notebook. A successful final code check still validates the student’s own project.
+Responses are separate from the optional four-step notebook. A successful final code check validates the independent project.
 
 Teach a command before asking students to explain its behavior. Keep working examples short and isolate one property at a time. Use an unfamiliar target to test whether students can transfer the idea. Do not turn experiments into more copy-the-solution steps.
 
-Run `node pythoncourse/test-unit-depth.mjs` to check all predictions, independent experiment solutions, unsuccessful attempts, project restoration, evidence persistence, and mobile interaction.
+Run `node pythoncourse/test-unit-one.mjs` to check the revised unit with real CodeMirror and Skulpt. It checks all assignment solutions, the creative preview programs, the prediction programs, incorrect-result cases, saved drafts and notes, gated navigation, feedback, target placement, and mobile layout. Set `BROWSER_EXECUTABLE` for a custom Chromium binary. Set `UNIT_TEST_MODULES` to an installed node_modules directory with Playwright, CodeMirror, and Skulpt to use local dependencies. `UNIT_TEST_UI_ONLY=1` checks only the interface flows. `UNIT_TEST_FULL_FLOW=1` also completes every lesson through the visible controls.
 
 
 ## Typed examples and assignment order
 
 Every available lesson opens with a blank example editor. Students type the numbered example and run after each command. Give exact line numbers for edits and additions, and set `focusLines` on guided steps to highlight those lines in the live editor. Keep command line numbers accurate against the current example; identify insertions before a command when preceding edits can shift its line.
 
-Each lesson needs a student-facing `purpose` explaining the command understanding and its connection to later loops, variables, functions, or parameters. Follow the typed example with controlled changes and checked predictions. Finish with a fixed required assignment (`check` on a separate draft), then a choice assignment with objective requirements. Visual examples belong to the choice assignment and supply inspiration only. `typed: true` starts an isolated draft empty; `example` and `numbered: true` display starting code to type. Preserve student drafts when navigating. Final completion requires the required assignment and understanding checks to pass.
+Each lesson needs a student-facing `purpose` explaining the command understanding and its connection to later loops, variables, functions, or parameters. Follow the typed example with controlled changes and checked predictions. Finish with a fixed required assignment (`check` on a separate draft), then a choice assignment with objective requirements. Fixed assignments show the required result. Creative assignments show possible ideas with a caption explaining that the listed requirements govern the check. `typed: true` starts an isolated draft empty; `example` and `numbered: true` display starting code to type. Preserve student drafts when navigating. Final completion requires the required assignment and understanding checks to pass.
+
+Line instructions belong in a separate strip above CodeMirror. Only line backgrounds belong inside the code. Target coordinates and persistent success messages belong outside the drawing canvas. Clear results when the step or its code changes. A failed check must display the failed rule’s repair guidance; a passed check needs a prominent status near the controls and an unambiguous button state.
+
+Validate visible effects, not unused command names. Style rules inspect the color and width used by actual strokes. Circle-placement rules inspect their starting points. Text rules compare the actual Python output, including spaces and row order. The first unit uses one literal command per line, with comments allowed; that constraint makes its simple trace reliable. Loops, variables, and functions will need execution-based checks when introduced.
 
 This order supersedes earlier guidance to begin with prefilled code or offer choice during the guided example.

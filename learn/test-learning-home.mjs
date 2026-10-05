@@ -57,9 +57,9 @@ try {
   await page.locator('#courseMapButton').click();assert(await page.locator('.sidebar').isVisible());await page.keyboard.press('Escape');assert(!(await page.locator('.sidebar').isVisible()));
   const width=Number(await page.locator('#courseResizeDivider').getAttribute('aria-valuenow'));await page.locator('#courseResizeDivider').focus();await page.keyboard.press('ArrowRight');assert.equal(Number(await page.locator('#courseResizeDivider').getAttribute('aria-valuenow')),width+15);
   await page.screenshot({path:path.join(proof,'python-course-desktop.png')});
-  await page.locator('.activity-tab[data-lesson="1-15-create-ascii"]').click();assert(await page.locator('#nextActivity').isDisabled());await page.reload();assert.equal(await page.locator('#lessonTitle').innerText(),'ASCII Badge');
+  await page.locator('.activity-tab[data-lesson="1-15-create-ascii"]').click();assert(await page.locator('#nextActivity').isDisabled());await page.reload();assert.equal(await page.locator('#lessonTitle').innerText(),'ASCII Dashboard');
   await page.goto(origin+'/learn/');assert((await page.locator('#continueLink').getAttribute('href')).includes('1-15-create-ascii'));
-  await page.evaluate(()=>localStorage.setItem('dsteckler-pythoncourse-progress-v2',JSON.stringify({'1-1-make-path':true,'not-a-lesson':true})));
+  await page.evaluate(()=>localStorage.setItem('dsteckler-pythoncourse-progress-v3-unit1',JSON.stringify({'1-1-make-path':true,'not-a-lesson':true})));
   await page.reload();assert.equal(await page.locator('#pythonProgress').innerText(),'1 / 15 complete');
   console.log('PASS home, search, aliases, four habits, notebook isolation/download, code drafts, course history/resume, progress and resizing');
 

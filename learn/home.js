@@ -37,7 +37,7 @@
   function refreshProgress() {
     const available=window.PYTHON_COURSE.units.flatMap(unit=>unit.lessons).filter(lesson=>lesson.available);
     try {
-      const progress=JSON.parse(localStorage.getItem('dsteckler-pythoncourse-progress-v2')||'{}')||{};
+      const progress=JSON.parse(localStorage.getItem('dsteckler-pythoncourse-progress-v3-unit1')||localStorage.getItem('dsteckler-pythoncourse-progress-v2')||'{}')||{};
       const complete=available.filter(lesson=>progress[lesson.id]).length;
       document.getElementById('pythonProgress').textContent=complete+' / '+available.length+' complete';
       document.getElementById('pythonProgressFill').style.width=(complete/available.length*100)+'%';
