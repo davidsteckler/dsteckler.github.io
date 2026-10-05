@@ -1904,6 +1904,9 @@ for i in range(4):
     var sctx = spriteCanvas.getContext("2d");
     var world = document.getElementById("worldWrap");
 
+    var courseExecutionCalls=[];
+    function recordCourseCall(name,args){if(!COURSE_EMBED)return;var a=args[0];courseExecutionCalls.push({name:name,num:typeof a==="number"?a:null,str:typeof a==="string"?a:null,raw:String(a===undefined?"":a)});}
+
     var state = {
       x:0, y:0, heading:0,
       penDown:true,
@@ -2248,6 +2251,7 @@ for i in range(4):
     }
 
     function reset(){
+      courseExecutionCalls=[];
       motionStatus.textContent="";
       ctx.clearRect(0,0,400,400);
       sctx.clearRect(0,0,400,400);
@@ -2409,22 +2413,22 @@ for i in range(4):
 
     function installBuiltins(){
       function fn0(name,cb){
-        Sk.builtins[name]=new Sk.builtin.func(function(){cb();return none();});
+        Sk.builtins[name]=new Sk.builtin.func(function(){recordCourseCall(name,[]);cb();return none();});
       }
       function fn1(name,cb){
-        Sk.builtins[name]=new Sk.builtin.func(function(a){return cb(js(a));});
+        Sk.builtins[name]=new Sk.builtin.func(function(a){recordCourseCall(name,[js(a)]);return cb(js(a));});
       }
       function fn2(name,cb){
-        Sk.builtins[name]=new Sk.builtin.func(function(a,b){return cb(js(a),js(b));});
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){recordCourseCall(name,[js(a),js(b)]);return cb(js(a),js(b));});
       }
       function anim1(name,cb){
         Sk.builtins[name]=new Sk.builtin.func(function(a){
-          return Sk.misceval.promiseToSuspension(cb(js(a)));
+          recordCourseCall(name,[js(a)]);return Sk.misceval.promiseToSuspension(cb(js(a)));
         });
       }
       function anim2(name,cb){
         Sk.builtins[name]=new Sk.builtin.func(function(a,b){
-          return Sk.misceval.promiseToSuspension(cb(js(a),js(b)));
+          recordCourseCall(name,[js(a),js(b)]);return Sk.misceval.promiseToSuspension(cb(js(a),js(b)));
         });
       }
       anim1("forward",animateForward);
@@ -2464,6 +2468,7 @@ for i in range(4):
         return none();
       });
       var circleFn=function(radius,extent,steps){
+        recordCourseCall("circle",[js(radius)]);
         return Sk.misceval.promiseToSuspension(
           animateCircle(
             js(radius),
@@ -2547,7 +2552,8 @@ for i in range(4):
           fillColor:String(state.fillColor),
           pensize:Number(state.size)||1,
           background:String(state.background||""),
-          printed:coursePrintedText
+          printed:coursePrintedText,
+          calls:courseExecutionCalls.slice()
         };
       }
     };
