@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: steckler-youtube-audio
+    runtime: docker
+    plan: free
+    rootDir: youtube-mp3/server
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: CONVERTER_ACCESS_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://dsteckler.com,https://www.dsteckler.com

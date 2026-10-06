@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YouTube to MP3 · David Steckler</title>
+<meta name="description" content="Convert a YouTube video to a downloadable MP3.">
+<link rel="stylesheet" href="/shared-site-header.css?v=1">
+<style>
+:root{color-scheme:light;--ink:#1c1b18;--muted:#716d65;--paper:#f0ebe1;--card:#faf7f0;--teal:#1a5c6b;--line:#d8d2c6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,sans-serif}a{color:var(--teal)}header,footer{max-width:1000px;margin:auto;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:20px}header a,footer a{text-decoration:none}.brand{font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--ink)}main{max-width:730px;margin:48px auto 80px;padding:0 24px}.eyebrow{font:12px ui-monospace,monospace;color:var(--teal);letter-spacing:.1em}h1{font:600 clamp(38px,7vw,64px)/1.05 Georgia,serif;letter-spacing:-.04em;margin:18px 0}h1 span{color:var(--teal)}.intro{color:var(--muted);margin-bottom:34px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 50px #1c1b1809;padding:28px}.wave{height:68px;display:flex;justify-content:center;gap:5px;align-items:center;margin:0 0 25px}.wave i{display:block;width:5px;height:var(--h);border-radius:5px;background:var(--teal);opacity:.75}.working .wave i{animation:pulse .9s ease-in-out infinite alternate;animation-delay:var(--delay)}@keyframes pulse{to{transform:scaleY(.35);opacity:.3}}label,.label{display:block;font-size:13px;font-weight:700;margin:0 0 8px}input,select,button{font:inherit}input[type=url],input[type=password]{width:100%;padding:14px 15px;color:var(--ink);background:white;border:1px solid var(--line);border-radius:12px;font-size:16px}input:focus,select:focus,button:focus-visible,a:focus-visible{outline:3px solid #1a5c6b55;outline-offset:3px}.row{display:flex;align-items:end;gap:16px;margin-top:20px}.quality{flex:1}select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:white}.primary{border:0;background:var(--teal);color:white;border-radius:12px;padding:14px 22px;font-weight:700;cursor:pointer;min-height:49px}.primary:disabled{opacity:.45;cursor:not-allowed}.note{font-size:12px;color:var(--muted);margin:18px 0 0}.status{margin-top:20px;font-size:14px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#fff9;overflow-wrap:anywhere}.status.error{color:#943a27;border-color:#c58b7c}.status:empty{display:none}.result{margin-top:22px;border-top:1px solid var(--line);padding-top:22px}.result h2{font-size:18px;margin:0 0 6px;overflow-wrap:anywhere}.meta{color:var(--muted);font-size:13px}.download{display:inline-flex;text-decoration:none;margin-top:12px}.progress{width:100%;accent-color:var(--teal);height:6px;margin:12px 0 0}details{margin-top:24px;color:var(--muted);font-size:13px}summary{cursor:pointer;padding:8px 0}details label{margin-top:14px}details .primary{font-size:13px;margin-top:16px;padding:10px 16px;min-height:40px}details p{line-height:1.6}footer{border-top:1px solid var(--line);font-size:12px;color:var(--muted)}[hidden]{display:none!important}@media(max-width:520px){main{margin-top:28px;padding:0 18px}.card{padding:22px}.row{flex-direction:column;align-items:stretch}.quality{width:100%}header,footer{padding:20px 18px}.wave{gap:4px}}@media(prefers-reduced-motion:reduce){.working .wave i{animation:none}}
+</style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-V55DVP2SHR');</script>
+</head>
+<body>
+<header><a class="brand" href="/">David Steckler</a><a href="/search.html">Explore the site ↗</a></header>
+<main>
+<div class="eyebrow">AUDIO TOOLS / 01</div><h1>YouTube <span>to MP3.</span></h1>
+<p class="intro">Paste a video link. Save the audio as an MP3.</p>
+<section class="card" id="card" aria-label="MP3 converter">
+<div class="wave" aria-hidden="true" id="wave"></div>
+<form id="convertForm">
+<label for="videoUrl">YouTube link</label><input id="videoUrl" type="url" placeholder="https://www.youtube.com/watch?v=…" required autocomplete="off" spellcheck="false">
+<div class="row"><div class="quality"><label for="quality">MP3 quality</label><select id="quality"><option value="128">128 kbps · smaller file</option><option value="192" selected>192 kbps · standard</option><option value="320">320 kbps · larger file</option></select></div><button class="primary" id="convert" disabled>Convert to MP3</button></div>
+<p class="note">Higher bitrate increases file size; source audio determines the detail available. Use videos you own or have permission to download.</p>
+</form>
+<div class="status" id="status" role="status" aria-live="polite">Checking converter connection…</div>
+<progress class="progress" id="progress" max="100" hidden aria-label="Audio download progress"></progress>
+<section class="result" id="result" hidden><h2 id="videoTitle"></h2><div class="meta" id="videoMeta"></div><a class="primary download" id="download">Download MP3 ↓</a><p class="note">The download is available for 30 minutes.</p></section>
+</section>
+<details id="settings"><summary>Converter connection</summary>
+<p id="connectionNote">Connect the audio server to enable conversion.</p>
+<form id="connectionForm"><label for="serverUrl">Audio server URL</label><input type="url" id="serverUrl" placeholder="https://your-audio-server.example.com" required spellcheck="false"><label for="accessKey">Access key</label><input type="password" id="accessKey" autocomplete="off" required placeholder="Your server access key"><button class="primary" id="connect">Connect server</button></form>
+<p>The server address is saved in this browser. The access key is kept for this tab’s session.</p>
+</details>
+</main><footer><a href="/">Home</a><a href="/learn/">Student home</a><a href="/search.html">Search</a><span>David Steckler</span></footer>
+<script src="./app.js"></script>
+</body></html>
