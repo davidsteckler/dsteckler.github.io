@@ -1,0 +1,83 @@
+import {chromium} from 'playwright';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {createRequire} from 'node:module';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const require=createRequire(import.meta.url);
+const root=path.dirname(path.dirname(fileURLToPath(import.meta.url))),origin='http://127.0.0.1:8793';
+const server=spawn('python3',['-m','http.server','8793','--bind','127.0.0.1'],{cwd:root,stdio:'ignore'});
+let browser;
+try{
+  for(let i=0;i<60;i++){try{await fetch(origin);break;}catch{await new Promise(resolve=>setTimeout(resolve,100));}}
+  vm.runInThisContext(fs.readFileSync(path.join(root,'turtle/history-diff.js'),'utf8'));
+  for(const [oldCode,newCode] of [['',''],['','a'],['a\nb\na','a\na\nb'],['x\n','x'],['a\nb\nc','a\nx\nc'],['q\n'.repeat(800),'z\n'.repeat(700)]]){
+    const {rows}=globalThis.TurtleHistoryDiff(oldCode,newCode);
+    assert.equal(rows.filter(row=>row.kind!=='added').map(row=>row.text).join('\n'),oldCode);
+    assert.equal(rows.filter(row=>row.kind!=='removed').map(row=>row.text).join('\n'),newCode);
+  }
+  browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
+  const context=await browser.newContext({viewport:{width:1600,height:1000}});
+  const deps=[['**/codemirror.min.css','codemirror/lib/codemirror.css'],['**/codemirror.min.js','codemirror/lib/codemirror.js'],['**/mode/python/python.min.js','codemirror/mode/python/python.js'],['**/skulpt.min.js','skulpt/dist/skulpt.min.js'],['**/skulpt-stdlib.js','skulpt/dist/skulpt-stdlib.js']];
+  for(const [pattern,file] of deps)await context.route(pattern,route=>route.fulfill({path:require.resolve(file)}));
+  await context.route('**/googletagmanager.com/**',route=>route.abort());
+  const oldCode='forward(35)\nleft(90)\nforward(60)',newCode='forward(50)\nleft(90)\nforward(60)';
+  await context.addInitScript(({oldCode,newCode})=>{
+    if(!location.pathname.startsWith('/turtle/')||localStorage.getItem('dsteckler-turtle-code-v1-history-v1'))return;
+    localStorage.setItem('dsteckler-turtle-code-v1',newCode);
+    localStorage.setItem('dsteckler-turtle-code-v1-history-v1',JSON.stringify([{time:Date.now()-1000,code:newCode,label:'Autosave'},{time:Date.now()-60000,code:oldCode,label:'Autosave'}]));
+  },{oldCode,newCode});
+  const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));page.on('dialog',dialog=>dialog.accept());
+  await page.goto(origin+'/turtle/');await page.waitForFunction(()=>window.TurtleSidebar&&window.TurtleWorkbench);
+  const editor=page.locator('.code-panel .CodeMirror'),preview=page.locator('.history-preview .CodeMirror');
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),newCode);
+  assert((await page.locator('.reference-topic').count())>=95);
+  await page.locator('#codeHistoryBtn').click();assert(await page.locator('#historyPane').isVisible());
+  assert.equal(await preview.evaluate(element=>element.CodeMirror.getValue()),newCode);
+  await page.locator('.history-version').nth(1).hover();
+  assert.equal(await preview.evaluate(element=>element.CodeMirror.getValue()),oldCode);
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),newCode,'Hover leaves the working editor intact');
+  await page.locator('.history-version').first().click();await page.locator('#historyView').selectOption('diff');
+  assert.equal(await preview.evaluate(element=>element.CodeMirror.getValue()),'forward(35)\nforward(50)\nleft(90)\nforward(60)');
+  assert.equal(await page.locator('.history-diff-added').count(),1);assert.equal(await page.locator('.history-diff-removed').count(),1);
+  await page.locator('#historyView').selectOption('code');await page.locator('.history-version').nth(1).click();
+  await page.locator('#restoreHistoryVersion').click();
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),oldCode);
+  assert(await page.evaluate(code=>TurtleWorkbench.readHistory().some(entry=>entry.code===code),newCode),'Restore retains the replaced code');
+  await page.locator('#referenceTab').click();await page.locator('#commandSearch').fill('color');
+  await page.locator('.reference-topic').filter({has:page.getByText('color()',{exact:true})}).click();
+  assert(await page.getByRole('heading',{name:'color()',exact:true}).isVisible());
+  await page.locator('.reference-example').filter({hasText:'Traffic lights'}).click();
+  assert.match(await page.locator('.reference-code').textContent(),/limegreen/);
+  await page.getByRole('button',{name:'Load example',exact:true}).click();
+  const loaded=await editor.evaluate(element=>element.CodeMirror.getValue());assert.match(loaded,/limegreen/);
+  assert(await page.evaluate(code=>TurtleWorkbench.readHistory().some(entry=>entry.code===code),oldCode));
+  await editor.evaluate(element=>{element.CodeMirror.setValue('forward(137)\nleft(42)');});
+  await page.locator('#clearCodeBtn').click();assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),'');
+  await page.locator('#codeHistoryBtn').click();
+  const index=await page.evaluate(()=>TurtleWorkbench.readHistory().findIndex(entry=>entry.code==='forward(137)\nleft(42)'));assert(index>=0);
+  await page.locator('.history-version').nth(index).click();await page.locator('#restoreHistoryVersion').click();
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),'forward(137)\nleft(42)');
+  await page.reload();await page.waitForFunction(()=>window.TurtleSidebar);assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),'forward(137)\nleft(42)');
+  await page.locator('#referenceTab').click();await page.locator('#commandSearch').fill('radius');assert((await page.locator('.reference-topic').count())>0);
+  await page.locator('#commandSearch').fill('zz-no-matching-command');assert(await page.locator('#commandEmpty').isVisible());
+  await page.locator('#commandSearch').fill('');
+  await page.locator('#commandSearch').fill('forward');await page.locator('.reference-topic').filter({has:page.getByText('forward()',{exact:true})}).click();
+  await editor.evaluate(element=>{element.CodeMirror.setValue('color("teal")');element.CodeMirror.setCursor({line:0,ch:13});});
+  await page.getByRole('button',{name:'Insert example',exact:true}).click();
+  assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^color\("teal"\)\npensize\(4\)\nforward\(100\)/);
+  await page.locator('#runBtn').click();await page.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good'));assert(!await page.locator('.error-card').count());
+  await page.locator('#codeHistoryBtn').click();
+  assert((await page.locator('#commandLibrary').boundingBox()).width>=500);
+  if(process.env.TURTLE_SIDEBAR_PROOF){fs.mkdirSync(process.env.TURTLE_SIDEBAR_PROOF,{recursive:true});await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'history-desktop.png')});}
+  await page.setViewportSize({width:390,height:844});
+  assert(await page.locator('#historyPane').isVisible());const box=await page.locator('#commandLibrary').boundingBox();assert(box.width<=390);
+  await page.locator('#historyTab').press('ArrowLeft');assert(await page.locator('#referencePane').isVisible());
+  await page.locator('#referenceTab').press('ArrowRight');assert(await page.locator('#historyPane').isVisible());
+  if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'history-mobile.png')});
+  await page.locator('#commandsClose').click();await page.locator('#codeHistoryBtn').click();assert(await page.locator('#historyPane').isVisible());
+  assert.deepEqual(errors,[]);
+  console.log('PASS shared reference, legacy history, hover previews, diffs, restore, immediate clear, reload, insert/load examples, Python run, keyboard tabs, desktop and mobile.');
+}finally{await browser?.close();server.kill();}

@@ -1,0 +1,37 @@
+name: Turtle reference and code history
+on:
+  push:
+    paths:
+      - 'turtle/**'
+      - 'turtlereference/**'
+      - 'pythoncourse/test-code-history.mjs'
+      - '.github/workflows/turtle-sidebar.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sidebar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test dependencies
+        run: |
+          npm install --no-save playwright codemirror@5 skulpt
+          npx playwright install --with-deps chromium
+      - name: Check reference and history
+        env:
+          TURTLE_SIDEBAR_PROOF: turtle-sidebar-proof
+        run: node turtle/test-sidebar.mjs
+      - name: Check course code recovery
+        run: node pythoncourse/test-code-history.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: turtle-sidebar-proof
+          path: turtle-sidebar-proof
+          if-no-files-found: warn
+          retention-days: 7

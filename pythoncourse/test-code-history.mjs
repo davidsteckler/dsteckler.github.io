@@ -20,21 +20,22 @@ try {
  // Clear immediately, before the debounce fires: the previous code must survive.
  await frame.locator('#clearCodeBtn').click();
  await frame.locator('#codeHistoryBtn').click();
- const dialog=frame.locator('dialog[open]');
+ const history=frame.locator('#historyPane');
  const entries=await frame.evaluate(()=>JSON.parse(localStorage.getItem('dsteckler-pythoncourse-'+new URL(location.href).searchParams.get('lesson')+'-history-v1')));
  const index=entries.findIndex(e=>e.code===original);assert(index>=0);
- await dialog.locator('select').selectOption(String(index));assert.equal(await dialog.locator('pre').textContent(),original);
- await dialog.getByRole('button',{name:'Restore this version'}).click();
- assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),original);
- await page.reload();frame=await editor();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),original);
+ await history.locator('.history-version').nth(index).click();assert.equal(await history.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),original);
+ await history.getByRole('button',{name:'Restore this version'}).click();
+ assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),original);
+ await frame.locator('#commandsClose').click();
+ await page.reload();frame=await editor();assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),original);
  await page.locator('#resetBtn').click();
- assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'');
+ assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'');
  assert(await frame.evaluate(code=>JSON.parse(localStorage.getItem('dsteckler-pythoncourse-'+new URL(location.href).searchParams.get('lesson')+'-history-v1')).some(e=>e.code===code),original));
  await page.locator('.step-dot').nth(7).click();frame=await editor();
  assert.match(await page.locator('#resetBtn').textContent(),/assignment/);
  assert(!await frame.evaluate(code=>JSON.parse(localStorage.getItem(new URL(location.href).searchParams.get('lesson')? 'dsteckler-pythoncourse-'+new URL(location.href).searchParams.get('lesson')+'-history-v1':'')||'[]').some(e=>e.code===code),original));
  await page.setViewportSize({width:390,height:844});
  await page.locator('#editorTab').click();
- await frame.locator('#codeHistoryBtn').click();assert(await frame.locator('dialog[open]').isVisible());
+ await frame.locator('#codeHistoryBtn').click();assert(await frame.locator('#historyPane').isVisible());
  assert.deepEqual(errors,[]);console.log('Code recovery, immediate clear, reload, scoped history, starter loading and mobile history passed.');
 } finally {await browser?.close();server.kill();}

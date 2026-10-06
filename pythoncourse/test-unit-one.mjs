@@ -80,10 +80,11 @@ try{
   const first=lessons[0];await page.goto(origin+'/pythoncourse/?lesson='+first.id);frame=await editor();
   const draft='forward(80)\nleft(90)\nforward(80)';await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),draft);
   await frame.locator('#clearCodeBtn').click();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'');
-  await frame.locator('#codeHistoryBtn').click();const history=frame.locator('dialog[open]');
+  await frame.locator('#codeHistoryBtn').click();const history=frame.locator('#historyPane');
   const saved=await frame.evaluate(()=>JSON.parse(localStorage.getItem('dsteckler-pythoncourse-'+new URL(location.href).searchParams.get('lesson')+'-history-v1')));
   const index=saved.findIndex(v=>v.code===draft);assert(index>=0,'Immediate clear preserves typed code in history');
-  await history.locator('select').selectOption(String(index));await history.getByRole('button',{name:'Restore this version'}).click();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),draft);
+  await history.locator('.history-version').nth(index).click();await history.getByRole('button',{name:'Restore this version'}).click();assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),draft);
+  await frame.locator('#commandsClose').click();
   const questionIndex=first.steps.findIndex(s=>s.question),q=first.steps[questionIndex].question;
   frame=await goStep(questionIndex);assert(await page.locator('#replayPrediction').isDisabled());
   await page.locator('#checkPrediction').click();assert((await page.locator('#predictionFeedback').innerText()).includes('Choose a prediction first'));
