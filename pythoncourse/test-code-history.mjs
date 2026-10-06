@@ -16,7 +16,7 @@ try {
  async function editor(){await page.waitForFunction(()=>document.getElementById('editorFrame').contentDocument?.querySelector('.CodeMirror')&&new URL(document.getElementById('editorFrame').contentWindow.location.href).searchParams.get('lesson')===document.getElementById('editorFrame').dataset.lessonKey);return page.frames().find(f=>f.url().includes('embed=course'));}
  let frame=await editor();
  const original='forward(137)\nleft(42)';
- await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),original);
+ await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),original);
  // Clear immediately, before the debounce fires: the previous code must survive.
  await frame.locator('#clearCodeBtn').click();
  await frame.locator('#codeHistoryBtn').click();

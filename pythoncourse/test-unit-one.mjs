@@ -33,7 +33,7 @@ try{
   if(process.env.UNIT_TEST_UI_ONLY!=='1'){
   for(const lesson of lessons){
     await page.goto(origin+'/pythoncourse/?lesson='+lesson.id);frame=await editor();
-    assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'','Example starts empty: '+lesson.id);
+    assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'','Example starts empty: '+lesson.id);
     assert(lesson.purpose&&lesson.objective&&lesson.notes);
     assert.equal(lesson.steps.filter(s=>s.question).length,2);
     assert(lesson.steps.every(s=>s.id&&s.title&&s.task&&s.phase));
@@ -78,8 +78,8 @@ try{
   }
   // Check visible interactions using the actual embedded Python editor.
   const first=lessons[0];await page.goto(origin+'/pythoncourse/?lesson='+first.id);frame=await editor();
-  const draft='forward(80)\nleft(90)\nforward(80)';await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),draft);
-  await frame.locator('#clearCodeBtn').click();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'');
+  const draft='forward(80)\nleft(90)\nforward(80)';await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),draft);
+  await frame.locator('#clearCodeBtn').click();assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'');
   await frame.locator('#codeHistoryBtn').click();const history=frame.locator('#historyPane');
   const saved=await frame.evaluate(()=>JSON.parse(localStorage.getItem('dsteckler-pythoncourse-'+new URL(location.href).searchParams.get('lesson')+'-history-v1')));
   const index=saved.findIndex(v=>v.code===draft);assert(index>=0,'Immediate clear preserves typed code in history');
@@ -93,24 +93,24 @@ try{
   await frame.waitForFunction(()=>document.getElementById('runBtn').disabled===false);
   await page.locator('input[name="prediction"]').nth(q.answer).check();await page.locator('#checkPrediction').click();assert((await page.locator('#predictionFeedback').innerText()).startsWith('✓ Corrected prediction'));
   assert((await page.evaluate(()=>Object.values(window.__unitTest.readResponses()).find(v=>v?.firstChoice!==undefined))).firstChoice===wrong);
-  frame=await goStep(0);assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),draft,'Prediction keeps typed draft');
+  frame=await goStep(0);assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),draft,'Prediction keeps typed draft');
   const creative=first.steps.length-1;await goStep(creative);assert((await page.locator('#visibleCheckStatus').innerText()).includes('Pass this assignment'));
-  assert.equal(await page.locator('#stepPhase').innerText(),'Required assignment');frame=await editor();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'','Assignment starts blank');
-  await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.setValue('forward(1)'));await page.locator('#checkCheckpoint').click();await page.waitForSelector('#checkFeedback.bad');
-  await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),solutions[first.steps.find(s=>s.check).id]);await frame.locator('#runBtn').click();await frame.waitForFunction(()=>document.getElementById('runBtn').disabled);await page.locator('#checkCheckpoint').click();await page.waitForSelector('#checkFeedback.good');assert.equal(await page.locator('#checkCheckpoint').innerText(),'✓ Assignment passed');
+  assert.equal(await page.locator('#stepPhase').innerText(),'Required assignment');frame=await editor();assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'','Assignment starts blank');
+  await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.setValue('forward(1)'));await page.locator('#checkCheckpoint').click();await page.waitForSelector('#checkFeedback.bad');
+  await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),solutions[first.steps.find(s=>s.check).id]);await frame.locator('#runBtn').click();await frame.waitForFunction(()=>document.getElementById('runBtn').disabled);await page.locator('#checkCheckpoint').click();await page.waitForSelector('#checkFeedback.good');assert.equal(await page.locator('#checkCheckpoint').innerText(),'✓ Assignment passed');
   assert(await frame.locator('#courseTargetSuccess').isVisible());assert(await frame.locator('#courseTargetLabel').evaluate(el=>el.parentElement.classList.contains('world-info')));
-  await goStep(creative);frame=await editor();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'','Project starts blank');
-  const project=first.visuals[0].previewCode;await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),project);await goStep(0);await goStep(creative);frame=await editor();assert.equal(await frame.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),project,'Project saves separately');
+  await goStep(creative);frame=await editor();assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),'','Project starts blank');
+  const project=first.visuals[0].previewCode;await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),project);await goStep(0);await goStep(creative);frame=await editor();assert.equal(await frame.locator('.code-panel .CodeMirror').evaluate(el=>el.CodeMirror.getValue()),project,'Project saves separately');
   frame=await goStep(first.steps.findIndex(s=>s.response));await page.locator('#evidenceResponse').fill('The first side got longer; the corner stayed 90 degrees.');await page.reload();await editor();assert((await page.locator('#evidenceResponse').inputValue()).includes('corner stayed'));
   // A guide must stay above the code when the referenced lines do not exist yet.
-  const route=lessons[1];await page.goto(origin+'/pythoncourse/?lesson='+route.id);frame=await editor();await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),route.steps[0].example);frame=await goStep(route.steps.findIndex(s=>s.id.endsWith('close-example')));
+  const route=lessons[1];await page.goto(origin+'/pythoncourse/?lesson='+route.id);frame=await editor();await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),route.steps[0].example);frame=await goStep(route.steps.findIndex(s=>s.id.endsWith('close-example')));
   await frame.waitForSelector('#courseLineGuide');assert(await frame.locator('#courseLineGuide').evaluate(el=>el.parentElement.classList.contains('code-panel')));assert.equal(await frame.locator('.CodeMirror .course-line-guide').count(),0);
   await page.locator('.step-dot').nth(0).click();assert(await page.locator('#checkFeedback').isHidden());assert(await page.locator('#checkCheckpoint').isHidden());
   // Readable spacing and text mode, on desktop and on a phone.
   const ascii=lessons[12];await page.goto(origin+'/pythoncourse/?lesson='+ascii.id);frame=await editor();assert(await frame.locator('body').evaluate(el=>el.classList.contains('course-text-output')));
   assert(await frame.locator('#worldStage').isHidden());assert.equal((await frame.locator('#worldPanel .panel-label').innerText()).toLowerCase(),'text output');
   assert.equal(await page.locator('.primary-symbols .symbol-button').count(),4);
-  await frame.locator('.CodeMirror').evaluate(el=>{el.CodeMirror.setValue('print("")');el.CodeMirror.setCursor({line:0,ch:7});});
+  await frame.locator('.code-panel .CodeMirror').evaluate(el=>{el.CodeMirror.setValue('print("")');el.CodeMirror.setCursor({line:0,ch:7});});
   await page.getByRole('button',{name:'Insert and copy light shade ░'}).click();await frame.waitForFunction(()=>document.querySelector('.CodeMirror').CodeMirror.getValue()==='print("░")');
   await page.locator('#showSpaces').click();assert((await page.locator('#stepExample').innerText()).includes('print'));
   frame=await goStep(ascii.steps.findIndex(s=>s.phase==='Required assignment'));await page.locator('#showSpaces').click();assert((await page.locator('#stepExample').innerText()).includes('█·█'));
@@ -134,13 +134,13 @@ try{
       }
       for(const step of lesson.steps.filter(s=>s.check)){
         const frame=await goStep(lesson.steps.indexOf(step));
-        await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),solutions[step.id]);
+        await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),solutions[step.id]);
         await page.locator('#checkCheckpoint').click();await page.waitForSelector('#checkFeedback.good');
         assert.equal(await page.locator('#checkCheckpoint').innerText(),'✓ Assignment passed');
       }
       const frame=await goStep(lesson.steps.length-1),v=lesson.visuals[0],code=v.previewCode||v.ascii.split('\n').map(row=>'print('+JSON.stringify(row)+')').join('\n');
       assert.equal(await page.locator('#stepPhase').innerText(),'Create your own');
-      await frame.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),code);
+      await frame.locator('.code-panel .CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),code);
       await page.locator('#nextBtn').click();await page.waitForSelector('#checkFeedback.good');
       assert.equal(await page.evaluate(id=>JSON.parse(localStorage.getItem('dsteckler-pythoncourse-progress-v3-unit1'))[id],lesson.id),true);
       console.log('PASS complete lesson through controls '+lesson.number);
