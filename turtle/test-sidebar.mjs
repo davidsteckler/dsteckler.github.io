@@ -61,6 +61,8 @@ try{
   await reference.locator('.code-panel .CodeMirror').waitFor();
   await page.waitForFunction(()=>document.querySelector('.reference-runner').contentWindow.TurtleWorkbench?.editor.getValue().includes('limegreen'));
   assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),oldCode,'Preview leaves main code untouched');
+  const previewSizes=await page.locator('.reference-runner').evaluate(frame=>{const doc=frame.contentDocument;return {code:doc.querySelector('.code-panel').getBoundingClientRect().width,world:doc.querySelector('.world-panel').getBoundingClientRect().width,width:frame.clientWidth};});
+  assert(previewSizes.code>previewSizes.width*.3);assert(previewSizes.world>previewSizes.width*.3,'Drawing occupies a full pane in narrow reference embed');
   await page.waitForFunction(()=>document.querySelector('.reference-runner').contentDocument.getElementById('codeStatus').classList.contains('good'));
   assert.equal(await page.locator('.reference-runner-actions button').count(),3);
   await page.getByRole('button',{name:'Load into main editor',exact:true}).click();
