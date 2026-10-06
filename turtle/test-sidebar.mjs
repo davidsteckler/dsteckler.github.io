@@ -57,9 +57,13 @@ try{
   await page.locator('.reference-topic').filter({has:page.getByText('color()',{exact:true})}).click();
   assert(await page.getByRole('heading',{name:'color()',exact:true}).isVisible());
   await page.locator('.reference-example').filter({hasText:'Traffic lights'}).click();
-  assert.match(await page.locator('.reference-code').textContent(),/limegreen/);
-  assert.equal(await page.locator('.reference-actions button').count(),1,'One example-loading action');
-  await page.getByRole('button',{name:'Load example',exact:true}).click();
+  const reference=page.frameLocator('.reference-runner');
+  await reference.locator('.code-panel .CodeMirror').waitFor();
+  await page.waitForFunction(()=>document.querySelector('.reference-runner').contentWindow.TurtleWorkbench?.editor.getValue().includes('limegreen'));
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),oldCode,'Preview leaves main code untouched');
+  await page.waitForFunction(()=>document.querySelector('.reference-runner').contentDocument.getElementById('codeStatus').classList.contains('good'));
+  assert.equal(await page.locator('.reference-runner-actions button').count(),3);
+  await page.getByRole('button',{name:'Load into main editor',exact:true}).click();
   const loaded=await editor.evaluate(element=>element.CodeMirror.getValue());assert.match(loaded,/limegreen/);
   assert(await page.evaluate(code=>TurtleWorkbench.readHistory().some(entry=>entry.code===code),oldCode));
   await editor.evaluate(element=>{element.CodeMirror.setValue('forward(137)\nleft(42)');});
@@ -73,7 +77,8 @@ try{
   await page.locator('#commandSearch').fill('zz-no-matching-command');assert(await page.locator('#commandEmpty').isVisible());
   await page.locator('#commandSearch').fill('');
   await page.locator('#commandSearch').fill('forward');await page.locator('.reference-topic').filter({has:page.getByText('forward()',{exact:true})}).click();
-  await page.getByRole('button',{name:'Load example',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.reference-runner').contentWindow.TurtleWorkbench?.editor.getValue().includes('forward(100)'));
+  await page.getByRole('button',{name:'Load into main editor',exact:true}).click();
   assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^pensize\(4\)\nforward\(100\)/);
   await page.locator('#runBtn').click();await page.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good'));assert(!await page.locator('.error-card').count());
   const displayCode=await editor.evaluate(element=>element.CodeMirror.getValue());

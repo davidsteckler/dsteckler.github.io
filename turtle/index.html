@@ -856,7 +856,7 @@
   body.trace-embed .editor-divider{display:block}
 }
 </style>
-<link rel="stylesheet" href="sidebar.css?v=4">
+<link rel="stylesheet" href="sidebar.css?v=5">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1065,7 +1065,8 @@ for i in range(4):
   var STORAGE_KEY = "dsteckler-turtle-code-v1";
   var QUERY_PARAMS = new URLSearchParams(window.location.search);
   var EMBED_MODE = QUERY_PARAMS.get("embed") || "";
-  var TRACE_EMBED = EMBED_MODE === "trace";
+  var REFERENCE_EMBED = EMBED_MODE === "reference";
+  var TRACE_EMBED = EMBED_MODE === "trace" || REFERENCE_EMBED;
   var COURSE_EMBED = EMBED_MODE === "course";
   var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
   var COURSE_CODE = QUERY_PARAMS.get("code");
@@ -1160,6 +1161,7 @@ for i in range(4):
   };
   var TRACE_CODE = TRACE_PROGRAMS[TRACE_EXAMPLE] || TRACE_PROGRAMS.sequence;
   if(TRACE_EMBED) document.body.classList.add("trace-embed");
+  if(REFERENCE_EMBED) document.body.classList.add("reference-embed");
   if(COURSE_EMBED) document.body.classList.add("course-embed");
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
@@ -1379,7 +1381,7 @@ for i in range(4):
 
   if(TRACE_EMBED){
     editor.setValue(TRACE_CODE);
-    editor.setOption("readOnly","nocursor");
+    editor.setOption("readOnly",REFERENCE_EMBED?false:"nocursor");
     saveStatus.textContent = "trace example";
   }else if(COURSE_EMBED){
     try {
@@ -2822,7 +2824,7 @@ for i in range(4):
 <script src="/turtlereference/reference-trail-examples.js?v=1"></script>
 <script src="/turtlereference/example-previews.js?v=2"></script>
 <script src="history-diff.js?v=1"></script>
-<script src="sidebar.js?v=3"></script>
+<script src="sidebar.js?v=4"></script>
 <script src="display.js?v=1"></script>
 </body>
 </html>

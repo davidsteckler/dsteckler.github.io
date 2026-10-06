@@ -52,13 +52,6 @@
     const detail=$('referenceDetail');detail.replaceChildren();
     detail.append(action('← All topics',()=>{browse();$('referenceScroll').scrollTop=browseScroll;},'reference-back'));
     detail.append(make('div','reference-group-label',topic.group),make('h2','',topic.title),make('p','',topic.summary));
-    detail.append(make('pre','reference-syntax',topic.syntax));
-    if(topic.aliases?.length)detail.append(make('p','', 'Also: '+topic.aliases.join(', ')));
-    if(topic.params?.length){
-      const params=make('dl','reference-params');
-      for(const [name,explanation] of topic.params)params.append(make('dt','',name),make('dd','',explanation));
-      detail.append(params);
-    }
     detail.append(make('h3','','Examples'));
     const strip=make('div','reference-example-strip');strip.setAttribute('aria-label','Example variations');
     for(const example of topic.examples||[topic]){
@@ -68,6 +61,21 @@
       button.append(make('span','',example.label||'Example'));strip.append(button);
     }
     detail.append(strip,make('div','reference-example-content'));
+    const runner=make('iframe','reference-runner');runner.title='Runnable reference example';runner.src='/turtle/?embed=reference';
+    runner.addEventListener('load',()=>updateRunner());detail.append(runner);
+    const runnerButtons=make('div','reference-runner-actions');
+    runnerButtons.append(action('▶ Run',()=>runner.contentWindow.TraceTurtleEmbed?.run(),'btn primary'),action('Stop',()=>runner.contentWindow.TraceTurtleEmbed?.stop()),action('Load into main editor',()=>{
+      const code=runner.contentWindow.TurtleWorkbench?.editor.getValue()||currentExample.code;
+      workbench.replace(code,'Loaded '+(currentExample.label||currentTopic.title)+' reference example');
+      if(innerWidth<=1350)workbench.closeSidebar();
+    }));detail.append(runnerButtons);
+    const notes=make('details','reference-topic-notes');notes.append(make('summary','','Syntax & parameters'));
+    notes.append(make('pre','reference-syntax',topic.syntax));
+    if(topic.aliases?.length)notes.append(make('p','','Also: '+topic.aliases.join(', ')));
+    const params=make('dl','reference-params');
+    for(const [name,explanation] of topic.params||[])params.append(make('dt','',name),make('dd','',explanation));
+    notes.append(params);detail.append(notes,make('div','reference-example-notes'));
+
     if(topic.related?.some(id=>byId.has(id))){
       detail.append(make('h3','','Related'));
       const related=make('div','reference-related');
@@ -78,21 +86,22 @@
     const fullRow=make('p');fullRow.append(full);detail.append(fullRow);
     showExample();$('referenceScroll').scrollTop=0;
   }
+  function updateRunner(){
+    const runner=$('referenceDetail').querySelector('.reference-runner'),win=runner?.contentWindow;
+    if(!win?.TraceTurtleEmbed||!currentExample)return;
+    win.TraceTurtleEmbed.stop();win.TraceTurtleEmbed.reset();
+    win.TurtleWorkbench.editor.setValue(currentExample.code);win.TurtleWorkbench.editor.refresh();
+    win.TraceTurtleEmbed.run();
+  }
   function showExample(){
     const example=currentExample,content=$('referenceDetail').querySelector('.reference-example-content');if(!example||!content)return;
     $('referenceDetail').querySelectorAll('[data-example-id]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exampleId===example.id)));
     content.replaceChildren(make('h3','',example.label||'Example'),make('p','',example.summary));
-    const preview=thumbnail(currentTopic,example);
-    if(preview){preview.classList.add('reference-result-preview');content.append(preview);}
-    const code=make('pre','reference-code',example.code);code.setAttribute('aria-label','Example code');content.append(code);
-    const buttons=make('div','reference-actions');
-    const load=action('Load example',()=>{
-      workbench.replace(example.code,'Loaded '+(example.label||currentTopic.title)+' reference example');
-      if(innerWidth<=1350)workbench.closeSidebar();
-    },'btn primary');load.title='Load in the editor. Your current code is saved in History.';
-    buttons.append(load);content.append(buttons);
-    for(const [title,text] of [['What you should see',example.expected],['Try changing',example.tryThis]])if(text)content.append(make('h3','',title),make('p','',text));
-    if(example.watchFor){const note=make('div','reference-note');note.append(make('p','',example.watchFor));content.append(note);}
+    const notes=$('referenceDetail').querySelector('.reference-example-notes');notes.replaceChildren();
+    for(const [title,text] of [['What you should see',example.expected],['Try changing',example.tryThis]])if(text)notes.append(make('h3','',title),make('p','',text));
+    if(example.watchFor){const note=make('details','reference-topic-notes');note.append(make('summary','','Watch for'),make('p','',example.watchFor));notes.append(note);}
+    updateRunner();
+    $('referenceScroll').scrollTop=0;
   }
   $('commandSearch').addEventListener('input',()=>{browse();$('referenceScroll').scrollTop=0;});
   browse();
