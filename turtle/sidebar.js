@@ -23,7 +23,11 @@
       const heading=make('summary','',group);heading.append(make('span','',String(matches.length)));section.append(heading);
       for(const topic of matches){
         const button=action('',()=>openTopic(topic.id),'reference-topic');
-        button.append(make('strong','',topic.title),make('small','',topic.summary));
+        const image=thumbnail(topic,topic.examples?.[0]||topic);
+        if(image)button.append(image);
+        const copy=make('span','reference-topic-copy');
+        copy.append(make('strong','',topic.title),make('small','',topic.summary));
+        button.append(copy);
         section.append(button);
       }
       container.append(section);
@@ -78,6 +82,8 @@
     const example=currentExample,content=$('referenceDetail').querySelector('.reference-example-content');if(!example||!content)return;
     $('referenceDetail').querySelectorAll('[data-example-id]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exampleId===example.id)));
     content.replaceChildren(make('h3','',example.label||'Example'),make('p','',example.summary));
+    const preview=thumbnail(currentTopic,example);
+    if(preview){preview.classList.add('reference-result-preview');content.append(preview);}
     const code=make('pre','reference-code',example.code);code.setAttribute('aria-label','Example code');content.append(code);
     const buttons=make('div','reference-actions');
     const load=action('Load example',()=>{

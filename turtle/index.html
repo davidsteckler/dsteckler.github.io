@@ -856,7 +856,7 @@
   body.trace-embed .editor-divider{display:block}
 }
 </style>
-<link rel="stylesheet" href="sidebar.css?v=3">
+<link rel="stylesheet" href="sidebar.css?v=4">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1303,7 +1303,7 @@ for i in range(4):
       if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
       e.preventDefault();
       var step=field==="library"?10:2;
-      layoutState[field]=clamp(layoutState[field]+(e.key==="ArrowRight"?(field==="library"?-step:step):(field==="library"?step:-step)),min,max);
+      layoutState[field]=clamp(layoutState[field]+(e.key==="ArrowRight"?step:-step),min,max);
       applyLayout(true);
     });
   }
@@ -1314,7 +1314,7 @@ for i in range(4):
     return Math.round((e.clientX-codeRect.left)/total*100);
   });
   enableDivider(libraryDivider,"library",250,660,function(e){
-    return Math.round((workspace.getBoundingClientRect().right-e.clientX-9)/10)*10;
+    return Math.round((e.clientX-workspace.getBoundingClientRect().left-9)/10)*10;
   });
   (function enableOutputDivider(){
     if(!outputDivider)return;
@@ -2822,7 +2822,7 @@ for i in range(4):
 <script src="/turtlereference/reference-trail-examples.js?v=1"></script>
 <script src="/turtlereference/example-previews.js?v=2"></script>
 <script src="history-diff.js?v=1"></script>
-<script src="sidebar.js?v=2"></script>
+<script src="sidebar.js?v=3"></script>
 <script src="display.js?v=1"></script>
 </body>
 </html>

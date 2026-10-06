@@ -34,6 +34,13 @@ try{
   const editor=page.locator('.code-panel .CodeMirror'),preview=page.locator('.history-preview .CodeMirror');
   assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),newCode);
   assert((await page.locator('.reference-topic').count())>=95);
+  assert.equal(await page.locator('.reference-topic .reference-thumbnail').count(),await page.locator('.reference-topic').count());
+  const sidebarBounds=await page.locator('#commandLibrary').boundingBox(),codeBounds=await editor.boundingBox();
+  assert(sidebarBounds.x+sidebarBounds.width<=codeBounds.x);
+  await page.locator('#commandSearch').fill('circle');
+  assert((await page.locator('.reference-topic').count())>0);
+  assert((await page.locator('.reference-topic').count())<95);
+  await page.locator('#commandSearch').fill('');
   await page.locator('#codeHistoryBtn').click();assert(await page.locator('#historyPane').isVisible());
   assert.equal(await preview.evaluate(element=>element.CodeMirror.getValue()),newCode);
   await page.locator('.history-version').nth(1).hover();
