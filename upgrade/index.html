@@ -231,7 +231,7 @@ if(menuBtn&&nav) menuBtn.addEventListener('click',()=>{const open=nav.classList.
 const revealObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.07});
 document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
 
-const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduceMotion=false;
 const DPR=Math.min(window.devicePixelRatio||1,2);
 const C={bg:'#0d100d',teal:'#6bd0cf',teal2:'#257885',ember:'#df7138',gold:'#e3bb61',white:'#f6f1e8',dim:'rgba(246,241,232,.16)',dim2:'rgba(246,241,232,.08)'};
 
@@ -485,8 +485,8 @@ addAnimation(document.getElementById('heroCanvas'),s=>t=>drawHero(s,t));
 document.querySelectorAll('canvas[data-art]').forEach(c=>addAnimation(c,factories[c.dataset.art]));
 
 function frame(t){
-  animations.forEach(a=>{if(a.visible)a.draw(reduceMotion?0:t)});
-  if(!reduceMotion)requestAnimationFrame(frame);
+  animations.forEach(a=>{if(a.visible)a.draw(t)});
+  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 </script>
