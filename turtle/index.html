@@ -856,8 +856,8 @@
   body.trace-embed .editor-divider{display:block}
 }
 </style>
-<link rel="stylesheet" href="sidebar.css?v=2">
-<link rel="stylesheet" href="display.css?v=1">
+<link rel="stylesheet" href="sidebar.css?v=3">
+<link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -930,27 +930,6 @@
         <button class="display-step" type="button" data-display-step="outputFontSize" data-direction="1" aria-label="Increase output text size">+</button>
         <output id="outputFontSizeValue" for="outputFontSize">14 px</output>
       </div>
-    </div>
-    <div class="layout-group layout-editor">
-      <label for="editorSize">Editor / World</label>
-      <input id="editorSize" type="range" min="30" max="70" value="53" step="1" aria-label="Editor width as a percentage of the editor and world space">
-      <output id="editorSizeValue" for="editorSize">53% editor</output>
-    </div>
-    <div class="layout-group layout-library">
-      <label for="librarySize">Sidebar width</label>
-      <input id="librarySize" type="range" min="250" max="660" value="300" step="10">
-      <output id="librarySizeValue" for="librarySize">300 px</output>
-      <button class="layout-text-button" id="libraryToggle" type="button">Hide sidebar</button>
-    </div>
-    <div class="layout-group layout-mobile-editor">
-      <label for="mobileEditorSize">Editor height</label>
-      <input id="mobileEditorSize" type="range" min="220" max="650" value="355" step="10">
-      <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
-    </div>
-    <div class="layout-group layout-output">
-      <label for="outputSize">Output height</label>
-      <input id="outputSize" type="range" min="100" max="290" value="150" step="10" aria-label="Text output panel height">
-      <output id="outputSizeValue" for="outputSize">150 px</output>
     </div>
     <button class="layout-text-button reset-layout" id="resetLayout" type="button">Reset view</button>
   </section>
@@ -1034,7 +1013,7 @@ for i in range(4):
           <button class="sidebar-tab" id="referenceTab" role="tab" aria-selected="true" aria-controls="referencePane" type="button">Reference</button>
           <button class="sidebar-tab" id="historyTab" role="tab" aria-selected="false" aria-controls="historyPane" tabindex="-1" type="button">History</button>
         </div>
-        <button class="command-close" id="commandsClose" type="button" aria-label="Close sidebar">×</button>
+        <button class="command-close" id="commandsClose" type="button" aria-label="Close sidebar">Hide</button>
       </div>
       <section class="sidebar-pane" id="referencePane" role="tabpanel" aria-labelledby="referenceTab">
         <div class="reference-search">
@@ -1260,12 +1239,7 @@ for i in range(4):
   var viewWorldBtn = document.getElementById("viewWorldBtn");
   var editorDivider = document.getElementById("editorDivider");
   var libraryDivider = document.getElementById("libraryDivider");
-  var editorSize = document.getElementById("editorSize");
-  var librarySize = document.getElementById("librarySize");
-  var mobileEditorSize = document.getElementById("mobileEditorSize");
-  var outputSize = document.getElementById("outputSize");
   var outputDivider = document.getElementById("outputDivider");
-  var libraryToggle = document.getElementById("libraryToggle");
   var LAYOUT_KEY = "dsteckler-turtle-layout-v3";
   var layoutDefaults = { editor:53, library:300, mobile:355, output:150, libraryVisible:true }; // 150px keeps the desktop workspace in one viewport
   var layoutState = Object.assign({},layoutDefaults);
@@ -1290,15 +1264,6 @@ for i in range(4):
     document.documentElement.style.setProperty("--mobile-editor-height",layoutState.mobile+"px");
     document.documentElement.style.setProperty("--output-height",layoutState.output+"px");
     document.body.classList.toggle("library-hidden",!layoutState.libraryVisible);
-    editorSize.value=layoutState.editor;
-    librarySize.value=layoutState.library;
-    mobileEditorSize.value=layoutState.mobile;
-    outputSize.value=layoutState.output;
-    document.getElementById("editorSizeValue").textContent=layoutState.editor+"% editor";
-    document.getElementById("librarySizeValue").textContent=layoutState.library+" px";
-    document.getElementById("mobileEditorSizeValue").textContent=layoutState.mobile+" px";
-    document.getElementById("outputSizeValue").textContent=layoutState.output+" px";
-    libraryToggle.textContent=layoutState.libraryVisible?"Hide sidebar":"Show sidebar";
     editorDivider.setAttribute("aria-valuenow",layoutState.editor);
     libraryDivider.setAttribute("aria-valuenow",layoutState.library);
     if(outputDivider)outputDivider.setAttribute("aria-valuenow",layoutState.output);
@@ -1306,21 +1271,6 @@ for i in range(4):
     if(typeof editor!=="undefined"&&editor)editor.refresh();
     if(typeof fitWorld==="function")requestAnimationFrame(fitWorld);
   }
-  [
-    [editorSize,"editor"],
-    [librarySize,"library"],
-    [mobileEditorSize,"mobile"],
-    [outputSize,"output"]
-  ].forEach(function(pair){
-    pair[0].addEventListener("input",function(){
-      layoutState[pair[1]]=Number(this.value);
-      applyLayout(true);
-    });
-  });
-  libraryToggle.addEventListener("click",function(){
-    layoutState.libraryVisible=!layoutState.libraryVisible;
-    applyLayout(true);
-  });
   document.getElementById("resetLayout").addEventListener("click",function(){
     layoutState=Object.assign({},layoutDefaults);
     applyLayout(true);
@@ -2760,7 +2710,10 @@ for i in range(4):
   }
 
   if(commandsToggle) commandsToggle.addEventListener("click",function(){if(window.TurtleSidebar)window.TurtleSidebar.open("reference");else openCommands();});
-  if(commandsClose) commandsClose.addEventListener("click", closeCommands);
+  if(commandsClose) commandsClose.addEventListener("click", function(){
+    closeCommands();
+    if(window.innerWidth>1350&&!COURSE_EMBED){layoutState.libraryVisible=false;applyLayout(true);}
+  });
   if(commandsOverlay) commandsOverlay.addEventListener("click", closeCommands);
 
   document.addEventListener("keydown", function(e){
