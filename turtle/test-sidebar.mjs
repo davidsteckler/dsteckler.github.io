@@ -51,6 +51,7 @@ try{
   assert(await page.getByRole('heading',{name:'color()',exact:true}).isVisible());
   await page.locator('.reference-example').filter({hasText:'Traffic lights'}).click();
   assert.match(await page.locator('.reference-code').textContent(),/limegreen/);
+  assert.equal(await page.locator('.reference-actions button').count(),1,'One example-loading action');
   await page.getByRole('button',{name:'Load example',exact:true}).click();
   const loaded=await editor.evaluate(element=>element.CodeMirror.getValue());assert.match(loaded,/limegreen/);
   assert(await page.evaluate(code=>TurtleWorkbench.readHistory().some(entry=>entry.code===code),oldCode));
@@ -65,10 +66,24 @@ try{
   await page.locator('#commandSearch').fill('zz-no-matching-command');assert(await page.locator('#commandEmpty').isVisible());
   await page.locator('#commandSearch').fill('');
   await page.locator('#commandSearch').fill('forward');await page.locator('.reference-topic').filter({has:page.getByText('forward()',{exact:true})}).click();
-  await editor.evaluate(element=>{element.CodeMirror.setValue('color("teal")');element.CodeMirror.setCursor({line:0,ch:13});});
-  await page.getByRole('button',{name:'Insert example',exact:true}).click();
-  assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^color\("teal"\)\npensize\(4\)\nforward\(100\)/);
+  await page.getByRole('button',{name:'Load example',exact:true}).click();
+  assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^pensize\(4\)\nforward\(100\)/);
   await page.locator('#runBtn').click();await page.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good'));assert(!await page.locator('.error-card').count());
+  const displayCode=await editor.evaluate(element=>element.CodeMirror.getValue());
+  const initialWorld=await page.locator('#worldScaleBox').evaluate(element=>element.getBoundingClientRect().width);
+  async function slide(id,value){await page.locator('#'+id).evaluate((element,value)=>{element.value=String(value);element.dispatchEvent(new Event('input',{bubbles:true}));},value);}
+  await slide('codeFontSize',32);assert.equal(await editor.evaluate(element=>getComputedStyle(element).fontSize),'32px');
+  await page.getByRole('button',{name:'Increase code size',exact:true}).click();assert.equal(await page.locator('#codeFontSize').inputValue(),'34');
+  await page.getByRole('button',{name:'Decrease code size',exact:true}).click();assert.equal(await page.locator('#codeFontSize').inputValue(),'32');
+  await slide('outputFontSize',30);assert.equal(await page.locator('#output').evaluate(element=>getComputedStyle(element).fontSize),'30px');
+  await slide('drawingZoom',200);assert(Math.abs((await page.locator('#worldScaleBox').evaluate(element=>element.getBoundingClientRect().width))-initialWorld*2)<2);
+  await slide('drawingZoom',300);assert.equal(await page.locator('#worldStage').evaluate(element=>getComputedStyle(element).overflow),'auto');
+  assert(await page.getByRole('button',{name:'Increase drawing zoom',exact:true}).isDisabled());
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),displayCode,'Display controls preserve the program');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Zoom stays inside the drawing panel');
+  await page.reload();await page.waitForFunction(()=>window.TurtleSidebar);
+  assert.equal(await page.locator('#codeFontSize').inputValue(),'32');assert.equal(await page.locator('#drawingZoom').inputValue(),'300');assert.equal(await page.locator('#outputFontSize').inputValue(),'30');
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),displayCode);
   await page.locator('#codeHistoryBtn').click();
   assert((await page.locator('#commandLibrary').boundingBox()).width>=500);
   if(process.env.TURTLE_SIDEBAR_PROOF){fs.mkdirSync(process.env.TURTLE_SIDEBAR_PROOF,{recursive:true});await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'history-desktop.png')});}
@@ -78,6 +93,12 @@ try{
   await page.locator('#referenceTab').press('ArrowRight');assert(await page.locator('#historyPane').isVisible());
   if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'history-mobile.png')});
   await page.locator('#commandsClose').click();await page.locator('#codeHistoryBtn').click();assert(await page.locator('#historyPane').isVisible());
+  await page.locator('#commandsClose').click();
+  assert(await page.locator('#codeFontSize').isVisible());assert(await page.locator('#drawingZoom').isVisible());assert(await page.locator('#outputFontSize').isVisible());
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile display controls fit the page');
+  await page.locator('#resetLayout').click();assert.equal(await editor.evaluate(element=>getComputedStyle(element).fontSize),'16px');
+  assert.equal(await page.locator('#drawingZoom').inputValue(),'100');assert.equal(await page.locator('#outputFontSize').inputValue(),'14');
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),displayCode,'Reset view preserves code');
   assert.deepEqual(errors,[]);
-  console.log('PASS shared reference, legacy history, hover previews, diffs, restore, immediate clear, reload, insert/load examples, Python run, keyboard tabs, desktop and mobile.');
+  console.log('PASS shared reference, single example action, legacy history, hover previews, diffs, restore, immediate clear, reload, Python run, independent zoom, saved sizes, reset, keyboard tabs, desktop and mobile.');
 }finally{await browser?.close();server.kill();}

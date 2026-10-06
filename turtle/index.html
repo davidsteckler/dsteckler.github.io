@@ -856,7 +856,8 @@
   body.trace-embed .editor-divider{display:block}
 }
 </style>
-<link rel="stylesheet" href="sidebar.css?v=1">
+<link rel="stylesheet" href="sidebar.css?v=2">
+<link rel="stylesheet" href="display.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -907,6 +908,29 @@
   </header>
 
   <section class="layoutbar" aria-label="Workspace layout controls">
+    <div class="display-controls" role="group" aria-label="Code and output size">
+      <div class="display-control">
+        <label for="codeFontSize">Code size</label>
+        <button class="display-step" type="button" data-display-step="codeFontSize" data-direction="-1" aria-label="Decrease code size">−</button>
+        <input id="codeFontSize" type="range" min="12" max="40" step="2" value="16" aria-label="Code font size">
+        <button class="display-step" type="button" data-display-step="codeFontSize" data-direction="1" aria-label="Increase code size">+</button>
+        <output id="codeFontSizeValue" for="codeFontSize">16 px</output>
+      </div>
+      <div class="display-control">
+        <label for="drawingZoom">Drawing</label>
+        <button class="display-step" type="button" data-display-step="drawingZoom" data-direction="-1" aria-label="Decrease drawing zoom">−</button>
+        <input id="drawingZoom" type="range" min="50" max="300" step="10" value="100" aria-label="Drawing zoom">
+        <button class="display-step" type="button" data-display-step="drawingZoom" data-direction="1" aria-label="Increase drawing zoom">+</button>
+        <output id="drawingZoomValue" for="drawingZoom">100%</output>
+      </div>
+      <div class="display-control">
+        <label for="outputFontSize">Output text</label>
+        <button class="display-step" type="button" data-display-step="outputFontSize" data-direction="-1" aria-label="Decrease output text size">−</button>
+        <input id="outputFontSize" type="range" min="12" max="40" step="2" value="14" aria-label="Output text font size">
+        <button class="display-step" type="button" data-display-step="outputFontSize" data-direction="1" aria-label="Increase output text size">+</button>
+        <output id="outputFontSizeValue" for="outputFontSize">14 px</output>
+      </div>
+    </div>
     <div class="layout-group layout-editor">
       <label for="editorSize">Editor / World</label>
       <input id="editorSize" type="range" min="30" max="70" value="53" step="1" aria-label="Editor width as a percentage of the editor and world space">
@@ -924,11 +948,11 @@
       <output id="mobileEditorSizeValue" for="mobileEditorSize">355 px</output>
     </div>
     <div class="layout-group layout-output">
-      <label for="outputSize">Text output</label>
+      <label for="outputSize">Output height</label>
       <input id="outputSize" type="range" min="100" max="290" value="150" step="10" aria-label="Text output panel height">
       <output id="outputSizeValue" for="outputSize">150 px</output>
     </div>
-    <button class="layout-text-button reset-layout" id="resetLayout" type="button">Reset layout</button>
+    <button class="layout-text-button reset-layout" id="resetLayout" type="button">Reset view</button>
   </section>
 
   <main class="workspace" id="workspace">
@@ -1222,6 +1246,7 @@ for i in range(4):
   var loading = document.getElementById("loading");
   var worldStage = document.getElementById("worldStage");
   var worldWrap = document.getElementById("worldWrap");
+  var worldDrawingZoom = 100;
   var commandsToggle = document.getElementById("commandsToggle");
   var commandsClose = document.getElementById("commandsClose");
   var commandsOverlay = document.getElementById("commandsOverlay");
@@ -1299,6 +1324,7 @@ for i in range(4):
   document.getElementById("resetLayout").addEventListener("click",function(){
     layoutState=Object.assign({},layoutDefaults);
     applyLayout(true);
+    if(window.resetTurtleDisplay)window.resetTurtleDisplay();
   });
   function enableDivider(divider,field,min,max,compute){
     var dragging=false;
@@ -2750,7 +2776,13 @@ for i in range(4):
       openCommands();
     },
     closeSidebar:closeCommands,
-    stop:stopCode
+    stop:stopCode,
+    setDisplay:function(settings){
+      editor.getWrapperElement().style.fontSize=clamp(Number(settings.code)||16,12,40)+"px";
+      output.style.fontSize=clamp(Number(settings.output)||14,12,40)+"px";
+      worldDrawingZoom=clamp(Number(settings.drawing)||100,50,300);
+      editor.refresh();fitWorld();
+    }
   };
 
   gridToggle.addEventListener("change", function(){
@@ -2765,11 +2797,14 @@ for i in range(4):
 
   function fitWorld(){
     var mobile=window.innerWidth<=840;
-    var stageWidth=worldStage.clientWidth;
-    var stageHeight=worldStage.clientHeight;
+    var stageWidth=worldStage.offsetWidth;
+    var stageHeight=worldStage.offsetHeight;
     var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
     var usableHeight=mobile?404:Math.max(180,stageHeight-24);
-    var scale=Math.min(1,usableWidth/404,usableHeight/404);
+    var baseScale=Math.min(1,usableWidth/404,usableHeight/404);
+    var scale=baseScale*worldDrawingZoom/100;
+    worldStage.classList.toggle("drawing-zoomed",worldDrawingZoom>100);
+    worldStage.style.height=mobile?(404*baseScale+20)+"px":"";
     worldWrap.style.transform="scale("+scale+")";
     worldScaleBox.style.width=(404*scale)+"px";
     worldScaleBox.style.height=(404*scale)+"px";
@@ -2834,6 +2869,7 @@ for i in range(4):
 <script src="/turtlereference/reference-trail-examples.js?v=1"></script>
 <script src="/turtlereference/example-previews.js?v=2"></script>
 <script src="history-diff.js?v=1"></script>
-<script src="sidebar.js?v=1"></script>
+<script src="sidebar.js?v=2"></script>
+<script src="display.js?v=1"></script>
 </body>
 </html>

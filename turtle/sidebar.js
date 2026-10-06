@@ -40,17 +40,6 @@
     tile.style.backgroundPosition=-(record.tile%atlas.columns)*size+'px '+-Math.floor(record.tile/atlas.columns)*size+'px';
     return tile;
   }
-  function insertExample(code){
-    const cm=workbench.editor,from=cm.getCursor('from'),to=cm.getCursor('to');
-    const line=cm.getLine(from.line)||'',indent=(line.match(/^\s*/)||[''])[0];
-    const prefix=line.slice(0,from.ch).trim()?'\n'+indent:'';
-    const suffix=(cm.getLine(to.line)||'').slice(to.ch).trim()?'\n'+indent:'\n';
-    const snippet=prefix+code.split('\n').map((text,index)=>index?indent+text:text).join('\n')+suffix;
-    workbench.stop();workbench.saveVersion(cm.getValue(),'Before inserting reference');
-    cm.replaceSelection(snippet,'end','+reference');workbench.save('Inserted reference example');
-    if(innerWidth<=1350)workbench.closeSidebar();
-    cm.focus();cm.scrollIntoView(cm.getCursor(),50);
-  }
   function openTopic(id){
     const topic=byId.get(id);if(!topic)return;
     if(!currentTopic)browseScroll=$('referenceScroll').scrollTop;
@@ -91,12 +80,11 @@
     content.replaceChildren(make('h3','',example.label||'Example'),make('p','',example.summary));
     const code=make('pre','reference-code',example.code);code.setAttribute('aria-label','Example code');content.append(code);
     const buttons=make('div','reference-actions');
-    const insert=action('Insert example',()=>insertExample(example.code));insert.title='Add this code at your cursor';
     const load=action('Load example',()=>{
       workbench.replace(example.code,'Loaded '+(example.label||currentTopic.title)+' reference example');
       if(innerWidth<=1350)workbench.closeSidebar();
     },'btn primary');load.title='Load in the editor. Your current code is saved in History.';
-    buttons.append(insert,load);content.append(buttons);
+    buttons.append(load);content.append(buttons);
     for(const [title,text] of [['What you should see',example.expected],['Try changing',example.tryThis]])if(text)content.append(make('h3','',title),make('p','',text));
     if(example.watchFor){const note=make('div','reference-note');note.append(make('p','',example.watchFor));content.append(note);}
   }
