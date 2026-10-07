@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="A simple browser-based HTML editor with a live webpage preview.">
+<title>HTML Editor | David Steckler</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+:root{
+  --bg:#f0ebe1;
+  --paper:#faf7f0;
+  --surface:#fffdf8;
+  --ink:#202525;
+  --mid:#4f5858;
+  --soft:#737b79;
+  --ghost:#9da3a0;
+  --rule:#d8d2c6;
+  --rule-strong:#bdb5a7;
+  --teal:#176b73;
+  --teal-dark:#0f5057;
+  --teal-light:#e1efed;
+  --terra:#b85d3f;
+  --green:#2c7a58;
+  --editor:#202526;
+  --editor-2:#292f30;
+  --editor-rule:#3a4142;
+  --editor-text:#e7eceb;
+  --shadow:0 12px 35px rgba(37,43,42,.09);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink)}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow:hidden;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.app{
+  width:100%;
+  height:100dvh;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr);
+  overflow:hidden;
+}
+.appbar{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:8px 14px;
+  border-bottom:1px solid var(--rule);
+  background:rgba(250,247,240,.96);
+  backdrop-filter:blur(12px);
+}
+.appbar-left,.appbar-right{display:flex;align-items:center;min-width:0}
+.appbar-left{gap:12px}
+.appbar-right{gap:8px;justify-content:flex-end}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  text-decoration:none;
+  flex:0 0 auto;
+}
+.brand-mark{
+  width:32px;height:32px;border-radius:9px;
+  display:grid;place-items:center;
+  color:#fff;background:var(--teal);
+  font:800 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.brand-title{
+  font-weight:820;
+  font-size:.84rem;
+  letter-spacing:-.01em;
+  white-space:nowrap;
+}
+.appbar-divider{width:1px;height:30px;background:var(--rule-strong);opacity:.75}
+.tool-copy{min-width:0}
+.tool-title{
+  font-weight:850;
+  font-size:.92rem;
+  line-height:1.1;
+  letter-spacing:-.02em;
+  white-space:nowrap;
+}
+.tool-note{
+  color:var(--soft);
+  font-size:.67rem;
+  margin-top:2px;
+  white-space:nowrap;
+}
+.site-link{
+  text-decoration:none;
+  color:var(--mid);
+  font-size:.7rem;
+  font-weight:760;
+  padding:7px 8px;
+  border-radius:8px;
+}
+.site-link:hover{background:#fff;color:var(--ink)}
+.btn{
+  height:34px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border:1px solid var(--rule);
+  background:#fff;
+  color:var(--ink);
+  border-radius:9px;
+  padding:0 11px;
+  font-weight:800;
+  font-size:.75rem;
+  box-shadow:0 1px 1px rgba(0,0,0,.02);
+  white-space:nowrap;
+}
+.btn:hover{border-color:var(--rule-strong)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.primary:hover{background:var(--teal-dark)}
+.btn.danger{color:#8c422d;background:#fff8f5;border-color:#e6cfc5}
+.shortcut{opacity:.7;font:600 .61rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+.layoutbar{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:7px 15px;
+  border-bottom:1px solid var(--rule);
+  background:#eee9df;
+  color:var(--mid);
+}
+.layout-group{display:flex;align-items:center;gap:8px;min-width:0}
+.layout-group label{white-space:nowrap;font-size:.72rem;font-weight:800}
+.layout-group input[type="range"]{width:120px;accent-color:var(--teal)}
+.layout-group output{
+  min-width:42px;
+  color:var(--soft);
+  font:650 .66rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.auto-wrap{
+  display:flex;align-items:center;gap:7px;
+  font-size:.72rem;font-weight:800;white-space:nowrap;
+}
+.auto-wrap input{accent-color:var(--teal)}
+.save-status{
+  margin-left:auto;
+  color:var(--soft);
+  font:650 .66rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  white-space:nowrap;
+}
+.workspace{
+  --code-width:50%;
+  display:grid;
+  grid-template-columns:minmax(280px,var(--code-width)) 10px minmax(320px,1fr);
+  gap:5px;
+  padding:9px;
+  min-height:0;
+  height:100%;
+  overflow:hidden;
+}
+.panel{
+  min-height:0;
+  min-width:0;
+  height:100%;
+  border:1px solid var(--rule);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+}
+.panel-head{
+  height:47px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 13px;
+  border-bottom:1px solid var(--rule);
+  background:#f8f4ec;
+}
+.panel-label{
+  display:flex;align-items:center;gap:8px;
+  font:800 .72rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--mid);
+}
+.panel-mini{color:var(--ghost);font-size:.68rem;font-weight:700}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--ghost)}
+.status-dot.running{background:#d89e38;box-shadow:0 0 0 4px rgba(216,158,56,.12)}
+.status-dot.good{background:var(--green);box-shadow:0 0 0 4px rgba(44,122,88,.10)}
+.status-dot.bad{background:var(--terra);box-shadow:0 0 0 4px rgba(184,93,63,.10)}
+.code-panel{
+  display:grid;
+  grid-template-rows:47px minmax(0,1fr);
+  background:var(--editor);
+  border-color:#343a3b;
+}
+.code-panel .panel-head{background:var(--editor-2);border-color:var(--editor-rule)}
+.code-panel .panel-label{color:#bac2c1}
+.code-panel .panel-mini{color:#818a89}
+.editor-actions{display:flex;align-items:center;gap:7px}
+.ghost-btn{
+  border:0;background:transparent;color:#8f9998;
+  font-size:.69rem;font-weight:800;padding:6px 7px;border-radius:7px
+}
+.ghost-btn:hover{background:#343b3c;color:#e2e8e7}
+#editorSource{display:none}
+.CodeMirror{
+  height:100%;
+  font:500 15px/1.62 "JetBrains Mono","SFMono-Regular",Consolas,Monaco,monospace;
+  background:var(--editor);
+  color:var(--editor-text);
+}
+.CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}
+.CodeMirror-linenumber{color:#697271}
+.CodeMirror-cursor{border-left:2px solid #e4bd66}
+.CodeMirror-selected{background:#374243!important}
+.CodeMirror-activeline-background{background:rgba(255,255,255,.025)}
+.cm-s-default .cm-tag{color:#e8a56d}
+.cm-s-default .cm-bracket{color:#cfd6d5}
+.cm-s-default .cm-attribute{color:#d7a7df}
+.cm-s-default .cm-string{color:#a9ce94}
+.cm-s-default .cm-keyword{color:#d7a7df}
+.cm-s-default .cm-number{color:#e4bd66}
+.cm-s-default .cm-comment{color:#7f9187;font-style:italic}
+.cm-s-default .cm-property{color:#87c8dc}
+.cm-s-default .cm-def{color:#87c8dc}
+.splitter{
+  min-width:10px;
+  position:relative;
+  cursor:col-resize;
+  touch-action:none;
+}
+.splitter:before{
+  content:"";
+  position:absolute;
+  left:4px;top:11px;bottom:11px;
+  width:2px;border-radius:999px;background:#c6bfb2;
+}
+.splitter:hover:before,.splitter.dragging:before{background:var(--teal)}
+.preview-panel{
+  display:grid;
+  grid-template-rows:47px minmax(0,1fr) auto var(--console-height,120px);
+  min-height:0;
+}
+.preview-head-actions{display:flex;align-items:center;gap:7px}
+.device-group{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--rule);border-radius:9px;background:#fff}
+.device-btn{
+  border:0;background:transparent;color:var(--soft);border-radius:6px;
+  padding:5px 8px;font-size:.65rem;font-weight:800
+}
+.device-btn.active{background:var(--teal-light);color:var(--teal-dark)}
+.preview-stage{
+  min-height:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:auto;
+  padding:14px;
+  background:
+    radial-gradient(circle at 50% 22%,rgba(23,107,115,.055),transparent 46%),
+    #e9e4da;
+}
+.preview-shell{
+  width:100%;
+  height:100%;
+  min-height:220px;
+  background:#fff;
+  border:1px solid #c9c3b8;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(37,43,42,.08);
+  transition:width .18s ease;
+}
+.preview-shell.tablet{width:min(768px,100%)}
+.preview-shell.mobile{width:min(390px,100%)}
+#preview{display:block;width:100%;height:100%;border:0;background:#fff}
+.console-resizer{
+  height:7px;
+  cursor:row-resize;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  background:#eee9df;
+  position:relative;
+}
+.console-resizer:after{
+  content:"";
+  position:absolute;left:50%;top:2px;transform:translateX(-50%);
+  width:36px;height:2px;border-radius:99px;background:#bbb3a6;
+}
+.console{
+  min-height:0;
+  background:#181c1d;
+  display:grid;
+  grid-template-rows:30px minmax(0,1fr);
+}
+.console-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 11px;
+  color:#9da6a5;
+  font:700 .66rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.console-clear{border:0;background:transparent;color:#818a89;font-size:.66rem;font-weight:750;padding:4px 6px;border-radius:6px}
+.console-clear:hover{background:#262c2d;color:#c9cecd}
+#consoleOutput{
+  margin:0;padding:2px 12px 10px;overflow:auto;
+  color:#cfd6d5;white-space:pre-wrap;overflow-wrap:anywhere;
+  font:500 12px/1.5 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+}
+.console-line{display:block;padding:1px 0}
+.console-line.log{color:#cfd6d5}
+.console-line.info{color:#9ec8d8}
+.console-line.warn{color:#e3c36f}
+.console-line.error{color:#f0a48c}
+.console-empty{color:#77807f}
+.history-backdrop{
+  position:fixed;inset:0;z-index:30;background:rgba(20,25,25,.22);
+  opacity:0;pointer-events:none;transition:opacity .18s ease;
+}
+.history-backdrop.open{opacity:1;pointer-events:auto}
+.history-drawer{
+  position:fixed;z-index:31;right:0;top:0;bottom:0;width:min(430px,92vw);
+  transform:translateX(102%);transition:transform .22s ease;
+  background:var(--paper);border-left:1px solid var(--rule);box-shadow:-18px 0 45px rgba(30,35,34,.14);
+  display:grid;grid-template-rows:auto minmax(0,1fr);
+}
+.history-drawer.open{transform:translateX(0)}
+.history-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:15px 16px;border-bottom:1px solid var(--rule)
+}
+.history-head h2{margin:0;font-size:1rem;letter-spacing:-.02em}
+.history-close{border:0;background:transparent;font-size:1.2rem;color:var(--soft);padding:5px 8px;border-radius:8px}
+.history-close:hover{background:#ebe5d9}
+.history-list{overflow:auto;padding:10px}
+.history-empty{padding:28px 14px;color:var(--soft);font-size:.82rem;line-height:1.5}
+.history-item{
+  border:1px solid var(--rule);border-radius:12px;background:#fffdf8;
+  padding:11px;margin-bottom:8px;
+}
+.history-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.history-time{font-size:.7rem;font-weight:800;color:var(--mid)}
+.history-why{font-size:.66rem;color:var(--soft);margin-top:2px}
+.history-preview{
+  margin:0 0 9px;max-height:82px;overflow:hidden;
+  padding:8px;border-radius:8px;background:#202526;color:#ccd3d2;
+  white-space:pre-wrap;font:500 10.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace
+}
+.restore-btn{
+  border:1px solid #bfdad6;background:var(--teal-light);color:var(--teal-dark);
+  border-radius:8px;padding:6px 9px;font-size:.69rem;font-weight:850
+}
+@media(max-width:900px){
+  body{overflow:auto}
+  .app{height:auto;min-height:100dvh;overflow:visible}
+  .appbar{align-items:flex-start;flex-wrap:wrap}
+  .appbar-right{width:100%;justify-content:flex-start;flex-wrap:wrap}
+  .tool-note,.site-link{display:none}
+  .layoutbar{flex-wrap:wrap}
+  .save-status{margin-left:0}
+  .workspace{
+    display:flex;flex-direction:column;height:auto;overflow:visible;padding:8px;
+  }
+  .code-panel,.preview-panel{height:68vh;min-height:480px}
+  .splitter{display:none}
+  .layout-group.code-size{display:none}
+  .preview-panel{grid-template-rows:47px minmax(300px,1fr) auto 110px}
+}
+@media(max-width:560px){
+  .brand-title{display:none}
+  .appbar-divider{display:none}
+  .appbar{gap:8px}
+  .appbar-left{gap:8px}
+  .btn{padding:0 9px}
+  .shortcut{display:none}
+  .device-btn{padding:5px 6px}
+  .preview-head-actions .btn{display:none}
+  .CodeMirror{font-size:13.5px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="appbar">
+    <div class="appbar-left">
+      <a class="brand" href="/" aria-label="David Steckler home">
+        <span class="brand-mark">&lt;/&gt;</span>
+        <span class="brand-title">dsteckler.com</span>
+      </a>
+      <span class="appbar-divider" aria-hidden="true"></span>
+      <div class="tool-copy">
+        <div class="tool-title">HTML Editor</div>
+        <div class="tool-note">Write code. Run it. See the webpage.</div>
+      </div>
+    </div>
+    <div class="appbar-right">
+      <a class="site-link" href="/turtle/">Python editor</a>
+      <button class="btn" id="historyBtn" type="button">History</button>
+      <button class="btn danger" id="resetBtn" type="button">Reset</button>
+      <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl↵</span></button>
+    </div>
+  </header>
+
+  <div class="layoutbar">
+    <div class="layout-group code-size">
+      <label for="codeSize">Code</label>
+      <input id="codeSize" type="range" min="30" max="70" value="50">
+      <output id="codeSizeOut">50%</output>
+    </div>
+    <label class="auto-wrap"><input id="autoRun" type="checkbox" checked> Auto-run</label>
+    <div class="layout-group">
+      <label for="fontSize">Text size</label>
+      <input id="fontSize" type="range" min="12" max="24" value="15">
+      <output id="fontSizeOut">15px</output>
+    </div>
+    <span class="save-status" id="saveStatus">saved locally</span>
+  </div>
+
+  <main class="workspace" id="workspace">
+    <section class="panel code-panel">
+      <div class="panel-head">
+        <div class="panel-label"><span class="status-dot" id="statusDot"></span> index.html</div>
+        <div class="editor-actions">
+          <span class="panel-mini" id="lineCount">1 line</span>
+          <button class="ghost-btn" id="copyBtn" type="button">Copy</button>
+        </div>
+      </div>
+      <textarea id="editorSource"><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Webpage</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: teal;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hello, world!</h1>
+  <p>I made this webpage with HTML.</p>
+
+  <button onclick="sayHello()">Click me</button>
+
+  <script>
+    function sayHello() {
+      console.log("The button worked!");
+    }
+  <\/script>
+</body>
+</html></textarea>
+    </section>
+
+    <div class="splitter" id="splitter" title="Drag to resize"></div>
+
+    <section class="panel preview-panel">
+      <div class="panel-head">
+        <div class="panel-label"><span class="status-dot good" id="previewDot"></span> Preview</div>
+        <div class="preview-head-actions">
+          <div class="device-group" aria-label="Preview width">
+            <button class="device-btn active" type="button" data-device="desktop">Desktop</button>
+            <button class="device-btn" type="button" data-device="tablet">Tablet</button>
+            <button class="device-btn" type="button" data-device="mobile">Phone</button>
+          </div>
+          <button class="btn" id="openPreviewBtn" type="button">Open</button>
+        </div>
+      </div>
+      <div class="preview-stage">
+        <div class="preview-shell" id="previewShell">
+          <iframe id="preview" title="HTML preview" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+        </div>
+      </div>
+      <div class="console-resizer" id="consoleResizer" title="Drag to resize console"></div>
+      <div class="console">
+        <div class="console-head">
+          <span>Console</span>
+          <button class="console-clear" id="clearConsole" type="button">Clear</button>
+        </div>
+        <pre id="consoleOutput"><span class="console-empty">console.log() and JavaScript errors appear here.</span></pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="history-backdrop" id="historyBackdrop"></div>
+<aside class="history-drawer" id="historyDrawer" aria-hidden="true">
+  <div class="history-head">
+    <div>
+      <h2>Code history</h2>
+      <div class="panel-mini">Saved versions from this browser</div>
+    </div>
+    <button class="history-close" id="historyClose" type="button" aria-label="Close history">×</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script>
+(function(){
+  var STORAGE_KEY = "dsteckler-html-code-v1";
+  var HISTORY_KEY = "dsteckler-html-history-v1";
+  var LAYOUT_KEY = "dsteckler-html-layout-v1";
+  var starter = document.getElementById("editorSource").value;
+
+  var editor = CodeMirror.fromTextArea(document.getElementById("editorSource"),{
+    mode:"htmlmixed",
+    lineNumbers:true,
+    lineWrapping:false,
+    autoCloseTags:true,
+    autoCloseBrackets:true,
+    matchBrackets:true,
+    styleActiveLine:true,
+    indentUnit:2,
+    tabSize:2,
+    indentWithTabs:false,
+    extraKeys:{
+      "Ctrl-Enter":runPreview,
+      "Cmd-Enter":runPreview,
+      "Tab":function(cm){
+        if(cm.somethingSelected()) cm.indentSelection("add");
+        else cm.replaceSelection("  ","end");
+      }
+    }
+  });
+
+  var workspace = document.getElementById("workspace");
+  var splitter = document.getElementById("splitter");
+  var codeSize = document.getElementById("codeSize");
+  var codeSizeOut = document.getElementById("codeSizeOut");
+  var fontSize = document.getElementById("fontSize");
+  var fontSizeOut = document.getElementById("fontSizeOut");
+  var autoRun = document.getElementById("autoRun");
+  var runBtn = document.getElementById("runBtn");
+  var resetBtn = document.getElementById("resetBtn");
+  var copyBtn = document.getElementById("copyBtn");
+  var preview = document.getElementById("preview");
+  var previewShell = document.getElementById("previewShell");
+  var previewDot = document.getElementById("previewDot");
+  var statusDot = document.getElementById("statusDot");
+  var saveStatus = document.getElementById("saveStatus");
+  var lineCount = document.getElementById("lineCount");
+  var consoleOutput = document.getElementById("consoleOutput");
+  var consoleResizer = document.getElementById("consoleResizer");
+  var openPreviewBtn = document.getElementById("openPreviewBtn");
+  var historyBtn = document.getElementById("historyBtn");
+  var historyDrawer = document.getElementById("historyDrawer");
+  var historyBackdrop = document.getElementById("historyBackdrop");
+  var historyClose = document.getElementById("historyClose");
+  var historyList = document.getElementById("historyList");
+
+  function readJson(key,fallback){
+    try{
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  }
+  function writeJson(key,value){
+    try{ localStorage.setItem(key,JSON.stringify(value)); }catch(e){}
+  }
+
+  var layout = readJson(LAYOUT_KEY,{code:50,font:15,console:120,auto:true});
+  layout.code = Math.max(30,Math.min(70,Number(layout.code)||50));
+  layout.font = Math.max(12,Math.min(24,Number(layout.font)||15));
+  layout.console = Math.max(72,Math.min(280,Number(layout.console)||120));
+  layout.auto = layout.auto !== false;
+
+  function applyLayout(){
+    workspace.style.setProperty("--code-width",layout.code+"%");
+    workspace.style.setProperty("--console-height",layout.console+"px");
+    codeSize.value = layout.code;
+    codeSizeOut.textContent = Math.round(layout.code)+"%";
+    fontSize.value = layout.font;
+    fontSizeOut.textContent = Math.round(layout.font)+"px";
+    autoRun.checked = layout.auto;
+    editor.getWrapperElement().style.fontSize = layout.font+"px";
+    requestAnimationFrame(function(){editor.refresh();});
+  }
+  applyLayout();
+
+  var savedCode = "";
+  try{ savedCode = localStorage.getItem(STORAGE_KEY) || ""; }catch(e){}
+  if(savedCode) editor.setValue(savedCode);
+
+  function updateLineCount(){
+    var count = editor.lineCount();
+    lineCount.textContent = count + (count===1 ? " line" : " lines");
+  }
+  updateLineCount();
+
+  var saveTimer = null;
+  var runTimer = null;
+  function scheduleSave(){
+    saveStatus.textContent = "saving…";
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try{ localStorage.setItem(STORAGE_KEY,editor.getValue()); }catch(e){}
+      saveStatus.textContent = "saved locally";
+    },250);
+  }
+  function scheduleRun(){
+    if(!autoRun.checked) return;
+    clearTimeout(runTimer);
+    runTimer = setTimeout(runPreview,650);
+  }
+  editor.on("change",function(){
+    statusDot.className = "status-dot running";
+    updateLineCount();
+    scheduleSave();
+    scheduleRun();
+  });
+
+  function formatForConsole(value){
+    if(typeof value === "string") return value;
+    try{return JSON.stringify(value);}catch(e){return String(value);}
+  }
+  function clearConsole(){
+    consoleOutput.innerHTML = '<span class="console-empty">console.log() and JavaScript errors appear here.</span>';
+  }
+  function appendConsole(type,args){
+    if(consoleOutput.querySelector(".console-empty")) consoleOutput.innerHTML = "";
+    var line = document.createElement("span");
+    line.className = "console-line " + (type || "log");
+    line.textContent = (args || []).map(formatForConsole).join(" ");
+    consoleOutput.appendChild(line);
+    consoleOutput.appendChild(document.createTextNode("\n"));
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+  }
+
+  function history(){
+    return readJson(HISTORY_KEY,[]);
+  }
+  function pushHistory(reason){
+    var code = editor.getValue();
+    var list = history();
+    if(list.length && list[0].code === code) return;
+    list.unshift({code:code,time:Date.now(),reason:reason || "Run"});
+    if(list.length>20) list.length=20;
+    writeJson(HISTORY_KEY,list);
+  }
+
+  function monitorScript(){
+    return '<script>(function(){' +
+      'function send(type,args){try{parent.postMessage({source:"dsteckler-html-preview",type:type,args:Array.prototype.map.call(args,function(v){if(typeof v==="string")return v;try{return JSON.stringify(v);}catch(e){return String(v);}})},"*");}catch(e){}}' +
+      '["log","info","warn","error"].forEach(function(k){var old=console[k];console[k]=function(){send(k,arguments);if(old)old.apply(console,arguments);};});' +
+      'window.addEventListener("error",function(e){send("error",[e.message+" at line "+e.lineno]);});' +
+      'window.addEventListener("unhandledrejection",function(e){send("error",["Unhandled promise: "+e.reason]);});' +
+      'parent.postMessage({source:"dsteckler-html-preview",type:"ready",args:[]},"*");' +
+    '})();<\/script>';
+  }
+
+  function withMonitor(code){
+    var monitor = monitorScript();
+    var bodyClose = code.toLowerCase().lastIndexOf("</body>");
+    if(bodyClose >= 0) return code.slice(0,bodyClose) + monitor + code.slice(bodyClose);
+    return code + monitor;
+  }
+
+  function runPreview(){
+    clearTimeout(runTimer);
+    statusDot.className = "status-dot running";
+    previewDot.className = "status-dot running";
+    clearConsole();
+    pushHistory("Run");
+    try{ localStorage.setItem(STORAGE_KEY,editor.getValue()); }catch(e){}
+    saveStatus.textContent = "saved locally";
+    preview.srcdoc = withMonitor(editor.getValue());
+    setTimeout(function(){
+      statusDot.className = "status-dot good";
+      if(previewDot.className.indexOf("running")>=0) previewDot.className = "status-dot good";
+    },250);
+  }
+
+  window.addEventListener("message",function(event){
+    if(event.source !== preview.contentWindow) return;
+    var data = event.data || {};
+    if(data.source !== "dsteckler-html-preview") return;
+    if(data.type === "ready"){
+      previewDot.className = "status-dot good";
+      return;
+    }
+    if(data.type === "error") previewDot.className = "status-dot bad";
+    appendConsole(data.type,data.args || []);
+  });
+
+  runBtn.addEventListener("click",runPreview);
+  document.getElementById("clearConsole").addEventListener("click",clearConsole);
+
+  autoRun.addEventListener("change",function(){
+    layout.auto = autoRun.checked;
+    writeJson(LAYOUT_KEY,layout);
+    if(autoRun.checked) runPreview();
+  });
+
+  codeSize.addEventListener("input",function(){
+    layout.code = Number(this.value);
+    workspace.style.setProperty("--code-width",layout.code+"%");
+    codeSizeOut.textContent = layout.code+"%";
+    editor.refresh();
+  });
+  codeSize.addEventListener("change",function(){writeJson(LAYOUT_KEY,layout);});
+
+  fontSize.addEventListener("input",function(){
+    layout.font = Number(this.value);
+    editor.getWrapperElement().style.fontSize = layout.font+"px";
+    fontSizeOut.textContent = layout.font+"px";
+    editor.refresh();
+  });
+  fontSize.addEventListener("change",function(){writeJson(LAYOUT_KEY,layout);});
+
+  var draggingSplit = false;
+  splitter.addEventListener("pointerdown",function(e){
+    if(window.innerWidth<=900) return;
+    draggingSplit = true;
+    splitter.classList.add("dragging");
+    splitter.setPointerCapture(e.pointerId);
+  });
+  splitter.addEventListener("pointermove",function(e){
+    if(!draggingSplit) return;
+    var rect = workspace.getBoundingClientRect();
+    var pct = ((e.clientX-rect.left)/rect.width)*100;
+    layout.code = Math.max(30,Math.min(70,pct));
+    workspace.style.setProperty("--code-width",layout.code+"%");
+    codeSize.value = layout.code;
+    codeSizeOut.textContent = Math.round(layout.code)+"%";
+    editor.refresh();
+  });
+  function endSplit(){
+    if(!draggingSplit) return;
+    draggingSplit=false;
+    splitter.classList.remove("dragging");
+    writeJson(LAYOUT_KEY,layout);
+  }
+  splitter.addEventListener("pointerup",endSplit);
+  splitter.addEventListener("pointercancel",endSplit);
+
+  var draggingConsole = false;
+  consoleResizer.addEventListener("pointerdown",function(e){
+    draggingConsole=true;
+    consoleResizer.setPointerCapture(e.pointerId);
+  });
+  consoleResizer.addEventListener("pointermove",function(e){
+    if(!draggingConsole) return;
+    var panel = consoleResizer.closest(".preview-panel").getBoundingClientRect();
+    layout.console = Math.max(72,Math.min(280,panel.bottom-e.clientY));
+    workspace.style.setProperty("--console-height",layout.console+"px");
+  });
+  function endConsole(){
+    if(!draggingConsole) return;
+    draggingConsole=false;
+    writeJson(LAYOUT_KEY,layout);
+  }
+  consoleResizer.addEventListener("pointerup",endConsole);
+  consoleResizer.addEventListener("pointercancel",endConsole);
+
+  document.querySelectorAll(".device-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      document.querySelectorAll(".device-btn").forEach(function(b){b.classList.remove("active");});
+      btn.classList.add("active");
+      previewShell.classList.remove("tablet","mobile");
+      if(btn.dataset.device !== "desktop") previewShell.classList.add(btn.dataset.device);
+    });
+  });
+
+  copyBtn.addEventListener("click",async function(){
+    try{
+      await navigator.clipboard.writeText(editor.getValue());
+      var old = copyBtn.textContent;
+      copyBtn.textContent = "Copied";
+      setTimeout(function(){copyBtn.textContent=old;},900);
+    }catch(e){
+      editor.focus();
+      editor.execCommand("selectAll");
+    }
+  });
+
+  resetBtn.addEventListener("click",function(){
+    if(!confirm("Reset the editor back to the starter webpage? Your current version will stay in History.")) return;
+    pushHistory("Before reset");
+    editor.setValue(starter);
+    try{localStorage.setItem(STORAGE_KEY,starter);}catch(e){}
+    runPreview();
+    editor.focus();
+  });
+
+  openPreviewBtn.addEventListener("click",function(){
+    var blob = new Blob([editor.getValue()],{type:"text/html"});
+    var url = URL.createObjectURL(blob);
+    var win = window.open(url,"_blank");
+    if(!win) appendConsole("warn",["Your browser blocked the new preview tab."]);
+    setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  });
+
+  function renderHistory(){
+    var list = history();
+    historyList.innerHTML = "";
+    if(!list.length){
+      historyList.innerHTML = '<div class="history-empty">Run your code or make changes and reset it. Earlier versions will appear here.</div>';
+      return;
+    }
+    list.forEach(function(item,index){
+      var card = document.createElement("div");
+      card.className = "history-item";
+      var row = document.createElement("div");
+      row.className = "history-row";
+      var meta = document.createElement("div");
+      var time = document.createElement("div");
+      time.className = "history-time";
+      time.textContent = new Date(item.time).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+      var why = document.createElement("div");
+      why.className = "history-why";
+      why.textContent = item.reason || "Saved version";
+      meta.appendChild(time);meta.appendChild(why);
+      var restore = document.createElement("button");
+      restore.className = "restore-btn";
+      restore.type = "button";
+      restore.textContent = "Restore";
+      restore.addEventListener("click",function(){
+        pushHistory("Before restore");
+        editor.setValue(item.code);
+        try{localStorage.setItem(STORAGE_KEY,item.code);}catch(e){}
+        closeHistory();
+        runPreview();
+        editor.focus();
+      });
+      row.appendChild(meta);row.appendChild(restore);
+      var previewCode = document.createElement("pre");
+      previewCode.className = "history-preview";
+      previewCode.textContent = item.code.slice(0,650);
+      card.appendChild(row);card.appendChild(previewCode);
+      historyList.appendChild(card);
+    });
+  }
+
+  function openHistory(){
+    renderHistory();
+    historyDrawer.classList.add("open");
+    historyBackdrop.classList.add("open");
+    historyDrawer.setAttribute("aria-hidden","false");
+  }
+  function closeHistory(){
+    historyDrawer.classList.remove("open");
+    historyBackdrop.classList.remove("open");
+    historyDrawer.setAttribute("aria-hidden","true");
+  }
+  historyBtn.addEventListener("click",openHistory);
+  historyClose.addEventListener("click",closeHistory);
+  historyBackdrop.addEventListener("click",closeHistory);
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")closeHistory();});
+
+  window.addEventListener("resize",function(){editor.refresh();});
+  runPreview();
+  editor.focus();
+})();
+</script>
+</body>
+</html>
