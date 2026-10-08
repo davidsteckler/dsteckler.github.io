@@ -261,9 +261,9 @@ try{
   assert.equal(await page.locator('#topicPage').innerText(),'Stop 2 / 4');
   await page.locator('#previousTopic').click();await page.waitForFunction(()=>document.body.dataset.exampleId==='owl-meet');
   await page.goto(origin+'/turtlereference/trails/');
-  assert.equal(await page.locator('.trail-card').count(),6);
+  assert.equal(await page.locator('.trail-card').count(),scope.window.TURTLE_TRAILS.length);
   assert.equal(await page.locator('.trail-card[data-trail="pocket-owl"] .trail-bottom a').getAttribute('href'),'../#owl-name');
-  assert((await page.locator('#totalProgress').innerText()).includes('1 of 29'));
+  assert((await page.locator('#totalProgress').innerText()).includes('1 of '+scope.window.TURTLE_TRAILS.reduce((n,t)=>n+t.stops.length,0)));
   for(const level of ['Beginner','Medium','Hard']){
     await page.locator('.level-filters button[data-level="'+level+'"]').click();
     assert.equal(await page.locator('.trail-card:visible').count(),scope.window.TURTLE_TRAILS.filter(t=>t.level===level).length);

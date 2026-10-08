@@ -194,7 +194,12 @@
       button.title = example.label + (example.previewNote ? ' · Preview ' + example.previewNote.toLowerCase() : '');
       const art = document.createElement('span'); art.className = 'example-art'; art.setAttribute('aria-hidden','true');
       const preview = previewAtlas.examples[current.id + '/' + example.id];
-      if (typeof preview?.tile === 'number') {
+      if (preview?.image) {
+        art.classList.add('drawing-preview');
+        art.style.backgroundImage = 'url("' + preview.image + '")';
+        art.style.backgroundSize = 'contain';
+        art.style.backgroundPosition = 'center';
+      } else if (typeof preview?.tile === 'number') {
         art.classList.add('drawing-preview');
         art.style.backgroundSize = (previewAtlas.columns * 68) + 'px ' + (previewAtlas.rows * 68) + 'px';
         art.style.backgroundPosition = -(preview.tile % previewAtlas.columns * 68) + 'px ' + (-Math.floor(preview.tile / previewAtlas.columns) * 68) + 'px';

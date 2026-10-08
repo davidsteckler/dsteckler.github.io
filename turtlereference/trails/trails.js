@@ -8,8 +8,8 @@
   for (const trail of trails) {
     const card = document.createElement('article'); card.className = 'trail-card'; card.dataset.level = trail.level; card.dataset.trail = trail.id;
     const preview = document.createElement('div'); preview.className = 'trail-preview';
-    if (['firefly-grove','pixel-potion'].includes(trail.id)) {
-      const img = document.createElement('img'); img.src = '../trail-previews/' + trail.id + '.png'; img.alt = trail.id === 'firefly-grove' ? 'A crescent moon over green hills and scattered warm firefly lights' : 'Two pixel bottles labeled Dream and Mana, with purple and blue liquid'; preview.append(img);
+    if (['firefly-grove','pixel-potion','strange-garden','tiny-dragon'].includes(trail.id)) {
+      const img = document.createElement('img'); img.src = '../trail-previews/' + ({'strange-garden':'garden-wild--original.svg','tiny-dragon':'dragon-trick--original.svg'}[trail.id] || trail.id + '.png'); img.alt = trail.id === 'firefly-grove' ? 'A crescent moon over green hills and scattered warm firefly lights' : trail.id === 'pixel-potion' ? 'Two pixel bottles labeled Dream and Mana, with purple and blue liquid' : trail.id === 'strange-garden' ? 'Fifteen colorful flowers with green stems' : 'A green dragon breathing a golden spark'; preview.append(img);
     } else {
       const art = document.createElement('pre'); art.textContent = trail.preview; art.setAttribute('aria-label', trail.title + ' sample text art'); preview.append(art);
     }
@@ -35,7 +35,7 @@
       document.querySelectorAll('.level-filters button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
       document.querySelectorAll('.trail-card').forEach(card => { card.hidden = level !== 'All' && card.dataset.level !== level; });
       const count = trails.filter(trail => level === 'All' || trail.level === level).length;
-      document.getElementById('trailCount').textContent = level === 'All' ? 'Six trails. Start wherever you’re curious.' : count + ' ' + level.toLowerCase() + (count === 1 ? ' trail' : ' trails');
+      document.getElementById('trailCount').textContent = level === 'All' ? 'Eight trails. Start wherever you’re curious.' : count + ' ' + level.toLowerCase() + (count === 1 ? ' trail' : ' trails');
     });
   });
   // Returning from a stop should immediately show the latest checklist.
