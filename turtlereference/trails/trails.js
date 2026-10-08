@@ -9,7 +9,7 @@
     const card = document.createElement('article'); card.className = 'trail-card'; card.dataset.level = trail.level; card.dataset.trail = trail.id;
     const preview = document.createElement('div'); preview.className = 'trail-preview';
     if (['firefly-grove','pixel-potion','strange-garden','tiny-dragon'].includes(trail.id)) {
-      const img = document.createElement('img'); img.src = '../trail-previews/' + ({'strange-garden':'garden-wild--original.svg','tiny-dragon':'dragon-trick--original.svg'}[trail.id] || trail.id + '.png'); img.alt = trail.id === 'firefly-grove' ? 'A crescent moon over green hills and scattered warm firefly lights' : trail.id === 'pixel-potion' ? 'Two pixel bottles labeled Dream and Mana, with purple and blue liquid' : trail.id === 'strange-garden' ? 'Five leafy flowers in a garden bed' : 'A horned green dragon with a purple wing, curling tail, and warm sparks'; preview.append(img);
+      const img = document.createElement('img'); img.src = '../trail-previews/' + ({'strange-garden':'garden-wild--original.svg','tiny-dragon':'dragon-trick--original.svg'}[trail.id] || trail.id + '.png') + '?v=2'; img.alt = trail.id === 'firefly-grove' ? 'A crescent moon over green hills and scattered warm firefly lights' : trail.id === 'pixel-potion' ? 'Two pixel bottles labeled Dream and Mana, with purple and blue liquid' : trail.id === 'strange-garden' ? 'Five leafy flowers in a garden bed' : 'A horned green dragon with a purple wing, curling tail, and warm sparks'; preview.append(img);
     } else {
       const art = document.createElement('pre'); art.textContent = trail.preview; art.setAttribute('aria-label', trail.title + ' sample text art'); preview.append(art);
     }
