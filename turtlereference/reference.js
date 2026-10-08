@@ -27,12 +27,13 @@
   const previewAtlas = window.REFERENCE_PREVIEWS;
   let focusMarks = [];
   function exampleKey(entry = current, example = currentExample) { return example.id === 'original' ? entry.id : entry.id + '/' + example.id; }
+  function draftKey() { return exampleKey() + (current.draftVersion ? '@' + current.draftVersion : ''); }
   try { drafts = JSON.parse(localStorage.getItem(storageKey) || '{}') || {}; } catch {}
   function persist() { try { localStorage.setItem(storageKey, JSON.stringify(drafts)); } catch { $('referenceStatus').textContent = 'Edits stay in this open page.'; } }
   function captureDraft() {
     if (!current || !ready || pending) return;
     const cm = frame.contentDocument?.querySelector('.CodeMirror')?.CodeMirror;
-    if (cm) { drafts[exampleKey()] = cm.getValue(); persist(); }
+    if (cm) { drafts[draftKey()] = cm.getValue(); persist(); }
   }
   function normalizedHex(value) {
     const digits = value.trim().replace(/^#/, '');
@@ -251,7 +252,7 @@
     $('useColor').disabled = true;
     document.body.dataset.exampleId = '';
     $('runExample').disabled = true; $('resetExample').disabled = true;
-    const code = typeof drafts[exampleKey()] === 'string' ? drafts[exampleKey()] : currentExample.code;
+    const code = typeof drafts[draftKey()] === 'string' ? drafts[draftKey()] : currentExample.code;
     send({kind:'turtle-tutorial-set-code', code, run, requestId:++requestId});
   }
   const diagrams = {
@@ -370,7 +371,7 @@
   });
   $('runExample').addEventListener('click', () => { send({kind:'turtle-tutorial-run'}); if (innerWidth < 1000) setMobileView('editor'); });
   function resetCurrentExample() {
-    drafts[exampleKey()] = currentExample.code;
+    drafts[draftKey()] = currentExample.code;
     persist();
     applyExample(currentExample.auto !== false);
     $('referenceStatus').textContent = 'Original code restored.';
@@ -392,7 +393,7 @@
       syncColorViewer();
       $('runExample').disabled = false; $('resetExample').disabled = false;
     } else if (message.kind === 'turtle-tutorial-code' && !pending && appliedId === exampleKey()) {
-      drafts[exampleKey()] = message.code; persist();
+      drafts[draftKey()] = message.code; persist();
     } else if (message.kind === 'turtle-tutorial-reset-code') {
       resetCurrentExample();
     } else if (message.kind === 'turtle-tutorial-save-failed') {
