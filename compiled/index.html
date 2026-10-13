@@ -1,0 +1,2834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-V55DVP2SHR');
+</script>
+
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A browser-based Python Turtle sandbox for learning Python visually.">
+  <title>Compiled-Style Turtle | David Steckler</title>
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+
+  <style>
+    :root{
+      --bg:#f0ebe1;
+      --paper:#faf7f0;
+      --surface:#fffdf8;
+      --ink:#202525;
+      --mid:#4f5858;
+      --soft:#737b79;
+      --ghost:#9da3a0;
+      --rule:#d8d2c6;
+      --rule-strong:#bdb5a7;
+      --teal:#176b73;
+      --teal-dark:#0f5057;
+      --teal-light:#e1efed;
+      --terra:#b85d3f;
+      --terra-light:#f5e6df;
+      --green:#2c7a58;
+      --editor:#202526;
+      --editor-2:#292f30;
+      --editor-rule:#3a4142;
+      --editor-text:#e7eceb;
+      --shadow:0 12px 35px rgba(37,43,42,.09);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink)}
+    body{
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      overflow:hidden;
+    }
+    button,select,input{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+    }
+
+    .appbar{
+      min-height:58px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:8px 14px;
+      border-bottom:1px solid var(--rule);
+      background:rgba(250,247,240,.96);
+      backdrop-filter:blur(12px);
+    }
+    .appbar-left,.appbar-right{
+      display:flex;
+      align-items:center;
+      min-width:0;
+    }
+    .appbar-left{gap:12px}
+    .appbar-right{gap:12px;justify-content:flex-end}
+    .appbar-divider{
+      width:1px;height:30px;flex:0 0 auto;
+      background:var(--rule-strong);
+      opacity:.75;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      text-decoration:none;
+      min-width:0;
+      flex:0 0 auto;
+    }
+    .brand-mark{
+      width:32px;height:32px;border-radius:9px;
+      display:grid;place-items:center;
+      color:white;background:var(--teal);
+      font:800 14px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .brand-title{
+      font-weight:820;
+      font-size:.84rem;
+      letter-spacing:-.01em;
+      white-space:nowrap;
+    }
+    .title-wrap{display:flex;align-items:center;gap:9px;min-width:0}
+    .turtle-badge{
+      width:31px;height:31px;border-radius:9px;
+      display:grid;place-items:center;
+      border:1px solid #b8d8d4;
+      background:var(--teal-light);
+      color:var(--teal);
+      font-size:17px;
+      flex:0 0 auto;
+    }
+    .tool-copy{min-width:0}
+    .tool-title{
+      font-weight:850;
+      font-size:.92rem;
+      line-height:1.1;
+      letter-spacing:-.02em;
+      white-space:nowrap;
+    }
+    .tool-note{
+      color:var(--soft);
+      font-size:.67rem;
+      line-height:1.2;
+      margin-top:2px;
+      white-space:nowrap;
+    }
+    .site-actions{display:flex;align-items:center;gap:1px;flex:0 0 auto}
+    .site-link{
+      text-decoration:none;
+      color:var(--mid);
+      font-size:.7rem;
+      font-weight:750;
+      padding:7px 7px;
+      border-radius:8px;
+    }
+    .site-link:hover{background:rgba(255,255,255,.7);color:var(--ink)}
+    .toolbar{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:nowrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      height:34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border:1px solid var(--rule);
+      background:white;
+      color:var(--ink);
+      border-radius:9px;
+      padding:0 11px;
+      font-weight:800;
+      font-size:.75rem;
+      box-shadow:0 1px 1px rgba(0,0,0,.02);
+      white-space:nowrap;
+    }
+    .btn:hover{border-color:var(--rule-strong);background:#fff}
+    .btn.primary{background:var(--teal);border-color:var(--teal);color:white}
+    .btn.primary:hover{background:var(--teal-dark)}
+    .btn.danger{color:#8c422d}
+    .btn.soft-danger{color:#8c422d;background:#fff8f5;border-color:#e6cfc5}
+    .btn.soft-danger:hover{background:#fff2ec;border-color:#d9b5a7}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .shortcut{opacity:.72;font:600 .61rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .workspace{
+      min-height:0;
+      padding:14px;
+      display:grid;
+      grid-template-columns:minmax(360px,1.08fr) minmax(410px,.92fr) 292px;
+      gap:14px;
+      align-items:stretch;
+    }
+    .panel{
+      min-height:0;
+      border:1px solid var(--rule);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:var(--surface);
+      box-shadow:var(--shadow);
+    }
+    .panel-head{
+      height:43px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 13px;
+      border-bottom:1px solid var(--rule);
+      background:#f8f4ec;
+    }
+    .panel-label{
+      display:flex;align-items:center;gap:8px;
+      font:800 .72rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--mid);
+    }
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--ghost)}
+    .status-dot.running{background:#d89e38;box-shadow:0 0 0 4px rgba(216,158,56,.12)}
+    .status-dot.good{background:var(--green);box-shadow:0 0 0 4px rgba(44,122,88,.10)}
+    .status-dot.bad{background:var(--terra);box-shadow:0 0 0 4px rgba(184,93,63,.10)}
+    .panel-mini{color:var(--ghost);font-size:.68rem;font-weight:700}
+
+    .code-panel{
+      display:grid;
+      grid-template-rows:43px minmax(320px,1fr);
+      background:var(--editor);
+      border-color:#343a3b;
+    }
+    .code-panel .panel-head{
+      border-color:var(--editor-rule);
+      background:var(--editor-2);
+    }
+    .code-panel .panel-label{color:#bac2c1}
+    .code-panel .panel-mini{color:#818a89}
+
+    #editor-source{display:none}
+    .CodeMirror{
+      height:100%;
+      font:500 15px/1.62 "JetBrains Mono","SFMono-Regular",Consolas,Monaco,monospace;
+      background:var(--editor);
+      color:var(--editor-text);
+    }
+    .CodeMirror-gutters{background:#1b2021;border-right:1px solid #333a3b}
+    .CodeMirror-linenumber{color:#697271}
+    .CodeMirror-cursor{border-left:2px solid #e4bd66}
+    .CodeMirror .turtle-current-line{background:rgba(30,169,154,.20)!important;border-left:3px solid #35bdad}
+    .CodeMirror .turtle-error-line{
+      background:rgba(219,93,66,.18)!important;
+      box-shadow:inset 3px 0 #e16f55;
+    }
+    .CodeMirror .turtle-error-token{
+      text-decoration:underline wavy #ef8a70 1.5px;
+      text-decoration-skip-ink:none;
+      background:rgba(239,138,112,.10);
+    }
+    .playback-line-status{font:700 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#79cab2;white-space:nowrap}
+    .world-edit-link{display:none;border:0;background:transparent;color:var(--teal);font-size:.69rem;font-weight:800;padding:5px;cursor:pointer}
+    .editor-head-right{display:flex;align-items:center;gap:11px;min-width:0}
+    #pauseBtn[disabled],#stepBtn[disabled]{opacity:.42}
+    .CodeMirror-selected{background:#374243 !important}
+    .cm-s-default .cm-keyword{color:#d7a7df}
+    .cm-s-default .cm-def{color:#87c8dc}
+    .cm-s-default .cm-variable{color:#e7eceb}
+    .cm-s-default .cm-variable-2{color:#a9d0e0}
+    .cm-s-default .cm-variable-3{color:#dfb48b}
+    .cm-s-default .cm-number{color:#e4bd66}
+    .cm-s-default .cm-string{color:#a9ce94}
+    .cm-s-default .cm-comment{color:#7f9187;font-style:italic}
+    .cm-s-default .cm-builtin{color:#85c7c0}
+    .cm-s-default .cm-operator{color:#cfd6d5}
+
+    .console{
+      border-top:1px solid var(--editor-rule);
+      display:grid;
+      grid-template-rows:34px 1fr;
+      min-height:0;
+      background:#181c1d;
+    }
+    .world-panel .console{
+      border-top:1px solid #303738;
+      background:#181c1d;
+    }
+    .console-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 12px;
+      color:#9da6a5;
+      font:700 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .console-clear{
+      border:0;background:transparent;color:#818a89;
+      font-size:.67rem;font-weight:700;padding:5px 7px;border-radius:6px;
+    }
+    .console-clear:hover{background:#262c2d;color:#c9cecd}
+    #output{
+      margin:0;
+      padding:2px 13px 12px;
+      overflow:auto;
+      color:#cfd6d5;
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
+      font:500 12.5px/1.5 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+    }
+    #output .error{color:#f0a48c}
+    #output .success{color:#9fd0b4}
+    #output .muted{color:#7c8584}
+    .error-card{
+      display:block;margin:3px 0 8px;padding:11px 12px 12px;
+      border:1px solid #6c4138;border-radius:10px;background:#251d1b;
+      color:#e8e4df;white-space:normal;font-family:Arial,Helvetica,sans-serif;
+    }
+    .error-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+    .error-badge{color:#f2aa93;font:800 .67rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.05em}
+    .error-line-button{border:1px solid #65443d;background:#30231f;color:#f3c5b5;border-radius:7px;padding:5px 8px;font-size:.66rem;font-weight:800}
+    .error-line-button:hover{background:#3a2924}
+    .error-title{font-size:.87rem;font-weight:850;line-height:1.25;color:#fff;margin-bottom:5px}
+    .error-explanation{font-size:.76rem;line-height:1.45;color:#d7d0cb}
+    .error-source{display:block;margin-top:8px;padding:7px 8px;border-radius:7px;background:#171b1c;color:#f1d4c8;font:650 .72rem/1.45 "JetBrains Mono","SFMono-Regular",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .error-hint{display:block;margin-top:8px;padding:7px 8px;border-radius:7px;background:#e7f2ee;color:#174f48;font-size:.74rem;line-height:1.4;font-weight:750}
+    .error-raw{margin-top:8px;color:#9f9691;font-size:.66rem}
+    .error-raw summary{cursor:pointer;color:#b9aaa4;font-weight:750}
+    .error-raw code{display:block;margin-top:5px;color:#a9a09b;font:500 .65rem/1.4 "JetBrains Mono","SFMono-Regular",Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+
+    .world-panel{
+      display:grid;
+      grid-template-rows:43px minmax(420px,1fr) auto var(--output-height,150px);
+      min-height:0;
+    }
+    .world-stage{
+      min-height:0;
+      display:grid;
+      place-items:center;
+      padding:20px;
+      background:
+        radial-gradient(circle at 50% 40%,rgba(23,107,115,.05),transparent 52%),
+        var(--surface);
+      overflow:auto;
+    }
+    .world-wrap{
+      width:404px;height:404px;
+      position:relative;
+      flex:0 0 auto;
+      border:2px solid #b8b4aa;
+      background:white;
+      box-shadow:0 8px 24px rgba(36,42,41,.08);
+      overflow:hidden;
+    }
+    .grid{
+      position:absolute;inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(to right,rgba(32,37,37,.075) 1px,transparent 1px),
+        linear-gradient(to bottom,rgba(32,37,37,.075) 1px,transparent 1px);
+      background-size:20px 20px;
+      z-index:0;
+    }
+    .axis-x,.axis-y{position:absolute;background:rgba(32,37,37,.28);pointer-events:none;z-index:1}
+    .axis-x{left:0;right:0;top:199px;height:1px}
+    .axis-y{top:0;bottom:0;left:199px;width:1px}
+    .axis-label{
+      position:absolute;z-index:1;pointer-events:none;
+      font:600 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:rgba(32,37,37,.48);
+      background:rgba(255,255,255,.78);
+      padding:2px 3px;
+      border-radius:3px;
+    }
+    .axis-label.xneg{left:4px;top:204px}
+    .axis-label.xpos{right:4px;top:204px}
+    .axis-label.ypos{left:204px;top:4px}
+    .axis-label.yneg{left:204px;bottom:4px}
+    #turtle-canvas{
+      position:absolute;inset:0;
+      width:400px;height:400px;
+      z-index:2;
+      pointer-events:none;
+    }
+    #turtle-drawing,#turtle-sprite{
+      position:absolute;
+      inset:0;
+      width:400px;
+      height:400px;
+      display:block;
+    }
+    #turtle-drawing{z-index:2}
+    #turtle-sprite{z-index:3}
+
+    .world-info{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-top:1px solid var(--rule);
+      background:#f8f4ec;
+    }
+    .world-copy{font-size:.77rem;color:var(--mid);line-height:1.4}
+    .world-copy strong{color:var(--ink)}
+    .toggle{
+      display:flex;align-items:center;gap:7px;
+      color:var(--soft);font-size:.72rem;font-weight:700;
+      white-space:nowrap;
+    }
+    .toggle input{accent-color:var(--teal)}
+
+    .command-library{
+      min-height:0;
+      display:grid;
+      grid-template-rows:auto auto auto 1fr;
+      background:var(--surface);
+    }
+    .command-library .panel-head{padding-right:8px}
+    .commands-count{
+      font:700 .65rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--ghost);
+    }
+    .command-search-wrap{
+      padding:10px;
+      border-bottom:1px solid var(--rule);
+      background:#fbf8f2;
+    }
+    .command-search{
+      width:100%;
+      height:36px;
+      border:1px solid var(--rule);
+      border-radius:10px;
+      background:white;
+      color:var(--ink);
+      padding:0 10px;
+      outline:none;
+      font-size:.78rem;
+    }
+    .command-search:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,107,115,.08)}
+    .library-nav{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:4px;
+      padding:8px 8px 7px;
+      border-bottom:1px solid var(--rule);
+      background:#f6f2e9;
+    }
+    .library-tab{
+      min-width:0;
+      border:1px solid transparent;
+      border-radius:8px;
+      background:transparent;
+      color:var(--soft);
+      padding:7px 4px;
+      font-size:.66rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .library-tab:hover{background:white;color:var(--ink)}
+    .library-tab.active{
+      background:var(--teal-light);
+      border-color:#bfdad6;
+      color:var(--teal-dark);
+    }
+    .library-section{display:none}
+    .library-section.active{display:block}
+    .library-section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:8px;
+      margin:8px 2px 10px;
+      padding-bottom:8px;
+      border-bottom:1px solid var(--rule);
+    }
+    .library-section-head strong{font-size:.8rem;color:var(--ink)}
+    .library-section-head span{font-size:.66rem;color:var(--soft)}
+    .library-searching .library-section{display:block}
+    .library-searching .library-section-head{display:none}
+
+    .command-scroll{
+      min-height:0;
+      overflow:auto;
+      padding:6px 10px 16px;
+    }
+    .command-tip{
+      margin:6px 0 12px;
+      color:var(--soft);
+      font-size:.7rem;
+      line-height:1.4;
+    }
+    .command-tip strong{color:var(--teal)}
+    .extra-reference .command-item{padding:7px}
+    .command-category{margin:14px 0 5px}
+    .command-category:first-of-type{margin-top:6px}
+    .command-category-title{
+      font:800 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--teal);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      padding:0 2px 6px;
+    }
+    .command-item{
+      width:100%;
+      display:block;
+      text-align:left;
+      border:1px solid transparent;
+      border-top-color:var(--rule);
+      background:transparent;
+      padding:9px 7px;
+      color:var(--ink);
+      border-radius:8px;
+    }
+    .command-item:hover,
+    .command-item:focus{
+      background:var(--teal-light);
+      border-color:#c6dedb;
+      outline:none;
+    }
+    .command-syntax{
+      display:block;
+      font:700 .73rem/1.35 "JetBrains Mono","SFMono-Regular",Consolas,monospace;
+      color:var(--ink);
+      overflow-wrap:anywhere;
+    }
+    .command-desc{
+      display:block;
+      margin-top:4px;
+      color:var(--soft);
+      font-size:.68rem;
+      line-height:1.38;
+    }
+    .command-alias{
+      display:block;
+      margin-top:4px;
+      color:var(--ghost);
+      font:600 .61rem/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;
+    }
+    .command-empty{
+      display:none;
+      padding:24px 8px;
+      text-align:center;
+      color:var(--soft);
+      font-size:.75rem;
+    }
+    .command-close{
+      display:none;
+      border:0;
+      background:transparent;
+      color:var(--soft);
+      font-size:1.1rem;
+      line-height:1;
+      padding:5px 7px;
+      border-radius:7px;
+    }
+    .command-close:hover{background:rgba(0,0,0,.05)}
+    .commands-toggle{display:none}
+    .commands-overlay{display:none}
+
+    .example-select{
+      height:36px;
+      border:1px solid var(--rule);
+      background:white;
+      color:var(--mid);
+      border-radius:10px;
+      padding:0 30px 0 10px;
+      font-size:.76rem;
+      font-weight:750;
+      outline:none;
+    }
+
+    .loading{
+      position:absolute;inset:0;z-index:8;
+      display:none;place-items:center;
+      background:rgba(255,253,248,.9);
+      color:var(--mid);
+      font-size:.78rem;font-weight:800;
+    }
+    .loading.show{display:grid}
+
+
+    /* A viewport workspace lets each panel scroll independently. */
+    .app{height:100dvh;min-height:0;grid-template-rows:auto auto minmax(0,1fr);overflow:hidden}
+    .layoutbar{
+      display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+      min-height:44px;padding:7px 15px;border-bottom:1px solid var(--rule);
+      background:#eee9df;color:var(--mid);
+    }
+    .layout-group{display:flex;align-items:center;gap:9px;min-width:0}
+    .layout-group label{white-space:nowrap;font-size:.72rem;font-weight:800}
+    .layout-group input[type="range"]{width:114px;accent-color:var(--teal);cursor:ew-resize}
+    .layout-group output{
+      white-space:nowrap;min-width:61px;
+      font:650 .66rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+      color:var(--soft);font-variant-numeric:tabular-nums;
+    }
+    .layout-mobile-editor{display:none}
+    .layout-output input[type="range"]{width:86px}
+    .layout-text-button{
+      border:0;background:transparent;border-radius:7px;color:var(--teal);
+      font-size:.7rem;font-weight:800;padding:5px 6px;white-space:nowrap;
+    }
+    .layout-text-button:hover{background:rgba(23,107,115,.09)}
+    .reset-layout{margin-left:auto}
+    .workspace{
+      --code-fr:53fr;--world-fr:47fr;--library-width:300px;
+      display:grid;
+      grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr)) 10px var(--library-width);
+      gap:5px;padding:9px;
+      min-height:0;height:100%;
+      overflow:hidden;align-items:stretch;
+    }
+    .panel{height:100%;min-width:0}
+    .code-panel{grid-template-rows:47px minmax(0,1fr)}
+    .code-panel .CodeMirror{height:100%}
+    .panel-head{height:47px}
+    .editor-head-start,.world-head-actions{display:flex;align-items:center;gap:9px;min-width:0}
+    .clear-code-btn{
+      height:32px;padding:0 10px;border-color:#bf6047;
+      color:#8c3427;background:#fff4ef;
+      font-size:.73rem;white-space:nowrap;
+    }
+    .clear-code-btn:hover{border-color:#9a4633;background:#ffeae0}
+    .code-panel .panel-head{background:#292f30}
+    .code-panel .clear-code-btn{background:#452d28;color:#ffe0d2;border-color:#a2634d}
+    .code-panel .clear-code-btn:hover{background:#5b352d;border-color:#cc896f}
+    .world-head-actions .panel-mini{white-space:nowrap}
+    .clear-run-btn{height:31px;padding:0 10px;font-size:.72rem;color:var(--teal);white-space:nowrap}
+    .world-panel{grid-template-rows:47px minmax(185px,1fr) auto var(--output-height,150px)}
+    .world-stage{
+      position:relative;min-height:0;display:flex;justify-content:center;align-items:flex-start;
+      padding:12px;overflow:auto;
+    }
+    .motion-status{
+      position:absolute;left:12px;bottom:9px;z-index:5;
+      border-radius:6px;padding:4px 7px;
+      background:rgba(234,246,241,.95);color:var(--teal);
+      font:700 .67rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
+      pointer-events:none;
+    }
+    .motion-status:empty{display:none}
+    .world-scale-box{position:relative;flex:none;width:404px;height:404px}
+    .world-wrap{transform-origin:top left}
+    .world-info{padding:7px 12px;gap:8px}
+    .world-copy{font-size:.72rem}
+    .toggle{font-size:.69rem}
+    .resize-divider{
+      min-width:0;position:relative;cursor:col-resize;touch-action:none;
+      align-self:stretch;border-radius:10px;outline:none;
+    }
+    .resize-divider:before{
+      content:"";position:absolute;left:50%;top:calc(50% - 31px);
+      transform:translateX(-50%);width:5px;height:62px;border-radius:8px;
+      background:#bab6ab;transition:background .15s;
+    }
+    .resize-divider:hover:before,.resize-divider:focus-visible:before,.resize-divider.dragging:before{background:var(--teal)}
+    body.is-resizing,body.is-resizing *{cursor:col-resize!important;user-select:none!important}
+    .command-library{grid-template-rows:47px auto auto minmax(0,1fr)}
+    .command-scroll{overscroll-behavior:contain}
+    .recipe-panel{border:1px solid #cfdbd8;border-radius:10px;background:#f3f8f6;margin:4px 0 12px}
+    .recipe-panel summary{cursor:pointer;font-size:.74rem;font-weight:800;color:var(--teal);padding:11px 10px}
+    .recipe-panel summary span{float:right;color:var(--soft);font-size:.62rem;font-weight:650}
+    .recipe-body{padding:0 7px 7px}
+    .recipe-button{display:block;text-align:left;width:100%;padding:8px 7px;border:0;border-top:1px solid #d4e4e1;background:transparent;border-radius:6px;color:var(--ink)}
+    .recipe-button:hover{background:#e2f0ec}
+    .recipe-button strong{display:block;font-size:.7rem;margin-bottom:3px}
+    .recipe-button code{font-size:.65rem;color:var(--soft)}
+    .mobile-output{display:none}
+    body.trace-embed .appbar,
+    body.trace-embed .layoutbar,
+    body.trace-embed .command-library,
+    body.trace-embed .library-divider,
+    body.trace-embed .commands-overlay{display:none!important}
+    body.trace-embed .app{grid-template-rows:minmax(0,1fr);height:100dvh}
+    body.trace-embed .workspace{
+      grid-template-columns:minmax(300px,1fr) 10px minmax(360px,1fr)!important;
+      gap:5px;padding:8px;height:100dvh
+    }
+    body.trace-embed .clear-code-btn,
+    body.trace-embed .clear-run-btn,
+    body.trace-embed .world-edit-link{display:none!important}
+    body.trace-embed .code-panel,
+    body.trace-embed .world-panel{height:100%}
+    body.trace-embed .code-panel .CodeMirror{font-size:16px}
+    body.trace-embed .world-panel{grid-template-rows:47px minmax(250px,1fr) auto 78px}
+    body.trace-embed #output{font-size:11px}
+    @media(min-width:1351px){
+      body.library-hidden .workspace{
+        grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(360px,var(--world-fr));
+      }
+      body.library-hidden .library-divider,
+      body.library-hidden .command-library{display:none}
+    }
+    @media(max-width:1350px){
+      .workspace{grid-template-columns:minmax(280px,var(--code-fr)) 10px minmax(320px,var(--world-fr))}
+      .layout-library{display:none}
+      .library-divider{display:none}
+      .command-library{
+        display:grid;position:fixed;z-index:42;top:0;right:0;bottom:0;
+        height:100dvh;width:min(360px,90vw);border-radius:0;
+        transform:translateX(105%);transition:transform .2s ease;
+        box-shadow:-18px 0 42px rgba(32,37,37,.18);
+      }
+      body.commands-open .command-library{transform:translateX(0)}
+      .commands-toggle{display:inline-flex}
+      .command-close{display:block}
+      .commands-overlay{
+        position:fixed;inset:0;z-index:41;background:rgba(24,28,28,.4);
+      }
+      body.commands-open .commands-overlay{display:block}
+    }
+    @media(max-width:840px){
+      html,body{height:auto;min-height:100%}
+      body{overflow-x:hidden;overflow-y:auto}
+      .app{height:auto;min-height:100dvh;overflow:visible;display:block}
+      .appbar{
+        position:sticky;top:0;z-index:30;
+        flex-wrap:wrap;
+        padding:7px 9px;
+        gap:6px;
+        background:var(--surface);
+        box-shadow:0 3px 12px rgba(32,37,37,.07);
+      }
+      .appbar-left{flex:1 1 auto}
+      .appbar-right{width:100%;justify-content:space-between;gap:6px}
+      .brand-title{font-size:.78rem}
+      .tool-title{font-size:.84rem}
+      .tool-note{display:none}
+      .site-actions{order:2}
+      .toolbar{order:1;gap:5px}
+      .toolbar .btn,.toolbar .example-select{height:34px;padding-left:8px;padding-right:8px}
+      .mobile-output{display:inline-flex}
+      .world-edit-link{display:inline-block}
+      .layoutbar{gap:8px;padding:8px 10px}
+      .layout-editor{display:none}
+      .layout-mobile-editor{display:flex}
+      .layout-output{display:flex}
+      .layout-group input[type="range"]{width:85px}
+      .layout-group output{min-width:42px}
+      .workspace{display:flex;flex-direction:column;min-height:0;height:auto;gap:9px;padding:9px;overflow:visible}
+      .resize-divider{display:none}
+      .code-panel{height:var(--mobile-editor-height,355px);min-height:220px;flex:none;grid-template-rows:47px minmax(0,1fr)}
+      .world-panel{height:auto;min-height:0;flex:none;grid-template-rows:47px auto auto var(--output-height,150px)}
+      .world-stage{min-height:0;padding:10px;overflow:hidden}
+      .motion-status{bottom:7px;left:9px;font-size:.64rem}
+      .world-scale-box{flex:none}
+      .command-library{height:100dvh}
+      .panel{border-radius:13px}
+    }
+    @media(max-width:560px){
+      .appbar{padding:7px}
+      .brand-title,.site-actions{display:none}
+      .appbar-divider{height:26px}
+      .appbar-left{gap:7px}
+      .title-wrap{min-width:0}
+      .tool-title{font-size:.82rem}
+      .toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;gap:5px}
+      .toolbar .btn,.toolbar .example-select{height:38px;width:100%;min-width:0;font-size:.72rem;padding:0 4px}
+      .toolbar .primary{grid-column:auto}
+      .toolbar #viewWorldBtn{display:inline-flex}
+      .shortcut{display:none}
+      .layoutbar{justify-content:space-between;gap:6px}
+      .layout-output input[type="range"]{width:58px}
+      .layout-group{gap:4px}
+      .layout-group label{font-size:.65rem}
+      .layout-group output{font-size:.61rem}
+      .reset-layout{font-size:.63rem;margin-left:0}
+      .editor-head-start{gap:6px}
+      .clear-code-btn{font-size:.68rem;height:33px;padding:0 8px}
+      .code-panel .panel-label{font-size:.66rem}
+      .code-panel .panel-mini{font-size:.6rem;white-space:nowrap}
+      .editor-head-right{gap:4px}
+      .playback-line-status{font-size:.6rem}
+      .world-panel .panel-mini{display:none}
+      .world-panel{scroll-margin-top:145px}
+      .clear-run-btn{height:33px}
+      .world-info{grid-template-columns:1fr auto}
+      .world-copy{font-size:.68rem}
+      .command-library{width:min(365px,94vw)}
+    }
+
+  
+    /* Compact editable workspace for lessons embedded in /pythoncourse/. */
+    body.course-embed .appbar-left,
+    body.course-embed .site-actions,
+    body.course-embed .layoutbar,
+    body.course-embed .command-library,
+    body.course-embed .library-divider,
+    body.course-embed .commands-overlay,
+    body.course-embed .example-select,
+    body.course-embed .commands-toggle,
+    body.course-embed .mobile-output{display:none!important}
+    body.course-embed{overflow:hidden}
+    body.course-embed .app{
+      height:100dvh;min-height:0;overflow:hidden;
+      grid-template-rows:52px minmax(0,1fr)
+    }
+    body.course-embed .appbar{
+      min-height:52px;padding:7px 10px;justify-content:flex-end;
+      border-bottom:1px solid var(--rule);background:#f8f4ec
+    }
+    body.course-embed .appbar-right{width:100%;justify-content:flex-end}
+    body.course-embed .toolbar{display:flex;width:auto;gap:6px}
+    body.course-embed .toolbar .btn{height:36px}
+    body.course-embed .workspace{
+      height:100%;min-height:0;overflow:hidden;
+      grid-template-columns:minmax(260px,1fr) 10px minmax(330px,1fr)!important;
+      gap:5px;padding:8px
+    }
+    body.course-embed .code-panel,
+    body.course-embed .world-panel{height:100%;min-height:0}
+    body.course-embed .editor-divider:before{
+      width:4px;
+      height:72px;
+      background:#9e9a92
+    }
+    body.course-embed .code-panel .CodeMirror{font-size:15px}
+    body.course-embed .world-panel{grid-template-rows:47px minmax(210px,1fr) auto 105px}
+    body.course-embed .world-edit-link{display:none!important}
+    @media(max-width:840px){
+      body.course-embed{overflow:auto}
+      body.course-embed .app{height:auto;min-height:100dvh;overflow:visible;display:block}
+      body.course-embed .appbar{position:sticky;top:0}
+      body.course-embed .appbar-right{width:100%}
+      body.course-embed .toolbar{display:grid;width:100%;grid-template-columns:repeat(4,minmax(0,1fr))}
+      body.course-embed .workspace{display:flex;height:auto;overflow:visible}
+      body.course-embed .code-panel{height:340px}
+      body.course-embed .world-panel{height:auto}
+    }
+
+    /* Direct drag handle between the Turtle world and text output. */
+    .world-panel{grid-template-rows:47px minmax(185px,1fr) auto 9px var(--output-height,150px)}
+    .output-resize-handle{
+      position:relative;
+      min-height:9px;
+      cursor:row-resize;
+      touch-action:none;
+      background:#eee9df;
+      outline:none;
+      border-top:1px solid #d7d1c6;
+      border-bottom:1px solid #d7d1c6;
+    }
+    .output-resize-handle:after{
+      content:"";
+      position:absolute;
+      left:50%;top:50%;
+      width:46px;height:3px;
+      transform:translate(-50%,-50%);
+      border-radius:99px;
+      background:#aaa69e;
+      transition:width .12s,background .12s;
+    }
+    .output-resize-handle:hover:after,
+    .output-resize-handle:focus-visible:after,
+    .output-resize-handle.dragging:after{
+      width:62px;
+      background:#747a77;
+    }
+    body.is-resizing-output,body.is-resizing-output *{cursor:row-resize!important;user-select:none!important}
+    body.trace-embed .world-panel{grid-template-rows:47px minmax(250px,1fr) auto 9px 78px}
+    body.course-embed .world-panel{grid-template-rows:47px minmax(210px,1fr) auto 9px var(--output-height,150px)}
+    @media(max-width:840px){
+      .world-panel{grid-template-rows:47px auto auto 9px var(--output-height,150px)}
+      body.course-embed .world-panel{grid-template-rows:47px auto auto 9px var(--output-height,150px)}
+    }
+/* Keep both trace panes visible when the embedded viewport fits them. */
+@media(min-width:680px){
+  body.trace-embed .workspace{display:grid;grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr)!important;overflow:hidden}
+  body.trace-embed .editor-divider{display:block}
+}
+</style>
+<link rel="stylesheet" href="/turtle/sidebar.css?v=6">
+<link rel="stylesheet" href="/turtle/display.css?v=2">
+<link rel="stylesheet" href="/learn/student-nav.css?v=2">
+<script defer src="/learn/student-nav.js?v=2"></script>
+<style>.playback-controls,.playback-speed,.speed-controls{display:none!important}</style>
+</head>
+
+<body data-student-area="create" data-student-layout="runtime">
+<div class="app">
+  <header class="appbar">
+    <div class="appbar-left">
+      <a class="brand" href="../index.html" aria-label="David Steckler home">
+        <span class="brand-mark">&gt;_</span>
+        <span class="brand-title">David Steckler</span>
+      </a>
+
+      <span class="appbar-divider" aria-hidden="true"></span>
+
+      <div class="title-wrap">
+        <div class="turtle-badge" aria-hidden="true">▲</div>
+        <div class="tool-copy">
+          <div class="tool-title">Compiled-Style Turtle</div>
+          <div class="tool-note">Compile first. Display the complete drawing instantly.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="appbar-right">
+      <nav class="site-actions" aria-label="Site">
+        <a class="site-link" href="../turtlereference/">Reference</a>
+        <a class="site-link" href="../course.html">Course</a>
+        <a class="site-link" href="../index.html">Home</a>
+      </nav>
+
+      <div class="toolbar">
+        <select class="example-select" id="examples" aria-label="Load an example">
+          <option value="">Examples</option>
+          <option value="square">Square</option>
+          <option value="star">Star</option>
+          <option value="spiral">Spiral</option>
+          <option value="colors">Color Wheel</option>
+        </select>
+        <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
+        <button class="btn" id="pauseBtn" type="button" disabled style="display:none">⏸ Pause</button>
+        <button class="btn" id="stepBtn" type="button" disabled style="display:none">↳ Step</button>
+        <button class="btn danger" id="stopBtn" type="button" disabled>■ Stop</button>
+        <button class="btn commands-toggle" id="commandsToggle" type="button" aria-controls="commandLibrary" aria-expanded="false">☰ Reference</button>
+        <button class="btn mobile-output" id="viewWorldBtn" type="button">View world ↓</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="layoutbar" aria-label="Workspace layout controls">
+    <div class="display-controls" role="group" aria-label="Code and output size">
+      <div class="display-control">
+        <label for="codeFontSize">Code size</label>
+        <button class="display-step" type="button" data-display-step="codeFontSize" data-direction="-1" aria-label="Decrease code size">−</button>
+        <input id="codeFontSize" type="range" min="12" max="40" step="2" value="16" aria-label="Code font size">
+        <button class="display-step" type="button" data-display-step="codeFontSize" data-direction="1" aria-label="Increase code size">+</button>
+        <output id="codeFontSizeValue" for="codeFontSize">16 px</output>
+      </div>
+      <div class="display-control">
+        <label for="drawingZoom">Drawing</label>
+        <button class="display-step" type="button" data-display-step="drawingZoom" data-direction="-1" aria-label="Decrease drawing zoom">−</button>
+        <input id="drawingZoom" type="range" min="50" max="300" step="10" value="100" aria-label="Drawing zoom">
+        <button class="display-step" type="button" data-display-step="drawingZoom" data-direction="1" aria-label="Increase drawing zoom">+</button>
+        <output id="drawingZoomValue" for="drawingZoom">100%</output>
+      </div>
+      <div class="display-control">
+        <label for="outputFontSize">Output text</label>
+        <button class="display-step" type="button" data-display-step="outputFontSize" data-direction="-1" aria-label="Decrease output text size">−</button>
+        <input id="outputFontSize" type="range" min="12" max="40" step="2" value="14" aria-label="Output text font size">
+        <button class="display-step" type="button" data-display-step="outputFontSize" data-direction="1" aria-label="Increase output text size">+</button>
+        <output id="outputFontSizeValue" for="outputFontSize">14 px</output>
+      </div>
+    </div>
+    <button class="layout-text-button reset-layout" id="resetLayout" type="button">Reset view</button>
+  </section>
+
+  <main class="workspace" id="workspace">
+    <section class="panel code-panel">
+      <div class="panel-head">
+        <div class="editor-head-start">
+          <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Turtle's output alone">⌫ Clear all code</button>
+          <button class="btn" id="codeHistoryBtn" type="button">History</button>
+          <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
+        </div>
+        <div class="editor-head-right">
+          <span class="playback-line-status" id="playbackLineStatus" aria-live="polite"></span>
+          <div class="panel-mini" id="saveStatus">saved locally</div>
+        </div>
+      </div>
+
+      <textarea id="editor-source" spellcheck="false"># Turtle starts at (0, 0), facing right.
+# Try changing the distance or the number of repeats.
+
+for i in range(4):
+    forward(100)
+    left(90)</textarea>
+
+    </section>
+
+    <div class="resize-divider editor-divider" id="editorDivider" role="separator" tabindex="0" aria-label="Resize code editor and Turtle world" aria-orientation="vertical" aria-valuenow="53" aria-valuemin="30" aria-valuemax="70" title="Drag to resize editor and world"></div>
+
+    <section class="panel world-panel" id="worldPanel">
+      <div class="panel-head">
+        <div class="panel-label">Turtle World</div>
+        <div class="world-head-actions">
+          <span class="panel-mini" id="worldLineStatus">400 × 400</span>
+          <button class="world-edit-link" id="editCodeBtn" type="button">↑ Edit code</button>
+          <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Turtle's drawing and printed output; keep your code">↻ Clear Run</button>
+        </div>
+      </div>
+
+      <div class="world-stage" id="worldStage">
+        <div class="motion-status" id="motionStatus" aria-live="polite"></div>
+        <div class="world-scale-box" id="worldScaleBox">
+          <div class="world-wrap" id="worldWrap">
+          <div class="grid" id="grid"></div>
+          <div class="axis-x" id="axisX"></div>
+          <div class="axis-y" id="axisY"></div>
+          <span class="axis-label xneg">−200</span>
+          <span class="axis-label xpos">200</span>
+          <span class="axis-label ypos">200</span>
+          <span class="axis-label yneg">−200</span>
+          <div id="turtle-canvas" aria-label="Turtle drawing canvas">
+            <canvas id="turtle-drawing" width="400" height="400"></canvas>
+            <canvas id="turtle-sprite" width="400" height="400"></canvas>
+          </div>
+          <div class="loading" id="loading">Loading Python…</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="world-info">
+        <div class="world-copy"><strong>Pen starts down.</strong> <code>penup()</code> moves without drawing; <code>pendown()</code> draws again.</div>
+        <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+      </div>
+
+      <div class="output-resize-handle" id="outputDivider" role="separator" tabindex="0" aria-label="Resize output panel" aria-orientation="horizontal" aria-valuemin="100" aria-valuemax="290" aria-valuenow="150" title="Drag to resize output"></div>
+
+      <div class="console" aria-label="Text output">
+        <div class="console-head">
+          <span>Output · print() & errors</span>
+          <button class="console-clear" id="clearConsole" type="button">clear</button>
+        </div>
+        <div id="output"><span class="muted">print() output will appear here.</span></div>
+      </div>
+    </section>
+
+    <div class="resize-divider library-divider" id="libraryDivider" role="separator" tabindex="0" aria-label="Resize reference and history sidebar" aria-orientation="vertical" aria-valuenow="300" aria-valuemin="250" aria-valuemax="660" title="Drag to resize sidebar"></div>
+
+    <aside class="panel command-library" id="commandLibrary" aria-label="Reference and code history">
+      <div class="panel-head sidebar-head">
+        <div class="sidebar-tabs" role="tablist" aria-label="Sidebar">
+          <button class="sidebar-tab" id="referenceTab" role="tab" aria-selected="true" aria-controls="referencePane" type="button">Reference</button>
+          <button class="sidebar-tab" id="historyTab" role="tab" aria-selected="false" aria-controls="historyPane" tabindex="-1" type="button">History</button>
+        </div>
+        <button class="command-close" id="commandsClose" type="button" aria-label="Close sidebar">Hide</button>
+      </div>
+      <section class="sidebar-pane" id="referencePane" role="tabpanel" aria-labelledby="referenceTab">
+        <div class="reference-search">
+          <input class="command-search" id="commandSearch" type="search" placeholder="Search commands, topics, or examples…" aria-label="Search reference" autocomplete="off" spellcheck="false">
+          <div class="reference-topline"><span id="commandsCount"></span><a href="/reference/" target="_blank" rel="noopener">Full reference ↗</a></div>
+        </div>
+        <div class="reference-scroll" id="referenceScroll">
+          <div id="referenceBrowse"></div>
+          <article class="reference-detail" id="referenceDetail" hidden></article>
+          <p class="reference-empty" id="commandEmpty" hidden>No reference items match that search.</p>
+        </div>
+      </section>
+      <section class="sidebar-pane" id="historyPane" role="tabpanel" aria-labelledby="historyTab" hidden>
+        <div class="history-tools">
+          <div class="history-tools-top"><strong>Code history</strong><button class="btn" id="saveHistoryVersion" type="button">Save version</button></div>
+          <p>Hover to preview · click to keep a version open. Saved on this device.</p>
+        </div>
+        <div class="history-layout">
+          <div class="history-list" id="historyList" aria-label="Saved versions"></div>
+          <div class="history-preview">
+            <div class="history-preview-head">
+              <strong id="historyVersionTime"></strong>
+              <p id="historyVersionReason"></p>
+              <label class="history-view-control">Show <select id="historyView"><option value="code">Full code</option><option value="diff">Changes since previous save</option></select></label>
+            </div>
+            <div class="history-preview-editor"><textarea id="historyCode" aria-label="Saved code preview"></textarea></div>
+            <div class="history-footer">
+              <button class="btn primary" id="restoreHistoryVersion" type="button">Restore this version</button>
+              <div class="history-status" id="historyStatus" role="status"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+    <div class="commands-overlay" id="commandsOverlay"></div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="/assets/vendor/codemirror/closebrackets.js?v=1"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "dsteckler-compiled-turtle-code-v1";
+  var QUERY_PARAMS = new URLSearchParams(window.location.search);
+  var EMBED_MODE = QUERY_PARAMS.get("embed") || "";
+  var REFERENCE_EMBED = EMBED_MODE === "reference";
+  var TRACE_EMBED = EMBED_MODE === "trace" || REFERENCE_EMBED;
+  var COURSE_EMBED = EMBED_MODE === "course";
+  var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
+  var COURSE_CODE = QUERY_PARAMS.get("code");
+  var COURSE_STORAGE_KEY = "dsteckler-pythoncourse-" + COURSE_LESSON;
+  var TRACE_EXAMPLE = QUERY_PARAMS.get("trace") || "sequence";
+  var TRACE_PROGRAMS = {
+    sequence: [
+      "forward(100)",
+      "circle(10)",
+      "forward(10)",
+      "circle(20)",
+      "circle(30)",
+      "forward(30)"
+    ].join("\n"),
+    "for-loops": [
+      "forward(20)",
+      "for i in range(2):",
+      "    circle(10)",
+      "    circle(20)",
+      "    circle(30)",
+      "    left(90)",
+      "forward(100)"
+    ].join("\n"),
+    functions: [
+      "speed(4)",
+      "",
+      "def double_circle():",
+      "    setheading(90)",
+      "    circle(20)",
+      "    setheading(270)",
+      "    circle(20)",
+      "",
+      "bgcolor(\"pink\")",
+      "for i in range(2):",
+      "    double_circle()",
+      "    penup()",
+      "    forward(40)",
+      "    seth(0)",
+      "    pendown()"
+    ].join("\n"),
+    variables: [
+      "def filled_circle():",
+      "    begin_fill()",
+      "    circle(50)",
+      "    end_fill()",
+      "",
+      "circle_color = \"blue\"",
+      "penup()",
+      "backward(25)",
+      "color(circle_color)",
+      "filled_circle()",
+      "forward(50)",
+      "circle_color = \"red\"",
+      "color(circle_color)",
+      "filled_circle()"
+    ].join("\n"),
+    parameters: [
+      "def growing_circles(x, y):",
+      "    penup()",
+      "    goto(x, y)",
+      "    radius = 10",
+      "    pendown()",
+      "    for i in range(3):",
+      "        circle(radius)",
+      "        radius += 10",
+      "",
+      "growing_circles(-50, -50)",
+      "growing_circles(100, 0)"
+    ].join("\n"),
+    "using-i": [
+      "speed(10)",
+      "",
+      "def square(side_length):",
+      "    for i in range(4):",
+      "        forward(side_length)",
+      "        left(90)",
+      "",
+      "square(20)",
+      "penup()",
+      "sety(100)",
+      "pendown()",
+      "square(50)"
+    ].join("\n"),
+    "extended-loop": [
+      "speed(10)",
+      "for i in range(200, 0, -50):",
+      "    forward(i)",
+      "    left(90)",
+      "penup()",
+      "goto(0, 0)"
+    ].join("\n")
+  };
+  var TRACE_CODE = TRACE_PROGRAMS[TRACE_EXAMPLE] || TRACE_PROGRAMS.sequence;
+  if(TRACE_EMBED) document.body.classList.add("trace-embed");
+  if(REFERENCE_EMBED) document.body.classList.add("reference-embed");
+  if(COURSE_EMBED) document.body.classList.add("course-embed");
+  var DEFAULT_CODE = [
+    "# Turtle starts at (0, 0), facing right.",
+    "# Try changing the distance or the number of repeats.",
+    "",
+    "for i in range(4):",
+    "    forward(100)",
+    "    left(90)"
+  ].join("\n");
+
+  var examples = {
+    square: [
+      "for i in range(4):",
+      "    forward(100)",
+      "    left(90)"
+    ].join("\n"),
+    star: [
+      "color(\"purple\")",
+      "pensize(3)",
+      "",
+      "for i in range(5):",
+      "    forward(150)",
+      "    right(144)"
+    ].join("\n"),
+    spiral: [
+      "speed(0)",
+      "",
+      "for i in range(55):",
+      "    forward(i * 3)",
+      "    right(91)"
+    ].join("\n"),
+    colors: [
+      "speed(0)",
+      "pensize(3)",
+      "",
+      "colors = [\"red\", \"orange\", \"gold\", \"green\", \"blue\", \"purple\"]",
+      "",
+      "for i in range(72):",
+      "    color(colors[i % len(colors)])",
+      "    forward(120)",
+      "    backward(120)",
+      "    right(5)"
+    ].join("\n")
+  };
+
+  var source = document.getElementById("editor-source");
+  var output = document.getElementById("output");
+  var runBtn = document.getElementById("runBtn");
+  var stopBtn = document.getElementById("stopBtn");
+  var pauseBtn = document.getElementById("pauseBtn");
+  var stepBtn = document.getElementById("stepBtn");
+  var playbackLineStatus = document.getElementById("playbackLineStatus");
+  var worldLineStatus = document.getElementById("worldLineStatus");
+  document.getElementById("editCodeBtn").addEventListener("click",function(){
+    document.querySelector(".code-panel").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  var clearCodeBtn = document.getElementById("clearCodeBtn");
+  var clearRunBtn = document.getElementById("clearRunBtn");
+  var codeStatus = document.getElementById("codeStatus");
+  var saveStatus = document.getElementById("saveStatus");
+  var examplesSelect = document.getElementById("examples");
+  var gridToggle = document.getElementById("gridToggle");
+  var loading = document.getElementById("loading");
+  var worldStage = document.getElementById("worldStage");
+  var worldWrap = document.getElementById("worldWrap");
+  var worldDrawingZoom = 100;
+  var commandsToggle = document.getElementById("commandsToggle");
+  var commandsClose = document.getElementById("commandsClose");
+  var commandsOverlay = document.getElementById("commandsOverlay");
+  var commandSearch = document.getElementById("commandSearch");
+  var commandEmpty = document.getElementById("commandEmpty");
+  var commandsCount = document.getElementById("commandsCount");
+
+  var workspace = document.getElementById("workspace");
+  var worldScaleBox = document.getElementById("worldScaleBox");
+  var worldPanel = document.getElementById("worldPanel");
+  var viewWorldBtn = document.getElementById("viewWorldBtn");
+  var editorDivider = document.getElementById("editorDivider");
+  var libraryDivider = document.getElementById("libraryDivider");
+  var outputDivider = document.getElementById("outputDivider");
+  var LAYOUT_KEY = "dsteckler-turtle-layout-v3";
+  var layoutDefaults = { editor:53, library:300, mobile:355, output:150, libraryVisible:true }; // 150px keeps the desktop workspace in one viewport
+  var layoutState = Object.assign({},layoutDefaults);
+  function clamp(n,low,high){ return Math.min(high,Math.max(low,n)); }
+  try{
+    var storedLayout=JSON.parse(localStorage.getItem(LAYOUT_KEY)||"null");
+    if(storedLayout){
+      ["editor","library","mobile","output"].forEach(function(k){
+        if(Number.isFinite(storedLayout[k]))layoutState[k]=storedLayout[k];
+      });
+      if(typeof storedLayout.libraryVisible==="boolean")layoutState.libraryVisible=storedLayout.libraryVisible;
+    }
+  }catch(e){}
+  function applyLayout(save){
+    layoutState.editor=clamp(layoutState.editor,30,70);
+    layoutState.library=clamp(layoutState.library,250,660);
+    layoutState.mobile=clamp(layoutState.mobile,220,650);
+    layoutState.output=clamp(layoutState.output,100,290);
+    workspace.style.setProperty("--code-fr",layoutState.editor+"fr");
+    workspace.style.setProperty("--world-fr",(100-layoutState.editor)+"fr");
+    workspace.style.setProperty("--library-width",layoutState.library+"px");
+    document.documentElement.style.setProperty("--mobile-editor-height",layoutState.mobile+"px");
+    document.documentElement.style.setProperty("--output-height",layoutState.output+"px");
+    document.body.classList.toggle("library-hidden",!layoutState.libraryVisible);
+    editorDivider.setAttribute("aria-valuenow",layoutState.editor);
+    libraryDivider.setAttribute("aria-valuenow",layoutState.library);
+    if(outputDivider)outputDivider.setAttribute("aria-valuenow",layoutState.output);
+    if(save)try{localStorage.setItem(LAYOUT_KEY,JSON.stringify(layoutState));}catch(e){}
+    if(typeof editor!=="undefined"&&editor)editor.refresh();
+    if(typeof fitWorld==="function")requestAnimationFrame(fitWorld);
+  }
+  document.getElementById("resetLayout").addEventListener("click",function(){
+    layoutState=Object.assign({},layoutDefaults);
+    applyLayout(true);
+    if(window.resetTurtleDisplay)window.resetTurtleDisplay();
+  });
+  function enableDivider(divider,field,min,max,compute){
+    var dragging=false;
+    divider.addEventListener("pointerdown",function(e){
+      if(e.button!==0||window.innerWidth<=840||(field==="library"&&window.innerWidth<=1350))return;
+      dragging=true;
+      divider.setPointerCapture(e.pointerId);
+      divider.classList.add("dragging");
+      document.body.classList.add("is-resizing");
+      e.preventDefault();
+    });
+    divider.addEventListener("pointermove",function(e){
+      if(!dragging)return;
+      layoutState[field]=clamp(compute(e),min,max);
+      applyLayout(true);
+    });
+    function stopDrag(){
+      dragging=false;
+      divider.classList.remove("dragging");
+      document.body.classList.remove("is-resizing");
+    }
+    divider.addEventListener("pointerup",stopDrag);
+    divider.addEventListener("pointercancel",stopDrag);
+    divider.addEventListener("lostpointercapture",stopDrag);
+    divider.addEventListener("keydown",function(e){
+      if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+      e.preventDefault();
+      var step=field==="library"?10:2;
+      layoutState[field]=clamp(layoutState[field]+(e.key==="ArrowRight"?step:-step),min,max);
+      applyLayout(true);
+    });
+  }
+  enableDivider(editorDivider,"editor",30,70,function(e){
+    var codeRect=document.querySelector(".code-panel").getBoundingClientRect();
+    var worldRect=worldPanel.getBoundingClientRect();
+    var total=codeRect.width+worldRect.width;
+    return Math.round((e.clientX-codeRect.left)/total*100);
+  });
+  enableDivider(libraryDivider,"library",250,660,function(e){
+    return Math.round((e.clientX-workspace.getBoundingClientRect().left-9)/10)*10;
+  });
+  (function enableOutputDivider(){
+    if(!outputDivider)return;
+    var dragging=false,startY=0,startOutput=layoutState.output;
+    function finish(e){
+      if(!dragging)return;
+      dragging=false;
+      outputDivider.classList.remove("dragging");
+      document.body.classList.remove("is-resizing-output");
+      try{ if(e&&outputDivider.hasPointerCapture(e.pointerId))outputDivider.releasePointerCapture(e.pointerId); }catch(err){}
+    }
+    outputDivider.addEventListener("pointerdown",function(e){
+      e.preventDefault();
+      dragging=true;
+      startY=e.clientY;
+      startOutput=layoutState.output;
+      outputDivider.classList.add("dragging");
+      document.body.classList.add("is-resizing-output");
+      try{outputDivider.setPointerCapture(e.pointerId);}catch(err){}
+    });
+    outputDivider.addEventListener("pointermove",function(e){
+      if(!dragging)return;
+      layoutState.output=clamp(startOutput+(startY-e.clientY),100,290);
+      applyLayout(true);
+    });
+    outputDivider.addEventListener("pointerup",finish);
+    outputDivider.addEventListener("pointercancel",finish);
+    outputDivider.addEventListener("keydown",function(e){
+      if(e.key!=="ArrowUp"&&e.key!=="ArrowDown")return;
+      e.preventDefault();
+      layoutState.output=clamp(layoutState.output+(e.key==="ArrowUp"?10:-10),100,290);
+      applyLayout(true);
+    });
+  })();
+  viewWorldBtn.addEventListener("click",function(){
+    worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  applyLayout(false);
+
+  var editor = CodeMirror.fromTextArea(source, {
+    mode: "python",
+    autoCloseBrackets: {pairs:"()",override:true},
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    lineWrapping: false,
+    autofocus: true,
+    extraKeys: {
+      "Tab": function(cm){
+        if(cm.somethingSelected()){
+          cm.indentSelection("add");
+        } else {
+          cm.replaceSelection("    ", "end");
+        }
+      },
+      "Shift-Tab": function(cm){ cm.indentSelection("subtract"); },
+      "Ctrl-Enter": function(){ runCode(); },
+      "Cmd-Enter": function(){ runCode(); }
+    }
+  });
+
+  if(TRACE_EMBED){
+    editor.setValue(TRACE_CODE);
+    editor.setOption("readOnly",REFERENCE_EMBED?false:"nocursor");
+    saveStatus.textContent = "trace example";
+  }else if(COURSE_EMBED){
+    try {
+      var courseSaved = localStorage.getItem(COURSE_STORAGE_KEY);
+      if(courseSaved !== null){
+        editor.setValue(courseSaved);
+      }else if(COURSE_CODE !== null){
+        editor.setValue(COURSE_CODE);
+      }
+      saveStatus.textContent = "saved for this lesson";
+    } catch(e) {
+      if(COURSE_CODE !== null) editor.setValue(COURSE_CODE);
+    }
+  }else{
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if(saved !== null) editor.setValue(saved);
+    } catch(e) {}
+  }
+
+  var errorLineMarker=null;
+  var errorTokenMarker=null;
+
+  function clearErrorHighlight(){
+    if(errorLineMarker!==null){
+      try{editor.removeLineClass(errorLineMarker,"background","turtle-error-line");}catch(e){}
+      errorLineMarker=null;
+    }
+    if(errorTokenMarker){
+      try{errorTokenMarker.clear();}catch(e){}
+      errorTokenMarker=null;
+    }
+  }
+
+  function highlightError(line,token){
+    clearErrorHighlight();
+    var n=Number(line);
+    if(!Number.isInteger(n)||n<1||n>editor.lineCount())return;
+    errorLineMarker=editor.addLineClass(n-1,"background","turtle-error-line");
+    var sourceLine=editor.getLine(n-1)||"";
+    if(token){
+      var start=sourceLine.indexOf(token);
+      if(start>=0){
+        errorTokenMarker=editor.markText(
+          {line:n-1,ch:start},
+          {line:n-1,ch:start+token.length},
+          {className:"turtle-error-token"}
+        );
+      }
+    }
+    editor.scrollIntoView({line:n-1,ch:0},80);
+  }
+
+  var codeSaveKey = COURSE_EMBED ? COURSE_STORAGE_KEY : STORAGE_KEY;
+  var codeHistoryKey = codeSaveKey + "-history-v1";
+  var saveTimer = null, pendingChangeLabel = "Autosave";
+  function readCodeHistory(){
+    try{var entries=JSON.parse(localStorage.getItem(codeHistoryKey)||"[]");return Array.isArray(entries)?entries.filter(function(e){return e&&typeof e.code==="string"&&Number.isFinite(e.time);}):[];}catch(e){return [];}
+  }
+  function saveCodeVersion(code,label){
+    if(TRACE_EMBED)return true;
+    try{
+      var entries=readCodeHistory();
+      if(!entries.length||entries[0].code!==code){
+        entries.unshift({id:typeof crypto.randomUUID==="function"?crypto.randomUUID():Date.now()+"-"+Math.random().toString(36).slice(2),time:Date.now(),code:code,label:label||"Autosave"});
+        entries=entries.slice(0,300);
+        while(entries.length>1&&JSON.stringify(entries).length>1500000)entries.pop();
+        localStorage.setItem(codeHistoryKey,JSON.stringify(entries));
+        window.dispatchEvent(new CustomEvent("turtle-history-updated"));
+      }
+      return true;
+    }catch(e){saveStatus.textContent="History could not be saved";return false;}
+  }
+  function flushCodeSave(label){
+    if(TRACE_EMBED)return;
+    clearTimeout(saveTimer);saveTimer=null;
+    try{
+      localStorage.setItem(codeSaveKey,editor.getValue());
+      if(saveCodeVersion(editor.getValue(),typeof label==="string"?label:pendingChangeLabel))saveStatus.textContent="Saved on this device";
+    }catch(e){saveStatus.textContent="not saved";}
+    pendingChangeLabel="Autosave";
+  }
+  // The containing course uses this before changing a step or lesson.
+  window.saveTurtleCode=flushCodeSave;
+  window.replaceTurtleCode=function(code,label){
+    stopCode();
+    saveCodeVersion(editor.getValue(),"Before "+(label||"loading code"));
+    editor.setValue(String(code));flushCodeSave(label||"Loaded code");editor.focus();
+  };
+  saveCodeVersion(editor.getValue(),"Opened editor");
+  editor.on("beforeChange",function(cm,change){
+    if(!saveTimer)saveCodeVersion(cm.getValue(),pendingChangeLabel);
+    var origin=change.origin||"";
+    pendingChangeLabel=origin==="paste"?"Pasted code":origin==="+delete"?"Deleted code":origin==="+reference"?"Inserted reference":origin==="setValue"?"Loaded code":"Typed code";
+  });
+  window.addEventListener("pagehide",flushCodeSave);
+  document.addEventListener("visibilitychange",function(){if(document.hidden)flushCodeSave();});
+  document.getElementById("codeHistoryBtn").addEventListener("click",function(){
+    if(window.TurtleSidebar)window.TurtleSidebar.open("history");
+  });
+  if(TRACE_EMBED)document.getElementById("codeHistoryBtn").hidden=true;
+  editor.on("change", function(){
+    clearErrorHighlight();
+    if(TRACE_EMBED){saveStatus.textContent="trace example";return;}
+    saveStatus.textContent="saving…";
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(flushCodeSave,750);
+  });
+
+  function setStatus(type){
+    codeStatus.className = "status-dot" + (type ? " " + type : "");
+  }
+
+  function setOutput(html){
+    output.innerHTML = html;
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function appendOutput(text, className){
+    var span = document.createElement("span");
+    if(className) span.className = className;
+    span.textContent = text;
+    output.appendChild(span);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  var TURTLE_ERROR_NAMES=[
+    "forward","backward","left","right","goto","setposition","setx","sety",
+    "penup","pendown","pensize","speed","circle","color","pencolor",
+    "fillcolor","bgcolor","begin_fill","end_fill","shape","clear","reset",
+    "dot","stamp","hideturtle","showturtle","setheading","write","onclick","getscreen"
+  ];
+
+  function editDistance(a,b){
+    a=String(a||"").toLowerCase();
+    b=String(b||"").toLowerCase();
+    var row=[];
+    for(var j=0;j<=b.length;j++)row[j]=j;
+    for(var i=1;i<=a.length;i++){
+      var previous=row[0];
+      row[0]=i;
+      for(var k=1;k<=b.length;k++){
+        var old=row[k];
+        row[k]=Math.min(row[k]+1,row[k-1]+1,previous+(a[i-1]===b[k-1]?0:1));
+        previous=old;
+      }
+    }
+    return row[b.length];
+  }
+
+  function likelyTurtleName(name){
+    if(!name||name.length<3)return null;
+    var best=null;
+    var distance=99;
+    TURTLE_ERROR_NAMES.forEach(function(candidate){
+      var d=editDistance(name,candidate);
+      if(d<distance){distance=d;best=candidate;}
+    });
+    return distance<=(name.length<=5?1:2)?best:null;
+  }
+
+  function getErrorLine(err,raw){
+    if(err&&err.traceback&&err.traceback.length){
+      for(var i=err.traceback.length-1;i>=0;i--){
+        if(err.traceback[i]&&err.traceback[i].lineno){
+          return Math.max(1,Number(err.traceback[i].lineno));
+        }
+      }
+    }
+    var match=String(raw||"").match(/\bline\s+(\d+)\b/i);
+    return match?Math.max(1,Number(match[1])):null;
+  }
+
+  function getErrorMessage(raw,name){
+    var text=String(raw||"").trim();
+    var prefix=String(name||"")+":";
+    if(text.toLowerCase().indexOf(prefix.toLowerCase())===0){
+      text=text.slice(prefix.length).trim();
+    }
+    return text.replace(/\s+on\s+line\s+\d+\s*$/i,"").trim();
+  }
+
+  function analyzeError(err){
+    var name=(err&&(err.tp$name||err.name))||"Error";
+    var raw="";
+    try{raw=err&&err.toString?err.toString():String(err);}
+    catch(e){raw=String(err);}
+
+    var line=getErrorLine(err,raw);
+    var lineText=(line&&line<=editor.lineCount())?(editor.getLine(line-1)||""):"";
+    var message=getErrorMessage(raw,name);
+    var title="Python found an error.";
+    var explanation="Check the highlighted line and the original Python message below.";
+    var hint="";
+    var token=null;
+
+    var nameMatch=message.match(/\bname ['"]([^'"]+)['"] is not defined/i);
+    if(name==="NameError"||nameMatch){
+      token=nameMatch?nameMatch[1]:null;
+      title=token?"Python doesn't know "+token+".":"Python doesn't recognize a name.";
+      explanation=token
+        ? "That name has not been defined yet. It may be misspelled, or it may need to be created before this line runs."
+        : "A variable or function on this line has not been defined yet.";
+      var guess=likelyTurtleName(token);
+      if(guess&&guess!==token)hint="Check the spelling. Did you mean "+guess+"()?";
+    }else if(name==="IndentationError"||/indent/i.test(message)){
+      title="Python is expecting different indentation.";
+      explanation="Indentation shows which lines belong inside a loop, function, or if statement.";
+      hint="Use 4 spaces for each level. Lines in the same block should line up.";
+    }else if(name==="SyntaxError"||name==="ParseError"||/bad input|syntax|unexpected eof|unexpected token/i.test(message)){
+      title="Python can't read this line yet.";
+      explanation="A punctuation or structure problem is stopping Python from understanding the code.";
+      var trimmed=lineText.trim();
+      var block=trimmed.match(/^(for|while|if|elif|else|def)\b/);
+      if(block&&!/:\s*(#.*)?$/.test(trimmed)){
+        hint="Add a colon (:) at the end of this "+block[1]+" line.";
+        token=block[1];
+      }else{
+        var opens=(lineText.match(/\(/g)||[]).length;
+        var closes=(lineText.match(/\)/g)||[]).length;
+        if(opens>closes)hint="There is an opening ( without a matching ).";
+        else if(closes>opens)hint="There is a closing ) without a matching opening (.";
+        else hint="Check this line and the line just above it. Python can notice a missing symbol one line later.";
+      }
+    }else if(name==="TypeError"){
+      title="This operation is using the wrong kind of value.";
+      explanation="Python understood the code, but the values or arguments do not fit this operation.";
+      if(/argument|takes|positional/i.test(message))hint="Check how many values are inside the parentheses.";
+    }else if(name==="ValueError"){
+      title="Python received a value it can't use here.";
+      explanation="The kind of value may be allowed, but this particular value is not valid for the operation.";
+    }else if(name==="IndexError"){
+      title="That list position doesn't exist.";
+      explanation="List indexes start at 0, and this code tried to use a position beyond the available items.";
+      hint="Check the list length and the index used on this line.";
+    }else if(name==="ZeroDivisionError"){
+      title="Python can't divide by zero.";
+      explanation="The value on the right side of /, //, or % became 0.";
+    }else if(name==="AttributeError"){
+      title="That object doesn't have this method or property.";
+      explanation="Check the name after the dot and make sure it belongs to this kind of value.";
+    }
+
+    return {
+      name:name,raw:raw,message:message,line:line,lineText:lineText,
+      title:title,explanation:explanation,hint:hint,token:token
+    };
+  }
+
+  function renderError(err){
+    var info=analyzeError(err);
+    highlightError(info.line,info.token);
+    output.textContent="";
+
+    var card=document.createElement("div");
+    card.className="error-card";
+
+    var top=document.createElement("div");
+    top.className="error-card-top";
+
+    var badge=document.createElement("span");
+    badge.className="error-badge";
+    badge.textContent=info.name+(info.line?" · line "+info.line:"");
+    top.appendChild(badge);
+
+    if(info.line){
+      var jump=document.createElement("button");
+      jump.type="button";
+      jump.className="error-line-button";
+      jump.textContent="Go to line "+info.line;
+      jump.addEventListener("click",function(){
+        editor.focus();
+        editor.setCursor({line:Math.max(0,info.line-1),ch:0});
+        editor.scrollIntoView({line:Math.max(0,info.line-1),ch:0},100);
+      });
+      top.appendChild(jump);
+    }
+
+    card.appendChild(top);
+
+    var title=document.createElement("div");
+    title.className="error-title";
+    title.textContent=info.title;
+    card.appendChild(title);
+
+    var explanation=document.createElement("div");
+    explanation.className="error-explanation";
+    explanation.textContent=info.explanation;
+    card.appendChild(explanation);
+
+    if(info.line&&info.lineText){
+      var source=document.createElement("code");
+      source.className="error-source";
+      source.textContent=info.line+" | "+info.lineText;
+      card.appendChild(source);
+    }
+
+    if(info.hint){
+      var hint=document.createElement("span");
+      hint.className="error-hint";
+      hint.textContent="Try this: "+info.hint;
+      card.appendChild(hint);
+    }
+
+    var details=document.createElement("details");
+    details.className="error-raw";
+    var summary=document.createElement("summary");
+    summary.textContent="Python's original message";
+    details.appendChild(summary);
+
+    var raw=document.createElement("code");
+    raw.textContent=info.raw;
+    details.appendChild(raw);
+    card.appendChild(details);
+
+    output.appendChild(card);
+    output.scrollTop=output.scrollHeight;
+    return info;
+  }
+
+  var coursePrintedText="";
+  function outf(text){
+    coursePrintedText+=text;
+    if(output.querySelector(".muted")) output.textContent = "";
+    appendOutput(text);
+  }
+
+  function builtinRead(x){
+    if(typeof Sk === "undefined" || Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined){
+      throw new Error("File not found: " + x);
+    }
+    return Sk.builtinFiles.files[x];
+  }
+
+  var TurtleRuntime = (function(){
+    var drawCanvas = document.getElementById("turtle-drawing");
+    var spriteCanvas = document.getElementById("turtle-sprite");
+    var ctx = drawCanvas.getContext("2d");
+    var sctx = spriteCanvas.getContext("2d");
+    var world = document.getElementById("worldWrap");
+
+    var courseExecutionCalls=[];
+    function recordCourseCall(name,args){if(!COURSE_EMBED)return;var a=args[0];courseExecutionCalls.push({name:name,num:typeof a==="number"?a:null,str:typeof a==="string"?a:null,raw:String(a===undefined?"":a)});}
+
+    var state = {
+      x:0, y:0, heading:0,
+      penDown:true,
+      color:"#000000",
+      fillColor:"#000000",
+      size:1,
+      visible:true,
+      speed:6,
+      shape:"turtle",
+      filling:false,
+      fillPoints:[]
+    };
+
+    function px(x){ return 200 + x; }
+    function py(y){ return 200 - y; }
+    function rad(deg){ return deg * Math.PI / 180; }
+    function none(){ return Sk.builtin.none.none$; }
+    function js(v){ return Sk.ffi.remapToJs(v); }
+    function pyNum(v){ return Sk.ffi.remapToPy(v); }
+
+    function configureLine(){
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = Math.max(.5, Number(state.size) || 1);
+      ctx.strokeStyle = state.color;
+    }
+
+    function drawSegment(x1,y1,x2,y2){
+      if(!state.penDown) return;
+      configureLine();
+      ctx.beginPath();
+      ctx.moveTo(px(x1),py(y1));
+      ctx.lineTo(px(x2),py(y2));
+      ctx.stroke();
+    }
+
+    function recordFillPoint(){
+      if(state.filling) state.fillPoints.push([state.x,state.y]);
+    }
+
+    function drawSpriteOn(target, permanent){
+      if(!state.visible && !permanent) return;
+      target.save();
+      target.translate(px(state.x),py(state.y));
+      target.rotate(-rad(state.heading));
+
+      var accent=state.color||"#176b73";
+      var outline="#173b3d";
+      var body="#8fc6ae";
+      var shape=state.shape||"turtle";
+
+      target.lineCap="round";
+      target.lineJoin="round";
+      target.lineWidth=1.35;
+
+      if(shape!=="turtle"){
+        target.fillStyle=accent;
+        target.strokeStyle=outline;
+        target.beginPath();
+        if(shape==="circle"){
+          target.arc(0,0,7,0,Math.PI*2);
+          target.fill();target.stroke();
+        }else if(shape==="square"){
+          target.fillRect(-7,-7,14,14);
+          target.strokeRect(-7,-7,14,14);
+        }else if(shape==="triangle"){
+          target.moveTo(9,0);target.lineTo(-7,-7);target.lineTo(-7,7);target.closePath();
+          target.fill();target.stroke();
+        }else if(shape==="classic"){
+          target.moveTo(10,0);target.lineTo(-7,-5);target.lineTo(-3,0);target.lineTo(-7,5);target.closePath();
+          target.fill();target.stroke();
+        }else{
+          target.moveTo(10,0);target.lineTo(-6,-6);target.lineTo(-2,0);target.lineTo(-6,6);target.closePath();
+          target.fill();target.stroke();
+        }
+        target.restore();
+        return;
+      }
+
+      target.fillStyle=body;
+      target.strokeStyle=outline;
+
+      // Tail.
+      target.beginPath();
+      target.moveTo(-10.5,0);
+      target.lineTo(-14.5,-2.1);
+      target.lineTo(-14.5,2.1);
+      target.closePath();
+      target.fill();target.stroke();
+
+      // Four flippers, spaced away from the shell so they remain distinct.
+      [[-5,-7,-.34],[-5,7,.34],[4,-7,-.52],[4,7,.52]].forEach(function(leg){
+        target.save();
+        target.translate(leg[0],leg[1]);
+        target.rotate(leg[2]);
+        target.beginPath();
+        target.ellipse(0,0,3.7,2,0,0,Math.PI*2);
+        target.fill();target.stroke();
+        target.restore();
+      });
+
+      // Shell.
+      target.fillStyle=accent;
+      target.beginPath();
+      target.ellipse(-1,0,8.8,6.3,0,0,Math.PI*2);
+      target.fill();target.stroke();
+
+      // Subtle shell markings keep the shape readable at small sizes.
+      target.save();
+      target.globalAlpha=.45;
+      target.strokeStyle="#ffffff";
+      target.lineWidth=.9;
+      target.beginPath();
+      target.moveTo(-6.5,-3);target.lineTo(4.5,2.8);
+      target.moveTo(-6.5,3);target.lineTo(4.5,-2.8);
+      target.stroke();
+      target.restore();
+
+      // Head. Its position makes heading immediately obvious.
+      target.fillStyle=body;
+      target.strokeStyle=outline;
+      target.beginPath();
+      target.arc(9.8,0,4,0,Math.PI*2);
+      target.fill();target.stroke();
+
+      // Eye.
+      target.fillStyle=outline;
+      target.beginPath();
+      target.arc(11.2,-1.2,.7,0,Math.PI*2);
+      target.fill();
+
+      target.restore();
+    }
+
+    function refreshSprite(){
+      sctx.clearRect(0,0,400,400);
+      drawSpriteOn(sctx,false);
+    }
+
+    var motion = null;
+    var motionStatus = document.getElementById("motionStatus");
+
+    function durationMs(kind, magnitude){
+      var amount=Math.abs(magnitude)||0;
+      var speed=currentSpeed();
+
+      if(speed===0) return 6;
+
+      var base=kind==="turn"
+        ? Math.max(100,amount*3.0)
+        : Math.max(115,amount*4.0);
+
+      var slowFactor=2.65;
+      var fastFactor=.105;
+      var t=(speed-1)/9;
+      var factor=slowFactor*Math.pow(fastFactor/slowFactor,t);
+
+      return Math.max(38,Math.min(8000,base*factor));
+    }
+
+    function animate(kind,amount,update,label){
+      if(playback.forceInstant){update(1);return Promise.resolve(none());}
+
+      if(!Number.isFinite(amount) || amount === 0){
+        update(1);
+        return Promise.resolve(none());
+      }
+      if(!playback.active){
+        update(1);
+        return Promise.resolve(none());
+      }
+      return new Promise(function(resolve,reject){
+        var operation = {
+          raf:null, lastTime:null, fraction:0, finished:false,
+          resolve:resolve, reject:reject,
+          start:null, cancel:null
+        };
+        motion=operation;
+        motionStatus.textContent=label||"Moving Turtle";
+        function finish(){
+          operation.finished=true;
+          if(operation.raf!==null)cancelAnimationFrame(operation.raf);
+          if(motion===operation)motion=null;
+          motionStatus.textContent="";
+          resolve(none());
+        }
+        function frame(now){
+          operation.raf=null;
+          if(operation.finished||motion!==operation)return;
+          if(!playback.active){
+            operation.cancel();
+            return;
+          }
+          if(playback.paused&&!playback.stepOnce){
+            operation.lastTime=null;
+            return;
+          }
+          if(operation.lastTime===null)operation.lastTime=now;
+          var dt=Math.min(60,Math.max(0,now-operation.lastTime));
+          operation.lastTime=now;
+          operation.fraction=Math.min(1,operation.fraction+dt/durationMs(kind,amount));
+          update(operation.fraction);
+          if(operation.fraction>=1)finish();
+          else operation.raf=requestAnimationFrame(frame);
+        }
+        operation.start=function(){
+          if(operation.finished||operation.raf!==null)return;
+          if(playback.paused&&!playback.stepOnce)return;
+          operation.lastTime=null;
+          operation.raf=requestAnimationFrame(frame);
+        };
+        operation.cancel=function(){
+          if(operation.finished)return;
+          operation.finished=true;
+          if(operation.raf!==null)cancelAnimationFrame(operation.raf);
+          if(motion===operation)motion=null;
+          motionStatus.textContent="";
+          reject(new Error("Playback stopped"));
+        };
+        operation.start();
+      });
+    }
+
+    function moveTo(x,y){
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y))return;
+      var ox=state.x,oy=state.y;
+      drawSegment(ox,oy,x,y);
+      state.x=x;state.y=y;
+      recordFillPoint();
+      refreshSprite();
+    }
+
+    function animateMoveTo(x,y,label){
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y))
+        return Promise.reject(new Error("Turtle coordinates must be numbers"));
+      var ox=state.x,oy=state.y;
+      var dx=x-ox,dy=y-oy;
+      return animate("move",Math.hypot(dx,dy),function(t){
+        moveTo(ox+dx*t,oy+dy*t);
+      },label||"Moving "+Math.round(Math.hypot(dx,dy))+" px");
+    }
+
+    function animateForward(distance){
+      var d=Number(distance);
+      if(!Number.isFinite(d))return Promise.reject(new Error("Distance must be a number"));
+      var a=rad(state.heading);
+      return animateMoveTo(
+        state.x+Math.cos(a)*d,
+        state.y+Math.sin(a)*d,
+        (d<0?"Backward ":"Forward ")+Math.abs(d)+" px"
+      );
+    }
+
+    function animateTurn(degrees){
+      var angle=Number(degrees);
+      if(!Number.isFinite(angle))return Promise.reject(new Error("Angle must be a number"));
+      var start=state.heading;
+      return animate("turn",angle,function(t){
+        state.heading=start+angle*t;
+        refreshSprite();
+      },(angle<0?"Turning right ":"Turning left ")+Math.abs(angle)+"°");
+    }
+
+    function animateHeading(heading){
+      var target=Number(heading);
+      if(!Number.isFinite(target))return Promise.reject(new Error("Heading must be a number"));
+      var delta=((target-state.heading)%360+540)%360-180;
+      return animateTurn(delta).then(function(){
+        state.heading=target;
+        refreshSprite();
+        return none();
+      });
+    }
+
+    function animateCircle(radius,extent,steps){
+      var r=Number(radius);
+      var angle=extent===undefined?360:Number(extent);
+      var stepCount=steps===undefined||steps===null?null:Math.max(1,Math.floor(Number(steps)));
+      if(!Number.isFinite(r)||!Number.isFinite(angle)||(stepCount!==null&&!Number.isFinite(stepCount)))
+        return Promise.reject(new Error("Circle radius, extent, and steps must be numbers"));
+      if(r===0||angle===0)return Promise.resolve(none());
+      var heading=state.heading;
+      var base=rad(heading);
+      var cx=state.x-r*Math.sin(base);
+      var cy=state.y+r*Math.cos(base);
+      var startAngle=Math.atan2(state.y-cy,state.x-cx);
+      var signedExtent=rad(angle)*(r>=0?1:-1);
+      var arcLength=Math.abs(r*rad(angle));
+
+      if(stepCount!==null){
+        var points=[[state.x,state.y]];
+        for(var s=1;s<=stepCount;s++){
+          var theta=startAngle+signedExtent*(s/stepCount);
+          points.push([cx+Math.abs(r)*Math.cos(theta),cy+Math.abs(r)*Math.sin(theta)]);
+        }
+        var lengths=[],total=0;
+        for(var p=1;p<points.length;p++){
+          var d=Math.hypot(points[p][0]-points[p-1][0],points[p][1]-points[p-1][1]);
+          lengths.push(d);total+=d;
+        }
+        return animate("move",total,function(t){
+          var target=t*total,used=0,index=0;
+          while(index<lengths.length-1&&used+lengths[index]<target){used+=lengths[index];index++;}
+          var local=lengths[index]?Math.max(0,Math.min(1,(target-used)/lengths[index])):1;
+          var a=points[index],b=points[index+1];
+          moveTo(a[0]+(b[0]-a[0])*local,a[1]+(b[1]-a[1])*local);
+          state.heading=heading+angle*(r>=0?1:-1)*t;
+          refreshSprite();
+        },"Drawing "+stepCount+"-step shape");
+      }
+
+      // Keep normal circle() visually smooth even when a fast animation only
+      // receives a handful of browser frames. We still animate over time, but
+      // subdivide the distance between frames into small arc segments.
+      var lastT=0;
+      return animate("move",arcLength,function(t){
+        var delta=Math.max(0,t-lastT);
+        var degreesThisFrame=Math.abs(angle)*delta;
+        var substeps=Math.max(1,Math.ceil(degreesThisFrame/3));
+        for(var i=1;i<=substeps;i++){
+          var tt=lastT+delta*(i/substeps);
+          var a=startAngle+signedExtent*tt;
+          state.heading=heading+angle*(r>=0?1:-1)*tt;
+          moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
+        }
+        lastT=t;
+      },"Drawing arc "+Math.abs(angle)+"°");
+    }
+
+    function syncAnimationPause(){
+      if(!motion)return;
+      if(playback.paused&&!playback.stepOnce){
+        if(motion.raf!==null)cancelAnimationFrame(motion.raf);
+        motion.raf=null;
+        motion.lastTime=null;
+      }else motion.start();
+    }
+
+    function cancelAnimation(){
+      if(motion)motion.cancel();
+      motionStatus.textContent="";
+    }
+
+    function reset(){
+      courseExecutionCalls=[];
+      motionStatus.textContent="";
+      ctx.clearRect(0,0,400,400);
+      sctx.clearRect(0,0,400,400);
+      state.x=0; state.y=0; state.heading=0;
+      state.penDown=true;
+      state.color="#000000";
+      state.fillColor="#000000";
+      state.size=1;
+      state.visible=true;
+      state.speed=6;
+      state.shape="turtle";
+      state.turtleClickCallback=null;
+      state.screenClickCallback=null;
+      state.screenObject=null;
+      state.filling=false;
+      state.fillPoints=[];
+      world.style.backgroundColor="#ffffff";
+      refreshSprite();
+    }
+
+    function clear(){
+      ctx.clearRect(0,0,400,400);
+      state.filling=false;
+      state.fillPoints=[];
+      refreshSprite();
+    }
+
+    function beginFill(){
+      state.filling=true;
+      state.fillPoints=[[state.x,state.y]];
+    }
+
+    function endFill(){
+      if(state.filling && state.fillPoints.length>2){
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(px(state.fillPoints[0][0]),py(state.fillPoints[0][1]));
+        for(var i=1;i<state.fillPoints.length;i++){
+          ctx.lineTo(px(state.fillPoints[i][0]),py(state.fillPoints[i][1]));
+        }
+        ctx.closePath();
+        ctx.globalCompositeOperation="destination-over";
+        ctx.fillStyle=state.fillColor;
+        ctx.fill();
+        ctx.restore();
+      }
+      state.filling=false;
+      state.fillPoints=[];
+      refreshSprite();
+    }
+
+    function setColor(value){
+      if(value===undefined || value===null) return;
+      state.color=String(value);
+      refreshSprite();
+    }
+
+    function setFillColor(value){
+      if(value===undefined || value===null) return;
+      state.fillColor=String(value);
+    }
+
+    function dot(size,color){
+      size=Number(size)||6;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px(state.x),py(state.y),Math.abs(size)/2,0,Math.PI*2);
+      ctx.fillStyle=color ? String(color) : state.color;
+      ctx.fill();
+      ctx.restore();
+      refreshSprite();
+    }
+
+    function writeText(message,font,align){
+      var family="Arial",size=14;
+      if(Array.isArray(font)&&font.length){
+        family=String(font[0]||family);
+        if(font.length>1&&Number.isFinite(Number(font[1])))size=Number(font[1]);
+      }
+      var alignment=String(align||"left").toLowerCase();
+      if(["left","center","right"].indexOf(alignment)<0)alignment="left";
+      ctx.save();
+      ctx.fillStyle=state.color;
+      ctx.font=size+"px "+JSON.stringify(family);
+      ctx.textBaseline="middle";
+      ctx.textAlign=alignment;
+      ctx.fillText(String(message),px(state.x),py(state.y));
+      ctx.restore();
+    }
+
+    function setShape(name){
+      var allowed=["arrow","turtle","circle","square","triangle","classic"];
+      var next=String(name);
+      if(allowed.indexOf(next)<0)throw new Error("Unknown turtle shape: "+next);
+      state.shape=next;
+      refreshSprite();
+    }
+
+
+    function pyNameToJs(pyName){
+      if(pyName&&typeof pyName.$jsstr==="function")return pyName.$jsstr();
+      return pyName&&pyName.v!==undefined?String(pyName.v):String(pyName);
+    }
+
+    function callClickCallback(callback,x,y){
+      if(!callback||playback.active)return;
+      playback.active=true;
+      playback.paused=false;
+      playback.stepOnce=false;
+      playback.speed=state.speed;
+      syncPlaybackButtons();
+      Sk.misceval.asyncToPromise(function(){
+        return Sk.misceval.callsimOrSuspend(callback,pyNum(x),pyNum(y));
+      }).catch(function(err){
+        renderError(err);
+        setStatus("bad");
+      }).finally(function(){
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        playback.autoStepOnFirstPause=false;
+        syncPlaybackButtons();
+      });
+    }
+
+    world.addEventListener("click",function(event){
+      var rect=world.getBoundingClientRect();
+      var localX=(event.clientX-rect.left)/rect.width*400;
+      var localY=(event.clientY-rect.top)/rect.height*400;
+      var x=localX-200,y=200-localY;
+      if(state.turtleClickCallback&&Math.hypot(x-state.x,y-state.y)<=20){
+        callClickCallback(state.turtleClickCallback,x,y);
+      }else if(state.screenClickCallback){
+        callClickCallback(state.screenClickCallback,x,y);
+      }
+    });
+
+    function getScreenObject(){
+      if(state.screenObject)return state.screenObject;
+      var obj=new Sk.builtin.object();
+      obj.tp$name="Screen";
+      obj.$attrs={};
+      var onclickFn=new Sk.builtin.func(function(callback){
+        state.screenClickCallback=callback;
+        return none();
+      });
+      obj.tp$getattr=function(pyName){
+        var name=pyNameToJs(pyName);
+        if(name==="onclick")return onclickFn;
+        return this.$attrs[name];
+      };
+      obj.tp$setattr=function(pyName,value){
+        this.$attrs[pyNameToJs(pyName)]=value;
+        return none();
+      };
+      state.screenObject=obj;
+      return obj;
+    }
+
+    function installBuiltins(){
+      function fn0(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(){recordCourseCall(name,[]);cb();return none();});
+      }
+      function fn1(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a){recordCourseCall(name,[js(a)]);return cb(js(a));});
+      }
+      function fn2(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){recordCourseCall(name,[js(a),js(b)]);return cb(js(a),js(b));});
+      }
+      function anim1(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a){
+          recordCourseCall(name,[js(a)]);return Sk.misceval.promiseToSuspension(cb(js(a)));
+        });
+      }
+      function anim2(name,cb){
+        Sk.builtins[name]=new Sk.builtin.func(function(a,b){
+          recordCourseCall(name,[js(a),js(b)]);return Sk.misceval.promiseToSuspension(cb(js(a),js(b)));
+        });
+      }
+      anim1("forward",animateForward);
+      Sk.builtins.fd=Sk.builtins.forward;
+      anim1("backward",function(d){return animateForward(-Number(d));});
+      Sk.builtins.back=Sk.builtins.backward;Sk.builtins.bk=Sk.builtins.backward;
+      anim1("left",animateTurn);
+      Sk.builtins.lt=Sk.builtins.left;
+      anim1("right",function(a){return animateTurn(-Number(a));});
+      Sk.builtins.rt=Sk.builtins.right;
+
+      anim2("goto",function(x,y){return animateMoveTo(x,y);});
+      // Skulpt rewrites the JavaScript-reserved identifier goto.
+      Sk.builtins["goto_$rw$"]=Sk.builtins.goto;
+      Sk.builtins.setpos=Sk.builtins.goto;Sk.builtins.setposition=Sk.builtins.goto;
+      anim1("setx",function(x){return animateMoveTo(x,state.y);});
+      anim1("sety",function(y){return animateMoveTo(state.x,y);});
+      Sk.builtins.home=new Sk.builtin.func(function(){
+        return Sk.misceval.promiseToSuspension(
+          animateMoveTo(0,0,"Returning home").then(function(){return animateHeading(0);})
+        );
+      });
+
+      fn0("penup",function(){state.penDown=false;});
+      Sk.builtins.up=Sk.builtins.penup;Sk.builtins.pu=Sk.builtins.penup;
+      fn0("pendown",function(){state.penDown=true;});
+      Sk.builtins.down=Sk.builtins.pendown;Sk.builtins.pd=Sk.builtins.pendown;
+      Sk.builtins.isdown=new Sk.builtin.func(function(){return Sk.ffi.remapToPy(state.penDown);});
+
+      fn1("speed",function(v){
+        var next=Number(v);
+        if(!Number.isFinite(next)) throw new Error("speed() needs a number from 0 to 10");
+        next=clamp(next,0,10);
+        state.speed=next;
+        playback.speed=next;
+        schedulePlayback();
+        return none();
+      });
+      var circleFn=function(radius,extent,steps){
+        recordCourseCall("circle",[js(radius)]);
+        return Sk.misceval.promiseToSuspension(
+          animateCircle(
+            js(radius),
+            extent===Sk.builtin.none.none$?undefined:js(extent),
+            steps===Sk.builtin.none.none$?undefined:js(steps)
+          )
+        );
+      };
+      circleFn.co_varnames=["radius","extent","steps"];
+      circleFn.co_argcount=3;
+      circleFn.$defaults=[new Sk.builtin.int_(360),Sk.builtin.none.none$];
+      Sk.builtins.circle=new Sk.builtin.func(circleFn);
+
+      fn1("color",function(c){setColor(c);state.fillColor=String(c);return none();});
+      fn1("pencolor",function(c){setColor(c);return none();});
+      fn1("fillcolor",function(c){setFillColor(c);return none();});
+      fn1("pensize",function(v){state.size=Math.max(.5,Number(v)||1);return none();});
+      Sk.builtins.width=Sk.builtins.pensize;
+      fn0("begin_fill",beginFill);
+      fn0("end_fill",endFill);
+      fn0("clear",clear);
+      fn1("shape",function(name){setShape(name);return none();});
+      fn0("reset",reset);
+      fn1("dot",function(v){dot(v);return none();});
+      fn0("stamp",function(){drawSpriteOn(ctx,true);});
+      fn0("hideturtle",function(){state.visible=false;refreshSprite();});
+      Sk.builtins.ht=Sk.builtins.hideturtle;
+      fn0("showturtle",function(){state.visible=true;refreshSprite();});
+      Sk.builtins.st=Sk.builtins.showturtle;
+
+      Sk.builtins.heading=new Sk.builtin.func(function(){return pyNum(state.heading);});
+      anim1("setheading",animateHeading);
+      Sk.builtins.seth=Sk.builtins.setheading;
+      Sk.builtins.xcor=new Sk.builtin.func(function(){return pyNum(state.x);});
+      Sk.builtins.ycor=new Sk.builtin.func(function(){return pyNum(state.y);});
+      Sk.builtins.position=new Sk.builtin.func(function(){
+        return new Sk.builtin.tuple([pyNum(state.x),pyNum(state.y)]);
+      });
+      Sk.builtins.pos=Sk.builtins.position;
+
+      fn1("bgcolor",function(c){world.style.backgroundColor=String(c);return none();});
+
+      var writeFn=function(message,move,align,font){
+        writeText(
+          js(message),
+          font===Sk.builtin.none.none$?null:js(font),
+          align===Sk.builtin.none.none$?"left":js(align)
+        );
+        return none();
+      };
+      writeFn.co_varnames=["message","move","align","font"];
+      writeFn.co_argcount=4;
+      writeFn.$defaults=[
+        Sk.builtin.bool.false$,
+        new Sk.builtin.str("left"),
+        Sk.builtin.none.none$
+      ];
+      Sk.builtins.write=new Sk.builtin.func(writeFn);
+
+      Sk.builtins.onclick=new Sk.builtin.func(function(callback){
+        state.turtleClickCallback=callback;
+        return none();
+      });
+      Sk.builtins.getscreen=new Sk.builtin.func(function(){return getScreenObject();});
+    }
+
+    return {
+      reset:reset,
+      clear:clear,
+      installBuiltins:installBuiltins,
+      syncAnimationPause:syncAnimationPause,
+      cancelAnimation:cancelAnimation,
+      snapshot:function(){
+        var heading=((Number(state.heading)||0)%360+360)%360;
+        return {
+          x:Number(state.x)||0,
+          y:Number(state.y)||0,
+          heading:heading,
+          penDown:!!state.penDown,
+          color:String(state.color),
+          fillColor:String(state.fillColor),
+          pensize:Number(state.size)||1,
+          background:String(state.background||""),
+          printed:coursePrintedText,
+          calls:courseExecutionCalls.slice()
+        };
+      }
+    };
+  })();
+
+  function clearWorld(){
+    TurtleRuntime.reset();
+  }
+
+  var runToken = 0;
+  var playback = {
+    active:false, paused:false, stepOnce:false,
+    autoStepOnFirstPause:false,
+    pending:null, timer:null,
+    speed:6,
+    forceInstant:false,
+    marker:null
+  };
+
+  function currentSpeed(){
+    if(playback.forceInstant)return 0;
+    return clamp(Number(playback.speed)||0,0,10);
+  }
+
+  // Skulpt pauses before each real Python statement, including loop bodies
+  // and statements inside user-defined functions. Rendering remains immediate
+  // when a statement executes; the next statement waits for the speed timer.
+  function lineDelay(){
+    var speed=currentSpeed();
+    if(speed===0) return 0;
+
+    var t=(speed-1)/9;
+    var codeDelay=230*Math.pow(18/230,t);
+    return Math.max(8,Math.min(1200,Math.round(codeDelay)));
+  }
+  function showExecutingLine(line){
+    if(playback.marker!==null){
+      try{editor.removeLineClass(playback.marker,"background","turtle-current-line");}catch(e){}
+      playback.marker=null;
+    }
+    var n=Number(line);
+    if(Number.isInteger(n)&&n>0&&n<=editor.lineCount()){
+      playback.marker=editor.addLineClass(n-1,"background","turtle-current-line");
+      playbackLineStatus.textContent="Line "+n;
+      worldLineStatus.textContent="Line "+n+" · "+(editor.getLine(n-1)||"").trim().slice(0,32);
+      editor.scrollIntoView({line:n-1,ch:0},60);
+    }else{
+      playbackLineStatus.textContent="";
+      worldLineStatus.textContent="400 × 400";
+    }
+  }
+  function syncPlaybackButtons(){
+    runBtn.disabled=playback.active;
+    stopBtn.disabled=!playback.active;
+    pauseBtn.disabled=!playback.active;
+    // Step is available before a run starts. During a run, it becomes
+    // available whenever execution is paused on a real Python statement.
+    stepBtn.disabled=playback.active ? (!playback.paused||!playback.pending) : false;
+    pauseBtn.textContent=playback.paused?"▶ Resume":"⏸ Pause";
+  }
+  function schedulePlayback(){
+    if(playback.timer!==null){
+      clearTimeout(playback.timer);
+      playback.timer=null;
+    }
+    if(!playback.active||playback.paused||!playback.pending)return;
+    var pending=playback.pending;
+    playback.timer=setTimeout(function(){
+      playback.timer=null;
+      if(!playback.active||playback.paused||playback.pending!==pending)return;
+      playback.pending=null;
+      playback.lastExecutedLine=pending.line||null;
+      try{pending.resolve(pending.susp.resume());}
+      catch(e){pending.reject(e);}
+    },lineDelay());
+  }
+  function cancelPlayback(){
+    if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+    var pending=playback.pending;
+    playback.pending=null;
+    playback.active=false;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.autoStepOnFirstPause=false;
+    playback.lastExecutedLine=null;
+    TurtleRuntime.cancelAnimation();
+    if(pending)pending.reject(new Error("Playback stopped"));
+    syncPlaybackButtons();
+    showExecutingLine(null);
+  }
+  function debugStatement(susp,token,line){
+    return new Promise(function(resolve,reject){
+      if(token!==runToken||!playback.active){
+        reject(new Error("Playback stopped"));
+        return;
+      }
+
+      showExecutingLine(line);
+      var autoFirstStep=playback.autoStepOnFirstPause;
+      if(autoFirstStep) playback.autoStepOnFirstPause=false;
+
+      playback.pending={susp:susp,resolve:resolve,reject:reject,line:line};
+
+      // A Step click from the stopped state should execute the first
+      // statement immediately, then pause on the next statement.
+      if(autoFirstStep){
+        var first=playback.pending;
+        playback.pending=null;
+        playback.stepOnce=true;
+        playback.lastExecutedLine=first.line||null;
+        syncPlaybackButtons();
+        try{first.resolve(first.susp.resume());}
+        catch(e){first.reject(e);}
+        return;
+      }
+
+      // After executing one statement, stop at the next executable line.
+      if(playback.stepOnce){
+        playback.stepOnce=false;
+        playback.paused=true;
+      }
+
+      syncPlaybackButtons();
+      schedulePlayback();
+    });
+  }
+  pauseBtn.addEventListener("click",function(){
+    if(!playback.active)return;
+    playback.paused=!playback.paused;
+    playback.stepOnce=false;
+    syncPlaybackButtons();
+    TurtleRuntime.syncAnimationPause();
+    schedulePlayback();
+  });
+  stepBtn.addEventListener("click",function(){
+    // From a stopped program, Step starts fresh, executes the first
+    // statement, and pauses on the next one.
+    if(!playback.active){
+      runCode(true);
+      return;
+    }
+
+    if(!playback.paused||!playback.pending)return;
+    var pending=playback.pending;
+    playback.pending=null;
+    if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+    playback.stepOnce=true;
+    playback.paused=false;
+    playback.lastExecutedLine=pending.line||null;
+    syncPlaybackButtons();
+    TurtleRuntime.syncAnimationPause();
+    try{pending.resolve(pending.susp.resume());}
+    catch(e){pending.reject(e);}
+  });
+
+  async function runCode(startWithStep,options){
+    options=options||{};
+    startWithStep=false;
+    if(playback.active)return {ok:false,error:"The program is already running."};
+    if(typeof Sk==="undefined"){
+      setStatus("bad");
+      setOutput('<span class="error">Python did not load. Check the internet connection and refresh the page.</span>');
+      return {ok:false,error:"Python did not load."};
+    }
+    runToken++;
+    flushCodeSave("Run code");
+    var token=runToken, userCode=editor.getValue(), debugLine=0;
+    clearErrorHighlight();
+    clearWorld();
+    setOutput("");
+    coursePrintedText="";
+    setStatus("running");
+    playback.active=true;
+    playback.paused=false;
+    playback.stepOnce=false;
+    playback.autoStepOnFirstPause=!!startWithStep;
+    playback.pending=null;
+    playback.lastExecutedLine=null;
+    playback.speed=0;
+    playback.forceInstant=true;
+    showExecutingLine(null);
+    syncPlaybackButtons();
+    if(window.innerWidth<=560){
+      requestAnimationFrame(function(){worldPanel.scrollIntoView({behavior:"smooth",block:"start"});});
+    }
+
+    Sk.configure({
+      output:outf,
+      read:builtinRead,
+      __future__:Sk.python3,
+      debugging:true,
+      breakpoints:function(filename,lineno){
+        if(token!==runToken)return false;
+        // Don't stop in modules imported by the student's code.
+        if(String(filename).indexOf("<stdin>")<0)return false;
+        debugLine=lineno;
+        return true;
+      },
+      // Stepping may legitimately take several minutes; Stop can interrupt it.
+      execLimit:null,
+      yieldLimit:100,
+      inputfun:function(promptText){
+        var value=window.prompt(promptText||"");
+        return Promise.resolve(value===null?"":value);
+      },
+      inputfunTakesPrompt:true
+    });
+
+    TurtleRuntime.installBuiltins();
+    try{
+      await Sk.misceval.asyncToPromise(function(){
+        return Sk.importMainWithBody("<stdin>",false,userCode,true);
+      },{
+        "Sk.debug":function(susp){
+          return debugStatement(susp,token,debugLine);
+        }
+      });
+      if(token!==runToken)return;
+      if(!output.textContent.trim()){
+        appendOutput("Program finished. No text was printed.\n","muted");
+      }else{
+        appendOutput("\nProgram finished.\n","success");
+      }
+      setStatus("good");
+      if(COURSE_EMBED)window.parent.postMessage({type:"pythoncourse-run-complete",lesson:COURSE_LESSON,code:userCode,run:{ok:true},runtime:TurtleRuntime.snapshot()},window.location.origin);
+      return {ok:true};
+    }catch(err){
+      if(token!==runToken)return {ok:false,error:"Run stopped."};
+      renderError(err);
+      setStatus("bad");
+      if(COURSE_EMBED)window.parent.postMessage({type:"pythoncourse-run-complete",lesson:COURSE_LESSON,code:userCode,run:{ok:false,error:formatError(err)},runtime:TurtleRuntime.snapshot()},window.location.origin);
+      return {ok:false,error:formatError(err)};
+    }finally{
+      if(token===runToken){
+        if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
+        playback.pending=null;
+        playback.active=false;
+        playback.paused=false;
+        playback.stepOnce=false;
+        playback.forceInstant=false;
+        syncPlaybackButtons();
+        showExecutingLine(null);
+        if(window.innerWidth<=560){
+          requestAnimationFrame(function(){
+            worldPanel.scrollIntoView({behavior:"smooth",block:"start"});
+          });
+        }
+      }
+    }
+  }
+
+  function formatError(err){
+    var info=analyzeError(err);
+    return info.name+(info.line?" on line "+info.line:"")+": "+info.message;
+  }
+
+  function stopCode(){
+    if(!playback.active)return;
+    runToken++;
+    cancelPlayback();
+    setStatus("");
+    appendOutput("\nStopped.\n","muted");
+  }
+
+  function clearRun(){
+    runToken++;
+    cancelPlayback();
+    clearErrorHighlight();
+    setStatus("");
+    clearWorld();
+    setOutput('<span class="muted">Run cleared. Your code is still here.</span>');
+  }
+
+  function clearCode(){
+    if(playback.active)stopCode();
+    if(!editor.getValue())return;
+    if(!window.confirm("Clear all code from the editor? Turtle's drawing and text output will stay."))return;
+    window.replaceTurtleCode("", "clearing code");
+  }
+
+  if(COURSE_EMBED){
+    window.addEventListener("message",async function(event){
+      if(event.origin!==window.location.origin)return;
+      var data=event.data||{};
+      if(data.type==="pythoncourse-insert-text"){
+        var insertText=String(data.text||"");
+        if(insertText){
+          editor.replaceSelection(insertText,"end");
+          editor.focus();
+          saveStatus.textContent="saving…";
+        }
+        return;
+      }
+      if(data.type!=="pythoncourse-check-request")return;
+      var requestId=String(data.requestId||"");
+      var code=editor.getValue();
+      if(playback.active){stopCode();await Promise.resolve();}
+      var runResult=await runCode(false,{check:true});
+      window.parent.postMessage({
+        type:"pythoncourse-check-result",
+        requestId:requestId,
+        lesson:COURSE_LESSON,
+        code:code,
+        run:runResult||{ok:false,error:"The check could not finish."},
+        runtime:TurtleRuntime.snapshot()
+      },window.location.origin);
+    });
+  }
+
+  runBtn.addEventListener("click",function(){runCode(false,{check:true});});
+  stopBtn.addEventListener("click", stopCode);
+  clearCodeBtn.addEventListener("click", clearCode);
+  clearRunBtn.addEventListener("click", clearRun);
+
+  document.getElementById("clearConsole").addEventListener("click", function(){
+    clearErrorHighlight();
+    setOutput('<span class="muted">Output cleared.</span>');
+  });
+
+  examplesSelect.addEventListener("change", function(){
+    if(!this.value || !examples[this.value]) return;
+    clearErrorHighlight();
+    window.replaceTurtleCode(examples[this.value],"Loaded "+this.options[this.selectedIndex].text+" example");
+    this.value = "";
+  });
+
+  function openCommands(){
+    document.body.classList.add("commands-open");
+    if(commandsToggle)commandsToggle.setAttribute("aria-expanded","true");
+    if(commandSearch && window.innerWidth <= 1350 && !document.body.classList.contains("history-active")){
+      setTimeout(function(){ commandSearch.focus(); }, 180);
+    }
+  }
+
+  function closeCommands(){
+    document.body.classList.remove("commands-open");
+    if(commandsToggle)commandsToggle.setAttribute("aria-expanded","false");
+  }
+
+  if(commandsToggle) commandsToggle.addEventListener("click",function(){if(window.TurtleSidebar)window.TurtleSidebar.open("reference");else openCommands();});
+  if(commandsClose) commandsClose.addEventListener("click", function(){
+    closeCommands();
+    if(window.innerWidth>1350&&!COURSE_EMBED){layoutState.libraryVisible=false;applyLayout(true);}
+  });
+  if(commandsOverlay) commandsOverlay.addEventListener("click", closeCommands);
+
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeCommands();
+  });
+
+  window.TurtleWorkbench = {
+    editor:editor, isTrace:TRACE_EMBED, isCourse:COURSE_EMBED,
+    historyKey:codeHistoryKey, readHistory:readCodeHistory,
+    saveVersion:saveCodeVersion, save:flushCodeSave, replace:window.replaceTurtleCode,
+    openSidebar:function(){
+      if(!layoutState.libraryVisible){layoutState.libraryVisible=true;applyLayout(true);}
+      openCommands();
+    },
+    closeSidebar:closeCommands,
+    stop:stopCode,
+    setDisplay:function(settings){
+      editor.getWrapperElement().style.fontSize=clamp(Number(settings.code)||16,12,40)+"px";
+      output.style.fontSize=clamp(Number(settings.output)||14,12,40)+"px";
+      worldDrawingZoom=clamp(Number(settings.drawing)||100,50,300);
+      editor.refresh();fitWorld();
+    }
+  };
+
+  gridToggle.addEventListener("change", function(){
+    var show = this.checked;
+    ["grid","axisX","axisY"].forEach(function(id){
+      document.getElementById(id).style.display = show ? "" : "none";
+    });
+    document.querySelectorAll(".axis-label").forEach(function(el){
+      el.style.display = show ? "" : "none";
+    });
+  });
+
+  function fitWorld(){
+    var mobile=window.innerWidth<=840;
+    var stageWidth=worldStage.offsetWidth;
+    var stageHeight=worldStage.offsetHeight;
+    var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
+    var usableHeight=mobile?404:Math.max(180,stageHeight-24);
+    var baseScale=Math.min(1,usableWidth/404,usableHeight/404);
+    var scale=baseScale*worldDrawingZoom/100;
+    worldStage.classList.toggle("drawing-zoomed",worldDrawingZoom>100);
+    worldStage.style.height=mobile?(404*baseScale+20)+"px":"";
+    worldWrap.style.transform="scale("+scale+")";
+    worldScaleBox.style.width=(404*scale)+"px";
+    worldScaleBox.style.height=(404*scale)+"px";
+  }
+  window.addEventListener("resize",fitWorld);
+  if(typeof ResizeObserver!=="undefined"){
+    var layoutObserver=new ResizeObserver(function(){
+      if(typeof editor!=="undefined"&&editor)editor.refresh();
+      fitWorld();
+    });
+    layoutObserver.observe(worldStage);
+    layoutObserver.observe(document.querySelector(".code-panel"));
+  }
+  requestAnimationFrame(fitWorld);
+
+  if(typeof Sk === "undefined"){
+    loading.classList.add("show");
+    setTimeout(function(){
+      if(typeof Sk === "undefined"){
+        loading.textContent = "Python could not load";
+      } else {
+        loading.classList.remove("show");
+      }
+    }, 1200);
+  }
+
+  if(TRACE_EMBED){
+    window.TraceTurtleEmbed={
+      step:function(){
+        if(!playback.active){ runCode(true); }
+        else if(playback.paused && playback.pending){ stepBtn.click(); }
+      },
+      run:function(){
+        if(playback.active) return false;
+        runCode(false);
+        return true;
+      },
+      stop:function(){ if(playback.active) stopCode(); },
+      reset:function(){
+        if(playback.active) stopCode();
+        playback.lastExecutedLine=null;
+        clearWorld();
+        setOutput('<span class="muted">Trace example ready.</span>');
+        showExecutingLine(1);
+      },
+      highlight:function(line){ showExecutingLine(line); },
+      lastLine:function(){ return playback.lastExecutedLine; },
+      isPaused:function(){ return !!(playback.active && playback.paused && playback.pending); },
+      isActive:function(){ return !!playback.active; }
+    };
+  }
+  clearWorld();
+  setOutput(TRACE_EMBED?'<span class="muted">Trace example ready.</span>':'<span class="muted">print() output will appear here.</span>');
+  if(TRACE_EMBED) showExecutingLine(1);
+  else editor.focus();
+})();
+</script>
+<script src="/turtlereference/reference-data.js?v=1"></script>
+<script src="/turtlereference/reference-more.js?v=2"></script>
+<script src="/turtlereference/reference-trails.js?v=1"></script>
+<script src="/turtlereference/reference-examples.js?v=2"></script>
+<script src="/turtlereference/reference-trail-examples.js?v=1"></script>
+<script src="/turtlereference/example-previews.js?v=2"></script>
+<script src="/turtle/history-diff.js?v=1"></script>
+<script src="/turtle/sidebar.js?v=4"></script>
+<script src="/turtle/display.js?v=1"></script>
+</body>
+</html>
