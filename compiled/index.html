@@ -861,6 +861,7 @@
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 <style>.playback-controls,.playback-speed,.speed-controls{display:none!important}</style>
+<style>body.compiled-building #turtle-drawing,body.compiled-building #turtle-sprite{visibility:hidden!important}</style>
 </head>
 
 <body data-student-area="create" data-student-layout="runtime">
@@ -2540,6 +2541,7 @@ for i in range(4):
       setOutput('<span class="error">Python did not load. Check the internet connection and refresh the page.</span>');
       return {ok:false,error:"Python did not load."};
     }
+    document.body.classList.add("compiled-building");
     runToken++;
     flushCodeSave("Run code");
     var token=runToken, userCode=editor.getValue(), debugLine=0;
@@ -2610,6 +2612,7 @@ for i in range(4):
       return {ok:false,error:formatError(err)};
     }finally{
       if(token===runToken){
+        document.body.classList.remove("compiled-building");
         if(playback.timer!==null){clearTimeout(playback.timer);playback.timer=null;}
         playback.pending=null;
         playback.active=false;
@@ -2633,6 +2636,7 @@ for i in range(4):
   }
 
   function stopCode(){
+    document.body.classList.remove("compiled-building");
     if(!playback.active)return;
     runToken++;
     cancelPlayback();
@@ -2641,6 +2645,7 @@ for i in range(4):
   }
 
   function clearRun(){
+    document.body.classList.remove("compiled-building");
     runToken++;
     cancelPlayback();
     clearErrorHighlight();
