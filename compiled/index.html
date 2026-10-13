@@ -2059,6 +2059,60 @@ for i in range(4):
       },"Drawing arc "+Math.abs(angle)+"°");
     }
 
+
+    // On the compiled-style page, calculate each turtle operation immediately.
+    // There are no animation frames, statement pauses, or Promise suspensions.
+    function directMoveTo(x,y){
+      x=Number(x);y=Number(y);
+      if(!Number.isFinite(x)||!Number.isFinite(y)) throw new Error("Turtle coordinates must be numbers");
+      moveTo(x,y);
+      return none();
+    }
+    function directForward(distance){
+      var d=Number(distance);
+      if(!Number.isFinite(d)) throw new Error("Distance must be a number");
+      var a=rad(state.heading);
+      return directMoveTo(state.x+Math.cos(a)*d,state.y+Math.sin(a)*d);
+    }
+    function directTurn(angle){
+      var n=Number(angle);
+      if(!Number.isFinite(n)) throw new Error("Angle must be a number");
+      state.heading+=n;
+      refreshSprite();
+      return none();
+    }
+    function directHeading(heading){
+      var target=Number(heading);
+      if(!Number.isFinite(target)) throw new Error("Heading must be a number");
+      state.heading=target;
+      refreshSprite();
+      return none();
+    }
+    function directCircle(radius,extent,steps){
+      var r=Number(radius);
+      var angle=extent===undefined?360:Number(extent);
+      var count=steps===undefined||steps===null?null:Math.max(1,Math.floor(Number(steps)));
+      if(!Number.isFinite(r)||!Number.isFinite(angle)||(count!==null&&!Number.isFinite(count)))
+        throw new Error("Circle radius, extent, and steps must be numbers");
+      if(r===0||angle===0)return none();
+      var heading=state.heading;
+      var base=rad(heading);
+      var cx=state.x-r*Math.sin(base);
+      var cy=state.y+r*Math.cos(base);
+      var startAngle=Math.atan2(state.y-cy,state.x-cx);
+      var sign=r>=0?1:-1;
+      var signedExtent=rad(angle)*sign;
+      var stepsToDraw=count!==null?count:Math.max(1,Math.ceil(Math.abs(angle)/3));
+      for(var i=1;i<=stepsToDraw;i++){
+        var fraction=i/stepsToDraw;
+        var a=startAngle+signedExtent*fraction;
+        moveTo(cx+Math.abs(r)*Math.cos(a),cy+Math.abs(r)*Math.sin(a));
+        state.heading=heading+angle*sign*fraction;
+      }
+      refreshSprite();
+      return none();
+    }
+
     function syncAnimationPause(){
       if(!motion)return;
       if(playback.paused&&!playback.stepOnce){
@@ -2246,34 +2300,30 @@ for i in range(4):
       }
       function anim1(name,cb){
         Sk.builtins[name]=new Sk.builtin.func(function(a){
-          recordCourseCall(name,[js(a)]);return Sk.misceval.promiseToSuspension(cb(js(a)));
+          recordCourseCall(name,[js(a)]);return cb(js(a));
         });
       }
       function anim2(name,cb){
         Sk.builtins[name]=new Sk.builtin.func(function(a,b){
-          recordCourseCall(name,[js(a),js(b)]);return Sk.misceval.promiseToSuspension(cb(js(a),js(b)));
+          recordCourseCall(name,[js(a),js(b)]);return cb(js(a),js(b));
         });
       }
-      anim1("forward",animateForward);
+      anim1("forward",directForward);
       Sk.builtins.fd=Sk.builtins.forward;
-      anim1("backward",function(d){return animateForward(-Number(d));});
+      anim1("backward",function(d){return directForward(-Number(d));});
       Sk.builtins.back=Sk.builtins.backward;Sk.builtins.bk=Sk.builtins.backward;
-      anim1("left",animateTurn);
+      anim1("left",directTurn);
       Sk.builtins.lt=Sk.builtins.left;
-      anim1("right",function(a){return animateTurn(-Number(a));});
+      anim1("right",function(a){return directTurn(-Number(a));});
       Sk.builtins.rt=Sk.builtins.right;
 
-      anim2("goto",function(x,y){return animateMoveTo(x,y);});
+      anim2("goto",directMoveTo);
       // Skulpt rewrites the JavaScript-reserved identifier goto.
       Sk.builtins["goto_$rw$"]=Sk.builtins.goto;
       Sk.builtins.setpos=Sk.builtins.goto;Sk.builtins.setposition=Sk.builtins.goto;
-      anim1("setx",function(x){return animateMoveTo(x,state.y);});
-      anim1("sety",function(y){return animateMoveTo(state.x,y);});
-      Sk.builtins.home=new Sk.builtin.func(function(){
-        return Sk.misceval.promiseToSuspension(
-          animateMoveTo(0,0,"Returning home").then(function(){return animateHeading(0);})
-        );
-      });
+      anim1("setx",function(x){return directMoveTo(x,state.y);});
+      anim1("sety",function(y){return directMoveTo(state.x,y);});
+      Sk.builtins.home=new Sk.builtin.func(function(){directMoveTo(0,0);directHeading(0);return none();});
 
       fn0("penup",function(){state.penDown=false;});
       Sk.builtins.up=Sk.builtins.penup;Sk.builtins.pu=Sk.builtins.penup;
@@ -2292,12 +2342,10 @@ for i in range(4):
       });
       var circleFn=function(radius,extent,steps){
         recordCourseCall("circle",[js(radius)]);
-        return Sk.misceval.promiseToSuspension(
-          animateCircle(
-            js(radius),
-            extent===Sk.builtin.none.none$?undefined:js(extent),
-            steps===Sk.builtin.none.none$?undefined:js(steps)
-          )
+        return directCircle(
+          js(radius),
+          extent===Sk.builtin.none.none$?undefined:js(extent),
+          steps===Sk.builtin.none.none$?undefined:js(steps)
         );
       };
       circleFn.co_varnames=["radius","extent","steps"];
@@ -2323,7 +2371,7 @@ for i in range(4):
       Sk.builtins.st=Sk.builtins.showturtle;
 
       Sk.builtins.heading=new Sk.builtin.func(function(){return pyNum(state.heading);});
-      anim1("setheading",animateHeading);
+      anim1("setheading",directHeading);
       Sk.builtins.seth=Sk.builtins.setheading;
       Sk.builtins.xcor=new Sk.builtin.func(function(){return pyNum(state.x);});
       Sk.builtins.ycor=new Sk.builtin.func(function(){return pyNum(state.y);});
@@ -2568,17 +2616,9 @@ for i in range(4):
       output:outf,
       read:builtinRead,
       __future__:Sk.python3,
-      debugging:true,
-      breakpoints:function(filename,lineno){
-        if(token!==runToken)return false;
-        // Don't stop in modules imported by the student's code.
-        if(String(filename).indexOf("<stdin>")<0)return false;
-        debugLine=lineno;
-        return true;
-      },
-      // Stepping may legitimately take several minutes; Stop can interrupt it.
+      debugging:false,
       execLimit:null,
-      yieldLimit:100,
+      yieldLimit:1000,
       inputfun:function(promptText){
         var value=window.prompt(promptText||"");
         return Promise.resolve(value===null?"":value);
@@ -2590,10 +2630,6 @@ for i in range(4):
     try{
       await Sk.misceval.asyncToPromise(function(){
         return Sk.importMainWithBody("<stdin>",false,userCode,true);
-      },{
-        "Sk.debug":function(susp){
-          return debugStatement(susp,token,debugLine);
-        }
       });
       if(token!==runToken)return;
       if(!output.textContent.trim()){
