@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const activities = [
+    ['Is it AI or just Technology?','Play two games about AI and everyday technology, including paper and money.','Beginner','challenge','AI · technology · reasoning','/isitai/'],
     ['Route puzzle','Reach the goal using movement and turns.','Beginner','challenge','Movement · debugging','/learn/python/?lesson=1-2-solve-route'],
     ['Bubble pattern puzzle','Work out the sizes and spacing in a pattern.','Beginner','challenge','circle() · patterns','/learn/python/?lesson=1-5-solve-bubbles'],
     ['Repair the neon sign','Find the commands that changed the sign’s appearance.','Beginner','challenge','Color · line width','/learn/python/?lesson=1-11-solve-style'],
