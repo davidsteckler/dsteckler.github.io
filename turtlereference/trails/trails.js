@@ -2,14 +2,18 @@
   const trails = window.TURTLE_TRAILS, progress = window.TurtleTrailProgress;
   const total = trails.reduce((n, trail) => n + trail.stops.length, 0);
   const completed = trails.reduce((n, trail) => n + trail.stops.filter(stop => progress.has(stop.id)).length, 0);
+  const allLabel = trails.length + ' trails. Start wherever you’re curious.';
+  document.getElementById('trailCount').textContent = allLabel;
   document.getElementById('totalProgress').textContent = completed ? completed + ' of ' + total + ' stops marked done' : total + ' stops to explore';
   const filled = Math.floor(completed / total * 20);
   document.getElementById('totalBar').textContent = '[' + '#'.repeat(filled) + '.'.repeat(20 - filled) + ']';
   for (const trail of trails) {
     const card = document.createElement('article'); card.className = 'trail-card'; card.dataset.level = trail.level; card.dataset.trail = trail.id;
     const preview = document.createElement('div'); preview.className = 'trail-preview';
-    if (['firefly-grove','pixel-potion','strange-garden','tiny-dragon'].includes(trail.id)) {
-      const img = document.createElement('img'); img.src = '../trail-previews/' + ({'strange-garden':'garden-wild--original.svg','tiny-dragon':'dragon-trick--original.svg'}[trail.id] || trail.id + '.png') + '?v=2'; img.alt = trail.id === 'firefly-grove' ? 'A crescent moon over green hills and scattered warm firefly lights' : trail.id === 'pixel-potion' ? 'Two pixel bottles labeled Dream and Mana, with purple and blue liquid' : trail.id === 'strange-garden' ? 'Five leafy flowers in a garden bed' : 'A horned green dragon with a purple wing, curling tail, and warm sparks'; preview.append(img);
+    const existingImages = {'firefly-grove':'firefly-grove.png','pixel-potion':'pixel-potion.png','strange-garden':'garden-wild--original.svg','tiny-dragon':'dragon-trick--original.svg'};
+    const previewImage = trail.previewImage || (existingImages[trail.id] && 'trail-previews/' + existingImages[trail.id] + '?v=2');
+    if (previewImage) {
+      const img = document.createElement('img'); img.src = '../' + previewImage; img.alt = trail.previewAlt || trail.stops[trail.stops.length - 1].expected; preview.append(img);
     } else {
       const art = document.createElement('pre'); art.textContent = trail.preview; art.setAttribute('aria-label', trail.title + ' sample text art'); preview.append(art);
     }
@@ -35,7 +39,7 @@
       document.querySelectorAll('.level-filters button').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
       document.querySelectorAll('.trail-card').forEach(card => { card.hidden = level !== 'All' && card.dataset.level !== level; });
       const count = trails.filter(trail => level === 'All' || trail.level === level).length;
-      document.getElementById('trailCount').textContent = level === 'All' ? 'Eight trails. Start wherever you’re curious.' : count + ' ' + level.toLowerCase() + (count === 1 ? ' trail' : ' trails');
+      document.getElementById('trailCount').textContent = level === 'All' ? allLabel : count + ' ' + level.toLowerCase() + (count === 1 ? ' trail' : ' trails');
     });
   });
   // Returning from a stop should immediately show the latest checklist.
