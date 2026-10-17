@@ -7,6 +7,7 @@
   const byId=new Map(topics.map(topic=>[topic.id,topic]));
   const groups=[...new Set(topics.map(topic=>topic.group))];
   let activeTab='reference',currentTopic=null,currentExample=null,browseScroll=0;
+  let exampleRun=0,exampleDialog=null;
   const make=(tag,className,text)=>{const element=document.createElement(tag);if(className)element.className=className;if(text!==undefined)element.textContent=text;return element;};
   const action=(label,fn,className='btn')=>{const button=make('button',className,label);button.type='button';button.addEventListener('click',fn);return button;};
 
@@ -14,6 +15,7 @@
     return [topic.title,topic.group,topic.syntax,topic.summary,...(topic.aliases||[]),...(topic.params||[]).flat(),...(topic.examples||[]).flatMap(example=>[example.label,example.summary,example.code])].join(' ').toLowerCase();
   }
   function browse(){
+    exampleRun++;
     const query=$('commandSearch').value.trim().toLowerCase(),found=topics.filter(topic=>searchText(topic).includes(query));
     const container=$('referenceBrowse');container.replaceChildren();
     $('referenceDetail').hidden=true;container.hidden=false;currentTopic=null;
@@ -57,18 +59,13 @@
     for(const example of topic.examples||[topic]){
       const button=action('',()=>{currentExample=example;showExample();},'reference-example');
       button.dataset.exampleId=example.id;button.setAttribute('aria-pressed',String(example===currentExample));
-      const image=thumbnail(topic,example);if(image)button.append(image);else button.classList.add('no-thumbnail');
       button.append(make('span','',example.label||'Example'));strip.append(button);
     }
     detail.append(strip,make('div','reference-example-content'));
-    const runner=make('iframe','reference-runner');runner.title='Runnable reference example';runner.src='/turtle/?embed=reference';
+    const runner=make('iframe','reference-engine');runner.title='Example execution engine';runner.hidden=true;runner.tabIndex=-1;runner.setAttribute('aria-hidden','true');runner.src='/turtle/?embed=reference';
     runner.addEventListener('load',()=>updateRunner());detail.append(runner);
     const runnerButtons=make('div','reference-runner-actions');
-    runnerButtons.append(action('▶ Run',()=>runner.contentWindow.TraceTurtleEmbed?.run(),'btn primary'),action('Stop',()=>runner.contentWindow.TraceTurtleEmbed?.stop()),action('Load into main editor',()=>{
-      const code=runner.contentWindow.TurtleWorkbench?.editor.getValue()||currentExample.code;
-      workbench.replace(code,'Loaded '+(currentExample.label||currentTopic.title)+' reference example');
-      if(innerWidth<=1350)workbench.closeSidebar();
-    }));detail.append(runnerButtons);
+    runnerButtons.append(action('Use this code',()=>loadExample(currentExample.code),'btn primary'),action('Expand example ↗',()=>expandExample()));detail.append(runnerButtons);
     const notes=make('details','reference-topic-notes');notes.append(make('summary','','Syntax & parameters'));
     notes.append(make('pre','reference-syntax',topic.syntax));
     if(topic.aliases?.length)notes.append(make('p','','Also: '+topic.aliases.join(', ')));
@@ -86,17 +83,82 @@
     const fullRow=make('p');fullRow.append(full);detail.append(fullRow);
     showExample();$('referenceScroll').scrollTop=0;
   }
-  function updateRunner(){
-    const runner=$('referenceDetail').querySelector('.reference-runner'),win=runner?.contentWindow;
-    if(!win?.TraceTurtleEmbed||!currentExample)return;
-    win.TraceTurtleEmbed.stop();win.TraceTurtleEmbed.reset();
-    win.TurtleWorkbench.editor.setValue(currentExample.code);win.TurtleWorkbench.editor.refresh();
-    win.TraceTurtleEmbed.run();
+  function loadExample(code){
+    workbench.replace(code,'Loaded '+(currentExample.label||currentTopic.title)+' reference example');
+    if(innerWidth<=1350)workbench.closeSidebar();
+  }
+  function formattedCode(code){
+    const pre=make('pre','reference-example-code'),body=make('code');pre.append(body);
+    const mode=CodeMirror.getMode({indentUnit:4,tabSize:4},'python'),state=CodeMirror.startState(mode);
+    for(const [i,line] of code.split('\n').entries()){
+      if(i)body.append(document.createTextNode('\n'));
+      const stream=new CodeMirror.StringStream(line,4);
+      if(!line&&mode.blankLine)mode.blankLine(state);
+      while(!stream.eol()){
+        stream.start=stream.pos;const style=mode.token(stream,state);
+        if(stream.pos===stream.start)stream.next();
+        const span=make('span','',stream.current());if(style)span.className=style.split(' ').map(s=>'cm-'+s).join(' ');body.append(span);
+      }
+    }return pre;
+  }
+  async function updateRunner(){
+    const runner=$('referenceDetail').querySelector('.reference-engine'),win=runner?.contentWindow;
+    if(!win?.TraceTurtleEmbed?.preview||!currentExample)return;
+    const serial=++exampleRun,example=currentExample,result=$('referenceDetail').querySelector('.reference-result');
+    if(!result)return;result.setAttribute('aria-busy','true');
+    try{
+      const outcome=await win.TraceTurtleEmbed.preview(example.code);
+      if(serial!==exampleRun||example!==currentExample||!result.isConnected)return;
+      const content=result.querySelector('.reference-result-content');content.replaceChildren();
+      if(!outcome.ok){content.append(make('p','reference-result-error',outcome.error||'This example could not run. Expand it to inspect the code.'));return;}
+      if(outcome.printed.trim())content.append(make('pre','reference-result-console',outcome.printed.trimEnd()));
+      const drawing=win.document.getElementById('turtle-drawing'),sprite=win.document.getElementById('turtle-sprite');
+      const pixels=drawing.getContext('2d').getImageData(0,0,400,400).data;
+      let hasDrawing=false;for(let i=3;i<pixels.length;i+=4)if(pixels[i]){hasDrawing=true;break;}
+      const background=win.getComputedStyle(win.document.getElementById('worldWrap')).backgroundColor;
+      if(hasDrawing||!outcome.printed.trim()||background!=='rgb(255, 255, 255)'){
+        // Fit the visible marks rather than spending the card on empty canvas.
+        const composite=document.createElement('canvas');composite.width=400;composite.height=400;
+        const paint=composite.getContext('2d');paint.drawImage(drawing,0,0);paint.drawImage(sprite,0,0);
+        let left=0,top=0,right=400,bottom=400;
+        if(background==='rgb(255, 255, 255)'){
+          const marks=paint.getImageData(0,0,400,400).data;let minX=400,minY=400,maxX=0,maxY=0;
+          for(let y=0;y<400;y++)for(let x=0;x<400;x++)if(marks[(y*400+x)*4+3]){minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
+          if(minX<=maxX){left=Math.max(0,minX-25);top=Math.max(0,minY-25);right=Math.min(400,maxX+26);bottom=Math.min(400,maxY+26);}
+        }
+        const canvas=make('canvas','reference-result-canvas');canvas.width=right-left;canvas.height=bottom-top;canvas.setAttribute('role','img');canvas.setAttribute('aria-label',example.expected||'Result of the example');
+        const ctx=canvas.getContext('2d');ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(composite,left,top,canvas.width,canvas.height,0,0,canvas.width,canvas.height);content.append(canvas);
+      }
+    }catch(error){if(serial===exampleRun)result.querySelector('.reference-result-content').replaceChildren(make('p','reference-result-error','Preview unavailable. Expand the example to try it.'));}
+    finally{if(serial===exampleRun)result.setAttribute('aria-busy','false');}
+  }
+  function expandExample(){
+    if(exampleDialog){exampleDialog.close();exampleDialog.remove();}
+    const example=currentExample,dialog=make('dialog','reference-dialog');exampleDialog=dialog;
+    const heading=make('div','reference-dialog-heading'),title=make('h2','',currentTopic.title+' · '+example.label);title.id='expandedExampleTitle';dialog.setAttribute('aria-labelledby',title.id);
+    heading.append(title,action('Close',()=>dialog.close()));
+    const runner=make('iframe','reference-runner');runner.title='Interactive reference example';runner.src='/turtle/?embed=reference';
+    runner.addEventListener('load',()=>{const win=runner.contentWindow;win.TurtleWorkbench.editor.setValue(example.code);win.TurtleWorkbench.editor.refresh();win.TraceTurtleEmbed.run();});
+    const actions=make('div','reference-dialog-actions');
+    actions.append(make('p','','Change the code and run it to experiment.'),action('▶ Run',()=>runner.contentWindow.TraceTurtleEmbed?.run(),'btn primary'),action('Stop',()=>runner.contentWindow.TraceTurtleEmbed?.stop()),action('Use this code',()=>{loadExample(runner.contentWindow.TurtleWorkbench?.editor.getValue()||example.code);dialog.close();}));
+    dialog.append(heading,runner,actions);document.body.append(dialog);
+    dialog.addEventListener('close',()=>{runner.contentWindow.TraceTurtleEmbed?.stop();dialog.remove();if(exampleDialog===dialog)exampleDialog=null;});
+    dialog.showModal();
   }
   function showExample(){
     const example=currentExample,content=$('referenceDetail').querySelector('.reference-example-content');if(!example||!content)return;
     $('referenceDetail').querySelectorAll('[data-example-id]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exampleId===example.id)));
-    content.replaceChildren(make('h3','',example.label||'Example'),make('p','',example.summary));
+    exampleRun++;
+    content.replaceChildren();
+    const codeCard=make('section','reference-code-card'),codeHead=make('div','reference-card-heading');codeHead.append(make('strong','','Python'),action('Copy',async()=>{
+      try{await navigator.clipboard.writeText(example.code);codeHead.querySelector('button').textContent='Copied';}catch{codeHead.querySelector('button').textContent='Use this code to copy';}
+    },'reference-copy'));
+    codeCard.append(codeHead,formattedCode(example.code));
+    const result=make('section','reference-result');result.setAttribute('aria-busy','true');
+    const resultHead=make('div','reference-card-heading');resultHead.append(make('strong','','Result'),action('Run again',()=>updateRunner(),'reference-copy'));
+    result.append(resultHead,make('div','reference-result-content'));result.querySelector('.reference-result-content').append(make('p','reference-preview-loading','Running example…'));
+    content.append(codeCard,result);
+    if(/\b(onclick|onscreenclick|onkey|onkeypress)\s*\(/.test(example.code))content.append(make('p','reference-interaction-hint','Expand this example to try its interactions.'));
     const notes=$('referenceDetail').querySelector('.reference-example-notes');notes.replaceChildren();
     for(const [title,text] of [['What you should see',example.expected],['Try changing',example.tryThis]])if(text)notes.append(make('h3','',title),make('p','',text));
     if(example.watchFor){const note=make('details','reference-topic-notes');note.append(make('summary','','Watch for'),make('p','',example.watchFor));notes.append(note);}

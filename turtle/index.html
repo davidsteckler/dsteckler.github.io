@@ -856,8 +856,9 @@
   body.trace-embed .editor-divider{display:block}
 }
 </style>
-<link rel="stylesheet" href="sidebar.css?v=6">
+<link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
+<link rel="stylesheet" href="files.css?v=2">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -1710,6 +1711,10 @@ for i in range(4):
   }
 
   function builtinRead(x){
+    if(window.TurtleFiles){
+      var localFile=window.TurtleFiles.read(x);
+      if(localFile!==undefined)return localFile;
+    }
     if(typeof Sk === "undefined" || Sk.builtinFiles === undefined || Sk.builtinFiles.files[x] === undefined){
       throw new Error("File not found: " + x);
     }
@@ -2732,6 +2737,14 @@ for i in range(4):
     },
     closeSidebar:closeCommands,
     stop:stopCode,
+    selectFile:function(id,doc){
+      stopCode();flushCodeSave();clearErrorHighlight();showExecutingLine(null);
+      codeSaveKey=id==="main"?STORAGE_KEY:STORAGE_KEY+"-file-"+id;
+      codeHistoryKey=codeSaveKey+"-history-v1";
+      this.historyKey=codeHistoryKey;
+      editor.swapDoc(doc);setStatus("");flushCodeSave("Opened file");editor.refresh();
+      window.dispatchEvent(new CustomEvent("turtle-history-updated"));
+    },
     setDisplay:function(settings){
       editor.getWrapperElement().style.fontSize=clamp(Number(settings.code)||16,12,40)+"px";
       output.style.fontSize=clamp(Number(settings.output)||14,12,40)+"px";
@@ -2751,7 +2764,7 @@ for i in range(4):
   });
 
   function fitWorld(){
-    var mobile=window.innerWidth<=840;
+    var mobile=window.innerWidth<=840&&!REFERENCE_EMBED;
     var stageWidth=worldStage.offsetWidth;
     var stageHeight=worldStage.offsetHeight;
     var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
@@ -2788,6 +2801,12 @@ for i in range(4):
 
   if(TRACE_EMBED){
     window.TraceTurtleEmbed={
+      preview:async function(code){
+        if(playback.active)stopCode();
+        editor.setValue(String(code));
+        var result=await runCode(false,{check:true});
+        return {ok:!!(result&&result.ok),printed:coursePrintedText,error:result&&result.error,state:TurtleRuntime.snapshot()};
+      },
       step:function(){
         if(!playback.active){ runCode(true); }
         else if(playback.paused && playback.pending){ stepBtn.click(); }
@@ -2823,8 +2842,9 @@ for i in range(4):
 <script src="/turtlereference/reference-examples.js?v=2"></script>
 <script src="/turtlereference/reference-trail-examples.js?v=1"></script>
 <script src="/turtlereference/example-previews.js?v=2"></script>
+<script src="files.js?v=2"></script>
 <script src="history-diff.js?v=1"></script>
-<script src="sidebar.js?v=4"></script>
+<script src="sidebar.js?v=5"></script>
 <script src="display.js?v=1"></script>
 </body>
 </html>

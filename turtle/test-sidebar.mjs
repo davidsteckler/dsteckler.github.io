@@ -21,7 +21,8 @@ try{
   browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:1600,height:1000}});
   const deps=[['**/codemirror.min.css','codemirror/lib/codemirror.css'],['**/codemirror.min.js','codemirror/lib/codemirror.js'],['**/mode/python/python.min.js','codemirror/mode/python/python.js'],['**/skulpt.min.js','skulpt/dist/skulpt.min.js'],['**/skulpt-stdlib.js','skulpt/dist/skulpt-stdlib.js']];
-  for(const [pattern,file] of deps)await context.route(pattern,route=>route.fulfill({path:require.resolve(file)}));
+  const fixtureNames={'codemirror/lib/codemirror.css':'codemirror.css','codemirror/lib/codemirror.js':'codemirror.js','codemirror/mode/python/python.js':'python.js','skulpt/dist/skulpt.min.js':'skulpt.js','skulpt/dist/skulpt-stdlib.js':'skulpt-stdlib.js'};
+  for(const [pattern,file] of deps)await context.route(pattern,route=>route.fulfill({path:process.env.TURTLE_TEST_DEPS_DIR?path.join(process.env.TURTLE_TEST_DEPS_DIR,fixtureNames[file]):require.resolve(file)}));
   await context.route('**/googletagmanager.com/**',route=>route.abort());
   const oldCode='forward(35)\nleft(90)\nforward(60)',newCode='forward(50)\nleft(90)\nforward(60)';
   await context.addInitScript(({oldCode,newCode})=>{
@@ -57,6 +58,11 @@ try{
   await page.locator('.reference-topic').filter({has:page.getByText('color()',{exact:true})}).click();
   assert(await page.getByRole('heading',{name:'color()',exact:true}).isVisible());
   await page.locator('.reference-example').filter({hasText:'Traffic lights'}).click();
+  await page.waitForFunction(()=>document.querySelector('.reference-result')?.getAttribute('aria-busy')==='false');
+  assert.match(await page.locator('.reference-example-code').innerText(),/limegreen/);
+  assert(await page.locator('.reference-result-canvas').isVisible());
+  assert.equal(await page.locator('#referenceDetail .reference-runner').count(),0,'Sidebar has no nested interactive workspace');
+  await page.getByRole('button',{name:'Expand example ↗',exact:true}).click();
   const reference=page.frameLocator('.reference-runner');
   await reference.locator('.code-panel .CodeMirror').waitFor();
   await page.waitForFunction(()=>document.querySelector('.reference-runner').contentWindow.TurtleWorkbench?.editor.getValue().includes('limegreen'));
@@ -64,8 +70,8 @@ try{
   const previewSizes=await page.locator('.reference-runner').evaluate(frame=>{const doc=frame.contentDocument;return {code:doc.querySelector('.code-panel').getBoundingClientRect().width,world:doc.querySelector('.world-panel').getBoundingClientRect().width,width:frame.clientWidth};});
   assert(previewSizes.code>previewSizes.width*.3);assert(previewSizes.world>previewSizes.width*.3,'Drawing occupies a full pane in narrow reference embed');
   await page.waitForFunction(()=>document.querySelector('.reference-runner').contentDocument.getElementById('codeStatus').classList.contains('good'));
-  assert.equal(await page.locator('.reference-runner-actions button').count(),3);
-  await page.getByRole('button',{name:'Load into main editor',exact:true}).click();
+  assert.equal(await page.locator('.reference-runner-actions button').count(),2);
+  await page.locator('.reference-dialog').getByRole('button',{name:'Use this code',exact:true}).click();
   const loaded=await editor.evaluate(element=>element.CodeMirror.getValue());assert.match(loaded,/limegreen/);
   assert(await page.evaluate(code=>TurtleWorkbench.readHistory().some(entry=>entry.code===code),oldCode));
   await editor.evaluate(element=>{element.CodeMirror.setValue('forward(137)\nleft(42)');});
@@ -79,8 +85,8 @@ try{
   await page.locator('#commandSearch').fill('zz-no-matching-command');assert(await page.locator('#commandEmpty').isVisible());
   await page.locator('#commandSearch').fill('');
   await page.locator('#commandSearch').fill('forward');await page.locator('.reference-topic').filter({has:page.getByText('forward()',{exact:true})}).click();
-  await page.waitForFunction(()=>document.querySelector('.reference-runner').contentWindow.TurtleWorkbench?.editor.getValue().includes('forward(100)'));
-  await page.getByRole('button',{name:'Load into main editor',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.reference-engine').contentWindow.TurtleWorkbench?.editor.getValue().includes('forward(100)'));
+  await page.getByRole('button',{name:'Use this code',exact:true}).click();
   assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^pensize\(4\)\nforward\(100\)/);
   await page.locator('#runBtn').click();await page.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good'));assert(!await page.locator('.error-card').count());
   const displayCode=await editor.evaluate(element=>element.CodeMirror.getValue());
@@ -113,6 +119,27 @@ try{
   await page.locator('#resetLayout').click();assert.equal(await editor.evaluate(element=>getComputedStyle(element).fontSize),'16px');
   assert.equal(await page.locator('#drawingZoom').inputValue(),'100');assert.equal(await page.locator('#outputFontSize').inputValue(),'14');
   assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),displayCode,'Reset view preserves code');
+  await page.setViewportSize({width:1600,height:1000});
+  await page.locator('#referenceTab').click();await page.locator('#commandSearch').fill('isdown');
+  await page.locator('.reference-topic').filter({has:page.getByText('isdown()',{exact:true})}).click();
+  await page.waitForFunction(()=>document.querySelector('.reference-result')?.getAttribute('aria-busy')==='false');
+  assert.equal((await page.locator('.reference-result-console').innerText()).trim(),'True\nFalse');
+  assert.match(await page.locator('.reference-example-code').innerText(),/print\(isdown\(\)\)/);
+  const resultBounds=await page.locator('.reference-result').boundingBox(),sidebar=await page.locator('#commandLibrary').boundingBox();
+  assert(resultBounds.width<=sidebar.width,'Code and result cards fit the sidebar');
+  assert(await page.locator('.reference-example-code').evaluate(el=>el.scrollWidth<=el.clientWidth),'Code wraps without a horizontal scrollbar');
+  if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'reference-desktop.png')});
+  await page.getByRole('button',{name:'Expand example ↗',exact:true}).click();
+  await page.locator('.reference-dialog').getByRole('button',{name:'Close',exact:true}).press('Escape');await page.locator('.reference-dialog').waitFor({state:'detached'});
+  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>TurtleSidebar.open('reference'));
+  assert(await page.locator('.reference-result-console').isVisible());
+  if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'reference-mobile.png')});
+  await page.getByRole('button',{name:'Expand example ↗',exact:true}).click();
+  await page.frameLocator('.reference-runner').locator('.code-panel .CodeMirror').waitFor();
+  const mobilePanels=await page.locator('.reference-runner').evaluate(frame=>{const doc=frame.contentDocument;return {code:doc.querySelector('.code-panel').getBoundingClientRect().toJSON(),world:doc.querySelector('.world-panel').getBoundingClientRect().toJSON()};});
+  assert(mobilePanels.world.y>=mobilePanels.code.y+mobilePanels.code.height-1,'Expanded mobile example stacks code and drawing');
+  if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'reference-expanded-mobile.png')});
+  await page.locator('.reference-dialog').getByRole('button',{name:'Close',exact:true}).click();
   assert.deepEqual(errors,[]);
-  console.log('PASS shared reference, single example action, legacy history, hover previews, diffs, restore, immediate clear, reload, Python run, independent zoom, saved sizes, reset, keyboard tabs, desktop and mobile.');
+  console.log('PASS compact reference code/results, printed booleans, expanded editable example, modal close, desktop/mobile layout, shared reference, history/diffs/restore, code clearing, Python execution, saved zoom and keyboard tabs.');
 }finally{await browser?.close();server.kill();}
