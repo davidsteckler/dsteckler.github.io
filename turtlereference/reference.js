@@ -23,6 +23,13 @@
   applyClassroomDisplay();
   const storageKey = 'dsteckler-turtle-reference-drafts-v1';
   let drafts = {}, current, currentExample, ready = false, pending = false, requestId = 0, appliedId = null;
+  let exampleDirection = 'All', creativeIdeaIndex = 0;
+  const creativeCategory = example => example.creativeCategory || (example.id === 'original' ? 'Start' : 'Variation');
+  const visibleExamples = () => current.examples.filter(example => exampleDirection === 'All' || creativeCategory(example) === exampleDirection);
+  function showCreativeIdea() {
+    const ideas = [...new Set([currentExample.tryThis, ...(trails.get(current.trail)?.creativeIdeas || [])].filter(Boolean))];
+    $('creativeIdea').textContent = ideas[creativeIdeaIndex % ideas.length] || '';
+  }
   const exampleTotal = entries.reduce((count, entry) => count + entry.examples.length, 0);
   const previewAtlas = window.REFERENCE_PREVIEWS;
   let focusMarks = [];
@@ -180,11 +187,19 @@
     if (focus) $('exampleChoices').querySelector('[aria-pressed="true"]')?.focus({preventScroll:true});
   }
   function renderExampleChoices() {
-    const examples = current.examples, position = examples.indexOf(currentExample);
+    const examples = visibleExamples(), position = examples.indexOf(currentExample);
     const listScroll = $('exampleChoices').scrollLeft;
     $('exampleChoices').replaceChildren();
     $('exampleCount').textContent = (position + 1) + ' / ' + examples.length;
     $('activeExampleLabel').textContent = 'Example ' + (position + 1) + ' · ' + currentExample.label;
+    for (const id of ['exampleDirection','surpriseExample','creativeIdeas']) $(id).hidden = !current.trail;
+    const direction = $('exampleDirection'); direction.replaceChildren();
+    for (const value of ['All', ...new Set(current.examples.map(creativeCategory))]) {
+      const option = document.createElement('option'); option.value = value; option.textContent = value === 'All' ? 'All ideas' : value; direction.append(option);
+    }
+    direction.value = exampleDirection;
+    $('surpriseExample').disabled = examples.length < 2;
+    creativeIdeaIndex = 0; showCreativeIdea();
     $('previousExample').disabled = position === 0; $('nextExample').disabled = position === examples.length - 1;
     $('previousExample').title = examples[position - 1]?.label || 'First example';
     $('nextExample').title = examples[position + 1]?.label || 'Last example';
@@ -207,8 +222,11 @@
       } else {
         art.classList.add('text-preview'); art.textContent = preview?.text || 'Run';
       }
-      const label = document.createElement('span'); label.className = 'example-card-label'; label.textContent = example.label;
-      button.append(art, label);
+      const copy = document.createElement('span'); copy.className = 'example-card-copy';
+      const label = document.createElement('span'); label.className = 'example-card-label'; label.textContent = example.id === 'original' && current.trail ? 'Original' : example.label;
+      copy.append(label);
+      if (current.trail) { const badge = document.createElement('small'); badge.className = 'example-category'; badge.textContent = creativeCategory(example); copy.append(badge); }
+      button.append(art, copy);
       button.addEventListener('click', () => chooseExample(example.id, true));
       button.addEventListener('keydown', event => {
         let next;
@@ -290,8 +308,10 @@
   function selectEntry(id, updateHistory = false) {
     const [topicId, exampleId = 'original'] = id.split('/');
     const entry = byId.get(topicId) || entries[0];
+    if (current?.id !== entry.id) exampleDirection = 'All';
     captureDraft(); clearFocusMarks(); current = entry;
     currentExample = entry.examples.find(example => example.id === exampleId) || entry.examples[0];
+    if (exampleDirection !== 'All' && creativeCategory(currentExample) !== exampleDirection) exampleDirection = 'All';
     if (updateHistory) history.pushState(null, '', '#' + exampleKey());
     document.title = entry.title + (currentExample.id === 'original' ? '' : ' · ' + currentExample.label) + ' · Python Turtle Reference | David Steckler';
     window.LEARNING_ACTIVITY = {id:'reference:'+exampleKey(),title:entry.title+' · '+currentExample.label,url:'/turtlereference/#'+exampleKey()};
@@ -360,8 +380,19 @@
   }
   $('previousTopic').addEventListener('click', () => turnPage(-1));
   $('nextTopic').addEventListener('click', () => turnPage(1));
-  $('previousExample').addEventListener('click', () => chooseExample(current.examples[current.examples.indexOf(currentExample) - 1].id));
-  $('nextExample').addEventListener('click', () => chooseExample(current.examples[current.examples.indexOf(currentExample) + 1].id));
+  $('previousExample').addEventListener('click', () => { const examples = visibleExamples(), next = examples[examples.indexOf(currentExample) - 1]; if (next) chooseExample(next.id); });
+  $('nextExample').addEventListener('click', () => { const examples = visibleExamples(), next = examples[examples.indexOf(currentExample) + 1]; if (next) chooseExample(next.id); });
+  $('exampleDirection').addEventListener('change', event => {
+    exampleDirection = event.target.value;
+    const examples = visibleExamples();
+    if (!examples.includes(currentExample)) chooseExample(examples[0].id);
+    else renderExampleChoices();
+  });
+  $('surpriseExample').addEventListener('click', () => {
+    const alternatives = visibleExamples().filter(example => example !== currentExample);
+    if (alternatives.length) chooseExample(alternatives[Math.floor(Math.random() * alternatives.length)].id);
+  });
+  $('nextCreativeIdea').addEventListener('click', () => { creativeIdeaIndex++; showCreativeIdea(); });
   $('markComplete').addEventListener('click', () => {
     if (!current.trail) return;
     const done = !window.TurtleTrailProgress.has(current.id);
@@ -421,7 +452,9 @@
   function placePicker() {
     if (narrow.matches) $('mobileExampleSlot').append(picker);
     else document.querySelector('.editor-shell').prepend(picker);
+    requestAnimationFrame(revealSelectedExample);
   }
+  window.addEventListener('resize', () => requestAnimationFrame(revealSelectedExample));
   narrow.addEventListener('change', placePicker); placePicker();
   new ResizeObserver(() => {
     document.documentElement.style.setProperty('--picker-height', picker.offsetHeight + 'px');

@@ -9,13 +9,15 @@ import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 
 const root=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const selected=new Set(process.argv.slice(2));
+const selected=new Set(process.argv.slice(2).filter(value=>value!=='--missing'));
+const onlyMissing=process.argv.includes('--missing');
 assert(selected.size,'Pass one or more trail IDs to render.');
 const scope={window:{}};
 for(const file of ['reference-data.js','reference-more.js','reference-trails.js','reference-examples.js','reference-trail-examples.js','example-previews.js'])vm.runInNewContext(fs.readFileSync(path.join(root,'turtlereference',file),'utf8'),scope,{filename:file});
 for(const id of selected)assert(scope.window.TURTLE_TRAILS.some(t=>t.id===id),'Unknown trail: '+id);
-const examples=scope.window.TURTLE_REFERENCE.filter(topic=>selected.has(topic.trail)).flatMap(topic=>topic.examples.map(example=>({...example,key:topic.id+'/'+example.id})));
 const manifest=scope.window.REFERENCE_PREVIEWS;
+const hash=example=>createHash('sha256').update(example.code+'\n'+(example.previewCall||'')).digest('hex');
+const examples=scope.window.TURTLE_REFERENCE.filter(topic=>selected.has(topic.trail)).flatMap(topic=>topic.examples.map(example=>({...example,key:topic.id+'/'+example.id}))).filter(example=>!onlyMissing||manifest.examples[example.key]?.hash!==hash(example));
 const pending=new Map(),assets=new Map();
 const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE||undefined,args:['--no-sandbox']});
 try{

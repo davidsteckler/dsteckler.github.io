@@ -27,6 +27,10 @@ for(const entry of entries){
   assert.equal(entry.examples[0].code,entry.code,'Keep the existing draft compatible: '+entry.id);
   assert.equal(new Set(entry.examples.map(e=>e.code)).size,entry.examples.length,'Repeated code: '+entry.id);
 }
+for(const trail of scope.window.TURTLE_TRAILS){
+  for(const stop of trail.stops)assert(stop.examples.length>=4,stop.id+' needs at least four creative choices');
+  assert(trail.stops.at(-1).examples.length>=6,trail.id+' needs at least six finished-project choices');
+}
 for(const example of examples){
   for(const text of example.focus||[])assert(example.code.includes(text),example.id+' has a missing highlight');
   const preview=scope.window.REFERENCE_PREVIEWS.examples[example.id];
@@ -351,6 +355,42 @@ try{
   });
   await page.screenshot({path:path.join(proof,'color-viewer-mobile-drawing.png')});
   console.log('PASS short reference and color links, homepage links, and mobile color picking');
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto(origin+'/turtlereference/#lantern-festival');
+  await page.waitForFunction(()=>document.body.dataset.editorReady==='true'&&document.body.dataset.exampleId==='lantern-festival');
+  editor=page.frames().find(frame=>frame.url().includes('tutorialEmbed'));
+  assert.equal(await page.locator('.example-card').count(),6);
+  await page.locator('#exampleDirection').selectOption('Color');
+  await page.waitForFunction(()=>document.body.dataset.exampleId?.startsWith('lantern-festival/'));
+  assert(await page.locator('.example-category').evaluateAll(nodes=>nodes.every(node=>node.textContent==='Color')),'Filtering shows only color choices');
+  await page.locator('.example-card[data-example="ocean-colors"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='lantern-festival/ocean-colors');
+  const ownRibbon=(await editor.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()))+'\n# My own ribbon idea\n';
+  await editor.locator('.CodeMirror').evaluate((el,code)=>el.CodeMirror.setValue(code),ownRibbon);
+  await page.locator('#exampleDirection').selectOption('All');
+  await page.locator('#surpriseExample').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId!=='lantern-festival/ocean-colors');
+  await page.locator('.example-card[data-example="ocean-colors"]').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='lantern-festival/ocean-colors');
+  assert.equal(await editor.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),ownRibbon,'Surprise keeps the separate edited draft');
+  await page.locator('#creativeIdeas summary').click();
+  const firstIdea=await page.locator('#creativeIdea').innerText();
+  await page.locator('#nextCreativeIdea').click();
+  assert.notEqual(await page.locator('#creativeIdea').innerText(),firstIdea);
+  assert.equal(await editor.locator('.CodeMirror').evaluate(el=>el.CodeMirror.getValue()),ownRibbon,'Idea prompts preserve the working code');
+  await page.screenshot({path:path.join(proof,'creative-options-desktop.png')});
+  await page.setViewportSize({width:390,height:844});
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight),'Creative controls fit the phone');
+  await page.waitForFunction(()=>{const chosen=document.querySelector('.example-card[aria-pressed="true"]').getBoundingClientRect(),strip=document.getElementById('exampleChoices').getBoundingClientRect();return chosen.x>=strip.x&&chosen.right<=strip.right;});
+  const chosen=await page.locator('.example-card[aria-pressed="true"]').boundingBox(),strip=await page.locator('#exampleChoices').boundingBox();
+  assert(chosen.x>=strip.x&&chosen.x+chosen.width<=strip.x+strip.width,'Selected creative choice stays visible on mobile');
+  await page.locator('#exampleDirection').selectOption('Remix');
+  assert.equal(await page.locator('.example-card').count(),2);
+  await page.locator('#nextExample').click();
+  await page.waitForFunction(()=>document.body.dataset.exampleId==='lantern-festival/three-lanterns');
+  assert(await page.locator('#nextExample').isDisabled(),'Pagination follows the filtered choices');
+  await page.screenshot({path:path.join(proof,'creative-options-mobile.png')});
+  console.log('PASS creative categories, random choices, isolated drafts, idea prompts, filtered pagination, and mobile layout');
   await page.goto(origin+'/turtleprojects/');
   await page.locator('.demo-quick-run').first().click();await page.waitForSelector('#codeStatus.good',{timeout:30000});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
