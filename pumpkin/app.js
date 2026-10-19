@@ -301,6 +301,11 @@
       if (!editor || !api || !frame.contentWindow.Sk) return;
     } catch { return; }
     booted = true;ready = true;
+    // Keep the editable reference runtime, but give this workspace its own
+    // layout. reference-embed hides panel headers and world-info, which would
+    // move the editor and canvas into the fixed-height header grid tracks.
+    frameDoc.body.classList.remove('reference-embed');
+    frameDoc.body.classList.add('pumpkin-embed');
     // The shared editor places fills behind existing ink. Pumpkin parts are
     // opaque layers: an eye, patch, or hat must fill over the body beneath it.
     // Adapt this embedded canvas only; the main Turtle workspace is separate.
@@ -314,10 +319,18 @@
     style.textContent = `
       html,body{height:100%!important;min-height:0!important;overflow:hidden!important}
       body.trace-embed .app{height:100%!important;min-height:0!important;display:grid!important;grid-template-rows:minmax(0,1fr)!important}
-      body.trace-embed .workspace{display:grid!important;height:100%!important;min-height:0!important;grid-template-columns:minmax(0,1.1fr) 8px minmax(0,1fr)!important;padding:0!important;gap:0!important;overflow:hidden!important}
+      body.trace-embed .workspace{display:grid!important;height:100%!important;min-height:0!important;grid-template-columns:minmax(0,1.1fr) 8px minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;padding:0!important;gap:0!important;overflow:hidden!important}
       body.trace-embed .code-panel,body.trace-embed .world-panel{height:100%!important;min-width:0!important;min-height:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-      body.trace-embed .code-panel{grid-template-rows:39px minmax(0,1fr)!important}
-      body.trace-embed .world-panel{grid-template-rows:39px minmax(190px,1fr) auto 9px 75px!important;background:#fafbf5}
+      body.trace-embed .code-panel{grid-column:1!important;grid-row:1!important;grid-template-rows:39px minmax(0,1fr)!important}
+      body.trace-embed .editor-divider{grid-column:2!important;grid-row:1!important}
+      body.trace-embed .world-panel{grid-column:3!important;grid-row:1!important;grid-template-rows:39px minmax(190px,1fr) auto 9px 75px!important;background:#fafbf5}
+      body.pumpkin-embed .code-panel>.panel-head,body.pumpkin-embed .world-panel>.panel-head{display:flex!important}
+      body.pumpkin-embed .world-info{display:grid!important}
+      body.pumpkin-embed .code-panel>.CodeMirror{grid-row:2!important;min-height:0!important}
+      body.pumpkin-embed .world-stage{grid-row:2!important}
+      body.pumpkin-embed .world-info{grid-row:3!important}
+      body.pumpkin-embed .output-resize-handle{grid-row:4!important}
+      body.pumpkin-embed .world-panel>.console{grid-row:5!important;min-height:0!important}
       .panel-head{min-height:39px!important;height:39px!important;padding:7px 10px!important}
       .panel-label{font-size:10px!important}.panel-mini,#saveStatus,#codeHistoryBtn{display:none!important}
       body.trace-embed .code-panel .CodeMirror{font-size:14px!important;height:100%!important}
