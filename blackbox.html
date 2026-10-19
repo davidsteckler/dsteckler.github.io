@@ -170,15 +170,23 @@
       position:relative;
     }
 
-    pre{
+    .binaryCanvas{
+      display:block;
+      width:100%;
       margin:0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.65;
-      font-size: 14px;
-      letter-spacing: 0.06em;
-      color: rgba(245,248,255,0.88);
-      user-select:text;
+      font-family:var(--mono);
+      cursor:crosshair;
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+      touch-action:manipulation;
+      outline:none;
+    }
+
+    .binaryCanvas:focus-visible{
+      outline:2px solid rgba(134,243,198,0.65);
+      outline-offset:5px;
+      border-radius:3px;
     }
 
     ::selection{ background: rgba(134,243,198,0.22); }
@@ -287,7 +295,6 @@
     }
 
     @media (max-width: 520px){
-      pre{ font-size: 13px; line-height: 1.6; }
       .wrap{ padding-top: 24px; }
       .content{ padding: 14px; }
       .binaryBox{ padding: 14px; }
@@ -327,9 +334,7 @@
         <p style="margin:0 0 2px;color:rgba(245,248,255,0.58);font-size:13px;line-height:1.6;">A transmission was found.</p>
 
         <div class="binaryBox">
-<pre id="b" aria-label="binary message">
-01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010 01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100 01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000 01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100 01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111 01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111 01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010 01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111 01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101 01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000 01000010 01000101 00100000 01011001 01001111 01010101 01010010 01010011 00101100 00100000 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001110 01001111 01010100 01001001 01000011 01000101 00100000 01001001 01010100 00100000 01000001 01001110 01000100 00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110 01000111 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01001101 01000101 01010011 01010011 01000001 01000111 01000101 00100000 01001101 01000001 01011001 00100000 01001110 01001111 01010100 00100000 01000110 01010101 01001100 01001100 01011001 00100000 01001101 01000001 01001011 01000101 00100000 01010011 01000101 01001110 01010011 01000101 00100000 01011001 01000101 01010100 00101110 00001010 01001001 01000110 00100000 01011001 01001111 01010101 00100000 01000011 01000001 01001110 00100000 01001101 01000001 01001011 01000101 00100000 01001001 01010100 00100000 01000110 01010101 01010010 01010100 01001000 01000101 01010010 00101100 00100000 01001001 01010100 00100000 01010111 01001001 01001100 01001100 00101110 00001010 01010111 01001000 01000001 01010100 00100000 01010111 01001001 01001100 01001100 00100000 01011001 01001111 01010101 00100000 01000010 01010101 01001001 01001100 01000100 00100000 01010111 01001001 01010100 01001000 00100000 01001001 01010100 00111111 00001010
-</pre>
+<canvas id="b" class="binaryCanvas" tabindex="0" role="img" aria-label="Binary transmission displayed in groups of eight. Click a group, or use the arrow keys to choose one, to light the eight LEDs."></canvas>
         </div>
 
         <div class="signal" id="signal" aria-live="polite"></div>
@@ -353,15 +358,44 @@
 
   <script>
     (function(){
-      const pre = document.getElementById("b");
+      const canvas = document.getElementById("b");
+      const ctx = canvas.getContext("2d");
       const bus = document.getElementById("bus");
       const leds = Array.from(bus.querySelectorAll(".led"));
 
-      const raw = pre.textContent.trim();
+      const raw = [
+        "01000011 01001111 01001110 01000111 01010010 01000001 01010100 01010011 00101110 00001010",
+        "01011001 01001111 01010101 00100000 01001010 01010101 01010011 01010100 00100000 01010100",
+        "01010010 01000001 01001110 01010011 01001100 01000001 01010100 01000101 01000100 00100000",
+        "01000101 01001100 01000101 01000011 01010100 01010010 01001001 01000011 01001001 01010100",
+        "01011001 00100000 01001001 01001110 01010100 01001111 00100000 01010100 01001000 01001111",
+        "01010101 01000111 01001000 01010100 00101110 00001010 01000001 00100000 01001100 01001111",
+        "01010100 00100000 01001111 01000110 00100000 01000110 01010101 01010100 01010101 01010010",
+        "01000101 01010011 00100000 01010011 01010100 01000001 01010010 01010100 00100000 01010111",
+        "01001001 01010100 01001000 00100000 01001111 01001110 01000101 00100000 01001100 01010101",
+        "01000011 01001011 01011001 00100000 01000010 01010010 01000101 01000001 01001011 00101110",
+        "00001010 01010100 01001000 01001001 01010011 00100000 01000011 01000001 01001110 00100000",
+        "01000010 01000101 00100000 01011001 01001111 01010101 01010010 01010011 00101100 00100000",
+        "01001001 01000110 00100000 01011001 01001111 01010101 00100000 01001110 01001111 01010100",
+        "01001001 01000011 01000101 00100000 01001001 01010100 00100000 01000001 01001110 01000100",
+        "00100000 01001011 01000101 01000101 01010000 00100000 01000111 01001111 01001001 01001110",
+        "01000111 00101110 00001010 01010100 01001000 01001001 01010011 00100000 01001101 01000101",
+        "01010011 01010011 01000001 01000111 01000101 00100000 01001101 01000001 01011001 00100000",
+        "01001110 01001111 01010100 00100000 01000110 01010101 01001100 01001100 01011001 00100000",
+        "01001101 01000001 01001011 01000101 00100000 01010011 01000101 01001110 01010011 01000101",
+        "00100000 01011001 01000101 01010100 00101110 00001010 01001001 01000110 00100000 01011001",
+        "01001111 01010101 00100000 01000011 01000001 01001110 00100000 01001101 01000001 01001011",
+        "01000101 00100000 01001001 01010100 00100000 01000110 01010101 01010010 01010100 01001000",
+        "01000101 01010010 00101100 00100000 01001001 01010100 00100000 01010111 01001001 01001100",
+        "01001100 00101110 00001010 01010111 01001000 01000001 01010100 00100000 01010111 01001001",
+        "01001100 01001100 00100000 01011001 01001111 01010101 00100000 01000010 01010101 01001001",
+        "01001100 01000100 00100000 01010111 01001001 01010100 01001000 00100000 01001001 01010100",
+        "00111111 00001010"
+      ].join(" ");
       const chunks = raw.split(/\s+/);
 
       // Findable, but not a solution.
-      pre.dataset.groups = String(chunks.length);
+      canvas.dataset.groups = String(chunks.length);
       document.body.setAttribute("data-aux", "ivrj fbhpr");
 
       const signal = document.getElementById("signal");
@@ -405,48 +439,104 @@
         leds.forEach(l => l.classList.remove("on","off"));
       }
 
-      // Click any 8-bit chunk in the text: light the bus accordingly.
-      // Works with wrapping by grabbing the 8-bit word at click point.
-      pre.addEventListener("click", (e) => {
-        let range = null;
+      // Draw the transmission as pixels, leaving no selectable binary text on the page.
+      // Track the rectangle for each byte so tapping still drives the LED bus.
+      let byteHitboxes = [];
+      let selectedByte = -1;
 
-        if(document.caretRangeFromPoint){
-          range = document.caretRangeFromPoint(e.clientX, e.clientY);
-        }else if(document.caretPositionFromPoint){
-          const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
-          if(pos){
-            range = document.createRange();
-            range.setStart(pos.offsetNode, pos.offset);
-            range.setEnd(pos.offsetNode, pos.offset);
+      function drawBinary(){
+        const width = Math.floor(canvas.getBoundingClientRect().width);
+        if(width < 1) return;
+
+        const compact = window.matchMedia("(max-width: 520px)").matches;
+        const fontSize = compact ? 13 : 14;
+        const lineHeight = fontSize * (compact ? 1.6 : 1.65);
+        const font = fontSize + "px " + getComputedStyle(canvas).fontFamily;
+        ctx.font = font;
+
+        // Draw each character separately to preserve the previous 0.06em spacing.
+        const advance = ctx.measureText("0").width + fontSize * 0.06;
+        const byteWidth = advance * 8;
+        const boxes = [];
+        let x = 0;
+        let y = 0;
+
+        chunks.forEach((bits, index) => {
+          if(x > 0 && x + byteWidth > width){
+            x = 0;
+            y += lineHeight;
           }
-        }
+          boxes.push({ x, y, width:byteWidth, height:lineHeight, bits, index });
+          x += byteWidth + advance;
+        });
 
-        if(!range) return;
+        const height = Math.ceil(y + lineHeight + 2);
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.style.height = height + "px";
+        canvas.width = Math.ceil(width * dpr);
+        canvas.height = Math.ceil(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.font = font;
+        ctx.textBaseline = "top";
 
-        const node = range.startContainer;
-        const text = node && node.nodeType === 3 ? node.textContent : "";
-        const idx = range.startOffset;
+        boxes.forEach(box => {
+          if(box.index === selectedByte){
+            ctx.fillStyle = "rgba(134,243,198,0.12)";
+            ctx.fillRect(box.x, box.y + 1, box.width, lineHeight - 2);
+          }
 
-        let left = idx, right = idx;
-        while(left > 0 && /[01]/.test(text[left-1])) left--;
-        while(right < text.length && /[01]/.test(text[right])) right++;
+          ctx.fillStyle = "rgba(245,248,255,0.88)";
+          for(let i = 0; i < 8; i++){
+            ctx.fillText(box.bits[i], box.x + i * advance, box.y);
+          }
+        });
+        byteHitboxes = boxes;
+      }
 
-        const word = text.slice(left, right).trim();
-        if(/^[01]{8}$/.test(word)){
-          showByte(word);
-          bus.title = word;
-          recordInteraction(1);
+      function activateByte(index){
+        if(index < 0 || index >= chunks.length) return;
+        selectedByte = index;
+        drawBinary();
+        const bits = chunks[index];
+        showByte(bits);
+        bus.title = bits;
+        canvas.setAttribute("aria-label", "Binary group " + (index + 1) + " of " + chunks.length + ": " + bits + ". Use the arrow keys for the next group.");
+        recordInteraction(1);
+      }
+
+      canvas.addEventListener("click", e => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const hit = byteHitboxes.find(box =>
+          x >= box.x && x < box.x + box.width &&
+          y >= box.y && y < box.y + box.height
+        );
+        if(hit) activateByte(hit.index);
+      });
+
+      canvas.addEventListener("keydown", e => {
+        if(e.key === "ArrowRight" || e.key === "ArrowLeft"){
+          e.preventDefault();
+          const delta = e.key === "ArrowRight" ? 1 : -1;
+          const next = selectedByte < 0 ? 0 : Math.max(0, Math.min(chunks.length - 1, selectedByte + delta));
+          activateByte(next);
+        }else if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          activateByte(selectedByte < 0 ? 0 : selectedByte);
         }
       });
 
-      // Double click selects all
-      pre.addEventListener("dblclick", () => {
-        const range = document.createRange();
-        range.selectNodeContents(pre);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-      });
+      // Disable routine copy, right-click and drag operations on the binary canvas.
+      canvas.addEventListener("copy", e => e.preventDefault());
+      canvas.addEventListener("contextmenu", e => e.preventDefault());
+      canvas.addEventListener("dragstart", e => e.preventDefault());
+
+      drawBinary();
+      window.addEventListener("resize", () => window.requestAnimationFrame(drawBinary));
+      if(document.fonts && document.fonts.ready){
+        document.fonts.ready.then(drawBinary);
+      }
 
       // The bus reacts, but does not explain itself.
       bus.addEventListener("click", (e) => {
@@ -456,7 +546,7 @@
 
       // If they click outside, clear back to “idle”
       window.addEventListener("click", (e) => {
-        if(!pre.contains(e.target) && !bus.contains(e.target)){
+        if(!canvas.contains(e.target) && !bus.contains(e.target)){
           clearBus();
           bus.removeAttribute("title");
         }
