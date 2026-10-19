@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4f0e8">
+  <meta name="description" content="Draw a pumpkin with Python and Tracy the Turtle. A guided tutorial, the live Turtle editor, and 48 editable pumpkin variations.">
+  <title>Make a Pumpkin with Python | David Steckler</title>
+  <link rel="stylesheet" href="/pumpkin/styles.css?v=1">
+  <script defer src="/pumpkin/app.js?v=1"></script>
+</head>
+<body>
+  <a class="skip" href="#studio">Skip to the editor</a>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">&gt;_</span> David Steckler</a>
+    <nav aria-label="Site"><a href="/turtleprojects/">Drawing projects</a><a href="/turtlereference/">Command reference</a><a href="/turtle/">Turtle editor <span aria-hidden="true">↗</span></a></nav>
+  </header>
+
+  <main class="page">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="tiny-pumpkin" aria-hidden="true"></span> PYTHON TURTLE · CREATIVE CODING</div>
+        <h1 id="page-title">Make a pumpkin<br>with Python.</h1>
+        <p>Build a jack-o’-lantern one shape at a time.<br class="desktop-break"> Then make it your own with 48 runnable variations.</p>
+        <div class="hero-actions"><a class="button primary" href="#studio" id="startTutorial">Start the tutorial <span aria-hidden="true">↓</span></a><a class="text-link" href="#gallery" id="exploreGallery">Explore the pumpkins <span aria-hidden="true">↗</span></a></div>
+        <div class="hero-skills">Coordinates <span>·</span> Filled shapes <span>·</span> Loops <span>·</span> Functions</div>
+      </div>
+      <div class="hero-pumpkins" aria-label="Three pumpkins you can make">
+        <button class="hero-card hero-original" data-design="original" type="button"><img src="/pumpkin/previews/original.svg" alt="Orange pumpkin with triangular eyes and six pointed teeth" width="400" height="400"><span>Start here <span aria-hidden="true">↗</span></span></button>
+        <button class="hero-card hero-witch" data-design="witch" type="button"><img src="/pumpkin/previews/witch.svg" alt="Pumpkin wearing a purple witch hat" width="400" height="400"><span>Add a hat <span aria-hidden="true">↗</span></span></button>
+        <button class="hero-card hero-moon" data-design="moon" type="button"><img src="/pumpkin/previews/moon.svg" alt="Pumpkin under a crescent moon and stars" width="400" height="400"><span>Make a scene <span aria-hidden="true">↗</span></span></button>
+      </div>
+    </section>
+
+    <div class="viewbar" id="workshop">
+      <div class="view-tabs" role="tablist" aria-label="Pumpkin workshop">
+        <button id="tutorialTab" class="view-tab active" role="tab" aria-selected="true" aria-controls="studio" type="button">Tutorial &amp; editor</button>
+        <button id="galleryTab" class="view-tab" role="tab" aria-selected="false" aria-controls="gallery" type="button">Variations <span class="count">48</span></button>
+      </div>
+      <button id="guideButton" class="guide-link" type="button"><span aria-hidden="true">?</span> Command guide</button>
+    </div>
+
+    <section class="studio" id="studio" role="tabpanel" aria-labelledby="tutorialTab">
+      <aside class="lesson-panel" aria-label="Tutorial instructions">
+        <div class="lesson-topline"><span id="lessonMode" class="eyebrow">THE TUTORIAL</span><button type="button" id="backTutorial" class="small-link" hidden>Back to tutorial</button></div>
+        <label class="step-label" for="stepSelect">Jump to a step</label>
+        <select id="stepSelect" aria-label="Choose tutorial step"></select>
+        <div class="progress-track" aria-hidden="true"><div id="stepProgress"></div></div>
+        <div class="step-number" id="stepNumber">STEP 01 / 10</div>
+        <h2 id="lessonTitle">Draw the pumpkin outline</h2>
+        <div id="lessonSkill" class="skill-label">Position + circle</div>
+        <div class="target-row"><img id="targetImage" src="/pumpkin/previews/step-circle.svg" alt="Target drawing for the selected step" width="400" height="400"><div><span class="eyebrow">YOUR TARGET</span><p id="expected">One orange circle centered in the black world.</p><a id="targetLink" href="/pumpkin/previews/step-circle.svg" target="_blank" rel="noopener">View larger <span aria-hidden="true">↗</span></a></div></div>
+        <p id="instruction" class="instruction"></p>
+        <p id="explanation" class="explanation"></p>
+        <details class="code-details" open><summary id="snippetLabel">Code for this step</summary><pre><code id="snippet"></code></pre></details>
+        <button id="loadStep" class="button load-button" type="button" disabled>Load this step into my editor</button>
+        <p class="load-note" id="loadNote">Browsing steps keeps your code. Loading a step saves your previous version.</p>
+        <div class="experiment-box"><span class="eyebrow">TRY A CHANGE</span><p id="experiment"></p></div>
+        <details class="predict" id="predictBox"><summary id="prediction"></summary><p id="answer"></p></details>
+        <label class="done-check" id="doneLabel"><input id="stepDone" type="checkbox"> I tried this step</label>
+        <div class="step-navigation" id="stepNavigation"><button id="previousStep" class="button" type="button">← Previous</button><button id="nextStep" class="button dark" type="button">Next step →</button></div>
+        <p class="completion-note" id="completionNote"></p>
+      </aside>
+
+      <div class="editor-panel">
+        <div class="editor-toolbar">
+          <div class="run-controls"><button id="runCode" class="button run-button" type="button" disabled><span aria-hidden="true">▶</span> Run</button><button id="pauseCode" class="button compact" type="button" disabled>Pause</button><button id="stepCode" class="button compact" type="button" disabled>Step</button><button id="stopCode" class="button compact" type="button" disabled>Stop</button></div>
+          <label class="speed-control">Speed <select id="speedSelect" aria-label="Drawing speed"><option value="0">0 · Instant</option><option value="1">1 · Slowest</option><option value="2">2</option><option value="3">3 · Slow</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6 · Normal</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10 · Fast</option></select></label>
+        </div>
+        <div class="editor-context"><span id="documentName">My pumpkin.py</span><span id="saveState" role="status">Loading the Turtle editor…</span></div>
+        <div class="frame-wrap">
+          <iframe id="turtleFrame" title="Python code editor and live Tracy Turtle drawing" src="/turtle/?embed=reference&amp;pumpkin=1" allow="clipboard-write"></iframe>
+          <div id="editorLoading" class="editor-loading"><span class="loading-dot" aria-hidden="true"></span><strong>Opening the Turtle editor</strong><p>Your code and the drawing will appear here.</p></div>
+        </div>
+        <div class="editor-footer"><span id="runStatus" role="status">Type or edit the code, then press Run.</span><div><button id="resetCode" type="button" disabled>Reset example</button><button id="historyButton" type="button" disabled>Saved versions</button><button id="downloadCode" type="button" disabled>Download .py</button><button id="clearDrawing" type="button" disabled>Clear drawing</button></div></div>
+        <div class="editor-tip"><span class="keycap">Ctrl</span> + <span class="keycap">Enter</span> to run <span class="tip-divider">·</span> <strong>Step</strong> follows one Python statement at a time <span class="tip-divider">·</span> Your code saves on this device</div>
+      </div>
+    </section>
+
+    <section class="gallery" id="gallery" role="tabpanel" aria-labelledby="galleryTab" hidden>
+      <div class="gallery-heading"><div><span class="eyebrow">MAKE A DIFFERENT PUMPKIN</span><h2>48 ways to start.</h2><p>Choose a drawing to open its full Python code. Change it, run it, and keep experimenting.</p></div><label class="search-label"><span class="sr-only">Search pumpkin variations</span><input id="gallerySearch" type="search" placeholder="Search faces, hats, scenes…" autocomplete="off"></label></div>
+      <div class="gallery-filters" role="group" aria-label="Filter pumpkin variations" id="galleryFilters"></div>
+      <div class="gallery-resultline"><p id="resultCount" aria-live="polite">48 pumpkins</p><span>Every preview comes from its Python drawing.</span></div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <p id="noResults" class="empty" hidden>No pumpkins match that search. Try a different word or choose All.</p>
+    </section>
+    <footer class="site-footer"><span>Drawn with Python &amp; Tracy the Turtle.</span><nav aria-label="More learning"><a href="/gridworld/">Grid World</a><a href="/pen/">Pen up &amp; pen down</a><a href="/turtleprojects/">More drawing projects</a><a href="/turtle/">Full Turtle editor ↗</a></nav></footer>
+  </main>
+
+  <dialog id="guideDialog" aria-labelledby="guideTitle"><div class="dialog-head"><div><span class="eyebrow">KEEP THIS HANDY</span><h2 id="guideTitle">The pumpkin command guide</h2></div><button class="close-dialog" data-close="guideDialog" aria-label="Close command guide" type="button">×</button></div><div class="dialog-body"><p>The editor uses the same Tracy commands as <a href="/turtle/">the Turtle page</a>. Type them directly; you do not need <code>import turtle</code> here.</p><table><thead><tr><th>Command</th><th>What to watch</th></tr></thead><tbody>
+  <tr><td><code>penup()</code></td><td>Move Tracy without leaving a trail.</td></tr><tr><td><code>pendown()</code></td><td>Draw while Tracy moves. She starts with her pen down.</td></tr><tr><td><code>setposition(x, y)</code></td><td>Move to a point. x goes left/right; y goes down/up.</td></tr><tr><td><code>setheading(0)</code></td><td>Face right. 90 = up; 180 = left; 270 = down.</td></tr><tr><td><code>forward(50)</code></td><td>Move 50 pixels in the current direction.</td></tr><tr><td><code>left(120)</code></td><td>Turn left 120°. Three of these turns make a triangle.</td></tr><tr><td><code>circle(140)</code></td><td>Draw a circle with radius 140 to Tracy’s left.</td></tr><tr><td><code>circle(50, 180)</code></td><td>Draw half a circle. The second value is the angle.</td></tr><tr><td><code>color("darkorange")</code></td><td>Choose the outline and fill color. Hex colors work too.</td></tr><tr><td><code>begin_fill()</code><br><code>end_fill()</code></td><td>Put these around the commands that draw a closed shape.</td></tr><tr><td><code>for i in range(6):</code></td><td>Repeat the indented lines six times.</td></tr><tr><td><code>def triangle():</code></td><td>Define a function. Call <code>triangle()</code> to run it.</td></tr><tr><td><code>speed(0)</code></td><td>Instant drawing. Use 1–10 for animation.</td></tr><tr><td><code>hideturtle()</code></td><td>Hide Tracy’s marker while keeping the drawing.</td></tr></tbody></table>
+  <div class="coordinate-note"><svg viewBox="0 0 240 240" aria-label="Coordinates: left is negative x, right is positive x, up is positive y, down is negative y" role="img"><rect x="1" y="1" width="238" height="238" rx="5" fill="#fff" stroke="#d8d4c9"/><path d="M20 120H220M120 20V220" stroke="#a4aaa0"/><g fill="#505d53" font-family="system-ui" font-size="12"><text x="184" y="136">(200, 0)</text><text x="5" y="136">(−200, 0)</text><text x="127" y="18">(0, 200)</text><text x="124" y="230">(0, −200)</text><text x="127" y="115">(0, 0)</text><text x="28" y="85">(−75, 35)</text></g><circle cx="120" cy="120" r="3" fill="#2d5a44"/><circle cx="78.75" cy="100.75" r="4" fill="#c56930"/></svg><p><strong>The world is 400 × 400.</strong><br>The center is (0, 0). The left eye starts left of center and above it, so its x is negative and its y is positive.</p></div>
+  <div class="help-note"><strong>Seeing a line between your shapes?</strong> Put <code>penup()</code> before moving to the next shape, then <code>pendown()</code> before drawing.</div><div class="help-note"><strong>A function or loop will not run?</strong> Check the colon and indent its body four spaces. Keep the function’s call outside the definition.</div></div></dialog>
+
+  <dialog id="historyDialog" aria-labelledby="historyTitle"><div class="dialog-head"><div><span class="eyebrow">THIS DRAWING’S VERSIONS</span><h2 id="historyTitle">Saved versions</h2></div><button class="close-dialog" data-close="historyDialog" aria-label="Close saved versions" type="button">×</button></div><div class="dialog-body"><p>Your code is saved before loading a step, resetting an example, or restoring a version. Recent editing checkpoints are saved too.</p><div id="historyList"></div></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

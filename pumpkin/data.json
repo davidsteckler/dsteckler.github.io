@@ -1,0 +1,713 @@
+{
+  "stages": [
+    {
+      "id": "circle",
+      "title": "Draw the pumpkin outline",
+      "skill": "Position + circle",
+      "instruction": "Start with the outline. Type this program in the editor, then press Run.",
+      "why": "Our world runs from −200 to 200. A circle is drawn to Tracy’s left. Facing right at (0, −140) puts its center at (0, 0).",
+      "snippet": "speed(6)\nbgcolor(\"black\")\n\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\ncircle(140)",
+      "code": "speed(6)\nbgcolor(\"black\")\n\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\ncircle(140)\n",
+      "expected": "One orange circle centered in the black world.",
+      "predict": "Why is the starting y value −140 instead of 0?",
+      "answer": "circle(140) starts on the edge, 140 pixels below the center. Starting at (0, 0) would put the center at (0, 140), partly outside the world.",
+      "experiment": "Change circle(140) to circle(100). Notice that its bottom stays in the same place.",
+      "focus": [
+        "circle(140)",
+        "setposition(0, -140)"
+      ],
+      "preview": "previews/step-circle.svg"
+    },
+    {
+      "id": "fill",
+      "title": "Fill the circle",
+      "skill": "Color + fill",
+      "instruction": "Put begin_fill() immediately before circle(140), and end_fill() immediately after it.",
+      "why": "color() sets the outline and fill color. begin_fill() records a shape; end_fill() fills that shape.",
+      "snippet": "color(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n",
+      "expected": "A solid orange pumpkin body.",
+      "predict": "What happens if you leave out end_fill()?",
+      "answer": "The outline is drawn, but the fill is never completed.",
+      "experiment": "Try color(\"orange\") or color(\"#f97316\"). Keep the quotation marks.",
+      "focus": [
+        "begin_fill()",
+        "end_fill()"
+      ],
+      "preview": "previews/step-fill.svg"
+    },
+    {
+      "id": "eye",
+      "title": "Draw one triangle eye",
+      "skill": "Pen up + turning",
+      "instruction": "Add this after the body. Move with the pen up so there is no line from the pumpkin’s bottom to the eye.",
+      "why": "Each side is 50 pixels. Tracy turns 120° at each corner: three exterior turns add up to 360°.",
+      "snippet": "# One filled triangle, before we turn it into a function.\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ncolor(\"white\")\nbegin_fill()\nforward(50)\nleft(120)\nforward(50)\nleft(120)\nforward(50)\nleft(120)\nend_fill()",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\n# One filled triangle, before we turn it into a function.\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ncolor(\"white\")\nbegin_fill()\nforward(50)\nleft(120)\nforward(50)\nleft(120)\nforward(50)\nleft(120)\nend_fill()\n",
+      "expected": "One white triangle on the left side of the face.",
+      "predict": "Would left(60) close this three-sided shape?",
+      "answer": "No. Tracy needs an exterior turn of 120°. The inside angle of an equilateral triangle is 60°.",
+      "experiment": "Move the eye: change −75 to −95. Negative x values move left.",
+      "focus": [
+        "setposition(-75, 35)",
+        "left(120)"
+      ],
+      "preview": "previews/step-eye.svg"
+    },
+    {
+      "id": "two-eyes",
+      "title": "Give it a second eye",
+      "skill": "Reuse + coordinates",
+      "instruction": "Replace the long eye instructions with triangle(), then call it at two different positions.",
+      "why": "The definition saves the drawing instructions. Calling triangle() runs them. setheading(0) gives each eye the same starting direction.",
+      "snippet": "def triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n",
+      "expected": "Two matching white triangle eyes.",
+      "predict": "Does defining triangle() draw an eye by itself?",
+      "answer": "No. The indented instructions run when Python reaches a triangle() call.",
+      "experiment": "Change forward(50) inside the function to forward(40). Both eyes shrink.",
+      "focus": [
+        "def triangle():",
+        "triangle()"
+      ],
+      "preview": "previews/step-two-eyes.svg"
+    },
+    {
+      "id": "nose",
+      "title": "Add an upside-down nose",
+      "skill": "Direction + functions",
+      "instruction": "Add a smaller triangle function. Move to (15, −12), face left, and call it once.",
+      "why": "This triangle uses 30-pixel sides. Starting at 180° turns the same left-turn triangle upside down.",
+      "snippet": "def small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n",
+      "expected": "Two eyes and a small downward-pointing nose.",
+      "predict": "What would setheading(0) do to the nose?",
+      "answer": "It would point up and extend to the right from (15, −12). Heading changes both the direction and where the triangle lands.",
+      "experiment": "Change the nose’s y value from −12 to 0 to move it up.",
+      "focus": [
+        "setheading(180)",
+        "forward(30)"
+      ],
+      "preview": "previews/step-nose.svg"
+    },
+    {
+      "id": "stem",
+      "title": "Build the green stem",
+      "skill": "Rectangle + loop",
+      "instruction": "Add a green filled rectangle at the top of the pumpkin.",
+      "why": "The loop repeats a short side, a corner, a long side, and a corner twice. The stem overlaps the body slightly so the pieces connect.",
+      "snippet": "# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n\n# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()\n",
+      "expected": "A green stem attached to the top.",
+      "predict": "Why does range(2) draw four sides?",
+      "answer": "Each repeat draws two sides. Two repeats × two sides = four sides.",
+      "experiment": "Change forward(48) to forward(36) for a shorter stem.",
+      "focus": [
+        "for i in range(2):",
+        "forward(48)"
+      ],
+      "preview": "previews/step-stem.svg"
+    },
+    {
+      "id": "one-tooth",
+      "title": "Try one tooth",
+      "skill": "Reuse a smaller shape",
+      "instruction": "Move to the right end of the mouth, face left, and reuse small_triangle().",
+      "why": "The nose and this tooth use the same function. Position and heading give the same shape a different job.",
+      "snippet": "penup()\nsetposition(90, -44)\nsetheading(180)\npendown()\n\nsmall_triangle()\n",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n\n# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()\n\npenup()\nsetposition(90, -44)\nsetheading(180)\npendown()\n\nsmall_triangle()\n",
+      "expected": "One downward-pointing tooth below the right eye.",
+      "predict": "Will this tooth be the same size as the nose?",
+      "answer": "Yes. Both calls use small_triangle(), whose sides are 30 pixels.",
+      "experiment": "Try a tooth at (0, −44). Set the position before calling the function.",
+      "focus": [
+        "setposition(90, -44)",
+        "small_triangle()"
+      ],
+      "preview": "previews/step-one-tooth.svg"
+    },
+    {
+      "id": "teeth",
+      "title": "Repeat a whole row of teeth",
+      "skill": "For loop + spacing",
+      "instruction": "Replace the single tooth call with this loop. Keep the positioning lines above it.",
+      "why": "Each repeat draws a tooth and moves 30 pixels left. The pen goes up for the move and down for the next tooth.",
+      "snippet": "penup()\nsetposition(90, -44)\nsetheading(180)\npendown()\nfor i in range(6):\n    small_triangle()\n    penup()\n    forward(30)\n    pendown()",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n\n# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()\n\npenup()\nsetposition(90, -44)\nsetheading(180)\npendown()\nfor i in range(6):\n    small_triangle()\n    penup()\n    forward(30)\n    pendown()\n",
+      "expected": "Six connected triangular teeth across the face.",
+      "predict": "What changes if forward(30) becomes forward(35)?",
+      "answer": "The teeth keep their 30-pixel sides, but their starting points are 35 pixels apart. Five-pixel gaps appear.",
+      "experiment": "Try range(5), then range(7). The row starts at the same place and grows toward the left.",
+      "focus": [
+        "for i in range(6):",
+        "forward(30)"
+      ],
+      "preview": "previews/step-teeth.svg"
+    },
+    {
+      "id": "finish",
+      "title": "Finish your jack-o’-lantern",
+      "skill": "Read the whole program",
+      "instruction": "Add hideturtle() at the end. Run the complete drawing and compare it with the target.",
+      "why": "The drawing is built in layers: body, eyes, nose, stem, then teeth. hideturtle() removes Tracy’s marker after her work is done.",
+      "snippet": "hideturtle()",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n\n# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()\n\npenup()\nsetposition(90, -44)\nsetheading(180)\npendown()\nfor i in range(6):\n    small_triangle()\n    penup()\n    forward(30)\n    pendown()\n\nhideturtle()\n",
+      "expected": "The complete pumpkin from this tutorial.",
+      "predict": "Does hideturtle() erase the picture?",
+      "answer": "No. It hides Tracy’s marker. The shapes she drew stay on the canvas.",
+      "experiment": "Use speed(0) for an instant drawing. Use speed(3) to watch the movements.",
+      "focus": [
+        "hideturtle()"
+      ],
+      "preview": "previews/step-finish.svg"
+    },
+    {
+      "id": "remix",
+      "title": "Make your own version",
+      "skill": "Change + explain",
+      "instruction": "Choose a variation below, or change your own pumpkin. Make three changes you can point to in the code.",
+      "why": "Try one change at a time. Run, look at the result, and decide what to change next. You can return to any saved draft.",
+      "snippet": "# Ideas to try:\n# 1. A new body or background color\n# 2. Different eye positions or sizes\n# 3. A different tooth count or spacing",
+      "code": "speed(6)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n\n# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()\n\npenup()\nsetposition(90, -44)\nsetheading(180)\npendown()\nfor i in range(6):\n    small_triangle()\n    penup()\n    forward(30)\n    pendown()\n\nhideturtle()\n",
+      "expected": "A pumpkin with choices you can explain.",
+      "predict": "Which function would you change to resize both eyes?",
+      "answer": "triangle(). Both eyes call that function, so changing its side length affects both eyes.",
+      "experiment": "Pick a gallery design and add a detail of your own. Explain which commands make it appear.",
+      "focus": [
+        "def triangle():",
+        "for i in range(6):"
+      ],
+      "preview": "previews/step-remix.svg"
+    }
+  ],
+  "designs": [
+    {
+      "id": "original",
+      "title": "The original",
+      "category": "Faces",
+      "description": "The triangle-eyed pumpkin from the tutorial.",
+      "experiment": "Change range(6) to range(5). Predict which end of the tooth row gets shorter.",
+      "code": "speed(0)\nbgcolor(\"black\")\n\n# The circle starts at its bottom edge.\npenup()\nsetposition(0, -140)\nsetheading(0)\npendown()\ncolor(\"darkorange\")\nbegin_fill()\ncircle(140)\nend_fill()\n\ndef triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(50)\n        left(120)\n    end_fill()\n\ndef small_triangle():\n    color(\"white\")\n    begin_fill()\n    for i in range(3):\n        forward(30)\n        left(120)\n    end_fill()\n\npenup()\nsetposition(-75, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(25, 35)\nsetheading(0)\npendown()\ntriangle()\n\npenup()\nsetposition(15, -12)\nsetheading(180)\npendown()\nsmall_triangle()\n\n# A rectangle: two long sides and two short sides.\npenup()\nsetposition(-14, 136)\nsetheading(0)\npendown()\ncolor(\"green\")\nbegin_fill()\nfor i in range(2):\n    forward(28)\n    left(90)\n    forward(48)\n    left(90)\nend_fill()\n\npenup()\nsetposition(90, -44)\nsetheading(180)\npendown()\nfor i in range(6):\n    small_triangle()\n    penup()\n    forward(30)\n    pendown()\n\nhideturtle()\n",
+      "focus": "for i in range(6):",
+      "level": "Medium",
+      "preview": "previews/original.svg"
+    },
+    {
+      "id": "smile",
+      "title": "Big smile",
+      "category": "Faces",
+      "description": "Round eyes and a wide curved smile.",
+      "experiment": "Change the smile’s thickness from 8 to 14.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/smile.svg"
+    },
+    {
+      "id": "surprised",
+      "title": "Surprised",
+      "category": "Faces",
+      "description": "Three circles make a surprised expression.",
+      "experiment": "Change the mouth radius from 24 to 35.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\ndisk(0, -43, 24, \"#fff4d0\")\ndisk(0, -43, 14, \"#20212b\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/surprised.svg"
+    },
+    {
+      "id": "sleepy",
+      "title": "Sleepy",
+      "category": "Faces",
+      "description": "Curved eyelids and a tiny sleeping mouth.",
+      "experiment": "Change the eye arc extent from 180 to 120.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\narc(-70, 49, 270, 22, 180, \"#fff4d0\", 7)\narc(27, 49, 270, 22, 180, \"#fff4d0\", 7)\ndisk(0, -43, 12, \"#fff4d0\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/sleepy.svg"
+    },
+    {
+      "id": "angry",
+      "title": "Angry eyebrows",
+      "category": "Faces",
+      "description": "Slanted eyebrows change the same round eyes.",
+      "experiment": "Reverse the two eyebrow headings to soften the expression.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\nline(-78, 87, 340, 55, \"#20212b\", 10)\nline(27, 68, 20, 55, \"#20212b\", 10)\nline(-32, -52, 0, 64, \"#fff4d0\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/angry.svg"
+    },
+    {
+      "id": "wink",
+      "title": "One wink",
+      "category": "Faces",
+      "description": "One open eye, one closed eye, and a smile.",
+      "experiment": "Move the winking eye up by changing its y value.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 20, \"#fff4d0\")\narc(26, 48, 270, 22, 180, \"#fff4d0\", 7)\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/wink.svg"
+    },
+    {
+      "id": "vampire",
+      "title": "Vampire",
+      "category": "Faces",
+      "description": "A dark mouth with two bright fangs.",
+      "experiment": "Change both fang side lengths from 27 to 36.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#fff4d0\")\ntriangle(27, 32, 45, 0, \"#fff4d0\")\nbox(-65, -69, 130, 42, \"#20212b\")\ntriangle(-32, -27, 27, 180, \"#fff4d0\")\ntriangle(57, -27, 27, 180, \"#fff4d0\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/vampire.svg"
+    },
+    {
+      "id": "cat",
+      "title": "Cat face",
+      "category": "Faces",
+      "description": "Pointed ears, whiskers, and small round eyes.",
+      "experiment": "Change the whisker lengths from 38 to 50.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-103, 86, 65, 0, \"#ff9500\")\ntriangle(39, 86, 65, 0, \"#ff9500\")\ndisk(-48, 48, 18, \"#20212b\")\ndisk(48, 48, 18, \"#20212b\")\ntriangle(12, 1, 24, 180, \"#eea1a0\")\nline(-50, -13, 170, 38, \"#fff4d0\", 3)\nline(50, -13, 10, 38, \"#fff4d0\", 3)\nline(-50, -29, 180, 38, \"#fff4d0\", 3)\nline(50, -29, 0, 38, \"#fff4d0\", 3)\nline(-50, -45, 190, 38, \"#fff4d0\", 3)\nline(50, -45, -10, 38, \"#fff4d0\", 3)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/cat.svg"
+    },
+    {
+      "id": "robot",
+      "title": "Robot face",
+      "category": "Faces",
+      "description": "Square eyes and a gridded robot mouth.",
+      "experiment": "Change the number of vertical mouth lines.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nbox(-75, 25, 47, 43, \"#20212b\")\nbox(-62, 37, 20, 18, \"#a9f0dd\")\nbox(28, 25, 47, 43, \"#20212b\")\nbox(41, 37, 20, 18, \"#a9f0dd\")\nbox(-68, -72, 136, 43, \"#20212b\")\nline(-41, -70, 90, 39, \"#fff4d0\", 2)\nline(-14, -70, 90, 39, \"#fff4d0\", 2)\nline(13, -70, 90, 39, \"#fff4d0\", 2)\nline(40, -70, 90, 39, \"#fff4d0\", 2)\nline(-67, -51, 0, 134, \"#fff4d0\", 2)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/robot.svg"
+    },
+    {
+      "id": "zipper",
+      "title": "Zipper smile",
+      "category": "Faces",
+      "description": "A diagonal mouth with repeated stitches.",
+      "experiment": "Change the stitch spacing from 22 to 18.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#fff4d0\")\ntriangle(27, 32, 45, 0, \"#fff4d0\")\nline(-78, -60, 10, 158, \"#20212b\", 6)\nline(-65, -69, 80, 25, \"#20212b\", 4)\nline(-43, -65, 80, 25, \"#20212b\", 4)\nline(-21, -61, 80, 25, \"#20212b\", 4)\nline(1, -57, 80, 25, \"#20212b\", 4)\nline(23, -53, 80, 25, \"#20212b\", 4)\nline(45, -49, 80, 25, \"#20212b\", 4)\nline(67, -45, 80, 25, \"#20212b\", 4)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/zipper.svg"
+    },
+    {
+      "id": "hearts",
+      "title": "Heart eyes",
+      "category": "Faces",
+      "description": "Two hearts above a curved smile.",
+      "experiment": "Change both heart sizes from 42 to 50.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef heart(x, y, size, shade):\n    disk(x - size / 4, y, size / 3, shade)\n    disk(x + size / 4, y, size / 3, shade)\n    triangle(x + size / 2, y, size, 180, shade)\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nheart(-48, 58, 42, \"#9e2844\")\nheart(48, 58, 42, \"#9e2844\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/hearts.svg"
+    },
+    {
+      "id": "goofy",
+      "title": "Goofy grin",
+      "category": "Faces",
+      "description": "Different-sized eyes and two square teeth.",
+      "experiment": "Swap the two eye radii and watch the expression change.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-47, 48, 28, \"#fff4d0\")\ndisk(47, 47, 19, \"#fff4d0\")\ndisk(-42, 46, 10, \"#20212b\")\ndisk(43, 49, 7, \"#20212b\")\nbox(-63, -68, 126, 42, \"#20212b\")\nbox(-34, -51, 22, 25, \"#fff4d0\")\nbox(12, -68, 22, 25, \"#fff4d0\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/goofy.svg"
+    },
+    {
+      "id": "ghost",
+      "title": "Ghost pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#26332f\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#eee8d8\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#253b38\")\ntriangle(27, 32, 45, 0, \"#253b38\")\ntriangle(13, -10, 26, 180, \"#253b38\")\ntriangle(84, -43, 28, 180, \"#253b38\")\ntriangle(56, -43, 28, 180, \"#253b38\")\ntriangle(28, -43, 28, 180, \"#253b38\")\ntriangle(0, -43, 28, 180, \"#253b38\")\ntriangle(-28, -43, 28, 180, \"#253b38\")\ntriangle(-56, -43, 28, 180, \"#253b38\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/ghost.svg"
+    },
+    {
+      "id": "teal",
+      "title": "Teal pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#10292d\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#49aeb0\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#f8e7b6\")\ntriangle(27, 32, 45, 0, \"#f8e7b6\")\ntriangle(13, -10, 26, 180, \"#f8e7b6\")\ntriangle(84, -43, 28, 180, \"#f8e7b6\")\ntriangle(56, -43, 28, 180, \"#f8e7b6\")\ntriangle(28, -43, 28, 180, \"#f8e7b6\")\ntriangle(0, -43, 28, 180, \"#f8e7b6\")\ntriangle(-28, -43, 28, 180, \"#f8e7b6\")\ntriangle(-56, -43, 28, 180, \"#f8e7b6\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/teal.svg"
+    },
+    {
+      "id": "pink",
+      "title": "Pink pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#362733\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#eb9bad\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#482a4d\")\ntriangle(27, 32, 45, 0, \"#482a4d\")\ntriangle(13, -10, 26, 180, \"#482a4d\")\ntriangle(84, -43, 28, 180, \"#482a4d\")\ntriangle(56, -43, 28, 180, \"#482a4d\")\ntriangle(28, -43, 28, 180, \"#482a4d\")\ntriangle(0, -43, 28, 180, \"#482a4d\")\ntriangle(-28, -43, 28, 180, \"#482a4d\")\ntriangle(-56, -43, 28, 180, \"#482a4d\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/pink.svg"
+    },
+    {
+      "id": "purple",
+      "title": "Purple pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#201c32\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#9f80d0\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#f4df9b\")\ntriangle(27, 32, 45, 0, \"#f4df9b\")\ntriangle(13, -10, 26, 180, \"#f4df9b\")\ntriangle(84, -43, 28, 180, \"#f4df9b\")\ntriangle(56, -43, 28, 180, \"#f4df9b\")\ntriangle(28, -43, 28, 180, \"#f4df9b\")\ntriangle(0, -43, 28, 180, \"#f4df9b\")\ntriangle(-28, -43, 28, 180, \"#f4df9b\")\ntriangle(-56, -43, 28, 180, \"#f4df9b\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/purple.svg"
+    },
+    {
+      "id": "green",
+      "title": "Green pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#1f3025\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#a1b35b\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#263f2a\")\ntriangle(27, 32, 45, 0, \"#263f2a\")\ntriangle(13, -10, 26, 180, \"#263f2a\")\ntriangle(84, -43, 28, 180, \"#263f2a\")\ntriangle(56, -43, 28, 180, \"#263f2a\")\ntriangle(28, -43, 28, 180, \"#263f2a\")\ntriangle(0, -43, 28, 180, \"#263f2a\")\ntriangle(-28, -43, 28, 180, \"#263f2a\")\ntriangle(-56, -43, 28, 180, \"#263f2a\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/green.svg"
+    },
+    {
+      "id": "red",
+      "title": "Red pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#2c2028\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#d95542\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#ffe7bd\")\ntriangle(27, 32, 45, 0, \"#ffe7bd\")\ntriangle(13, -10, 26, 180, \"#ffe7bd\")\ntriangle(84, -43, 28, 180, \"#ffe7bd\")\ntriangle(56, -43, 28, 180, \"#ffe7bd\")\ntriangle(28, -43, 28, 180, \"#ffe7bd\")\ntriangle(0, -43, 28, 180, \"#ffe7bd\")\ntriangle(-28, -43, 28, 180, \"#ffe7bd\")\ntriangle(-56, -43, 28, 180, \"#ffe7bd\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/red.svg"
+    },
+    {
+      "id": "blue",
+      "title": "Blue pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#1b293a\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#689fc7\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#f5efd6\")\ntriangle(27, 32, 45, 0, \"#f5efd6\")\ntriangle(13, -10, 26, 180, \"#f5efd6\")\ntriangle(84, -43, 28, 180, \"#f5efd6\")\ntriangle(56, -43, 28, 180, \"#f5efd6\")\ntriangle(28, -43, 28, 180, \"#f5efd6\")\ntriangle(0, -43, 28, 180, \"#f5efd6\")\ntriangle(-28, -43, 28, 180, \"#f5efd6\")\ntriangle(-56, -43, 28, 180, \"#f5efd6\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/blue.svg"
+    },
+    {
+      "id": "gold",
+      "title": "Golden pumpkin",
+      "category": "Colors",
+      "description": "Change the body, background, and face palette together.",
+      "experiment": "Find the first disk() call below the functions. Replace its last value with a color you choose.",
+      "code": "speed(0)\nbgcolor(\"#303028\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#dfbc65\")\nbox(-13, 130, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#3f3e26\")\ntriangle(27, 32, 45, 0, \"#3f3e26\")\ntriangle(13, -10, 26, 180, \"#3f3e26\")\ntriangle(84, -43, 28, 180, \"#3f3e26\")\ntriangle(56, -43, 28, 180, \"#3f3e26\")\ntriangle(28, -43, 28, 180, \"#3f3e26\")\ntriangle(0, -43, 28, 180, \"#3f3e26\")\ntriangle(-28, -43, 28, 180, \"#3f3e26\")\ntriangle(-56, -43, 28, 180, \"#3f3e26\")\n\nhideturtle()\n",
+      "focus": "disk(0, 0, 134",
+      "level": "Medium",
+      "preview": "previews/gold.svg"
+    },
+    {
+      "id": "dots",
+      "title": "Polka dots",
+      "category": "Patterns",
+      "description": "Rows of small circles across the pumpkin.",
+      "experiment": "Change the dot radius from 7 to 11.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nfor row in range(4):\n    for col in range(5):\n        disk(-78 + col * 39, -78 + row * 45, 7, \"#ffd375\")\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/dots.svg"
+    },
+    {
+      "id": "stripes",
+      "title": "Vertical stripes",
+      "category": "Patterns",
+      "description": "Repeated green stripes on an orange body.",
+      "experiment": "Change range(7) to range(5) and compare the spacing.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nfor i in range(7):\n    box(-84 + i * 26, -88, 11, 176, \"#d57719\")\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/stripes.svg"
+    },
+    {
+      "id": "patchwork",
+      "title": "Patchwork",
+      "category": "Patterns",
+      "description": "Warm-colored square patches with stitched edges.",
+      "experiment": "Try different colors in the three box() calls.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nbox(-95, -65, 57, 57, \"#f9b145\")\nline(-87, -69, 90, 10, \"#20212b\", 2)\nline(-87, -13, 90, 10, \"#20212b\", 2)\nline(-70, -69, 90, 10, \"#20212b\", 2)\nline(-70, -13, 90, 10, \"#20212b\", 2)\nline(-53, -69, 90, 10, \"#20212b\", 2)\nline(-53, -13, 90, 10, \"#20212b\", 2)\nbox(38, 8, 54, 54, \"#cd6945\")\nline(46, 4, 90, 10, \"#20212b\", 2)\nline(46, 57, 90, 10, \"#20212b\", 2)\nline(63, 4, 90, 10, \"#20212b\", 2)\nline(63, 57, 90, 10, \"#20212b\", 2)\nline(80, 4, 90, 10, \"#20212b\", 2)\nline(80, 57, 90, 10, \"#20212b\", 2)\nbox(-20, -100, 42, 42, \"#e6bd68\")\nline(-12, -104, 90, 10, \"#20212b\", 2)\nline(-12, -63, 90, 10, \"#20212b\", 2)\nline(5, -104, 90, 10, \"#20212b\", 2)\nline(5, -63, 90, 10, \"#20212b\", 2)\nline(22, -104, 90, 10, \"#20212b\", 2)\nline(22, -63, 90, 10, \"#20212b\", 2)\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/patchwork.svg"
+    },
+    {
+      "id": "stars",
+      "title": "Star-covered",
+      "category": "Patterns",
+      "description": "Small gold stars across a purple pumpkin.",
+      "experiment": "Change star sizes from 24 to 32.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef star(x, y, side, shade):\n    move(x, y)\n    setheading(72)\n    color(shade)\n    begin_fill()\n    for i in range(5):\n        forward(side)\n        right(144)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#9772bf\")\nbox(-13, 130, 26, 43, \"#487c43\")\nstar(-85, 40, 24, \"#fbe5a4\")\nstar(-25, 83, 24, \"#fbe5a4\")\nstar(57, 57, 24, \"#fbe5a4\")\nstar(-65, -63, 24, \"#fbe5a4\")\nstar(24, -67, 24, \"#fbe5a4\")\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/stars.svg"
+    },
+    {
+      "id": "checker",
+      "title": "Checker pattern",
+      "category": "Patterns",
+      "description": "Nested loops draw a checker pattern.",
+      "experiment": "Change the row and column counts separately.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nfor row in range(5):\n    for col in range(5):\n        if (row + col) % 2 == 0:\n            box(-85 + col * 34, -85 + row * 34, 34, 34, \"#db7627\")\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/checker.svg"
+    },
+    {
+      "id": "rings",
+      "title": "Concentric rings",
+      "category": "Patterns",
+      "description": "Repeated outlines inside the pumpkin body.",
+      "experiment": "Change the three ring radii.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\narc(0, -112, 0, 112, 360, \"#da741a\", 3)\narc(0, -91, 0, 91, 360, \"#da741a\", 3)\narc(0, -69, 0, 69, 360, \"#da741a\", 3)\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/rings.svg"
+    },
+    {
+      "id": "rainbow",
+      "title": "Rainbow stripes",
+      "category": "Patterns",
+      "description": "Seven colored bands cross the pumpkin.",
+      "experiment": "Change the order of the colors in the list.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ncolors = [\"#e8756f\", \"#efa363\", \"#e9ca70\", \"#8caf73\", \"#68aeaa\", \"#6c92ba\", \"#a488bb\"]\nfor i in range(7):\n    box(-94, -84 + i * 24, 188, 24, colors[i])\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/rainbow.svg"
+    },
+    {
+      "id": "spiral",
+      "title": "Spiral pumpkin",
+      "category": "Patterns",
+      "description": "A growing spiral is drawn with a loop.",
+      "experiment": "Change right(16) to right(22).",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nmove(0, 0)\ncolor(\"#ffc85a\")\npensize(3)\nfor i in range(90):\n    forward(i / 3)\n    right(16)\npensize(1)\ntriangle(-72, 32, 45, 0, \"#20212b\")\ntriangle(27, 32, 45, 0, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/spiral.svg"
+    },
+    {
+      "id": "witch",
+      "title": "Witch hat",
+      "category": "Costumes",
+      "description": "A pointed purple hat and a wide brim.",
+      "experiment": "Change the hat’s polygon points to make it taller or wider.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef polygon(points, shade):\n    move(points[0][0], points[0][1])\n    color(shade)\n    begin_fill()\n    for point in points[1:]:\n        setposition(point[0], point[1])\n    setposition(points[0][0], points[0][1])\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\npolygon([[-87, 102], [80, 102], [-17, 189]], \"#7557a0\")\nbox(-113, 95, 226, 19, \"#503b70\")\nbox(-62, 112, 106, 12, \"#d4ad68\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/witch.svg"
+    },
+    {
+      "id": "pirate",
+      "title": "Pirate",
+      "category": "Costumes",
+      "description": "A dark bandana, an eye patch, and a grin.",
+      "experiment": "Move the eye patch by changing its disk() coordinates.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nbox(-99, 82, 198, 32, \"#992e46\")\nline(-91, 78, 340, 182, \"#20212b\", 7)\ndisk(-48, 44, 27, \"#20212b\")\ndisk(48, 44, 19, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\ndisk(-107, 92, 18, \"#992e46\")\ntriangle(-111, 85, 42, 240, \"#992e46\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/pirate.svg"
+    },
+    {
+      "id": "wizard",
+      "title": "Starry wizard",
+      "category": "Costumes",
+      "description": "A blue hat decorated with golden stars.",
+      "experiment": "Add another star() call to the hat.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef polygon(points, shade):\n    move(points[0][0], points[0][1])\n    color(shade)\n    begin_fill()\n    for point in points[1:]:\n        setposition(point[0], point[1])\n    setposition(points[0][0], points[0][1])\n    end_fill()\n\ndef star(x, y, side, shade):\n    move(x, y)\n    setheading(72)\n    color(shade)\n    begin_fill()\n    for i in range(5):\n        forward(side)\n        right(144)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\npolygon([[-87, 102], [80, 102], [-17, 189]], \"#426692\")\nbox(-113, 95, 226, 19, \"#30496e\")\nbox(-62, 112, 106, 12, \"#d4ad68\")\nstar(-36, 142, 24, \"#ffe2a4\")\nstar(9, 120, 16, \"#ffe2a4\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/wizard.svg"
+    },
+    {
+      "id": "crown",
+      "title": "Pumpkin royalty",
+      "category": "Costumes",
+      "description": "A crown with three points and colored jewels.",
+      "experiment": "Change the jewel colors or add a fourth jewel.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef polygon(points, shade):\n    move(points[0][0], points[0][1])\n    color(shade)\n    begin_fill()\n    for point in points[1:]:\n        setposition(point[0], point[1])\n    setposition(points[0][0], points[0][1])\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\npolygon([[-78, 106], [-86, 168], [-40, 141], [0, 187], [40, 141], [86, 168], [78, 106]], \"#e6bf61\")\ndisk(-48, 121, 7, \"#c85264\")\ndisk(0, 121, 7, \"#558c9e\")\ndisk(48, 121, 7, \"#77a36d\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/crown.svg"
+    },
+    {
+      "id": "headphones",
+      "title": "Headphones",
+      "category": "Costumes",
+      "description": "An arc joins two padded ear cups.",
+      "experiment": "Change the headphone arc thickness from 13 to 20.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\narc(-143, 5, 90, -143, 180, \"#6d7a9f\", 13)\nbox(-151, -29, 26, 73, \"#8e9fc7\")\nbox(125, -29, 26, 73, \"#8e9fc7\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/headphones.svg"
+    },
+    {
+      "id": "glasses",
+      "title": "Round glasses",
+      "category": "Costumes",
+      "description": "Two ring-shaped lenses and a bridge.",
+      "experiment": "Change both outer lens radii together.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#20212b\")\ndisk(48, 48, 18, \"#20212b\")\narc(-49, -33, 270, 49, 180, \"#20212b\", 8)\narc(-48, 10, 0, 38, 360, \"#433d44\", 6)\narc(48, 10, 0, 38, 360, \"#433d44\", 6)\nline(-10, 48, 0, 20, \"#20212b\", 6)\nline(-112, 54, 0, 26, \"#20212b\", 5)\nline(86, 54, 0, 26, \"#20212b\", 5)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/glasses.svg"
+    },
+    {
+      "id": "bowtie",
+      "title": "Bow tie",
+      "category": "Costumes",
+      "description": "Two triangles meet under the smile.",
+      "experiment": "Change the bow tie color or triangle side length.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\ntriangle(-50, -93, 52, 270, \"#a84051\")\ntriangle(50, -145, 52, 90, \"#a84051\")\ndisk(0, -119, 12, \"#702f41\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/bowtie.svg"
+    },
+    {
+      "id": "mummy",
+      "title": "Mummy wrap",
+      "category": "Costumes",
+      "description": "Pale bands leave a narrow gap for the eyes.",
+      "experiment": "Change the band heights to reveal more of the pumpkin.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\nbox(-84, 86, 168, 26, \"#e8dfc6\")\nbox(-112, 57, 224, 24, \"#e8dfc6\")\nbox(-123, -8, 246, 26, \"#e8dfc6\")\nbox(-112, -40, 224, 27, \"#e8dfc6\")\nbox(-89, -73, 178, 27, \"#e8dfc6\")\nbox(-62, -103, 124, 25, \"#e8dfc6\")\ndisk(-45, 36, 16, \"#20212b\")\ndisk(-42, 39, 5, \"#d2e6be\")\ndisk(45, 36, 16, \"#20212b\")\ndisk(48, 39, 5, \"#d2e6be\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/mummy.svg"
+    },
+    {
+      "id": "bat",
+      "title": "Bat wings",
+      "category": "Costumes",
+      "description": "Two angular wings extend from a smaller body.",
+      "experiment": "Move one wing point and compare the silhouette.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef polygon(points, shade):\n    move(points[0][0], points[0][1])\n    color(shade)\n    begin_fill()\n    for point in points[1:]:\n        setposition(point[0], point[1])\n    setposition(points[0][0], points[0][1])\n    end_fill()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\npolygon([[-65, 48], [-183, 113], [-167, 25], [-130, 41], [-111, -24], [-80, 2]], \"#8262a1\")\npolygon([[65, 48], [183, 113], [167, 25], [130, 41], [111, -24], [80, 2]], \"#8262a1\")\ndisk(0, 0, 91, \"#ff9500\")\nbox(-13, 87, 26, 43, \"#487c43\")\ntriangle(-47.52, 21.12, 29.700000000000003, 0, \"#fff4d0\")\ntriangle(17.82, 21.12, 29.700000000000003, 0, \"#fff4d0\")\ntriangle(8.58, -6.6000000000000005, 17.16, 180, \"#fff4d0\")\ntriangle(55.440000000000005, -28.380000000000003, 18.48, 180, \"#fff4d0\")\ntriangle(36.96, -28.380000000000003, 18.48, 180, \"#fff4d0\")\ntriangle(18.48, -28.380000000000003, 18.48, 180, \"#fff4d0\")\ntriangle(0.0, -28.380000000000003, 18.48, 180, \"#fff4d0\")\ntriangle(-18.48, -28.380000000000003, 18.48, 180, \"#fff4d0\")\ntriangle(-36.96, -28.380000000000003, 18.48, 180, \"#fff4d0\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/bat.svg"
+    },
+    {
+      "id": "alien",
+      "title": "Alien antennae",
+      "category": "Costumes",
+      "description": "Two stalks end in small glowing circles.",
+      "experiment": "Change the antenna stalk lengths and move the circles to match.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\nline(-58, 116, 112, 58, \"#93c476\", 7)\nline(58, 116, 68, 58, \"#93c476\", 7)\ndisk(-80, 170, 13, \"#c8eb94\")\ndisk(80, 170, 13, \"#c8eb94\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/alien.svg"
+    },
+    {
+      "id": "unicorn",
+      "title": "Unicorn",
+      "category": "Costumes",
+      "description": "A striped horn rises above a pink face.",
+      "experiment": "Change the two horn stripe positions.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef polygon(points, shade):\n    move(points[0][0], points[0][1])\n    color(shade)\n    begin_fill()\n    for point in points[1:]:\n        setposition(point[0], point[1])\n    setposition(points[0][0], points[0][1])\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 134, \"#e6a0b5\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\npolygon([[-23, 111], [0, 188], [23, 111]], \"#f3df9e\")\nline(-13, 140, 348, 26, \"#cf9ac1\", 5)\nline(-7, 161, 348, 15, \"#cf9ac1\", 4)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/unicorn.svg"
+    },
+    {
+      "id": "flowers",
+      "title": "Flower crown",
+      "category": "Costumes",
+      "description": "Little circles cluster around three flower centers.",
+      "experiment": "Change the petal shade and center shade separately.",
+      "code": "speed(0)\nbgcolor(\"#101b22\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, 0, 134, \"#ff9500\")\nbox(-13, 130, 26, 43, \"#487c43\")\ndisk(-48, 48, 18, \"#fff4d0\")\ndisk(48, 48, 18, \"#fff4d0\")\narc(-49, -33, 270, 49, 180, \"#fff4d0\", 8)\ndisk(-79, 116, 12, \"#df8c9c\")\ndisk(-51, 116, 12, \"#df8c9c\")\ndisk(-65, 130, 12, \"#df8c9c\")\ndisk(-65, 102, 12, \"#df8c9c\")\ndisk(-65, 116, 8, \"#f8e8b9\")\ndisk(-14, 137, 12, \"#c4b0d9\")\ndisk(14, 137, 12, \"#c4b0d9\")\ndisk(0, 151, 12, \"#c4b0d9\")\ndisk(0, 123, 12, \"#c4b0d9\")\ndisk(0, 137, 8, \"#f8e8b9\")\ndisk(51, 116, 12, \"#e6ce79\")\ndisk(79, 116, 12, \"#e6ce79\")\ndisk(65, 130, 12, \"#e6ce79\")\ndisk(65, 102, 12, \"#e6ce79\")\ndisk(65, 116, 8, \"#f8e8b9\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Medium",
+      "preview": "previews/flowers.svg"
+    },
+    {
+      "id": "twins",
+      "title": "Pumpkin twins",
+      "category": "Scenes",
+      "description": "A pair of small pumpkins share the world.",
+      "experiment": "Change the x values to move the pumpkins closer together.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(-93, -25, 79, \"#ff9500\")\nbox(-106, 50, 26, 43, \"#487c43\")\ndisk(-119.4, 1.4000000000000021, 9.9, \"#fff4d0\")\ndisk(-66.6, 1.4000000000000021, 9.9, \"#fff4d0\")\narc(-119.95, -43.150000000000006, 270, 26.950000000000003, 180, \"#fff4d0\", 4.4)\ndisk(93, -25, 79, \"#ff9500\")\nbox(80, 50, 26, 43, \"#487c43\")\ndisk(66.6, 1.4000000000000021, 9.9, \"#fff4d0\")\ndisk(119.4, 1.4000000000000021, 9.9, \"#fff4d0\")\narc(66.05, -43.150000000000006, 270, 26.950000000000003, 180, \"#fff4d0\", 4.4)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/twins.svg"
+    },
+    {
+      "id": "family",
+      "title": "Pumpkin family",
+      "category": "Scenes",
+      "description": "Three sizes sit along the same ground line.",
+      "experiment": "Change the small pumpkin’s radius and move its face to match.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(-107, -34, 73, \"#ff9500\")\nbox(-120, 35, 26, 43, \"#487c43\")\ndisk(-130.04, -10.96, 8.64, \"#fff4d0\")\ndisk(-83.96000000000001, -10.96, 8.64, \"#fff4d0\")\narc(-130.52, -49.84, 270, 23.52, 180, \"#fff4d0\", 3.84)\ndisk(46, -5, 100, \"#ff9500\")\nbox(33, 91, 26, 43, \"#487c43\")\ndisk(13.839999999999996, 27.160000000000004, 12.06, \"#fff4d0\")\ndisk(78.16, 27.160000000000004, 12.06, \"#fff4d0\")\narc(13.169999999999995, -27.110000000000003, 270, 32.830000000000005, 180, \"#fff4d0\", 5.36)\ndisk(137, -72, 36, \"#ff9500\")\nbox(124, -40, 26, 43, \"#487c43\")\ndisk(125.48, -60.480000000000004, 4.32, \"#fff4d0\")\ndisk(148.52, -60.480000000000004, 4.32, \"#fff4d0\")\narc(125.24, -79.92, 270, 11.76, 180, \"#fff4d0\", 1.92)\nline(-185, -110, 0, 370, \"#78915d\", 4)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/family.svg"
+    },
+    {
+      "id": "patch",
+      "title": "Pumpkin patch",
+      "category": "Scenes",
+      "description": "A loop plants a row of little pumpkins.",
+      "experiment": "Change the number of pumpkins and the distance between them.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef star(x, y, side, shade):\n    move(x, y)\n    setheading(72)\n    color(shade)\n    begin_fill()\n    for i in range(5):\n        forward(side)\n        right(144)\n    end_fill()\n\nbox(-200, -200, 400, 128, \"#384938\")\nfor i in range(5):\n    x = -152 + i * 76\n    disk(x, -70, 32, \"#ef922b\")\n    box(x - 4, -40, 8, 16, \"#60834f\")\n    triangle(x - 18, -63, 12, 0, \"#fff0b8\")\n    triangle(x + 7, -63, 12, 0, \"#fff0b8\")\nstar(-150, 100, 20, \"#d9d9ad\")\nstar(-40, 148, 20, \"#d9d9ad\")\nstar(105, 95, 20, \"#d9d9ad\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/patch.svg"
+    },
+    {
+      "id": "moon",
+      "title": "Under the moon",
+      "category": "Scenes",
+      "description": "A crescent moon and stars above a pumpkin.",
+      "experiment": "Move the crescent’s two disks together to a new location.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef star(x, y, side, shade):\n    move(x, y)\n    setheading(72)\n    color(shade)\n    begin_fill()\n    for i in range(5):\n        forward(side)\n        right(144)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(-120, 132, 43, \"#f4df9e\")\ndisk(-102, 146, 39, \"#18242c\")\nstar(62, 150, 18, \"#f1dfad\")\nstar(130, 102, 18, \"#f1dfad\")\nstar(4, 122, 18, \"#f1dfad\")\ndisk(10, -36, 104, \"#ff9500\")\nbox(-3, 64, 26, 43, \"#487c43\")\ntriangle(-40.4, -13.600000000000001, 31.499999999999996, 0, \"#fff4d0\")\ntriangle(28.9, -13.600000000000001, 31.499999999999996, 0, \"#fff4d0\")\ntriangle(19.1, -43.0, 18.2, 180, \"#fff4d0\")\ntriangle(68.8, -66.1, 19.599999999999998, 180, \"#fff4d0\")\ntriangle(49.199999999999996, -66.1, 19.599999999999998, 180, \"#fff4d0\")\ntriangle(29.599999999999998, -66.1, 19.599999999999998, 180, \"#fff4d0\")\ntriangle(10.0, -66.1, 19.599999999999998, 180, \"#fff4d0\")\ntriangle(-9.599999999999998, -66.1, 19.599999999999998, 180, \"#fff4d0\")\ntriangle(-29.199999999999996, -66.1, 19.599999999999998, 180, \"#fff4d0\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/moon.svg"
+    },
+    {
+      "id": "web",
+      "title": "Spiderweb corner",
+      "category": "Scenes",
+      "description": "Spokes and connecting lines build a corner web.",
+      "experiment": "Change the number of web rings from 3 to 4.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(-18, -21, 111, \"#ff9500\")\nbox(-31, 86, 26, 43, \"#487c43\")\ntriangle(-72.72, 3.3200000000000003, 34.2, 0, \"#fff4d0\")\ntriangle(2.5199999999999996, 3.3200000000000003, 34.2, 0, \"#fff4d0\")\ntriangle(-8.12, -28.6, 19.76, 180, \"#fff4d0\")\ntriangle(45.84, -53.68, 21.28, 180, \"#fff4d0\")\ntriangle(24.560000000000002, -53.68, 21.28, 180, \"#fff4d0\")\ntriangle(3.280000000000001, -53.68, 21.28, 180, \"#fff4d0\")\ntriangle(-18.0, -53.68, 21.28, 180, \"#fff4d0\")\ntriangle(-39.28, -53.68, 21.28, 180, \"#fff4d0\")\ntriangle(-60.56, -53.68, 21.28, 180, \"#fff4d0\")\nline(190, 190, 180.0, 145.0, \"#a4b5b2\", 2)\nline(190, 190, -134.18542295024028, 149.21461054467824, \"#a4b5b2\", 2)\nline(190, 190, -90.0, 145.0, \"#a4b5b2\", 2)\nfor i in range(1, 4):\n    d = i * 43\n    line(190 - d, 190, 315, d * 0.6, \"#a4b5b2\", 2)\n    line(190 - d * 0.576, 190 - d * 0.424, 315, d * 0.6, \"#a4b5b2\", 2)\nline(158, 131, 270, 48, \"#a4b5b2\", 2)\ndisk(158, 74, 9, \"#bdc9c1\")\nline(158, 74, 25, 19, \"#bdc9c1\", 2)\nline(158, 74, 65, 19, \"#bdc9c1\", 2)\nline(158, 74, 115, 19, \"#bdc9c1\", 2)\nline(158, 74, 155, 19, \"#bdc9c1\", 2)\nline(158, 74, 205, 19, \"#bdc9c1\", 2)\nline(158, 74, 245, 19, \"#bdc9c1\", 2)\nline(158, 74, 295, 19, \"#bdc9c1\", 2)\nline(158, 74, 335, 19, \"#bdc9c1\", 2)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/web.svg"
+    },
+    {
+      "id": "leaves",
+      "title": "Autumn leaves",
+      "category": "Scenes",
+      "description": "Colored diamond-shaped leaves frame the pumpkin.",
+      "experiment": "Change the leaf colors or their four points.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndef polygon(points, shade):\n    move(points[0][0], points[0][1])\n    color(shade)\n    begin_fill()\n    for point in points[1:]:\n        setposition(point[0], point[1])\n    setposition(points[0][0], points[0][1])\n    end_fill()\n\ndef line(x, y, heading, length, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    forward(length)\n    pensize(1)\n\ndisk(0, 0, 111, \"#ff9500\")\nbox(-13, 107, 26, 43, \"#487c43\")\ntriangle(-57.6, 25.6, 36.0, 0, \"#fff4d0\")\ntriangle(21.6, 25.6, 36.0, 0, \"#fff4d0\")\ntriangle(10.4, -8.0, 20.8, 180, \"#fff4d0\")\ntriangle(67.2, -34.4, 22.400000000000002, 180, \"#fff4d0\")\ntriangle(44.800000000000004, -34.4, 22.400000000000002, 180, \"#fff4d0\")\ntriangle(22.400000000000002, -34.4, 22.400000000000002, 180, \"#fff4d0\")\ntriangle(0.0, -34.4, 22.400000000000002, 180, \"#fff4d0\")\ntriangle(-22.400000000000002, -34.4, 22.400000000000002, 180, \"#fff4d0\")\ntriangle(-44.800000000000004, -34.4, 22.400000000000002, 180, \"#fff4d0\")\npolygon([[-157, 133], [-143, 108], [-157, 83], [-171, 108]], \"#c77740\")\nline(-157, 81, 90, 51, \"#544931\", 2)\npolygon([[148, 119], [162, 94], [148, 69], [134, 94]], \"#d2ad59\")\nline(148, 67, 90, 51, \"#544931\", 2)\npolygon([[-153, -77], [-139, -102], [-153, -127], [-167, -102]], \"#9d684f\")\nline(-153, -129, 90, 51, \"#544931\", 2)\npolygon([[150, -73], [164, -98], [150, -123], [136, -98]], \"#99a66b\")\nline(150, -125, 90, 51, \"#544931\", 2)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/leaves.svg"
+    },
+    {
+      "id": "stack",
+      "title": "Pumpkin stack",
+      "category": "Scenes",
+      "description": "Three pumpkins get smaller as they stack up.",
+      "experiment": "Change the face of the middle pumpkin.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef arc(x, y, heading, radius, extent, shade, thickness):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    pensize(thickness)\n    circle(radius, extent)\n    pensize(1)\n\ndisk(0, -103, 79, \"#ff9500\")\nbox(-13, -28, 26, 43, \"#487c43\")\ndisk(-24.0, -79.0, 9.0, \"#fff4d0\")\ndisk(24.0, -79.0, 9.0, \"#fff4d0\")\narc(-24.5, -119.5, 270, 24.5, 180, \"#fff4d0\", 4.0)\ndisk(-6, 25, 57, \"#ff9500\")\nbox(-19, 78, 26, 43, \"#487c43\")\ndisk(-23.759999999999998, 42.76, 6.66, \"#fff4d0\")\ndisk(11.759999999999998, 42.76, 6.66, \"#fff4d0\")\narc(-24.13, 12.790000000000001, 270, 18.13, 180, \"#fff4d0\", 2.96)\ndisk(0, 117, 40, \"#ff9500\")\nbox(-13, 153, 26, 43, \"#487c43\")\ndisk(-12.0, 129.0, 4.5, \"#fff4d0\")\ndisk(12.0, 129.0, 4.5, \"#fff4d0\")\narc(-12.25, 108.75, 270, 12.25, 180, \"#fff4d0\", 2.0)\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/stack.svg"
+    },
+    {
+      "id": "glow",
+      "title": "Lantern glow",
+      "category": "Scenes",
+      "description": "Warm circles behind the body suggest a soft glow.",
+      "experiment": "Change the three glow colors to a cooler palette.",
+      "code": "speed(0)\nbgcolor(\"#18242c\")\n\ndef move(x, y):\n    penup()\n    setposition(x, y)\n    setheading(0)\n    pendown()\n\ndef disk(x, y, radius, shade):\n    move(x, y - radius)\n    color(shade)\n    begin_fill()\n    circle(radius)\n    end_fill()\n\ndef box(x, y, width, height, shade):\n    move(x, y)\n    color(shade)\n    begin_fill()\n    for i in range(2):\n        forward(width)\n        left(90)\n        forward(height)\n        left(90)\n    end_fill()\n\ndef triangle(x, y, side, heading, shade):\n    move(x, y)\n    setheading(heading)\n    color(shade)\n    begin_fill()\n    for i in range(3):\n        forward(side)\n        left(120)\n    end_fill()\n\ndisk(0, 0, 183, \"#30281e\")\ndisk(0, 0, 165, \"#4d351d\")\ndisk(0, 0, 148, \"#79501e\")\ndisk(0, 0, 125, \"#ff9500\")\nbox(-13, 121, 26, 43, \"#487c43\")\ntriangle(-72, 32, 45, 0, \"#ffea92\")\ntriangle(27, 32, 45, 0, \"#ffea92\")\ntriangle(13, -10, 26, 180, \"#ffea92\")\ntriangle(84, -43, 28, 180, \"#ffea92\")\ntriangle(56, -43, 28, 180, \"#ffea92\")\ntriangle(28, -43, 28, 180, \"#ffea92\")\ntriangle(0, -43, 28, 180, \"#ffea92\")\ntriangle(-28, -43, 28, 180, \"#ffea92\")\ntriangle(-56, -43, 28, 180, \"#ffea92\")\n\nhideturtle()\n",
+      "focus": "",
+      "level": "Hard",
+      "preview": "previews/glow.svg"
+    }
+  ]
+}
