@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tracy’s Pen | David Steckler</title>
+<meta name="description" content="See why Tracy draws: pen down touches the ground and leaves a trail. Pen up lets her move without drawing. An animated Python turtle demonstration.">
+<style>
+:root{--bg:#f0ebe1;--paper:#faf7f0;--surface:#fffdf8;--ink:#202525;--mid:#4f5858;--rule:#d8d2c6;--teal:#176b73;--teallight:#e1efed;--up:#a34e32;--uplight:#f5e6df;--body:#8fc6ae;--outline:#173b3d}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit}button,input{font:inherit}button{cursor:pointer}button,a,input{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--up);outline-offset:4px}button{border:1px solid var(--rule);border-radius:9px;background:var(--surface);padding:10px 16px;color:var(--ink);font-weight:650}button:hover{border-color:var(--teal)}button.primary{background:var(--teal);color:white;border-color:var(--teal)}button:disabled{opacity:.5;cursor:default}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}header{border-bottom:1px solid var(--rule);background:var(--paper)}nav{max-width:1360px;margin:auto;padding:14px 32px;display:flex;justify-content:space-between;align-items:center;gap:20px;font-size:14px}.brand{font-weight:750;text-decoration:none;display:flex;align-items:center;gap:10px}.brand span{background:var(--teal);color:white;border-radius:8px;padding:5px 8px;font-family:monospace}nav .links{display:flex;gap:24px}nav .links a{text-decoration:none;color:var(--mid)}main{max-width:1360px;margin:auto;padding:32px}.intro{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:25px}.eyebrow{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);font-weight:800;margin:0 0 8px}h1{font-size:clamp(34px,4vw,54px);letter-spacing:-.045em;line-height:1.08;margin:0 0 12px;font-weight:780}.intro p:last-child{color:var(--mid);max-width:730px;margin:0;font-size:18px}.start-note{border-left:3px solid var(--teal);padding:3px 0 3px 16px;max-width:290px;font-size:15px;flex-shrink:0}.start-note strong{display:block;color:var(--teal);font-size:17px}.demo{border:1px solid var(--rule);border-radius:18px;background:var(--surface);overflow:hidden;box-shadow:0 12px 35px #252b2a09}.demo-heading{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;gap:18px}.demo-heading h2{font-size:23px;letter-spacing:-.02em;margin:0}.demo-heading p{margin:2px 0 0;color:var(--mid);font-size:15px}.badge{font-size:13px;font-weight:800;color:var(--teal);background:var(--teallight);border:1px solid #b8d8d4;padding:8px 12px;border-radius:99px;white-space:nowrap}.badge.up{color:var(--up);background:var(--uplight);border-color:#e2b9a9}.views{display:grid;grid-template-columns:minmax(0,1fr) 330px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}.overhead{min-width:0;background:var(--paper);display:flex;flex-direction:column;justify-content:space-between}.view-label{margin:16px 22px 0;display:flex;justify-content:space-between;gap:16px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;font-weight:750;color:var(--mid)}.view-label span:last-child{color:var(--teal)}.overhead svg{width:100%;display:block;min-height:210px}.under-diagram{display:grid;grid-template-columns:1fr 1fr 1fr;padding:0 20px 18px;gap:10px}.under-diagram div{text-align:center;font-size:13px;color:var(--mid)}.under-diagram b{display:block;color:var(--teal);font-size:15px}.under-diagram .gap b{color:var(--up)}.closeup{border-left:1px solid var(--rule);display:flex;flex-direction:column;justify-content:center;padding-bottom:10px}.closeup .view-label{margin-top:17px}.closeup svg{width:100%;display:block}.close-caption{margin:0 20px 9px;text-align:center;font-weight:750;color:var(--teal);font-size:16px}.close-caption.up{color:var(--up)}.program{display:grid;grid-template-columns:215px minmax(0,1fr);background:#202526;color:#e7eceb}.program-intro{padding:18px 22px;border-right:1px solid #3a4142;font-size:13px;color:#b7c9c6}.program-intro strong{display:block;color:#fffdf8;font-size:14px;margin-bottom:4px}.code-lines{padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.code-lines div{padding:8px 10px;border:1px solid transparent;border-radius:7px;font-size:15px;color:#c7d2d0}.code-lines .active{background:#355351;border-color:#5b8f88;color:#fff}.code-lines .active.lift{background:#654331;border-color:#b77a5e}.code-lines small{display:block;font:11px/1.7 Inter,system-ui,sans-serif;letter-spacing:.04em;color:#b7c9c6}.controls{display:flex;align-items:center;gap:10px;padding:16px 22px;flex-wrap:wrap}.scrubber{display:flex;align-items:center;gap:10px;flex:1;min-width:160px;color:var(--mid);font-size:12px}.scrubber input{width:100%;accent-color:var(--teal)}.time{font-variant-numeric:tabular-nums;white-space:nowrap}.steps{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--rule);background:var(--paper)}.steps button{text-align:left;border:0;border-right:1px solid var(--rule);border-radius:0;padding:14px 22px;background:transparent;color:var(--mid);font-size:14px}.steps button:last-child{border-right:0}.steps button[aria-current="step"]{box-shadow:inset 0 3px var(--teal);color:var(--teal);background:var(--teallight)}.steps span{font-weight:800;margin-right:8px}.takeaway{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:22px 0 30px}.takeaway article{border:1px solid var(--rule);border-radius:13px;padding:18px 22px;background:var(--paper);display:flex;gap:16px;align-items:center}.takeaway code{font-size:21px;font-weight:750;color:var(--teal);white-space:nowrap}.takeaway article:first-child code{color:var(--up)}.takeaway p{margin:0;color:var(--mid);font-size:15px}.takeaway strong{display:block;color:var(--ink);font-size:17px}.lab{border-top:1px solid var(--rule);padding-top:27px}.lab-top{display:flex;justify-content:space-between;gap:20px;align-items:center}.lab h2{font-size:25px;letter-spacing:-.03em;margin:0 0 3px}.lab p{color:var(--mid);margin:0}.lab-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:18px 0 12px}.lab-controls button[aria-pressed="true"]{background:var(--teallight);border-color:var(--teal);color:var(--teal)}.lab-controls button.up[aria-pressed="true"]{background:var(--uplight);border-color:var(--up);color:var(--up)}.lab-controls .reset{margin-left:auto;font-size:13px;background:transparent}.lab-stage{background:var(--surface);border:1px solid var(--rule);border-radius:12px;overflow:hidden}.lab-stage svg{display:block;width:100%;max-height:160px}.lab-status{display:flex;justify-content:space-between;gap:15px;padding:10px 18px;border-top:1px solid var(--rule);font-size:14px;color:var(--mid)}footer{display:flex;justify-content:space-between;gap:20px;max-width:1360px;padding:12px 32px 32px;margin:auto;font-size:13px;color:var(--mid)}.svg-label{font-family:Inter,system-ui,sans-serif;font-size:20px;font-weight:700}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(min-width:1500px){main{padding-top:42px}.overhead svg{min-height:260px}}@media(max-width:1000px){.intro{align-items:start}.start-note{max-width:240px}.views{grid-template-columns:minmax(0,1fr) 260px}.program{grid-template-columns:170px 1fr}.code-lines{justify-content:start}.code-lines div{font-size:13px}.takeaway article{display:block}.takeaway code{display:block;margin-bottom:5px}}@media(max-width:720px){nav{padding:12px 18px}nav .links{gap:15px;font-size:12px}main{padding:24px 16px}.intro{display:block}.intro p:last-child{font-size:16px}.start-note{margin-top:18px;max-width:none}.views{grid-template-columns:1fr}.closeup{border-left:0;border-top:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:5px 12px}.closeup .view-label{grid-column:1/-1;margin:10px 8px 0}.closeup svg{max-height:165px}.close-caption{margin:0 10px;font-size:16px}.overhead svg{min-height:170px}.demo-heading{padding:17px 18px;align-items:start}.demo-heading h2{font-size:20px}.demo-heading p{font-size:14px}.badge{font-size:11px;padding:6px 9px}.under-diagram{padding:0 8px 14px;gap:5px}.under-diagram div{font-size:11px}.under-diagram b{font-size:13px}.program{display:block}.program-intro{border:0;padding:12px 16px 0}.program-intro strong{display:inline;font-size:12px}.program-intro span{margin-left:8px;font-size:11px}.code-lines{padding:8px;gap:0;justify-content:space-around}.code-lines div{font-size:11px;padding:6px 4px}.code-lines small{font-size:9px}.controls{padding:12px}.controls button{padding:8px 11px;font-size:13px}.scrubber{min-width:100%;order:2}.steps button{padding:12px 10px;font-size:12px}.steps span{margin-right:3px}.takeaway{gap:10px}.takeaway article{padding:14px}.takeaway code{font-size:17px}.takeaway strong{font-size:15px}.takeaway p{font-size:13px}.lab-controls button{font-size:13px;padding:9px 12px}.lab-top{align-items:start}.lab .badge{margin-top:5px}.lab-status{font-size:12px}footer{padding:10px 18px 25px;font-size:12px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+<!-- Same silhouette, proportions, and colors as /turtle/'s canvas sprite. -->
+<g id="tracy-body" stroke="#173b3d" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+<path d="M-10.5 0 -14.5-2.1 -14.5 2.1Z" fill="#8fc6ae"/>
+<g fill="#8fc6ae"><ellipse cx="-5" cy="-7" rx="3.7" ry="2" transform="rotate(-19 -5 -7)"/><ellipse cx="-5" cy="7" rx="3.7" ry="2" transform="rotate(19 -5 7)"/><ellipse cx="4" cy="-7" rx="3.7" ry="2" transform="rotate(-30 4 -7)"/><ellipse cx="4" cy="7" rx="3.7" ry="2" transform="rotate(30 4 7)"/></g>
+<ellipse cx="-1" cy="0" rx="8.8" ry="6.3" fill="#176b73"/><path d="M-6.5-3 4.5 2.8M-6.5 3 4.5-2.8" stroke="white" stroke-width=".9" opacity=".45"/><circle cx="9.8" cy="0" r="4" fill="#8fc6ae"/><circle cx="11.2" cy="-1.2" r=".7" fill="#173b3d" stroke="none"/>
+</g>
+<g id="tiny-pen" stroke="#173b3d" stroke-width=".65" stroke-linejoin="round"><path d="M13.5-1.4H20V1.4H13.5Z" fill="#e7b94e"/><path d="M20-1.4 22 0 20 1.4" fill="#173b3d"/></g>
+<pattern id="dots" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d8d2c6"/></pattern>
+</defs></svg>
+<header><nav aria-label="Main"><a class="brand" href="/"><span>ds</span> David Steckler</a><div class="links"><a href="/turtle/">Turtle editor ↗</a><a href="/turtlereference/">Reference</a></div></nav></header>
+<main>
+<div class="intro"><div><p class="eyebrow">Python · Meet Tracy’s pen</p><h1>Pen up. Pen down.</h1><p>Tracy holds a pen in her mouth. When the tip touches the ground, her movement leaves a trail.</p></div><aside class="start-note"><strong>Her pen starts DOWN.</strong>That’s why you’ve already been able to draw with <code>forward()</code>.</aside></div>
+<section class="demo" aria-label="Animated demonstration of Tracy’s pen">
+<div class="demo-heading"><div><h2 id="scene-title">Tracy starts with her pen down.</h2><p id="scene-copy">The pen is already touching the ground.</p></div><span class="badge" id="pen-badge">PEN DOWN · DRAWING</span></div>
+<div class="views">
+<div class="overhead"><div class="view-label"><span>From above · watch the trail</span><span id="movement-label">New program</span></div>
+<svg id="route" viewBox="0 0 1000 275" role="img" aria-labelledby="route-title route-desc"><title id="route-title">Tracy moves across the drawing surface</title><desc id="route-desc">A solid line appears while the pen is down. No line appears in the middle while the pen is lifted. The first line stays on the surface.</desc>
+<rect width="1000" height="275" fill="url(#dots)"/><path d="M165 139H385" stroke="#176b73" stroke-width="7" stroke-linecap="round" id="trail-one" fill="none"/><path d="M605 139H825" stroke="#176b73" stroke-width="7" stroke-linecap="round" id="trail-two" fill="none"/>
+<g id="start-marker"><circle cx="165" cy="139" r="5" fill="#176b73"/><text x="165" y="206" text-anchor="middle" fill="#4f5858" font-size="17" font-family="system-ui">start</text></g>
+<g id="tracy" transform="translate(110 139) scale(2.5)"><use href="#tracy-body"/><g id="route-pen"><use href="#tiny-pen"/></g></g>
+<g id="gap-label" opacity="0"><path d="M410 181v11h170v-11" fill="none" stroke="#a34e32" stroke-width="2"/><text x="495" y="222" text-anchor="middle" class="svg-label" fill="#a34e32">No trail. No drawing.</text></g>
+<g id="draw-label" opacity="0"><text x="275" y="87" text-anchor="middle" class="svg-label" fill="#176b73">A drawn trail</text></g>
+</svg>
+<div class="under-diagram"><div><b>Pen down</b>Move + draw</div><div class="gap"><b>Pen up</b>Move without drawing</div><div><b>Pen down again</b>Move + draw</div></div></div>
+<div class="closeup"><div class="view-label"><span>A closer look · from the side</span></div>
+<svg viewBox="0 0 360 250" role="img" aria-labelledby="side-title side-desc"><title id="side-title">Tracy holding a pen in her mouth</title><desc id="side-desc">The pen pivots upward from her mouth, lifting its tip off the ground. Lowering the pen brings the tip back to the ground.</desc>
+<path d="M24 200H340" stroke="#bdb5a7" stroke-width="3"/><text x="31" y="224" fill="#737b79" font-family="system-ui" font-size="13">drawing surface</text>
+<g stroke="#173b3d" stroke-width="2.4" stroke-linejoin="round"><path d="m76 176-21 9 23 3" fill="#8fc6ae"/><ellipse cx="113" cy="187" rx="18" ry="10" fill="#8fc6ae"/><ellipse cx="176" cy="187" rx="18" ry="10" fill="#8fc6ae"/><path d="M77 176c0-81 115-81 119 0Z" fill="#176b73"/><path d="M135 116v60m-45-35 92 0m-78-13 13 48m50-48-13 48" fill="none" stroke="#b5d7c8" stroke-width="2" opacity=".65"/><path d="M193 169q16-11 22-25" fill="none" stroke="#8fc6ae" stroke-width="19"/><ellipse cx="220" cy="138" rx="26" ry="22" fill="#8fc6ae"/><circle cx="229" cy="130" r="3.3" fill="#173b3d" stroke="none"/>
+<g id="side-pen" transform="rotate(0 240 146)"><path d="m236 145 8-5 34 52-8 5Z" fill="#e7b94e"/><path d="m270 197 10 3-2-8Z" fill="#173b3d"/><path d="m243 145 29 45" stroke="#fff0bf" stroke-width="2"/></g><path d="M231 148q7 4 13-2" fill="none"/>
+</g>
+<circle id="contact" cx="280" cy="200" r="6" fill="#176b73"/>
+<g id="air-gap" opacity="0"><path d="M302 142v49m-5-43 5-6 5 6m-10 37 5 6 5-6" fill="none" stroke="#a34e32" stroke-width="2"/><text x="280" y="105" text-anchor="middle" fill="#a34e32" font-family="system-ui" font-weight="750" font-size="15">Tip lifted off the ground</text></g>
+</svg><p class="close-caption" id="contact-label">Tip on the ground → leaves a line</p></div></div>
+<div class="program"><div class="program-intro"><strong>The code running</strong><span>Starts with the pen down.</span></div><div class="code-lines" aria-label="Python code"><div id="code-0"><small>1 · draw</small><code>forward(100)</code></div><div id="code-1" class="lift"><small>2 · lift</small><code>penup()</code></div><div id="code-2" class="lift"><small>3 · move</small><code>forward(100)</code></div><div id="code-3"><small>4 · lower</small><code>pendown()</code></div><div id="code-4"><small>5 · draw</small><code>forward(100)</code></div></div></div>
+<div class="controls"><button class="primary" id="play">Pause</button><button id="replay">↺ Replay</button><button id="next">Next step →</button><label class="scrubber"><span class="sr-only">Animation position</span><input id="scrub" type="range" min="0" max="21" step="0.05" value="0"><span class="time" id="time">0 / 21s</span></label></div>
+<div class="steps" aria-label="Jump to a part of the demonstration"><button data-seek="0" aria-current="step"><span>01</span> Starts down</button><button data-seek="6"><span>02</span> Lift & move</button><button data-seek="12"><span>03</span> Lower & draw</button></div>
+<p id="announcement" class="sr-only" aria-live="polite"></p>
+</section>
+<div class="takeaway"><article><code>penup()</code><p><strong>Lift the pen.</strong>Tracy can move without drawing. Existing lines stay.</p></article><article><code>pendown()</code><p><strong>Lower the pen.</strong>Tracy’s next movement draws a trail.</p></article></div>
+<section class="lab" aria-labelledby="lab-title"><div class="lab-top"><div><h2 id="lab-title">Try the commands.</h2><p>Choose the pen position. Then move Tracy.</p></div><span id="lab-badge" class="badge">PEN DOWN</span></div><div class="lab-controls"><button id="lab-up" class="up" aria-pressed="false"><code>penup()</code></button><button id="lab-down" aria-pressed="true"><code>pendown()</code></button><button id="lab-move" class="primary"><code>forward(100)</code> →</button><button id="lab-reset" class="reset">↺ New program</button></div><div class="lab-stage"><svg viewBox="0 0 1100 140" role="img" aria-label="Practice drawing surface. Use the buttons to lift or lower the pen and move Tracy."><rect width="1100" height="140" fill="url(#dots)"/><g id="lab-trails" fill="none" stroke="#176b73" stroke-width="6" stroke-linecap="round"></g><g id="lab-tracy" transform="translate(60 70) scale(2.2)"><use href="#tracy-body"/><g id="lab-pen"><use href="#tiny-pen"/></g></g></svg><div class="lab-status" role="status"><span id="lab-message">New program: Tracy’s pen is already down.</span><span id="lab-count">0 moves</span></div></div></section>
+</main><footer><span>Tracy’s pen · Python Turtle</span><a href="/turtle/">Open the turtle editor →</a></footer>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const DURATION=21, MOVE=220, START=110, TIP=55;
+const clamp=(v,min=0,max=1)=>Math.max(min,Math.min(max,v));
+const ease=v=>{v=clamp(v);return v*v*(3-2*v)};
+function sceneAt(t){
+ t=clamp(t,0,DURATION);
+ const first=clamp((t-2)/4), gap=clamp((t-8)/4), last=clamp((t-14)/4);
+ const lift=ease((t-6)/1.4)*(1-ease((t-12)/1.4));
+ let phase=t<2?0:t<6?1:t<8?2:t<12?3:t<14?4:t<18?5:6;
+ return {t,first,gap,last,lift,phase,x:START+MOVE*(first+gap+last),up:t>=6&&t<13.4,code:[-1,0,1,2,3,4,-1][phase]};
+}
+const scenes=[
+ ['Tracy starts with her pen down.','The pen is already touching the ground.','New program'],
+ ['Pen down: moving draws a trail.','forward(100) moves Tracy. The pen leaves a line.','Moving + drawing'],
+ ['penup() lifts the pen.','Watch the tip lift off the ground. Tracy stays in place.','Lifting the pen'],
+ ['Pen up: moving leaves no trail.','forward(100) still moves Tracy. The ground stays blank.','Moving · no drawing'],
+ ['pendown() lowers the pen.','Watch the tip return to the ground. Tracy stays in place.','Lowering the pen'],
+ ['Pen down: drawing starts again.','Her next forward(100) leaves a new line. The gap stays empty.','Moving + drawing'],
+ ['Two trails. One blank gap.','Tracy moved all three times. She drew only while her pen was down.','Complete']
+];
+let time=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,lastStamp=null,previousPhase=-1;
+function render(t){
+ const s=sceneAt(t),copy=scenes[s.phase];
+ $('tracy').setAttribute('transform',`translate(${s.x} 139) scale(2.5)`);
+ for(const [id,f] of [['trail-one',s.first],['trail-two',s.last]]){
+  $(id).style.opacity=f>0?'1':'0';$(id).setAttribute('stroke-dasharray',`${MOVE*f} ${MOVE+1}`);
+ }
+ $('route-pen').setAttribute('transform',`rotate(${-48*s.lift} 13.5 0)`);
+ $('side-pen').setAttribute('transform',`rotate(${-65*s.lift} 240 146)`);
+ $('contact').setAttribute('opacity',1-s.lift);$('air-gap').setAttribute('opacity',s.lift);
+ $('gap-label').setAttribute('opacity',clamp((t-8.5)/1.2));
+ $('draw-label').setAttribute('opacity',clamp((t-3)/1));
+ $('start-marker').setAttribute('opacity',t<3?1:0);
+ $('scene-title').textContent=copy[0];$('scene-copy').textContent=copy[1];$('movement-label').textContent=copy[2];
+ const penIsUp=s.lift>.5;
+ $('pen-badge').textContent=penIsUp?'PEN UP · NO DRAWING':'PEN DOWN · DRAWING';
+ $('pen-badge').className='badge'+(penIsUp?' up':'');
+ $('contact-label').textContent=penIsUp?'Tip off the ground → no line':'Tip on the ground → leaves a line';
+ $('contact-label').className='close-caption'+(penIsUp?' up':'');
+ for(let i=0;i<5;i++)$('code-'+i).classList.toggle('active',s.code===i);
+ document.querySelectorAll('[data-seek]').forEach((el,i)=>{if(i===(t<6?0:t<12?1:2))el.setAttribute('aria-current','step');else el.removeAttribute('aria-current')});
+ $('scrub').value=t;$('time').textContent=`${Math.floor(t)} / ${DURATION}s`;
+ $('next').disabled=t>=DURATION;
+ if(previousPhase!==s.phase){$('announcement').textContent=copy[0]+' '+copy[1];previousPhase=s.phase;}
+}
+function setPlaying(value){playing=value;lastStamp=null;$('play').textContent=playing?'Pause':time>=DURATION?'Play again':'Play';}
+function seek(t){time=clamp(t,0,DURATION);render(time)}
+function tick(stamp){if(playing){if(lastStamp!==null){time=Math.min(DURATION,time+(stamp-lastStamp)/1000);render(time)}lastStamp=stamp;if(time>=DURATION)setPlaying(false)}requestAnimationFrame(tick)}
+$('play').addEventListener('click',()=>{if(time>=DURATION)seek(0);setPlaying(!playing)});
+$('replay').addEventListener('click',()=>{seek(0);setPlaying(true)});
+$('next').addEventListener('click',()=>{setPlaying(false);seek([2,6,8,12,14,18,21].find(t=>t>time+.05)??21)});
+$('scrub').addEventListener('input',e=>{setPlaying(false);seek(Number(e.target.value))});
+document.querySelectorAll('[data-seek]').forEach(el=>el.addEventListener('click',()=>{setPlaying(false);seek(Number(el.dataset.seek))}));
+document.addEventListener('visibilitychange',()=>{lastStamp=null});
+setPlaying(playing);render(0);requestAnimationFrame(tick);
+// Practice area: lifting never removes earlier strokes and never creates a path.
+let labDown=true,labX=60,moves=0,labBusy=false,labGeneration=0;
+function setLabPen(down){labDown=down;$('lab-up').setAttribute('aria-pressed',String(!down));$('lab-down').setAttribute('aria-pressed',String(down));$('lab-pen').setAttribute('transform',`rotate(${down?0:-48} 13.5 0)`);$('lab-badge').className='badge'+(down?'':' up');$('lab-badge').textContent=down?'PEN DOWN':'PEN UP';$('lab-message').textContent=down?'Tip down. The next movement will draw a trail.':'Tip lifted. The next movement will leave no trail.';}
+function resetLab(){labGeneration++;labBusy=false;labX=60;moves=0;$('lab-trails').replaceChildren();$('lab-tracy').setAttribute('transform','translate(60 70) scale(2.2)');setLabPen(true);$('lab-count').textContent='0 moves';$('lab-message').textContent='New program: Tracy’s pen is already down.';enableLab();}
+function enableLab(){for(const id of ['lab-up','lab-down'])$(id).disabled=labBusy;$('lab-move').disabled=labBusy||labX>=960;}
+function moveLab(){if(labBusy||labX>=960)return;labBusy=true;enableLab();const from=labX,to=from+100,draw=labDown,generation=labGeneration;let path=null,start=null;
+ if(draw){path=document.createElementNS('http://www.w3.org/2000/svg','path');$('lab-trails').append(path);}
+ function frame(stamp){if(generation!==labGeneration)return;if(start===null)start=stamp;const p=matchMedia('(prefers-reduced-motion: reduce)').matches?1:clamp((stamp-start)/800);const x=from+(to-from)*p;$('lab-tracy').setAttribute('transform',`translate(${x} 70) scale(2.2)`);if(path)path.setAttribute('d',`M${from+48.4} 70H${x+48.4}`);if(p<1)requestAnimationFrame(frame);else{labX=to;moves++;labBusy=false;enableLab();$('lab-count').textContent=moves+' '+(moves===1?'move':'moves');$('lab-message').textContent=draw?'Tracy moved and drew a trail.':'Tracy moved. No trail was drawn.';if(labX>=960)$('lab-message').textContent+=' End of the surface. Choose New program to restart.';}}
+ requestAnimationFrame(frame);
+}
+$('lab-up').addEventListener('click',()=>setLabPen(false));$('lab-down').addEventListener('click',()=>setLabPen(true));$('lab-move').addEventListener('click',moveLab);$('lab-reset').addEventListener('click',resetLab);
+</script>
+</body>
+</html>
