@@ -1,0 +1,1 @@
+document.querySelectorAll('.motion-control').forEach(button=>{button.addEventListener('click',()=>{const paused=document.body.classList.toggle('paused');const label=paused?'Play animation':'Pause animation';button.setAttribute('aria-label',label);button.title=label})});
