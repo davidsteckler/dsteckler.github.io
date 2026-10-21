@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173d40">
+  <meta name="description" content="Make a 3D model in your browser. Sketch, extrude, combine shapes, and export STL files. No account needed.">
+  <title>Form · 3D Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23173d40'/%3E%3Cpath d='m20 7 12 7v13l-12 7-12-7V14l12-7Zm0 14 12-7M8 14l12 7v13' fill='none' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6M8 12h13"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 3 9 5v8l-9 5-9-5V8l9-5Zm0 10 9-5M3 8l9 5v8"/></symbol>
+  <symbol id="i-cylinder" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7" ry="3"/><path d="M5 5.5v13c0 4 14 4 14 0v-13M5 18.5c0-4 14-4 14 0"/></symbol>
+  <symbol id="i-sphere" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><ellipse cx="12" cy="12" rx="9" ry="3.5"/></symbol>
+  <symbol id="i-cone" viewBox="0 0 24 24"><path d="m4 18 8-15 8 15"/><ellipse cx="12" cy="18" rx="8" ry="3"/></symbol>
+  <symbol id="i-ring" viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="7"/><ellipse cx="12" cy="11" rx="5" ry="3"/><path d="M3 12c2 7 16 7 18 0"/></symbol>
+  <symbol id="i-select" viewBox="0 0 24 24"><path d="m5 3 14 11-7 1-3 6L5 3Z"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M10 4h10v10M20 4 9 15M4 10v10h10"/></symbol>
+  <symbol id="i-sketch" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7a2 2 0 0 0-4-4L5 15l-1 5ZM5 15l4 4"/></symbol>
+  <symbol id="i-union" viewBox="0 0 24 24"><path d="M3 3h11v7h7v11H10v-7H3V3Z"/></symbol>
+  <symbol id="i-subtract" viewBox="0 0 24 24"><path d="M3 3h12v7h-5v5H3V3Z"/><path d="M10 15v6h11V10h-6" stroke-dasharray="2 3"/></symbol>
+  <symbol id="i-intersect" viewBox="0 0 24 24"><path d="M3 3h12v12H3V3Zm7 7h11v11H10V10Z"/><path d="M10 10h5v5h-5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="m8 5-5 5 5 5M3 10h11a7 7 0 0 1 0 14" transform="translate(0 -2)"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="m16 5 5 5-5 5M21 10H10a7 7 0 0 0 0 14" transform="translate(0 -2)"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6h7l2 3h9v11H3V6Zm0 3V4h7l2 2h9v3"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5V3Zm9 0v6h5M12 12v6m-3-3h6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M8 8h12v13H8V8ZM16 8V3H3v13h5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M3 9V3h6m6 0h6v6M3 15v6h6m6 0h6v-6M8 8h8v8H8V8Z"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16m3-11h1m-1 4h1"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1.5 1-1.5 1.5-1.5 3m0 3h.01"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></symbol>
+  <symbol id="i-rectangle" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/></symbol>
+  <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+  <symbol id="i-polygon" viewBox="0 0 24 24"><path d="m12 3 9 7-4 11H7L3 10l9-7Z"/></symbol>
+  <symbol id="i-extrude" viewBox="0 0 24 24"><path d="m4 10 8 4 8-4-8-4-8 4Zm0 0v8l8 4 8-4v-8M12 14v8M12 2v7m-3-4 3-3 3 3"/></symbol>
+</defs></svg>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="identity">
+      <a class="back-link icon-button" href="/learn/" aria-label="Back to student home" title="Back to student home"><svg><use href="#i-arrow"/></svg></a>
+      <a class="wordmark" href="./" aria-label="Form 3D Studio"><span class="brand-mark"><svg><use href="#i-cube"/></svg></span><span>form<span class="brand-period">.</span></span><span class="studio-label">3D STUDIO</span></a>
+    </div>
+    <div class="project-identity"><label class="sr-only" for="project-name">Project name</label><input id="project-name" value="Untitled design" maxlength="80" spellcheck="false"><span id="save-status" class="save-indicator"><span></span>Saved on this device</span></div>
+    <div class="history-actions"><button class="icon-button" id="undo" aria-label="Undo" title="Undo (Ctrl / ⌘ Z)" disabled><svg><use href="#i-undo"/></svg></button><button class="icon-button" id="redo" aria-label="Redo" title="Redo (Ctrl / ⌘ Shift Z)" disabled><svg><use href="#i-redo"/></svg></button></div>
+    <div class="file-actions"><button class="icon-button" id="new-project" aria-label="New design" title="New design"><svg><use href="#i-file"/></svg></button><button class="icon-button" id="open-project" aria-label="Open design" title="Open a design file"><svg><use href="#i-folder"/></svg></button><button class="quiet-button" id="save-project" title="Download an editable project (Ctrl / ⌘ S)"><svg><use href="#i-download"/></svg><span>Save project</span></button><button class="primary-button" id="export-stl" title="Export visible bodies for 3D printing"><svg><use href="#i-download"/></svg><span>Export STL</span></button><button class="icon-button inspector-toggle" id="panel-toggle" aria-label="Toggle properties" title="Bodies and properties" aria-controls="properties-panel" aria-expanded="false"><svg><use href="#i-panel"/></svg></button></div>
+    <input id="file-input" type="file" accept=".json,.form3d" hidden>
+  </header>
+
+  <div class="commandbar" aria-label="Modeling tools">
+    <div class="command-group shape-commands"><span class="command-label">ADD</span><button class="command-button" data-add="box" title="Add a box"><svg><use href="#i-cube"/></svg>Box</button><button class="command-button" data-add="cylinder" title="Add a cylinder"><svg><use href="#i-cylinder"/></svg>Cylinder</button><button class="command-button" data-add="sphere" title="Add a sphere"><svg><use href="#i-sphere"/></svg>Sphere</button><button class="command-button" data-add="cone" title="Add a cone"><svg><use href="#i-cone"/></svg>Cone</button><button class="command-button" data-add="torus" title="Add a ring"><svg><use href="#i-ring"/></svg>Ring</button></div>
+    <div class="command-group boolean-commands"><span class="command-label">COMBINE</span><button class="command-button" data-boolean="union" title="Unite selected bodies" disabled><svg><use href="#i-union"/></svg>Union</button><button class="command-button" data-boolean="subtract" title="Cut the other selected bodies from the first selected body" disabled><svg><use href="#i-subtract"/></svg>Subtract</button><button class="command-button" data-boolean="intersect" title="Keep the volume shared by selected bodies" disabled><svg><use href="#i-intersect"/></svg>Intersect</button></div>
+    <button class="help-link" id="help-button" title="Controls and keyboard shortcuts"><svg><use href="#i-help"/></svg><span>Quick guide</span></button>
+  </div>
+
+  <main class="main-layout">
+    <section class="workspace" aria-label="3D modeling workspace">
+      <div id="viewport" tabindex="0" aria-label="3D model view. Drag empty space to orbit, right drag to pan, scroll to zoom."><div id="loading" class="loading"><span class="loading-spinner"></span><p>Opening your workspace…</p></div></div>
+
+      <div class="tool-rail" role="toolbar" aria-label="Selection and transformation">
+        <button class="rail-button active" data-tool="select" aria-label="Select" aria-pressed="true" title="Select (V)"><svg><use href="#i-select"/></svg><span>Select</span></button>
+        <button class="rail-button" data-tool="move" aria-label="Move" aria-pressed="false" title="Move (G)"><svg><use href="#i-move"/></svg><span>Move</span></button>
+        <button class="rail-button" data-tool="rotate" aria-label="Rotate" aria-pressed="false" title="Rotate (R)"><svg><use href="#i-rotate"/></svg><span>Rotate</span></button>
+        <button class="rail-button" data-tool="scale" aria-label="Scale" aria-pressed="false" title="Scale (S)"><svg><use href="#i-scale"/></svg><span>Scale</span></button>
+        <div class="rail-divider"></div>
+        <button class="rail-button sketch-tool" id="sketch-start" title="Draw a 2D sketch, then extrude (K)"><svg><use href="#i-sketch"/></svg><span>Sketch</span></button>
+        <div class="rail-divider"></div>
+        <button class="rail-button" id="duplicate" aria-label="Duplicate selected bodies" title="Duplicate (Ctrl / ⌘ D)" disabled><svg><use href="#i-copy"/></svg><span>Copy</span></button>
+        <button class="rail-button delete-tool" id="delete-body" aria-label="Delete selected bodies" title="Delete selected bodies (Delete / Backspace)" disabled><svg><use href="#i-trash"/></svg><span>Delete</span></button>
+      </div>
+
+      <div class="view-controls" role="group" aria-label="Camera views"><div class="view-presets"><button data-view="iso" class="active" title="Isometric view">3D</button><button data-view="top" title="Top view looking down the Z axis">Top</button><button data-view="front" title="Front view">Front</button><button data-view="right" title="Right view">Right</button></div><button class="icon-button fit-button" id="fit-view" aria-label="Fit all bodies in view" title="Fit all bodies (F)"><svg><use href="#i-fit"/></svg></button></div>
+      <span class="workspace-label"><i></i>PERSPECTIVE <span>·</span> MILLIMETERS</span>
+
+      <div class="welcome-card" id="welcome-card"><button class="dismiss-button icon-button" id="dismiss-welcome" title="Dismiss introduction" aria-label="Dismiss introduction"><svg><use href="#i-close"/></svg></button><p class="eyebrow">A LITTLE SPACE FOR BIG IDEAS</p><h1>Make something<br> from nothing.</h1><p>Add a shape or draw a sketch.<br>Give your next idea another dimension.</p><div class="starter-label">Or start with an example</div><div class="starter-buttons"><button data-example="bracket"><svg><use href="#i-cube"/></svg>Bracket</button><button data-example="trophy"><svg><use href="#i-cylinder"/></svg>Trophy</button><button data-example="vase"><svg><use href="#i-ring"/></svg>Vase</button></div><div class="local-note"><span class="tiny-dot"></span>No account. Your work stays in this browser.</div></div>
+
+      <div class="sketch-bar" id="sketch-bar" hidden><div class="sketch-heading"><span class="sketch-badge"><svg><use href="#i-sketch"/></svg>SKETCH MODE</span><p id="sketch-hint">Drag on the grid to draw a rectangle.</p></div><div class="sketch-actions"><div class="sketch-types" role="group" aria-label="Sketch shape"><button class="icon-button active" data-sketch="rectangle" title="Rectangle" aria-label="Draw rectangle"><svg><use href="#i-rectangle"/></svg></button><button class="icon-button" data-sketch="circle" title="Circle" aria-label="Draw circle"><svg><use href="#i-circle"/></svg></button><button class="icon-button" data-sketch="polygon" title="Polygon" aria-label="Draw polygon"><svg><use href="#i-polygon"/></svg></button></div><label class="extrude-height">Height<input type="number" id="sketch-height" value="20" min="0.1" max="10000" step="1"><span>mm</span></label><button class="primary-button" id="sketch-finish"><svg><use href="#i-extrude"/></svg>Extrude</button><button class="quiet-button" id="sketch-cancel">Cancel</button></div></div>
+
+      <div class="viewport-bottom"><p class="camera-hint">Drag to orbit <span>·</span> Right drag to pan <span>·</span> Scroll to zoom</p><div class="grid-settings"><label><input id="grid-enabled" type="checkbox" checked> Grid</label><span class="setting-divider"></span><label><input id="snap-enabled" type="checkbox" checked> Snap</label><label class="snap-value"><span class="sr-only">Snap step in millimeters</span><select id="snap-step"><option value="0.1">0.1 mm</option><option value="0.5">0.5 mm</option><option value="1" selected>1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option></select></label></div></div>
+    </section>
+
+    <aside id="properties-panel" class="properties-panel" aria-label="Bodies and properties">
+      <div class="panel-heading"><h2>Bodies <span id="body-count">0</span></h2><span class="panel-caption">YOUR DESIGN</span></div>
+      <div class="body-list" id="body-list" aria-label="Design bodies"><p class="body-list-empty">Your shapes will appear here.</p></div>
+      <div class="selection-heading"><h2>Properties</h2><span id="selected-count">Nothing selected</span></div>
+      <div id="selection-empty" class="selection-empty"><span class="empty-selection-icon"><svg><use href="#i-select"/></svg></span><h3>A shape, a world of possibilities.</h3><p>Select a body to adjust its size, position, and color.</p><p class="selection-tip"><kbd>Shift</kbd> + click to select more than one.</p></div>
+      <form id="selection-properties" class="selection-properties" hidden onsubmit="return false">
+        <div class="name-field"><label for="body-name">BODY NAME</label><div><input type="text" id="body-name" maxlength="80" autocomplete="off"><label class="color-label" title="Body color"><span class="sr-only">Body color</span><input type="color" id="body-color" value="#387c82"></label></div></div>
+        <fieldset><legend>Dimensions <span>mm</span></legend><div class="dimension-fields"><label><span>Width <b>X</b></span><input type="number" data-dimension="0" value="20" min="0.1" max="10000" step="1"></label><label><span>Depth <b>Y</b></span><input type="number" data-dimension="1" value="20" min="0.1" max="10000" step="1"></label><label><span>Height <b>Z</b></span><input type="number" data-dimension="2" value="20" min="0.1" max="10000" step="1"></label></div></fieldset>
+        <fieldset><legend>Position <span>mm · center</span></legend><div class="coordinate-fields"><label><span class="axis-x">X</span><input type="number" data-position="0" value="0" min="-10000" max="10000" step="1"></label><label><span class="axis-y">Y</span><input type="number" data-position="1" value="0" min="-10000" max="10000" step="1"></label><label><span class="axis-z">Z</span><input type="number" data-position="2" value="10" min="-10000" max="10000" step="1"></label></div></fieldset>
+        <fieldset><legend>Rotation <span>degrees</span></legend><div class="coordinate-fields"><label><span class="axis-x">X</span><input type="number" data-rotation="0" value="0" min="-360" max="360" step="1"></label><label><span class="axis-y">Y</span><input type="number" data-rotation="1" value="0" min="-360" max="360" step="1"></label><label><span class="axis-z">Z</span><input type="number" data-rotation="2" value="0" min="-360" max="360" step="1"></label></div></fieldset>
+        <div class="placement-actions"><button type="button" class="quiet-button" id="drop-body" title="Place the bottom of selected bodies on the ground plane"><svg><use href="#i-drop"/></svg>Drop to grid</button><button type="button" class="quiet-button" id="center-body" title="Center the selected body on the X and Y axes"><svg><use href="#i-target"/></svg>Center</button></div>
+        <p class="property-tip">Exact numbers. More room to experiment.</p>
+      </form>
+      <div class="panel-footer"><svg><use href="#i-cube"/></svg><span>Built in your browser.<br><strong>Yours to shape.</strong></span></div>
+    </aside>
+  </main>
+
+  <footer class="statusbar"><span class="status-leading"><span class="ready-dot"></span><span id="status-message" role="status" aria-live="polite">Ready when you are.</span></span><span class="status-trailing"><span id="cursor-position">X 0.0 &nbsp; Y 0.0 &nbsp; Z 0.0</span><span class="unit-badge">mm</span></span></footer>
+</div>
+
+<dialog id="help-dialog" class="studio-dialog"><div class="dialog-header"><div><p class="eyebrow">A GOOD PLACE TO START</p><h2>Your studio, at a glance.</h2></div><button class="icon-button" data-close-help aria-label="Close guide"><svg><use href="#i-close"/></svg></button></div><div class="help-content"><section><h3>Build a model</h3><p>Add a shape, then set its dimensions in the properties panel. Select <strong>Sketch</strong> to draw a rectangle, circle, or polygon on the ground plane and extrude it to a height.</p><p><strong>Shift + click</strong> selects multiple bodies. Union joins them, Subtract cuts the other selected bodies out of the first one, and Intersect keeps their shared volume.</p></section><section><h3>Move around</h3><p>Drag empty space to orbit. Right drag to pan. Scroll or pinch to zoom. Use the view buttons for Top, Front, Right, or 3D.</p><div class="shortcut-grid"><span>Select<kbd>V</kbd></span><span>Move<kbd>G</kbd></span><span>Rotate<kbd>R</kbd></span><span>Scale<kbd>S</kbd></span><span>Sketch<kbd>K</kbd></span><span>Fit all<kbd>F</kbd></span><span>Remove<kbd>Delete</kbd></span><span>Cancel / deselect<kbd>Esc</kbd></span><span>Undo<kbd>Ctrl / ⌘ Z</kbd></span><span>Redo<kbd>Ctrl / ⌘ Shift Z</kbd></span><span>Duplicate<kbd>Ctrl / ⌘ D</kbd></span><span>Select all<kbd>Ctrl / ⌘ A</kbd></span><span>Save project<kbd>Ctrl / ⌘ S</kbd></span></div></section><section><h3>Keep what you make</h3><p>Changes autosave in this browser on this device. <strong>Save project</strong> downloads an editable file you can open here later or move to another computer. Browser data can be cleared, so download important work.</p><p><strong>Export STL</strong> downloads visible bodies as a triangle mesh using millimeters. Check the model and its scale in your slicer before printing. This is a mesh modeling studio; it does not include Shapr3D’s full CAD kernel or sketch constraints.</p></section></div><div class="dialog-footer"><span>No account or upload required.</span><button class="primary-button" data-close-help>Let’s make something</button></div></dialog>
+
+<dialog id="confirm-dialog" class="studio-dialog confirm-dialog"><div class="dialog-header"><h2 id="confirm-title">Start a new design?</h2></div><p id="confirm-message">Download your project first if you want to keep a separate copy.</p><div class="confirm-actions"><button class="quiet-button" id="confirm-cancel">Cancel</button><button class="primary-button" id="confirm-accept">Continue</button></div></dialog>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
