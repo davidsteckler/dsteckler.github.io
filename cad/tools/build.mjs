@@ -19,4 +19,5 @@ const licenses = await Promise.all(packages.map(async name => {
   const license = await readFile(directory + 'node_modules/' + name + '/LICENSE', 'utf8');
   return `${name} ${json.version}\n${license}`;
 }));
-await writeFile(directory + '../vendor/LICENSES.txt', licenses.join('\n\n--------------------\n\n'));
+const fontLicense = await readFile(directory + '../fonts/LICENSE.txt', 'utf8');
+await writeFile(directory + '../vendor/LICENSES.txt', [...licenses, fontLicense].join('\n\n--------------------\n\n'));

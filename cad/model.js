@@ -1,11 +1,12 @@
-import {THREE, Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION, STLExporter} from './vendor/engine.js';
+import {THREE, Brush, Evaluator, ADDITION, SUBTRACTION, INTERSECTION, STLExporter, FontLoader, TextGeometry, RoundedBoxGeometry, STUDIO_FONT} from './vendor/engine.js';
 
-const TYPES = new Set(['box', 'cylinder', 'sphere', 'cone', 'torus', 'extrusion', 'custom']);
+const TYPES = new Set(['box', 'roundedbox', 'cylinder', 'tube', 'sphere', 'cone', 'torus', 'wedge', 'text', 'extrusion', 'custom']);
 const MAX_BODIES = 100;
 const MAX_VERTICES = 150000;
 const MAX_PROJECT_VERTICES = 300000;
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
-const DEFAULT_NAMES = {box:'Box', cylinder:'Cylinder', sphere:'Sphere', cone:'Cone', torus:'Ring', extrusion:'Extruded sketch', custom:'Combined body'};
+const DEFAULT_NAMES = {box:'Box', roundedbox:'Rounded box', cylinder:'Cylinder', tube:'Tube', sphere:'Sphere', cone:'Cone', torus:'Ring', wedge:'Wedge', text:'Text', extrusion:'Extruded sketch', custom:'Combined body'};
+const studioFont = new FontLoader().parse(STUDIO_FONT);
 
 function check(condition, message) {
   if (!condition) throw new Error(message);
@@ -79,6 +80,33 @@ function geometryData(value) {
   return {position:[...position], index};
 }
 
+function validateText(value) {
+  check(typeof value === 'string' && value.trim().length > 0 && value.length <= 80, 'Text must contain 1–80 characters.');
+  check(!/[\r\n\t]/.test(value), 'Use a single line of text.');
+  const missing = [...value].find(character => !Object.hasOwn(STUDIO_FONT.glyphs, character));
+  check(!missing, `The studio font does not contain the character “${missing}”. Use letters, numbers, and supported punctuation.`);
+  return value;
+}
+
+function positiveParameter(value, label, allowZero = false) {
+  check(typeof value === 'number' && Number.isFinite(value) && value >= (allowZero ? 0 : 0.001) && value <= 100000, `${label} must be a finite ${allowZero ? 'non-negative' : 'positive'} measurement.`);
+  return value;
+}
+
+/** Clamp valid shape parameters after an explicit resize; imports remain strict. */
+export function normalizeBodyParameters(body) {
+  const dimensions = vector(body.dimensions, 'Dimensions', 0.01, 100000);
+  if (body.type === 'roundedbox') {
+    const radius = positiveParameter(body.params?.radius ?? Math.min(2, ...dimensions.map(n => n / 2)), 'Corner radius', true);
+    body.params = {radius:Math.min(radius, ...dimensions.map(n => n / 2))};
+  } else if (body.type === 'tube') {
+    const limit = Math.min(dimensions[0], dimensions[1]) / 2;
+    const wall = positiveParameter(body.params?.wall ?? Math.min(2, limit / 4), 'Wall thickness');
+    body.params = {wall:Math.min(wall, limit * 0.99)};
+  }
+  return body;
+}
+
 function validateBody(raw) {
   check(raw && typeof raw === 'object' && !Array.isArray(raw), 'Each body must be an object.');
   check(TYPES.has(raw.type), 'Unsupported body type.');
@@ -100,16 +128,44 @@ function validateBody(raw) {
   };
   if (body.type === 'extrusion') body.points = validateSketch(raw.points);
   if (body.type === 'custom') body.geometry = geometryData(raw.geometry);
+  if (raw.params !== undefined) check(raw.params && typeof raw.params === 'object' && !Array.isArray(raw.params), 'Shape parameters must be an object.');
+  if (body.type === 'roundedbox') {
+    const radius = positiveParameter(raw.params?.radius ?? Math.min(2, ...body.dimensions.map(n => n / 2)), 'Corner radius', true);
+    check(radius <= Math.min(...body.dimensions) / 2, 'Corner radius cannot exceed half the smallest dimension.');
+    body.params = {radius};
+  }
+  if (body.type === 'tube') {
+    const wall = positiveParameter(raw.params?.wall ?? Math.min(2, Math.min(body.dimensions[0], body.dimensions[1]) / 8), 'Wall thickness');
+    check(wall < Math.min(body.dimensions[0], body.dimensions[1]) / 2, 'Wall thickness must leave an open center in the tube.');
+    body.params = {wall};
+  }
+  if (body.type === 'text') body.text = validateText(raw.text);
   return body;
 }
 
 export function createBody(type, options = {}) {
+  if (type === 'text' && !options.dimensions) return createTextBody(options.text ?? 'Text', options);
   const dimensions = type === 'torus' ? [40, 40, 10] : type === 'extrusion' ? [40, 30, 12] : [30, 30, 30];
   return validateBody({
     id:identifier(), name:DEFAULT_NAMES[type] || 'Body', type, color:'#df9b64', dimensions,
     position:[0, 0, (options.dimensions || dimensions)[2] / 2], rotation:[0, 0, 0], visible:true, locked:false,
     ...options
   });
+}
+
+/** Create XY lettering, extruded upward along Z, without distorting its aspect. */
+export function createTextBody(text, options = {}) {
+  validateText(text);
+  const {height = 10, depth = 2, ...bodyOptions} = options;
+  positiveParameter(height, 'Letter height');
+  positiveParameter(depth, 'Text thickness');
+  const geometry = new TextGeometry(text, {font:studioFont, size:1, depth:1, curveSegments:8, bevelEnabled:false});
+  try {
+    geometry.computeBoundingBox();
+    const size = geometry.boundingBox.getSize(new THREE.Vector3());
+    check(size.x > 0 && size.y > 0, 'The text must contain visible letters.');
+    return createBody('text', {name:text.slice(0, 80).trim(), dimensions:[size.x / size.y * height, height, depth], ...bodyOptions, text});
+  } finally { geometry.dispose(); }
 }
 
 export function cloneBody(body, options = {}) {
@@ -126,7 +182,9 @@ function normalizeGeometry(geometry, dimensions) {
   check([size.x, size.y, size.z].every(number => Number.isFinite(number) && number > 1e-8), 'This operation did not create a solid body.');
   geometry.translate(-center.x, -center.y, -center.z);
   geometry.scale(dimensions[0] / size.x, dimensions[1] / size.y, dimensions[2] / size.z);
-  geometry.computeVertexNormals();
+  // scale() already transforms existing normals, including the analytic normals
+  // on curved primitives. Recomputing unindexed rounded-box normals facets them.
+  if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();
   const position = geometry.getAttribute('position');
   if (!geometry.getAttribute('uv')) geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(position.count * 2), 2));
   geometry.computeBoundingBox();
@@ -139,10 +197,34 @@ export function buildMesh(body) {
   let geometry;
   switch (valid.type) {
     case 'box': geometry = new THREE.BoxGeometry(1, 1, 1); break;
+    case 'roundedbox': geometry = valid.params.radius === 0 ? new THREE.BoxGeometry(...valid.dimensions) : new RoundedBoxGeometry(...valid.dimensions, 4, valid.params.radius); break;
     case 'sphere': geometry = new THREE.SphereGeometry(1, 40, 24); break;
     case 'cylinder': geometry = new THREE.CylinderGeometry(1, 1, 1, 64); geometry.rotateX(Math.PI / 2); break;
     case 'cone': geometry = new THREE.ConeGeometry(1, 1, 64); geometry.rotateX(Math.PI / 2); break;
     case 'torus': geometry = new THREE.TorusGeometry(1, 0.25, 20, 64); break;
+    case 'tube': {
+      const shape = new THREE.Shape();
+      shape.absellipse(0, 0, valid.dimensions[0] / 2, valid.dimensions[1] / 2, 0, Math.PI * 2, false);
+      const opening = new THREE.Path();
+      opening.absellipse(0, 0, valid.dimensions[0] / 2 - valid.params.wall, valid.dimensions[1] / 2 - valid.params.wall, 0, Math.PI * 2, true);
+      shape.holes.push(opening);
+      geometry = new THREE.ExtrudeGeometry(shape, {depth:valid.dimensions[2], bevelEnabled:false, curveSegments:32, steps:1});
+      break;
+    }
+    case 'wedge': {
+      geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([
+        -0.5,-0.5,-0.5, 0.5,-0.5,-0.5, 0.5,0.5,-0.5,
+        -0.5,0.5,-0.5, 0.5,-0.5,0.5, 0.5,0.5,0.5
+      ], 3));
+      geometry.setIndex([0,3,2,0,2,1,1,2,5,1,5,4,0,1,4,3,5,2,0,4,5,0,5,3]);
+      // Each prism face has a crisp normal rather than rounded ramp edges.
+      const indexed = geometry;
+      geometry = indexed.toNonIndexed();
+      indexed.dispose();
+      break;
+    }
+    case 'text': geometry = new TextGeometry(valid.text, {font:studioFont, size:1, depth:1, curveSegments:8, bevelEnabled:false}); break;
     case 'extrusion': {
       const shape = new THREE.Shape(valid.points.map(point => new THREE.Vector2(...point)));
       geometry = new THREE.ExtrudeGeometry(shape, {depth:1, bevelEnabled:false, steps:1});

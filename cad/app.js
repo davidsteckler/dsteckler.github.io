@@ -1,15 +1,19 @@
 import {THREE, OrbitControls, TransformControls} from './vendor/engine.js';
-import {createBody, buildMesh, cloneBody, combineBodies, calculateBounds, serializeProject, parseProject, exportSTL} from './model.js';
+import {createBody, createTextBody, normalizeBodyParameters, buildMesh, cloneBody, combineBodies, calculateBounds, estimateVolume, serializeProject, parseProject, exportSTL} from './model.js';
+import {alignBodies, distributeBodies, mirrorBodies, linearPattern, radialPattern, importSTL, summarizeBodies} from './operations.js';
 
 const $ = id => document.getElementById(id);
 const all = selector => [...document.querySelectorAll(selector)];
 const STORAGE_KEY = 'dsteckler-form3d-v1';
+const PREFERENCES_KEY = 'dsteckler-form3d-preferences';
 const palette = ['#497cbd', '#e6a45f', '#69a79b', '#b08ac4', '#d37f76'];
 let project = {version: 1, units: 'mm', name: 'Mounting bracket', bodies: []};
 let selected = new Set(), meshes = new Map(), history = [], future = [];
 let mode = 'select', sketch = null, transformSnapshot = null, saveTimer, statusTimer;
 let storageAvailable = true, pendingConfirmation = null, renderRequested = true;
-let renderer, scene, camera, orbit, transform, bodyGroup, selectionGroup, sketchGroup, grid;
+let renderer, scene, camera, perspectiveCamera, orthographicCamera, orbit, transform, bodyGroup, selectionGroup, sketchGroup, grid;
+let experience = 'beginner', guideExpanded = true, guideProgress = new Set();
+let measurementTimer, textTargetId = null, workplaneGrid = null;
 const viewport = $('viewport');
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -66,6 +70,7 @@ function rebuild() {
     mesh.receiveShadow = false;
     mesh.material.roughness = 0.52;
     mesh.material.metalness = 0.08;
+    mesh.material.wireframe = $('wireframe-enabled')?.checked || false;
     // Boolean meshes can have coplanar T junctions: outlining every triangle
     // exposes construction seams rather than the finished surface.
     if (body.type !== 'custom') {
@@ -93,6 +98,143 @@ function updateOutline() {
 }
 function selectionBodies() { return [...selected].map(id => project.bodies.find(b => b.id === id)).filter(Boolean); }
 function editableBodies() { return selectionBodies().filter(b => !b.locked); }
+function preferences() {
+  try { return JSON.parse(localStorage.getItem(PREFERENCES_KEY) || '{}') || {}; } catch { return {}; }
+}
+function savePreferences() {
+  try { localStorage.setItem(PREFERENCES_KEY, JSON.stringify({experience, guideExpanded, guideProgress: [...guideProgress]})); } catch {}
+}
+function setExperience(value, announce = true) {
+  experience = value === 'advanced' ? 'advanced' : 'beginner';
+  document.body.dataset.experience = experience;
+  $('experience-mode').value = experience;
+  if (experience === 'beginner') {
+    $('export-selected').checked = false;
+    $('stl-units').value = 'mm';
+    $('wireframe-enabled').checked = false;
+    for (const mesh of meshes.values()) mesh.material.wireframe = false;
+    setProjection('perspective');
+  }
+  savePreferences(); refresh();
+  if (announce) message(experience === 'beginner' ? 'Beginner mode: start with a shape, then follow the guide. Your design is unchanged.' : 'Advanced mode: precision tools are available. Your design is unchanged.');
+}
+function markGuide(step) { guideProgress.add(step); savePreferences(); refreshGuide(); }
+function refreshGuide() {
+  if (!$('guide-steps')) return;
+  $('guide-steps').hidden = !guideExpanded;
+  $('guide-toggle').setAttribute('aria-expanded', String(guideExpanded));
+  $('guide-toggle').textContent = guideExpanded ? 'Hide steps' : 'Show steps';
+  $('guide-steps').replaceChildren();
+  const steps = [
+    ['start', 'Choose a starting shape', 'Add a box or use the example.', () => addShape('box')],
+    ['size', 'Make it the right size', 'Select a body and enter exact dimensions.', () => {
+      if (!selectionBodies().length && project.bodies.length) select(project.bodies.find(b => b.visible !== false)?.id);
+      document.body.classList.add('panel-open'); $('panel-toggle').setAttribute('aria-expanded', 'true');
+      if (selectionBodies().length === 1) all('[data-dimension]')[0].focus();
+      else message('Select one visible body to change its size.');
+    }],
+    ['sketch', 'Try a sketch', 'Draw a profile and give it height.', startSketch],
+    ['export', 'Save a printable copy', 'Export STL, then open it in your slicer.', exportModel]
+  ];
+  steps.forEach(([id, title, detail, action], index) => {
+    const button = document.createElement('button'); button.type = 'button';
+    button.className = 'guide-step' + (guideProgress.has(id) ? ' complete' : '');
+    const number = document.createElement('span'); number.className = 'guide-step-number'; number.textContent = guideProgress.has(id) ? '✓' : index + 1;
+    const copy = document.createElement('span'), heading = document.createElement('strong'), hint = document.createElement('small');
+    heading.textContent = title; hint.textContent = detail; copy.append(heading, hint); button.append(number, copy);
+    button.addEventListener('click', action); $('guide-steps').append(button);
+  });
+}
+function scheduleMeasurements() {
+  clearTimeout(measurementTimer);
+  if (experience !== 'advanced') return;
+  measurementTimer = setTimeout(() => {
+    try {
+      const bodies = selectionBodies(), summary = summarizeBodies(bodies.length ? bodies : project.bodies);
+      $('measurement-size').textContent = summary.dimensions.map(n => n.toFixed(2)).join(' × ') + ' mm';
+      $('measurement-volume').textContent = (summary.estimatedVolume / 1000).toFixed(3) + ' cm³';
+      $('measurement-triangles').textContent = summary.triangleCount.toLocaleString() + ' triangles';
+      $('measurement-distance').textContent = summary.centerDistance == null ? 'Select two bodies' : summary.centerDistance.toFixed(2) + ' mm between centers';
+    } catch (error) { $('measurement-size').textContent = error.message; }
+  }, 100);
+}
+function replaceBodies(updated) {
+  const replacements = new Map(updated.map(body => [body.id, body]));
+  project.bodies = project.bodies.map(body => replacements.get(body.id) || body);
+}
+function runAlignment(axis, anchor) {
+  mutate(() => replaceBodies(alignBodies(selectionBodies(), Number(axis), anchor)), 'Bodies aligned to the first selected body.');
+}
+function runDistribution(axis) {
+  mutate(() => replaceBodies(distributeBodies(selectionBodies(), Number(axis))), 'Body centers distributed evenly; the endpoints stayed fixed.');
+}
+function runMirror(axis) {
+  mutate(() => {
+    const copies = mirrorBodies(selectionBodies(), Number(axis));
+    project.bodies.push(...copies); selected = new Set(copies.map(body => body.id));
+  }, 'Mirrored copies created across the selection’s center plane. Originals are unchanged.');
+}
+function openPattern() {
+  if (!selectionBodies().length) return;
+  $('pattern-feedback').textContent = '';
+  $('pattern-dialog').showModal();
+}
+function createPattern() {
+  const source = selectionBodies();
+  try {
+    const options = {count: Number($('pattern-count').value), axis: Number($('pattern-axis').value), spacing: Number($('pattern-spacing').value), angle: Number($('pattern-angle').value)};
+    if ($('pattern-center').value === 'origin') options.center = [0, 0, 0];
+    const copies = $('pattern-type').value === 'radial' ? radialPattern(source, options) : linearPattern(source, options);
+    if (project.bodies.length + copies.length > 100) throw Error('This pattern would exceed the 100-body project limit. Use fewer instances.');
+    if (mutate(() => { project.bodies.push(...copies); selected = new Set([...source, ...copies].map(b => b.id)); }, 'Pattern created. Each copy remains editable.')) {
+      $('pattern-dialog').close(); fit();
+    }
+  } catch (error) { $('pattern-feedback').textContent = error.message; }
+}
+function openText() {
+  const bodies = editableBodies();
+  textTargetId = bodies.length === 1 && selectionBodies().length === 1 ? bodies[0].id : null;
+  $('text-action').value = 'standalone';
+  $('text-target-note').textContent = textTargetId ? `Raised or engraved text will be centered on the XY top of “${bodies[0].name}”. For a flat plaque, select that body first.` : 'Select one unlocked body to add raised or engraved lettering. Standalone text needs no selection.';
+  [...$('text-action').options].forEach(option => { option.disabled = option.value !== 'standalone' && !textTargetId; });
+  $('text-feedback').textContent = ''; $('text-dialog').showModal();
+  $('text-content').focus();
+}
+function addText() {
+  try {
+    const content = $('text-content').value.trim(), height = Number($('text-height').value), depth = Number($('text-depth').value);
+    if (!content || content.length > 40) throw Error('Enter 1–40 characters for the lettering.');
+    if (!Number.isFinite(height) || height < 0.5 || height > 1000 || !Number.isFinite(depth) || depth < 0.1 || depth > 1000) throw Error('Choose letter height 0.5–1,000 mm and thickness 0.1–1,000 mm.');
+    const action = $('text-action').value;
+    const body = createTextBody(content, {height, depth, name: content.slice(0, 80), color: palette[project.bodies.length % palette.length]});
+    let target;
+    if (action !== 'standalone') {
+      target = project.bodies.find(b => b.id === textTargetId);
+      if (!target || target.locked || target.visible === false) throw Error('Select one visible, unlocked body before opening the text tool.');
+      const bounds = calculateBounds([target]);
+      const shrink = Math.min(1, bounds.size[0] * 0.85 / body.dimensions[0], bounds.size[1] * 0.8 / body.dimensions[1]);
+      body.dimensions[0] *= shrink; body.dimensions[1] *= shrink;
+      if (Math.min(body.dimensions[0], body.dimensions[1]) < 0.1) throw Error('The selected top surface is too small for this text.');
+      body.position = [bounds.center[0], bounds.center[1], action === 'raised' ? bounds.max[2] + depth / 2 - Math.min(0.3, depth * 0.2) : bounds.max[2] - depth / 2 + Math.min(0.2, depth * 0.1)];
+      body.color = target.color;
+    }
+    if (mutate(() => {
+      if (!target) { project.bodies.push(body); selected = new Set([body.id]); }
+      else {
+        const targetVolume = estimateVolume(target), textVolume = estimateVolume(body);
+        const result = combineBodies([target, body], action === 'raised' ? 'union' : 'subtract');
+        const resultVolume = estimateVolume(result), tolerance = Math.max(0.00001, textVolume * 0.0001);
+        if ((action === 'engraved' && targetVolume - resultVolume <= tolerance) || (action === 'raised' && targetVolume + textVolume - resultVolume <= tolerance)) {
+          throw Error('The lettering did not touch a solid top surface. Select a flat, upward-facing plaque or add standalone text.');
+        }
+        result.name = (target.name + (action === 'raised' ? ' lettered' : ' engraved')).slice(0, 80);
+        project.bodies = project.bodies.filter(b => b.id !== target.id); project.bodies.push(result); selected = new Set([result.id]);
+      }
+    }, action === 'standalone' ? '3D lettering added. Edit its words in Properties.' : 'Lettering applied. Undo restores the original body.')) {
+      $('text-dialog').close(); $('welcome-card').hidden = true; fit(); markGuide('start');
+    } else $('text-feedback').textContent = $('status-message').textContent;
+  } catch (error) { $('text-feedback').textContent = error.message; }
+}
 function refresh() {
   renderRequested = true;
   const bodies = selectionBodies();
@@ -105,6 +247,7 @@ function refresh() {
   $('duplicate').disabled = bodies.length === 0;
   all('[data-boolean]').forEach(button => { button.disabled = bodies.length < 2 || bodies.some(b => b.locked); });
   $('export-stl').disabled = !project.bodies.some(b => b.visible !== false);
+  if ($('export-selected')?.checked) $('export-stl').disabled = bodies.length === 0;
   $('selection-properties').hidden = bodies.length !== 1;
   $('selection-empty').hidden = bodies.length === 1;
   if (bodies.length > 1) $('selection-empty').textContent = `${bodies.length} bodies selected. Subtract cuts the other bodies from “${bodies[0].name}”. Union joins them; Intersect keeps their shared volume.`;
@@ -123,7 +266,20 @@ function refresh() {
     $('body-color').disabled = Boolean(body.locked);
     $('drop-body').disabled = Boolean(body.locked);
     $('center-body').disabled = Boolean(body.locked);
+    const radius = body.type === 'roundedbox', wall = body.type === 'tube', text = body.type === 'text';
+    $('shape-parameters').hidden = !(radius || wall || text);
+    $('radius-field').hidden = !radius; $('wall-field').hidden = !wall; $('body-text-field').hidden = !text;
+    if (radius) { $('corner-radius').value = body.params.radius; $('corner-radius').max = Math.min(...body.dimensions) / 2; }
+    if (wall) { $('tube-wall').value = body.params.wall; $('tube-wall').max = Math.min(body.dimensions[0], body.dimensions[1]) / 2 - 0.01; }
+    if (text) $('body-text').value = body.text;
+    for (const id of ['corner-radius', 'tube-wall', 'body-text']) $(id).disabled = Boolean(body.locked);
   }
+  $('multi-properties').hidden = bodies.length === 0;
+  all('[data-align-axis]').forEach(button => { button.disabled = bodies.length < 2 || bodies.slice(1).some(b => b.locked); });
+  all('[data-distribute]').forEach(button => { button.disabled = bodies.length < 3 || bodies.some(b => b.locked); });
+  all('[data-mirror]').forEach(button => { button.disabled = bodies.length === 0; });
+  $('pattern-start').disabled = bodies.length === 0;
+  scheduleMeasurements(); refreshGuide();
   renderBodyList();
   updateOutline();
   if (bodies.length === 1 && !bodies[0].locked && mode !== 'select' && !sketch) {
@@ -185,14 +341,17 @@ function mutate(action, text) {
   const before = snapshot();
   try {
     action();
+    for (const body of project.bodies) normalizeBodyParameters(body);
     // Validate a complete document before committing it to browser storage.
     project = parseProject(serializeProject(project));
     remember(before);
     rebuild(); persist();
     if (text) message(text);
+    return true;
   } catch (error) {
     project = parseProject(before);
     rebuild(); message(error.message || 'That change could not be completed.', true);
+    return false;
   }
 }
 function restoreFromHistory(direction) {
@@ -216,13 +375,14 @@ function setMode(next) {
 function addShape(type) {
   if (sketch) cancelSketch();
   const count = project.bodies.filter(b => b.type === type).length;
-  const names = {box: 'Box', cylinder: 'Cylinder', sphere: 'Sphere', cone: 'Cone', torus: 'Ring'};
-  const dimensions = type === 'torus' ? [36, 36, 10] : [30, 30, 30];
+  const names = {box: 'Box', cylinder: 'Cylinder', sphere: 'Sphere', cone: 'Cone', torus: 'Ring', roundedbox: 'Rounded box', tube: 'Tube', wedge: 'Wedge'};
+  const dimensions = type === 'torus' ? [36, 36, 10] : type === 'roundedbox' ? [40, 30, 20] : [30, 30, 30];
   const offset = Math.min(project.bodies.length, 10) * 6;
   const body = createBody(type, {name: `${names[type]} ${count + 1}`, dimensions, position: [offset, offset, dimensions[2] / 2], color: palette[project.bodies.length % palette.length]});
-  mutate(() => { project.bodies.push(body); selected = new Set([body.id]); }, `${names[type]} added. Set exact dimensions in the inspector.`);
+  if (!mutate(() => { project.bodies.push(body); selected = new Set([body.id]); }, `${names[type]} added. Set exact dimensions in the inspector.`)) return;
   $('welcome-card').hidden = true;
   setMode('move');
+  markGuide('start');
 }
 function duplicate() {
   const source = selectionBodies();
@@ -246,14 +406,15 @@ function removeSelected() {
   }, 'Selected bodies deleted. Undo restores them.');
 }
 function boolean(operation) {
-  const bodies = selectionBodies();
+  const bodies = structuredClone(selectionBodies()), sourceIds = new Set(bodies.map(b => b.id));
   if (bodies.length < 2 || bodies.some(b => b.locked)) return;
   message('Calculating solid…', true);
   requestAnimationFrame(() => {
     mutate(() => {
+      if (bodies.some(body => !project.bodies.some(current => current.id === body.id))) throw Error('The source selection changed. Select the bodies and try again.');
       const result = combineBodies(bodies, operation);
       result.name = {union: 'Joined body', subtract: bodies[0].name.slice(0, 76) + ' cut', intersect: 'Intersection'}[operation];
-      project.bodies = project.bodies.filter(b => !selected.has(b.id));
+      project.bodies = project.bodies.filter(b => !sourceIds.has(b.id));
       project.bodies.push(result); selected = new Set([result.id]);
     }, {union: 'Overlapping bodies joined into one solid.', subtract: 'Other selected bodies cut from the first selection.', intersect: 'Only the shared volume remains.'}[operation]);
   });
@@ -267,12 +428,39 @@ function fit(view = 'iso') {
   camera.position.copy(center).add(new THREE.Vector3(...directions[view]).multiplyScalar(radius));
   camera.near = 0.1;
   camera.far = Math.max(10000, radius * 50);
+  orbit.maxDistance = Math.max(10000, radius * 5);
+  if (camera.isOrthographicCamera) {
+    const aspect = viewport.clientWidth / Math.max(1, viewport.clientHeight);
+    const half = Math.max(45, ...bounds.size) * 0.9;
+    camera.left = -half * aspect; camera.right = half * aspect; camera.top = half; camera.bottom = -half; camera.zoom = 1;
+  }
   camera.updateProjectionMatrix();
   orbit.target.copy(center); orbit.update();
   all('[data-view]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.view === view));
     button.classList.toggle('active', button.dataset.view === view);
   });
+  renderRequested = true;
+}
+function setProjection(value) {
+  const next = value === 'orthographic' ? orthographicCamera : perspectiveCamera;
+  if (next === camera) return;
+  const distance = camera.position.distanceTo(orbit.target), aspect = viewport.clientWidth / Math.max(1, viewport.clientHeight);
+  const half = camera.isPerspectiveCamera ? distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) : (camera.top - camera.bottom) / (2 * camera.zoom);
+  next.position.copy(camera.position); next.up.copy(camera.up); next.quaternion.copy(camera.quaternion);
+  if (next.isOrthographicCamera) {
+    next.left = -half * aspect; next.right = half * aspect; next.top = half; next.bottom = -half; next.zoom = 1;
+  } else {
+    const direction = next.position.clone().sub(orbit.target).normalize();
+    next.position.copy(orbit.target).addScaledVector(direction, half / Math.tan(THREE.MathUtils.degToRad(next.fov / 2)));
+    next.aspect = aspect;
+  }
+  next.near = camera.near; next.far = camera.far; next.updateProjectionMatrix();
+  camera = next; orbit.object = camera; transform.camera = camera;
+  if (sketch) orientToSketch(); else orbit.update();
+  $('projection-mode').value = value;
+  document.querySelector('.workspace-label').textContent = (camera.isOrthographicCamera ? 'ORTHOGRAPHIC' : 'PERSPECTIVE') + ' · MILLIMETERS';
+  renderRequested = true;
 }
 function download(data, filename, type) {
   const blob = new Blob([data], {type});
@@ -287,7 +475,9 @@ function saveProject() {
 }
 function exportModel() {
   try {
-    download(exportSTL(project.bodies), filename() + '.stl', 'model/stl');
+    const bodies = experience === 'advanced' && $('export-selected').checked ? selectionBodies() : project.bodies;
+    download(exportSTL(bodies), filename() + '.stl', 'model/stl');
+    markGuide('export');
     message('STL exported in millimeters. Check your slicer preview before printing.', true);
   } catch (error) { message(error.message, true); }
 }
@@ -345,16 +535,52 @@ function worldPoint(event) {
   pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
   const point = new THREE.Vector3();
-  return raycaster.ray.intersectPlane(plane, point) ? [snap(point.x), snap(point.y)] : null;
+  if (!raycaster.ray.intersectPlane(plane, point)) return null;
+  if (!sketch) return [snap(point.x), snap(point.y)];
+  const basis = sketchBasis();
+  return [snap(point.dot(basis.u)), snap(point.dot(basis.v))];
+}
+function sketchBasis() {
+  const name = sketch?.plane || 'xy';
+  const axes = name === 'xz' ? [[1, 0, 0], [0, 0, 1], [0, -1, 0]] : name === 'yz' ? [[0, 1, 0], [0, 0, 1], [1, 0, 0]] : [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  return {u: new THREE.Vector3(...axes[0]), v: new THREE.Vector3(...axes[1]), n: new THREE.Vector3(...axes[2])};
+}
+function sketchPoint(u, v, depth = 0) {
+  const basis = sketchBasis();
+  return basis.u.multiplyScalar(u).addScaledVector(basis.v, v).addScaledVector(basis.n, (sketch?.offset || 0) + depth);
+}
+function orientToSketch() {
+  if (!sketch) return;
+  const basis = sketchBasis(), bounds = calculateBounds(project.bodies), center = new THREE.Vector3(...bounds.center);
+  const target = sketchPoint(center.dot(basis.u), center.dot(basis.v));
+  orbit.target.copy(target);
+  camera.position.copy(target).addScaledVector(basis.n, Math.max(90, ...bounds.size.map(n => n * 3.3)));
+  camera.up.copy(basis.v); camera.lookAt(target);
+  plane.setFromNormalAndCoplanarPoint(basis.n, basis.n.clone().multiplyScalar(sketch.offset));
+  if (workplaneGrid) { scene.remove(workplaneGrid); disposeObject(workplaneGrid); }
+  workplaneGrid = new THREE.GridHelper(1000, 100, '#6ba99e', '#c8ded9');
+  workplaneGrid.geometry.rotateX(Math.PI / 2);
+  workplaneGrid.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(basis.u, basis.v, basis.n));
+  workplaneGrid.position.copy(basis.n).multiplyScalar(sketch.offset);
+  scene.add(workplaneGrid); updateGridVisibility();
+  renderRequested = true;
+}
+function updateGridVisibility() {
+  const enabled = $('grid-enabled').checked;
+  grid.visible = enabled && !sketch; grid.userData.axes.forEach(axis => { axis.visible = grid.visible; });
+  if (workplaneGrid) workplaneGrid.visible = enabled && Boolean(sketch);
+  renderRequested = true;
 }
 function sketchInstruction() {
   if (!sketch) return '';
-  return sketch.shape === 'polygon' ? 'Click corners on the grid. Finish with Extrude or Enter. At least 3 corners are needed.' : `Drag on the grid to draw a ${sketch.shape}. Then choose an extrusion height.`;
+  const surface = sketch.plane.toUpperCase() + (sketch.offset ? ` at offset ${sketch.offset} mm` : '');
+  return surface + ': ' + (sketch.shape === 'polygon' ? 'Click corners. Extrude or Enter finishes; Backspace removes a corner.' : `Drag to draw a ${sketch.shape}, then choose its extrusion height.`);
 }
 function startSketch() {
   if (sketch) return;
   mode = 'select';
-  sketch = {shape: 'rectangle', points: [], start: null, current: null, drawing: false};
+  sketch = {shape: 'rectangle', points: [], start: null, current: null, drawing: false, plane: experience === 'advanced' ? $('sketch-plane').value : 'xy', offset: experience === 'advanced' ? Number($('sketch-offset').value) || 0 : 0};
+  if (experience === 'beginner') { $('sketch-plane').value = 'xy'; $('sketch-offset').value = '0'; }
   selected.clear(); transform.detach();
   $('welcome-card').hidden = true; $('sketch-bar').hidden = false;
   viewport.classList.add('sketching');
@@ -366,13 +592,15 @@ function startSketch() {
     button.setAttribute('aria-pressed', String(button.dataset.tool === mode));
     button.classList.toggle('active', button.dataset.tool === mode);
   });
-  fit('top'); orbit.enabled = false; refresh(); message(sketchInstruction(), true);
+  fit('top'); orbit.enabled = false; orientToSketch(); refresh(); message(sketchInstruction(), true);
 }
 function cancelSketch() {
   if (!sketch) return;
   sketch = null; clearGroup(sketchGroup); $('sketch-bar').hidden = true;
+  if (workplaneGrid) { scene.remove(workplaneGrid); disposeObject(workplaneGrid); workplaneGrid = null; }
+  plane.set(new THREE.Vector3(0, 0, 1), 0); updateGridVisibility();
   viewport.classList.remove('sketching'); orbit.enabled = true; refresh();
-  message('Sketch closed.');
+  fit('iso'); message('Sketch closed.');
 }
 function sketchOutline() {
   if (!sketch) return [];
@@ -390,13 +618,15 @@ function drawSketch() {
   clearGroup(sketchGroup);
   const points = sketchOutline();
   if (!points.length) return;
-  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p[0], p[1], 0.2))), new THREE.LineBasicMaterial({color: '#16766e', depthTest: false}));
+  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points.map(p => sketchPoint(p[0], p[1], 0.2))), new THREE.LineBasicMaterial({color: '#16766e', depthTest: false}));
   line.renderOrder = 15; sketchGroup.add(line);
   const solidPoints = sketch.shape === 'polygon' ? sketch.points : points.slice(0, -1);
   if (solidPoints.length >= 3) {
     const shape = new THREE.Shape(solidPoints.map(p => new THREE.Vector2(...p)));
     const fill = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({color: '#349d8e', opacity: 0.16, transparent: true, side: THREE.DoubleSide, depthWrite: false}));
-    fill.position.z = 0.15; sketchGroup.add(fill);
+    const basis = sketchBasis();
+    fill.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(basis.u, basis.v, basis.n));
+    fill.position.copy(basis.n).multiplyScalar(sketch.offset + 0.15); fill.material.depthTest = false; sketchGroup.add(fill);
   }
   $('sketch-hint').textContent = sketch.shape === 'polygon' ? `${sketch.points.length} corners · click to add, Enter to extrude` : sketch.shape === 'circle' ? `Radius ${Math.hypot(sketch.current[0] - sketch.start[0], sketch.current[1] - sketch.start[1]).toFixed(1)} mm` : `${Math.abs(sketch.current[0] - sketch.start[0]).toFixed(1)} × ${Math.abs(sketch.current[1] - sketch.start[1]).toFixed(1)} mm`;
 }
@@ -418,11 +648,16 @@ function finishSketch() {
       if (maxX - minX < 0.1 || maxY - minY < 0.1) throw Error('Draw a profile with width and depth before extruding.');
       body = createBody('extrusion', {name: sketch.shape === 'polygon' ? 'Polygon extrusion' : 'Rectangle extrusion', points, dimensions: [maxX - minX, maxY - minY, height], position: [(minX + maxX) / 2, (minY + maxY) / 2, height / 2], color: palette[project.bodies.length % palette.length]});
     }
+    const basis = sketchBasis();
+    body.position = sketchPoint(body.position[0], body.position[1], height / 2).toArray();
+    body.rotation = new THREE.Euler().setFromRotationMatrix(new THREE.Matrix4().makeBasis(basis.u, basis.v, basis.n)).toArray().slice(0, 3).map(THREE.MathUtils.radToDeg);
     // Build once before closing the sketch so an invalid polygon remains editable.
     const check = buildMesh(body); disposeObject(check);
+    if (!mutate(() => { project.bodies.push(body); selected = new Set([body.id]); }, 'Sketch extruded into a solid body.')) return;
     cancelSketch();
-    mutate(() => { project.bodies.push(body); selected = new Set([body.id]); }, 'Sketch extruded into a solid body.');
+    message('Sketch extruded into a solid body.');
     fit('iso'); setMode('move');
+    markGuide('sketch');
   } catch (error) { message(error.message, true); }
 }
 function setupScene() {
@@ -435,7 +670,9 @@ function setupScene() {
   renderer.domElement.setAttribute('tabindex', '0');
   viewport.prepend(renderer.domElement);
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(38, 1, 0.1, 10000); camera.up.set(0, 0, 1);
+  perspectiveCamera = new THREE.PerspectiveCamera(38, 1, 0.1, 10000);
+  orthographicCamera = new THREE.OrthographicCamera(-100, 100, 100, -100, 0.1, 10000);
+  camera = perspectiveCamera; camera.up.set(0, 0, 1); orthographicCamera.up.set(0, 0, 1);
   camera.position.set(160, -200, 160);
   orbit = new OrbitControls(camera, renderer.domElement);
   orbit.enableDamping = true; orbit.dampingFactor = 0.12;
@@ -467,7 +704,8 @@ function setupScene() {
   transform.addEventListener('change', () => { renderRequested = true; });
   transform.addEventListener('dragging-changed', event => { orbit.enabled = !event.value && !sketch; });
   transform.addEventListener('mouseDown', () => {
-    transformSnapshot = {json: snapshot(), dimensions: selectionBodies()[0]?.dimensions.slice()};
+    const body = selectionBodies()[0];
+    transformSnapshot = {json: snapshot(), dimensions: body?.dimensions.slice(), params: body?.params ? {...body.params} : null};
   });
   transform.addEventListener('objectChange', () => {
     const body = selectionBodies()[0], mesh = transform.object;
@@ -475,6 +713,13 @@ function setupScene() {
     body.position = mesh.position.toArray().map(n => Number(n.toFixed(4)));
     body.rotation = [mesh.rotation.x, mesh.rotation.y, mesh.rotation.z].map(n => Number(THREE.MathUtils.radToDeg(n).toFixed(4)));
     body.dimensions = transformSnapshot.dimensions.map((n, i) => Math.max(0.1, Math.min(10000, n * mesh.scale.getComponent(i))));
+    if (mode === 'scale' && $('aspect-lock').checked) {
+      const factor = mesh.scale.toArray().reduce((best, current) => Math.abs(current - 1) > Math.abs(best - 1) ? current : best, 1);
+      const bounded = Math.max(0.1 / Math.min(...transformSnapshot.dimensions), Math.min(10000 / Math.max(...transformSnapshot.dimensions), factor));
+      mesh.scale.setScalar(bounded); body.dimensions = transformSnapshot.dimensions.map(n => n * bounded);
+    }
+    if (transformSnapshot.params) body.params = {...transformSnapshot.params};
+    normalizeBodyParameters(body);
     all('[data-position]').forEach(input => { input.value = body.position[Number(input.dataset.position)].toFixed(2); });
     all('[data-rotation]').forEach(input => { input.value = body.rotation[Number(input.dataset.rotation)].toFixed(2); });
     all('[data-dimension]').forEach(input => { input.value = body.dimensions[Number(input.dataset.dimension)].toFixed(2); });
@@ -496,13 +741,16 @@ function setupScene() {
   const resize = () => {
     const {width, height} = viewport.getBoundingClientRect();
     renderer.setSize(Math.max(1, width), Math.max(1, height));
-    camera.aspect = width / Math.max(1, height); camera.updateProjectionMatrix();
+    const aspect = width / Math.max(1, height);
+    if (camera.isPerspectiveCamera) camera.aspect = aspect;
+    else { const half = (camera.top - camera.bottom) / 2; camera.left = -half * aspect; camera.right = half * aspect; }
+    camera.updateProjectionMatrix();
     renderRequested = true;
   };
   new ResizeObserver(resize).observe(viewport); resize();
   renderer.setAnimationLoop(() => {
     if (document.hidden) return;
-    orbit.update();
+    if (!sketch) orbit.update();
     if (renderRequested) { renderer.render(scene, camera); renderRequested = false; }
   });
   renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
@@ -519,7 +767,10 @@ function setupScene() {
   });
   renderer.domElement.addEventListener('pointermove', event => {
     const point = worldPoint(event);
-    if (point) $('cursor-position').textContent = `X ${point[0].toFixed(1)}  Y ${point[1].toFixed(1)} mm`;
+    if (point) {
+      const axes = sketch?.plane === 'xz' ? ['X', 'Z'] : sketch?.plane === 'yz' ? ['Y', 'Z'] : ['X', 'Y'];
+      $('cursor-position').textContent = `${axes[0]} ${point[0].toFixed(1)}  ${axes[1]} ${point[1].toFixed(1)} mm`;
+    }
     if (!sketch || !point || (!sketch.drawing && sketch.shape !== 'polygon')) return;
     sketch.current = point; drawSketch();
   });
@@ -537,7 +788,49 @@ function setupScene() {
 }
 
 function bindUI() {
-  all('[data-add]').forEach(button => button.addEventListener('click', () => addShape(button.dataset.add)));
+  all('[data-add]').forEach(button => button.addEventListener('click', () => { addShape(button.dataset.add); button.closest('details')?.removeAttribute('open'); }));
+  $('experience-mode').addEventListener('change', () => setExperience($('experience-mode').value));
+  $('guide-toggle').addEventListener('click', () => { guideExpanded = !guideExpanded; savePreferences(); refreshGuide(); });
+  $('text-start').addEventListener('click', openText); $('text-submit').addEventListener('click', addText);
+  $('text-cancel').addEventListener('click', () => $('text-dialog').close());
+  $('pattern-start').addEventListener('click', openPattern); $('pattern-submit').addEventListener('click', createPattern);
+  $('pattern-cancel').addEventListener('click', () => $('pattern-dialog').close());
+  all('[data-align-axis]').forEach(button => button.addEventListener('click', () => runAlignment(button.dataset.alignAxis, button.dataset.alignAnchor)));
+  all('[data-distribute]').forEach(button => button.addEventListener('click', () => runDistribution(button.dataset.distribute)));
+  all('[data-mirror]').forEach(button => button.addEventListener('click', () => runMirror(button.dataset.mirror)));
+  $('projection-mode').addEventListener('change', () => setProjection($('projection-mode').value));
+  $('wireframe-enabled').addEventListener('change', () => {
+    for (const mesh of meshes.values()) mesh.material.wireframe = $('wireframe-enabled').checked;
+    renderRequested = true;
+  });
+  $('export-selected').addEventListener('change', refresh);
+  $('import-stl').addEventListener('click', () => $('stl-input').click());
+  $('stl-input').addEventListener('change', async event => {
+    const file = event.target.files[0]; if (!file) return;
+    try {
+      if (file.size > 20 * 1024 * 1024) throw Error('STL files must be smaller than 20 MB.');
+      const body = importSTL(await file.arrayBuffer(), file.name, {units: $('stl-units').value});
+      if (mutate(() => { project.bodies.push(body); selected = new Set([body.id]); }, 'STL imported at its file scale and placed on the grid.')) {
+        $('welcome-card').hidden = true; fit(); markGuide('start');
+      }
+    } catch (error) { message('Could not import STL: ' + error.message, true); }
+    event.target.value = '';
+  });
+  for (const [id, parameter] of [['corner-radius', 'radius'], ['tube-wall', 'wall']]) {
+    $(id).addEventListener('change', () => {
+      const body = editableBodies()[0], value = Number($(id).value);
+      const max = parameter === 'radius' ? Math.min(...(body?.dimensions || [0])) / 2 : Math.min(...(body?.dimensions.slice(0, 2) || [0])) / 2 - 0.01;
+      if (!body || !Number.isFinite(value) || value < 0.01 || value > max) { refresh(); message(`Use a ${parameter} between 0.01 and ${max.toFixed(2)} mm.`); return; }
+      mutate(() => { body.params[parameter] = value; }, 'Shape updated.');
+    });
+  }
+  $('body-text').addEventListener('change', () => {
+    const body = editableBodies()[0]; if (!body || body.type !== 'text') return;
+    mutate(() => {
+      const updated = createTextBody($('body-text').value.trim(), {height: body.dimensions[1], depth: body.dimensions[2]});
+      body.text = updated.text; body.dimensions = updated.dimensions;
+    }, 'Lettering updated, preserving letter height and thickness.');
+  });
   all('[data-tool]').forEach(button => button.addEventListener('click', () => setMode(button.dataset.tool)));
   all('[data-view]').forEach(button => button.addEventListener('click', () => { if (sketch) cancelSketch(); fit(button.dataset.view); }));
   all('[data-boolean]').forEach(button => button.addEventListener('click', () => boolean(button.dataset.boolean)));
@@ -547,7 +840,7 @@ function bindUI() {
   $('redo').addEventListener('click', () => restoreFromHistory('redo'));
   $('duplicate').addEventListener('click', duplicate); $('delete-body').addEventListener('click', removeSelected);
   $('fit-view').addEventListener('click', () => fit('iso'));
-  $('grid-enabled').addEventListener('change', () => { grid.visible = $('grid-enabled').checked; grid.userData.axes.forEach(axis => { axis.visible = grid.visible; }); renderRequested = true; });
+  $('grid-enabled').addEventListener('change', updateGridVisibility);
   $('project-name').addEventListener('change', () => mutate(() => { project.name = $('project-name').value.trim().slice(0, 80) || 'Untitled design'; }));
   $('body-name').addEventListener('change', () => mutate(() => { const b = editableBodies()[0]; if (b) b.name = $('body-name').value.trim().slice(0, 80) || b.type; }));
   $('body-color').addEventListener('change', () => mutate(() => { const b = editableBodies()[0]; if (b) b.color = $('body-color').value; }));
@@ -557,7 +850,16 @@ function bindUI() {
       if (!body || !Number.isFinite(value) || (attribute === 'dimension' && (value < 0.1 || value > 10000)) || Math.abs(value) > 100000) {
         message('Enter a valid measurement. Dimensions must be 0.1–10,000 mm.'); refresh(); return;
       }
-      mutate(() => { body[property][Number(input.dataset[attribute])] = value; });
+      const index = Number(input.dataset[attribute]);
+      mutate(() => {
+        if (attribute === 'dimension' && $('aspect-lock').checked) {
+          const ratio = value / body.dimensions[index];
+          const dimensions = body.dimensions.map(n => n * ratio);
+          if (dimensions.some(n => n < 0.1 || n > 10000)) throw Error('That proportional resize would exceed the 0.1–10,000 mm dimension limits.');
+          body.dimensions = dimensions;
+        } else body[property][index] = value;
+      });
+      if (attribute === 'dimension') markGuide('size');
     }));
   }
   $('drop-body').addEventListener('click', () => mutate(() => {
@@ -595,7 +897,7 @@ function bindUI() {
   $('sketch-cancel').addEventListener('click', cancelSketch); $('sketch-finish').addEventListener('click', finishSketch);
   all('[data-sketch]').forEach(button => button.addEventListener('click', () => {
     if (!sketch) return;
-    sketch = {shape: button.dataset.sketch, points: [], start: null, current: null, drawing: false};
+    sketch = {...sketch, shape: button.dataset.sketch, points: [], start: null, current: null, drawing: false};
     clearGroup(sketchGroup);
     all('[data-sketch]').forEach(b => {
       b.setAttribute('aria-pressed', String(b === button));
@@ -603,11 +905,24 @@ function bindUI() {
     });
     $('sketch-hint').textContent = sketchInstruction(); message(sketchInstruction(), true);
   }));
+  $('sketch-undo-point').addEventListener('click', () => {
+    if (!sketch || sketch.shape !== 'polygon') return;
+    sketch.points.pop(); sketch.current = null; drawSketch();
+    $('sketch-hint').textContent = `${sketch.points.length} corners · click to add, Enter to extrude`;
+  });
+  for (const id of ['sketch-plane', 'sketch-offset']) $(id).addEventListener('change', () => {
+    if (!sketch) return;
+    const offset = Number($('sketch-offset').value);
+    if (!Number.isFinite(offset) || Math.abs(offset) > 100000) { $('sketch-offset').value = sketch.offset; message('Plane offset must be within ±100,000 mm.'); return; }
+    sketch.plane = $('sketch-plane').value; sketch.offset = offset;
+    orientToSketch(); drawSketch(); message(sketchInstruction(), true);
+  });
   document.addEventListener('keydown', event => {
     const editing = event.target.closest('input, textarea, select, [contenteditable="true"]');
-    if (editing || $('help-dialog').open || $('confirm-dialog').open) return;
     const key = event.key.toLowerCase(), command = event.ctrlKey || event.metaKey;
+    if ($('help-dialog').open || $('confirm-dialog').open || $('text-dialog').open || $('pattern-dialog').open) return;
     if (command && key === 's') { event.preventDefault(); saveProject(); return; }
+    if (editing) return;
     if (command && key === 'z') { event.preventDefault(); restoreFromHistory(event.shiftKey ? 'redo' : 'undo'); return; }
     if (command && key === 'y') { event.preventDefault(); restoreFromHistory('redo'); return; }
     if (command && key === 'd') { event.preventDefault(); duplicate(); return; }
@@ -615,6 +930,7 @@ function bindUI() {
     if (command || event.altKey) return;
     if (event.key === 'Escape') { if (sketch) cancelSketch(); else select(null); return; }
     if (sketch && event.key === 'Enter') { event.preventDefault(); finishSketch(); return; }
+    if (sketch && ['Backspace', 'Delete'].includes(event.key)) { event.preventDefault(); $('sketch-undo-point').click(); return; }
     if (sketch) return;
     if (['Delete', 'Backspace'].includes(event.key)) { event.preventDefault(); removeSelected(); }
     if ({v: 'select', g: 'move', r: 'rotate', s: 'scale'}[key]) setMode({v: 'select', g: 'move', r: 'rotate', s: 'scale'}[key]);
@@ -627,6 +943,9 @@ function bindUI() {
 
 try {
   setupScene(); bindUI();
+  const options = preferences();
+  guideExpanded = options.guideExpanded !== false;
+  guideProgress = new Set(Array.isArray(options.guideProgress) ? options.guideProgress.filter(s => ['start', 'size', 'sketch', 'export'].includes(s)) : []);
   let saved;
   try { saved = localStorage.getItem(STORAGE_KEY); }
   catch { storageAvailable = false; }
@@ -642,6 +961,7 @@ try {
       $('save-status').textContent = 'Saved design needs attention';
     }
   } else example('bracket', true);
+  setExperience(options.experience, false);
   $('loading').hidden = true;
   document.documentElement.dataset.ready = 'true';
 } catch (error) {

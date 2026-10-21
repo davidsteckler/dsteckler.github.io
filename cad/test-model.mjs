@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {createBody, buildMesh, cloneBody, calculateBounds, combineBodies, estimateVolume, parseProject, serializeProject, exportSTL, validateSketch} from './model.js';
+import {createBody, createTextBody, normalizeBodyParameters, buildMesh, cloneBody, calculateBounds, combineBodies, estimateVolume, parseProject, serializeProject, exportSTL, validateSketch} from './model.js';
+import {THREE} from './vendor/engine.js';
 
 const near = (actual, expected, tolerance = 0.001) => assert(Math.abs(actual - expected) <= tolerance, `${actual} should be within ${tolerance} of ${expected}`);
 let checks = 0;
@@ -87,4 +88,55 @@ for (let triangle = 0; triangle < triangles; triangle++) {
 min.forEach((value, i) => near(value, [40,-15,10][i]));
 max.forEach((value, i) => near(value, [60,-5,40][i]));
 assert.throws(() => exportSTL([hidden]), /show/); checks++;
-console.log(`PASS ${checks} geometry checks: dimensions, Z-up transforms, extrusion, solid booleans, resizing, project validation, cloning, binary STL world coordinates.`);
+
+const rounded = createBody('roundedbox', {dimensions:[20,30,40], position:[0,0,20], params:{radius:3}});
+calculateBounds([rounded]).size.forEach((value, i) => near(value, [20,30,40][i]));
+assert(estimateVolume(rounded) < 24000 && estimateVolume(rounded) > 22000, 'Rounded corners remove actual material');
+const roundedMesh = buildMesh(rounded);
+const roundedRay = new THREE.Raycaster(new THREE.Vector3(9.9,14.9,100), new THREE.Vector3(0,0,-1));
+assert.equal(roundedRay.intersectObject(roundedMesh, false).length, 0, 'The original box corner is rounded away');
+roundedMesh.geometry.dispose(); roundedMesh.material.dispose();
+const resizedRounded = normalizeBodyParameters({...rounded, dimensions:[2,30,40]});
+near(resizedRounded.params.radius, 1);
+assert.equal(buildMesh(resizedRounded).geometry.getAttribute('position').count > 0, true);
+checks++;
+
+const tube = createBody('tube', {dimensions:[20,30,40], position:[0,0,20], params:{wall:2}});
+calculateBounds([tube]).size.forEach((value, i) => near(value, [20,30,40][i]));
+near(estimateVolume(tube), Math.PI * (10 * 15 - 8 * 13) * 40, 12);
+const tubeMesh = buildMesh(tube);
+const centerRay = new THREE.Raycaster(new THREE.Vector3(0,0,100), new THREE.Vector3(0,0,-1));
+assert.equal(centerRay.intersectObject(tubeMesh, false).length, 0, 'Tube center remains open through both ends');
+tubeMesh.geometry.dispose(); tubeMesh.material.dispose();
+const resizedTube = normalizeBodyParameters({...tube, dimensions:[3,4,20]});
+assert(resizedTube.params.wall < 1.5);
+assert(estimateVolume(resizedTube) > 0); checks++;
+
+const wedge = createBody('wedge', {dimensions:[20,30,40], position:[10,15,20]});
+calculateBounds([wedge]).min.forEach((value, i) => near(value, [0,0,0][i]));
+near(estimateVolume(wedge), 12000); checks++;
+
+const letter = createTextBody('O', {height:10, depth:2});
+near(letter.dimensions[1], 10); near(letter.dimensions[2], 2);
+const letterMesh = buildMesh(letter);
+assert.equal(centerRay.intersectObject(letterMesh, false).length, 0, 'O has a real counter, not a filled glyph');
+const inkRay = new THREE.Raycaster(new THREE.Vector3(letter.dimensions[0] * 0.44,0,100), new THREE.Vector3(0,0,-1));
+assert(inkRay.intersectObject(letterMesh, false).length > 0, 'The lettering still contains solid strokes');
+letterMesh.geometry.dispose(); letterMesh.material.dispose();
+assert(estimateVolume(letter) < letter.dimensions[0] * 10 * 2 * 0.7);
+const caption = createTextBody('HIGHLANDS', {height:7, depth:1.5});
+near(caption.dimensions[1], 7); near(caption.dimensions[2], 1.5);
+assert(caption.dimensions[0] > 40);
+assert.equal(createTextBody('B', {...letter}).text, 'B', 'The requested text overrides older body text');
+checks++;
+
+const expandedProject = parseProject(serializeProject([rounded, tube, wedge, caption], 'New shapes'));
+assert.deepEqual(expandedProject.bodies, [rounded, tube, wedge, caption]);
+assert.deepEqual(parseProject(saved).bodies, [a, extrusion, hole], 'Original version 1 projects remain compatible');
+for (const body of [
+  {...rounded, params:{radius:11}}, {...rounded, params:{radius:-1}}, {...rounded, params:{radius:NaN}},
+  {...tube, params:{wall:10}}, {...tube, params:{wall:'2'}}, {...tube, params:[]},
+  {...letter, text:''}, {...letter, text:'😺'}, {...letter, text:'A\nB'}
+]) assert.throws(() => parseProject({version:1, units:'mm', name:'Invalid parameters', bodies:[body]}));
+checks++;
+console.log(`PASS ${checks} geometry checks: dimensions, Z-up transforms, extrusion, solid booleans, resizing, project validation, cloning, binary STL, rounded boxes, tubes, wedges, text counters, and v1 compatibility.`);
