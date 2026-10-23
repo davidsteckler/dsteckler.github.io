@@ -1,28 +1,29 @@
-# Bob: current canon and delivery
+# Bob: the original premise
 
-Story 1 is the user's original. Preserve its wording exactly. Story 2 is the approved longer draft, “bob showed his work”; preserve that copy unless the user requests another rewrite.
+Story 1 is the user's original. Preserve every line. The narrator is hungry and loves his friend Bob. Bob is a little lamb afraid he might become lunch. The narrator keeps choosing ordinary food. Bob never eats people or takes over their lives.
 
-The audience is middle school. Use dark, stupid, absurd situations narrated as mundane inconveniences. Consequences happen through objects, paperwork, and unexplained absences. Do not show graphic harm or explain the joke. Keep the writing clean.
+The audience is middle school. Write in plain lowercase with the original's calm, unsettling voice. Let Bob's increasingly desperate self-preservation supply the absurdity. Show the consequence, leave room for a pause, and do not explain the joke. Keep it clean and non-graphic.
 
 ## Connected sequence
 
-1. The hungry narrator goes to McDonalds; Bob survives.
-2. Bob eats the narrator's homework, then disappears into the hallway with the skeptical teacher. Bob returns wearing her lanyard, takes her job, marks her absent, and still gives the narrator a zero.
-3. Complaints bring Bob to the principal's office. Bob eats the paperwork and nameplate, takes the principal's chair, and punishes the narrator for chewing gum.
-4. Lunch duty leads to an eaten lunch card and cash register. The lunch lady phones the office; Bob answers his own complaint and sends the narrator to settle it. The narrator owes eighty dollars.
-5. Bob poses for staff photos and takes the narrator's turn. His portrait is printed under the narrator's name. The office refuses to accept the resulting photo ID because pets are forbidden.
-6. Bob plays Grandma in Little Red Riding Hood. The real wolf is terrified and asks the narrator's mom for a ride home.
-7. After that ride, Mom attends parent night with the zero grade and eighty dollar bill. She gets detention; the narrator has to sign her report card.
-8. Bob evacuates everyone, including Mom, for a fire drill. He returns with a brick in his wool and the school bell. The building is gone. Math continues.
-9. Bob tries to pin the missing school on the narrator during a news interview. The news uses the narrator's school photo from story 5, which shows Bob.
-10. Back at McDonalds, the cashier recognizes Bob from the news. Human police arrest him. His community-service sentence is teaching summer school. The narrator failed math and starts Monday.
+1. The hungry narrator goes to McDonalds. Bob is safe, for now.
+2. Bob prepares an excessive breakfast. The narrator's reassurance depends on how full he is.
+3. Hungry again, the narrator meets Bob disguised as Kevin. Fries end the disguise.
+4. Invited to a barbecue, Bob brings an extinguisher. The unlit barbecue ends up in the pond.
+5. Without the barbecue, the narrator tries vegetarian food until Monday. Bob crosses Monday and Tuesday off the calendar to remove the deadline.
+6. The week ends. Bob hides as a cauliflower in Kevin's sunglasses. The narrator considers cauliflower for lunch; it runs away.
+7. Bob brings a lawyer. Reassurance gives way to buying the narrator fries, followed by a legal bill.
+8. Bob gets a job at McDonalds to pay for lunch. He asks to be paid in fries; the narrator takes home his wages in a bag.
+9. A power cut stops the fryers. To reach the next town, Bob gets behind the wheel, despite never having driven.
+10. They are stopped in the parking lot. Bob offers his work badge as a licence. The officer hears the reassurance and gives them an escort to McDonalds.
 
-## Continuity and presentation
+## Visual and delivery continuity
 
-- Carry the same lanyard through Bob's school jobs.
-- Use the same school photo in chapters 5, 9, and 10.
-- The zero grade, eighty dollar bill, wolf pickup, and Mom's detention have later consequences.
-- Keep all existing chapter URLs. Story 2 is canonical at /bob2/; /bob/2/ redirects there.
-- Text is grouped into four dramatic beats. Timelines scale to the longer reading time.
-- Keep final-line groups concealed until the visual payoff, with a manual “and then…” reveal. Reduced-motion and no-JavaScript reading remain available.
-- The first-person narrator and staff are fictional. Generic portraits are illustrations, not photographs of real people.
+- Use the original lamb, cream and sage palette, and lowercase editorial presentation.
+- Bob looks worried when the narrator is hungry and relieved when there is other food.
+- Carry Kevin's sunglasses into the cauliflower disguise. Carry Bob's work badge into the traffic stop.
+- The job follows the legal bill; the power cut threatens the food supply; the escort resolves the failed drive.
+- Illustrations must show the actual action and payoff. Cars place Bob inside the driver's window, wearing a seat belt.
+- Keep every existing chapter URL. Story 2 is /bob2/; /bob/2/ redirects there.
+- Four timed beats support each scene. Readers can pause, scrub, replay, or reveal the ending manually.
+- Respect reduced motion and keep the full story readable without JavaScript.
