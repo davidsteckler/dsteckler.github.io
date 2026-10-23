@@ -1,25 +1,28 @@
-# Bob: continuity and delivery
+# Bob: current canon and delivery
 
-Story 1 is the user's original. Preserve its wording exactly.
+Story 1 is the user's original. Preserve its wording exactly. Story 2 is the approved longer draft, “bob showed his work”; preserve that copy unless the user requests another rewrite.
 
-The narrator first considers eating Bob. From story 2 onward, Bob quietly turns the threat around. He has a plan; the narrator keeps mistaking social conventions for protection. Nothing graphic happens on screen.
+The audience is middle school. Use dark, stupid, absurd situations narrated as mundane inconveniences. Consequences happen through objects, paperwork, and unexplained absences. Do not show graphic harm or explain the joke. Keep the writing clean.
 
-## Current sequence
+## Connected sequence
 
-- 2: Bob feeds the narrator and adds a “serves four” tag.
-- 3: Bob's cousin treats the narrator's invitation as a dinner arrangement and brings gravy.
-- 4: Bob claims authority. His cousin becomes the narrator's lawyer, while claiming a share of dinner.
-- 5: Rain cancels the barbecue; Bob has an air fryer.
-- 6: The narrator escapes home. Bob's missing poster offers free lunch. Mom offers to return the narrator.
-- 7: Mom delivers the narrator to Bob's restaurant and asks whether he comes with fries.
-- 8: The health inspector is Bob's son.
-- 9: During their reunion, the narrator escapes through a window, under a fence, and into a bush beside the restaurant's drive-through.
-- 10: The narrator reaches McDonalds in the next town, calling back to the safe meal in story 1. Bob is the cashier.
+1. The hungry narrator goes to McDonalds; Bob survives.
+2. Bob eats the narrator's homework, then disappears into the hallway with the skeptical teacher. Bob returns wearing her lanyard, takes her job, marks her absent, and still gives the narrator a zero.
+3. Complaints bring Bob to the principal's office. Bob eats the paperwork and nameplate, takes the principal's chair, and punishes the narrator for chewing gum.
+4. Lunch duty leads to an eaten lunch card and cash register. The lunch lady phones the office; Bob answers his own complaint and sends the narrator to settle it. The narrator owes eighty dollars.
+5. Bob poses for staff photos and takes the narrator's turn. His portrait is printed under the narrator's name. The office refuses to accept the resulting photo ID because pets are forbidden.
+6. Bob plays Grandma in Little Red Riding Hood. The real wolf is terrified and asks the narrator's mom for a ride home.
+7. After that ride, Mom attends parent night with the zero grade and eighty dollar bill. She gets detention; the narrator has to sign her report card.
+8. Bob evacuates everyone, including Mom, for a fire drill. He returns with a brick in his wool and the school bell. The building is gone. Math continues.
+9. Bob tries to pin the missing school on the narrator during a news interview. The news uses the narrator's school photo from story 5, which shows Bob.
+10. Back at McDonalds, the cashier recognizes Bob from the news. Human police arrest him. His community-service sentence is teaching summer school. The narrator failed math and starts Monday.
 
-## Voice and presentation
+## Continuity and presentation
 
-Use short, lowercase, matter-of-fact lines. Give each chapter a clear reversal that a student can understand on first reading. Stop on the punchline. Avoid explanations, a second weaker joke after the ending, profanity, and graphic violence.
-
-Each visual reveal belongs to the final animation beat. Endings can be revealed manually for reading aloud; reduced-motion and no-JavaScript readers receive the full text. Keep recurring people, props, and the same narrator portrait consistent.
-
-These are fictional characters and businesses within a cartoon story. The portrait is a generic narrator, not a real person's photograph.
+- Carry the same lanyard through Bob's school jobs.
+- Use the same school photo in chapters 5, 9, and 10.
+- The zero grade, eighty dollar bill, wolf pickup, and Mom's detention have later consequences.
+- Keep all existing chapter URLs. Story 2 is canonical at /bob2/; /bob/2/ redirects there.
+- Text is grouped into four dramatic beats. Timelines scale to the longer reading time.
+- Keep final-line groups concealed until the visual payoff, with a manual “and then…” reveal. Reduced-motion and no-JavaScript reading remain available.
+- The first-person narrator and staff are fictional. Generic portraits are illustrations, not photographs of real people.
