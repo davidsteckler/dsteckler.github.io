@@ -1,6 +1,8 @@
 import {THREE, OrbitControls, TransformControls} from './vendor/engine.js';
 import {createBody, createTextBody, normalizeBodyParameters, buildMesh, cloneBody, combineBodies, calculateBounds, estimateVolume, serializeProject, parseProject, exportSTL} from './model.js';
-import {moldCutters, shaveBody} from './mold.js';
+import {moldCutters, moldCapacity} from './mold.js';
+import {MEMORY_LIMITS, trimHistory} from './memory.js';
+import {startMoldTask} from './mold-task.js';
 import {alignBodies, distributeBodies, mirrorBodies, linearPattern, radialPattern, importSTL, summarizeBodies} from './operations.js';
 
 const $ = id => document.getElementById(id);
@@ -22,6 +24,7 @@ const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 let pointerStart = null;
 let moldStroke = null, moldBusy = false, moldGroup, moldCursor, moldHover = null;
 let textPreviewGroup = null, textPreviewTimer, textEditingId = null;
+let moldBatchStrokes = 0, moldTask = null, moldPreviewFrame = null, moldPreviewAt = 0, projectRevision = 0;
 
 function message(text, persistent = false) {
   clearTimeout(statusTimer);
@@ -31,11 +34,11 @@ function message(text, persistent = false) {
   }, 6000);
 }
 
-function snapshot() { return serializeProject(project); }
+function snapshot() { return JSON.stringify(project); }
 function remember(before = snapshot()) {
   if (history.at(-1) !== before) history.push(before);
-  if (history.length > 60) history.shift();
   future = [];
+  trimHistory(history, future);
 }
 function persist() {
   $('save-status').textContent = 'Saving…';
@@ -63,6 +66,7 @@ function clearGroup(group) {
   [...group.children].forEach(child => { group.remove(child); disposeObject(child); });
 }
 function rebuild() {
+  projectRevision++;
   if (moldCursor) moldCursor.visible = false;
   transform.detach();
   clearGroup(bodyGroup);
@@ -294,9 +298,9 @@ function refresh() {
   $('project-name').value = project.name;
   $('body-count').textContent = project.bodies.length;
   $('selected-count').textContent = bodies.length ? `${bodies.length} selected` : 'No selection';
-  $('undo').disabled = history.length === 0;
-  $('mold-undo').disabled = history.length === 0;
-  $('redo').disabled = future.length === 0;
+  $('undo').disabled = moldBusy || history.length === 0;
+  $('mold-undo').disabled = moldBusy || history.length === 0;
+  $('redo').disabled = moldBusy || future.length === 0;
   $('delete-body').disabled = editableBodies().length === 0;
   $('duplicate').disabled = bodies.length === 0;
   all('[data-boolean]').forEach(button => { button.disabled = bodies.length < 2 || bodies.some(b => b.locked); });
@@ -333,7 +337,7 @@ function refresh() {
   all('[data-distribute]').forEach(button => { button.disabled = bodies.length < 3 || bodies.some(b => b.locked); });
   all('[data-mirror]').forEach(button => { button.disabled = bodies.length === 0; });
   $('pattern-start').disabled = bodies.length === 0;
-  scheduleMeasurements(); refreshGuide();
+  scheduleMeasurements(); refreshGuide(); refreshMoldBudget();
   renderBodyList();
   updateOutline();
   if (bodies.length === 1 && !bodies[0].locked && ['move', 'rotate', 'scale'].includes(mode) && !sketch) {
@@ -399,7 +403,7 @@ function mutate(action, text) {
     action();
     for (const body of project.bodies) normalizeBodyParameters(body);
     // Validate a complete document before committing it to browser storage.
-    project = parseProject(serializeProject(project));
+    project = parseProject(project);
     remember(before);
     rebuild(); persist();
     if (text) message(text);
@@ -417,7 +421,8 @@ function restoreFromHistory(direction) {
   const from = direction === 'undo' ? history : future;
   const to = direction === 'undo' ? future : history;
   if (!from.length) return;
-  to.push(snapshot()); project = parseProject(from.pop());
+  const next = from.pop();
+  to.push(snapshot()); trimHistory(history, future, to); project = parseProject(next);
   selected.clear(); rebuild(); persist(); message(direction === 'undo' ? 'Change undone.' : 'Change restored.');
 }
 function setMode(next) {
@@ -593,11 +598,38 @@ function example(kind, initial = false) {
   if (!initial && project.bodies.length) confirmChange('Load an example?', 'The example replaces your current design. Save a project copy first if needed. You can undo this change.', load);
   else load();
 }
+function refreshMoldBudget() {
+  $('mold-stroke-count').textContent = `${moldBatchStrokes} / ${MEMORY_LIMITS.moldStrokes} strokes`;
+  $('mold-next-batch').disabled = moldBusy || moldBatchStrokes === 0;
+  $('mold-done').disabled = moldBusy;
+  $('mold-cancel-task').hidden = !moldBusy;
+  $('undo').disabled = moldBusy || history.length === 0;
+  $('mold-undo').disabled = moldBusy || history.length === 0;
+  $('redo').disabled = moldBusy || future.length === 0;
+  for (const id of ['mold-size', 'mold-depth', 'mold-through']) $(id).disabled = moldBusy || (id === 'mold-depth' && $('mold-through').checked);
+  if (mode !== 'mold') return;
+  const body = selectionBodies().length === 1 ? selectionBodies()[0] : null;
+  const capacity = moldCapacity(project.bodies, body);
+  $('mold-next-batch').disabled ||= !capacity.allowed;
+  const full = moldBatchStrokes >= MEMORY_LIMITS.moldStrokes;
+  $('mold-budget').textContent = !capacity.allowed ? capacity.reason : full ? 'Batch complete. Keep your cuts and clear Undo to continue.' : 'Use short strokes. Up to five strokes per batch.';
+  $('mold-budget').classList.toggle('at-limit', !capacity.allowed || full);
+}
+function nextMoldBatch() {
+  if (moldBusy || moldBatchStrokes === 0) return;
+  const capacity = moldCapacity(project.bodies, selectionBodies().length === 1 ? selectionBodies()[0] : null);
+  if (!capacity.allowed) { message(capacity.reason, true); return; }
+  cancelMoldStroke();
+  history = []; future = []; moldBatchStrokes = 0;
+  refresh(); persist();
+  message('Cuts kept. Undo history cleared. A new five-stroke batch is ready.');
+}
 function moldSettings() {
-  const diameter = Number($('mold-size').value), depth = Number($('mold-depth').value);
+  const diameter = Number($('mold-size').value), through = $('mold-through').checked;
+  const depth = through ? 2 : Number($('mold-depth').value);
   if (!Number.isFinite(diameter) || diameter < 0.5 || diameter > 1000) throw Error('Choose a brush size between 0.5 and 1,000 mm.');
   if (!Number.isFinite(depth) || depth < 0.1 || depth > 1000) throw Error('Choose a shave depth between 0.1 and 1,000 mm.');
-  return {diameter, depth, through:$('mold-through').checked};
+  return {diameter, depth, through};
 }
 function moldHit(event) {
   worldPoint(event);
@@ -618,7 +650,7 @@ function showMoldCursor(point, normal, settings) {
     ring.name = 'ring'; ring.renderOrder = 23; moldCursor.add(fill, ring); scene.add(moldCursor);
   }
   const source = project.bodies.find(b => b.id === moldStroke?.bodyId) || moldHover?.body;
-  const depth = settings.through && source ? calculateBounds([source]).size.reduce((sum, n) => sum + n, 1) : settings.depth;
+  const depth = settings.through && source ? source.dimensions.reduce((sum, n) => sum + n, 1) : settings.depth;
   moldCursor.visible = true; moldCursor.position.copy(point);
   moldCursor.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
   const fill = moldCursor.getObjectByName('volume'), ring = moldCursor.getObjectByName('ring');
@@ -627,16 +659,19 @@ function showMoldCursor(point, normal, settings) {
   renderRequested = true;
 }
 function beginMold(event) {
-  if (moldStroke) return;
+  if (moldStroke || moldBusy) return;
+  if (moldBatchStrokes >= MEMORY_LIMITS.moldStrokes) { message('Batch complete. Use Keep cuts & continue to start another batch.', true); return; }
   try {
     const settings = moldSettings(), hit = moldHit(event);
     if (!hit) { message('Start the brush on a visible, unlocked shape.'); return; }
+    const capacity = moldCapacity(project.bodies, hit.body);
+    if (!capacity.allowed) { message(capacity.reason, true); return; }
     moldHover = hit;
     selected = new Set([hit.body.id]); refresh();
     moldStroke = {...settings, bodyId:hit.body.id, normal:hit.normal.toArray(), points:[hit.point.toArray()], pointerId:event.pointerId,
       plane:new THREE.Plane().setFromNormalAndCoplanarPoint(hit.normal, hit.point)};
     renderer.domElement.setPointerCapture(event.pointerId); orbit.enabled = false;
-    showMoldCursor(hit.point, hit.normal, settings); drawMoldStroke();
+    showMoldCursor(hit.point, hit.normal, settings); queueMoldPreview();
     message('Release to apply this stroke. Escape cancels it.', true);
   } catch (error) { message(error.message, true); }
 }
@@ -656,8 +691,8 @@ function moveMold(event) {
       const deviation = new THREE.Line3(previous, point).closestPointToPoint(last, true, new THREE.Vector3()).distanceTo(last);
       if (oldDirection.dot(direction) > 0 && deviation < moldStroke.diameter * 0.04) points.pop();
     }
-    if (points.length >= 48) { message('Release to apply this stroke, then keep shaving with a new stroke.', true); return; }
-    points.push(point.toArray()); drawMoldStroke();
+    if (points.length >= MEMORY_LIMITS.strokePoints) { message('Release to apply this stroke, then keep shaving with a new stroke.', true); return; }
+    points.push(point.toArray()); queueMoldPreview();
   } else {
     try {
       moldHover = moldHit(event);
@@ -666,21 +701,41 @@ function moveMold(event) {
     } catch { if (moldCursor) moldCursor.visible = false; }
   }
 }
+function queueMoldPreview() {
+  if (moldPreviewFrame !== null) return;
+  const update = time => {
+    if (time - moldPreviewAt < 33) { moldPreviewFrame = requestAnimationFrame(update); return; }
+    moldPreviewFrame = null; moldPreviewAt = time; drawMoldStroke();
+  };
+  moldPreviewFrame = requestAnimationFrame(update);
+}
 function drawMoldStroke() {
   if (!moldGroup) { moldGroup = new THREE.Group(); scene.add(moldGroup); }
-  clearGroup(moldGroup);
-  if (!moldStroke) return;
-  // Translucent cutters show the actual swept area; solid edits happen on release.
+  if (!moldStroke) { clearGroup(moldGroup); return; }
   const source = project.bodies.find(b => b.id === moldStroke.bodyId);
-  const depth = moldStroke.through ? calculateBounds([source]).size.reduce((sum, n) => sum + n, 1) : moldStroke.depth;
-  for (const cutter of moldCutters({...moldStroke, depth})) {
+  const depth = moldStroke.through ? source.dimensions.reduce((sum, n) => sum + n, 1) : moldStroke.depth;
+  const cutters = moldCutters({...moldStroke, depth});
+  while (moldGroup.children.length > cutters.length) {
+    const mesh = moldGroup.children.at(-1); moldGroup.remove(mesh); disposeObject(mesh);
+  }
+  for (let i = 0; i < cutters.length; i++) {
+    const cutter = cutters[i], key = JSON.stringify([cutter.points, cutter.position, depth, moldStroke.diameter]);
+    const existing = moldGroup.children[i];
+    if (existing?.userData.previewKey === key) continue;
     const mesh = buildMesh(cutter); mesh.material.transparent = true; mesh.material.opacity = 0.2;
-    mesh.material.depthTest = false; mesh.material.depthWrite = false; mesh.renderOrder = 21;
-    moldGroup.add(mesh);
+    mesh.material.depthTest = false; mesh.material.depthWrite = false; mesh.renderOrder = 21; mesh.userData.previewKey = key;
+    // Reuse unchanged segments. A pointer move only replaces the moving end.
+    if (existing) {
+      existing.geometry.dispose(); existing.material.dispose();
+      existing.geometry = mesh.geometry; existing.material = mesh.material;
+      existing.position.copy(mesh.position); existing.quaternion.copy(mesh.quaternion); existing.userData.previewKey = key;
+    } else moldGroup.add(mesh);
   }
   renderRequested = true;
 }
 function cancelMoldStroke() {
+  if (moldPreviewFrame !== null) cancelAnimationFrame(moldPreviewFrame);
+  moldPreviewFrame = null; moldHover = null;
   const stroke = moldStroke; moldStroke = null;
   if (stroke && renderer.domElement.hasPointerCapture(stroke.pointerId)) renderer.domElement.releasePointerCapture(stroke.pointerId);
   if (moldGroup) clearGroup(moldGroup);
@@ -688,24 +743,28 @@ function cancelMoldStroke() {
   if (orbit) orbit.enabled = !sketch;
   renderRequested = true;
 }
-function finishMold(event) {
+async function finishMold(event) {
   if (!moldStroke || event.pointerId !== moldStroke.pointerId) return;
   moveMold(event);
-  const stroke = moldStroke, source = structuredClone(project.bodies.find(b => b.id === stroke.bodyId)), before = snapshot();
-  moldStroke = null;
-  if (renderer.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
-  moldBusy = true; viewport.setAttribute('aria-busy', 'true');
+  const stroke = moldStroke, source = project.bodies.find(b => b.id === stroke.bodyId), revision = projectRevision;
+  cancelMoldStroke();
+  moldBusy = true; viewport.setAttribute('aria-busy', 'true'); refreshMoldBudget();
   message('Shaving the shape…', true);
-  requestAnimationFrame(() => setTimeout(() => {
-    try {
-      const result = shaveBody(source, stroke);
-      if (snapshot() !== before) throw Error('The design changed. Try the mold stroke again.');
-      moldBusy = false;
-      mutate(() => { replaceBodies([result]); selected = new Set([result.id]); }, 'Shape shaved. Drag again to remove more, or Undo to restore this stroke.');
-    } catch (error) { message(error.message, true); }
-    finally { moldBusy = false; viewport.removeAttribute('aria-busy'); cancelMoldStroke(); refresh(); }
-  }, 0));
+  try {
+    moldTask = startMoldTask(source, stroke);
+    const result = await moldTask.promise;
+    if (projectRevision !== revision) throw Error('The design changed. Try the mold stroke again.');
+    const capacity = moldCapacity(project.bodies.map(body => body.id === source.id ? result : body));
+    if (!capacity.allowed) throw Error(capacity.reason);
+    moldBusy = false;
+    if (mutate(() => { replaceBodies([result]); selected = new Set([result.id]); }, 'Shape shaved. Undo restores recent cuts.')) {
+      moldBatchStrokes++;
+      if (moldBatchStrokes >= MEMORY_LIMITS.moldStrokes) message('Shape shaved. Batch complete. Keep your cuts and clear Undo to continue.', true);
+    }
+  } catch (error) { message(error.message, true); }
+  finally { moldTask = null; moldBusy = false; viewport.removeAttribute('aria-busy'); refresh(); }
 }
+
 function snap(value) {
   if (!$('snap-enabled').checked) return value;
   const step = Math.max(0.1, Number($('snap-step').value) || 1);
@@ -993,6 +1052,8 @@ function bindUI() {
   $('mold-start').addEventListener('click', () => setMode(mode === 'mold' ? 'select' : 'mold'));
   $('mold-done').addEventListener('click', () => setMode('select'));
   $('mold-undo').addEventListener('click', () => restoreFromHistory('undo'));
+  $('mold-next-batch').addEventListener('click', nextMoldBatch);
+  $('mold-cancel-task').addEventListener('click', () => moldTask?.cancel());
   $('mold-through').addEventListener('change', () => { $('mold-depth').disabled = $('mold-through').checked; });
   $('pattern-start').addEventListener('click', openPattern); $('pattern-submit').addEventListener('click', createPattern);
   $('pattern-cancel').addEventListener('click', () => $('pattern-dialog').close());
@@ -1123,7 +1184,8 @@ function bindUI() {
     const key = event.key.toLowerCase(), command = event.ctrlKey || event.metaKey;
     if ($('help-dialog').open || $('confirm-dialog').open || $('text-dialog').open || $('pattern-dialog').open) return;
     if (command && key === 's') { event.preventDefault(); saveProject(); return; }
-    if (editing || moldBusy) return;
+    if (moldBusy) { if (event.key === 'Escape') moldTask?.cancel(); return; }
+    if (editing) return;
     if (command && key === 'z') { event.preventDefault(); restoreFromHistory(event.shiftKey ? 'redo' : 'undo'); return; }
     if (command && key === 'y') { event.preventDefault(); restoreFromHistory('redo'); return; }
     if (command && key === 'd') { event.preventDefault(); duplicate(); return; }
@@ -1139,6 +1201,7 @@ function bindUI() {
     if (key === 'e') setMode(mode === 'mold' ? 'select' : 'mold');
     if (key === 't') openText();
   });
+  window.addEventListener('pagehide', () => { moldTask?.cancel(); cancelMoldStroke(); });
   window.addEventListener('beforeunload', () => {
     if (storageAvailable) { try { localStorage.setItem(STORAGE_KEY, snapshot()); } catch {} }
   });

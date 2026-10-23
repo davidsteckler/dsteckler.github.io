@@ -196,6 +196,38 @@ try {
   assert.equal(await page.locator('[data-tool="select"]').getAttribute('aria-pressed'), 'true');
   console.log('PASS mold pointer dragging, real cuts, stable body identity, per-stroke Undo, Escape cancellation, through-hole and Done controls');
 
+  await page.locator('#mold-start').click();
+  await page.locator('#mold-next-batch').click();
+  assert.equal(await page.locator('#undo').isDisabled(), true, 'Starting a batch releases Undo history');
+  await load(fixture('Five-stroke limit', [body('Batch plate', 'box', [80,60,10], [0,0,5])]));
+  await page.locator('[data-view="top"]').click();
+  await page.locator('#mold-through').uncheck(); await page.locator('#mold-size').fill('6'); await page.locator('#mold-depth').fill('0.5');
+  for (let stroke = 1; stroke <= 5; stroke++) {
+    await page.mouse.click(center.x, center.y);
+    await page.waitForFunction(count => document.querySelector('#mold-stroke-count').textContent === `${count} / 5 strokes`, stroke);
+    await saved();
+  }
+  assert.match(await page.locator('#mold-budget').innerText(), /Batch complete/);
+  const batchModel = JSON.stringify((await saved()).bodies);
+  await page.mouse.click(center.x + 15, center.y);
+  assert.match(await page.locator('#status-message').innerText(), /Batch complete/);
+  assert.equal(JSON.stringify((await saved()).bodies), batchModel, 'The sixth stroke is blocked before calculation');
+  await page.locator('#mold-done').click(); await page.locator('#mold-start').click();
+  assert.equal(await page.locator('#mold-stroke-count').innerText(), '5 / 5 strokes', 'Tool switches cannot bypass the batch cap');
+  await page.locator('#mold-undo').click(); await saved();
+  assert.equal(await page.locator('#mold-stroke-count').innerText(), '5 / 5 strokes', 'Undo cannot bypass the batch cap');
+  const keptModel = JSON.stringify((await saved()).bodies);
+  await page.locator('#mold-next-batch').click();
+  assert.equal(await page.locator('#mold-stroke-count').innerText(), '0 / 5 strokes');
+  assert.equal(await page.locator('#undo').isDisabled(), true); assert.equal(await page.locator('#redo').isDisabled(), true);
+  assert.equal(JSON.stringify((await saved()).bodies), keptModel, 'Checkpoint preserves the model exactly');
+  await page.mouse.click(center.x, center.y);
+  await page.waitForFunction(() => document.querySelector('#mold-stroke-count').textContent === '1 / 5 strokes');
+  await saved();
+  await page.screenshot({path:proof + '/bounded-eraser.png', fullPage:true});
+  await page.locator('#mold-done').click();
+  console.log('PASS five-stroke cap, mode/Undo bypass prevention, model-preserving checkpoints and worker-backed continuation');
+
   await load(fixture('Reference alignment', [body('Reference', 'box', [10, 20, 12], [-25, 0, 6], [0, 0, 30]), body('Mover', 'box', [8, 8, 8], [30, 10, 10])]));
   await select([0, 1]); await tool('[data-align-axis="0"][data-align-anchor="max"]');
   project = await saved(); assert.deepEqual(project.bodies[0].position, [-25, 0, 6], 'The first alignment reference stays fixed');

@@ -1,11 +1,32 @@
 import {THREE} from './vendor/engine.js';
-import {createBody, combineBodies, calculateBounds, estimateVolume, parseProject} from './model.js';
+import {createBody, combineBodies, buildMesh, estimateVolume, parseProject} from './model.js';
+import {MEMORY_LIMITS} from './memory.js';
 
 const check = (condition, message) => { if (!condition) throw Error(message); };
+const triangleCounts = new WeakMap();
+
+export function moldTriangleCount(body) {
+  if (body.type === 'custom') return (body.geometry.index?.length || body.geometry.position.length / 3) / 3;
+  if (!triangleCounts.has(body)) {
+    const mesh = buildMesh(body);
+    try { triangleCounts.set(body, (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3); }
+    finally { mesh.geometry.dispose(); mesh.material.dispose(); }
+  }
+  return triangleCounts.get(body);
+}
+
+export function moldCapacity(bodies, target) {
+  const projectTriangles = bodies.reduce((total, body) => total + moldTriangleCount(body), 0);
+  const triangles = target ? moldTriangleCount(target) : 0;
+  let reason = '';
+  if (projectTriangles > MEMORY_LIMITS.moldProjectTriangles) reason = 'This design has reached the eraser detail limit. Undo recent cuts or use a simpler design.';
+  else if (triangles >= MEMORY_LIMITS.moldInputTriangles) reason = 'This shape has reached the eraser detail limit. Undo recent cuts or erase a simpler shape.';
+  return {allowed:!reason, reason, triangles, projectTriangles};
+}
 
 /** A surface-aligned, closed cutter for each segment, with round ends. */
 export function moldCutters({points, normal, diameter = 10, depth = 2}) {
-  check(Array.isArray(points) && points.length >= 1 && points.length <= 48, 'Use a shorter mold stroke, with up to 48 points.');
+  check(Array.isArray(points) && points.length >= 1 && points.length <= MEMORY_LIMITS.strokePoints, 'Use a shorter mold stroke. Release and start another stroke.');
   check(points.every(p => Array.isArray(p) && p.length === 3 && p.every(n => Number.isFinite(n) && Math.abs(n) <= 1000000)), 'Mold points must contain valid coordinates.');
   check(Array.isArray(normal) && normal.length === 3 && normal.every(Number.isFinite), 'Choose a valid surface for the mold brush.');
   const n = new THREE.Vector3(...normal);
@@ -51,12 +72,18 @@ export function moldCutters({points, normal, diameter = 10, depth = 2}) {
 /** One atomic edit: unrelated bodies and the input remain unchanged. */
 export function shaveBody(body, stroke) {
   check(body && !body.locked && body.visible !== false, 'Choose a visible, unlocked shape to mold.');
+  const capacity = moldCapacity([body], body);
+  check(capacity.allowed, capacity.reason);
   const source = parseProject({version:1, units:'mm', name:'Mold', bodies:[body]}).bodies[0];
-  const depth = stroke.through ? calculateBounds([source]).size.reduce((sum, n) => sum + n, 1) : stroke.depth;
+  const depth = stroke.through ? source.dimensions.reduce((sum, n) => sum + n, 1) : stroke.depth;
   const cutters = moldCutters({...stroke, depth});
   const originalVolume = estimateVolume(source);
   let result = source;
-  for (let i = 0; i < cutters.length; i += 19) result = combineBodies([result, ...cutters.slice(i, i + 19)], 'subtract');
+  // One segment per operation releases intermediate CSG meshes between cuts.
+  for (const cutter of cutters) {
+    result = combineBodies([result, cutter], 'subtract');
+    check(moldTriangleCount(result) <= MEMORY_LIMITS.moldOutputTriangles, 'This stroke would add too much detail. Try a shorter stroke or Undo recent cuts.');
+  }
   check(originalVolume - estimateVolume(result) > Math.max(0.00001, originalVolume * 1e-8), 'The brush missed the solid. Start a stroke on a solid surface.');
   result.id = source.id; result.name = source.name; result.color = source.color;
   return parseProject({version:1, units:'mm', name:'Mold', bodies:[result]}).bodies[0];
