@@ -65,6 +65,7 @@ try {
   await page.reload(); await page.waitForFunction(() => document.documentElement.dataset.ready === 'true');
   assert.equal(await page.locator('#body-count').innerText(), '1');
   await page.locator('#file-input').setInputFiles({name: 'invalid.form3d', mimeType: 'application/json', buffer: Buffer.from('{"version":99}')});
+  await page.waitForFunction(() => document.querySelector('#status-message').textContent.startsWith('Could not open project'));
   assert.match(await page.locator('#status-message').innerText(), /Could not open project/);
   assert.equal(await page.locator('#body-count').innerText(), '1', 'Invalid import preserves the current design');
   console.log('PASS binary STL, editable project download/import, autosave restore and invalid import preservation');
