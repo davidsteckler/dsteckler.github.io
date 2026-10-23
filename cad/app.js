@@ -1,5 +1,6 @@
 import {THREE, OrbitControls, TransformControls} from './vendor/engine.js';
 import {createBody, createTextBody, normalizeBodyParameters, buildMesh, cloneBody, combineBodies, calculateBounds, estimateVolume, serializeProject, parseProject, exportSTL} from './model.js';
+import {moldCutters, shaveBody} from './mold.js';
 import {alignBodies, distributeBodies, mirrorBodies, linearPattern, radialPattern, importSTL, summarizeBodies} from './operations.js';
 
 const $ = id => document.getElementById(id);
@@ -19,12 +20,14 @@ const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 let pointerStart = null;
+let moldStroke = null, moldBusy = false, moldGroup, moldCursor, moldHover = null;
+let textPreviewGroup = null, textPreviewTimer, textEditingId = null;
 
 function message(text, persistent = false) {
   clearTimeout(statusTimer);
   $('status-message').textContent = text;
   if (!persistent) statusTimer = setTimeout(() => {
-    $('status-message').textContent = sketch ? sketchInstruction() : 'Ready to create. All dimensions are in millimeters.';
+    $('status-message').textContent = sketch ? sketchInstruction() : mode === 'mold' ? 'Drag on a shape to shave it. Release to apply. Undo restores each stroke.' : 'Ready to create. All dimensions are in millimeters.';
   }, 6000);
 }
 
@@ -60,6 +63,7 @@ function clearGroup(group) {
   [...group.children].forEach(child => { group.remove(child); disposeObject(child); });
 }
 function rebuild() {
+  if (moldCursor) moldCursor.visible = false;
   transform.detach();
   clearGroup(bodyGroup);
   meshes.clear();
@@ -192,34 +196,83 @@ function createPattern() {
   } catch (error) { $('pattern-feedback').textContent = error.message; }
 }
 function openText() {
+  if (moldBusy) return;
+  setMode('select');
   const bodies = editableBodies();
   textTargetId = bodies.length === 1 && selectionBodies().length === 1 ? bodies[0].id : null;
-  $('text-action').value = 'standalone';
-  $('text-target-note').textContent = textTargetId ? `Raised or engraved text will be centered on the XY top of “${bodies[0].name}”. For a flat plaque, select that body first.` : 'Select one unlocked body to add raised or engraved lettering. Standalone text needs no selection.';
+  const editing = bodies.length === 1 && bodies[0].type === 'text' ? bodies[0] : null;
+  textEditingId = editing?.id || null;
+  if (editing) textTargetId = null;
+  $('text-content').value = editing?.text || '';
+  $('text-height').value = editing?.dimensions[1] || 10;
+  $('text-depth').value = editing?.dimensions[2] || 2;
+  $('text-action').value = textTargetId ? 'raised' : 'standalone';
+  $('text-fit').checked = true;
+  $('text-fit-field').hidden = !textTargetId;
+  $('text-target-note').textContent = editing ? 'Edit the words and press Enter to update this text.' : textTargetId ? `Lettering will be centered on the flat top of “${bodies[0].name}”. Fit to shape keeps it within the edges.` : 'Type your words and press Enter. Select a shape first to put raised or engraved lettering on its flat top.';
   [...$('text-action').options].forEach(option => { option.disabled = option.value !== 'standalone' && !textTargetId; });
   $('text-feedback').textContent = ''; $('text-dialog').showModal();
-  $('text-content').focus();
+  updateTextPreview(); $('text-content').focus();
 }
-function addText() {
-  try {
-    const content = $('text-content').value.trim(), height = Number($('text-height').value), depth = Number($('text-depth').value);
-    if (!content || content.length > 40) throw Error('Enter 1–40 characters for the lettering.');
-    if (!Number.isFinite(height) || height < 0.5 || height > 1000 || !Number.isFinite(depth) || depth < 0.1 || depth > 1000) throw Error('Choose letter height 0.5–1,000 mm and thickness 0.1–1,000 mm.');
-    const action = $('text-action').value;
-    const body = createTextBody(content, {height, depth, name: content.slice(0, 80), color: palette[project.bodies.length % palette.length]});
-    let target;
-    if (action !== 'standalone') {
-      target = project.bodies.find(b => b.id === textTargetId);
-      if (!target || target.locked || target.visible === false) throw Error('Select one visible, unlocked body before opening the text tool.');
-      const bounds = calculateBounds([target]);
+function textDraft() {
+  const content = $('text-content').value.trim(), height = Number($('text-height').value), depth = Number($('text-depth').value);
+  if (!content || content.length > 40) throw Error('Enter 1–40 characters for the lettering.');
+  if (!Number.isFinite(height) || height < 0.5 || height > 1000 || !Number.isFinite(depth) || depth < 0.1 || depth > 1000) throw Error('Choose letter height 0.5–1,000 mm and thickness 0.1–1,000 mm.');
+  const action = $('text-action').value;
+  const body = createTextBody(content, {height, depth, name:content, color:palette[project.bodies.length % palette.length]});
+  let target;
+  if (textEditingId) {
+    const existing = project.bodies.find(b => b.id === textEditingId);
+    if (!existing || existing.locked || existing.visible === false) throw Error('Select visible, unlocked text to edit.');
+    Object.assign(body, {id:existing.id, color:existing.color, position:existing.position.slice(), rotation:existing.rotation.slice()});
+    const normal = new THREE.Vector3(0, 0, 1).applyEuler(new THREE.Euler(...existing.rotation.map(THREE.MathUtils.degToRad)));
+    body.position = new THREE.Vector3(...existing.position).addScaledVector(normal, (depth - existing.dimensions[2]) / 2).toArray();
+  } else if (action !== 'standalone') {
+    target = project.bodies.find(b => b.id === textTargetId);
+    if (!target || target.locked || target.visible === false) throw Error('Select one visible, unlocked body before opening the text tool.');
+    const bounds = calculateBounds([target]);
+    if ($('text-fit').checked) {
       const shrink = Math.min(1, bounds.size[0] * 0.85 / body.dimensions[0], bounds.size[1] * 0.8 / body.dimensions[1]);
       body.dimensions[0] *= shrink; body.dimensions[1] *= shrink;
-      if (Math.min(body.dimensions[0], body.dimensions[1]) < 0.1) throw Error('The selected top surface is too small for this text.');
-      body.position = [bounds.center[0], bounds.center[1], action === 'raised' ? bounds.max[2] + depth / 2 - Math.min(0.3, depth * 0.2) : bounds.max[2] - depth / 2 + Math.min(0.2, depth * 0.1)];
-      body.color = target.color;
     }
+    if (Math.min(body.dimensions[0], body.dimensions[1]) < 0.1) throw Error('The selected top surface is too small for this text.');
+    body.position = [bounds.center[0], bounds.center[1], action === 'raised' ? bounds.max[2] + depth / 2 - Math.min(0.3, depth * 0.2) : bounds.max[2] - depth / 2 + Math.min(0.2, depth * 0.1)];
+    body.color = target.color;
+  } else if (project.bodies.length) {
+    const bounds = calculateBounds(project.bodies);
+    body.position = [bounds.max[0] + body.dimensions[0] / 2 + 5, bounds.center[1], depth / 2];
+  }
+  return {body, target, action};
+}
+function clearTextPreview() {
+  clearTimeout(textPreviewTimer);
+  if (textPreviewGroup) { scene.remove(textPreviewGroup); disposeObject(textPreviewGroup); textPreviewGroup = null; }
+  renderRequested = true;
+}
+function updateTextPreview() {
+  clearTextPreview();
+  const content = $('text-content').value.trim();
+  $('text-preview-words').textContent = content || 'Your text';
+  $('text-fit-field').hidden = !textTargetId || $('text-action').value === 'standalone';
+  $('text-submit').lastChild.textContent = textEditingId ? 'Update text' : 'Add text';
+  if (!content) { $('text-submit').disabled = true; $('text-preview-size').textContent = 'Type above to preview your lettering'; $('text-feedback').textContent = ''; return; }
+  try {
+    const {body} = textDraft();
+    $('text-submit').disabled = false; $('text-feedback').textContent = '';
+    $('text-preview-size').textContent = body.dimensions.map(n => Number(n.toFixed(1))).join(' × ') + ' mm';
+    textPreviewGroup = new THREE.Group();
+    const mesh = buildMesh(body); mesh.material.transparent = true; mesh.material.opacity = 0.6;
+    mesh.material.color.set('#d28a39'); mesh.material.depthTest = false; mesh.renderOrder = 30;
+    textPreviewGroup.add(mesh); scene.add(textPreviewGroup); renderRequested = true;
+  } catch (error) { $('text-submit').disabled = true; $('text-feedback').textContent = error.message; }
+}
+
+function addText() {
+  try {
+    const {body, target, action} = textDraft();
     if (mutate(() => {
-      if (!target) { project.bodies.push(body); selected = new Set([body.id]); }
+      if (textEditingId) { replaceBodies([body]); selected = new Set([body.id]); }
+      else if (!target) { project.bodies.push(body); selected = new Set([body.id]); }
       else {
         const targetVolume = estimateVolume(target), textVolume = estimateVolume(body);
         const result = combineBodies([target, body], action === 'raised' ? 'union' : 'subtract');
@@ -231,7 +284,7 @@ function addText() {
         project.bodies = project.bodies.filter(b => b.id !== target.id); project.bodies.push(result); selected = new Set([result.id]);
       }
     }, action === 'standalone' ? '3D lettering added. Edit its words in Properties.' : 'Lettering applied. Undo restores the original body.')) {
-      $('text-dialog').close(); $('welcome-card').hidden = true; fit(); markGuide('start');
+      $('text-dialog').close(); $('welcome-card').hidden = true; setMode('move'); fit(); markGuide('start');
     } else $('text-feedback').textContent = $('status-message').textContent;
   } catch (error) { $('text-feedback').textContent = error.message; }
 }
@@ -242,6 +295,7 @@ function refresh() {
   $('body-count').textContent = project.bodies.length;
   $('selected-count').textContent = bodies.length ? `${bodies.length} selected` : 'No selection';
   $('undo').disabled = history.length === 0;
+  $('mold-undo').disabled = history.length === 0;
   $('redo').disabled = future.length === 0;
   $('delete-body').disabled = editableBodies().length === 0;
   $('duplicate').disabled = bodies.length === 0;
@@ -282,7 +336,7 @@ function refresh() {
   scheduleMeasurements(); refreshGuide();
   renderBodyList();
   updateOutline();
-  if (bodies.length === 1 && !bodies[0].locked && mode !== 'select' && !sketch) {
+  if (bodies.length === 1 && !bodies[0].locked && ['move', 'rotate', 'scale'].includes(mode) && !sketch) {
     transform.setMode({move: 'translate', rotate: 'rotate', scale: 'scale'}[mode]);
     transform.attach(meshes.get(bodies[0].id));
   } else transform.detach();
@@ -338,6 +392,8 @@ function select(id, extend = false) {
   refresh();
 }
 function mutate(action, text) {
+  if (moldBusy) return false;
+  if (moldStroke) cancelMoldStroke();
   const before = snapshot();
   try {
     action();
@@ -355,6 +411,8 @@ function mutate(action, text) {
   }
 }
 function restoreFromHistory(direction) {
+  if (moldBusy) return;
+  cancelMoldStroke();
   if (sketch) cancelSketch();
   const from = direction === 'undo' ? history : future;
   const to = direction === 'undo' ? future : history;
@@ -363,16 +421,26 @@ function restoreFromHistory(direction) {
   selected.clear(); rebuild(); persist(); message(direction === 'undo' ? 'Change undone.' : 'Change restored.');
 }
 function setMode(next) {
+  if (moldBusy) return;
+  cancelMoldStroke();
   if (sketch) cancelSketch();
   mode = next;
+  $('mold-bar').hidden = mode !== 'mold';
+  viewport.classList.toggle('molding', mode === 'mold');
+  $('mold-start').setAttribute('aria-pressed', String(mode === 'mold'));
+  orbit.enableRotate = mode !== 'mold';
+  if (moldCursor) moldCursor.visible = false;
   all('[data-tool]').forEach(button => {
     button.setAttribute('aria-pressed', String(button.dataset.tool === mode));
     button.classList.toggle('active', button.dataset.tool === mode);
   });
   refresh();
-  if (mode !== 'select') message(`Select one body to ${mode}. Drag a colored handle to edit that axis.`);
+  if (mode === 'mold') { $('welcome-card').hidden = true; message('Drag on a shape to shave it. Release to apply. Undo restores each stroke.', true); }
+  else if (mode !== 'select') message(`Select one body to ${mode}. Drag a colored handle to edit that axis.`);
 }
 function addShape(type) {
+  if (moldBusy) return;
+  if (mode === 'mold') setMode('select');
   if (sketch) cancelSketch();
   const count = project.bodies.filter(b => b.type === type).length;
   const names = {box: 'Box', cylinder: 'Cylinder', sphere: 'Sphere', cone: 'Cone', torus: 'Ring', roundedbox: 'Rounded box', tube: 'Tube', wedge: 'Wedge'};
@@ -525,6 +593,119 @@ function example(kind, initial = false) {
   if (!initial && project.bodies.length) confirmChange('Load an example?', 'The example replaces your current design. Save a project copy first if needed. You can undo this change.', load);
   else load();
 }
+function moldSettings() {
+  const diameter = Number($('mold-size').value), depth = Number($('mold-depth').value);
+  if (!Number.isFinite(diameter) || diameter < 0.5 || diameter > 1000) throw Error('Choose a brush size between 0.5 and 1,000 mm.');
+  if (!Number.isFinite(depth) || depth < 0.1 || depth > 1000) throw Error('Choose a shave depth between 0.1 and 1,000 mm.');
+  return {diameter, depth, through:$('mold-through').checked};
+}
+function moldHit(event) {
+  worldPoint(event);
+  const hit = raycaster.intersectObjects([...meshes.values()].filter(mesh => mesh.visible), false)[0];
+  if (!hit?.face) return null;
+  const body = project.bodies.find(b => b.id === hit.object.userData.bodyId);
+  if (!body || body.locked) return null;
+  const normal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
+  return {body, point:hit.point, normal};
+}
+function showMoldCursor(point, normal, settings) {
+  if (!moldCursor) {
+    moldCursor = new THREE.Group();
+    const geometry = new THREE.CylinderGeometry(1, 1, 1, 32); geometry.rotateX(Math.PI / 2);
+    const fill = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color:'#dc795c', transparent:true, opacity:0.18, depthTest:false, depthWrite:false}));
+    fill.name = 'volume'; fill.renderOrder = 22;
+    const ring = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:48}, (_, i) => new THREE.Vector3(Math.cos(i / 48 * Math.PI * 2), Math.sin(i / 48 * Math.PI * 2), 0))), new THREE.LineBasicMaterial({color:'#b34f36', depthTest:false}));
+    ring.name = 'ring'; ring.renderOrder = 23; moldCursor.add(fill, ring); scene.add(moldCursor);
+  }
+  const source = project.bodies.find(b => b.id === moldStroke?.bodyId) || moldHover?.body;
+  const depth = settings.through && source ? calculateBounds([source]).size.reduce((sum, n) => sum + n, 1) : settings.depth;
+  moldCursor.visible = true; moldCursor.position.copy(point);
+  moldCursor.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+  const fill = moldCursor.getObjectByName('volume'), ring = moldCursor.getObjectByName('ring');
+  fill.scale.set(settings.diameter / 2, settings.diameter / 2, depth); fill.position.z = -depth / 2 + 0.025;
+  ring.scale.setScalar(settings.diameter / 2); ring.position.z = 0.1;
+  renderRequested = true;
+}
+function beginMold(event) {
+  if (moldStroke) return;
+  try {
+    const settings = moldSettings(), hit = moldHit(event);
+    if (!hit) { message('Start the brush on a visible, unlocked shape.'); return; }
+    moldHover = hit;
+    selected = new Set([hit.body.id]); refresh();
+    moldStroke = {...settings, bodyId:hit.body.id, normal:hit.normal.toArray(), points:[hit.point.toArray()], pointerId:event.pointerId,
+      plane:new THREE.Plane().setFromNormalAndCoplanarPoint(hit.normal, hit.point)};
+    renderer.domElement.setPointerCapture(event.pointerId); orbit.enabled = false;
+    showMoldCursor(hit.point, hit.normal, settings); drawMoldStroke();
+    message('Release to apply this stroke. Escape cancels it.', true);
+  } catch (error) { message(error.message, true); }
+}
+function moveMold(event) {
+  if (moldStroke) {
+    if (event.pointerId !== moldStroke.pointerId) return;
+    worldPoint(event);
+    const point = raycaster.ray.intersectPlane(moldStroke.plane, new THREE.Vector3());
+    if (!point) return;
+    showMoldCursor(point, new THREE.Vector3(...moldStroke.normal), moldStroke);
+    const points = moldStroke.points, last = new THREE.Vector3(...points.at(-1));
+    if (point.distanceTo(last) < moldStroke.diameter * 0.12) return;
+    // Merge straight portions so a long drag cuts a continuous capsule.
+    if (points.length > 1) {
+      const previous = new THREE.Vector3(...points.at(-2));
+      const oldDirection = last.clone().sub(previous), direction = point.clone().sub(last);
+      const deviation = new THREE.Line3(previous, point).closestPointToPoint(last, true, new THREE.Vector3()).distanceTo(last);
+      if (oldDirection.dot(direction) > 0 && deviation < moldStroke.diameter * 0.04) points.pop();
+    }
+    if (points.length >= 48) { message('Release to apply this stroke, then keep shaving with a new stroke.', true); return; }
+    points.push(point.toArray()); drawMoldStroke();
+  } else {
+    try {
+      moldHover = moldHit(event);
+      if (moldHover) showMoldCursor(moldHover.point, moldHover.normal, moldSettings());
+      else if (moldCursor) { moldCursor.visible = false; renderRequested = true; }
+    } catch { if (moldCursor) moldCursor.visible = false; }
+  }
+}
+function drawMoldStroke() {
+  if (!moldGroup) { moldGroup = new THREE.Group(); scene.add(moldGroup); }
+  clearGroup(moldGroup);
+  if (!moldStroke) return;
+  // Translucent cutters show the actual swept area; solid edits happen on release.
+  const source = project.bodies.find(b => b.id === moldStroke.bodyId);
+  const depth = moldStroke.through ? calculateBounds([source]).size.reduce((sum, n) => sum + n, 1) : moldStroke.depth;
+  for (const cutter of moldCutters({...moldStroke, depth})) {
+    const mesh = buildMesh(cutter); mesh.material.transparent = true; mesh.material.opacity = 0.2;
+    mesh.material.depthTest = false; mesh.material.depthWrite = false; mesh.renderOrder = 21;
+    moldGroup.add(mesh);
+  }
+  renderRequested = true;
+}
+function cancelMoldStroke() {
+  const stroke = moldStroke; moldStroke = null;
+  if (stroke && renderer.domElement.hasPointerCapture(stroke.pointerId)) renderer.domElement.releasePointerCapture(stroke.pointerId);
+  if (moldGroup) clearGroup(moldGroup);
+  if (moldCursor) moldCursor.visible = false;
+  if (orbit) orbit.enabled = !sketch;
+  renderRequested = true;
+}
+function finishMold(event) {
+  if (!moldStroke || event.pointerId !== moldStroke.pointerId) return;
+  moveMold(event);
+  const stroke = moldStroke, source = structuredClone(project.bodies.find(b => b.id === stroke.bodyId)), before = snapshot();
+  moldStroke = null;
+  if (renderer.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
+  moldBusy = true; viewport.setAttribute('aria-busy', 'true');
+  message('Shaving the shape…', true);
+  requestAnimationFrame(() => setTimeout(() => {
+    try {
+      const result = shaveBody(source, stroke);
+      if (snapshot() !== before) throw Error('The design changed. Try the mold stroke again.');
+      moldBusy = false;
+      mutate(() => { replaceBodies([result]); selected = new Set([result.id]); }, 'Shape shaved. Drag again to remove more, or Undo to restore this stroke.');
+    } catch (error) { message(error.message, true); }
+    finally { moldBusy = false; viewport.removeAttribute('aria-busy'); cancelMoldStroke(); refresh(); }
+  }, 0));
+}
 function snap(value) {
   if (!$('snap-enabled').checked) return value;
   const step = Math.max(0.1, Number($('snap-step').value) || 1);
@@ -577,6 +758,8 @@ function sketchInstruction() {
   return surface + ': ' + (sketch.shape === 'polygon' ? 'Click corners. Extrude or Enter finishes; Backspace removes a corner.' : `Drag to draw a ${sketch.shape}, then choose its extrusion height.`);
 }
 function startSketch() {
+  if (moldBusy) return;
+  if (mode === 'mold') setMode('select');
   if (sketch) return;
   mode = 'select';
   sketch = {shape: 'rectangle', points: [], start: null, current: null, drawing: false, plane: experience === 'advanced' ? $('sketch-plane').value : 'xy', offset: experience === 'advanced' ? Number($('sketch-offset').value) || 0 : 0};
@@ -702,7 +885,7 @@ function setupScene() {
   transform = new TransformControls(camera, renderer.domElement);
   transform.setSize(0.85); transform.setSpace('world'); scene.add(transform.getHelper());
   transform.addEventListener('change', () => { renderRequested = true; });
-  transform.addEventListener('dragging-changed', event => { orbit.enabled = !event.value && !sketch; });
+  transform.addEventListener('dragging-changed', event => { orbit.enabled = !event.value && !sketch && !moldStroke; });
   transform.addEventListener('mouseDown', () => {
     const body = selectionBodies()[0];
     transformSnapshot = {json: snapshot(), dimensions: body?.dimensions.slice(), params: body?.params ? {...body.params} : null};
@@ -756,6 +939,10 @@ function setupScene() {
   renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
   renderer.domElement.addEventListener('pointerdown', event => {
     pointerStart = {x: event.clientX, y: event.clientY, button: event.button};
+    if (mode === 'mold') {
+      if (event.button === 0 && !moldBusy) beginMold(event);
+      return;
+    }
     if (!sketch || event.button !== 0) return;
     const point = worldPoint(event); if (!point) return;
     if (sketch.shape === 'polygon') {
@@ -766,6 +953,7 @@ function setupScene() {
     renderer.domElement.setPointerCapture(event.pointerId); drawSketch();
   });
   renderer.domElement.addEventListener('pointermove', event => {
+    if (mode === 'mold') { if (!moldBusy) moveMold(event); return; }
     const point = worldPoint(event);
     if (point) {
       const axes = sketch?.plane === 'xz' ? ['X', 'Z'] : sketch?.plane === 'yz' ? ['Y', 'Z'] : ['X', 'Y'];
@@ -775,6 +963,7 @@ function setupScene() {
     sketch.current = point; drawSketch();
   });
   renderer.domElement.addEventListener('pointerup', event => {
+    if (mode === 'mold') { if (event.button === 0) finishMold(event); return; }
     if (renderer.domElement.hasPointerCapture(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
     if (sketch) { sketch.drawing = false; return; }
     if (!pointerStart || pointerStart.button !== 0 || Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 5 || transform.dragging || transform.axis) return;
@@ -782,6 +971,9 @@ function setupScene() {
     const hit = raycaster.intersectObjects([...meshes.values()].filter(mesh => mesh.visible), false)[0];
     select(hit?.object.userData.bodyId, event.shiftKey || event.metaKey || event.ctrlKey);
   });
+  renderer.domElement.addEventListener('pointercancel', () => { cancelMoldStroke(); });
+  renderer.domElement.addEventListener('lostpointercapture', () => { if (moldStroke) cancelMoldStroke(); });
+  renderer.domElement.addEventListener('pointerleave', () => { if (!moldStroke && moldCursor) { moldCursor.visible = false; renderRequested = true; } });
   renderer.domElement.addEventListener('webglcontextlost', event => {
     event.preventDefault(); message('The 3D view was interrupted. Download your project, then reload the page.', true);
   });
@@ -793,6 +985,15 @@ function bindUI() {
   $('guide-toggle').addEventListener('click', () => { guideExpanded = !guideExpanded; savePreferences(); refreshGuide(); });
   $('text-start').addEventListener('click', openText); $('text-submit').addEventListener('click', addText);
   $('text-cancel').addEventListener('click', () => $('text-dialog').close());
+  $('text-dialog').addEventListener('close', clearTextPreview);
+  $('text-dialog').addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.isComposing && event.target.matches('input')) { event.preventDefault(); addText(); }
+  });
+  for (const id of ['text-content', 'text-height', 'text-depth', 'text-action', 'text-fit']) $(id).addEventListener('input', () => { clearTimeout(textPreviewTimer); textPreviewTimer = setTimeout(updateTextPreview, 120); });
+  $('mold-start').addEventListener('click', () => setMode(mode === 'mold' ? 'select' : 'mold'));
+  $('mold-done').addEventListener('click', () => setMode('select'));
+  $('mold-undo').addEventListener('click', () => restoreFromHistory('undo'));
+  $('mold-through').addEventListener('change', () => { $('mold-depth').disabled = $('mold-through').checked; });
   $('pattern-start').addEventListener('click', openPattern); $('pattern-submit').addEventListener('click', createPattern);
   $('pattern-cancel').addEventListener('click', () => $('pattern-dialog').close());
   all('[data-align-axis]').forEach(button => button.addEventListener('click', () => runAlignment(button.dataset.alignAxis, button.dataset.alignAnchor)));
@@ -922,19 +1123,21 @@ function bindUI() {
     const key = event.key.toLowerCase(), command = event.ctrlKey || event.metaKey;
     if ($('help-dialog').open || $('confirm-dialog').open || $('text-dialog').open || $('pattern-dialog').open) return;
     if (command && key === 's') { event.preventDefault(); saveProject(); return; }
-    if (editing) return;
+    if (editing || moldBusy) return;
     if (command && key === 'z') { event.preventDefault(); restoreFromHistory(event.shiftKey ? 'redo' : 'undo'); return; }
     if (command && key === 'y') { event.preventDefault(); restoreFromHistory('redo'); return; }
     if (command && key === 'd') { event.preventDefault(); duplicate(); return; }
     if (command && key === 'a') { event.preventDefault(); selected = new Set(project.bodies.filter(b => b.visible !== false).map(b => b.id)); refresh(); return; }
     if (command || event.altKey) return;
-    if (event.key === 'Escape') { if (sketch) cancelSketch(); else select(null); return; }
+    if (event.key === 'Escape') { if (mode === 'mold') { if (moldStroke) cancelMoldStroke(); else setMode('select'); } else if (sketch) cancelSketch(); else select(null); return; }
     if (sketch && event.key === 'Enter') { event.preventDefault(); finishSketch(); return; }
     if (sketch && ['Backspace', 'Delete'].includes(event.key)) { event.preventDefault(); $('sketch-undo-point').click(); return; }
     if (sketch) return;
     if (['Delete', 'Backspace'].includes(event.key)) { event.preventDefault(); removeSelected(); }
     if ({v: 'select', g: 'move', r: 'rotate', s: 'scale'}[key]) setMode({v: 'select', g: 'move', r: 'rotate', s: 'scale'}[key]);
     if (key === 'f') fit(); if (key === 'k') startSketch();
+    if (key === 'e') setMode(mode === 'mold' ? 'select' : 'mold');
+    if (key === 't') openText();
   });
   window.addEventListener('beforeunload', () => {
     if (storageAvailable) { try { localStorage.setItem(STORAGE_KEY, snapshot()); } catch {} }
