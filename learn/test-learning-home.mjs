@@ -21,7 +21,7 @@ try {
   const page=await context.newPage();
   await page.goto(origin+'/learn/');
   assert.equal(await page.locator('.habit-card').count(),4);
-  assert.equal(await page.locator('.activity-card').count(),18);
+  assert.equal(await page.locator('.activity-card').count(),19);
   assert.equal(await page.locator('.activity-card[href="/isitai/"]').count(),1);
   await page.locator('#learningSearch').fill('ASCII');assert.equal(await page.locator('.activity-card').count(),5);
   await page.locator('[data-filter="tool"]').click();assert.equal(await page.locator('.activity-card').count(),1);
