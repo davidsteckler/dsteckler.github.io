@@ -7,7 +7,7 @@
   body.classList.add('student-shell');
   const path = location.pathname;
   const area = body.dataset.studentArea || (path.startsWith('/pythoncourse') ? 'python' : path.startsWith('/turtlereference') ? 'reference' : path.startsWith('/turtleprojects') ? 'challenges' : path.startsWith('/turtle/') ? 'create' : 'home');
-  const links = [['home','Student home','/learn/'],['habits','Four steps','/learn/#habits'],['python','Python','/learn/python/'],['binary','Binary','/learn/binary/'],['challenges','Challenges','/learn/#challenges'],['reference','Reference','/learn/reference/'],['create','Create','/learn/create/']];
+  const links = [['home','Student home','/learn/'],['habits','Four steps','/learn/#habits'],['python','Python','/learn/python/'],['pi','Raspberry Pi','/pi/'],['binary','Binary','/learn/binary/'],['challenges','Challenges','/learn/#challenges'],['reference','Reference','/learn/reference/'],['create','Create','/learn/create/']];
   const bar = document.createElement('div');
   bar.id = 'studentNav'; bar.setAttribute('role','navigation'); bar.setAttribute('aria-label','Student learning');
   bar.innerHTML = '<a class="student-home" href="/learn/" aria-label="Student home"><span class="student-brand">DS / learn</span><span class="student-mobile-home">Home</span></a><div class="student-links">' + links.map(([id,label,href]) => '<a href="'+href+'" data-area="'+id+'"'+(id === area ? ' aria-current="page"' : '')+'>'+label+'</a>').join('') + '</div><button type="button" id="openThinking">My thinking</button>';
