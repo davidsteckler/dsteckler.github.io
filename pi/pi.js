@@ -11,35 +11,23 @@ function save() { try { localStorage.setItem('dsteckler-pi-lab-v1',JSON.stringif
 function toast(text) { $('toast').textContent = text; $('toast').classList.add('visible'); clearTimeout(toast.timer); toast.timer = setTimeout(()=>$('toast').classList.remove('visible'),2600); }
 function record() { if(!state[project.id] || typeof state[project.id] !== 'object')state[project.id] = {}; return state[project.id]; }
 function download(text,name,type='text/plain') { const url = URL.createObjectURL(new Blob([text],{type})); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500); }
-function art(p) {
- const index=projects.indexOf(p); const id=p.id;
- const shell='<rect x="65" y="22" width="230" height="114" rx="9" fill="#203d37"/><path d="M65 43H295" stroke="#49675c"/><circle cx="78" cy="33" r="3" fill="#e1a786"/><circle cx="89" cy="33" r="3" fill="#d6ed93"/>';
- let inner='';
- if (id==='terminal-badge')inner=shell+'<text x="85" y="67" fill="#d6ed93" font-family="monospace" font-size="10">+------------------+</text><text x="85" y="86" fill="#e8eee0" font-family="monospace" font-size="10">|   PI MAKER LAB    |</text><text x="85" y="105" fill="#d6ed93" font-family="monospace" font-size="10">+------------------+</text>';
- else if(id==='number-guess')inner=shell+'<text x="84" y="65" fill="#a2b7a9" font-family="monospace" font-size="11">Guess 1 to 20: 8</text><text x="84" y="85" fill="#e1a786" font-family="monospace" font-size="11">Too low</text><text x="84" y="109" fill="#d6ed93" font-family="monospace" font-size="11">Guess 1 to 20: 12 ▋</text>';
- else if(id==='file-sorter')inner='<path d="M55 54v58h80V62h-42l-8-8Z M222 54v58h80V62h-42l-8-8Z" fill="#d5dcb7" stroke="#72917b" stroke-width="2"/><path d="M148 84h57m-10-8 10 8-10 8" stroke="#4e7768" stroke-width="3" fill="none"/><text x="95" y="97" fill="#395b50" text-anchor="middle" font-size="13">.txt .png</text><text x="261" y="97" fill="#395b50" text-anchor="middle" font-size="13">sorted</text>';
- else if(id==='pi-data-log'||id==='sensor-dashboard')inner=shell+'<path d="M84 113h190M85 52v62" stroke="#6f8f7a"/><path d="m86 103 28-19 26 5 32-22 31 10 30-18 33 4" stroke="#d6ed93" stroke-width="3" fill="none"/><text x="92" y="65" fill="#e9eee2" font-family="monospace" font-size="10">CPU · C</text>';
- else if(id==='snake')inner=shell+'<path d="M110 101h62V76h49" stroke="#d6ed93" stroke-width="16" fill="none"/><rect x="251" y="95" width="13" height="13" fill="#f0ac89"/>';
- else if(id==='keyboard-maze')inner=shell+'<path d="M130 46v59M180 75v58M230 46v59" stroke="#7eab96" stroke-width="9"/><rect x="83" y="53" width="13" height="13" fill="#f0ac89"/><rect x="262" y="108" width="16" height="16" fill="#d6ed93"/>';
- else if(id==='paddle-rally')inner=shell+'<path d="M180 48v82" stroke="#49675c" stroke-dasharray="4 4"/><path d="M88 67v40M273 83v40" stroke="#d6ed93" stroke-width="8"/><circle cx="208" cy="72" r="6" fill="#fffdf8"/>';
- else if(id==='catch-game'||id==='physical-controller')inner=shell+'<rect x="150" y="114" width="59" height="7" fill="#d6ed93"/><rect x="174" y="62" width="12" height="12" fill="#f0ac89"/>'+(id==='physical-controller'?'<path d="M96 132v10h163v-10" stroke="#6c8c7c" fill="none"/><circle cx="120" cy="144" r="8" fill="#f0ac89"/><circle cx="237" cy="144" r="8" fill="#f0ac89"/>':'');
- else if(id==='bouncing-ball')inner=shell+'<path d="m105 116 55-57 57 57 44-46" stroke="#557a65" stroke-dasharray="4 4" fill="none"/><circle cx="216" cy="115" r="9" fill="#d6ed93"/>';
- else if(id==='robot-buggy')inner='<rect x="107" y="47" width="145" height="74" rx="14" fill="#689478"/><rect x="95" y="54" width="17" height="30" rx="4" fill="#243e35"/><rect x="247" y="54" width="17" height="30" rx="4" fill="#243e35"/><rect x="95" y="98" width="17" height="30" rx="4" fill="#243e35"/><rect x="247" y="98" width="17" height="30" rx="4" fill="#243e35"/><rect x="153" y="61" width="57" height="44" rx="4" fill="#d6ed93"/><path d="M281 79h35m-9-9 9 9-9 9" stroke="#547664" stroke-width="3" fill="none"/>';
- else if(id.includes('camera')||id==='time-lapse')inner='<rect x="100" y="42" width="145" height="83" rx="12" fill="#3c6d5b"/><circle cx="172" cy="83" r="30" fill="#203d37"/><circle cx="172" cy="83" r="19" fill="#789f8a"/><circle cx="172" cy="83" r="11" fill="#203d37"/><rect x="115" y="32" width="40" height="17" rx="4" fill="#3c6d5b"/>'+(id==='time-lapse'?'<text x="268" y="91" font-size="22" fill="#456b5a">01 02</text>':id==='camera-motion'?'<path d="M262 62h34v44h-34Z" fill="none" stroke="#d29873" stroke-width="3"/>':'<text x="270" y="92" font-size="27" fill="#456b5a">3 2 1</text>');
- else if(id==='traffic-lights')inner='<rect x="145" y="24" width="70" height="117" rx="14" fill="#203d37"/><circle cx="180" cy="49" r="13" fill="#e3a18a"/><circle cx="180" cy="82" r="13" fill="#cebb81" opacity=".4"/><circle cx="180" cy="115" r="13" fill="#d6ed93" opacity=".35"/>';
- else if(id==='distance-meter')inner='<rect x="100" y="51" width="160" height="72" rx="8" fill="#729c83"/><circle cx="136" cy="87" r="25" fill="#203d37"/><circle cx="224" cy="87" r="25" fill="#203d37"/><path d="M279 63q30 24 0 48m13-60q46 35 0 72" stroke="#a4ba9e" stroke-width="3" fill="none"/>';
- else if(id==='gpio-soundboard')inner='<rect x="76" y="48" width="210" height="76" rx="12" fill="#3c6d5b"/>'+[108,155,202,249].map((x,i)=>'<circle cx="'+x+'" cy="86" r="16" fill="'+['#d6ed93','#f0ac89','#8bb5a5','#e3d1a1'][i]+'"/>').join('');
- else if(id==='motion-alarm')inner='<rect x="137" y="70" width="87" height="55" rx="5" fill="#729c83"/><path d="M145 87a35 35 0 0 1 71 0Z" fill="#f7f7e9"/><path d="M113 52q-26 27 0 54m132-54q26 27 0 54" stroke="#76987f" stroke-width="3" fill="none"/>';
- else {
- const colors=id==='rgb-mixer'?['#e3a18a','#d6ed93','#94bfc1']:['#d6ed93'];
- inner='<path d="M72 121h217" stroke="#9bb29e" stroke-width="2"/>'+colors.map((color,i)=>{const x=colors.length===1?180:112+i*68;return '<path d="M'+(x-9)+' 89v32m18-32v32" stroke="#63806c" stroke-width="2"/><path d="M'+(x-17)+' 89V65a17 17 0 0 1 34 0v24Z" fill="'+color+'" stroke="#749178"/><circle cx="'+x+'" cy="69" r="28" fill="'+color+'" opacity=".2"/>';}).join('');
- if(id==='button-lamp')inner+='<rect x="77" y="93" width="34" height="25" rx="5" fill="#203d37"/>';
- if(id==='morse-beacon')inner+='<text x="245" y="79" font-family="monospace" font-size="20" fill="#456b5a">... ---</text>';
- if(id==='reaction-timer')inner+='<text x="45" y="75" font-family="monospace" font-size="17" fill="#456b5a">0.243s</text>';
- if(id==='pwm-light')inner+='<path d="m238 104 9-32 9 32 9-32 9 32" fill="none" stroke="#749178" stroke-width="2"/>';
- if(id==='light-sensor')inner+='<circle cx="100" cy="72" r="20" fill="#b9ad80"/><path d="m85 72 8-6 7 12 7-12 8 6" stroke="#f6efdb" stroke-width="3" fill="none"/>';
- }
- return '<svg viewBox="0 0 360 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+esc(p.title)+' illustration">'+inner+'</svg>';
+function photoMarkup(v, mode='card') {
+ const detailed=mode==='lesson'||mode==='hero';
+ const points=detailed?v.annotations:v.annotations.slice(0,1);
+ const font=v.width/29, boxHeight=font*1.55;
+ const overlays=points.map((a,i)=>{
+  const boxWidth=Math.min(v.width*.85,a.label.length*font*.56+font*.8);
+  const x=Math.min(v.width-boxWidth-8,Math.max(8,a.tx*v.width));
+  const y=Math.min(v.height-boxHeight-8,Math.max(8,a.ty*v.height-boxHeight));
+  const px=a.x*v.width,py=a.y*v.height;
+  return '<g class="photo-callout" data-callout="'+i+'"><path d="M'+px+' '+py+' L'+(x+boxWidth/2)+' '+(y+boxHeight/2)+'" fill="none" stroke="#fff" stroke-width="'+(v.width/190)+'"/><path d="M'+px+' '+py+' L'+(x+boxWidth/2)+' '+(y+boxHeight/2)+'" fill="none" stroke="#b64616" stroke-width="'+(v.width/420)+'"/><circle cx="'+px+'" cy="'+py+'" r="'+(v.width/145)+'" fill="#b64616" stroke="white" stroke-width="'+(v.width/500)+'"/><rect x="'+x+'" y="'+y+'" width="'+boxWidth+'" height="'+boxHeight+'" rx="'+(font*.15)+'" fill="#fffdf8" stroke="#d1c9bd" stroke-width="'+(v.width/900)+'"/><text x="'+(x+font*.4)+'" y="'+(y+font*1.06)+'" fill="#28342e" font-family="system-ui,sans-serif" font-weight="650" font-size="'+font+'">'+esc(a.label)+'</text></g>';
+ }).join('');
+ return '<div class="real-photo real-photo-'+mode+'"><img src="'+esc(v.src)+'" alt="'+esc(v.alt)+'" width="'+v.width+'" height="'+v.height+'" '+(mode==='hero'?'fetchpriority="high"':'loading="lazy"')+' decoding="async">'+(points.length?'<svg class="photo-overlay" viewBox="0 0 '+v.width+' '+v.height+'" aria-hidden="true">'+overlays+'</svg>':'')+(mode==='card'&&v.snippet?'<code class="photo-code">'+esc(v.snippet)+'</code>':'')+'</div>';
+}
+function art(p) { return photoMarkup(window.PI_VISUALS[p.id]); }
+function lessonPhoto(p) {
+ const v=window.PI_VISUALS[p.id];
+ return '<section class="photo-reference"><div class="photo-reference-head"><h3>'+(p.category==='Pygame'?'Actual program output':'See the hardware')+'</h3><div>'+(v.annotations.length?'<button type="button" id="togglePhotoLabels" aria-pressed="true">Hide labels</button>':'')+'<button type="button" id="enlargePhoto">Enlarge</button></div></div>'+photoMarkup(v,'lesson')+'<p class="photo-caption">'+esc(v.caption)+' <a href="'+esc(v.source)+'" target="_blank" rel="noopener">Image source ↗</a></p></section>';
 }
 function renderCards() {
  const q=$('search').value.trim().toLowerCase(),level=$('level').value,category=$('category').value;
@@ -83,8 +71,11 @@ function renderStep() {
  $('referenceLabel').textContent='PYTHON 3 · RUN IN THONNY ON THE PI';
  $('codeNote').textContent=step>=5?'Keep your working file on the Pi. Save a separate copy for each challenge.':'Line numbers are for reference. Type only the Python code. Run this program on the Pi.';
  showCode(example);
+ $('photoPanel').innerHTML=lessonPhoto(p);
  $('resultPanel').innerHTML='<h3>What you should see</h3><p>'+esc(step<=2?p.smallExpected:p.expected)+'</p>'+(p.id==='time-lapse'&&step>=3?'<h3>Assemble the movie in Terminal</h3><p>In File Manager open the new run folder. Right-click inside it and open a Terminal there, then run:</p><pre class="command">ffmpeg -framerate 10 -i frame-%04d.jpg -c:v libx264 -pix_fmt yuv420p movie.mp4</pre><p>Open movie.mp4 from that folder.</p>':'')+(step===0?'<h3>You will need</h3><ul>'+p.needs.map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul><h3>Before this project</h3><p>'+esc(p.prereq)+'</p>':'');
  $('sourceList').innerHTML=p.sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title)+' ↗</a>').join('');
+ if($('togglePhotoLabels'))$('togglePhotoLabels').onclick=()=>{const photo=document.querySelector('.photo-reference');const hidden=photo.classList.toggle('labels-hidden');$('togglePhotoLabels').setAttribute('aria-pressed',String(!hidden));$('togglePhotoLabels').textContent=hidden?'Show labels':'Hide labels';};
+ $('enlargePhoto').onclick=()=>{const v=window.PI_VISUALS[p.id];$('photoDialogContent').innerHTML='<h2>'+esc(p.title)+'</h2>'+photoMarkup(v,'lesson')+'<p class="photo-caption">'+esc(v.caption)+' <a href="'+esc(v.source)+'" target="_blank" rel="noopener">Image source</a></p>';$('photoDialog').showModal();};
  $('backStep').disabled=step===0; $('nextStep').hidden=step===7;
  $('backStep').onclick=()=>goStep(step-1);$('nextStep').onclick=()=>goStep(step+1);
  for(const id of ['changeNote','evidence'])if($(id))$(id).addEventListener('input',()=>{record()[id]=$(id).value;save();if(id==='evidence'){if(!record().evidence.trim()){record().complete=false;save();}completion();}});
@@ -105,6 +96,8 @@ $('setupButton').onclick=()=>$('setupDialog').showModal();$('closeSetup').onclic
 $('copyCode').onclick=async()=>{try{await navigator.clipboard.writeText(shownCode);toast('Python copied. Paste into Thonny.');}catch{toast('Copy unavailable here. Use Download .py.');}};
 $('downloadCode').onclick=()=>download(shownCode,project.id.replaceAll('-','_')+(step<3?'_checkpoint':'')+'.py','text/x-python');
 $('exportNotes').onclick=exportNotes;
+$('closePhoto').onclick=()=>$('photoDialog').close();
+if($('heroPhoto'))$('heroPhoto').innerHTML=photoMarkup(window.PI_VISUALS['terminal-badge'],'hero');
 const query=new URLSearchParams(location.search),requested=query.get('project');
 project=projects.find(p=>p.id===requested);
 if(project){$('catalog').hidden=true;$('workspace').hidden=false;document.body.classList.add('project-mode');document.title=project.title+' · Raspberry Pi Lab | David Steckler';$('projectTitle').textContent=project.title;$('projectMeta').textContent=project.level+' · '+project.category+' · '+project.minutes+' min';$('projectSummary').textContent=project.summary;$('prereq').textContent=project.prereq;$('materials').innerHTML=project.needs.map(x=>'<li>'+esc(x)+'</li>').join('');$('skills').innerHTML=project.skills.map(x=>'<span class="skill">'+esc(x)+'</span>').join('');$('miniPreview').innerHTML=art(project);const explicitStep=Number(query.get('step'));step=explicitStep>=1&&explicitStep<=8?explicitStep-1:Math.min(7,Math.max(0,Number(record().step)||0));state.lastProject=project.id;save();window.LEARNING_ACTIVITY={id:'pi-'+project.id,title:project.title,url:'/pi/?project='+project.id};window.dispatchEvent(new CustomEvent('learning-activity',{detail:window.LEARNING_ACTIVITY}));renderStep();}
