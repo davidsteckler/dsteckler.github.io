@@ -12,6 +12,8 @@ Run `python pi/validate.py` from the repository root after installing `pygame`, 
 
 Research checked 2026-10-26. Primary sources are linked per project. Camera examples use Picamera2, GPIO examples use GPIO Zero, and dependency instructions use Raspberry Pi OS apt packages. Older inspiration pages can use different camera software; keep classroom code aligned to current APIs.
 
-## Real visual references
+## Finished result previews
 
-`visuals.js` maps every project to a locally hosted photograph or a screen capture from the actual Pygame reference program. `images/CREDITS.html` records sources and licenses. Hardware images are reference photographs; exact project connections remain in the wiring tables. The page draws SVG leader lines and labels over each image, with coordinates normalized to that source image. Keep image and SVG aspect-ratio behavior aligned when changing a crop. The lesson supports hiding labels and enlarging the photograph. Avoid replacing these assets with decorative hardware illustrations.
+Every project has its own locally hosted 1200 × 800 result composition in `images/results/`, mapped in `visuals.js`. Terminal, file-sorter, and Pygame previews come from running the reference programs. Hardware previews combine real circuit/build photographs with Python-drawn output art: timing traces, color mixes, a reaction result, saved data, or a robot route. Sensor readings, dashboard values, and motion masks are illustrative and identified in the captions. Camera previews include real Raspberry Pi camera sample photographs and flower time-lapse frames.
+
+`images/CREDITS.html` records source photographs and licenses. Exact project connections remain in the wiring tables. SVG labels and leader lines are drawn over each composition using normalized target coordinates. The catalogue, featured examples, lesson preview, and enlarged view share these annotations. Lessons support hiding labels. Check label placement at both thumbnail and enlarged sizes when changing an image.

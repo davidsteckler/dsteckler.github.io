@@ -12,22 +12,28 @@ function toast(text) { $('toast').textContent = text; $('toast').classList.add('
 function record() { if(!state[project.id] || typeof state[project.id] !== 'object')state[project.id] = {}; return state[project.id]; }
 function download(text,name,type='text/plain') { const url = URL.createObjectURL(new Blob([text],{type})); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500); }
 function photoMarkup(v, mode='card') {
- const detailed=mode==='lesson'||mode==='hero';
- const points=detailed?v.annotations:v.annotations.slice(0,1);
- const font=v.width/29, boxHeight=font*1.55;
+ const points=v.annotations;
+ const font=v.width/31;
+ const placed=[];
  const overlays=points.map((a,i)=>{
-  const boxWidth=Math.min(v.width*.85,a.label.length*font*.56+font*.8);
-  const x=Math.min(v.width-boxWidth-8,Math.max(8,a.tx*v.width));
-  const y=Math.min(v.height-boxHeight-8,Math.max(8,a.ty*v.height-boxHeight));
+  const words=a.label.split(' '),lines=[];let line='';
+  for(const word of words){if((line+' '+word).trim().length>19&&line){lines.push(line);line=word;}else line=(line+' '+word).trim();}if(line)lines.push(line);
+  const boxWidth=Math.min(v.width*.44,Math.max(...lines.map(x=>x.length))*font*.57+font*1.05);
+  const boxHeight=font*(lines.length*1.15+.5);
+  let x=Math.min(v.width-boxWidth-12,Math.max(12,a.tx*v.width));
+  let y=Math.min(v.height-boxHeight-12,Math.max(125,a.ty*v.height-boxHeight));
+  for(const r of placed){if(x<r.x+r.w+8&&x+boxWidth>r.x-8&&y<r.y+r.h+8&&y+boxHeight>r.y-8){y=Math.max(125,r.y-boxHeight-font*.35);}}
+  placed.push({x,y,w:boxWidth,h:boxHeight});
   const px=a.x*v.width,py=a.y*v.height;
-  return '<g class="photo-callout" data-callout="'+i+'"><path d="M'+px+' '+py+' L'+(x+boxWidth/2)+' '+(y+boxHeight/2)+'" fill="none" stroke="#fff" stroke-width="'+(v.width/190)+'"/><path d="M'+px+' '+py+' L'+(x+boxWidth/2)+' '+(y+boxHeight/2)+'" fill="none" stroke="#b64616" stroke-width="'+(v.width/420)+'"/><circle cx="'+px+'" cy="'+py+'" r="'+(v.width/145)+'" fill="#b64616" stroke="white" stroke-width="'+(v.width/500)+'"/><rect x="'+x+'" y="'+y+'" width="'+boxWidth+'" height="'+boxHeight+'" rx="'+(font*.15)+'" fill="#fffdf8" stroke="#d1c9bd" stroke-width="'+(v.width/900)+'"/><text x="'+(x+font*.4)+'" y="'+(y+font*1.06)+'" fill="#28342e" font-family="system-ui,sans-serif" font-weight="650" font-size="'+font+'">'+esc(a.label)+'</text></g>';
+  const nearestX=Math.max(x,Math.min(px,x+boxWidth)),nearestY=Math.max(y,Math.min(py,y+boxHeight));
+  return '<g class="photo-callout" data-callout="'+i+'"><path d="M'+px+' '+py+' L'+nearestX+' '+nearestY+'" fill="none" stroke="#fffdf8" stroke-width="'+(v.width/190)+'"/><path d="M'+px+' '+py+' L'+nearestX+' '+nearestY+'" fill="none" stroke="#c65326" stroke-width="'+(v.width/360)+'"/><circle cx="'+px+'" cy="'+py+'" r="'+(v.width/140)+'" fill="#c65326" stroke="white" stroke-width="'+(v.width/450)+'"/><rect x="'+x+'" y="'+y+'" width="'+boxWidth+'" height="'+boxHeight+'" rx="'+(font*.13)+'" fill="#fffdf8" stroke="#d4cabc" stroke-width="'+(v.width/800)+'"/>'+lines.map((line,n)=>'<text x="'+(x+font*.5)+'" y="'+(y+font*(1.02+n*1.15))+'" fill="#243e34" font-family="system-ui,sans-serif" font-weight="700" font-size="'+font+'">'+esc(line)+'</text>').join('')+'</g>';
  }).join('');
- return '<div class="real-photo real-photo-'+mode+'"><img src="'+esc(v.src)+'" alt="'+esc(v.alt)+'" width="'+v.width+'" height="'+v.height+'" '+(mode==='hero'?'fetchpriority="high"':'loading="lazy"')+' decoding="async">'+(points.length?'<svg class="photo-overlay" viewBox="0 0 '+v.width+' '+v.height+'" aria-hidden="true">'+overlays+'</svg>':'')+(mode==='card'&&v.snippet?'<code class="photo-code">'+esc(v.snippet)+'</code>':'')+'</div>';
+ return '<div class="real-photo real-photo-'+mode+'"><img src="'+esc(v.src)+'" alt="'+esc(v.alt)+'" width="'+v.width+'" height="'+v.height+'" '+(mode==='hero'?'fetchpriority="high"':'loading="lazy"')+' decoding="async">'+(points.length?'<svg class="photo-overlay" viewBox="0 0 '+v.width+' '+v.height+'" aria-hidden="true">'+overlays+'</svg>':'')+'</div>';
 }
 function art(p) { return photoMarkup(window.PI_VISUALS[p.id]); }
 function lessonPhoto(p) {
  const v=window.PI_VISUALS[p.id];
- return '<section class="photo-reference"><div class="photo-reference-head"><h3>'+(p.category==='Pygame'?'Actual program output':'See the hardware')+'</h3><div>'+(v.annotations.length?'<button type="button" id="togglePhotoLabels" aria-pressed="true">Hide labels</button>':'')+'<button type="button" id="enlargePhoto">Enlarge</button></div></div>'+photoMarkup(v,'lesson')+'<p class="photo-caption">'+esc(v.caption)+' <a href="'+esc(v.source)+'" target="_blank" rel="noopener">Image source ↗</a></p></section>';
+ return '<section class="photo-reference"><div class="photo-reference-head"><h3>'+'Finished result preview'+'</h3><div>'+(v.annotations.length?'<button type="button" id="togglePhotoLabels" aria-pressed="true">Hide labels</button>':'')+'<button type="button" id="enlargePhoto">Enlarge</button></div></div>'+photoMarkup(v,'lesson')+'<p class="photo-caption">'+esc(v.caption)+' <a href="'+esc(v.source)+'" target="_blank" rel="noopener">Image source ↗</a></p></section>';
 }
 function renderCards() {
  const q=$('search').value.trim().toLowerCase(),level=$('level').value,category=$('category').value;
@@ -97,7 +103,12 @@ $('copyCode').onclick=async()=>{try{await navigator.clipboard.writeText(shownCod
 $('downloadCode').onclick=()=>download(shownCode,project.id.replaceAll('-','_')+(step<3?'_checkpoint':'')+'.py','text/x-python');
 $('exportNotes').onclick=exportNotes;
 $('closePhoto').onclick=()=>$('photoDialog').close();
-if($('heroPhoto'))$('heroPhoto').innerHTML=photoMarkup(window.PI_VISUALS['terminal-badge'],'hero');
+if($('heroPhoto')){
+ const featured={'robot-buggy':['A moving buggy','See the finished buggy and the route it can drive.'],'keyboard-maze':['A playable maze','A game screen with controls, obstacles, and an exit.'],'traffic-lights':['A traffic-light sequence','An assembled circuit and the timed light sequence.']};
+ function chooseFeature(id){$('heroPhoto').innerHTML=photoMarkup(window.PI_VISUALS[id],'hero');$('heroCaption').innerHTML=esc(featured[id][1])+' <a href="?project='+id+'">Open project →</a>';document.querySelectorAll('[data-feature]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.feature===id)));}
+ document.querySelectorAll('[data-feature]').forEach(b=>b.addEventListener('click',()=>chooseFeature(b.dataset.feature)));
+ chooseFeature('robot-buggy');
+}
 const query=new URLSearchParams(location.search),requested=query.get('project');
 project=projects.find(p=>p.id===requested);
 if(project){$('catalog').hidden=true;$('workspace').hidden=false;document.body.classList.add('project-mode');document.title=project.title+' · Raspberry Pi Lab | David Steckler';$('projectTitle').textContent=project.title;$('projectMeta').textContent=project.level+' · '+project.category+' · '+project.minutes+' min';$('projectSummary').textContent=project.summary;$('prereq').textContent=project.prereq;$('materials').innerHTML=project.needs.map(x=>'<li>'+esc(x)+'</li>').join('');$('skills').innerHTML=project.skills.map(x=>'<span class="skill">'+esc(x)+'</span>').join('');$('miniPreview').innerHTML=art(project);const explicitStep=Number(query.get('step'));step=explicitStep>=1&&explicitStep<=8?explicitStep-1:Math.min(7,Math.max(0,Number(record().step)||0));state.lastProject=project.id;save();window.LEARNING_ACTIVITY={id:'pi-'+project.id,title:project.title,url:'/pi/?project='+project.id};window.dispatchEvent(new CustomEvent('learning-activity',{detail:window.LEARNING_ACTIVITY}));renderStep();}
