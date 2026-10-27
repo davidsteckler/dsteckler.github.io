@@ -1513,7 +1513,7 @@ for i in range(4):
     "forward","backward","left","right","goto","setposition","setx","sety",
     "penup","pendown","pensize","speed","circle","color","pencolor",
     "fillcolor","bgcolor","begin_fill","end_fill","shape","clear","reset",
-    "dot","stamp","hideturtle","showturtle","setheading","write","onclick","getscreen"
+    "dot","stamp","hideturtle","showturtle","setheading","write","onclick","onscreenclick","done","mainloop","getscreen"
   ];
 
   function editDistance(a,b){
@@ -2189,6 +2189,9 @@ for i in range(4):
       syncPlaybackButtons();
       Sk.misceval.asyncToPromise(function(){
         return Sk.misceval.callsimOrSuspend(callback,pyNum(x),pyNum(y));
+      },{
+        // Debug suspensions must also be handled for callbacks after the initial run.
+        "Sk.debug":function(susp){return susp.resume();}
       }).catch(function(err){
         renderError(err);
         setStatus("bad");
@@ -2356,6 +2359,13 @@ for i in range(4):
         state.turtleClickCallback=callback;
         return none();
       });
+      Sk.builtins.onscreenclick=new Sk.builtin.func(function(callback){
+        state.screenClickCallback=callback;
+        return none();
+      });
+      // The browser keeps the Turtle world visible without a blocking Tkinter loop.
+      Sk.builtins.done=new Sk.builtin.func(function(){return none();});
+      Sk.builtins.mainloop=Sk.builtins.done;
       Sk.builtins.getscreen=new Sk.builtin.func(function(){return getScreenObject();});
     }
 
