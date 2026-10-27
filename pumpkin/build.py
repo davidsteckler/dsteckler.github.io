@@ -1,15 +1,112 @@
-"""Author Pumpkin Studio data and preview every program by executing its Turtle calls."""
+"""Author the student programs with visible Turtle commands and small functions."""
 from pathlib import Path
+import ast
+import html
 import json
 import math
-import html
 
 ROOT = Path(__file__).parent
 
-BODY = '''speed(6)
-bgcolor("black")
+def combine(*parts):
+    return '\n\n'.join(part.strip() for part in parts if part).strip() + '\n'
 
-# The circle starts at its bottom edge.
+class Drawing:
+    """Authoring convenience only; none of this class is shown to students."""
+    def __init__(self, background='black'):
+        self.background = background
+        self.functions = {}
+        self.blocks = []
+
+    def function(self, name, commands):
+        text = 'def ' + name + '():\n' + '\n'.join('    ' + line for line in commands.splitlines())
+        assert name not in self.functions or self.functions[name] == text, name
+        self.functions[name] = text
+        return name + '()'
+
+    def add(self, label, commands):
+        self.blocks.append('# ' + label + '\n' + commands)
+
+    def position(self, x, y, heading=0):
+        def number(value):
+            value = round(value, 1)
+            return str(int(value)) if value == int(value) else str(value)
+        return f'penup()\nsetposition({number(x)}, {number(y)})\nsetheading({number(heading)})\npendown()'
+
+    def filled(self, label, x, y, commands, color, heading=0, function=None):
+        shape = 'begin_fill()\n' + commands + '\nend_fill()'
+        if function:
+            shape = self.function(function, shape)
+        self.add(label, self.position(x, y, heading) + '\ncolor(' + json.dumps(color) + ')\n' + shape)
+
+    def circle(self, label, x, y, size, color, function=None):
+        # The authored center is converted to a literal bottom-edge coordinate.
+        self.filled(label, x, y-size, f'circle({size})', color, function=function)
+
+    def rectangle(self, label, x, y, width, height, color, function=None):
+        commands = f'for i in range(2):\n    forward({width})\n    left(90)\n    forward({height})\n    left(90)'
+        self.filled(label, x, y, commands, color, function=function)
+
+    def triangle(self, label, x, y, size, color='white', heading=0, function='triangle'):
+        commands = f'for i in range(3):\n    forward({size})\n    left(120)'
+        self.filled(label, x, y, commands, color, heading, function)
+
+    def arc(self, label, x, y, heading, size, angle, color='white', width=6):
+        self.add(label, self.position(x,y,heading) + f'\ncolor({json.dumps(color)})\npensize({width})\ncircle({size}, {angle})\npensize(1)')
+
+    def line(self, label, x, y, heading, length, color='white', width=3):
+        self.add(label, self.position(x,y,heading) + f'\ncolor({json.dumps(color)})\npensize({width})\nforward({length})\npensize(1)')
+
+    def path(self, label, points, color):
+        # Student code visits each point explicitly, with no lists or indexing.
+        first, *rest = points
+        commands = '\n'.join(f'setposition({x}, {y})' for x,y in rest+[first])
+        self.filled(label, *first, commands, color)
+
+    def star(self, label, x, y, size=24, color='gold'):
+        self.filled(label,x,y,f'for i in range(5):\n    forward({size})\n    right(144)',color,72,'star')
+
+    def body(self, color='darkorange', x=0, y=0, size=134):
+        self.circle('Draw the pumpkin body. The circle starts at its bottom.',x,y,size,color)
+        self.rectangle('Draw the green stem at the top.',x-12,y+size-4,24,36,'green','stem')
+
+    def eyes(self, kind='triangle', color='white', x=0, y=0, size=45, distance=48):
+        if kind == 'triangle':
+            self.triangle('Draw the left eye.',x-distance-size/2,y+32,size,color)
+            self.triangle('Draw the right eye. Reuse triangle().',x+distance-size/2,y+32,size,color)
+        else:
+            self.circle('Draw the left eye.',x-distance,y+48,size,color,'eye')
+            self.circle('Draw the right eye. Reuse eye().',x+distance,y+48,size,color,'eye')
+
+    def smile(self, x=0, y=0, size=49, color='white'):
+        self.arc('Draw the smile. 180 makes half a circle.',x-size,y-33,270,size,180,color,7)
+
+    def face(self, color='white'):
+        self.eyes(color=color)
+        self.triangle('Face left to draw the nose pointing down.',15,-10,30,color,180,'small_triangle')
+        self.add('Draw six teeth, moving left after each tooth.', self.position(90,-44,180) + f'\ncolor({json.dumps(color)})\nfor i in range(6):\n    small_triangle()\n    penup()\n    forward(30)\n    pendown()')
+
+    def code(self):
+        definitions = combine('# Make these functions first. They run when you call them below.', *self.functions.values()) if self.functions else ''
+        return combine(definitions, f'# Set up the drawing.\nspeed(0)\nbgcolor({json.dumps(self.background)})', *self.blocks, 'hideturtle()')
+
+designs = []
+def design(id, title, category, description, experiment, drawing, level='Practice', focus=''):
+    code = drawing if isinstance(drawing,str) else drawing.code()
+    designs.append(dict(id=id,title=title,category=category,description=description,experiment=experiment,
+                        code=code,level=level,focus=focus,preview=f'previews/{id}.svg'))
+
+# The tutorial uses the same familiar two triangle functions throughout.
+TRIANGLE = '''def triangle():
+    color("white")
+    begin_fill()
+    for i in range(3):
+        forward(50)
+        left(120)
+    end_fill()'''
+SMALL = TRIANGLE.replace('def triangle():','def small_triangle():').replace('forward(50)','forward(30)')
+FUNCTIONS = combine('# Make these functions first.',TRIANGLE,SMALL)
+SETUP = 'speed(0)\nbgcolor("black")'
+BODY = '''# Draw the body. The circle starts at its bottom edge.
 penup()
 setposition(0, -140)
 setheading(0)
@@ -18,39 +115,7 @@ color("darkorange")
 begin_fill()
 circle(140)
 end_fill()'''
-
-TRIANGLE = '''def triangle():
-    color("white")
-    begin_fill()
-    for i in range(3):
-        forward(50)
-        left(120)
-    end_fill()'''
-
-SMALL = '''def small_triangle():
-    color("white")
-    begin_fill()
-    for i in range(3):
-        forward(30)
-        left(120)
-    end_fill()'''
-
-LEFT_EYE = '''penup()
-setposition(-75, 35)
-setheading(0)
-pendown()
-triangle()'''
-RIGHT_EYE = '''penup()
-setposition(25, 35)
-setheading(0)
-pendown()
-triangle()'''
-NOSE = '''penup()
-setposition(15, -12)
-setheading(180)
-pendown()
-small_triangle()'''
-STEM = '''# A rectangle: two long sides and two short sides.
+STEM = '''# Draw the stem at the top.
 penup()
 setposition(-14, 136)
 setheading(0)
@@ -63,423 +128,478 @@ for i in range(2):
     forward(48)
     left(90)
 end_fill()'''
-TOOTH_START = '''penup()
-setposition(90, -44)
-setheading(180)
-pendown()'''
-TEETH = TOOTH_START + '''
-for i in range(6):
-    small_triangle()
-    penup()
-    forward(30)
-    pendown()'''
-
-def combine(*parts):
-    return '\n\n'.join(p.strip() for p in parts if p).strip() + '\n'
-
-FINAL = combine(BODY, TRIANGLE, SMALL, LEFT_EYE, RIGHT_EYE, NOSE, STEM, TEETH, 'hideturtle()')
-
-EYE_RAW = '''# One filled triangle, before we turn it into a function.
+LEFT_EYE = '''# Draw the left eye.
 penup()
 setposition(-75, 35)
 setheading(0)
 pendown()
-color("white")
-begin_fill()
-forward(50)
-left(120)
-forward(50)
-left(120)
-forward(50)
-left(120)
-end_fill()'''
-
-stages = []
-def stage(id, title, skill, instruction, why, snippet, code, expected, predict, answer, experiment, focus):
-    stages.append(dict(id=id, title=title, skill=skill, instruction=instruction, why=why,
-                       snippet=snippet, code=code, expected=expected, predict=predict,
-                       answer=answer, experiment=experiment, focus=focus,
-                       preview=f'previews/step-{id}.svg'))
-
-OUTLINE = '''speed(6)
-bgcolor("black")
-
+triangle()'''
+RIGHT_EYE = LEFT_EYE.replace('left eye','right eye').replace('(-75, 35)','(25, 35)')
+NOSE = '''# Face left to draw the nose pointing down.
 penup()
-setposition(0, -140)
-setheading(0)
+setposition(15, -12)
+setheading(180)
 pendown()
-color("darkorange")
-circle(140)'''
-stage('circle', 'Draw the pumpkin outline', 'Position + circle',
-      'Start with the outline. Type this program in the editor, then press Run.',
-      'Our world runs from −200 to 200. A circle is drawn to Tracy’s left. Facing right at (0, −140) puts its center at (0, 0).',
-      OUTLINE, combine(OUTLINE), 'One orange circle centered in the black world.',
-      'Why is the starting y value −140 instead of 0?',
-      'circle(140) starts on the edge, 140 pixels below the center. Starting at (0, 0) would put the center at (0, 140), partly outside the world.',
-      'Change circle(140) to circle(100). Notice that its bottom stays in the same place.', ['circle(140)', 'setposition(0, -140)'])
-stage('fill', 'Fill the circle', 'Color + fill',
-      'Put begin_fill() immediately before circle(140), and end_fill() immediately after it.',
-      'color() sets the outline and fill color. begin_fill() records a shape; end_fill() fills that shape.',
-      'color("darkorange")\nbegin_fill()\ncircle(140)\nend_fill()', combine(BODY),
-      'A solid orange pumpkin body.', 'What happens if you leave out end_fill()?',
-      'The outline is drawn, but the fill is never completed.',
-      'Try color("orange") or color("#f97316"). Keep the quotation marks.', ['begin_fill()', 'end_fill()'])
-stage('eye', 'Draw one triangle eye', 'Pen up + turning',
-      'Add this after the body. Move with the pen up so there is no line from the pumpkin’s bottom to the eye.',
-      'Each side is 50 pixels. Tracy turns 120° at each corner: three exterior turns add up to 360°.',
-      EYE_RAW, combine(BODY, EYE_RAW), 'One white triangle on the left side of the face.',
-      'Would left(60) close this three-sided shape?',
-      'No. Tracy needs an exterior turn of 120°. The inside angle of an equilateral triangle is 60°.',
-      'Move the eye: change −75 to −95. Negative x values move left.', ['setposition(-75, 35)', 'left(120)'])
-stage('two-eyes', 'Give it a second eye', 'Reuse + coordinates',
-      'Replace the long eye instructions with triangle(), then call it at two different positions.',
-      'The definition saves the drawing instructions. Calling triangle() runs them. setheading(0) gives each eye the same starting direction.',
-      combine(TRIANGLE, LEFT_EYE, RIGHT_EYE), combine(BODY, TRIANGLE, LEFT_EYE, RIGHT_EYE),
-      'Two matching white triangle eyes.', 'Does defining triangle() draw an eye by itself?',
-      'No. The indented instructions run when Python reaches a triangle() call.',
-      'Change forward(50) inside the function to forward(40). Both eyes shrink.', ['def triangle():', 'triangle()'])
-stage('nose', 'Add an upside-down nose', 'Direction + functions',
-      'Add a smaller triangle function. Move to (15, −12), face left, and call it once.',
-      'This triangle uses 30-pixel sides. Starting at 180° turns the same left-turn triangle upside down.',
-      combine(SMALL, NOSE), combine(BODY, TRIANGLE, SMALL, LEFT_EYE, RIGHT_EYE, NOSE),
-      'Two eyes and a small downward-pointing nose.', 'What would setheading(0) do to the nose?',
-      'It would point up and extend to the right from (15, −12). Heading changes both the direction and where the triangle lands.',
-      'Change the nose’s y value from −12 to 0 to move it up.', ['setheading(180)', 'forward(30)'])
-stage('stem', 'Build the green stem', 'Rectangle + loop',
-      'Add a green filled rectangle at the top of the pumpkin.',
-      'The loop repeats a short side, a corner, a long side, and a corner twice. The stem overlaps the body slightly so the pieces connect.',
-      STEM, combine(BODY, TRIANGLE, SMALL, LEFT_EYE, RIGHT_EYE, NOSE, STEM),
-      'A green stem attached to the top.', 'Why does range(2) draw four sides?',
-      'Each repeat draws two sides. Two repeats × two sides = four sides.',
-      'Change forward(48) to forward(36) for a shorter stem.', ['for i in range(2):', 'forward(48)'])
-stage('one-tooth', 'Try one tooth', 'Reuse a smaller shape',
-      'Move to the right end of the mouth, face left, and reuse small_triangle().',
-      'The nose and this tooth use the same function. Position and heading give the same shape a different job.',
-      combine(TOOTH_START, 'small_triangle()'), combine(BODY, TRIANGLE, SMALL, LEFT_EYE, RIGHT_EYE, NOSE, STEM, TOOTH_START, 'small_triangle()'),
-      'One downward-pointing tooth below the right eye.', 'Will this tooth be the same size as the nose?',
-      'Yes. Both calls use small_triangle(), whose sides are 30 pixels.',
-      'Try a tooth at (0, −44). Set the position before calling the function.', ['setposition(90, -44)', 'small_triangle()'])
-stage('teeth', 'Repeat a whole row of teeth', 'For loop + spacing',
-      'Replace the single tooth call with this loop. Keep the positioning lines above it.',
-      'Each repeat draws a tooth and moves 30 pixels left. The pen goes up for the move and down for the next tooth.',
-      TEETH, combine(BODY, TRIANGLE, SMALL, LEFT_EYE, RIGHT_EYE, NOSE, STEM, TEETH),
-      'Six connected triangular teeth across the face.', 'What changes if forward(30) becomes forward(35)?',
-      'The teeth keep their 30-pixel sides, but their starting points are 35 pixels apart. Five-pixel gaps appear.',
-      'Try range(5), then range(7). The row starts at the same place and grows toward the left.', ['for i in range(6):', 'forward(30)'])
-stage('finish', 'Finish your jack-o’-lantern', 'Read the whole program',
-      'Add hideturtle() at the end. Run the complete drawing and compare it with the target.',
-      'The drawing is built in layers: body, eyes, nose, stem, then teeth. hideturtle() removes Tracy’s marker after her work is done.',
-      'hideturtle()', FINAL,
-      'The complete pumpkin from this tutorial.', 'Does hideturtle() erase the picture?',
-      'No. It hides Tracy’s marker. The shapes she drew stay on the canvas.',
-      'Use speed(0) for an instant drawing. Use speed(3) to watch the movements.', ['hideturtle()'])
-stage('remix', 'Make your own version', 'Change + explain',
-      'Choose a variation below, or change your own pumpkin. Make three changes you can point to in the code.',
-      'Try one change at a time. Run, look at the result, and decide what to change next. You can return to any saved draft.',
-      '# Ideas to try:\n# 1. A new body or background color\n# 2. Different eye positions or sizes\n# 3. A different tooth count or spacing', FINAL,
-      'A pumpkin with choices you can explain.', 'Which function would you change to resize both eyes?',
-      'triangle(). Both eyes call that function, so changing its side length affects both eyes.',
-      'Pick a gallery design and add a detail of your own. Explain which commands make it appear.', ['def triangle():', 'for i in range(6):'])
-
-HELPERS = {
-    'move': ([], '''def move(x, y):
+small_triangle()'''
+TOOTH_START = '''# Start at the right end of the mouth and face left.
+penup()
+setposition(90, -44)
+setheading(180)
+pendown()'''
+TEETH = combine(TOOTH_START,'''# Draw a tooth, then move left. Repeat six times.
+for i in range(6):
+    small_triangle()
     penup()
-    setposition(x, y)
-    setheading(0)
-    pendown()'''),
-    'disk': (['move'], '''def disk(x, y, radius, shade):
-    move(x, y - radius)
-    color(shade)
-    begin_fill()
-    circle(radius)
-    end_fill()'''),
-    'box': (['move'], '''def box(x, y, width, height, shade):
-    move(x, y)
-    color(shade)
-    begin_fill()
-    for i in range(2):
-        forward(width)
-        left(90)
-        forward(height)
-        left(90)
-    end_fill()'''),
-    'triangle': (['move'], '''def triangle(x, y, side, heading, shade):
-    move(x, y)
-    setheading(heading)
-    color(shade)
-    begin_fill()
-    for i in range(3):
-        forward(side)
-        left(120)
-    end_fill()'''),
-    'arc': (['move'], '''def arc(x, y, heading, radius, extent, shade, thickness):
-    move(x, y)
-    setheading(heading)
-    color(shade)
-    pensize(thickness)
-    circle(radius, extent)
-    pensize(1)'''),
-    'line': (['move'], '''def line(x, y, heading, length, shade, thickness):
-    move(x, y)
-    setheading(heading)
-    color(shade)
-    pensize(thickness)
-    forward(length)
-    pensize(1)'''),
-    'polygon': (['move'], '''def polygon(points, shade):
-    move(points[0][0], points[0][1])
-    color(shade)
-    begin_fill()
-    for point in points[1:]:
-        setposition(point[0], point[1])
-    setposition(points[0][0], points[0][1])
-    end_fill()'''),
-    'star': (['move'], '''def star(x, y, side, shade):
-    move(x, y)
-    setheading(72)
-    color(shade)
-    begin_fill()
-    for i in range(5):
-        forward(side)
-        right(144)
-    end_fill()'''),
-    'heart': (['disk','triangle'], '''def heart(x, y, size, shade):
-    disk(x - size / 4, y, size / 3, shade)
-    disk(x + size / 4, y, size / 3, shade)
-    triangle(x + size / 2, y, size, 180, shade)''')
-}
+    forward(30)
+    pendown()''')
+FINAL = combine(FUNCTIONS, SETUP, BODY, STEM, LEFT_EYE, RIGHT_EYE, NOSE, TEETH, 'hideturtle()')
+stages = []
+def stage(id,title,skill,instruction,why,snippet,parts,expected,predict,answer,experiment,focus):
+    code = combine(FUNCTIONS, SETUP, *parts, 'hideturtle()')
+    stages.append(dict(id=id,title=title,skill=skill,instruction=instruction,why=why,snippet=snippet,
+                       code=code,expected=expected,predict=predict,answer=answer,experiment=experiment,
+                       focus=focus,preview=f'previews/step-{id}.svg'))
 
-class Program:
-    def __init__(self, bg='#101b22'):
-        self.bg, self.lines, self.used = bg, [], []
-    def need(self, name):
-        for dep in HELPERS[name][0]: self.need(dep)
-        if name not in self.used: self.used.append(name)
-    def call(self, name, *args):
-        self.need(name)
-        self.lines.append(name + '(' + ', '.join(json.dumps(a) for a in args) + ')')
-    def add(self, text): self.lines.append(text)
-    def code(self):
-        return combine('speed(0)\nbgcolor('+json.dumps(self.bg)+')',
-                       *[HELPERS[n][1] for n in self.used], '\n'.join(self.lines), 'hideturtle()')
-
-ORANGE='#ff9500'; WHITE='#fff4d0'; INK='#20212b'; GREEN='#487c43'
-def body(p, shade=ORANGE, x=0, y=0, r=134, ribs=False):
-    p.call('disk',x,y,r,shade)
-    if ribs:
-        for offset in [-44, 44]:
-            p.call('arc',x+offset-20,y-102,15,118,148,'#dc7210',2)
-    p.call('box',x-13,y+r-4,26,43,GREEN)
-def eyes(p, x=0,y=0,scale=1,kind='triangle',shade=WHITE):
-    if kind=='triangle':
-        for dx in [-72,27]: p.call('triangle',x+dx*scale,y+32*scale,45*scale,0,shade)
-    else:
-        for dx in [-48,48]: p.call('disk',x+dx*scale,y+48*scale,18*scale,shade)
-def smile(p,x=0,y=0,s=1,shade=WHITE):
-    p.call('arc',x-49*s,y-33*s,270,49*s,180,shade,8*s)
-def face(p, kind='classic', x=0, y=0, s=1, shade=WHITE):
-    if kind=='classic':
-        eyes(p,x,y,s,shade=shade)
-        p.call('triangle',x+13*s,y-10*s,26*s,180,shade)
-        for i in range(6): p.call('triangle',x+(84-i*28)*s,y-43*s,28*s,180,shade)
-    elif kind=='smile': eyes(p,x,y,s,'round',shade);smile(p,x,y,s,shade)
-
-designs=[]
-def design(id,title,category,description,experiment,p,focus='',level='Medium'):
-    code=p if isinstance(p,str) else p.code()
-    designs.append(dict(id=id,title=title,category=category,description=description,
-                        experiment=experiment,code=code,focus=focus,level=level,
-                        preview=f'previews/{id}.svg'))
+stage('functions','Make the triangle functions first','Functions + a loop',
+      'Type these two functions at the top. Then try triangle() underneath speed(0) and bgcolor("black").',
+      'def gives a name to a group of commands. The indented lines wait until you call the function. Each loop repeats three sides and three turns.',
+      combine(TRIANGLE,SMALL,'speed(0)\nbgcolor("black")\ntriangle()'),['triangle()'],
+      'One white triangle. The small triangle function is ready for later.',
+      'Does defining small_triangle() also draw a small triangle?',
+      'It waits. Add small_triangle() below the definitions to use it.',
+      'Replace the last triangle() call with small_triangle(). Compare the sizes.', ['def triangle():','def small_triangle():'])
+stage('body','Draw the pumpkin body','Position + color + fill',
+      'Keep both functions at the top. Replace the practice triangle() call with this body code.',
+      'Start at (0, −140), facing right. circle(140) draws the body above that point. begin_fill() and end_fill() fill the circle.',
+      BODY,[BODY],'A filled orange circle on a black background.',
+      'Why do we move with the pen up?','Tracy can reach the bottom of the body without drawing a line from the center.',
+      'Try color("orange") for the body. Keep the quotation marks.', ['circle(140)','setposition(0, -140)'])
+stage('stem','Add the stem at the top','A rectangle + a loop',
+      'Add the stem after the body code and before hideturtle().',
+      'The loop draws a short side and a long side twice. That makes four sides. We draw the body first so the stem can sit on top of it.',
+      STEM,[BODY,STEM],'The orange body with a green stem.',
+      'How many sides does range(2) draw here?','Four. Each repeat draws two sides.',
+      'Change forward(48) to forward(36) for a shorter stem.', ['for i in range(2):','forward(48)'])
+stage('left-eye','Use triangle() for the left eye','Call a function',
+      'Add these movement commands below the stem. Call the triangle function you made in step 1.',
+      'Move with the pen up, face right, then put the pen down. triangle() runs the white triangle commands at the top of your program.',
+      LEFT_EYE,[BODY,STEM,LEFT_EYE],'One white triangle eye on the left.',
+      'Where is the code that sets the eye color?','Inside triangle(), near the top of the program.',
+      'Change −75 to −85 to move the left eye farther left.', ['setposition(-75, 35)','triangle()'])
+stage('right-eye','Reuse triangle() for the right eye','Reuse a function',
+      'Move to the right side of the face and call triangle() again.',
+      'Both eyes use the same function. The movement commands give each eye a different starting place.',
+      RIGHT_EYE,[BODY,STEM,LEFT_EYE,RIGHT_EYE],'Two matching white triangle eyes.',
+      'What happens if forward(50) inside triangle() becomes forward(40)?','Both eyes get smaller because both calls use that function.',
+      'Change the right eye’s y value from 35 to 50.', ['setposition(25, 35)','triangle()'])
+stage('nose','Add the smaller nose','Heading + a function',
+      'Add this below the eyes. Use small_triangle(), which is already defined at the top.',
+      'setheading(180) faces left. The same left turns now draw a triangle pointing down.',
+      NOSE,[BODY,STEM,LEFT_EYE,RIGHT_EYE,NOSE],'Two eyes and a smaller upside-down nose.',
+      'Which number sets the nose’s side length?','forward(30), inside small_triangle().',
+      'Try setheading(0) here, then change it back to 180.', ['setheading(180)','small_triangle()'])
+stage('one-tooth','Try one tooth','Use the same function again',
+      'Move below the nose and reuse small_triangle() once.',
+      'The tooth and nose use exactly the same function. Their starting positions put them in different places.',
+      combine(TOOTH_START,'small_triangle()'),[BODY,STEM,LEFT_EYE,RIGHT_EYE,NOSE,TOOTH_START,'small_triangle()'],
+      'One downward-pointing tooth at the right of the mouth.',
+      'Will the tooth match the nose’s size?','Yes. Both call small_triangle().',
+      'Try setposition(60, -44) to move this tooth left.', ['setposition(90, -44)','small_triangle()'])
+stage('teeth','Repeat a row of teeth','A loop + a function',
+      'Replace the single tooth call with this loop. Keep the positioning commands above it.',
+      'Each repeat draws a tooth, lifts the pen, moves 30 pixels left, and lowers the pen for the next tooth.',
+      TEETH,[BODY,STEM,LEFT_EYE,RIGHT_EYE,NOSE,TEETH],'Six teeth across the mouth.',
+      'Which number changes the number of teeth?','The 6 in range(6). forward(30) changes their spacing.',
+      'Try range(5), then range(6). Watch the left end of the row.', ['for i in range(6):','forward(30)'])
+stage('finish','Read and run the whole drawing','Follow the program from top to bottom',
+      'Check the order: functions first, then setup, body, stem, left eye, right eye, nose, teeth, and hideturtle().',
+      'The functions wait at the top. Below them, the drawing commands run in order. Comments name the part you are drawing.',
+      FINAL,[BODY,STEM,LEFT_EYE,RIGHT_EYE,NOSE,TEETH],'The complete pumpkin.',
+      'Does hideturtle() erase the drawing?','It hides Tracy’s marker and leaves the drawing in place.',
+      'Change speed(0) to speed(3) to watch the drawing happen.', ['hideturtle()'])
+stage('remix','Make your own version','Change one thing at a time',
+      'Choose a gallery pumpkin or change this one. Make three changes you can point to in the code.',
+      'Each gallery example starts with its functions. The comments below them name each part as you draw it.',
+      '# Try a new color.\n# Move an eye.\n# Change the number of teeth.',[BODY,STEM,LEFT_EYE,RIGHT_EYE,NOSE,TEETH],
+      'A pumpkin with choices you can explain.',
+      'Which function changes the nose and every tooth together?','small_triangle(), because they all call it.',
+      'Change one thing, run the code, and explain what changed.', ['def small_triangle():','for i in range(6):'])
 
 design('original','The original','Faces','The triangle-eyed pumpkin from the tutorial.',
-       'Change range(6) to range(5). Predict which end of the tooth row gets shorter.',FINAL.replace('speed(6)','speed(0)'), 'for i in range(6):')
-for kind,title,desc,task in [
-    ('smile','Big smile','Round eyes and a wide curved smile.','Change the smile’s thickness from 8 to 14.'),
-    ('surprised','Surprised','Three circles make a surprised expression.','Change the mouth radius from 24 to 35.'),
-    ('sleepy','Sleepy','Curved eyelids and a tiny sleeping mouth.','Change the eye arc extent from 180 to 120.'),
-    ('angry','Angry eyebrows','Slanted eyebrows change the same round eyes.','Reverse the two eyebrow headings to soften the expression.'),
-    ('wink','One wink','One open eye, one closed eye, and a smile.','Move the winking eye up by changing its y value.'),
-    ('vampire','Vampire','A dark mouth with two bright fangs.','Change both fang side lengths from 27 to 36.'),
-    ('cat','Cat face','Pointed ears, whiskers, and small round eyes.','Change the whisker lengths from 38 to 50.'),
-    ('robot','Robot face','Square eyes and a gridded robot mouth.','Change the number of vertical mouth lines.'),
-    ('zipper','Zipper smile','A diagonal mouth with repeated stitches.','Change the stitch spacing from 22 to 18.'),
-    ('hearts','Heart eyes','Two hearts above a curved smile.','Change both heart sizes from 42 to 50.'),
-    ('goofy','Goofy grin','Different-sized eyes and two square teeth.','Swap the two eye radii and watch the expression change.')]:
-    p=Program();body(p)
-    if kind=='smile': face(p,'smile')
-    elif kind=='surprised': eyes(p,kind='round');p.call('disk',0,-43,24,WHITE);p.call('disk',0,-43,14,INK)
-    elif kind=='sleepy':
-        for x in [-70,27]: p.call('arc',x,49,270,22,180,WHITE,7)
-        p.call('disk',0,-43,12,WHITE)
-    elif kind=='angry':
-        eyes(p,kind='round');p.call('line',-78,87,340,55,INK,10);p.call('line',27,68,20,55,INK,10)
-        p.call('line',-32,-52,0,64,WHITE,8)
-    elif kind=='wink': p.call('disk',-48,48,20,WHITE);p.call('arc',26,48,270,22,180,WHITE,7);smile(p)
-    elif kind=='vampire':
-        eyes(p,kind='triangle');p.call('box',-65,-69,130,42,INK)
-        for x in [-32,57]: p.call('triangle',x,-27,27,180,WHITE)
-    elif kind=='cat':
-        p.call('triangle',-103,86,65,0,ORANGE);p.call('triangle',39,86,65,0,ORANGE)
-        eyes(p,kind='round',shade=INK);p.call('triangle',12,1,24,180,'#eea1a0')
-        for y,h in [(-13,170),(-29,180),(-45,190)]: p.call('line',-50,y,h,38,WHITE,3);p.call('line',50,y,180-h,38,WHITE,3)
-    elif kind=='robot':
-        for x in [-75,28]: p.call('box',x,25,47,43,INK);p.call('box',x+13,37,20,18,'#a9f0dd')
-        p.call('box',-68,-72,136,43,INK)
-        for i in range(1,5): p.call('line',-68+i*27,-70,90,39,WHITE,2)
-        p.call('line',-67,-51,0,134,WHITE,2)
-    elif kind=='zipper':
-        eyes(p,kind='triangle');p.call('line',-78,-60,10,158,INK,6)
-        for i in range(7): p.call('line',-65+i*22,-69+i*4,80,25,INK,4)
-    elif kind=='hearts':
-        for x in [-48,48]: p.call('heart',x,58,42,'#9e2844')
-        smile(p,shade=INK)
-    elif kind=='goofy':
-        p.call('disk',-47,48,28,WHITE);p.call('disk',47,47,19,WHITE)
-        p.call('disk',-42,46,10,INK);p.call('disk',43,49,7,INK)
-        p.call('box',-63,-68,126,42,INK)
-        p.call('box',-34,-51,22,25,WHITE);p.call('box',12,-68,22,25,WHITE)
-    design(kind,title,'Faces',desc,task,p)
+       'Change range(6) to range(5) in the teeth loop.',FINAL,'Start here','for i in range(6):')
 
-for id,title,shade,bg,face_shade in [
-    ('ghost','Ghost pumpkin','#eee8d8','#26332f','#253b38'),
-    ('teal','Teal pumpkin','#49aeb0','#10292d','#f8e7b6'),
-    ('pink','Pink pumpkin','#eb9bad','#362733','#482a4d'),
-    ('purple','Purple pumpkin','#9f80d0','#201c32','#f4df9b'),
-    ('green','Green pumpkin','#a1b35b','#1f3025','#263f2a'),
-    ('red','Red pumpkin','#d95542','#2c2028','#ffe7bd'),
-    ('blue','Blue pumpkin','#689fc7','#1b293a','#f5efd6'),
-    ('gold','Golden pumpkin','#dfbc65','#303028','#3f3e26')]:
-    p=Program(bg);body(p,shade);face(p,shade=face_shade)
-    design(id,title,'Colors','Change the body, background, and face palette together.',
-           'Find the first disk() call below the functions. Replace its last value with a color you choose.',p,'disk(0, 0, 134')
+for id,title,description,task in [
+    ('smile','Big smile','Two round eyes and a half-circle smile.','Change pensize(7) in the smile to pensize(12).'),
+    ('surprised','Surprised','Three white circles make a surprised face.','Change circle(24) in the mouth to circle(30).'),
+    ('sleepy','Sleepy','Two half-circle eyelids and a small round mouth.','Change pensize(7) in the eyelids to pensize(4).'),
+    ('angry','Angry eyebrows','Two slanted lines change the expression.','Change the eyebrow headings to 20 and 340.'),
+    ('wink','One wink','One circle eye, one curved eye, and a smile.','Change the winking eye’s starting y value from 48 to 60.'),
+    ('vampire','Vampire','A rectangle mouth with two triangle fangs.','Change forward(28) inside fang() to forward(36).'),
+    ('cat','Cat face','Triangle ears and nose, circle eyes, and straight whiskers.','Change the whiskers from forward(35) to forward(45).'),
+    ('robot','Robot face','Square eyes and a rectangle mouth with straight dividing lines.','Change the eye color from lightblue to yellow.'),
+    ('zipper','Zipper smile','A straight mouth with a row of little stitches.','Change range(7) to range(5) in the stitch loop.'),
+    ('hearts','Heart eyes','Each heart uses two half circles and two straight lines.','Change the eye color from crimson to deeppink.'),
+    ('goofy','Goofy grin','Two different eye sizes and two square teeth.','Change the eye(28) call to eye(20).')]:
+    p=Drawing();p.body()
+    if id=='smile': p.eyes('round',size=18);p.smile()
+    elif id=='surprised': p.eyes('round',size=18);p.circle('Draw the open mouth.',0,-43,24,'white')
+    elif id=='sleepy':
+        p.arc('Draw the left closed eye.',-70,49,270,22,180)
+        p.arc('Draw the right closed eye.',27,49,270,22,180)
+        p.circle('Draw the little sleeping mouth.',0,-43,12,'white')
+    elif id=='angry':
+        p.eyes('round',size=18)
+        p.line('Draw the left eyebrow slanting down.',-78,87,340,55,'black',9)
+        p.line('Draw the right eyebrow slanting up.',27,68,20,55,'black',9)
+        p.line('Draw the straight mouth.',-32,-52,0,64,'white',7)
+    elif id=='wink':
+        p.circle('Draw the open eye.',-48,48,20,'white','eye')
+        p.arc('Draw the winking eye.',26,48,270,22,180);p.smile()
+    elif id=='vampire':
+        p.eyes();p.rectangle('Draw the dark mouth.',-65,-69,130,42,'black')
+        p.triangle('Draw the left fang pointing down.',-32,-27,28,'white',180,'fang')
+        p.triangle('Draw the right fang. Reuse fang().',57,-27,28,'white',180,'fang')
+    elif id=='cat':
+        p.triangle('Draw the left ear.',-103,86,65,'darkorange',function='ear')
+        p.triangle('Draw the right ear. Reuse ear().',39,86,65,'darkorange',function='ear')
+        p.eyes('round','black',size=15)
+        p.triangle('Draw the pink nose pointing down.',12,1,24,'pink',180,'nose')
+        for side in [-1,1]:
+            for y,heading in [(-13,170),(-29,180),(-45,190)]:
+                p.line('Draw a left whisker.' if side==-1 else 'Draw a right whisker.',side*50,y,heading if side==-1 else 180-heading,35)
+    elif id=='robot':
+        for x,label in [(-75,'left'),(28,'right')]:p.rectangle(f'Draw the {label} square eye.',x,25,44,44,'lightblue','eye')
+        p.rectangle('Draw the black mouth.',-68,-72,136,43,'black')
+        p.add('Draw four lines across the mouth.',p.position(-41,-70,90)+'''\ncolor("white")
+for i in range(4):
+    forward(39)
+    penup()
+    backward(39)
+    right(90)
+    forward(27)
+    left(90)
+    pendown()''')
+    elif id=='zipper':
+        p.eyes();p.line('Draw the mouth from left to right.',-78,-50,0,156,'black',5)
+        p.add('Draw a stitch, then move right for the next one.',p.position(-66,-63,90)+'''\ncolor("black")
+pensize(3)
+for i in range(7):
+    forward(26)
+    penup()
+    backward(26)
+    right(90)
+    forward(22)
+    left(90)
+    pendown()
+pensize(1)''')
+    elif id=='hearts':
+        for x,label in [(-48,'left'),(48,'right')]:
+            p.filled(f'Draw the {label} heart eye.',x,27,'''left(45)
+forward(30)
+circle(15, 180)
+right(90)
+circle(15, 180)
+forward(30)''','crimson',function='heart')
+        p.smile(color='black')
+    elif id=='goofy':
+        # One optional parameter, with a familiar name and a plain explanation.
+        p.functions['eye']='''# size is the number you put inside eye(...).
+def eye(size):
+    begin_fill()
+    circle(size)
+    end_fill()'''
+        p.add('Draw the big left eye. Use 28 for size.',p.position(-47,20)+'\ncolor("white")\neye(28)')
+        p.add('Draw the smaller right eye. Use 18 for size.',p.position(47,30)+'\ncolor("white")\neye(18)')
+        p.circle('Draw the left pupil.',-43,46,9,'black','pupil')
+        p.circle('Draw the right pupil.',44,50,9,'black','pupil')
+        p.rectangle('Draw the mouth.',-63,-68,126,42,'black')
+        p.rectangle('Draw the left tooth.',-34,-48,22,22,'white','tooth')
+        p.rectangle('Draw the right tooth.',12,-68,22,22,'white','tooth')
+    design(id,title,'Faces',description,task,p,'One parameter' if id=='goofy' else 'Practice')
 
-for id,title,desc,task in [
-    ('dots','Polka dots','Rows of small circles across the pumpkin.','Change the dot radius from 7 to 11.'),
-    ('stripes','Vertical stripes','Repeated green stripes on an orange body.','Change range(7) to range(5) and compare the spacing.'),
-    ('patchwork','Patchwork','Warm-colored square patches with stitched edges.','Try different colors in the three box() calls.'),
-    ('stars','Star-covered','Small gold stars across a purple pumpkin.','Change star sizes from 24 to 32.'),
-    ('checker','Checker pattern','Nested loops draw a checker pattern.','Change the row and column counts separately.'),
-    ('rings','Concentric rings','Repeated outlines inside the pumpkin body.','Change the three ring radii.'),
-    ('rainbow','Rainbow stripes','Seven colored bands cross the pumpkin.','Change the order of the colors in the list.'),
-    ('spiral','Spiral pumpkin','A growing spiral is drawn with a loop.','Change right(16) to right(22).')]:
-    p=Program();body(p,'#9772bf' if id=='stars' else ORANGE)
+for id,title,color,background,face_color in [
+    ('ghost','Ghost pumpkin','ivory','darkslategray','black'),
+    ('teal','Teal pumpkin','teal','black','white'),
+    ('pink','Pink pumpkin','pink','black','purple'),
+    ('purple','Purple pumpkin','mediumpurple','black','yellow'),
+    ('green','Green pumpkin','yellowgreen','black','darkgreen'),
+    ('red','Red pumpkin','tomato','black','white'),
+    ('blue','Blue pumpkin','steelblue','black','white'),
+    ('gold','Golden pumpkin','goldenrod','black','black')]:
+    p=Drawing(background);p.body(color);p.face(face_color)
+    design(id,title,'Colors','The same shapes with a different body and face color.',
+           'Find the comment for the body. Change its color() command.',p,'Start here')
+
+for id,title,description,task in [
+    ('dots','Polka dots','A dot function and one loop draw each row.','Change range(5) to range(4) in one row.'),
+    ('stripes','Vertical stripes','A stripe function and one loop repeat tall rectangles.','Change range(7) to range(5).'),
+    ('patchwork','Patchwork','Three square patches, each with a row of stitches.','Change a patch color and run the code.'),
+    ('stars','Star-covered','Reuse star() at five starting positions.','Change forward(24) inside star() to forward(30).'),
+    ('checker','Checker pattern','A square function draws each row with one loop.','Change the square color from chocolate to brown.'),
+    ('rings','Concentric rings','Three circles sit inside the pumpkin.','Change circle(90) to circle(85) and move its start to (0, -85).'),
+    ('rainbow','Rainbow stripes','Seven rectangles use seven named colors.','Change the color() command for one band.'),
+    ('spiral','Spiral pumpkin','A variable makes each straight line a little longer.','Change size = size + 1 to size = size + 2.')]:
+    p=Drawing();p.body('mediumpurple' if id=='stars' else 'darkorange')
     if id=='dots':
-        p.need('disk');p.add('for row in range(4):\n    for col in range(5):\n        disk(-78 + col * 39, -78 + row * 45, 7, "#ffd375")')
+        p.function('dot','begin_fill()\ncircle(7)\nend_fill()')
+        for y in [64,19,-26,-71]:
+            p.add('Draw a row of five dots, moving right after each one.',p.position(-78,y)+'''\ncolor("gold")
+for i in range(5):
+    dot()
+    penup()
+    forward(39)
+    pendown()''')
     elif id=='stripes':
-        p.need('box');p.add('for i in range(7):\n    box(-84 + i * 26, -88, 11, 176, "#d57719")')
+        p.function('stripe','''begin_fill()
+for i in range(2):
+    forward(11)
+    left(90)
+    forward(176)
+    left(90)
+end_fill()''')
+        p.add('Draw seven stripes. Move right 26 pixels after each one.',p.position(-84,-88)+'''\ncolor("chocolate")
+for i in range(7):
+    stripe()
+    penup()
+    forward(26)
+    pendown()''')
     elif id=='patchwork':
-        for x,y,s,c in [(-95,-65,57,'#f9b145'),(38,8,54,'#cd6945'),(-20,-100,42,'#e6bd68')]:
-            p.call('box',x,y,s,s,c)
-            for i in range(3):p.call('line',x+8+i*17,y-4,90,10,INK,2);p.call('line',x+8+i*17,y+s-5,90,10,INK,2)
+        for x,y,color in [(-90,20,'gold'),(35,0,'coral'),(-25,-100,'khaki')]:
+            p.rectangle('Draw a square patch.',x,y,48,48,color,'patch')
+            p.add('Add three stitches along the patch edge.',p.position(x+8,y-5,90)+'''\ncolor("black")
+for i in range(3):
+    forward(10)
+    penup()
+    backward(10)
+    right(90)
+    forward(16)
+    left(90)
+    pendown()''')
     elif id=='stars':
-        for x,y in [(-85,40),(-25,83),(57,57),(-65,-63),(24,-67)]:p.call('star',x,y,24,'#fbe5a4')
+        for x,y in [(-85,40),(-25,83),(57,57),(-65,-63),(24,-67)]:p.star('Move to a new place and call star().',x,y)
     elif id=='checker':
-        p.need('box');p.add('for row in range(5):\n    for col in range(5):\n        if (row + col) % 2 == 0:\n            box(-85 + col * 34, -85 + row * 34, 34, 34, "#db7627")')
+        p.function('square','''begin_fill()
+for i in range(4):
+    forward(30)
+    left(90)
+end_fill()''')
+        for x,y,count in [(-75,45,3),(-45,15,2),(-75,-15,3),(-45,-45,2),(-75,-75,3)]:
+            p.add('Draw one row of squares, with a gap between them.',p.position(x,y)+f'''\ncolor("chocolate")
+for i in range({count}):
+    square()
+    penup()
+    forward(60)
+    pendown()''')
     elif id=='rings':
-        for r in [112,91,69]:p.call('arc',0,-r,0,r,360,'#da741a',3)
+        for size in [112,90,68]:p.arc('Draw a circle outline from its bottom edge.',0,-size,0,size,360,'chocolate',3)
     elif id=='rainbow':
-        p.need('box');p.add('colors = ["#e8756f", "#efa363", "#e9ca70", "#8caf73", "#68aeaa", "#6c92ba", "#a488bb"]\nfor i in range(7):\n    box(-94, -84 + i * 24, 188, 24, colors[i])')
+        for y,color in [(60,'red'),(36,'orange'),(12,'yellow'),(-12,'green'),(-36,'turquoise'),(-60,'blue'),(-84,'purple')]:
+            p.rectangle(f'Draw the {color} band.',-94,y,188,24,color,'band')
     elif id=='spiral':
-        p.call('move',0,0);p.add('color("#ffc85a")\npensize(3)\nfor i in range(90):\n    forward(i / 3)\n    right(16)\npensize(1)')
-    eyes(p,kind='triangle',shade=INK);smile(p,shade=INK)
-    design(id,title,'Patterns',desc,task,p,level='Hard' if id=='checker' else 'Medium')
+        p.add('Start with a short line. Add 1 to size after every turn.',p.position(0,0)+'''\ncolor("gold")
+pensize(3)
+size = 1
+for i in range(40):
+    forward(size)
+    right(25)
+    size = size + 1
+pensize(1)''')
+    p.eyes(color='black');p.smile(color='black')
+    design(id,title,'Patterns',description,task,p,'One variable' if id=='spiral' else 'More shapes')
 
-for id,title,desc,task in [
-    ('witch','Witch hat','A pointed purple hat and a wide brim.','Change the hat’s polygon points to make it taller or wider.'),
-    ('pirate','Pirate','A dark bandana, an eye patch, and a grin.','Move the eye patch by changing its disk() coordinates.'),
-    ('wizard','Starry wizard','A blue hat decorated with golden stars.','Add another star() call to the hat.'),
-    ('crown','Pumpkin royalty','A crown with three points and colored jewels.','Change the jewel colors or add a fourth jewel.'),
-    ('headphones','Headphones','An arc joins two padded ear cups.','Change the headphone arc thickness from 13 to 20.'),
-    ('glasses','Round glasses','Two ring-shaped lenses and a bridge.','Change both outer lens radii together.'),
-    ('bowtie','Bow tie','Two triangles meet under the smile.','Change the bow tie color or triangle side length.'),
-    ('mummy','Mummy wrap','Pale bands leave a narrow gap for the eyes.','Change the band heights to reveal more of the pumpkin.'),
-    ('bat','Bat wings','Two angular wings extend from a smaller body.','Move one wing point and compare the silhouette.'),
-    ('alien','Alien antennae','Two stalks end in small glowing circles.','Change the antenna stalk lengths and move the circles to match.'),
-    ('unicorn','Unicorn','A striped horn rises above a pink face.','Change the two horn stripe positions.'),
-    ('flowers','Flower crown','Little circles cluster around three flower centers.','Change the petal shade and center shade separately.')]:
-    p=Program()
+for id,title,description,task in [
+    ('witch','Witch hat','A purple triangle and a rectangle brim.','Change the hat color from rebeccapurple to blueviolet.'),
+    ('pirate','Pirate','A rectangle bandana and a circle eye patch.','Change circle(27) in the eye patch to circle(22).'),
+    ('wizard','Starry wizard','A blue triangle hat with two gold stars.','Change the two star starting positions.'),
+    ('crown','Pumpkin royalty','A rectangle, three triangles, and three circle jewels.','Change the three jewel colors.'),
+    ('headphones','Headphones','A half circle joins two rectangle ear cups.','Change pensize(12) for the headband to pensize(18).'),
+    ('glasses','Round glasses','Two circle outlines and three connecting lines.','Change pensize(5) on the lenses to pensize(8).'),
+    ('bowtie','Bow tie','Two triangles meet below the face.','Change the bow tie color to royalblue.'),
+    ('mummy','Mummy wrap','Five rectangle bands leave room for two eyes.','Change one band color to lightgray.'),
+    ('bat','Bat wings','Two large triangles make wings behind a small pumpkin.','Change the wing color from mediumpurple to gray.'),
+    ('alien','Alien antennae','Two straight stalks and two circle tips.','Change the antenna tip color from yellowgreen to yellow.'),
+    ('unicorn','Unicorn','A gold triangle horn on a pink pumpkin.','Change the horn color from gold to ivory.'),
+    ('flowers','Flower crown','Reuse a flower function three times above the face.','Change the petal color from hotpink to plum.')]:
+    p=Drawing()
     if id=='bat':
-        p.call('polygon',[[-65,48],[-183,113],[-167,25],[-130,41],[-111,-24],[-80,2]],'#8262a1')
-        p.call('polygon',[[65,48],[183,113],[167,25],[130,41],[111,-24],[80,2]],'#8262a1')
-        body(p,r=91);face(p,x=0,y=0,s=.66)
+        p.triangle('Draw the left wing behind the body.',-178,75,130,'mediumpurple',300,'wing')
+        p.triangle('Draw the right wing behind the body.',48,75,130,'mediumpurple',300,'wing')
+        p.body(size=91)
+        p.circle('Draw the left eye.',-34,30,12,'white','eye');p.circle('Draw the right eye.',34,30,12,'white','eye')
+        p.smile(y=13,size=34)
     else:
-        body(p,'#e6a0b5' if id=='unicorn' else ORANGE)
-        if id not in ['pirate','mummy','glasses']:face(p,'smile')
-    if id in ['witch','wizard']:
-        p.call('polygon',[[-87,102],[80,102],[-17,189]],'#7557a0' if id=='witch' else '#426692')
-        p.call('box',-113,95,226,19,'#503b70' if id=='witch' else '#30496e')
-        p.call('box',-62,112,106,12,'#d4ad68')
-        if id=='wizard':p.call('star',-36,142,24,'#ffe2a4');p.call('star',9,120,16,'#ffe2a4')
-    elif id=='pirate':
-        p.call('box',-99,82,198,32,'#992e46');p.call('line',-91,78,340,182,INK,7)
-        p.call('disk',-48,44,27,INK);p.call('disk',48,44,19,WHITE);smile(p)
-        p.call('disk',-107,92,18,'#992e46');p.call('triangle',-111,85,42,240,'#992e46')
-    elif id=='crown':
-        p.call('polygon',[[-78,106],[-86,168],[-40,141],[0,187],[40,141],[86,168],[78,106]],'#e6bf61')
-        for x,c in [(-48,'#c85264'),(0,'#558c9e'),(48,'#77a36d')]:p.call('disk',x,121,7,c)
-    elif id=='headphones':
-        p.call('arc',-143,5,90,-143,180,'#6d7a9f',13)
-        p.call('box',-151,-29,26,73,'#8e9fc7');p.call('box',125,-29,26,73,'#8e9fc7')
-    elif id=='glasses':
-        eyes(p,kind='round',shade=INK);smile(p,shade=INK)
-        for x in [-48,48]:p.call('arc',x,10,0,38,360,'#433d44',6)
-        p.call('line',-10,48,0,20,INK,6);p.call('line',-112,54,0,26,INK,5);p.call('line',86,54,0,26,INK,5)
-    elif id=='bowtie':
-        p.call('triangle',-50,-93,52,270,'#a84051');p.call('triangle',50,-145,52,90,'#a84051');p.call('disk',0,-119,12,'#702f41')
-    elif id=='mummy':
-        for x,y,w,h in [(-84,86,168,26),(-112,57,224,24),(-123,-8,246,26),(-112,-40,224,27),(-89,-73,178,27),(-62,-103,124,25)]:p.call('box',x,y,w,h,'#e8dfc6')
-        for x in [-45,45]:p.call('disk',x,36,16,INK);p.call('disk',x+3,39,5,'#d2e6be')
-    elif id=='alien':
-        p.call('line',-58,116,112,58,'#93c476',7);p.call('line',58,116,68,58,'#93c476',7)
-        p.call('disk',-80,170,13,'#c8eb94');p.call('disk',80,170,13,'#c8eb94')
-    elif id=='unicorn':
-        p.call('polygon',[[-23,111],[0,188],[23,111]],'#f3df9e')
-        p.call('line',-13,140,348,26,'#cf9ac1',5);p.call('line',-7,161,348,15,'#cf9ac1',4)
-    elif id=='flowers':
-        for x,y,c in [(-65,116,'#df8c9c'),(0,137,'#c4b0d9'),(65,116,'#e6ce79')]:
-            for dx,dy in [(-14,0),(14,0),(0,14),(0,-14)]:p.call('disk',x+dx,y+dy,12,c)
-            p.call('disk',x,y,8,'#f8e8b9')
-    design(id,title,'Costumes',desc,task,p,level='Hard' if id in ['witch','wizard','crown','bat'] else 'Medium')
+        p.body('pink' if id=='unicorn' else 'darkorange')
+        # Headwear belongs above the eyes in the main drawing sequence.
+        if id in ['witch','wizard']:
+            p.triangle('Draw the pointed hat.',-49,100,98,'rebeccapurple' if id=='witch' else 'royalblue',function='hat')
+            p.rectangle('Draw the wide hat brim.',-110,96,220,16,'indigo' if id=='witch' else 'navy')
+            if id=='wizard':
+                p.star('Draw the left star on the hat.',-29,142,20)
+                p.star('Draw the right star on the hat.',19,118,20)
+        elif id=='pirate':
+            p.rectangle('Draw the red bandana.',-99,82,198,30,'crimson')
+            p.line('Draw the eye patch strap.',-91,78,340,182,'black',6)
+        elif id=='crown':
+            p.rectangle('Draw the bottom of the crown.',-78,103,156,24,'goldenrod')
+            for x in [-78,-26,26]:p.triangle('Draw a crown point.',x,125,52,'gold',function='crown_point')
+            for x,color in [(-48,'crimson'),(0,'royalblue'),(48,'limegreen')]:p.circle('Draw a colored jewel.',x,116,7,color,'jewel')
+        elif id=='headphones':
+            p.arc('Draw the headband from left to right.',-143,5,90,-143,180,'slateblue',12)
+            p.rectangle('Draw the left ear cup.',-151,-29,26,73,'cornflowerblue','ear_cup')
+            p.rectangle('Draw the right ear cup.',125,-29,26,73,'cornflowerblue','ear_cup')
+        elif id=='mummy':
+            for y,width,x in [(78,168,-84),(49,224,-112),(-15,240,-120),(-50,208,-104),(-85,160,-80)]:
+                p.rectangle('Draw a wrap band across the body.',x,y,width,24,'wheat')
+        elif id=='alien':
+            p.line('Draw the left antenna stalk.',-58,116,112,58,'yellowgreen',6)
+            p.line('Draw the right antenna stalk.',58,116,68,58,'yellowgreen',6)
+            p.circle('Draw the left antenna tip.',-80,170,13,'yellowgreen','antenna_tip')
+            p.circle('Draw the right antenna tip.',80,170,13,'yellowgreen','antenna_tip')
+        elif id=='unicorn':p.triangle('Draw the horn above the face.',-30,115,60,'gold',function='horn')
+        elif id=='flowers':
+            p.functions['flower']='''def flower():
+    color("hotpink")
+    for i in range(4):
+        begin_fill()
+        circle(12)
+        end_fill()
+        left(90)'''
+            for x,y in [(-65,118),(0,142),(65,118)]:
+                p.add('Draw a flower above the eyes.',p.position(x,y)+'\nflower()')
+                p.circle('Add the yellow flower center.',x,y,7,'gold','flower_center')
+        if id=='pirate':
+            p.circle('Draw the black eye patch.',-48,44,27,'black')
+            p.circle('Draw the open eye.',48,44,19,'white')
+        elif id=='mummy':p.eyes('round','black',size=16)
+        else:p.eyes('round','black' if id=='glasses' else 'white',size=18)
+        if id=='glasses':
+            p.arc('Draw the left lens.',-48,10,0,38,360,'black',5)
+            p.arc('Draw the right lens.',48,10,0,38,360,'black',5)
+            p.line('Join the lenses with a bridge.',-10,48,0,20,'black',5)
+            p.line('Draw the left glasses arm.',-112,54,0,26,'black',4)
+            p.line('Draw the right glasses arm.',86,54,0,26,'black',4)
+        if id!='mummy':p.smile(color='black' if id=='glasses' else 'white')
+        if id=='bowtie':
+            p.triangle('Draw the left half of the bow tie.',-50,-90,52,'crimson',270,'bow')
+            p.triangle('Draw the right half of the bow tie.',50,-142,52,'crimson',90,'bow')
+            p.circle('Draw the bow tie knot.',0,-116,12,'darkred')
+    design(id,title,'Costumes',description,task,p,'More shapes')
 
-for id,title,desc,task in [
-    ('twins','Pumpkin twins','A pair of small pumpkins share the world.','Change the x values to move the pumpkins closer together.'),
-    ('family','Pumpkin family','Three sizes sit along the same ground line.','Change the small pumpkin’s radius and move its face to match.'),
-    ('patch','Pumpkin patch','A loop plants a row of little pumpkins.','Change the number of pumpkins and the distance between them.'),
-    ('moon','Under the moon','A crescent moon and stars above a pumpkin.','Move the crescent’s two disks together to a new location.'),
-    ('web','Spiderweb corner','Spokes and connecting lines build a corner web.','Change the number of web rings from 3 to 4.'),
-    ('leaves','Autumn leaves','Colored diamond-shaped leaves frame the pumpkin.','Change the leaf colors or their four points.'),
-    ('stack','Pumpkin stack','Three pumpkins get smaller as they stack up.','Change the face of the middle pumpkin.'),
-    ('glow','Lantern glow','Warm circles behind the body suggest a soft glow.','Change the three glow colors to a cooler palette.')]:
-    p=Program('#18242c')
-    if id=='twins':
-        for x in [-93,93]:body(p,x=x,y=-25,r=79);face(p,'smile',x=x,y=-25,s=.55)
-    elif id=='family':
-        for x,y,r,s in [(-107,-34,73,.48),(46,-5,100,.67),(137,-72,36,.24)]:body(p,x=x,y=y,r=r);face(p,'smile',x=x,y=y,s=s)
-        p.call('line',-185,-110,0,370,'#78915d',4)
-    elif id=='patch':
-        p.call('box',-200,-200,400,128,'#384938');p.need('disk');p.need('box');p.need('triangle')
-        p.add('for i in range(5):\n    x = -152 + i * 76\n    disk(x, -70, 32, "#ef922b")\n    box(x - 4, -40, 8, 16, "#60834f")\n    triangle(x - 18, -63, 12, 0, "#fff0b8")\n    triangle(x + 7, -63, 12, 0, "#fff0b8")')
-        for x,y in [(-150,100),(-40,148),(105,95)]:p.call('star',x,y,20,'#d9d9ad')
+def small_pumpkin(p):
+    # A complete, repeated object. Only ordinary relative pen movements inside.
+    p.functions['small_pumpkin']='''def small_pumpkin():
+    # Draw the body from its bottom edge.
+    color("darkorange")
+    begin_fill()
+    circle(32)
+    end_fill()
+
+    # Move up to the stem.
+    penup()
+    left(90)
+    forward(60)
+    right(90)
+    backward(4)
+    pendown()
+    color("green")
+    begin_fill()
+    for i in range(2):
+        forward(8)
+        left(90)
+        forward(16)
+        left(90)
+    end_fill()
+
+    # Move down and left to the first eye.
+    penup()
+    backward(14)
+    right(90)
+    forward(24)
+    left(90)
+    pendown()
+    color("white")
+    begin_fill()
+    circle(6)
+    end_fill()
+
+    # Move right to the second eye.
+    penup()
+    forward(36)
+    pendown()
+    begin_fill()
+    circle(6)
+    end_fill()
+
+    # Move down and left to the smile.
+    penup()
+    backward(30)
+    right(90)
+    forward(12)
+    pendown()
+    pensize(3)
+    circle(12, 180)
+    pensize(1)'''
+
+for id,title,description,task in [
+    ('twins','Pumpkin twins','Call the same small_pumpkin() function twice.','Change the second pumpkin’s starting x value from 90 to 70.'),
+    ('family','Pumpkin family','Three pumpkins share the same drawing function.','Move the middle pumpkin up by changing its starting y value.'),
+    ('patch','Pumpkin patch','One function draws a pumpkin. One loop repeats it across the ground.','Change range(5) to range(4).'),
+    ('moon','Under the moon','Two circles make a crescent above a smaller pumpkin.','Change the moon color from khaki to ivory.'),
+    ('web','Spiderweb corner','Straight lines connect a few points in the corner.','Change the web’s color() commands to silver.'),
+    ('leaves','Autumn leaves','A diamond leaf function is reused around the pumpkin.','Change the color() command before one leaf() call.'),
+    ('stack','Pumpkin stack','Three calls stack the same small pumpkin from top to bottom.','Change the middle pumpkin’s starting x value to 10.'),
+    ('glow','Lantern glow','Three background circles sit behind the pumpkin.','Change a glow color from peru to sienna.')]:
+    p=Drawing('midnightblue' if id in ['moon','web'] else 'black')
+    if id in ['twins','family','patch','stack']:
+        small_pumpkin(p)
+        if id=='patch':
+            p.rectangle('Draw the ground behind the pumpkins.',-200,-200,400,128,'darkgreen')
+            p.add('Draw five pumpkins, moving right after each one.',p.position(-152,-100)+'''\nfor i in range(5):
+    small_pumpkin()
+    # Return to the bottom of this pumpkin.
+    penup()
+    setheading(0)
+    backward(12)
+    right(90)
+    forward(24)
+    left(90)
+    # Move to the next pumpkin.
+    forward(76)
+    pendown()''')
+        else:
+            positions = [(-90,-80),(90,-80)] if id=='twins' else [(-100,-80),(0,-65),(100,-80)] if id=='family' else [(0,78),(0,-12),(0,-102)]
+            for x,y in positions:p.add('Move to the bottom of a pumpkin and call small_pumpkin().',p.position(x,y)+'\nsmall_pumpkin()')
     elif id=='moon':
-        p.call('disk',-120,132,43,'#f4df9e');p.call('disk',-102,146,39,p.bg)
-        for x,y in [(62,150),(130,102),(4,122)]:p.call('star',x,y,18,'#f1dfad')
-        body(p,x=10,y=-36,r=104);face(p,x=10,y=-36,s=.7)
+        p.circle('Draw the moon.',-120,140,38,'khaki')
+        p.circle('Cover part of the moon with the background color.',-103,151,34,'midnightblue')
+        for x,y in [(55,157),(132,111),(2,125)]:p.star('Draw a star in the sky.',x,y,18,'khaki')
+        p.body(x=0,y=-40,size=100)
+        p.circle('Draw the left eye.',-35,-5,14,'white','eye');p.circle('Draw the right eye.',35,-5,14,'white','eye')
+        p.smile(y=-20,size=35)
     elif id=='web':
-        body(p,x=-18,y=-21,r=111);face(p,x=-18,y=-21,s=.76)
-        for x,y in [(45,190),(86,83),(190,45)]:p.call('line',190,190,math.degrees(math.atan2(y-190,x-190)),math.hypot(x-190,y-190),'#a4b5b2',2)
-        p.need('line');p.add('for i in range(1, 4):\n    d = i * 43\n    line(190 - d, 190, 315, d * 0.6, "#a4b5b2", 2)\n    line(190 - d * 0.576, 190 - d * 0.424, 315, d * 0.6, "#a4b5b2", 2)')
-        p.call('line',158,131,270,48,'#a4b5b2',2);p.call('disk',158,74,9,'#bdc9c1')
-        for h in [25,65,115,155,205,245,295,335]:p.call('line',158,74,h,19,'#bdc9c1',2)
+        p.body(x=-20,y=-25,size=108)
+        p.circle('Draw the left eye.',-56,12,14,'white','eye');p.circle('Draw the right eye.',16,12,14,'white','eye')
+        p.smile(x=-20,y=-8,size=35)
+        for heading in [180,225,270]:p.line('Draw a line from the corner.',185,185,heading,135,'silver',2)
+        for commands in [
+            'setposition(135, 185)\nsetposition(150, 150)\nsetposition(185, 135)',
+            'setposition(95, 185)\nsetposition(121, 121)\nsetposition(185, 95)',
+            'setposition(55, 185)\nsetposition(93, 93)\nsetposition(185, 55)']:
+            first,*rest=commands.splitlines()
+            p.add('Connect three points to make a web strand.', 'penup()\n'+first+'\npendown()\ncolor("silver")\n'+'\n'.join(rest))
     elif id=='leaves':
-        body(p,r=111);face(p,s=.8)
-        for x,y,c in [(-157,108,'#c77740'),(148,94,'#d2ad59'),(-153,-102,'#9d684f'),(150,-98,'#99a66b')]:
-            p.call('polygon',[[x,y+25],[x+14,y],[x,y-25],[x-14,y]],c);p.call('line',x,y-27,90,51,'#544931',2)
-    elif id=='stack':
-        for x,y,r,s in [(0,-103,79,.5),(-6,25,57,.37),(0,117,40,.25)]:body(p,x=x,y=y,r=r);face(p,'smile',x=x,y=y,s=s)
+        p.body(size=106);p.eyes('round',size=18);p.smile()
+        for x,y,color,heading in [(-155,98,'coral',30),(145,95,'gold',30),(-153,-102,'sienna',30),(150,-98,'yellowgreen',30)]:
+            p.filled('Draw a leaf beside the pumpkin.',x,y,'''for i in range(2):
+    forward(25)
+    left(60)
+    forward(25)
+    left(120)''',color,heading,'leaf')
     elif id=='glow':
-        for r,c in [(183,'#30281e'),(165,'#4d351d'),(148,'#79501e')]:p.call('disk',0,0,r,c)
-        body(p,r=125);face(p,shade='#ffea92')
-    design(id,title,'Scenes',desc,task,p,level='Hard')
+        for size,color in [(183,'saddlebrown'),(165,'sienna'),(148,'peru')]:p.circle('Draw a glow circle behind the pumpkin.',0,0,size,color)
+        p.body(size=125);p.face('yellow')
+    design(id,title,'Scenes',description,task,p,'More shapes')
+
 
 class TurtleRecorder:
     """Small, deterministic implementation of the drawing commands used here."""
@@ -539,18 +659,57 @@ class TurtleRecorder:
         title=html.escape(title)
         return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="{title}"><title>{title}</title><rect width="400" height="400" fill="{html.escape(self.bg)}"/><g transform="translate(200 200) scale(1 -1)">'+''.join(self.elements)+'</g></svg>'
 
+
+def check_student_code(code):
+    """Keep the examples within the vocabulary taught in the first lessons."""
+    tree = ast.parse(code)
+    banned = (ast.If, ast.While, ast.List, ast.Tuple, ast.Dict, ast.Set,
+              ast.Subscript, ast.Attribute, ast.ListComp, ast.Lambda, ast.Import,
+              ast.ImportFrom, ast.Return, ast.Mult, ast.Div, ast.Mod, ast.Pow)
+    assert not any(isinstance(node,banned) for node in ast.walk(tree))
+    functions = {node.name:node for node in tree.body if isinstance(node,ast.FunctionDef)}
+    started = False
+    for node in tree.body:
+        if isinstance(node,ast.FunctionDef):
+            assert not started, 'Define functions before the drawing starts.'
+            assert len(node.args.args) <= 1
+            assert all(arg.arg == 'size' for arg in node.args.args)
+        else:
+            started = True
+    for node in ast.walk(tree):
+        if isinstance(node,ast.For):
+            assert isinstance(node.iter,ast.Call) and node.iter.func.id == 'range'
+            assert len(node.iter.args) == 1 and isinstance(node.iter.args[0],ast.Constant)
+            assert not any(isinstance(child,ast.For) for statement in node.body for child in ast.walk(statement)), 'Use one loop at a time.'
+        if isinstance(node,ast.Call):
+            assert isinstance(node.func,ast.Name)
+            if node.func.id in functions:
+                assert len(node.args) <= 1
+            assert node.func.id not in {'move','disk','box','arc','polygon','line'}
+    return tree
+
+
 def build():
-    assert len(designs)==48, len(designs)
-    assert len({d['id'] for d in designs})==48
+    assert len(stages) == 10
+    assert len(designs) == 48
+    assert len({d['id'] for d in designs}) == 48
     (ROOT/'previews').mkdir(exist_ok=True)
     for item in stages+designs:
-        recorder=TurtleRecorder()
-        svg=recorder.render(item['code'],item['title'])
+        check_student_code(item['code'])
+        recorder = TurtleRecorder()
+        svg = recorder.render(item['code'],item['title'])
         (ROOT/item['preview']).write_text(svg)
         if recorder.bounds:
-            xs,ys=zip(*recorder.bounds)
+            xs,ys = zip(*recorder.bounds)
             assert min(xs)>=-200.001 and max(xs)<=200.001 and min(ys)>=-200.001 and max(ys)<=200.001, (item['id'],min(xs),max(xs),min(ys),max(ys))
-    (ROOT/'data.json').write_text(json.dumps(dict(stages=stages,designs=designs),ensure_ascii=False,indent=2)+'\n')
-    print(f'Built and executed {len(stages)} tutorial checkpoints and {len(designs)} variations; all drawings fit the 400 × 400 world.')
+    keep = {item['preview'].split('/')[-1] for item in stages+designs}
+    for preview in (ROOT/'previews').glob('step-*.svg'):
+        if preview.name not in keep:
+            preview.unlink()
+    legacy = json.loads((ROOT/'legacy-hashes.json').read_text())
+    (ROOT/'data.json').write_text(json.dumps(dict(revision='beginner-2026-10',legacyHashes=legacy,stages=stages,designs=designs),ensure_ascii=False,indent=2)+'\n')
+    print(f'Built and executed {len(stages)} tutorial checkpoints and {len(designs)} variations; all drawings fit the 400 × 400 world and pass the beginner-code checks.')
 
-if __name__=='__main__':build()
+
+if __name__ == '__main__':
+    build()

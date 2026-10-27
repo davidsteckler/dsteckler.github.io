@@ -56,6 +56,28 @@
     write('history-' + id, history.slice(0, 30));
   }
 
+  function exampleHash(code) {
+    let hash = 2166136261;
+    for (const character of code.replace(/speed\(\d+\)/g, 'speed(0)').trim()) {
+      hash = Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0;
+    }
+    return String(hash);
+  }
+
+  function updateUneditedExamples() {
+    if (read('curriculum-revision', null) === data.revision) return;
+    for (const id of ['tutorial', ...data.designs.map(item => item.id)]) {
+      const saved = draft(id);
+      if (!saved || !data.legacyHashes[id]?.includes(exampleHash(saved.code))) continue;
+      checkpoint('Before the simpler examples', id, saved.code);
+      const code = id === 'tutorial' ? data.stages[state.step].code : data.designs.find(item => item.id === id).code;
+      write('draft-' + id, { code, updated: Date.now() });
+    }
+    // Student edits keep their draft. Earlier reference programs remain in history.
+    write('curriculum-revision', data.revision);
+    state.complete = state.complete.filter(id => data.stages.some(stage => stage.id === id));
+  }
+
   function clearFocus() {
     if (!editor) return;
     focusLines.forEach(line => { try { editor.removeLineClass(line, 'background', 'pumpkin-focus-line'); } catch {} });
@@ -157,8 +179,8 @@
     $('targetImage').alt = (tutorial ? 'Step target: ' : 'Example: ') + item.title;
     $('targetLink').href = '/pumpkin/' + item.preview;
     $('expected').textContent = tutorial ? item.expected : item.description;
-    $('instruction').textContent = tutorial ? item.instruction : 'The full example is in your editor. Press Run, then change a detail to make your own version.';
-    $('explanation').textContent = tutorial ? item.why : item.description + ' Each function groups the instructions for one shape. The calls below the functions put the drawing together.';
+    $('instruction').textContent = tutorial ? item.instruction : 'Copy the functions at the top first. Then follow the comments below them to draw each part in order.';
+    $('explanation').textContent = tutorial ? item.why : (item.id === 'goofy' ? 'eye(size) has one parameter. eye(28) uses 28 for size; eye(18) uses 18. The other movement and color commands work the same way.' : 'The functions wait until you call them. Each penup(), setposition(), and pendown() shows how Tracy moves to the next part.');
     $('snippet').innerHTML = coloredCode(tutorial ? item.snippet : item.code);
     $('snippetLabel').textContent = tutorial ? 'Code for this step' : 'Full example code';
     document.querySelector('.code-details').open = tutorial;
@@ -449,12 +471,13 @@
   }
 
   frame.addEventListener('load', wireEditor);
-  fetch('/pumpkin/data.json?v=1').then(response => {
+  fetch('/pumpkin/data.json?v=3').then(response => {
     if (!response.ok) throw new Error('Could not load tutorial data.');
     return response.json();
   }).then(result => {
     if (!Array.isArray(result.stages) || !Array.isArray(result.designs) || result.stages.length !== 10 || result.designs.length !== 48) throw new Error('Incomplete tutorial data.');
     data = result;
+    updateUneditedExamples();
     if (state.doc !== 'tutorial' && !currentDesign()) state.doc = 'tutorial';
     for (const [index, stage] of data.stages.entries()) {
       const option = document.createElement('option');option.value = String(index);option.textContent = (index + 1) + '. ' + stage.title;$('stepSelect').append(option);

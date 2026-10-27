@@ -1,12 +1,13 @@
 # Pumpkin Studio
 
-`/pumpkin/` provides a ten-step cumulative Python Turtle lesson and 48 runnable variations with matching drawing previews.
+`/pumpkin/` provides ten Python Turtle checkpoints and 48 runnable variations for seventh graders.
 
-- `index.html`, `styles.css`, and `app.js` provide the lesson, gallery, and editor controls.
-- The live editor is `/turtle/?embed=reference&pumpkin=1`, using `TurtleWorkbench` and `TraceTurtleEmbed`. Changes to steps do not replace the student's tutorial code. **Load & run this step** explicitly loads the reference program and saves the previous version.
-- Tutorial work and each gallery design have separate browser-local drafts. Saved versions retain the latest 30 distinct checkpoints. Completion checkboxes are separate from execution.
-- This page adapts the embedded drawing context's filled shapes to `source-over`, so filled eyes, hats, and patterns layer over the pumpkin body. The separate `/turtle/` page is unaffected.
-- `build.py` contains the authored programs and a Turtle recorder. Running `python pumpkin/build.py` from the repository root rebuilds `data.json` and every SVG in `previews/`. It executes all 58 programs and checks their bounds against the 400 × 400 world.
-- Keep gallery previews and lesson code in sync by regenerating them together. All programs use commands supported by the existing editor, with no `import turtle` line.
-
-Validation for the initial version executed all 58 programs through the source of `/turtle/`'s Skulpt/canvas runtime. Every rendered drawing matched its SVG preview with a mean RGB difference below 3/255. Interaction checks covered filtering/search, draft preservation, explicit checkpoint loading, history restore, speed controls, deep links, and reload persistence. Full browser layout verification was unavailable in the managed environment.
+- Each student program defines its functions first. The drawing then uses explicit pen movement, positions, headings, colors, and small shape functions.
+- Examples use ordinary Turtle commands, single `for i in range(number)` loops, and at most one simple variable or a single `size` parameter. There are no lists, indexing, conditionals, nested loops, coordinate formulas, or generic multi-argument shape helpers.
+- The tutorial starts by making `triangle()` and `small_triangle()`. Students then draw the body, stem, left eye, right eye, nose, and teeth in that order.
+- `build.py` authors all student code and uses a Turtle recorder to regenerate `data.json` and matching SVG previews. Run `python pumpkin/build.py` from the repository root. It executes all 58 programs, checks their bounds in the 400 × 400 world, and checks the beginner Python vocabulary.
+- Pattern and scene examples keep repetition visible. The goofy face introduces one explained `size` parameter; the spiral introduces one changing `size` variable.
+- The live editor remains `/turtle/?embed=reference&pumpkin=1`. Lesson navigation preserves a student's current work. Loading an example saves the previous code in Saved versions.
+- `legacy-hashes.json` identifies unedited references from the previous curriculum. On the first visit to the new version, those drafts update to the simplified code and their earlier code is checkpointed. Edited student drafts remain in place.
+- Tutorial work and each design keep separate browser-local drafts and the latest 30 distinct checkpoints. Completion checkboxes are separate from execution.
+- Filled shapes use the embedded canvas's `source-over` adaptation so eyes and decorations layer above the body. The standalone Turtle page is unaffected.
