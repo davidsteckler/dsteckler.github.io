@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python Turtle Editor | David Steckler</title>
+<meta name="description" content="Write and run Python turtle online. Start with import turtle, draw in your browser, and download your Python code.">
+<link rel="canonical" href="https://dsteckler.com/pythonturtle/">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+:root{--bg:#f0ebe1;--paper:#fffdf8;--ink:#202525;--muted:#606a68;--line:#d8d2c6;--teal:#176b73;--dark:#202526}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}button,select{font:inherit}button,a,select,input{accent-color:var(--teal)}button,select,.file-label{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:7px;padding:8px 12px;cursor:pointer}button:hover,.file-label:hover{background:#e1efed}button:disabled{opacity:.45;cursor:default}a{color:var(--teal)}:focus-visible{outline:3px solid #b85d3f;outline-offset:3px}.site-bar{height:46px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-size:13px}.site-bar a{text-decoration:none}.brand{font-weight:700;letter-spacing:.01em}.heading{padding:22px 24px 18px;display:flex;align-items:center;justify-content:space-between;gap:20px}h1{font-size:28px;letter-spacing:-.7px;margin:0 0 6px;font-weight:650}.heading p{margin:0;color:var(--muted);font-size:14px}.heading code{color:var(--teal);font-weight:700}.workspace{margin:0 24px 20px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}.panel-head{min-height:53px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;gap:12px;border-bottom:1px solid var(--line)}.panel-head h2{font-size:13px;font-weight:650;margin:0}.filename{display:flex;align-items:center;gap:9px}.dot{width:7px;height:7px;background:var(--teal);border-radius:50%}.actions{display:flex;gap:7px}.primary{background:var(--teal);border-color:var(--teal);color:white;font-weight:650}.primary:hover{background:#0f5057}.code-wrap{height:460px;background:var(--dark)}textarea{width:100%;height:100%;padding:16px;background:var(--dark);color:#e7eceb;font:15px/1.7 ui-monospace,monospace;border:0;resize:none}.CodeMirror{height:100%;font:15px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--dark);color:#e7eceb}.CodeMirror-gutters{background:var(--dark);border-right:1px solid #394242}.CodeMirror-linenumber{color:#899492;padding:0 12px}.CodeMirror-cursor{border-left:1px solid white}.CodeMirror-selected{background:#3c5358!important}.cm-s-default .cm-keyword{color:#d8a9ef}.cm-s-default .cm-number{color:#ecc78a}.cm-s-default .cm-string{color:#a9d5b1}.cm-s-default .cm-comment{color:#96a5a1}.cm-s-default .cm-builtin{color:#8cd0e0}.cm-s-default .cm-def{color:#dfca95}.editor-foot{padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}.editor-foot button{padding:3px 7px;font-size:12px}.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);font-size:12px}.tools select{min-width:0;max-width:100%;font-size:12px}.tools .spacer{flex:1}.stage{height:460px;background:white;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}.stage iframe{width:100%;height:100%;border:0;background:white}.empty{text-align:center;color:#737c78;font-size:14px;padding:24px}.empty svg{display:block;margin:0 auto 16px;color:var(--teal)}.empty strong{display:block;color:var(--ink);margin-bottom:7px;font-weight:550}.status{font-size:12px;color:var(--muted)}.status[data-state=error]{color:#ad3d30}.status[data-state=running]{color:var(--teal)}.console{border-top:1px solid var(--line)}.console summary{padding:10px 14px;cursor:pointer;font-size:12px;color:var(--muted)}#output{white-space:pre-wrap;overflow-wrap:anywhere;max-height:150px;overflow:auto;font:13px/1.6 ui-monospace,monospace;margin:0;padding:0 14px 14px}#output.error{color:#a33229}.note{font-size:12px;color:var(--muted);margin:0 24px 24px;line-height:1.7}dialog{width:min(690px,calc(100% - 28px));max-height:85vh;overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:24px;color:var(--ink)}dialog::backdrop{background:#20252566}dialog h2{margin:0;font-size:22px}dialog h3{font-size:15px;margin-top:24px}dialog p{font-size:14px;line-height:1.7}dialog code{font:13px ui-monospace,monospace;color:var(--teal)}dialog pre{padding:14px;background:#eaf0eb;border-radius:8px;line-height:1.7;overflow:auto}.dialog-head{display:flex;justify-content:space-between;align-items:center}.reference{border-collapse:collapse;width:100%;font-size:13px}.reference td{border-top:1px solid var(--line);padding:10px 0;line-height:1.5}.reference td:first-child{width:55%}.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}@media(min-width:1450px){.code-wrap,.stage{height:560px}}@media(max-width:850px){.workspace{grid-template-columns:1fr;margin:0 12px 16px;gap:12px}.heading{padding:18px 14px}.heading p{max-width:420px;line-height:1.6}h1{font-size:24px}.site-bar{padding:0 14px}.stage{height:420px}.code-wrap{height:350px}.note{margin:0 14px 20px}.heading{align-items:flex-start}.heading button{font-size:12px;white-space:nowrap}.editor-foot{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<nav class="site-bar" aria-label="Site"><a class="brand" href="/">David Steckler</a><a href="/turtle/">Tracy Turtle Editor ↗</a></nav>
+<header class="heading"><div><h1>Python Turtle Editor</h1><p>Start with <code>import turtle</code>. Write Python. Watch it draw.</p></div><button id="helpBtn">Quick reference</button></header>
+<main class="workspace">
+<section class="panel" aria-label="Python code editor">
+ <div class="panel-head"><h2 class="filename"><span class="dot"></span>main.py</h2><div class="actions"><button id="stopBtn" disabled>Stop</button><button id="runBtn" class="primary" disabled>▶ Run</button></div></div>
+ <div class="code-wrap"><label for="code" class="visually-hidden">Python code</label><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off">import turtle
+
+turtle.shape("turtle")
+turtle.color("teal")
+turtle.pensize(3)
+
+for i in range(4):
+    turtle.forward(100)
+    turtle.left(90)
+
+turtle.done()
+</textarea></div>
+ <div class="editor-foot"><span id="saveStatus">Saved in this browser</span><span>Ctrl / ⌘ + Enter to run</span><span><button id="smaller" aria-label="Smaller code text">A−</button> <button id="larger" aria-label="Larger code text">A+</button></span></div>
+ <div class="tools"><label for="examples">Examples</label><select id="examples"><option value="">Choose a drawing…</option><option value="square">Square · turtle commands</option><option value="object">Flower · named turtle</option><option value="spiral">Color spiral · loop</option><option value="two">Two turtles</option><option value="blank">Fresh start</option></select><span class="spacer"></span><label class="file-label" for="openFile" tabindex="0">Open .py</label><input id="openFile" type="file" accept=".py,text/x-python,text/plain" hidden><button id="downloadBtn">Download .py</button></div>
+</section>
+<section class="panel" aria-label="Turtle drawing">
+ <div class="panel-head"><h2>Turtle drawing</h2><span id="status" class="status" role="status" aria-live="polite">Loading Python…</span></div>
+ <div id="stage" class="stage"><div class="empty"><svg width="50" height="50" viewBox="0 0 50 50" fill="none" aria-hidden="true"><path d="M25 8 42 38 25 32 8 38Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M25 17V31" stroke="currentColor" stroke-width="2"/></svg><strong>Your drawing starts here.</strong>Run the code to move the turtle.</div></div>
+ <details id="console" class="console"><summary>Output &amp; errors</summary><pre id="output" aria-live="polite"></pre></details>
+</section>
+</main>
+<p class="note">Uses standard Python turtle syntax with a browser-based runtime. Common drawing commands, named turtles, loops, functions, <code>math</code>, and <code>random</code> work here. Desktop Tk features and some turtle methods are unavailable. <a href="https://docs.python.org/3/library/turtle.html" target="_blank" rel="noopener">Python turtle documentation ↗</a></p>
+<dialog id="help"><div class="dialog-head"><h2>Python turtle, from the start</h2><button id="closeHelp" aria-label="Close reference">Close</button></div><p>Import the library at the top of your program. Then put <code>turtle.</code> before each turtle command.</p><pre><code>import turtle
+
+turtle.forward(100)
+turtle.left(90)
+
+turtle.done()</code></pre><h3>Give your turtle a name</h3><p>Create a turtle object, then use its name to control it. You can create more than one turtle.</p><pre><code>import turtle
+
+pen = turtle.Turtle()
+pen.color("purple")
+pen.forward(100)
+
+turtle.done()</code></pre><h3>Commands to try</h3><table class="reference"><tbody><tr><td><code>turtle.forward(100)</code></td><td>Move forward 100 pixels</td></tr><tr><td><code>turtle.left(90)</code></td><td>Turn left 90 degrees</td></tr><tr><td><code>turtle.goto(-100, 50)</code></td><td>Move to an x, y coordinate</td></tr><tr><td><code>turtle.penup()</code> / <code>turtle.pendown()</code></td><td>Lift or lower the pen</td></tr><tr><td><code>turtle.circle(50)</code></td><td>Draw a circle with radius 50</td></tr><tr><td><code>turtle.color("teal")</code></td><td>Set the pen and fill color</td></tr><tr><td><code>turtle.begin_fill()</code> / <code>turtle.end_fill()</code></td><td>Fill a shape you draw between these calls</td></tr><tr><td><code>turtle.speed(0)</code></td><td>Draw at the fastest speed</td></tr><tr><td><code>screen = turtle.Screen()</code></td><td>Access the drawing screen</td></tr></tbody></table><p>The turtle starts at <code>(0, 0)</code> in the center, facing right. Positive y goes up. Import the library before using turtle names and commands.</p><p>Your code saves in this browser on this device. Download the <code>.py</code> file to keep a separate copy.</p></dialog>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="/assets/vendor/codemirror/closebrackets.js?v=1"></script>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id), storageKey='dsteckler-standard-python-turtle-v1';
+const starter=$('code').value;
+let editor=null,frame=null,session=0,running=false,ready=false,fontSize=15,watchdog=null;
+const examples={square:starter,object:'import turtle\n\npen = turtle.Turtle()\npen.shape("turtle")\npen.color("darkorchid")\npen.speed(0)\n\nfor i in range(12):\n    pen.circle(70)\n    pen.left(30)\n\nturtle.done()\n',spiral:'import turtle\n\nturtle.bgcolor("#202526")\nturtle.speed(0)\nturtle.pensize(2)\ncolors = ["#8ed1c4", "#f2c078", "#e99a8a", "#a9bce0"]\n\nfor i in range(160):\n    turtle.color(colors[i % 4])\n    turtle.forward(i * 1.3)\n    turtle.right(91)\n\nturtle.done()\n',two:'import turtle\n\nblue = turtle.Turtle()\nblue.shape("turtle")\nblue.color("steelblue")\n\norange = turtle.Turtle()\norange.shape("turtle")\norange.color("darkorange")\norange.left(180)\n\nfor i in range(4):\n    blue.forward(90)\n    blue.left(90)\n    orange.forward(90)\n    orange.left(90)\n\nturtle.done()\n',blank:'import turtle\n\n# Write your drawing here.\n\nturtle.done()\n'};
+try{const saved=localStorage.getItem(storageKey);if(saved!==null)$('code').value=saved;}catch(e){$('saveStatus').textContent='Browser storage unavailable — download to save';}
+if(window.CodeMirror){editor=CodeMirror.fromTextArea($('code'),{mode:{name:'python',version:3},lineNumbers:true,indentUnit:4,tabSize:4,indentWithTabs:false,autoCloseBrackets:true,extraKeys:{'Ctrl-Enter':run,'Cmd-Enter':run,Tab:cm=>cm.somethingSelected()?cm.indentSelection('add'):cm.replaceSelection('    ')}});editor.getWrapperElement().setAttribute('aria-label','Python code editor');editor.on('change',save);}
+else{$('code').addEventListener('input',save);$('code').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();run();}if(e.key==='Tab'){e.preventDefault();const t=e.target;t.setRangeText('    ',t.selectionStart,t.selectionEnd,'end');save();}});}
+function code(){return editor?editor.getValue():$('code').value;}
+function save(){try{localStorage.setItem(storageKey,code());$('saveStatus').textContent='Saved in this browser';}catch(e){$('saveStatus').textContent='Could not save — download your code';}}
+function status(text,state='idle'){$('status').textContent=text;$('status').dataset.state=state;}
+function controls(){ $('runBtn').disabled=!ready||running;$('stopBtn').disabled=!running; }
+function createFrame(){if(frame)frame.remove();frame=document.createElement('iframe');frame.title='Python turtle output';frame.setAttribute('sandbox','allow-scripts allow-modals');frame.src='runner.html';$('stage').replaceChildren(frame);}
+function stop(){session++;clearTimeout(watchdog);if(frame)frame.remove();frame=null;running=false;ready=false;status('Stopped');createFrame();controls();}
+function run(){if(!ready||running)return;running=true;session++;$('output').textContent='';$('output').className='';$('console').open=false;status('Drawing…','running');controls();frame.contentWindow.postMessage({type:'run',code:code(),session,width:Math.floor($('stage').clientWidth),height:Math.floor($('stage').clientHeight)},'*');clearTimeout(watchdog);watchdog=setTimeout(()=>{if(running){stop();$('output').textContent='This run reached the 60-second limit. Try fewer repetitions or turtle.speed(0).';$('console').open=true;}},60000);}
+window.addEventListener('message',e=>{if(!frame||e.source!==frame.contentWindow)return;const m=e.data;if(!m||typeof m!=='object')return;if(m.type==='ready'){ready=true;controls();if($('status').textContent==='Loading Python…')status('Ready');return;}if(m.type==='load-error'){ready=false;running=false;status('Python could not load','error');$('output').textContent=m.text;$('console').open=true;controls();return;}if(m.session!==session)return;if(m.type==='output'){if($('output').textContent.length<30000)$('output').textContent+=m.text;$('console').open=true;}if(m.type==='done'||m.type==='error'){clearTimeout(watchdog);running=false;controls();if(m.type==='error'){status('Check your code','error');$('output').className='error';$('output').textContent+=m.text;$('console').open=true;}else status('Finished');}});
+$('runBtn').onclick=run;$('stopBtn').onclick=stop;
+$('examples').onchange=e=>{const selected=e.target.value;if(!selected)return;if(code()!==starter&&code()!==examples.blank&&!confirm('Replace the code in the editor? Download it first if you want to keep a copy.')){e.target.value='';return;}if(running)stop();const text=examples[selected];if(editor)editor.setValue(text);else{$('code').value=text;save();}e.target.value='';};
+$('downloadBtn').onclick=()=>{const url=URL.createObjectURL(new Blob([code()],{type:'text/x-python;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='main.py';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+$('openFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;if(file.size>1000000){alert('Please choose a Python file smaller than 1 MB.');return;}if(!confirm('Replace the code in the editor with '+file.name+'?')){e.target.value='';return;}try{const text=await file.text();if(running)stop();if(editor)editor.setValue(text);else{$('code').value=text;save();}}catch(e){alert('Could not read that file.');}e.target.value='';};
+document.querySelector('.file-label').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('openFile').click();}};
+function resizeText(delta){fontSize=Math.max(11,Math.min(24,fontSize+delta));const el=editor?editor.getWrapperElement():$('code');el.style.fontSize=fontSize+'px';if(editor)editor.refresh();}
+$('smaller').onclick=()=>resizeText(-1);$('larger').onclick=()=>resizeText(1);$('helpBtn').onclick=()=>$('help').showModal();$('closeHelp').onclick=()=>$('help').close();
+createFrame();controls();
+})();
+</script>
+</body>
+</html>
