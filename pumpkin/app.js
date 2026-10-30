@@ -23,6 +23,7 @@
   let data, editor, api, frameDoc, ready = false, suppressSave = false;
   let saveTimer, toastTimer, editingTimer, lastEditingSnapshot = 0;
   let focusLines = [], runtimeObserver, booted = false, navigationToken = 0;
+  const updatedExamples = new Set();
   const frame = $('turtleFrame');
   const persistState = () => write('state', { step: state.step, complete: state.complete, doc: state.doc });
   const currentDesign = () => data?.designs.find(item => item.id === state.doc);
@@ -65,15 +66,21 @@
   }
 
   function updateUneditedExamples() {
-    if (read('curriculum-revision', null) === data.revision) return;
+    const revisionChanged = read('curriculum-revision', null) !== data.revision;
     for (const id of ['tutorial', ...data.designs.map(item => item.id)]) {
       const saved = draft(id);
-      if (!saved || !data.legacyHashes[id]?.includes(exampleHash(saved.code))) continue;
+      if (!saved) continue;
+      // Old drafts can differ from the reference after changing speed or color.
+      // Recognize the retired helper signatures even when their hash changed.
+      const retiredHelpers = /^\s*def\s+(?:move|disk|box|arc|polygon|line)\s*\([^\n)]*,[^\n)]*\)\s*:/m.test(saved.code);
+      const previousReference = revisionChanged && data.legacyHashes[id]?.includes(exampleHash(saved.code));
+      if (!retiredHelpers && !previousReference) continue;
       checkpoint('Before the simpler examples', id, saved.code);
       const code = id === 'tutorial' ? data.stages[state.step].code : data.designs.find(item => item.id === id).code;
       write('draft-' + id, { code, updated: Date.now() });
+      updatedExamples.add(id);
     }
-    // Student edits keep their draft. Earlier reference programs remain in history.
+    // Earlier programs remain available in Saved versions.
     write('curriculum-revision', data.revision);
     state.complete = state.complete.filter(id => data.stages.some(stage => stage.id === id));
   }
@@ -179,13 +186,14 @@
     $('targetImage').alt = (tutorial ? 'Step target: ' : 'Example: ') + item.title;
     $('targetLink').href = '/pumpkin/' + item.preview;
     $('expected').textContent = tutorial ? item.expected : item.description;
-    $('instruction').textContent = tutorial ? item.instruction : 'Copy the functions at the top first. Then follow the comments below them to draw each part in order.';
-    $('explanation').textContent = tutorial ? item.why : (item.id === 'goofy' ? 'eye(size) has one parameter. eye(28) uses 28 for size; eye(18) uses 18. The other movement and color commands work the same way.' : 'The functions wait until you call them. Each penup(), setposition(), and pendown() shows how Tracy moves to the next part.');
+    $('instruction').textContent = tutorial ? item.instruction : 'Type the functions at the top first. Then follow the comments below them to draw each part in order.';
+    $('explanation').textContent = tutorial ? item.why : 'The functions wait until you call them. Each penup(), setposition(), and pendown() shows how Tracy moves to the next part. Change the numbers or colors inside a function to change its shape.';
     $('snippet').innerHTML = coloredCode(tutorial ? item.snippet : item.code);
     $('snippetLabel').textContent = tutorial ? 'Code for this step' : 'Full example code';
     document.querySelector('.code-details').open = tutorial;
-    $('loadStep').textContent = tutorial ? 'Load & run this step' : 'Restore & run this example';
-    $('loadNote').textContent = tutorial ? 'Browsing steps keeps your code. Loading a step saves your previous version.' : 'Your edits save for this pumpkin. The original is always here to restore.';
+    $('loadStep').textContent = tutorial ? 'Load & run this step' : 'Load simple example';
+    $('loadNote').textContent = tutorial ? 'Browsing steps keeps your code. Loading a step saves your previous version.' : 'Load the current example here. Your earlier code stays in Saved versions.';
+    $('exampleUpdate').hidden = !updatedExamples.has(state.doc);
     $('experiment').textContent = item.experiment;
     $('predictBox').hidden = !tutorial;
     $('predictBox').open = false;
@@ -252,7 +260,7 @@
       article.querySelectorAll('button').forEach(button => button.addEventListener('click', () => openDesign(item.id)));
       return article;
     }));
-    $('resultCount').textContent = items.length + (items.length === 1 ? ' pumpkin' : ' pumpkins');
+    $('resultCount').textContent = items.length + (items.length === 1 ? ' design' : ' designs');
     $('noResults').hidden = items.length > 0;
     $('galleryFilters').querySelectorAll('button').forEach(button => {
       const active = button.dataset.category === state.category;
@@ -261,7 +269,7 @@
   }
 
   function initGallery() {
-    for (const category of ['All', 'Faces', 'Colors', 'Patterns', 'Costumes', 'Scenes']) {
+    for (const category of ['All', 'Halloween', 'Backgrounds', 'Faces', 'Colors', 'Patterns', 'Costumes', 'Scenes']) {
       const button = document.createElement('button');button.type = 'button';button.className = 'filter-button';
       button.dataset.category = category;
       const count = category === 'All' ? data.designs.length : data.designs.filter(item => item.category === category).length;
@@ -471,12 +479,15 @@
   }
 
   frame.addEventListener('load', wireEditor);
-  fetch('/pumpkin/data.json?v=3').then(response => {
+  fetch('/pumpkin/data.json?v=20261030', { cache: 'no-cache' }).then(response => {
     if (!response.ok) throw new Error('Could not load tutorial data.');
     return response.json();
   }).then(result => {
-    if (!Array.isArray(result.stages) || !Array.isArray(result.designs) || result.stages.length !== 10 || result.designs.length !== 48) throw new Error('Incomplete tutorial data.');
+    if (!Array.isArray(result.stages) || !Array.isArray(result.designs) || result.stages.length !== 10 || !result.designs.length || new Set(result.designs.map(item => item.id)).size !== result.designs.length) throw new Error('Incomplete tutorial data.');
     data = result;
+    $('designCount').textContent = String(data.designs.length);
+    $('galleryTitle').textContent = data.designs.length + ' ways to start.';
+    $('heroCount').textContent = String(data.designs.length);
     updateUneditedExamples();
     if (state.doc !== 'tutorial' && !currentDesign()) state.doc = 'tutorial';
     for (const [index, stage] of data.stages.entries()) {

@@ -239,7 +239,7 @@ for id,title,description,task in [
     ('robot','Robot face','Square eyes and a rectangle mouth with straight dividing lines.','Change the eye color from lightblue to yellow.'),
     ('zipper','Zipper smile','A straight mouth with a row of little stitches.','Change range(7) to range(5) in the stitch loop.'),
     ('hearts','Heart eyes','Each heart uses two half circles and two straight lines.','Change the eye color from crimson to deeppink.'),
-    ('goofy','Goofy grin','Two different eye sizes and two square teeth.','Change the eye(28) call to eye(20).')]:
+    ('goofy','Goofy grin','Two different eye sizes and two square teeth.','Change circle(28) inside big_eye() to circle(20).')]:
     p=Drawing();p.body()
     if id=='smile': p.eyes('round',size=18);p.smile()
     elif id=='surprised': p.eyes('round',size=18);p.circle('Draw the open mouth.',0,-43,24,'white')
@@ -302,20 +302,14 @@ circle(15, 180)
 forward(30)''','crimson',function='heart')
         p.smile(color='black')
     elif id=='goofy':
-        # One optional parameter, with a familiar name and a plain explanation.
-        p.functions['eye']='''# size is the number you put inside eye(...).
-def eye(size):
-    begin_fill()
-    circle(size)
-    end_fill()'''
-        p.add('Draw the big left eye. Use 28 for size.',p.position(-47,20)+'\ncolor("white")\neye(28)')
-        p.add('Draw the smaller right eye. Use 18 for size.',p.position(47,30)+'\ncolor("white")\neye(18)')
+        p.circle('Draw the big left eye.',-47,48,28,'white','big_eye')
+        p.circle('Draw the smaller right eye.',47,48,18,'white','small_eye')
         p.circle('Draw the left pupil.',-43,46,9,'black','pupil')
         p.circle('Draw the right pupil.',44,50,9,'black','pupil')
         p.rectangle('Draw the mouth.',-63,-68,126,42,'black')
         p.rectangle('Draw the left tooth.',-34,-48,22,22,'white','tooth')
         p.rectangle('Draw the right tooth.',12,-68,22,22,'white','tooth')
-    design(id,title,'Faces',description,task,p,'One parameter' if id=='goofy' else 'Practice')
+    design(id,title,'Faces',description,task,p,'Practice')
 
 for id,title,color,background,face_color in [
     ('ghost','Ghost pumpkin','ivory','darkslategray','black'),
@@ -601,6 +595,188 @@ for id,title,description,task in [
     design(id,title,'Scenes',description,task,p,'More shapes')
 
 
+# These helpers author literal beginner code. They never appear in the editor.
+def moon(p, x=-118, y=126):
+    p.circle('Draw the full moon in the sky.',x,y,40,'khaki')
+
+def ground(p, shade='darkslategray'):
+    p.rectangle('Draw the ground before the character.',-199,-199,398,72,shade,'ground')
+
+def sky_stars(p):
+    for x,y in [(-162,80),(-55,151),(61,143),(139,87)]:
+        p.star('Move to another place and call star().',x,y,15,'lightyellow')
+
+def ghost_character(p):
+    p.filled('Draw the ghost: a curved head and a wavy bottom.',-72,-90,'''for i in range(6):
+    circle(12, 180)
+    right(180)
+left(180)
+forward(105)
+circle(72, 180)
+forward(105)''','ivory',270,function='ghost_body')
+    p.circle('Draw the left eye.',-26,24,9,'midnightblue','ghost_eye')
+    p.circle('Draw the right eye. Call ghost_eye() again.',26,24,9,'midnightblue','ghost_eye')
+    p.circle('Draw the surprised mouth.',0,-18,15,'midnightblue')
+
+def black_cat(p):
+    p.arc('Draw the curling tail first.',67,-88,270,44,270,'black',17)
+    p.circle('Draw the round body.',0,-66,65,'black')
+    p.triangle('Draw the left ear.',-62,62,44,'black',function='ear')
+    p.triangle('Draw the right ear. Reuse ear().',18,62,44,'black',function='ear')
+    p.circle('Draw the head in front of the ears.',0,34,65,'black')
+    p.circle('Draw the left yellow eye.',-27,43,13,'gold','cat_eye')
+    p.circle('Draw the right yellow eye.',27,43,13,'gold','cat_eye')
+    p.line('Draw the left narrow pupil.',-27,34,90,18,'black',5)
+    p.line('Draw the right narrow pupil.',27,34,90,18,'black',5)
+    p.triangle('Draw the pink nose pointing down.',9,16,18,'pink',180,'nose')
+    for x,y,h in [(-29,4,170),(-29,-8,185),(29,4,10),(29,-8,355)]:
+        p.line('Draw a whisker from the cheek.',x,y,h,42,'silver',2)
+
+def gargoyle(p):
+    p.path('Draw the left stone wing.',[(-35,20),(-161,83),(-144,-10),(-109,8),(-80,-41)],'slategray')
+    p.path('Draw the right stone wing.',[(35,20),(161,83),(144,-10),(109,8),(80,-41)],'slategray')
+    p.rectangle('Draw the stone pedestal.',-90,-159,180,25,'slategray','pedestal')
+    p.circle('Draw the round stone body.',0,-62,65,'gray')
+    p.triangle('Draw the left horn.',-59,66,35,'silver',function='horn')
+    p.triangle('Draw the right horn.',24,66,35,'silver',function='horn')
+    p.circle('Draw the head.',0,35,64,'silver')
+    p.triangle('Draw the left glowing eye.',-43,43,27,'yellowgreen',180,'gargoyle_eye')
+    p.triangle('Draw the right glowing eye.',30,43,27,'yellowgreen',180,'gargoyle_eye')
+    p.rectangle('Draw the dark mouth.',-30,-4,60,17,'dimgray','mouth')
+    p.rectangle('Draw the left foot.',-58,-136,44,25,'silver','foot')
+    p.rectangle('Draw the right foot.',14,-136,44,25,'silver','foot')
+
+for id,title,description,task in [
+    ('floating-ghost','Floating ghost','A white ghost floats under a moon. The scalloped edge uses half circles.','Change ivory to lightcyan in the ghost body color.'),
+    ('black-cat','Black cat','A black cat with a curled tail, yellow eyes, and four whiskers.','Change gold to limegreen for the eyes.'),
+    ('moon-cat','Cat under the moon','A cat watches over a purple night with a full moon and stars.','Change the moon color from khaki to lightyellow.'),
+    ('gargoyle','Stone gargoyle','Stone wings, triangle horns, and glowing eyes above a pedestal.','Change the gargoyle eye color from yellowgreen to gold.'),
+    ('night-bat','Night bat','Pointed wings and triangle ears around a small round bat.','Change mediumpurple to steelblue in the wings.'),
+    ('skull','Friendly skull','A round skull, two eye sockets, and a row of square teeth.','Change range(4) to range(3) in the teeth loop.'),
+    ('cauldron','Bubbling cauldron','A round pot, green potion, and bubbles rising into the night.','Change the bubble color from yellowgreen to turquoise.'),
+    ('haunted-house','Haunted house','A pointed roof, glowing windows, and a moon above dark walls.','Change the window color from gold to orange.')]:
+    p=Drawing('rebeccapurple' if id in ['black-cat','moon-cat','night-bat'] else 'midnightblue')
+    if id in ['floating-ghost','moon-cat','night-bat','haunted-house']: moon(p);sky_stars(p)
+    if id not in ['floating-ghost','night-bat']: ground(p)
+    if id=='floating-ghost': ghost_character(p)
+    elif id in ['black-cat','moon-cat']: black_cat(p)
+    elif id=='gargoyle': gargoyle(p)
+    elif id=='night-bat':
+        p.path('Draw the left pointed wing.',[(-24,25),(-172,81),(-150,-27),(-112,-5),(-87,-44),(-55,-24)],'mediumpurple')
+        p.path('Draw the right pointed wing.',[(24,25),(172,81),(150,-27),(112,-5),(87,-44),(55,-24)],'mediumpurple')
+        p.triangle('Draw the left ear.',-43,35,30,'black',function='bat_ear')
+        p.triangle('Draw the right ear.',13,35,30,'black',function='bat_ear')
+        p.circle('Draw the bat body.',0,-18,54,'black')
+        p.circle('Draw the left eye.',-19,-3,8,'gold','bat_eye')
+        p.circle('Draw the right eye.',19,-3,8,'gold','bat_eye')
+        p.triangle('Draw the little fang.',7,-25,14,'white',180,'fang')
+    elif id=='skull':
+        p.circle('Draw the round top of the skull.',0,30,93,'ivory')
+        p.rectangle('Draw the square jaw.',-60,-102,120,68,'ivory','jaw')
+        p.circle('Draw the left eye socket.',-36,38,25,'midnightblue','eye_socket')
+        p.circle('Draw the right eye socket.',36,38,25,'midnightblue','eye_socket')
+        p.triangle('Draw the nose pointing down.',13,-1,26,'midnightblue',180,'nose')
+        p.function('tooth','begin_fill()\nfor i in range(4):\n    forward(14)\n    left(90)\nend_fill()')
+        p.add('Draw four teeth, moving right after each square.',p.position(-43,-92)+'''\ncolor("midnightblue")
+for i in range(4):
+    tooth()
+    penup()
+    forward(24)
+    pendown()''')
+    elif id=='cauldron':
+        p.rectangle('Draw the left foot.',-76,-137,30,38,'black','pot_foot')
+        p.rectangle('Draw the right foot.',46,-137,30,38,'black','pot_foot')
+        p.circle('Draw the round pot.',0,-27,100,'black')
+        p.rectangle('Draw the green potion surface.',-90,36,180,23,'limegreen','potion')
+        p.rectangle('Draw the heavy pot rim.',-111,23,222,18,'dimgray','rim')
+        p.arc('Draw a silver shine on the pot.',-72,-18,270,37,100,'silver',5)
+        p.circle('Draw the first bubble.',-46,102,17,'yellowgreen','bubble')
+        p.circle('Draw the second bubble.',38,139,17,'yellowgreen','bubble')
+        p.circle('Draw a smaller bubble.',5,82,9,'limegreen')
+    elif id=='haunted-house':
+        p.rectangle('Draw the house walls.',-100,-130,200,183,'indigo','walls')
+        p.path('Draw the pointed roof.',[(-126,53),(126,53),(0,169)],'black')
+        p.rectangle('Draw the tall door.',-22,-130,44,76,'black','door')
+        for x,y in [(-73,-7),(37,-7),(-73,-80),(37,-80)]:
+            p.rectangle('Draw another glowing window.',x,y,36,43,'gold','window')
+        p.circle('Draw the round attic window.',0,84,18,'gold')
+    design(id,title,'Halloween',description,task,p,'More shapes')
+
+for id,title,description,task in [
+    ('sunset','Halloween sunset','Wide bands of sunset color sit behind a small pumpkin.','Change one sky band color.'),
+    ('graveyard','Graveyard','Round-topped gravestones and a moon behind a pumpkin.','Change the gravestones from slategray to silver.'),
+    ('candy-sky','Candy sky','A bright purple sky with stars and wrapped candy.','Change the candy centers from hotpink to turquoise.'),
+    ('moonlit-hills','Moonlit hills','Two half circles make hills below the moon.','Change a hill color from teal to darkgreen.'),
+    ('haunted-forest','Haunted forest','Tall trunks and bare branches frame the pumpkin.','Change pensize(6) to pensize(9) in the branches.'),
+    ('spooky-windows','Spooky windows','Glowing rectangles make windows in a dark city skyline.','Change range(4) to range(3) in a window column.'),
+    ('starry-night','Starry night','One star function repeats across a purple sky.','Change forward(15) inside star() to forward(20).'),
+    ('cobweb-night','Cobweb night','Silver web strands in both upper corners frame the pumpkin.','Change the web color from silver to white.')]:
+    p=Drawing('rebeccapurple' if id=='candy-sky' else 'indigo' if id=='starry-night' else 'midnightblue')
+    if id=='sunset':
+        for y,shade in [(100,'indigo'),(0,'purple'),(-100,'crimson'),(-199,'coral')]:
+            p.rectangle('Draw a wide band of sky.',-199,y,398,99,shade,'sky_band')
+        p.circle('Draw the setting sun.',110,-13,44,'gold')
+        ground(p,'saddlebrown')
+    elif id=='graveyard':
+        moon(p);ground(p,'darkgreen')
+        for x in [-145,145]:
+            p.circle('Draw the rounded top of a gravestone.',x,-39,25,'slategray','stone_top')
+            p.rectangle('Draw the bottom of the gravestone.',x-25,-130,50,91,'slategray','stone_base')
+            p.line('Draw the upright of the cross.',x,-15,270,48,'lightgray',4)
+            p.line('Draw the crossbar.',x-14,-34,0,28,'lightgray',4)
+    elif id=='candy-sky':
+        sky_stars(p)
+        for x,y in [(-137,92),(124,81)]:
+            p.triangle('Draw the left candy wrapper.',x-14,y-14,28,'gold',90,'wrapper')
+            p.triangle('Draw the right candy wrapper.',x+14,y+14,28,'gold',270,'wrapper')
+            p.circle('Draw the round candy center.',x,y,22,'hotpink','candy')
+        ground(p,'mediumorchid')
+    elif id=='moonlit-hills':
+        moon(p);sky_stars(p)
+        p.filled('Draw the left hill with half a circle.',-10,-170,'circle(91, 180)','teal',90,'hill')
+        p.filled('Draw the right hill. Reuse hill().',192,-170,'circle(91, 180)','darkcyan',90,'hill')
+        ground(p,'darkslategray')
+    elif id=='haunted-forest':
+        moon(p,0,138);ground(p,'darkolivegreen')
+        for x in [-162,144]:
+            p.rectangle('Draw a tall dark tree trunk.',x,-127,18,265,'black','trunk')
+            p.line('Draw a branch reaching left.',x+9,59,145,57,'black',6)
+            p.line('Draw a branch reaching right.',x+9,91,35,53,'black',6)
+            p.line('Draw another branch.',x+9,-3,140,38,'black',6)
+    elif id=='spooky-windows':
+        moon(p,10,143)
+        for x in [-181,119]:
+            p.rectangle('Draw a tall building behind the pumpkin.',x,-155,62,262,'black','building')
+            p.function('window','begin_fill()\nfor i in range(4):\n    forward(16)\n    left(90)\nend_fill()')
+            for window_x in [x+8,x+37]:
+                p.add('Draw one column of four windows.',p.position(window_x,-87,90)+'''\ncolor("gold")
+for i in range(4):
+    window()
+    penup()
+    forward(43)
+    pendown()''')
+        ground(p)
+    elif id=='starry-night':
+        sky_stars(p)
+        for x,y in [(-144,-10),(122,5),(-107,149),(116,154),(-39,80),(21,108)]:
+            p.star('Move and reuse star() to fill the sky.',x,y,15,'lightyellow')
+        ground(p,'darkslateblue')
+    elif id=='cobweb-night':
+        for side in [-1,1]:
+            x=side*187
+            for h in ([0,315,270] if side==-1 else [180,225,270]):
+                p.line('Draw a web spoke from the corner.',x,187,h,115,'silver',2)
+            for length in [38,76,114]:
+                points=[(x-side*length,187),(x-side*round(length*.7),187-round(length*.7)),(x,187-length)]
+                p.add('Connect three points for one web strand.',p.position(*points[0])+ '\ncolor("silver")\n'+'\n'.join(f'setposition({a}, {b})' for a,b in points[1:]))
+        ground(p)
+    p.body(x=0,y=-55,size=78)
+    p.circle('Draw the left pumpkin eye.',-28,-28,11,'white','eye')
+    p.circle('Draw the right pumpkin eye. Reuse eye().',28,-28,11,'white','eye')
+    p.smile(y=-43,size=28)
+    design(id,title,'Backgrounds',description,task,p,'More shapes')
+
+
 class TurtleRecorder:
     """Small, deterministic implementation of the drawing commands used here."""
     def __init__(self):
@@ -672,8 +848,7 @@ def check_student_code(code):
     for node in tree.body:
         if isinstance(node,ast.FunctionDef):
             assert not started, 'Define functions before the drawing starts.'
-            assert len(node.args.args) <= 1
-            assert all(arg.arg == 'size' for arg in node.args.args)
+            assert not node.args.args, 'Use functions with empty parentheses.'
         else:
             started = True
     for node in ast.walk(tree):
@@ -684,15 +859,15 @@ def check_student_code(code):
         if isinstance(node,ast.Call):
             assert isinstance(node.func,ast.Name)
             if node.func.id in functions:
-                assert len(node.args) <= 1
+                assert not node.args
             assert node.func.id not in {'move','disk','box','arc','polygon','line'}
     return tree
 
 
 def build():
     assert len(stages) == 10
-    assert len(designs) == 48
-    assert len({d['id'] for d in designs}) == 48
+    assert len(designs) == 64
+    assert len({d['id'] for d in designs}) == len(designs)
     (ROOT/'previews').mkdir(exist_ok=True)
     for item in stages+designs:
         check_student_code(item['code'])
@@ -707,7 +882,7 @@ def build():
         if preview.name not in keep:
             preview.unlink()
     legacy = json.loads((ROOT/'legacy-hashes.json').read_text())
-    (ROOT/'data.json').write_text(json.dumps(dict(revision='beginner-2026-10',legacyHashes=legacy,stages=stages,designs=designs),ensure_ascii=False,indent=2)+'\n')
+    (ROOT/'data.json').write_text(json.dumps(dict(revision='halloween-2026-10-30',legacyHashes=legacy,stages=stages,designs=designs),ensure_ascii=False,indent=2)+'\n')
     print(f'Built and executed {len(stages)} tutorial checkpoints and {len(designs)} variations; all drawings fit the 400 × 400 world and pass the beginner-code checks.')
 
 
