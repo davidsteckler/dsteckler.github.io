@@ -366,6 +366,9 @@
       body.trace-embed .code-panel .CodeMirror{font-size:14px!important;height:100%!important}
       .world-stage{padding:8px!important}.world-info{font-size:10px!important;padding:8px!important}
       .world-info .world-copy{font-size:9px!important}.world-controls{font-size:9px!important}
+      .world-info{grid-template-columns:minmax(0,1fr)!important;gap:7px!important}
+      .world-controls{justify-content:space-between!important;gap:8px!important}
+      .neon-control{font-size:11px!important}.neon-control select{font-size:11px!important;padding:4px 6px!important}
       .editor-divider{background:#e6ebdc!important}.editor-divider:before{background:#b2c1a3!important}
       .pumpkin-focus-line{background:#36544055!important}.console-head{font-size:9px!important}
       @media(max-width:640px){

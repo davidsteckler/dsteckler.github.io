@@ -377,6 +377,11 @@
     }
     #turtle-drawing{z-index:2}
     #turtle-sprite{z-index:3}
+    .neon-filters{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+    .world-controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 14px}
+    .neon-control{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:var(--soft);white-space:nowrap}
+    .neon-control select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:5px 6px;min-height:30px;cursor:pointer}
+    .neon-control select:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 
     .world-info{
       display:grid;
@@ -897,6 +902,7 @@
           <option value="star">Star</option>
           <option value="spiral">Spiral</option>
           <option value="colors">Color Wheel</option>
+          <option value="neon">Neon rings</option>
         </select>
         <button class="btn primary" id="runBtn" type="button">▶ Run <span class="shortcut">Ctrl ↵</span></button>
         <button class="btn" id="pauseBtn" type="button" disabled>⏸ Pause</button>
@@ -992,7 +998,10 @@ for i in range(4):
 
       <div class="world-info">
         <div class="world-copy"><strong>Pen starts down.</strong> <code>penup()</code> moves without drawing; <code>pendown()</code> draws again.</div>
-        <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+        <div class="world-controls">
+          <label class="neon-control" for="neonGlow">Neon glow <select id="neonGlow" aria-label="Neon glow" title="Add a colored glow to your drawing. Bright colors on a black background show it best."><option value="off">Off</option><option value="soft">Soft</option><option value="bright">Bright</option></select></label>
+          <label class="toggle"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+        </div>
       </div>
 
       <div class="output-resize-handle" id="outputDivider" role="separator" tabindex="0" aria-label="Resize output panel" aria-orientation="horizontal" aria-valuemin="100" aria-valuemax="290" aria-valuenow="150" title="Drag to resize output"></div>
@@ -1058,6 +1067,7 @@ for i in range(4):
 <script src="/assets/vendor/codemirror/closebrackets.js?v=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script src="/turtle/neon.js?v=20261030"></script>
 
 <script>
 (function(){
@@ -1174,6 +1184,28 @@ for i in range(4):
   ].join("\n");
 
   var examples = {
+    neon: [
+      "# Neon glow is set to Bright below the drawing.",
+      "speed(0)",
+      "bgcolor(\"black\")",
+      "pensize(3)",
+      "",
+      "# Draw the blue ring.",
+      "penup()",
+      "setposition(-48, -70)",
+      "pendown()",
+      "color(\"cyan\")",
+      "circle(70)",
+      "",
+      "# Draw the pink ring.",
+      "penup()",
+      "setposition(48, -70)",
+      "pendown()",
+      "color(\"magenta\")",
+      "circle(70)",
+      "",
+      "hideturtle()"
+    ].join("\n"),
     square: [
       "for i in range(4):",
       "    forward(100)",
@@ -2708,6 +2740,7 @@ for i in range(4):
 
   examplesSelect.addEventListener("change", function(){
     if(!this.value || !examples[this.value]) return;
+    if(this.value === "neon" && window.TurtleNeon)window.TurtleNeon.setLevel("bright");
     clearErrorHighlight();
     window.replaceTurtleCode(examples[this.value],"Loaded "+this.options[this.selectedIndex].text+" example");
     this.value = "";
