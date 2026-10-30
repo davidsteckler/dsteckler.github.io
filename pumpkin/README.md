@@ -14,3 +14,5 @@
 
 - Halloween includes ghosts, cats, a gargoyle, bat, skull, cauldron, and haunted house. Backgrounds includes eight complete, editable scenes.
 - Cache versions change with the curriculum, and gallery counts come from the current data.
+
+- Neon glow below the drawing offers Off, Soft, and Bright. It follows the drawing colors and updates existing ink without changing Python code. The Pumpkin page remembers its own setting.
