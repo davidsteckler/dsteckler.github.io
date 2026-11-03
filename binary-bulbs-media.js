@@ -6,7 +6,7 @@
   function bulbRow(container,label,onToggle){
     return places.map((place,index)=>{
       const item=document.createElement('div');item.className='bit';
-      const caption=document.createElement('div');caption.className='bit-label';caption.textContent=place;
+      const caption=document.createElement('div');caption.className='bit-label';caption.innerHTML='<span class="place-value">'+place+'</span><span class="power-label">2<sup>'+Math.log2(place)+'</sup></span>';caption.setAttribute('aria-label',place+' equals 2 to the power '+Math.log2(place));
       const button=document.createElement('button');button.type='button';button.className='bit-button';
       button.setAttribute('aria-label',label+' bit worth '+place);
       button.append(original.cloneNode(true));
@@ -17,24 +17,52 @@
   function updateBulbs(buttons,value){
     buttons.forEach((button,i)=>{const bit=(value & places[i])?1:0;button.classList.toggle('on',!!bit);button.setAttribute('aria-pressed',String(!!bit));button.querySelector('.inside-bit').textContent=bit;});
   }
+  const format=n=>n.toLocaleString('en-US');
   const channels=[['r','Red','#ee8a78',255],['g','Green','#8bc898',128],['b','Blue','#8ab8ec',64]].map(([id,name,color,value])=>{
     const row=document.createElement('div');row.className='channel-row';row.style.setProperty('--bulb-color',color);
-    row.innerHTML='<div class="channel-control"><label for="rgb-'+id+'">'+name+' <output id="rgb-'+id+'-value" for="rgb-'+id+'"></output></label><input type="range" id="rgb-'+id+'" min="0" max="255" step="1" value="'+value+'"><code class="channel-byte" id="rgb-'+id+'-byte"></code></div><div class="media-bulbs" aria-label="'+name+' byte"></div>';
+    row.innerHTML='<div class="channel-control"><div class="channel-heading"><label for="rgb-'+id+'">'+name+' <output id="rgb-'+id+'-value" for="rgb-'+id+'"></output></label><button type="button" class="group-switch" aria-label="'+name+' group" aria-pressed="true">On</button></div><input type="range" id="rgb-'+id+'" min="0" max="255" step="1" value="'+value+'"><code class="channel-byte" id="rgb-'+id+'-byte"></code><button type="button" class="all-bits" aria-label="Turn all '+name.toLowerCase()+' bits on">All 8 on</button></div><div class="media-bulbs" aria-label="'+name+' byte"></div>';
     document.getElementById('rgbChannels').append(row);
-    const state={id,value,input:row.querySelector('input'),output:row.querySelector('output'),code:row.querySelector('code')};
+    const state={id,name,row,value,enabled:true,input:row.querySelector('input'),output:row.querySelector('output'),code:row.querySelector('code'),toggle:row.querySelector('.group-switch')};
     state.buttons=bulbRow(row.querySelector('.media-bulbs'),name,place=>{state.value^=place;renderColor();});
-    state.input.addEventListener('input',()=>{state.value=Number(state.input.value);renderColor();});return state;
+    state.input.addEventListener('input',()=>{state.value=Number(state.input.value);renderColor();});
+    state.toggle.addEventListener('click',()=>{state.enabled=!state.enabled;renderColor();});
+    row.querySelector('.all-bits').addEventListener('click',()=>{state.enabled=true;state.value=255;renderColor();});
+    return state;
   });
   function renderColor(){
-    channels.forEach(c=>{c.input.value=c.value;c.output.value=c.value;c.code.textContent=binary(c.value);updateBulbs(c.buttons,c.value);});
-    const values=channels.map(c=>c.value),hex='#'+values.map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+    const values=channels.map(c=>c.enabled?c.value:0);
+    channels.forEach((c,i)=>{
+      const value=values[i];c.input.value=value;c.output.value=value;c.code.textContent=binary(value);updateBulbs(c.buttons,value);
+      c.input.disabled=!c.enabled;c.buttons.forEach(b=>b.disabled=!c.enabled);
+      c.toggle.setAttribute('aria-pressed',String(c.enabled));c.toggle.textContent=c.enabled?'On':'Off';c.row.classList.toggle('channel-off',!c.enabled);
+    });
+    const hex='#'+values.map(n=>n.toString(16).padStart(2,'0')).join('').toUpperCase();
+    const number=values[0]*65536+values[1]*256+values[2];
     document.getElementById('rgbSwatch').style.backgroundColor='rgb('+values.join(',')+')';
     document.getElementById('rgbSwatch').setAttribute('aria-label','Color '+hex);
     document.getElementById('rgbCode').textContent='rgb('+values.join(', ')+')';
     document.getElementById('rgbHex').textContent=hex;
+    document.getElementById('rgbColorNumber').value=number;
+    document.getElementById('rgbFullBinary').textContent=values.map(binary).join(' ');
+    document.getElementById('rgbNumberEquation').textContent=values[0]+' × 65,536 + '+values[1]+' × 256 + '+values[2]+' = '+format(number);
+    const count=channels.filter(c=>c.enabled).length;
+    document.querySelectorAll('[data-channel-count]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.channelCount)===count)));
+    document.querySelectorAll('[data-count-row]').forEach(row=>row.classList.toggle('current',Number(row.dataset.countRow)===count));
+    document.getElementById('channelPossibilities').textContent=format(2**(count*8))+' possible '+(count===0?'color':'colors');
+    document.getElementById('channelExplanation').textContent=count===0?'All groups are off. The only result is black.':channels.filter(c=>c.enabled).map(c=>c.name.toLowerCase()).join(' + ')+' · '+(count*8)+' available bits · '+Array(count).fill('256').join(' × ')+' settings';
   }
-  document.querySelectorAll('[data-rgb-preset]').forEach(b=>b.addEventListener('click',()=>{b.dataset.rgbPreset.split(',').forEach((n,i)=>channels[i].value=Number(n));renderColor();}));
-  document.getElementById('rgbRandom').addEventListener('click',()=>{channels.forEach(c=>c.value=Math.floor(Math.random()*256));renderColor();});
+  function applyRGB(values){channels.forEach((c,i)=>{c.value=values[i];c.enabled=true;});renderColor();}
+  document.querySelectorAll('[data-rgb-preset]').forEach(b=>b.addEventListener('click',()=>applyRGB(b.dataset.rgbPreset.split(',').map(Number))));
+  document.getElementById('rgbRandom').addEventListener('click',()=>{channels.filter(c=>c.enabled).forEach(c=>c.value=Math.floor(Math.random()*256));renderColor();});
+  document.querySelectorAll('[data-channel-count]').forEach(b=>b.addEventListener('click',()=>{const count=Number(b.dataset.channelCount);channels.forEach((c,i)=>c.enabled=i<count);renderColor();}));
+  function setColorNumber(value){
+    if(!Number.isFinite(value))return;
+    const n=Math.min(16777215,Math.max(0,Math.round(value)));
+    applyRGB([Math.floor(n/65536),Math.floor(n/256)%256,n%256]);
+  }
+  document.getElementById('rgbColorNumber').addEventListener('input',e=>{if(e.target.value!=='')setColorNumber(e.target.valueAsNumber);});
+  document.getElementById('rgbColorNumber').addEventListener('change',e=>setColorNumber(e.target.value===''?0:e.target.valueAsNumber));
+  document.querySelectorAll('[data-color-number]').forEach(b=>b.addEventListener('click',()=>setColorNumber(Number(b.dataset.colorNumber))));
   renderColor();
 
   let samples=Array.from({length:16},(_,i)=>Math.round(128+110*Math.sin(i*Math.PI/8))),selected=0;
@@ -84,6 +112,7 @@
   renderAudio();
   function changeMode(){
     const mode=['color','audio'].includes(location.hash.slice(1))?location.hash.slice(1):'numbers';
+    document.body.dataset.bulbMode=mode;
     for(const name of ['numbers','color','audio'])document.getElementById(name+'Panel').hidden=name!==mode;
     document.querySelectorAll('.bulb-modes a').forEach(a=>{if(a.hash==='#'+mode)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');});
     if(mode!=='audio')stop();

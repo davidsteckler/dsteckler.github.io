@@ -349,7 +349,7 @@ footer{
 }
 </style>
 <link rel="stylesheet" href="learning-path.css">
-<link rel="stylesheet" href="binary-bulbs-media.css?v=1">
+<link rel="stylesheet" href="binary-bulbs-media.css?v=2">
 <link rel="stylesheet" href="shared-site-header.css?v=1"><link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -397,6 +397,7 @@ footer{
     <a href="#color">Binary Bulbs (24) · Color</a>
     <a href="#audio">Binary Bulbs · Audio</a>
   </nav>
+  <div class="base-links" role="navigation" aria-label="Number bases"><a href="/binary1.html#numbers" aria-current="page">Binary · Base 2</a><a href="/base8.html">Octal · Base 8</a><a href="/base10.html">Decimal · Base 10</a><a href="/base16.html">Hexadecimal · Base 16</a></div>
   <div id="numbersPanel">
   <section class="playground" aria-label="Binary bulbs activity">
     <div id="bulbs"></div>
@@ -444,8 +445,9 @@ footer{
 
   <section class="explainer">
     <h2>Why those place values matter</h2>
+    <p class="powers-intro">Each step to the left doubles the value. The powers of two count those steps, starting with 2<sup>0</sup> = 1 on the right.</p>
     <div class="example-labels" aria-hidden="true">
-      <span>128</span><span>64</span><span>32</span><span>16</span><span>8</span><span>4</span><span>2</span><span>1</span>
+      <span>128<small>2<sup>7</sup></small></span><span>64<small>2<sup>6</sup></small></span><span>32<small>2<sup>5</sup></small></span><span>16<small>2<sup>4</sup></small></span><span>8<small>2<sup>3</sup></small></span><span>4<small>2<sup>2</sup></small></span><span>2<small>2<sup>1</sup></small></span><span>1<small>2<sup>0</sup></small></span>
     </div>
     <div class="example-bits" aria-label="Binary 00101101">
       <span>0</span><span>0</span><span class="on">1</span><span>0</span><span class="on">1</span><span class="on">1</span><span>0</span><span class="on">1</span>
@@ -457,14 +459,34 @@ footer{
   </section>
   </div>
   <section id="colorPanel" class="media-panel" aria-labelledby="colorTitle" hidden>
-    <div class="media-intro"><h2 id="colorTitle">Binary Bulbs (24) · Color</h2><p>One color uses three bytes: red, green, and blue. Drag a slider or click any bulb. The color and all 24 bits stay connected.</p></div>
-    <div class="color-result"><div id="rgbSwatch" role="img" aria-label="Mixed color"></div><div class="result-copy"><strong id="rgbCode"></strong><strong id="rgbHex"></strong><span>8 red bits + 8 green bits + 8 blue bits = 24 bits</span></div></div>
+    <div class="media-intro"><h1 id="colorTitle">True Color · 24 Binary Bulbs</h1><p>You are choosing one of 16,777,216 colors. Each slider changes a whole byte of bulbs. Each bulb changes one bit.</p></div>
+    <div class="color-result">
+      <div id="rgbSwatch" role="img" aria-label="Mixed color"></div>
+      <div class="result-copy"><div class="rgb-number-line"><strong id="rgbCode"></strong><label for="rgbColorNumber">Color number <input id="rgbColorNumber" type="number" min="0" max="16777215" step="1" value="16744512" inputmode="numeric"></label></div><strong id="rgbHex"></strong><span>One of 16,777,216 colors · numbered 0 through 16,777,215</span></div>
+    </div>
+    <div class="channel-options" role="group" aria-label="Number of color channels available"><span>Try using:</span><button type="button" data-channel-count="0" aria-pressed="false">0 channels</button><button type="button" data-channel-count="1" aria-pressed="false">1 channel</button><button type="button" data-channel-count="2" aria-pressed="false">2 channels</button><button type="button" data-channel-count="3" aria-pressed="true">3 channels</button></div>
+    <div class="channel-summary" role="status"><strong id="channelPossibilities"></strong><span id="channelExplanation"></span></div>
     <div id="rgbChannels"></div>
-    <div class="media-actions" aria-label="Color presets"><button type="button" data-rgb-preset="0,0,0">Black</button><button type="button" data-rgb-preset="255,255,255">White</button><button type="button" data-rgb-preset="255,0,0">Red</button><button type="button" data-rgb-preset="0,255,0">Green</button><button type="button" data-rgb-preset="0,0,255">Blue</button><button type="button" id="rgbRandom">Random color</button></div>
-    <p class="media-note">Each row has the same place values as the original eight bulbs. Each channel can store 0–255. Together, the three bytes can represent 16,777,216 colors.<br>Try making yellow. Then change just the bulb worth 1 in the blue row.</p>
+    <div class="media-actions" aria-label="Color presets"><button type="button" data-rgb-preset="0,0,0">Black</button><button type="button" data-rgb-preset="255,255,255">White</button><button type="button" data-rgb-preset="255,0,0">Red</button><button type="button" data-rgb-preset="0,255,0">Green</button><button type="button" data-rgb-preset="0,0,255">Blue</button><button type="button" data-rgb-preset="255,255,0">Yellow</button><button type="button" data-rgb-preset="0,255,255">Cyan</button><button type="button" data-rgb-preset="255,0,255">Magenta</button><button type="button" id="rgbRandom">Random color</button></div>
+    <p class="media-note">Switch a color group off to remove its eight bits. Switching it back on restores its previous value. A slider at 0 turns all eight bulbs off; at 255, all eight are on. Color presets and the color-number box use all three channels.</p>
+    <section class="true-color-guide" aria-labelledby="trueColorTitle">
+      <h3 id="trueColorTitle">What does 2<sup>24</sup> represent?</h3>
+      <p>Every bulb has 2 possible states: off or on. With 24 bulbs, there are 24 groups of 2 choices multiplied together. Each different 24-bit pattern represents one RGB color.</p>
+      <div class="color-equation">2<sup>24</sup> = 256 × 256 × 256 = <strong>16,777,216 colors</strong></div>
+      <p>Eight red bits give 256 red levels, including 0. Green and blue each have 256 levels too. A 24-bit RGB color is commonly called <strong>true color</strong>.</p>
+      <div class="channel-comparison"><table><caption>How many colors can the available channels make?</caption><thead><tr><th scope="col">Channels available</th><th scope="col">Bits you can change</th><th scope="col">Possible colors</th></tr></thead><tbody><tr data-count-row="0"><th scope="row">0 · all off</th><td>0</td><td>2<sup>0</sup> = 1 (black)</td></tr><tr data-count-row="1"><th scope="row">1 · red, green, or blue</th><td>8</td><td>2<sup>8</sup> = 256</td></tr><tr data-count-row="2"><th scope="row">2 · any pair</th><td>16</td><td>2<sup>16</sup> = 65,536</td></tr><tr data-count-row="3"><th scope="row">3 · red + green + blue</th><td>24</td><td>2<sup>24</sup> = 16,777,216</td></tr></tbody></table></div>
+      <p>These totals count every setting the available sliders could use. A channel set to 0 still has 256 possible settings while its group is available.</p>
+      <h3>Your selected color as one number</h3>
+      <code id="rgbFullBinary" class="full-binary"></code>
+      <div class="number-equation" id="rgbNumberEquation"></div>
+      <p>The red byte occupies the left eight bits, followed by green and blue. That is why red is multiplied by 65,536 and green by 256. Try entering <button type="button" class="inline-color" data-color-number="0">0</button>, <button type="button" class="inline-color" data-color-number="255">255</button>, <button type="button" class="inline-color" data-color-number="256">256</button>, or <button type="button" class="inline-color" data-color-number="16777215">16,777,215</button> in the color-number box and watch which groups change.</p>
+      <h3>Why do the presets show only eight colors?</h3>
+      <p>If each whole red, green, or blue group can only be fully off or fully on, there are just 2 × 2 × 2 = <strong>8 colors</strong>. The sliders let each group use all 256 levels, including the shades in between.</p>
+      <p class="try-color">Try this: make yellow with red and green at 255 and blue at 0. Switch blue on, then turn on only its bulb worth 1. The color number increases by 1.</p>
+    </section>
   </section>
   <section id="audioPanel" class="media-panel" aria-labelledby="audioTitle" hidden>
-    <div class="media-intro"><h2 id="audioTitle">Binary Bulbs · Audio</h2><p>A sound wave can be stored as a sequence of numbers called samples. Choose a sample below, then change its eight bulbs and listen to what happens.</p></div>
+    <div class="media-intro"><h1 id="audioTitle">Binary Bulbs · Audio</h1><p>A sound wave can be stored as a sequence of numbers called samples. Choose a sample below, then change its eight bulbs and listen to what happens.</p></div>
     <div class="channel-row">
       <div class="channel-control"><label for="audioSample"><span id="audioSampleLabel">Sample 1</span><output id="audioSampleValue" for="audioSample">128</output></label><input type="range" id="audioSample" min="0" max="255" step="1" value="128"><code class="channel-byte" id="audioSampleByte">10000000</code></div>
       <div class="media-bulbs" id="audioBulbs" aria-label="Eight audio sample bulbs"></div>
@@ -526,7 +548,8 @@ function makeBulb(value,index){
 
   const label=document.createElement('div');
   label.className='bit-label';
-  label.textContent=value;
+  label.innerHTML='<span class="place-value">'+value+'</span><span class="power-label">2<sup>'+Math.log2(value)+'</sup></span>';
+  label.setAttribute('aria-label',value+' equals 2 to the power '+Math.log2(value));
   label.style.visibility=labelsOn?'visible':'hidden';
 
   const button=document.createElement('button');
@@ -628,6 +651,6 @@ document.getElementById('menuButton').onclick=()=>document.getElementById('siteN
 
 render();
 </script>
-<script src="binary-bulbs-media.js?v=1"></script>
+<script src="binary-bulbs-media.js?v=2"></script>
 </body>
 </html>
