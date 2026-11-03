@@ -146,7 +146,7 @@
     .no-js{margin-top:40px;color:#ffdbb5}
     @media(max-width:760px){.hub{padding-top:43px}.hero-top{display:block;margin-bottom:33px}.hero-signal{width:100%;margin-top:24px}.mission-grid,.workbench{grid-template-columns:1fr}.game{padding-top:20px}.work-panel,.context-panel{padding:19px}.work-panel{min-height:0}.steps{gap:4px}.step{padding:9px 5px;justify-content:center}.step span:last-child{display:none}.answer-row{flex-direction:column}.answer-row .btn{width:100%}.teacher-cards{grid-template-columns:1fr}footer{flex-direction:column;gap:5px}.mission-card{min-height:325px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
-    @media print{header,footer,.hub,.game,.teacher details>summary{display:none!important}.teacher{display:block!important}.teacher details{border:0}.teacher-card{border:2px dashed #000;color:#000;break-inside:avoid}.teacher-card strong{color:#000}.teacher-content{color:#000}.teacher-cards{grid-template-columns:1fr 1fr}body{background:#fff;color:#000}}
+    @media print{header,footer,.game,.hub>.hero-top,.hub>.section-heading,.hub>.mission-grid,.hub>.notes,.teacher details>summary{display:none!important}.teacher{display:block!important}.teacher details{border:0}.teacher-card{border:2px dashed #000;color:#000;break-inside:avoid}.teacher-card strong{color:#000}.teacher-content{color:#000}.teacher-cards{grid-template-columns:1fr 1fr}body{background:#fff;color:#000}}
   </style>
 </head>
 <body>
@@ -189,7 +189,7 @@
         </article>
       </div>
       <p class="notes"><strong>Interactive concept preview.</strong> The challenges are playable and progress is saved in this browser. This is a mockup; physical scavenger clues and teacher submissions are not connected yet.</p>
-      <section class="teacher" id="teacher">
+      <section class="teacher hidden" id="teacher">
         <details>
           <summary>Teacher setup / printable physical start cards</summary>
           <div class="teacher-content">
@@ -230,7 +230,7 @@
           steps:[
             {title:"The Light Sensor",blurb:"A hallway light switches itself on and off. Find the rule that controls it.",context:"Computers often read information from sensors. A light sensor measures brightness. A program uses that reading to decide what should happen.",question:"What is the LOWEST light reading that switches the light OFF?",placeholder:"Enter a number",hint:"Move the slider from dark to bright. Look for the exact moment the display changes.",check:function(a){return Number(a.trim())===30;}},
             {title:"The Broken Connection",blurb:"A message must reach computer D. One connection has been severed. Find a route that still works.",context:"The internet is a network of connected devices. Data can often take another route when a connection fails.",question:"Which middle router carries the working route from A to D?",placeholder:"Enter its letter",hint:"The red line is broken. Trace another path from A to D.",check:function(a){return a.trim().toUpperCase()==="B";}},
-            {title:"The Strange Login",blurb:"Someone attempted to access the system. Find the suspicious moment in the activity log.",context:"Cybersecurity specialists examine patterns in activity logs to investigate attacks. An unusual number of failed attempts can be a useful clue.",question:"At what time did the unusual burst of failures occur?",placeholder:"Example: 08:00",hint:"One minute contains far more failed attempts than the others.",check:function(a){return a.trim().replace(/\\s/g,"").replace(/^0/,"")==="8:08";}},
+            {title:"The Strange Login",blurb:"Someone attempted to access the system. Find the suspicious moment in the activity log.",context:"Cybersecurity specialists examine patterns in activity logs to investigate attacks. An unusual number of failed attempts can be a useful clue.",question:"At what time did the unusual burst of failures occur?",placeholder:"Example: 08:00",hint:"One minute contains far more failed attempts than the others.",check:function(a){return a.trim().replace(/\s/g,"").replace(/^0/,"")==="8:08";}},
             {title:"The Fan That Thinks",blurb:"The building's ventilation system follows a small program. Predict its behavior.",context:"Code is used to control real systems. The computer follows the precise rules supplied by the programmer.",question:"When the temperature is 29°C, will the fan be ON or OFF?",placeholder:"ON or OFF",hint:"Read the comparison first. Is 29 greater than or equal to 28?",check:function(a){return a.trim().toUpperCase()==="ON";}}
           ]},
         control:{
@@ -241,7 +241,7 @@
           steps:[
             {title:"Recover the Route",blurb:"Your rover must reach the marked square to deliver a replacement navigation module.",context:"Robots do exactly what their commands specify. F means move forward one square; R and L rotate 90 degrees.",question:"Type a sequence of F, R, and L commands to reach the goal.",placeholder:"Example: F R F",hint:"Start facing north. Move north once, turn east, then move east twice.",check:function(a){var x=1,y=2,d=0,commands=a.toUpperCase().replace(/[^FRL]/g,"");if(!commands||commands.length>30)return false;for(var i=0;i<commands.length;i++){if(commands[i]==="R")d=(d+1)%4;else if(commands[i]==="L")d=(d+3)%4;else {var dx=[0,1,0,-1][d],dy=[-1,0,1,0][d];x+=dx;y+=dy;if(x<0||x>4||y<0||y>3)return false;}}return x===3&&y===1;}},
             {title:"A Sensor Disagrees",blurb:"Three distance sensors are reading the surface below. One is giving a very different value.",context:"Engineers compare redundant sensors because measurements can be wrong. Independent readings help reveal faulty data.",question:"Which sensor reading is the outlier (in meters)?",placeholder:"Enter the suspect reading",hint:"Two readings are close together. The other one is much larger.",check:function(a){return Number(a.trim().replace(/m|meters/gi,""))===98;}},
-            {title:"Fix the Landing Code",blurb:"The landing thrusters should activate below 20 meters. The code is checking the wrong condition.",context:"A single comparison symbol can change what a program does. Engineers simulate and test critical logic before relying on it.",question:"Which comparison symbol should replace > to turn the thrusters ON below 20 meters?",placeholder:"Type one comparison symbol",hint:"The required condition is altitude less than 20.",check:function(a){return a.trim()==="<"||/^less\\s*than$/i.test(a.trim());}},
+            {title:"Fix the Landing Code",blurb:"The landing thrusters should activate below 20 meters. The code is checking the wrong condition.",context:"A single comparison symbol can change what a program does. Engineers simulate and test critical logic before relying on it.",question:"Which comparison symbol should replace > to turn the thrusters ON below 20 meters?",placeholder:"Type one comparison symbol",hint:"The required condition is altitude less than 20.",check:function(a){return a.trim()==="<"||/^less\s*than$/i.test(a.trim());}},
             {title:"Keep the System Alive",blurb:"A mission computer has stopped responding. The remaining machines must keep the system running.",context:"Redundancy means having additional components available if one fails. Important systems can use multiple computers to keep operating.",question:"Three computers are installed. One fails. How many remain available?",placeholder:"Enter a number",hint:"Two of the three computers are still responding.",check:function(a){return Number(a.trim())===2;}}
           ]}
       };
@@ -333,6 +333,7 @@
       $("back").addEventListener("click",home);
       $("print-cards").addEventListener("click",function(){window.print()});
       var search=new URLSearchParams(location.search),requested=search.get("hunt");
+      if(search.get("teacher")==="1")$("teacher").classList.remove("hidden");
       if(requested&&data[requested])openMission(requested);
     })();
   </script>
