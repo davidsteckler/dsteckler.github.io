@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#080c11">
-  <meta name="description" content="Computer Science Week: two interactive scavenger hunt mission previews for middle school students.">
+  <meta name="description" content="Computer Science Week: two interactive scavenger hunt investigations for middle school students.">
   <title>Computer Science Week — The Investigations | dsteckler.com</title>
   <style>
     :root{--bg:#080c11;--panel:#101820;--panel2:#121d27;--line:#293643;--text:#ecf2f6;--muted:#a2b0bd;--teal:#9be5d3;--amber:#f4ca86;--red:#ff9b9b;--font:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;--sans:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
@@ -188,13 +188,13 @@
           <div class="mission-bottom"><span class="duration">4 LOCKS + LANDING</span><button class="launch" data-start="control">OPEN CASE →</button></div>
         </article>
       </div>
-      <p class="notes"><strong>Interactive concept preview.</strong> The challenges are playable and progress is saved in this browser. This is a mockup; physical scavenger clues and teacher submissions are not connected yet.</p>
+      <p class="notes"><strong>Plan for one class per case.</strong> Investigate with a partner, record your evidence, and finish with a reflection. Progress saves on this browser. <a href="?teacher=1">Teacher setup</a></p>
       <section class="teacher hidden" id="teacher">
         <details>
           <summary>Teacher setup / printable physical start cards</summary>
           <div class="teacher-content">
-            <p>Print these two cards and hide them in different locations. Students open the corresponding mission and enter the access word they find. You can also use “Try digital preview” during testing. The cards are demonstration materials and can be revised before the event.</p>
-            <div class="teacher-cards">
+            <p>Print these two cards and hide them in different locations. Students open the corresponding mission and enter the access word they find. You can also use “Try digital preview” during testing. Use the cards for a physical start, or choose the digital start on screen. All later evidence is inside the investigation.</p>
+            <h4>42-minute class plan</h4><p>0–4: Introduce the case and find the start card. 4–28: Investigate four locks (about six minutes each). Partners switch driver and evidence recorder after every lock. 28–35: Finish the case and compare explanations. 35–42: Write the reflection and submit a screenshot plus the copied case report in Schoology.</p><p>Ask: What did you try? What happened? What will you test next? Offer the first hint before giving the solution. Fast finishers can test an alternative route or describe a failure the model does not handle.</p><h4>Before class</h4><p>Open each case once on a student device. Hide the start cards only in accessible classroom locations. On shared computers, reset the case before the next student starts. Reflections and notes save locally; the site does not send work to you automatically.</p><h4>Answer key</h4><p>Invisible Computer: 30; ABED or ACED; VENT; OFF ON ON. Mission Control: F R F F (other valid routes accepted); 13; &lt;; 12. These are simplified classroom models. The sensor outlier is suspicious, not proven faulty; two agreeing computers can still share a bug.</p><div class="teacher-cards">
               <div class="teacher-card">CASE FILE 01 / THE INVISIBLE COMPUTER<br>START AT: dsteckler.com/csweek/<br>ACCESS WORD <strong>CIRCUIT</strong>Find the computer you cannot see.</div>
               <div class="teacher-card">CASE FILE 02 / MISSION CONTROL<br>START AT: dsteckler.com/csweek/<br>ACCESS WORD <strong>ORBIT</strong>Recover the landing system.</div>
             </div>
@@ -248,20 +248,20 @@
       var active=null,step=-1,progress={},feedback="",showHint=false,landing=false,light=10;
       var $=function(id){return document.getElementById(id)};
       var escapeHtml=function(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})};
-      function load(){try{return JSON.parse(localStorage.getItem("csweek_mock_progress")||"{}")}catch(e){return {}}}
+      function load(){try{var v=JSON.parse(localStorage.getItem("csweek_mock_progress")||"{}");return v&&typeof v==="object"&&!Array.isArray(v)?v:{}}catch(e){return {}}}
       function persist(){try{localStorage.setItem("csweek_mock_progress",JSON.stringify(progress))}catch(e){}}
-      function count(){return Math.max(0,Math.min(5,Number(progress[active]||0)))}
+      function count(){return Math.max(0,Math.min(5,(Number.isFinite(Number(progress[active]))?Math.floor(Number(progress[active])):0)))}
       function current(){return data[active]}
       function openMission(id){active=id;progress=load();step=Math.min(count(),5)-1;feedback="";showHint=false;landing=false;light=10;$("hub").classList.add("hidden");$("game").classList.remove("hidden");render();window.scrollTo({top:0,behavior:"smooth"});}
       function home(){$("game").classList.add("hidden");$("hub").classList.remove("hidden");active=null;history.replaceState(null,"",location.pathname);window.scrollTo({top:0,behavior:"smooth"});}
-      function setLocation(){history.replaceState(null,"",location.pathname+"?hunt="+encodeURIComponent(active))}
+      function setLocation(){history.replaceState(null,"",location.pathname+"?hunt="+encodeURIComponent(active)+(teacherMode?"&teacher=1":""))}
       function render(){
         var m=current(),done=count(),label=step<0?"ACCESS":step>=4?"FINAL REVEAL":m.labels[step+1];
         setLocation();
         $("game-meta").textContent="CASE FILE 0"+(active==="invisible"?"1":"2")+" / "+(step>=4?"MISSION COMPLETE":"LOCK "+(Math.max(0,step)+1)+" OF 4");
         $("game-tag").textContent=m.tag;$("game-title").textContent=m.name;$("game-desc").textContent=m.intro;
         $("steps").innerHTML=m.labels.map(function(l,i){
-          var state=step+1===i?"active":done>=i&&i>0?"complete":"";
+          var state=step+1===i?"active":done>i?"complete":"";
           if(step>=4)state="complete";
           return '<div class="step '+state+'"><span class="step-count">'+(state==="complete"?"✓":String(i+1).padStart(2,"0"))+'</span><span>'+l+'</span></div>';
         }).join("");
@@ -274,7 +274,7 @@
           '<p>Your teacher has hidden a case file somewhere in the room. Find the card for this investigation and enter its access word below.</p>'+
           '<div class="mission-visual"><div class="caption">INCOMING TRANSMISSION</div><div class="terminal">&gt; CASE FILE IDENTIFIED<br>&gt; ENCRYPTED ACCESS: <span style="color:var(--amber)">■■■■■■■■</span><br>&gt; AUTHORIZATION REQUIRED</div></div>'+
           '<label class="answer-label" for="answer">Access word</label><form id="answer-form" class="answer-row"><input id="answer" class="answer-field" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Type word from physical card" required><button class="btn" type="submit">UNLOCK →</button></form>'+
-          '<p class="feedback" id="feedback" role="status"></p><button class="linkbtn" type="button" id="preview-skip">Try digital preview (skip physical clue)</button>';
+          '<p class="feedback" id="feedback" role="status"></p><button class="linkbtn" type="button" id="preview-skip">Begin with digital access</button>';
       }
       function stageMarkup(s,i){
         return '<div class="subtle-label">LOCK '+String(i+1).padStart(2,"0")+' / 04</div><h3>'+escapeHtml(s.title)+'</h3><p>'+escapeHtml(s.blurb)+'</p>'+
@@ -305,33 +305,81 @@
       }
       function reflectionMarkup(){
         var val=progress[active+"_reflection"]||"";
-        return '<div class="reflection"><label class="answer-label" for="reflection">Which part surprised you most? What would you want to explore next?</label><textarea id="reflection" placeholder="Write a few sentences...">'+escapeHtml(val)+'</textarea><p class="feedback" id="save-status">Saved only on this browser in the mockup.</p></div><div class="helper-row"><button class="btn secondary" type="button" id="back-hub">← CHOOSE ANOTHER CASE</button><button class="linkbtn" type="button" id="reset-mission">Reset this mission</button></div>';
+        return '<div class="reflection"><label class="answer-label" for="reflection">Which part surprised you most? What would you want to explore next?</label><textarea id="reflection" placeholder="Write a few sentences...">'+escapeHtml(val)+'</textarea><p class="feedback" id="save-status">Saved on this browser. Copy your case report for your teacher.</p></div><div class="helper-row"><button class="btn secondary" type="button" id="back-hub">← CHOOSE ANOTHER CASE</button><button class="linkbtn" type="button" id="reset-mission">Reset this mission</button></div>';
       }
       function contextMarkup(){
         var m=current();
-        if(step===-1)return '<div class="subtle-label">FIELD NOTES</div><h4>How this works</h4><p>Find your access card. Enter its word to begin. Each correct answer unlocks the next part of the investigation.</p><p>The digital preview button lets you test without hiding a physical clue.</p><h4>Time</h4><p>Designed to expand into one class period; this mockup uses shorter sample puzzles.</p>';
-        if(step===4)return '<div class="subtle-label">CASE FILE CLOSED</div><h4>What you investigated</h4><p>'+ (active==="invisible"?"Embedded computers can sense, communicate, protect, and control parts of the world around you.":"Reliable autonomous systems combine software with sensors, hardware, testing, and backup systems.")+'</p><p>This preview saves your answers locally. A classroom release could add student submissions and a teacher dashboard.</p>';
+        if(step===-1)return '<div class="subtle-label">FIELD NOTES</div><h4>How this works</h4><p>Find your access card. Enter its word to begin. Each correct answer unlocks the next part of the investigation.</p><p>Choose digital access if your teacher is running the hunt entirely on screen.</p><h4>Time</h4><p>Allow about six minutes per lock. Test an idea, record evidence, then unlock the next stage.</p>';
+        if(step===4)return '<div class="subtle-label">CASE FILE CLOSED</div><h4>What you investigated</h4><p>'+ (active==="invisible"?"Embedded computers can sense, communicate, protect, and control parts of the world around you.":"Reliable autonomous systems combine software with sensors, hardware, testing, and backup systems.")+'</p><p>Your notes and reflection stay on this device. Copy the case report and submit it in Schoology with a screenshot of this page.</p>';
         return '<div class="subtle-label">FIELD NOTE / '+String(step+1).padStart(2,"0")+'</div><h4>What you are investigating</h4><p>'+escapeHtml(m.steps[step].context)+'</p><h4>Progress</h4><p>'+step+' of 4 locks opened.</p><button class="linkbtn" type="button" id="reset-mission">Reset this mission</button>';
       }
       function bindStage(){
         var form=$("answer-form");
         if(form)form.addEventListener("submit",function(e){e.preventDefault();var input=$("answer"),a=input.value;var correct=step===-1?a.trim().toLowerCase()===current().access:current().steps[step].check(a);
           if(!correct){$("feedback").className="feedback";$("feedback").textContent="That does not unlock this stage. Check the evidence and try again.";return;}
-          $("feedback").className="feedback ok";$("feedback").textContent="ACCESS GRANTED / NEXT STAGE UNLOCKED";
           progress[active]=Math.max(count(),step+2);persist();
-          var button=form.querySelector("button");button.disabled=true;setTimeout(function(){step++;showHint=false;feedback="";render();},520);
+          input.disabled=true;var button=form.querySelector("button");button.disabled=true;
+          $("feedback").className="feedback ok";$("feedback").textContent=step<0?"Case opened.":discoveries[active][step];
+          var next=document.createElement("button");next.type="button";next.className="btn";next.textContent=step===3?"CLOSE CASE →":"CONTINUE →";
+          $("feedback").after(next);next.focus();next.addEventListener("click",function(){step++;showHint=false;render();var heading=$("work").querySelector("h3");if(heading){heading.tabIndex=-1;heading.focus();}});
+
         });
         var slider=$("light-slider");if(slider)slider.addEventListener("input",function(){light=Number(slider.value);$("reading").textContent=light;$("light-status").textContent=light<30?"ON":"OFF";$("light-status").className="big-status"+(light<30?"":" off");});
         var hint=$("hint-toggle");if(hint)hint.addEventListener("click",function(){showHint=!showHint;var previous=$("answer")?$("answer").value:"";render();if($("answer"))$("answer").value=previous;});
         var skip=$("preview-skip");if(skip)skip.addEventListener("click",function(){progress[active]=Math.max(count(),1);persist();step=0;render()});
         var homebtn=$("back-hub");if(homebtn)homebtn.addEventListener("click",home);
-        var reset=$("reset-mission");if(reset)reset.addEventListener("click",function(){if(!window.confirm("Restart this case file from the beginning?"))return;progress[active]=0;delete progress[active+"_reflection"];persist();step=-1;showHint=false;landing=false;render()});
-        var reflection=$("reflection");if(reflection)reflection.addEventListener("input",function(){progress[active+"_reflection"]=reflection.value;persist();$("save-status").textContent="Saved locally on this device (not submitted to teacher).";});
-        var land=$("land");if(land)land.addEventListener("click",function(){if(landing)return;landing=true;$("ship").classList.add("descending");land.disabled=true;$("landing-feedback").textContent="AUTO LANDING IN PROGRESS...";setTimeout(function(){$("landing-feedback").className="feedback ok";$("landing-feedback").textContent="TOUCHDOWN CONFIRMED / MISSION COMPLETE";},2250);});
+        var reset=$("reset-mission");if(reset)reset.addEventListener("click",function(){if(!window.confirm("Restart this case file from the beginning?"))return;progress[active]=0;delete progress[active+"_reflection"];for(var n=0;n<4;n++)delete progress[active+"_note_"+n];persist();step=-1;showHint=false;landing=false;render()});
+        var reflection=$("reflection");if(reflection)reflection.addEventListener("input",function(){progress[active+"_reflection"]=reflection.value;persist();$("save-status").textContent="Saved on this device. Remember to submit your case report.";});
+        var land=$("land");if(land)land.addEventListener("click",function(){if(landing)return;landing=true;$("ship").classList.add("descending");land.disabled=true;$("landing-feedback").textContent="AUTO LANDING IN PROGRESS...";setTimeout(function(){if(active!=="control"||step!==4||!$("landing-feedback"))return;$("landing-feedback").className="feedback ok";$("landing-feedback").textContent="TOUCHDOWN CONFIRMED / MISSION COMPLETE";},2250);});
       }
+
+      var teacherMode=new URLSearchParams(location.search).get("teacher")==="1";
+      var discoveries={
+        invisible:["Threshold recovered: 29 is ON; 30 is OFF. The sensor supplies data; the program decides.","Packet delivered. The alternate path kept the ventilation controller reachable.","VENT recovered. Failed logins are evidence to investigate; this log alone cannot prove an attack.","Ventilation restored. The hidden computer is the building controller you have been investigating."],
+        control:["Navigation module delivered. Turning changes direction without changing position.","13 m selected by taking the middle reading. Agreement helps identify suspicious data.","Comparison repaired. Test below, at, and above the boundary before trusting the rule.","12 m accepted by the two agreeing computers. The landing sequence is ready."]
+      };
+      data.invisible.intro="The hallway lights and ventilation stopped responding. Follow the building controller’s sensor, network, and security trail to restore it.";
+      Object.assign(data.invisible.steps[1],{question:"Find a working route from A to D. Type every router in order.",placeholder:"Example: A B E D",hint:"A can reach B or C. Both can reach E. Avoid the broken B–D link.",check:function(a){return /^(ABED|ACED)$/.test(a.toUpperCase().replace(/[\s,→>\-]/g,""));}});
+      Object.assign(data.invisible.steps[2],{blurb:"The burst of failed logins left a diagnostic payload. Find that row, then decode its four numbers using the letter key.",question:"What four-letter subsystem does the suspicious row identify?",placeholder:"Decoded subsystem",hint:"Use the row with 25 failures. A=1, B=2 … Z=26; 22 is V.",check:function(a){return a.trim().toUpperCase()==="VENT";}});
+      Object.assign(data.invisible.steps[3],{question:"Predict the fan at 27°C, 28°C, and 29°C, in that order.",placeholder:"Example: OFF OFF ON",hint:"The boundary is 28. Equality satisfies >=. Apply the rule separately to each reading.",check:function(a){return a.toUpperCase().trim().replace(/[,/]+/g," ").replace(/\s+/g," ")==="OFF ON ON";}});
+      Object.assign(data.control.steps[0],{hint:"Try F R F F. Use Test route to watch each command before submitting.",check:function(a){var r=traceRoute(a);return r.valid&&r.x===3&&r.y===1;}});
+      Object.assign(data.control.steps[1],{blurb:"The readings disagree. Mission protocol uses the median: sort the three readings and select the middle value. Identify the outlier, then recover the altitude used for landing.",question:"Which altitude should the controller use under this protocol?",placeholder:"Altitude in meters",hint:"Sort 12, 13, 98. The middle reading is the median.",check:function(a){return /^13\s*(m|meters)?$/i.test(a.trim());}});
+      Object.assign(data.control.steps[2],{blurb:"Thrusters must activate strictly below 20 meters. Choose the replacement symbol and test it at 12, 20, and 28 meters.",hint:"At 12 the result should be ON. At 20 and 28 it should be OFF. The boundary rules out <=."});
+      Object.assign(data.control.steps[3],{blurb:"One computer is sending a conflicting altitude. The simulator accepts the value reported by two computers. Recover the agreed reading.",question:"What altitude wins the two-out-of-three vote?",placeholder:"Altitude in meters",hint:"A reports 12, B reports 98, C reports 12. Which value appears twice?",check:function(a){return /^12\s*(m|meters)?$/i.test(a.trim());}});
+      function traceRoute(a){
+        if(!/^[FRL\s,]*$/i.test(a))return {valid:false,message:"Use only F, R, L, spaces, or commas."};
+        var commands=a.toUpperCase().replace(/[\s,]/g,""),x=1,y=2,d=0,path=["(2,3) ↑"];
+        if(!commands||commands.length>30)return {valid:false,message:"Enter between 1 and 30 commands."};
+        for(var i=0;i<commands.length;i++){var c=commands[i];if(c==="R")d=(d+1)%4;else if(c==="L")d=(d+3)%4;else{x+=[0,1,0,-1][d];y+=[-1,0,1,0][d];}if(x<0||x>4||y<0||y>3)return {valid:false,message:"Command "+(i+1)+" leaves the grid. Test a different route."};path.push(c+": ("+(x+1)+","+(y+1)+") "+["↑","→","↓","←"][d]);}
+        return {valid:true,x:x,y:y,message:path.join(" · ")+(x===3&&y===1?" — module delivered":" — goal is (4,2)")};
+      }
+      var originalVisual=visual;
+      visual=function(i){
+        if(active==="invisible"&&i===1)return '<div class="caption">PACKET ROUTES / B–D LINK OFFLINE</div><svg viewBox="0 0 360 170" role="img" aria-label="Live routes A to B, A to C, B to E, C to E, E to D; B to D is broken"><path d="M30 80L130 30L230 120L320 80M30 80L130 140L230 120" fill="none" stroke="#9be5d3" stroke-width="3"/><path d="M130 30L320 80" stroke="#ff9b9b" stroke-width="3" stroke-dasharray="6 6"/><g fill="#101820" stroke="#9be5d3" stroke-width="2"><circle cx="30" cy="80" r="19"/><circle cx="130" cy="30" r="19"/><circle cx="130" cy="140" r="19"/><circle cx="230" cy="120" r="19"/><circle cx="320" cy="80" r="19"/></g><g fill="#ecf2f6" text-anchor="middle" dominant-baseline="central"><text x="30" y="80">A</text><text x="130" y="30">B</text><text x="130" y="140">C</text><text x="230" y="120">E</text><text x="320" y="80">D</text></g></svg><p>Live links: A–B, A–C, B–E, C–E, E–D. Broken link: B–D.</p><label for="packet">Test a route</label><input id="packet" class="answer-field" placeholder="A B E D"><button type="button" class="btn secondary" id="test-packet">Send packet</button><p id="packet-result" role="status"></p>';
+        if(active==="invisible"&&i===2)return '<div class="caption">SECURITY LOG / A=1 … Z=26</div><table class="log"><thead><tr><th>TIME</th><th>FAILURES</th><th>PAYLOAD</th></tr></thead><tbody><tr><td>08:06</td><td>1</td><td>12 9 7 8</td></tr><tr><td>08:07</td><td>2</td><td>4 15 15 18</td></tr><tr><td>08:08</td><td>25</td><td>22 5 14 20</td></tr><tr><td>08:09</td><td>1</td><td>6 1 14 19</td></tr></tbody></table><p>Diagnostic payloads label a subsystem. Find the unusual pattern before decoding.</p>';
+        if(active==="control"&&i===3)return '<div class="caption">ALTITUDE VOTE / SIMPLIFIED FLIGHT COMPUTERS</div><div class="metrics">'+["A: 12 m","B: 98 m","C: 12 m"].map(function(v){return '<div class="metric">'+v+'</div>';}).join("")+'</div><p>Rule: accept an altitude only when at least two computers agree. If every reading differs, hold for review.</p>';
+        var html=originalVisual(i);
+        if(active==="control"&&i===0)html+='<button type="button" class="btn secondary" id="test-rover">Test route</button><p id="rover-result" role="status"></p>';
+        if(active==="control"&&i===2)html+='<label for="comparison">Replacement comparison</label><select id="comparison" class="answer-field"><option value="gt">&gt;</option><option value="lt">&lt;</option><option value="le">&lt;=</option><option value="ge">&gt;=</option></select><button type="button" class="btn secondary" id="test-code">Run three tests</button><p id="code-result" role="status"></p>';
+        return html;
+      };
+      var originalStage=stageMarkup;
+      stageMarkup=function(s,i){return originalStage(s,i)+'<details style="margin-top:20px"><summary>Evidence notebook</summary><label for="evidence">What did you try? What changed? What does that tell you?</label><textarea class="answer-field" id="evidence" rows="3">'+escapeHtml(progress[active+"_note_"+i]||"")+'</textarea></details>';};
+      var originalBind=bindStage;
+      bindStage=function(){
+        originalBind();
+        if($("light-slider")){$("light-slider").value=light;$("reading").textContent=light;$("light-status").textContent=light<30?"ON":"OFF";$("light-status").className="big-status"+(light<30?"":" off");}
+        var note=$("evidence");if(note)note.addEventListener("input",function(){progress[active+"_note_"+step]=note.value;persist();});
+        var rover=$("test-rover");if(rover)rover.onclick=function(){$("rover-result").textContent=traceRoute($("answer").value).message;};
+        var packet=$("test-packet");if(packet)packet.onclick=function(){var route=$("packet").value.toUpperCase().replace(/[\s,→>\-]/g,"");var links=["AB","AC","BE","CE","DE"];var valid=route[0]==="A"&&route[route.length-1]==="D";for(var j=1;j<route.length;j++)if(!links.includes(route.slice(j-1,j+1).split("").sort().join("")))valid=false;$("packet-result").textContent=valid?"Packet delivered. Record the route that worked.":"Packet stopped. Check each connection against the live links.";};
+        var test=$("test-code");if(test)test.onclick=function(){var op=$("comparison").value;$("code-result").textContent=[12,20,28].map(function(n){var on=op==="lt"?n<20:op==="le"?n<=20:op==="ge"?n>=20:n>20;return n+" m: "+(on?"ON":"OFF")+((on===(n<20))?" ✓":" ✗");}).join(" · ");};
+        var copy=$("copy-report");if(copy)copy.onclick=async function(){var report=current().name+"\n"+current().steps.map(function(s,i){return s.title+": "+(progress[active+"_note_"+i]||"No note recorded");}).join("\n\n")+"\n\nReflection: "+(progress[active+"_reflection"]||"");try{await navigator.clipboard.writeText(report);copy.textContent="REPORT COPIED";}catch(e){$("report-text").classList.remove("hidden");$("report-text").value=report;$("report-text").select();}};
+      };
+      var originalReflection=reflectionMarkup;
+      reflectionMarkup=function(){return originalReflection()+'<button type="button" class="btn secondary" id="copy-report">COPY CASE REPORT</button><textarea id="report-text" class="answer-field hidden" aria-label="Case report for copying" rows="12"></textarea>';};
       document.querySelectorAll("[data-start]").forEach(function(el){el.addEventListener("click",function(){openMission(el.getAttribute("data-start"))})});
       $("back").addEventListener("click",home);
-      $("print-cards").addEventListener("click",function(){window.print()});
+      $("print-cards").addEventListener("click",function(){$("teacher").querySelector("details").open=true;window.print()});
       var search=new URLSearchParams(location.search),requested=search.get("hunt");
       if(search.get("teacher")==="1")$("teacher").classList.remove("hidden");
       if(requested&&data[requested])openMission(requested);
