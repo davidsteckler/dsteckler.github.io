@@ -349,6 +349,7 @@ footer{
 }
 </style>
 <link rel="stylesheet" href="learning-path.css">
+<link rel="stylesheet" href="binary-bulbs-media.css?v=1">
 <link rel="stylesheet" href="shared-site-header.css?v=1"><link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -388,9 +389,15 @@ footer{
 <main>
   <section class="hero">
     <h1>Binary Bulbs</h1>
-    <p>Click a bit to change the number.</p>
+    <p>Explore numbers, color, and sound with bits.</p>
   </section>
 
+  <nav class="bulb-modes" aria-label="Binary bulb activities">
+    <a href="#numbers" aria-current="true">Binary Bulbs (8)</a>
+    <a href="#color">Binary Bulbs (24) · Color</a>
+    <a href="#audio">Binary Bulbs · Audio</a>
+  </nav>
+  <div id="numbersPanel">
   <section class="playground" aria-label="Binary bulbs activity">
     <div id="bulbs"></div>
 
@@ -447,6 +454,26 @@ footer{
       <span>Use the places with a 1:</span>
       <strong>32 + 8 + 4 + 1 = 45</strong>
     </div>
+  </section>
+  </div>
+  <section id="colorPanel" class="media-panel" aria-labelledby="colorTitle" hidden>
+    <div class="media-intro"><h2 id="colorTitle">Binary Bulbs (24) · Color</h2><p>One color uses three bytes: red, green, and blue. Drag a slider or click any bulb. The color and all 24 bits stay connected.</p></div>
+    <div class="color-result"><div id="rgbSwatch" role="img" aria-label="Mixed color"></div><div class="result-copy"><strong id="rgbCode"></strong><strong id="rgbHex"></strong><span>8 red bits + 8 green bits + 8 blue bits = 24 bits</span></div></div>
+    <div id="rgbChannels"></div>
+    <div class="media-actions" aria-label="Color presets"><button type="button" data-rgb-preset="0,0,0">Black</button><button type="button" data-rgb-preset="255,255,255">White</button><button type="button" data-rgb-preset="255,0,0">Red</button><button type="button" data-rgb-preset="0,255,0">Green</button><button type="button" data-rgb-preset="0,0,255">Blue</button><button type="button" id="rgbRandom">Random color</button></div>
+    <p class="media-note">Each row has the same place values as the original eight bulbs. Each channel can store 0–255. Together, the three bytes can represent 16,777,216 colors.<br>Try making yellow. Then change just the bulb worth 1 in the blue row.</p>
+  </section>
+  <section id="audioPanel" class="media-panel" aria-labelledby="audioTitle" hidden>
+    <div class="media-intro"><h2 id="audioTitle">Binary Bulbs · Audio</h2><p>A sound wave can be stored as a sequence of numbers called samples. Choose a sample below, then change its eight bulbs and listen to what happens.</p></div>
+    <div class="channel-row">
+      <div class="channel-control"><label for="audioSample"><span id="audioSampleLabel">Sample 1</span><output id="audioSampleValue" for="audioSample">128</output></label><input type="range" id="audioSample" min="0" max="255" step="1" value="128"><code class="channel-byte" id="audioSampleByte">10000000</code></div>
+      <div class="media-bulbs" id="audioBulbs" aria-label="Eight audio sample bulbs"></div>
+    </div>
+    <div class="wave-card"><svg id="sampleWave" viewBox="0 0 640 170" role="img" aria-label="Waveform showing all sixteen sample values; the orange point is the selected sample"></svg><div class="sample-picker" id="samplePicker" aria-label="Choose one of sixteen samples"></div></div>
+    <div class="media-actions"><button type="button" id="audioPlay" aria-pressed="false">Play sound</button><button type="button" data-wave="sine">Sine wave</button><button type="button" data-wave="square">Square wave</button><button type="button" data-wave="silence">Silence</button></div>
+    <div class="audio-controls"><label for="audioPitch">Wave repeats per second</label><input type="range" id="audioPitch" min="110" max="440" step="1" value="220"><output id="audioPitchValue" for="audioPitch">220 Hz</output></div>
+    <p id="audioMediaStatus" role="status"></p>
+    <p class="media-note">These are unsigned 8-bit PCM samples: 0 is the lowest wave position, 128 is the midpoint, and 255 is the highest. We repeat these 16 samples to make a tone. Each bulb changes one sample’s position in the wave.<br>Compare the sine and square waves at the same repeat rate. <a href="binaryaudio.html">Explore the full binary audio lesson →</a></p>
   </section>
 </main>
 
@@ -601,5 +628,6 @@ document.getElementById('menuButton').onclick=()=>document.getElementById('siteN
 
 render();
 </script>
+<script src="binary-bulbs-media.js?v=1"></script>
 </body>
 </html>
