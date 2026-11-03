@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <title>Hourly Weather · David Steckler</title>
+  <meta name="description" content="The whole forecast, hour by hour. 16 days of temperature, rain, humidity and wind. No account, no ads, no paywall.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./weather.css">
+  <script src="./weather.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#hourly">Skip to hourly forecast</a>
+  <header class="masthead"><a href="/" class="brand">DAVID STECKLER <span>/ weather</span></a><div class="header-right"><span class="promise">Every hour. Open to everyone.</span><div class="units" role="group" aria-label="Temperature units"><button data-unit="F" aria-pressed="true">°F</button><button data-unit="C" aria-pressed="false">°C</button></div></div></header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">// THE FORECAST, WITHOUT THE FRICTION</p><h1>Weather. <br><em>Hour by hour.</em></h1><p class="lede">Pick a day. See every hour. Get on with your day.</p></div><div class="location-box"><form id="search-form" role="search"><label for="city">Find your forecast</label><div class="search-field"><span aria-hidden="true">⌕</span><input id="city" type="search" placeholder="City or ZIP code" autocomplete="off" maxlength="100" required><button type="submit">Search <span aria-hidden="true">↗</span></button></div></form><div class="location-actions"><button id="locate">◎ Use my location</button><span>Defaults to Greenwich, CT</span></div><div id="search-results" aria-live="polite"></div></div></section>
+    <div id="notice" role="status" hidden></div>
+    <div class="forecast-top"><div><p class="eyebrow">YOUR LOCAL FORECAST</p><h2 id="place">Greenwich, Connecticut</h2><p id="updated" class="muted" aria-live="polite">Connecting to live weather…</p></div><button id="refresh" class="outline">↻ <span>Refresh</span></button></div>
+    <section id="current" class="current-panel" aria-label="Current weather"><p class="loading">Loading current conditions and all 16 days…</p></section>
+    <section class="forecast" aria-label="Daily and hourly forecast">
+      <div class="days-heading"><h2>Choose your day</h2><span>16-day outlook <span aria-hidden="true">→</span></span></div>
+      <div id="days" class="days" role="group" aria-label="Forecast day"></div>
+      <div id="forecast-content" hidden>
+        <div class="day-heading"><div><p id="selected-label" class="eyebrow"></p><h2 id="day-title"></h2><p id="day-summary" class="muted"></p></div><span id="hours-badge" class="badge"></span></div>
+        <div class="metrics" role="group" aria-label="Chart metric"><button data-metric="overview" aria-pressed="true">Overview</button><button data-metric="temperature" aria-pressed="false">Temperature</button><button data-metric="rain" aria-pressed="false">Precipitation</button><button data-metric="wind" aria-pressed="false">Wind</button><button data-metric="humidity" aria-pressed="false">Humidity</button><button data-metric="cloud" aria-pressed="false">Cloud cover</button><button data-metric="uv" aria-pressed="false">UV index</button></div>
+        <div class="chart-card"><div class="chart-top"><h3 id="chart-label">Temperature & rain chance</h3><div id="chart-legend"></div></div><div id="chart" class="chart"></div></div>
+        <div id="hourly" tabindex="-1" class="table-heading"><h3>The full hourly forecast</h3><span>All times local to <span id="timezone">Greenwich</span></span></div>
+        <p class="swipe-hint">Swipe the table to see every detail →</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Hourly forecast table; scroll horizontally for more columns"><table><caption id="table-caption" class="sr-only">Hourly weather forecast</caption><thead><tr><th scope="col">Time</th><th scope="col">Conditions</th><th scope="col">Temp</th><th scope="col">Feels like</th><th scope="col">Rain chance</th><th scope="col">Precip.</th><th scope="col">Humidity</th><th scope="col">Wind</th><th scope="col">Gusts</th><th scope="col">Cloud</th><th scope="col">UV</th></tr></thead><tbody id="hours"></tbody></table></div>
+      </div>
+    </section>
+    <footer><div><a href="/">← dsteckler.com</a><p>Every hour. No ads. No account. No paywall.</p></div><div><p>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo ↗</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></p><p>Forecasts change. Later days are less certain. Refreshes every 15 minutes while open.</p></div></footer>
+  </main>
+  <noscript><p class="noscript">Turn on JavaScript to load live hourly weather.</p></noscript>
+</body>
+</html>
