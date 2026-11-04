@@ -58,8 +58,7 @@ const Fieldwork = (() => {
     <path d="${Array.from({ length: 20 }, (_, i) => `M${i * 22} 0v200`).join(' ')} ${Array.from({ length: 10 }, (_, i) => `M0 ${i * 22}h420`).join(' ')}" fill="none" stroke="${palette[id][1]}" opacity=".18"/>
     ${illustrations[id]}
   </svg>`;
-  const object = (id, caption, hotspot) => `<figure class="object-figure"><div class="object-view object-${id}">${art(id)}${hotspot ? `<button class="object-pin" id="${hotspot.id}" aria-label="${hotspot.label}"><span aria-hidden="true">+</span></button>` : ''}</div><figcaption>${caption}</figcaption></figure>`;
-  const archive = (title, body) => `<details class="archive-reading"><summary>${title}</summary><div class="reading">${body}</div></details>`;
+  const object = (id, caption) => `<figure class="object-figure"><div class="object-view">${art(id)}</div><figcaption>${caption}</figcaption></figure>`;
   const note = (title, body) => `<aside class="evidence-note"><p><strong>${title}</strong> ${body}</p></aside>`;
 
   const fragments = {
@@ -135,5 +134,38 @@ const Fieldwork = (() => {
     };
   }
 
-  return { cases, art, object, archive, note, inspect, indexCard, bindIndex, check, clear };
+  function storyDoor(prompt, ready, next){
+    return `<section class="story-door" aria-label="Exit the archive">
+      <form id="story-door" ${ready?'hidden':''}>
+        <span class="caption">NEXT DOOR</span>
+        <label for="story-answer">${prompt}</label>
+        <div class="row"><input id="story-answer" type="text" autocomplete="off" spellcheck="false" maxlength="80" required><button>Open the door</button></div>
+      </form>
+      <p class="status" id="story-status" role="status"></p>
+      <div id="story-next">${ready?next:''}</div>
+    </section>`;
+  }
+  function bindStoryDoor(answers, reveal, open, sound){
+    const form=document.getElementById('story-door');
+    if(!form||form.hidden)return;
+    form.onsubmit=event=>{
+      event.preventDefault();
+      const normalize=text=>text.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      const input=document.getElementById('story-answer');
+      const message=document.getElementById('story-status');
+      const good=answers.some(answer=>normalize(answer)===normalize(input.value));
+      message.textContent=good?'The door is open.':'That doesn’t fit. Look back through the story.';
+      message.classList.toggle('good',good);
+      sound(good?'discover':'retry');
+      if(!good)return;
+      form.hidden=true;
+      const next=document.getElementById('story-next');
+      next.innerHTML=reveal();
+      const button=next.querySelector('button');
+      button.onclick=open;
+      button.focus();
+    };
+  }
+
+  return { cases, art, object, storyDoor, bindStoryDoor, note, inspect, indexCard, bindIndex, check, clear };
 })();
