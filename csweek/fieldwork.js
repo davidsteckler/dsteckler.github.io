@@ -134,38 +134,49 @@ const Fieldwork = (() => {
     };
   }
 
-  function storyDoor(prompt, ready, next){
-    return `<section class="story-door" aria-label="Exit the archive">
-      <form id="story-door" ${ready?'hidden':''}>
-        <span class="caption">NEXT DOOR</span>
-        <label for="story-answer">${prompt}</label>
-        <div class="row"><input id="story-answer" type="text" autocomplete="off" spellcheck="false" maxlength="80" required><button>Open the door</button></div>
+  function unlockedPrefix(rooms, cleared){
+    const blocked=rooms.findIndex((room,i)=>i<rooms.length-1&&!cleared[room]);
+    return blocked<0?rooms:rooms.slice(0,blocked+1);
+  }
+
+  function evidenceDoor(fields, story=true){
+    return `<section class="story-door" aria-labelledby="door-title">
+      <span class="caption">${story?'STORY EVIDENCE':'TEST RESULTS'}</span>
+      <h3 id="door-title">Open the next door</h3>
+      <p>${story?'Use the story and its evidence. Enter a word or short phrase for each clue.':'Enter what you found at this station.'}</p>
+      <form id="story-door">
+        ${fields.map(({prompt},i)=>`<div class="door-field">
+          <label for="story-answer-${i}">${i+1}. ${prompt}</label>
+          <input id="story-answer-${i}" name="clue" type="text" autocomplete="off" spellcheck="false" maxlength="100" required>
+        </div>`).join('')}
+        <button type="submit">Open the door</button>
+        <p class="status" id="story-status" role="status"></p>
       </form>
-      <p class="status" id="story-status" role="status"></p>
-      <div id="story-next">${ready?next:''}</div>
     </section>`;
   }
-  function bindStoryDoor(answers, reveal, open, sound){
+
+  function bindEvidenceDoor(fields, advance, sound){
     const form=document.getElementById('story-door');
-    if(!form||form.hidden)return;
+    if(!form)return;
+    const inputs=[...form.querySelectorAll('[name=clue]')];
+    const normalize=text=>text.toUpperCase().replace(/[^A-Z0-9]/g,'');
     form.onsubmit=event=>{
       event.preventDefault();
-      const normalize=text=>text.toUpperCase().replace(/[^A-Z0-9]/g,'');
-      const input=document.getElementById('story-answer');
-      const message=document.getElementById('story-status');
-      const good=answers.some(answer=>normalize(answer)===normalize(input.value));
-      message.textContent=good?'The door is open.':'That doesn’t fit. Look back through the story.';
-      message.classList.toggle('good',good);
-      sound(good?'discover':'retry');
-      if(!good)return;
-      form.hidden=true;
-      const next=document.getElementById('story-next');
-      next.innerHTML=reveal();
-      const button=next.querySelector('button');
-      button.onclick=open;
-      button.focus();
+      const incorrect=[];
+      fields.forEach(({answers},i)=>{
+        const input=inputs[i];
+        const good=answers.some(answer=>normalize(answer)===normalize(input.value));
+        input.setAttribute('aria-invalid',String(!good));
+        if(!good)incorrect.push(i);
+      });
+      if(!incorrect.length){sound('discover');advance();return;}
+      document.getElementById('story-status').textContent=incorrect.length===fields.length
+        ? 'Look back at the evidence and try again.'
+        : `Check clue ${incorrect.map(i=>i+1).join(' and ')} again. The other answer fits.`;
+      sound('retry');
+      inputs[incorrect[0]].focus();
     };
   }
 
-  return { cases, art, object, storyDoor, bindStoryDoor, note, inspect, indexCard, bindIndex, check, clear };
+  return { cases, art, object, unlockedPrefix, evidenceDoor, bindEvidenceDoor, note, inspect, indexCard, bindIndex, check, clear };
 })();
