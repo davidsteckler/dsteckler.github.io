@@ -42,7 +42,7 @@ function status(text,good=false){$('feedback').textContent=text;$('feedback').cl
 const names={letter:'The letter',history:'The Roman letters',mapping:'Alphabet test',first:'The first strip',second:'The margin',third:'Envelope III',security:'The intercepted copy',ending:'What you left behind'};
 function unlockedRooms(){
   return Fieldwork.unlockedPrefix(Object.keys(names),{
-    letter:s.envelopeSolved, history:s.romanDoor, mapping:s.mappingSolved,
+    letter:s.envelopeSolved, history:s.romanDoor, mapping:s.mappingDoor,
     first:s.firstSolved, second:s.secondSolved, third:s.thirdSolved, security:s.securitySolved
   });
 }
@@ -115,7 +115,7 @@ if(s.room==='history')Fieldwork.bindEvidenceDoor(romanClues,()=>{
 },Sound.play);
 if(s.room==='mapping'){
   Fieldwork.bindEvidenceDoor(mappingClues,()=>{
-    s.mappingSolved=true;go('first');
+    s.mappingDoor=true;go('first');
   },Sound.play);
   let animFrame=0;
   const frames=[['Z','Z','Start at Z. Encrypt forward three positions.'],['Z','A','First step: wrap from Z to A.'],['Z','B','Second step: A to B.'],['Z','C','Third step: B to C. Z encrypted with key 3 becomes C.'],['C','Z','Decrypt by following the mapping backward: C returns to Z.']];const step=()=>{const f=frames[animFrame++%frames.length];$('motion-input').textContent=f[0];$('motion-output').textContent=f[1];$('wrap-strip').querySelectorAll('span').forEach(node=>node.classList.toggle('current-letter',node.textContent===f[1]));$('motion-caption').textContent=f[2];Sound.play('tap');};$('step').onclick=()=>{clearInterval(timer);step();};$('play').onclick=()=>{clearInterval(timer);animFrame=0;step();timer=setInterval(()=>{if(animFrame>=frames.length){clearInterval(timer);return;}step();},1400);};$('pause').onclick=()=>clearInterval(timer);}

@@ -45,11 +45,11 @@ function file(target,title,sub=''){return `<button class="file new" data-open="$
 function discover(target){const s=state();if(!s.found.includes(target))s.found.push(target);persist();}
 function unlockedRooms(s){
   return Fieldwork.unlockedPrefix(validRooms[active],{
-    cabinet:s.plate, shannon:s.storyDoors?.shannon, relayLab:s.labChecks?.relayLab,
-    bench:s.benchSolved, hopper:s.storyDoors?.hopper, translationLab:s.labChecks?.translationLab,
+    cabinet:s.plate, shannon:s.storyDoors?.shannon, relayLab:s.stationDoors?.relayLab,
+    bench:s.benchSolved, hopper:s.storyDoors?.hopper, translationLab:s.stationDoors?.translationLab,
     reader:s.readerSolved, audit:s.auditSolved,
-    record:s.margin, johnson:s.storyDoors?.johnson, plotLab:s.labChecks?.plotLab,
-    tracking:s.routeSolved, hamilton:s.storyDoors?.hamilton, scheduleLab:s.labChecks?.scheduleLab,
+    record:s.margin, johnson:s.storyDoors?.johnson, plotLab:s.stationDoors?.plotLab,
+    tracking:s.routeSolved, hamilton:s.storyDoors?.hamilton, scheduleLab:s.stationDoors?.scheduleLab,
     scheduler:s.scheduleRound>=3, landing:s.landed
   });
 }
@@ -278,8 +278,8 @@ function bindLabGate(){
   const entry=Object.values(storyFiles).find(story=>story.lab===room);
   Fieldwork.bindEvidenceDoor(fields,()=>{
     const s=state();
-    s.labChecks??={};
-    s.labChecks[room]=true;
+    s.stationDoors??={};
+    s.stationDoors[room]=true;
     openRoom(entry.next);
   },Sound.play);
 }
