@@ -49,16 +49,17 @@ const Fieldwork = (() => {
       <text x="346" y="48" fill="#e5bc90" font-size="9">SEAL</text>`
   };
   const cases = [
-    { id: 'invisible', title: 'The Invisible Computer', intro: 'A warm cabinet. Three switches. A light that turns on for reasons you’ll have to test.' },
-    { id: 'control', title: 'Mission Control', intro: 'Two records of the same flight disagree. Find the first error, then get the crew through descent.' },
-    { id: 'letter', title: 'The Unread Letter', intro: 'An unsigned letter uses familiar letters in unfamiliar places. The seal is your first clue.' }
+    { id: 'invisible', title: 'The Invisible Computer', intro: 'The building is empty. The cabinet is warm.', image: 'relay-cabinet.webp' },
+    { id: 'control', title: 'Mission Control', intro: 'Same flight. Same stamp. Different tracks.', image: 'flight-console.webp' },
+    { id: 'letter', title: 'The Unread Letter', intro: 'No signature. The wax is still intact.', image: 'wax-letter.webp' }
   ];
   const art = id => `<svg class="case-art" viewBox="0 0 420 200" aria-hidden="true" focusable="false">
     <rect width="420" height="200" fill="${palette[id][0]}"/>
     <path d="${Array.from({ length: 20 }, (_, i) => `M${i * 22} 0v200`).join(' ')} ${Array.from({ length: 10 }, (_, i) => `M0 ${i * 22}h420`).join(' ')}" fill="none" stroke="${palette[id][1]}" opacity=".18"/>
     ${illustrations[id]}
   </svg>`;
-  const object = (id, caption) => `<figure class="object-figure">${art(id)}<figcaption>${caption}</figcaption></figure>`;
+  const object = (id, caption, hotspot) => `<figure class="object-figure"><div class="object-view object-${id}">${art(id)}${hotspot ? `<button class="object-pin" id="${hotspot.id}" aria-label="${hotspot.label}"><span aria-hidden="true">+</span></button>` : ''}</div><figcaption>${caption}</figcaption></figure>`;
+  const archive = (title, body) => `<details class="archive-reading"><summary>${title}</summary><div class="reading">${body}</div></details>`;
   const note = (title, body) => `<aside class="evidence-note"><p><strong>${title}</strong> ${body}</p></aside>`;
 
   const fragments = {
@@ -71,7 +72,7 @@ const Fieldwork = (() => {
   try { found = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch {}
   function fragment(id) {
     const order = cases.findIndex(item => item.id === id) + 1;
-    return `<div class="fragment"><span class="caption">ARCHIVE FRAGMENT 0${order}</span><p><strong>${fragments[id].mark}</strong></p><p>${fragments[id].line} <a href="./#case-index">Return to the case index</a>.</p></div>`;
+    return `<div class="fragment"><span class="caption">ARCHIVE FRAGMENT 0${order}</span><p><strong>${fragments[id].mark}</strong></p><p>${fragments[id].line} <a href="/csweek/#case-index">Return to the case index</a>.</p></div>`;
   }
   function unlock(id, target) {
     found[id] = true;
@@ -101,7 +102,10 @@ const Fieldwork = (() => {
   function bindIndex(sound) {
     const form = document.getElementById('vault-form');
     const index = document.getElementById('case-index');
-    if (location.hash === '#case-index') index.open = true;
+    if (location.hash === '#case-index') {
+      index.open = true;
+      requestAnimationFrame(() => index.scrollIntoView({block: 'start'}));
+    }
     form.onsubmit = event => {
       event.preventDefault();
       const words = document.getElementById('vault-words').value.toUpperCase().match(/[A-Z]+/g) || [];
@@ -131,5 +135,5 @@ const Fieldwork = (() => {
     };
   }
 
-  return { cases, art, object, note, inspect, indexCard, bindIndex, check, clear };
+  return { cases, art, object, archive, note, inspect, indexCard, bindIndex, check, clear };
 })();
