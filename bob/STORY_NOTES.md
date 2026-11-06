@@ -15,7 +15,8 @@ The audience is middle school. Write in plain lowercase with the original's calm
 7. Bob brings a lawyer. Reassurance gives way to buying the narrator fries, followed by a legal bill.
 8. Bob gets a job at McDonalds to pay for lunch. He asks to be paid in fries; the narrator takes home his wages in a bag.
 9. A power cut stops the fryers. To reach the next town, Bob gets behind the wheel, despite never having driven.
-10. They are stopped in the parking lot. Bob offers his work badge as a licence. The officer hears the reassurance and gives them an escort to McDonalds.
+10. Bob asks the narrator to sign a promise not to eat him. He has it notarized and framed. The reassurance still gets tested at dinner.
+11. Bob hires the kawaii eye of ra as a witness. She watches lunch, blinks once, and Bob asks for a second witness.
 
 ## Visual and delivery continuity
 
