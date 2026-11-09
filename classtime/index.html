@@ -104,6 +104,20 @@
     }
     .countdown.is-idle { color: #6d8096; font-size: clamp(85px, 13vw, 170px); }
     .countdown .colon { color: var(--accent); }
+
+    .hero[data-bell-stage="count"] { border-color:rgba(var(--accent-rgb),.55); }
+    .hero[data-bell-stage="count"]::before,.hero[data-bell-stage="ring"]::before {
+      content:"";position:absolute;left:50%;top:43%;width:min(48vw,400px);aspect-ratio:1;
+      border-radius:50%;border:2px solid rgba(var(--accent-rgb),.5);pointer-events:none;
+      animation:bellHalo 1s ease-out infinite;
+    }
+    .hero[data-bell-stage="count"] .countdown { color:var(--accent);font-size:clamp(120px,19vw,240px); }
+    .hero[data-bell-stage="count"] .countdown.tick { animation:bellPop .38s ease-out both; }
+    .hero[data-bell-stage="ring"] .countdown { color:var(--accent);font-size:clamp(83px,12vw,165px);animation:bellPop .5s ease-out both; }
+    .hero[data-bell-stage="ring"] { border-color:rgba(var(--accent-rgb),.8); }
+    body[data-urgency="ring"] { --accent:#a9e0c4;--accent-rgb:169,224,196; }
+    @keyframes bellHalo { from { opacity:.8;transform:translate(-50%,-50%) scale(.75); } to { opacity:0;transform:translate(-50%,-50%) scale(1.2); } }
+    @keyframes bellPop { from { opacity:.4;transform:scale(.86); } to { opacity:1;transform:scale(1); } }
     .progress-block { width: 100%; margin-top: auto; padding-top: 40px; }
     .progress-meta { display: flex; justify-content: space-between; gap: 12px; color: #c7d2df; font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; }
     .progress-meta span:nth-child(2) { color: var(--muted); font-weight: 500; }
@@ -248,7 +262,7 @@
       .period-row { flex-direction: row; align-items: center; }
       .footer { flex-wrap: wrap; }
     }
-    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
   </style>
 </head>
 <body>
@@ -289,7 +303,7 @@
       <div class="date" id="dateText"></div>
     </div>
 
-    <section class="hero" aria-label="Live period countdown">
+    <section class="hero" id="bellHero" aria-label="Live period countdown">
       <p class="eyebrow" id="eyebrow">CURRENT PERIOD</p>
       <h1 id="periodTitle">—</h1>
       <p class="current-class" id="currentClassName" hidden></p>
@@ -316,7 +330,7 @@
       <section class="summary-card">
         <span class="summary-label">SCHOOL DAY</span>
         <div class="summary-title">7:44 AM – 2:30 PM</div>
-        <div class="summary-desc">9 periods · Eastern Time</div>
+        <div class="summary-desc">9 periods · Bell rings 3 seconds after class ends</div>
       </section>
     </div>
 
@@ -336,6 +350,8 @@
     (function () {
       "use strict";
       const zone = "America/New_York";
+      const BELL_DELAY=3;
+      const BELL_HOLD=2;
       const periods = [
         [1, "07:44", "08:28"],
         [2, "08:31", "09:13"],
@@ -398,7 +414,7 @@
           const isActive = i === activeIndex;
           row.classList.toggle("active", isActive);
           row.classList.toggle("upcoming", !isActive && i === nextIndex && weekday && seconds < periods[periods.length - 1].end);
-          row.classList.toggle("past", weekday && seconds >= periods[i].end);
+          row.classList.toggle("past", weekday && seconds >= periods[i].end + BELL_DELAY + BELL_HOLD);
           if (isActive) row.setAttribute("aria-current", "true");
           else row.removeAttribute("aria-current");
         });
@@ -417,6 +433,10 @@
       function fmt(sec) {
         const h24 = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60);
         return String(h24 % 12 || 12) + ":" + String(m).padStart(2, "0") + (h24 >= 12 ? " PM" : " AM");
+      }
+      function bellTime(sec) {
+        const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);
+        return String(h%12||12)+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+(h>=12?" PM":" AM");
       }
       function remaining(sec) {
         sec = Math.max(0, Math.ceil(sec));
@@ -438,9 +458,19 @@
         els.eyebrow.textContent = state.eyebrow;
         els.periodTitle.textContent = state.title;
         els.timerLabel.textContent = state.timerLabel;
-        els.countdown.textContent = state.timer === null ? "—:—" : remaining(state.timer);
-        els.countdown.classList.toggle("is-idle", state.timer === null);
-        els.countdown.setAttribute("aria-label", state.timer === null ? "No countdown currently active" : remaining(state.timer) + " remaining");
+
+        const stage=state.bellStage||"";
+        document.getElementById("bellHero").dataset.bellStage=stage;
+        const display=state.bellText||(state.timer===null?"—:—":remaining(state.timer));
+        els.countdown.textContent=display;
+        els.countdown.classList.toggle("is-idle",state.timer===null&&stage!=="ring");
+        els.countdown.setAttribute("aria-label",stage==="ring"?"Bell has rung":stage==="count"?"Bell in "+display+" seconds":state.timer===null?"No countdown currently active":remaining(state.timer)+" remaining");
+        if(stage==="count"&&els.countdown.dataset.lastTick!==display){
+          els.countdown.classList.remove("tick");
+          void els.countdown.offsetWidth;
+          els.countdown.classList.add("tick");
+        }else if(stage!=="count"){els.countdown.classList.remove("tick");}
+        els.countdown.dataset.lastTick=stage==="count"?display:"";
         els.startTime.textContent = state.start;
         els.endTime.textContent = state.end;
         els.progressLabel.textContent = state.progressLabel;
@@ -466,34 +496,43 @@
         if (!weekday) {
           state = { status: "NO SCHOOL TODAY", eyebrow: "WEEKEND", title: "Enjoy your weekend", timerLabel: "NO ACTIVE PERIOD", timer: null, start: "7:44 AM", end: "2:30 PM", progressLabel: "WEEKDAY BELL SCHEDULE", progress: 0, note: "The regular school clock runs Monday through Friday.", nextName: "Period 1", nextDesc: nextWeekday(parts) + " · 7:44 AM" };
         } else {
-          activeIndex = periods.findIndex(function (p) { return sec >= p.start && sec < p.end; });
+          activeIndex = periods.findIndex(function (p) { return sec >= p.start && sec < p.end + BELL_DELAY + BELL_HOLD; });
           if (activeIndex >= 0) {
             const p = periods[activeIndex];
             const next = periods[activeIndex + 1];
-            const timeLeft = p.end - sec;
-            state = {
-              status: "CLASS IN SESSION", eyebrow: "CURRENT PERIOD", title: "Period " + p.number, timerLabel: "TIME UNTIL THE BELL",
-              timer: timeLeft, start: fmt(p.start), end: fmt(p.end),
-              progressLabel: "CLASS PROGRESS", progress: (sec - p.start) / (p.end - p.start) * 100,
-              note: "Period " + p.number + " ends at " + fmt(p.end) + ".",
-              nextName: next ? "Period " + next.number : "End of school",
-              nextDesc: next ? "Starts at " + fmt(next.start) : "Final bell at 2:30 PM",
-              urgency: timeLeft <= 60 ? "last" : timeLeft <= 300 ? "soon" : ""
+            const bellAt=p.end+BELL_DELAY;
+            const timeLeft=bellAt-sec;
+            const ringing=sec>=bellAt;
+            const counting=!ringing&&timeLeft<=3;
+            state={
+              status:ringing?"BELL!":counting?"FINAL COUNTDOWN":"CLASS IN SESSION",
+              eyebrow:ringing?"TIME TO GO":counting?"GET READY":"CURRENT PERIOD",
+              title:"Period "+p.number,
+              timerLabel:ringing?"THE BELL HAS RUNG":counting?"BELL IN":"TIME UNTIL THE BELL",
+              timer:ringing?0:timeLeft,
+              bellText:ringing?"BELL!":counting?String(Math.ceil(timeLeft)):"",
+              bellStage:ringing?"ring":counting?"count":"",
+              start:fmt(p.start),end:bellTime(bellAt),
+              progressLabel:"UNTIL THE BELL",progress:Math.min(100,(sec-p.start)/(bellAt-p.start)*100),
+              note:ringing?"Bell at "+bellTime(bellAt)+".":"Class ends at "+fmt(p.end)+" · Bell at "+bellTime(bellAt)+".",
+              nextName:next?"Period "+next.number:"End of school",
+              nextDesc:next?"Starts at "+fmt(next.start):"Final bell at "+bellTime(bellAt),
+              urgency:ringing?"ring":timeLeft<=60?"last":timeLeft<=300?"soon":""
             };
           } else if (sec < periods[0].start) {
             const p = periods[0];
             state = { status: "BEFORE SCHOOL", eyebrow: "FIRST BELL", title: "Good morning", timerLabel: "SCHOOL STARTS IN", timer: p.start - sec, start: fmt(p.start), end: fmt(p.end), progressLabel: "PERIOD 1", progress: 0, note: "Period 1 begins at 7:44 AM.", nextName: "Period 1", nextDesc: "Starts at 7:44 AM" };
-          } else if (sec >= periods[periods.length - 1].end) {
+          } else if (sec >= periods[periods.length - 1].end + BELL_DELAY + BELL_HOLD) {
             state = { status: "SCHOOL DAY COMPLETE", eyebrow: "FINAL BELL", title: "School's out", timerLabel: "SEE YOU NEXT SCHOOL DAY", timer: null, start: "7:44 AM", end: "2:30 PM", progressLabel: "DAY COMPLETE", progress: 100, note: "All 9 periods have finished.", nextName: "Period 1", nextDesc: nextWeekday(parts) + " · 7:44 AM" };
           } else {
             const nextIndex = periods.findIndex(function (p) { return sec < p.start; });
             const next = periods[nextIndex], prev = periods[nextIndex - 1];
-            const gap = next.start - prev.end;
+            const gap = next.start - (prev.end + BELL_DELAY + BELL_HOLD);
             state = {
               status: "BETWEEN PERIODS", eyebrow: "PASSING TIME", title: "Next: Period " + next.number,
               timerLabel: "NEXT PERIOD BEGINS IN", timer: next.start - sec,
               start: fmt(prev.end), end: fmt(next.start), progressLabel: "PASSING TIME",
-              progress: (sec - prev.end) / gap * 100,
+              progress: (sec - prev.end - BELL_DELAY - BELL_HOLD) / gap * 100,
               note: "Head to Period " + next.number + ".",
               nextName: "Period " + next.number, nextDesc: "Starts at " + fmt(next.start)
             };
@@ -511,7 +550,7 @@
         updateClassText(activeIndex, nextIndex, weekday, sec);
         Array.from(els.scheduleGrid.children).forEach(function (row, idx) {
           row.classList.toggle("current", idx === activeIndex);
-          row.classList.toggle("past", weekday && sec >= periods[idx].end);
+          row.classList.toggle("past", weekday && sec >= periods[idx].end + BELL_DELAY + BELL_HOLD);
           if (idx === activeIndex) row.setAttribute("aria-current", "true");
           else row.removeAttribute("aria-current");
         });
