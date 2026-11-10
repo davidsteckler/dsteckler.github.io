@@ -53,6 +53,7 @@ var frame=document.getElementById("editorFrame");
 var action=document.getElementById("actionButton");
 var previous=document.getElementById("backButton");
 var expandEditorBtn=document.getElementById("expandEditorBtn");
+var resetStarterBtn=document.getElementById("resetStarterBtn");
 var saveState=document.getElementById("saveState");
 var currentIndex=0,editorReady=false,pendingCheck=null,finishView=false;
 function el(id){return document.getElementById(id)}
@@ -141,11 +142,11 @@ function exampleImage(kind){
     coil:"One example of a coil using six rings of different sizes.",
     colors:"Two circles in blue and lavender on a #27A9E1 background."
   };
-  var src="/turtle/?embed=preview&code="+encodeURIComponent(programs[kind]||"");
+  var src="/turtle/?embed=preview&rev=unit1-20261110-6&code="+encodeURIComponent(programs[kind]||"");
   return '<figure class="example-figure">'+
     '<div class="example-figure-head"><strong>Example output</strong><span>Actual Turtle world · completed</span></div>'+
     '<div class="example-live-stage">'+
-      '<iframe class="example-live-world" src="'+escapeHtml(src)+'" title="'+escapeHtml("Finished Turtle output: "+descriptions[kind])+'" loading="lazy" tabindex="-1" aria-label="'+escapeHtml(descriptions[kind])+'"></iframe>'+
+      '<iframe class="example-live-world" src="'+escapeHtml(src)+'" title="'+escapeHtml("Finished Turtle output: "+descriptions[kind])+'" loading="eager" tabindex="-1" aria-label="'+escapeHtml(descriptions[kind])+'"></iframe>'+
     '</div>'+
     '<figcaption>'+escapeHtml(descriptions[kind])+'</figcaption>'+
   '</figure>';
@@ -227,6 +228,7 @@ function render(){
   editorCard.hidden=!l.editor;
   workspace.classList.remove("focus-editor");
   if(expandEditorBtn){expandEditorBtn.setAttribute("aria-pressed","false");expandEditorBtn.textContent="⤢ Expand editor"}
+  if(resetStarterBtn){resetStarterBtn.disabled=!l.editor;resetStarterBtn.textContent="↺ Reset starter code"}
   editorReady=false;pendingCheck=null;
   if(l.editor){
     var url="/turtle/?embed=course&ui=unit1-console-v2&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
@@ -369,6 +371,22 @@ body.addEventListener("change",function(event){
   if(id==="1.1.3"||id==="1.1.5")state.checks[id]=false;
   persist();refreshAction();setStatus("Draft saved on this device");
 });
+if(resetStarterBtn)resetStarterBtn.addEventListener("click",function(){
+  if(finishView || !LESSONS[currentIndex].editor)return;
+  if(!editorReady || !frame.contentWindow){
+    setStatus("Editor is loading. Try reset once it appears.");
+    return;
+  }
+  var lesson=LESSONS[currentIndex];
+  if(!window.confirm("Reset "+lesson.id+" to the original starter code?\n\nYour current code will still be available in History."))return;
+  resetStarterBtn.disabled=true;
+  resetStarterBtn.textContent="Resetting…";
+  frame.contentWindow.postMessage({
+    type:"turtlecourse-reset-starter",
+    lesson:"turtlecourse-"+lesson.id,
+    code:STARTERS[lesson.id]||""
+  },window.location.origin);
+});
 if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){
   var expanded=workspace.classList.toggle("focus-editor");
   expandEditorBtn.setAttribute("aria-pressed",String(expanded));
@@ -381,6 +399,20 @@ window.addEventListener("message",function(event){
   if(event.origin!==window.location.origin||event.source!==frame.contentWindow)return;
   var data=event.data||{},id=LESSONS[currentIndex].id;
   if(data.lesson!=="turtlecourse-"+id)return;
+  if(data.type==="turtlecourse-starter-reset-result"){
+    if(resetStarterBtn){resetStarterBtn.disabled=false;resetStarterBtn.textContent="↺ Reset starter code"}
+    if(data.ok){
+      delete state.checks[id];
+      delete state.validatedCode[id];
+      delete state.ran[id];
+      persist();
+      refreshAction();
+      setStatus("Original starter restored · previous code stays in History");
+    }else{
+      setStatus("Could not reset the starter code. Please retry.");
+    }
+    return;
+  }
   if(data.type==="pythoncourse-run-complete"){
     if(data.run&&data.run.ok){state.ran[id]=true;persist();setStatus("Program ran · code is saved separately")}
     if(state.checks[id]&&state.validatedCode[id]&&typeof data.code==="string"&&data.code!==state.validatedCode[id]){
