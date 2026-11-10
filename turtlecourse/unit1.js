@@ -114,35 +114,41 @@ function quizContent(){
   }).join("")+'<div class="mini-note">You can change an answer and check again. A score of 3 out of 3 completes this activity.</div>';
 }
 function exampleImage(kind){
-  var count=kind==="stretched"?5:kind==="coil"?6:2;
-  var radius=kind==="stretched"?35:kind==="coil"?35:48;
-  var step=kind==="stretched"?40:kind==="coil"?25:55;
-  var start=radius+15, cy=radius+20;
-  var width=Math.max(240,start+count*step+radius+14);
-  var height=radius*2+55;
-  var baseline=cy+radius;
-  var bg=kind==="colors"?"#27A9E1":"#ffffff";
-  var line=kind==="colors"?"#7042a0":"#253f4b";
-  var coilRadii=[20,28,35,25,32,22];
-  var circles=Array.from({length:count},function(_,i){
-    var stroke=kind==="colors"?(i===0?"#551b8a":"#173e59"):line;
-    var r=kind==="coil"?coilRadii[i]:radius;
-    var centerY=kind==="coil"?baseline-r:cy;
-    return '<circle cx="'+(start+i*step)+'" cy="'+centerY+'" r="'+r+'" fill="none" stroke="'+stroke+'" stroke-width="2.3" />';
-  }).join("");
-  var end=start+count*step;
-  var guide='<path d="M '+start+' '+baseline+' L '+end+' '+baseline+'" stroke="'+(kind==="colors"?"#173e59":line)+'" stroke-width="2.4" fill="none"/>';
-  var turtle='<circle cx="'+end+'" cy="'+baseline+'" r="5.5" fill="#168b82" stroke="#23444a" stroke-width="1.3"/>'+
-             '<circle cx="'+(end+7)+'" cy="'+baseline+'" r="3" fill="#a9d5ba" stroke="#23444a" stroke-width="1.1"/>';
-  var label=kind==="stretched"?"Five circles · radius 35 · forward 40 after each circle":
-            kind==="coil"?"One possible coil: six circles with different sizes":
-            "An example with two pen colors and a background";
+  // Each preview uses the real 400×400 Turtle canvas and executes this code
+  // automatically in a locked frame. The student's editor is separate.
+  var programs={
+    stretched:Array(5).fill("circle(35)\nforward(40)").join("\n"),
+    coil:[
+      "circle(22)","forward(18)",
+      "circle(35)","forward(30)",
+      "circle(26)","forward(20)",
+      "circle(40)","forward(25)",
+      "circle(30)","forward(24)",
+      "circle(20)","forward(18)"
+    ].join("\n"),
+    colors:[
+      'bgcolor("#27A9E1")',
+      'color("blue")',
+      "circle(50)",
+      "forward(50)",
+      'color("#E6E6FA")',
+      "circle(50)",
+      "forward(50)"
+    ].join("\n")
+  };
+  var descriptions={
+    stretched:"Five circles, each radius 35, moving forward 40 pixels after each ring.",
+    coil:"One example of a coil using six rings of different sizes.",
+    colors:"Two circles in blue and lavender on a #27A9E1 background."
+  };
+  var src="/turtle/?embed=preview&code="+encodeURIComponent(programs[kind]||"");
   return '<figure class="example-figure">'+
-    '<div class="example-figure-head"><strong>Example output</strong><span>A visual reference</span></div>'+
-    '<svg viewBox="0 0 '+width+' '+height+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+escapeHtml(label)+'">'+
-    '<rect width="'+width+'" height="'+height+'" fill="'+bg+'"/>'+
-    circles+guide+turtle+'</svg>'+
-    '<figcaption>'+escapeHtml(label)+'</figcaption></figure>';
+    '<div class="example-figure-head"><strong>Example output</strong><span>Actual Turtle world · completed</span></div>'+
+    '<div class="example-live-stage">'+
+      '<iframe class="example-live-world" src="'+escapeHtml(src)+'" title="'+escapeHtml("Finished Turtle output: "+descriptions[kind])+'" loading="lazy" tabindex="-1" aria-label="'+escapeHtml(descriptions[kind])+'"></iframe>'+
+    '</div>'+
+    '<figcaption>'+escapeHtml(descriptions[kind])+'</figcaption>'+
+  '</figure>';
 }
 
 function stretchedContent(){
