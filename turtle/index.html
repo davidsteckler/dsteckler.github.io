@@ -975,6 +975,7 @@ for i in range(4):
         <div class="world-head-actions">
           <span class="panel-mini" id="worldLineStatus">400 × 400</span>
           <button class="world-edit-link" id="editCodeBtn" type="button">↑ Edit code</button>
+          <button class="btn" id="toggleExampleOverlayBtn" type="button" hidden aria-pressed="false" title="Overlay the reference drawing without changing your program">Show example</button>
           <button class="btn clear-run-btn" id="clearRunBtn" type="button" title="Erase Turtle's drawing and printed output; keep your code">↻ Clear Run</button>
         </div>
       </div>
@@ -993,6 +994,7 @@ for i in range(4):
           <div id="turtle-canvas" aria-label="Turtle drawing canvas">
             <canvas id="turtle-drawing" width="400" height="400"></canvas>
             <canvas id="turtle-sprite" width="400" height="400"></canvas>
+            <canvas id="reference-overlay" width="400" height="400" hidden aria-hidden="true"></canvas>
           </div>
           <div class="loading" id="loading">Loading Python…</div>
           </div>
@@ -1071,6 +1073,7 @@ for i in range(4):
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script src="/turtle/neon.js?v=20261030"></script>
+<script src="/turtlecourse/readonly-preview.js?v=5-overlay"></script>
 
 <script>
 (function(){
@@ -1086,6 +1089,7 @@ for i in range(4):
   var UNIT1_EMBED = COURSE_EMBED && QUERY_PARAMS.get("ui") === "unit1-console-v2";
   var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
   var COURSE_CODE = QUERY_PARAMS.get("code");
+  var EXAMPLE_OVERLAY_CODE = UNIT1_EMBED ? QUERY_PARAMS.get("overlay") : null;
   var COURSE_STORAGE_KEY = "dsteckler-pythoncourse-" + COURSE_LESSON;
   var TRACE_EXAMPLE = QUERY_PARAMS.get("trace") || "sequence";
   var TRACE_PROGRAMS = {
@@ -2953,6 +2957,32 @@ for i in range(4):
         loading.classList.remove("show");
       }
     }, 1200);
+  }
+
+  // In course lessons only, overlay the finished example over the student's
+  // drawing at exactly the same 400 × 400 coordinates. No code is executed or
+  // changed when the reference is shown.
+  if(UNIT1_EMBED && EXAMPLE_OVERLAY_CODE && window.TurtleCourseExamples){
+    var overlayButton=document.getElementById("toggleExampleOverlayBtn");
+    var overlayCanvas=document.getElementById("reference-overlay");
+    try{
+      if(window.TurtleCourseExamples.run(overlayCanvas,EXAMPLE_OVERLAY_CODE,"",{overlay:true})){
+        overlayButton.hidden=false;
+        overlayCanvas.hidden=true;
+        var overlayVisible=false;
+        overlayButton.addEventListener("click",function(){
+          overlayVisible=!overlayVisible;
+          overlayCanvas.hidden=!overlayVisible;
+          overlayButton.setAttribute("aria-pressed",String(overlayVisible));
+          overlayButton.textContent=overlayVisible?"Hide example":"Show example";
+          overlayButton.title=overlayVisible?"Hide the dashed example drawing":"Overlay the example drawing for comparison";
+          document.body.classList.toggle("unit1-overlay-visible",overlayVisible);
+        });
+      }
+    }catch(e){
+      overlayButton.hidden=true;
+      overlayCanvas.hidden=true;
+    }
   }
 
   if(TRACE_EMBED){
