@@ -53,7 +53,7 @@ var frame=document.getElementById("editorFrame");
 var action=document.getElementById("actionButton");
 var previous=document.getElementById("backButton");
 var expandEditorBtn=document.getElementById("expandEditorBtn");
-var resetStarterBtn=document.getElementById("resetStarterBtn");
+
 var saveState=document.getElementById("saveState");
 var currentIndex=0,editorReady=false,pendingCheck=null,finishView=false;
 function el(id){return document.getElementById(id)}
@@ -228,7 +228,6 @@ function render(){
   editorCard.hidden=!l.editor;
   workspace.classList.remove("focus-editor");
   if(expandEditorBtn){expandEditorBtn.setAttribute("aria-pressed","false");expandEditorBtn.textContent="⤢ Expand editor"}
-  if(resetStarterBtn){resetStarterBtn.disabled=!l.editor;resetStarterBtn.textContent="↺ Reset starter code"}
   editorReady=false;pendingCheck=null;
   if(l.editor){
     var url="/turtle/?embed=course&ui=unit1-console-v2&rev=unit1-20261110-6&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
@@ -371,29 +370,6 @@ body.addEventListener("change",function(event){
   if(id==="1.1.3"||id==="1.1.5")state.checks[id]=false;
   persist();refreshAction();setStatus("Draft saved on this device");
 });
-if(resetStarterBtn)resetStarterBtn.addEventListener("click",function(){
-  if(finishView || !LESSONS[currentIndex].editor)return;
-  if(!editorReady || !frame.contentWindow){
-    setStatus("Editor is loading. Try reset once it appears.");
-    return;
-  }
-  var lesson=LESSONS[currentIndex];
-  if(!window.confirm("Reset "+lesson.id+" to the original starter code?\n\nYour current code will still be available in History."))return;
-  resetStarterBtn.disabled=true;
-  resetStarterBtn.textContent="Resetting…";
-  frame.contentWindow.postMessage({
-    type:"turtlecourse-reset-starter",
-    lesson:"turtlecourse-"+lesson.id,
-    code:STARTERS[lesson.id]||""
-  },window.location.origin);
-  setTimeout(function(){
-    if(resetStarterBtn.disabled && LESSONS[currentIndex].id===lesson.id){
-      resetStarterBtn.disabled=false;
-      resetStarterBtn.textContent="↺ Reset starter code";
-      setStatus("Editor did not respond. Refresh the page, then try again.");
-    }
-  },7000);
-});
 if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){
   var expanded=workspace.classList.toggle("focus-editor");
   expandEditorBtn.setAttribute("aria-pressed",String(expanded));
@@ -407,7 +383,6 @@ window.addEventListener("message",function(event){
   var data=event.data||{},id=LESSONS[currentIndex].id;
   if(data.lesson!=="turtlecourse-"+id)return;
   if(data.type==="turtlecourse-starter-reset-result"){
-    if(resetStarterBtn){resetStarterBtn.disabled=false;resetStarterBtn.textContent="↺ Reset starter code"}
     if(data.ok){
       delete state.checks[id];
       delete state.validatedCode[id];
