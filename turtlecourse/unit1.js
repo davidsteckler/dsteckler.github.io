@@ -12,67 +12,22 @@ var LESSONS=[
   {id:"1.1.8",name:"Color & Background Color",short:"Color & background",kind:"Coding exercise",subtitle:"Give the drawing a new background and use different pen colors.",editor:true}
 ];
 var SLINKY=[
-"circle(35)",
-"forward(20)",
-"circle(35)",
-"forward(20)",
-"circle(35)",
-"forward(20)",
-"circle(35)",
-"forward(20)",
-"circle(35)",
-"forward(20)",
-"",
-"",
-"'''",
-"================================================",
-"Type each response after the arrow.",
-"================================================",
-"",
-"PART 1: RUN THE PROGRAM",
-"",
-"1. Click Run.",
-"2. How many circles are drawn?",
-"",
-"       ANSWER -->",
-"",
-"------------------------------------------------",
-"PART 2: CAPITAL LETTER",
-"",
-"1. Predict what will happen if circle becomes Circle.",
-"",
-"       PREDICTION -->",
-"",
-"2. Change the first circle command to Circle.",
-"3. Click Run.",
-"",
-"       RESULT -->",
-"",
-"------------------------------------------------",
-"PART 3: REMOVE PARENTHESES",
-"",
-"1. Change Circle back to circle.",
-"2. Predict what will happen if you remove the",
-"   parentheses from the first circle command.",
-"",
-"       PREDICTION -->",
-"",
-"3. Remove the parentheses.",
-"4. Click Run.",
-"",
-"       RESULT -->",
-"",
-"================================================",
-"You must click Save AND Next to receive",
-"completion credit for this activity.",
-"================================================",
-"'''"
+  "circle(35)",
+  "forward(20)",
+  "circle(35)",
+  "forward(20)",
+  "circle(35)",
+  "forward(20)",
+  "circle(35)",
+  "forward(20)",
+  "circle(35)",
+  "forward(20)"
 ].join("\n");
 var STARTERS={
   "1.1.2":SLINKY,
-  "1.1.4":"# Stretched Slinky\n# Five rings, each radius 35\n# Move forward 40 pixels after EVERY circle\n\n",
-  "1.1.7":"# Slinky Coil Challenge\n# Six rings, each radius 25\n# Move forward 25 pixels after EVERY circle\n\n",
-  "1.1.8":"# Experiment with color and background color.\n# Example: bgcolor(\"lightblue\")\n# Example: color(\"purple\")\n\n"
+  "1.1.4":"",
+  "1.1.7":"",
+  "1.1.8":""
 };
 var TRACE=["forward(100)","circle(10)","forward(10)","circle(20)","circle(30)","forward(30)"];
 var QUIZ=[
@@ -232,7 +187,7 @@ function render(){
   editorCard.hidden=!l.editor;
   editorReady=false;pendingCheck=null;
   if(l.editor){
-    var url="/turtle/?embed=course&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
+    var url="/turtle/?embed=course&ui=unit1-console-v2&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
     if(frame.getAttribute("src")!==url)frame.setAttribute("src",url);
     else editorReady=!!frame.contentWindow;
   }else{
