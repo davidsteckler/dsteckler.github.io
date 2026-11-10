@@ -386,6 +386,13 @@ if(resetStarterBtn)resetStarterBtn.addEventListener("click",function(){
     lesson:"turtlecourse-"+lesson.id,
     code:STARTERS[lesson.id]||""
   },window.location.origin);
+  setTimeout(function(){
+    if(resetStarterBtn.disabled && LESSONS[currentIndex].id===lesson.id){
+      resetStarterBtn.disabled=false;
+      resetStarterBtn.textContent="↺ Reset starter code";
+      setStatus("Editor did not respond. Refresh the page, then try again.");
+    }
+  },7000);
 });
 if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){
   var expanded=workspace.classList.toggle("focus-editor");
