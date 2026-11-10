@@ -948,6 +948,7 @@
       <div class="panel-head">
         <div class="editor-head-start">
           <button class="btn clear-code-btn" id="clearCodeBtn" type="button" title="Erase all code in the editor; leave Turtle's output alone">⌫ Clear all code</button>
+          <button class="btn" id="resetToStarterBtn" type="button" hidden title="Restore this lesson's original starter code and reset Turtle to the beginning">↺ Reset starter</button>
           <button class="btn" id="codeHistoryBtn" type="button">History</button>
           <span class="panel-label"><span class="status-dot" id="codeStatus"></span> main.py</span>
         </div>
@@ -2826,6 +2827,23 @@ for i in range(4):
   runBtn.addEventListener("click",function(){runCode(false);});
   stopBtn.addEventListener("click", stopCode);
   clearCodeBtn.addEventListener("click", clearCode);
+  var nativeReset=document.getElementById("resetToStarterBtn");
+  if(UNIT1_EMBED && nativeReset){
+    nativeReset.hidden=false;
+    nativeReset.addEventListener("click",function(){
+      if(!window.confirm("Reset this activity to its original code?\n\nYour earlier version will remain in History."))return;
+      var ok=false;
+      try{
+        window.replaceTurtleCode(COURSE_CODE||"","Reset to starter code");
+        clearRun();
+        ok=true;
+      }catch(e){}
+      if(ok){
+        window.parent.postMessage({type:"turtlecourse-starter-reset-result",lesson:COURSE_LESSON,ok:true},window.location.origin);
+      }
+    });
+  }
+
   clearRunBtn.addEventListener("click", clearRun);
 
   document.getElementById("clearConsole").addEventListener("click", function(){
