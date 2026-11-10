@@ -52,6 +52,7 @@ var editorCard=document.getElementById("editorCard");
 var frame=document.getElementById("editorFrame");
 var action=document.getElementById("actionButton");
 var previous=document.getElementById("backButton");
+var expandEditorBtn=document.getElementById("expandEditorBtn");
 var saveState=document.getElementById("saveState");
 var currentIndex=0,editorReady=false,pendingCheck=null,finishView=false;
 function el(id){return document.getElementById(id)}
@@ -217,6 +218,8 @@ function render(){
   previous.disabled=currentIndex===0;
   workspace.classList.toggle("no-editor",!l.editor);
   editorCard.hidden=!l.editor;
+  workspace.classList.remove("focus-editor");
+  if(expandEditorBtn){expandEditorBtn.setAttribute("aria-pressed","false");expandEditorBtn.textContent="⤢ Expand editor"}
   editorReady=false;pendingCheck=null;
   if(l.editor){
     var url="/turtle/?embed=course&ui=unit1-console-v2&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
@@ -342,6 +345,11 @@ body.addEventListener("change",function(event){
   var id=LESSONS[currentIndex].id;
   if(id==="1.1.3"||id==="1.1.5")state.checks[id]=false;
   persist();refreshAction();setStatus("Draft saved on this device");
+});
+if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){
+  var expanded=workspace.classList.toggle("focus-editor");
+  expandEditorBtn.setAttribute("aria-pressed",String(expanded));
+  expandEditorBtn.textContent=expanded?"↙ Show instructions":"⤢ Expand editor";
 });
 previous.addEventListener("click",function(){if(finishView)gotoIndex(7);else gotoIndex(currentIndex-1)});
 action.addEventListener("click",handleAction);
