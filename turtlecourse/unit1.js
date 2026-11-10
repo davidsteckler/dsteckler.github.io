@@ -112,8 +112,38 @@ function quizContent(){
       }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div>';
   }).join("")+'<div class="mini-note">You can change an answer and check again. A score of 3 out of 3 completes this activity.</div>';
 }
+function exampleImage(kind){
+  var count=kind==="stretched"?5:kind==="coil"?6:2;
+  var radius=kind==="stretched"?35:kind==="coil"?25:48;
+  var step=kind==="stretched"?40:kind==="coil"?25:55;
+  var start=radius+15, cy=radius+20;
+  var width=Math.max(240,start+count*step+radius+14);
+  var height=radius*2+55;
+  var baseline=cy+radius;
+  var bg=kind==="colors"?"#daf0e6":"#ffffff";
+  var line=kind==="colors"?"#c26354":"#253f4b";
+  var circles=Array.from({length:count},function(_,i){
+    var stroke=kind==="colors"?(i===0?"#c26354":"#376aa1"):line;
+    return '<circle cx="'+(start+i*step)+'" cy="'+cy+'" r="'+radius+'" fill="none" stroke="'+stroke+'" stroke-width="2.3" />';
+  }).join("");
+  var end=start+count*step;
+  var guide='<path d="M '+start+' '+baseline+' L '+end+' '+baseline+'" stroke="'+(kind==="colors"?"#376aa1":line)+'" stroke-width="2.4" fill="none"/>';
+  var turtle='<circle cx="'+end+'" cy="'+baseline+'" r="5.5" fill="#168b82" stroke="#23444a" stroke-width="1.3"/>'+
+             '<circle cx="'+(end+7)+'" cy="'+baseline+'" r="3" fill="#a9d5ba" stroke="#23444a" stroke-width="1.1"/>';
+  var label=kind==="stretched"?"Five circles · radius 35 · forward 40 after each circle":
+            kind==="coil"?"Six circles · radius 25 · forward 25 after each circle":
+            "An example with two pen colors and a background";
+  return '<figure class="example-figure">'+
+    '<div class="example-figure-head"><strong>Example output</strong><span>A visual reference</span></div>'+
+    '<svg viewBox="0 0 '+width+' '+height+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+escapeHtml(label)+'">'+
+    '<rect width="'+width+'" height="'+height+'" fill="'+bg+'"/>'+
+    circles+guide+turtle+'</svg>'+
+    '<figcaption>'+escapeHtml(label)+'</figcaption></figure>';
+}
+
 function stretchedContent(){
   return '<h2>Make a stretched-out slinky</h2><p>Write your own program in <code>main.py</code>. Click <strong>Run</strong> to inspect the drawing, then use <strong>Check my work</strong> when ready.</p>'+
+  exampleImage('stretched')+
   '<p>Your program should have:</p><ul><li><strong>Five rings</strong></li><li>Each circle with a <strong>radius of 35</strong></li><li>Tracy moving forward <strong>40 pixels after every circle</strong></li></ul>'+
   '<div class="mini-note">You already saw the original slinky in 1.1.2. Compare your new spacing with that example. The checker looks at the commands your program executes.</div>'+
   '<div class="resource-links"><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command reference ↗</a></div>';
@@ -131,6 +161,7 @@ function traceContent(){
 }
 function coilContent(){
   return '<h2>Slinky Coil Challenge</h2><p>You made the original and stretched slinkies. Now write a new version from scratch using the rules below.</p>'+
+  exampleImage('coil')+
   '<ul><li>Draw <strong>six circles</strong> with a <strong>radius of 25</strong>.</li><li>Move forward <strong>25 pixels</strong> after <strong>each circle</strong>.</li><li>Use only commands you have learned so far. Make sure your drawing fits in Tracy’s world.</li></ul>'+
   '<div class="mini-note">Challenge rules for this version of the activity: there should be exactly six circles and six forward movements, alternating in that order.</div>'+
   '<p>Run your program, compare the output to your prediction, and check it when you are ready.</p>';
@@ -139,6 +170,7 @@ function colorsContent(){
   return '<h2>Give the slinky some color</h2><p>Two commands can change the look of your drawing:</p>'+
   '<pre class="codebox">bgcolor("lightblue")\ncolor("purple")\ncircle(35)</pre>'+
   '<p><code>bgcolor()</code> changes the background. <code>color()</code> changes the pen color.</p>'+
+  exampleImage('colors')+
   '<h3>Your task</h3><ul><li>Choose a background with <code>bgcolor()</code>.</li><li>Draw at least <strong>two circles</strong>.</li><li>Use <code>color()</code> to draw with <strong>two different pen colors</strong>.</li></ul>'+
   '<div class="mini-note">You can choose the colors and sizes. Try changing the background and rerunning your code to see the result.</div>'+
   '<div class="resource-links"><a href="/hex/" target="_blank" rel="noopener">Color picker ↗</a><a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a></div>';
@@ -289,7 +321,7 @@ function handleAction(){
     var missing=needs.filter(function(k){return !String(d[k]||"").trim()});
     if(missing.length){makeFeedback(false,"Finish all five responses.",["Predict, run, and record what happened in each experiment."]);return}
     if(!state.ran[id]){makeFeedback(false,"Run the program in the editor first.",["Use the green Run button in the Turtle editor."]);return}
-    if(!/^\s*5\s*$/.test(String(d.count))){makeFeedback(false,"Take another look at Part 1.",["Count the circles in the original Slinky program."]);return}
+    if(!/^\s*(5|five)\s*$/i.test(String(d.count))){makeFeedback(false,"Take another look at Part 1.",["Count the circles in the original Slinky program."]);return}
     completeAndNext();return;
   }
   if(id==="1.1.3"){if(state.checks[id])completeAndNext();else quizCheck();return}
