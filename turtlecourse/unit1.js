@@ -142,11 +142,10 @@ function exampleImage(kind){
     coil:"One example of a coil using six rings of different sizes.",
     colors:"Two circles in blue and lavender on a #27A9E1 background."
   };
-  var src="/turtle/?embed=preview&rev=unit1-20261110-6&code="+encodeURIComponent(programs[kind]||"");
   return '<figure class="example-figure">'+
-    '<div class="example-figure-head"><strong>Example output</strong><span>Actual Turtle world · completed</span></div>'+
+    '<div class="example-figure-head"><strong>Example output</strong><span>Finished Turtle world</span></div>'+
     '<div class="example-live-stage">'+
-      '<iframe class="example-live-world" src="'+escapeHtml(src)+'" title="'+escapeHtml("Finished Turtle output: "+descriptions[kind])+'" loading="eager" tabindex="-1" aria-label="'+escapeHtml(descriptions[kind])+'"></iframe>'+
+      '<canvas class="example-world-canvas" width="400" height="400" data-example-kind="'+escapeHtml(kind)+'" data-example-code="'+encodeURIComponent(programs[kind]||"")+'" role="img" aria-label="'+escapeHtml(descriptions[kind])+'"></canvas>'+
     '</div>'+
     '<figcaption>'+escapeHtml(descriptions[kind])+'</figcaption>'+
   '</figure>';
@@ -222,6 +221,7 @@ function render(){
   el("lessonBadge").textContent=l.kind;
   el("activityCounter").textContent=(currentIndex+1)+" of "+LESSONS.length;
   body.innerHTML=contentFor(l.id);
+  if(window.TurtleCourseExamples)window.TurtleCourseExamples.render(body);
   restoreDraft();
   previous.disabled=currentIndex===0;
   workspace.classList.toggle("no-editor",!l.editor);
