@@ -142,10 +142,22 @@ function exampleImage(kind){
     coil:"One example of a coil using six rings of different sizes.",
     colors:"Two circles in blue and lavender on a #27A9E1 background."
   };
+  var exampleCode=(programs[kind]||"").split("\n").map(function(line,i){
+    return '<div class="example-code-line"><span class="example-code-number" aria-hidden="true">'+(i+1)+'</span><code>'+escapeHtml(line)+'</code></div>';
+  }).join("");
   return '<figure class="example-figure">'+
-    '<div class="example-figure-head"><strong>Example output</strong><span>Finished Turtle world</span></div>'+
-    '<div class="example-live-stage">'+
+    '<div class="example-figure-head">'+
+      '<strong>Example reference</strong>'+
+      '<div class="example-view-toggle" role="group" aria-label="Example view">'+
+        '<button type="button" class="example-view-button active" data-example-view="drawing" aria-pressed="true">Drawing</button>'+
+        '<button type="button" class="example-view-button" data-example-view="code" aria-pressed="false">Show code</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="example-live-stage" data-example-panel="drawing">'+
       '<canvas class="example-world-canvas" width="400" height="400" data-example-kind="'+escapeHtml(kind)+'" data-example-code="'+encodeURIComponent(programs[kind]||"")+'" role="img" aria-label="'+escapeHtml(descriptions[kind])+'"></canvas>'+
+    '</div>'+
+    '<div class="example-reference-code" data-example-panel="code" hidden aria-label="Code used to create the example drawing">'+
+       exampleCode+
     '</div>'+
     '<figcaption>'+escapeHtml(descriptions[kind])+'</figcaption>'+
   '</figure>';
@@ -356,6 +368,21 @@ function handleAction(){
   if(["1.1.4","1.1.7","1.1.8"].indexOf(id)>-1){if(state.checks[id])completeAndNext();else requestCodeCheck();return}
 }
 menu.addEventListener("click",function(event){var btn=event.target.closest("[data-index]");if(btn)gotoIndex(Number(btn.dataset.index))});
+body.addEventListener("click",function(event){
+  var control=event.target.closest("[data-example-view]");
+  if(!control || !body.contains(control))return;
+  var card=control.closest(".example-figure");
+  if(!card)return;
+  var selected=control.dataset.exampleView;
+  card.querySelectorAll("[data-example-view]").forEach(function(button){
+    var active=button.dataset.exampleView===selected;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
+  card.querySelectorAll("[data-example-panel]").forEach(function(panel){
+    panel.hidden=panel.dataset.examplePanel!==selected;
+  });
+});
 body.addEventListener("input",function(event){
   var target=event.target;if(!target.dataset.answer)return;
   if(target.type==="radio" && !target.checked)return;
