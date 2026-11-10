@@ -231,7 +231,7 @@ function render(){
   if(resetStarterBtn){resetStarterBtn.disabled=!l.editor;resetStarterBtn.textContent="↺ Reset starter code"}
   editorReady=false;pendingCheck=null;
   if(l.editor){
-    var url="/turtle/?embed=course&ui=unit1-console-v2&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
+    var url="/turtle/?embed=course&ui=unit1-console-v2&rev=unit1-20261110-6&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
     if(frame.getAttribute("src")!==url)frame.setAttribute("src",url);
     else editorReady=!!frame.contentWindow;
   }else{
