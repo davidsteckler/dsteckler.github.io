@@ -864,6 +864,7 @@
 <link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
+<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -1079,6 +1080,7 @@ for i in range(4):
   var REFERENCE_EMBED = EMBED_MODE === "reference";
   var TRACE_EMBED = EMBED_MODE === "trace" || REFERENCE_EMBED;
   var COURSE_EMBED = EMBED_MODE === "course";
+  var UNIT1_EMBED = COURSE_EMBED && QUERY_PARAMS.get("ui") === "unit1-console-v2";
   var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
   var COURSE_CODE = QUERY_PARAMS.get("code");
   var COURSE_STORAGE_KEY = "dsteckler-pythoncourse-" + COURSE_LESSON;
@@ -1174,6 +1176,7 @@ for i in range(4):
   if(TRACE_EMBED) document.body.classList.add("trace-embed");
   if(REFERENCE_EMBED) document.body.classList.add("reference-embed");
   if(COURSE_EMBED) document.body.classList.add("course-embed");
+  if(UNIT1_EMBED) document.body.classList.add("unit1-embed");
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
     "# Try changing the distance or the number of repeats.",
@@ -1419,6 +1422,29 @@ for i in range(4):
   }else if(COURSE_EMBED){
     try {
       var courseSaved = localStorage.getItem(COURSE_STORAGE_KEY);
+      // One-time cleanup of duplicated lesson instructions in older saved starter files.
+      // Back up the original code so no student work is lost.
+      if(UNIT1_EMBED && courseSaved !== null){
+        var cleaned=courseSaved;
+        if(COURSE_LESSON === "turtlecourse-1.1.2"){
+          var instructionsAt=cleaned.indexOf("\n'''");
+          if(instructionsAt!==-1 && cleaned.slice(instructionsAt).includes("PART 1: RUN THE PROGRAM") && cleaned.slice(instructionsAt).includes("Type each response after the arrow.")){
+            cleaned=cleaned.slice(0,instructionsAt).replace(/\s+$/,"");
+          }
+        }else{
+          var oldIntro={
+            "turtlecourse-1.1.4":'# Stretched Slinky\n# Five rings, each radius 35\n# Move forward 40 pixels after EVERY circle\n\n',
+            "turtlecourse-1.1.7":'# Slinky Coil Challenge\n# Six rings, each radius 25\n# Move forward 25 pixels after EVERY circle\n\n',
+            "turtlecourse-1.1.8":'# Experiment with color and background color.\n# Example: bgcolor("lightblue")\n# Example: color("purple")\n\n'
+          }[COURSE_LESSON];
+          if(oldIntro && cleaned.startsWith(oldIntro))cleaned=cleaned.slice(oldIntro.length);
+        }
+        if(cleaned!==courseSaved){
+          localStorage.setItem(COURSE_STORAGE_KEY+"-instructions-backup-v1",courseSaved);
+          localStorage.setItem(COURSE_STORAGE_KEY,cleaned);
+          courseSaved=cleaned;
+        }
+      }
       if(courseSaved !== null){
         editor.setValue(courseSaved);
       }else if(COURSE_CODE !== null){
@@ -1529,6 +1555,7 @@ for i in range(4):
   }
 
   function setOutput(html){
+    if(UNIT1_EMBED)document.body.classList.remove("unit1-has-error");
     output.innerHTML = html;
     output.scrollTop = output.scrollHeight;
   }
@@ -1667,6 +1694,45 @@ for i in range(4):
   function renderError(err){
     var info=analyzeError(err);
     highlightError(info.line,info.token);
+    if(UNIT1_EMBED){
+      document.body.classList.add("unit1-has-error");
+      output.textContent="";
+      var simple=document.createElement("div");simple.className="unit1-error";
+      var header=document.createElement("div");header.className="unit1-error-top";
+      var label=document.createElement("span");label.className="unit1-error-badge";
+      label.textContent=info.name+(info.line?" · LINE "+info.line:"");
+      header.appendChild(label);
+      if(info.line){
+        var jump=document.createElement("button");
+        jump.type="button";jump.className="error-line-button";jump.textContent="Find line "+info.line;
+        jump.addEventListener("click",function(){
+          editor.focus();
+          editor.setCursor({line:Math.max(0,info.line-1),ch:0});
+          editor.scrollIntoView({line:Math.max(0,info.line-1),ch:0},90);
+        });
+        header.appendChild(jump);
+      }
+      simple.appendChild(header);
+      var title=document.createElement("div");title.className="unit1-error-title";
+      title.textContent=info.title;simple.appendChild(title);
+      if(info.line && info.lineText){
+        var sourceLine=document.createElement("code");sourceLine.className="unit1-error-source";
+        sourceLine.textContent=info.line+" | "+info.lineText;simple.appendChild(sourceLine);
+      }
+      if(info.hint){
+        var hint=document.createElement("div");hint.className="unit1-error-hint";
+        hint.textContent=info.hint;simple.appendChild(hint);
+      }
+      var rawWrap=document.createElement("details");rawWrap.className="unit1-error-raw";
+      var rawSummary=document.createElement("summary");rawSummary.textContent="Full Python error";
+      rawWrap.appendChild(rawSummary);
+      var rawCode=document.createElement("code");rawCode.textContent=info.raw;
+      rawWrap.appendChild(rawCode);simple.appendChild(rawWrap);
+      output.appendChild(simple);
+      output.scrollTop=0;
+      return info;
+    }
+
     output.textContent="";
 
     var card=document.createElement("div");
@@ -2637,7 +2703,9 @@ for i in range(4):
         }
       });
       if(token!==runToken)return;
-      if(!output.textContent.trim()){
+      if(UNIT1_EMBED){
+        appendOutput("✓ Run complete.","success");
+      }else if(!output.textContent.trim()){
         appendOutput("Program finished. No text was printed.\n","muted");
       }else{
         appendOutput("\nProgram finished.\n","success");
