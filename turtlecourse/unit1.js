@@ -27,7 +27,7 @@ var STARTERS={
   "1.1.2":SLINKY,
   "1.1.4":"",
   "1.1.7":"",
-  "1.1.8":""
+  "1.1.8":"color(\"red\")\ncircle(50)\nforward(50)\n\ncircle(50)\nforward(50)"
 };
 var TRACE=["forward(100)","circle(10)","forward(10)","circle(20)","circle(30)","forward(30)"];
 var QUIZ=[
@@ -115,24 +115,27 @@ function quizContent(){
 }
 function exampleImage(kind){
   var count=kind==="stretched"?5:kind==="coil"?6:2;
-  var radius=kind==="stretched"?35:kind==="coil"?25:48;
+  var radius=kind==="stretched"?35:kind==="coil"?35:48;
   var step=kind==="stretched"?40:kind==="coil"?25:55;
   var start=radius+15, cy=radius+20;
   var width=Math.max(240,start+count*step+radius+14);
   var height=radius*2+55;
   var baseline=cy+radius;
-  var bg=kind==="colors"?"#daf0e6":"#ffffff";
-  var line=kind==="colors"?"#c26354":"#253f4b";
+  var bg=kind==="colors"?"#27A9E1":"#ffffff";
+  var line=kind==="colors"?"#7042a0":"#253f4b";
+  var coilRadii=[20,28,35,25,32,22];
   var circles=Array.from({length:count},function(_,i){
-    var stroke=kind==="colors"?(i===0?"#c26354":"#376aa1"):line;
-    return '<circle cx="'+(start+i*step)+'" cy="'+cy+'" r="'+radius+'" fill="none" stroke="'+stroke+'" stroke-width="2.3" />';
+    var stroke=kind==="colors"?(i===0?"#551b8a":"#173e59"):line;
+    var r=kind==="coil"?coilRadii[i]:radius;
+    var centerY=kind==="coil"?baseline-r:cy;
+    return '<circle cx="'+(start+i*step)+'" cy="'+centerY+'" r="'+r+'" fill="none" stroke="'+stroke+'" stroke-width="2.3" />';
   }).join("");
   var end=start+count*step;
-  var guide='<path d="M '+start+' '+baseline+' L '+end+' '+baseline+'" stroke="'+(kind==="colors"?"#376aa1":line)+'" stroke-width="2.4" fill="none"/>';
+  var guide='<path d="M '+start+' '+baseline+' L '+end+' '+baseline+'" stroke="'+(kind==="colors"?"#173e59":line)+'" stroke-width="2.4" fill="none"/>';
   var turtle='<circle cx="'+end+'" cy="'+baseline+'" r="5.5" fill="#168b82" stroke="#23444a" stroke-width="1.3"/>'+
              '<circle cx="'+(end+7)+'" cy="'+baseline+'" r="3" fill="#a9d5ba" stroke="#23444a" stroke-width="1.1"/>';
   var label=kind==="stretched"?"Five circles · radius 35 · forward 40 after each circle":
-            kind==="coil"?"Six circles · radius 25 · forward 25 after each circle":
+            kind==="coil"?"One possible coil: six circles with different sizes":
             "An example with two pen colors and a background";
   return '<figure class="example-figure">'+
     '<div class="example-figure-head"><strong>Example output</strong><span>A visual reference</span></div>'+
@@ -161,20 +164,18 @@ function traceContent(){
     '<div class="resource-links"><a href="/tracetable/" target="_blank" rel="noopener">Explore the animated trace table ↗</a></div>';
 }
 function coilContent(){
-  return '<h2>Slinky Coil Challenge</h2><p>You made the original and stretched slinkies. Now write a new version from scratch using the rules below.</p>'+
+  return '<h2>Slinky Coil Challenge</h2><p>Create a fun slinky-like pattern using only <code>circle()</code> and <code>forward()</code>.</p>'+
   exampleImage('coil')+
-  '<ul><li>Draw <strong>six circles</strong> with a <strong>radius of 25</strong>.</li><li>Move forward <strong>25 pixels</strong> after <strong>each circle</strong>.</li><li>Use only commands you have learned so far. Make sure your drawing fits in Tracy’s world.</li></ul>'+
-  '<div class="mini-note">Challenge rules for this version of the activity: there should be exactly six circles and six forward movements, alternating in that order.</div>'+
-  '<p>Run your program, compare the output to your prediction, and check it when you are ready.</p>';
+  '<h3>Requirements</h3><ul><li>Use <code>circle()</code> at least <strong>6 times</strong>.</li><li>Use <code>forward()</code> at least <strong>6 times</strong>.</li><li>Use at least <strong>2 different sizes</strong> for your circles.</li></ul>'+
+  '<div class="mini-note">Experiment with different circle sizes and forward distances. Your drawing can look different from the example. Add a comment describing what your pattern looks like to you.</div>'+
+  '<p>Click <strong>Run</strong> to view your creation, then check your program when ready.</p>';
 }
 function colorsContent(){
-  return '<h2>Give the slinky some color</h2><p>Two commands can change the look of your drawing:</p>'+
-  '<pre class="codebox">bgcolor("lightblue")\ncolor("purple")\ncircle(35)</pre>'+
-  '<p><code>bgcolor()</code> changes the background. <code>color()</code> changes the pen color.</p>'+
+  return '<h2>Color &amp; Background Color</h2><p>You start with two red circles. Change the background and draw the circles with two new pen colors.</p>'+
   exampleImage('colors')+
-  '<h3>Your task</h3><ul><li>Choose a background with <code>bgcolor()</code>.</li><li>Draw at least <strong>two circles</strong>.</li><li>Use <code>color()</code> to draw with <strong>two different pen colors</strong>.</li></ul>'+
-  '<div class="mini-note">You can choose the colors and sizes. Try changing the background and rerunning your code to see the result.</div>'+
-  '<div class="resource-links"><a href="/hex/" target="_blank" rel="noopener">Color picker ↗</a><a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a></div>';
+  '<h3>Change these three things</h3><ol><li>Add <code>bgcolor("#27A9E1")</code> near the top to change the background.</li><li>Change <code>color("red")</code> to another built-in color, like <code>"blue"</code>.</li><li>Add a new <code>color("#...")</code> before the second circle, using a six-digit hex color.</li></ol>'+
+  '<div class="mini-note">The second <code>color()</code> should come before the second <code>circle(50)</code>. Keep the two circles and their forward movements in your program.</div>'+
+  '<div class="resource-links"><a href="/hex/" target="_blank" rel="noopener">Hex color picker ↗</a><a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a></div>';
 }
 function contentFor(id){
   switch(id){
@@ -278,15 +279,31 @@ function checkCommands(data,id){
   if(!data.run || !data.run.ok)return {ok:false,detail:[data.run&&data.run.error?data.run.error:"Your program did not finish running."]};
   var calls=(data.runtime&&Array.isArray(data.runtime.calls)?data.runtime.calls:[]);
   if(id==="1.1.8"){
-    var colors=calls.filter(function(c){return c.name==="color"&&typeof c.str==="string"&&c.str}).map(function(c){return c.str.toLowerCase()});
+    var colors=calls.filter(function(c){return c.name==="color" && typeof c.str==="string"}).map(function(c){return c.str});
     var backs=calls.filter(function(c){return c.name==="bgcolor"});
     var circles=calls.filter(function(c){return c.name==="circle"});
+    var named=colors.some(function(c){return /^[a-z]+$/i.test(c) && c.toLowerCase()!=="red"});
+    var hex=colors.some(function(c){return /^#[0-9a-f]{6}$/i.test(c)});
     var checks=[
-      {pass:backs.length>0,msg:"Use bgcolor() to set a background."},
-      {pass:new Set(colors).size>=2,msg:"Use color() with two different colors."},
-      {pass:circles.length>=2,msg:"Draw at least two circles."}
+      {pass:backs.some(function(c){return String(c.str||"").toUpperCase()==="#27A9E1"}),msg:'Use bgcolor("#27A9E1").'},
+      {pass:named,msg:"Change the first pen to a different named color."},
+      {pass:hex,msg:"Use a six-digit hex color for the second pen."},
+      {pass:circles.length===2,msg:"Keep exactly two circles."},
+      {pass:calls.filter(function(c){return c.name==="forward"}).length===2,msg:"Keep the two forward commands."}
     ];
     return {ok:checks.every(function(c){return c.pass}),detail:checks.map(function(c){return (c.pass?"✓ ":"• ")+c.msg})};
+  }
+  if(id==="1.1.7"){
+    var rings=calls.filter(function(c){return c.name==="circle"});
+    var moves=calls.filter(function(c){return c.name==="forward"});
+    var radii=new Set(rings.map(function(c){return Number(c.num)}));
+    var tests=[
+      {ok:rings.length>=6,msg:"Use circle() at least 6 times. Found "+rings.length+"."},
+      {ok:moves.length>=6,msg:"Use forward() at least 6 times. Found "+moves.length+"."},
+      {ok:radii.size>=2,msg:"Try at least 2 different circle sizes."},
+      {ok:calls.every(function(c){return c.name==="circle"||c.name==="forward"}),msg:"Use only circle() and forward() drawing commands."}
+    ];
+    return {ok:tests.every(function(x){return x.ok}),detail:tests.map(function(x){return (x.ok?"✓ ":"• ")+x.msg})};
   }
   var count=id==="1.1.4"?5:6,radius=id==="1.1.4"?35:25,dist=id==="1.1.4"?40:25;
   var relevant=calls.filter(function(c){return c.name==="circle"||c.name==="forward"});
