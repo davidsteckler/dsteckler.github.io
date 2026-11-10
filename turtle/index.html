@@ -865,6 +865,7 @@
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
 <link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=2">
+<link rel="stylesheet" href="/turtle/preview-embed.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
 </head>
@@ -1077,6 +1078,7 @@ for i in range(4):
   var STORAGE_KEY = "dsteckler-turtle-code-v1";
   var QUERY_PARAMS = new URLSearchParams(window.location.search);
   var EMBED_MODE = QUERY_PARAMS.get("embed") || "";
+  var PREVIEW_EMBED = EMBED_MODE === "preview";
   var REFERENCE_EMBED = EMBED_MODE === "reference";
   var TRACE_EMBED = EMBED_MODE === "trace" || REFERENCE_EMBED;
   var COURSE_EMBED = EMBED_MODE === "course";
@@ -1177,6 +1179,7 @@ for i in range(4):
   if(REFERENCE_EMBED) document.body.classList.add("reference-embed");
   if(COURSE_EMBED) document.body.classList.add("course-embed");
   if(UNIT1_EMBED) document.body.classList.add("unit1-embed");
+  if(PREVIEW_EMBED)document.body.classList.add("preview-embed");
   var DEFAULT_CODE = [
     "# Turtle starts at (0, 0), facing right.",
     "# Try changing the distance or the number of repeats.",
@@ -1400,7 +1403,7 @@ for i in range(4):
     tabSize: 4,
     indentWithTabs: false,
     lineWrapping: false,
-    autofocus: true,
+    autofocus: !PREVIEW_EMBED,
     extraKeys: {
       "Tab": function(cm){
         if(cm.somethingSelected()){
@@ -1415,7 +1418,11 @@ for i in range(4):
     }
   });
 
-  if(TRACE_EMBED){
+  if(PREVIEW_EMBED){
+    editor.setValue(COURSE_CODE || "");
+    editor.setOption("readOnly","nocursor");
+    saveStatus.textContent = "example";
+  }else if(TRACE_EMBED){
     editor.setValue(TRACE_CODE);
     editor.setOption("readOnly",REFERENCE_EMBED?false:"nocursor");
     saveStatus.textContent = "trace example";
@@ -1506,7 +1513,7 @@ for i in range(4):
     try{var entries=JSON.parse(localStorage.getItem(codeHistoryKey)||"[]");return Array.isArray(entries)?entries.filter(function(e){return e&&typeof e.code==="string"&&Number.isFinite(e.time);}):[];}catch(e){return [];}
   }
   function saveCodeVersion(code,label){
-    if(TRACE_EMBED)return true;
+    if(TRACE_EMBED||PREVIEW_EMBED)return true;
     try{
       var entries=readCodeHistory();
       if(!entries.length||entries[0].code!==code){
@@ -1520,7 +1527,7 @@ for i in range(4):
     }catch(e){saveStatus.textContent="History could not be saved";return false;}
   }
   function flushCodeSave(label){
-    if(TRACE_EMBED)return;
+    if(TRACE_EMBED||PREVIEW_EMBED)return;
     clearTimeout(saveTimer);saveTimer=null;
     try{
       localStorage.setItem(codeSaveKey,editor.getValue());
@@ -1549,7 +1556,7 @@ for i in range(4):
   if(TRACE_EMBED)document.getElementById("codeHistoryBtn").hidden=true;
   editor.on("change", function(){
     clearErrorHighlight();
-    if(TRACE_EMBED){saveStatus.textContent="trace example";return;}
+    if(TRACE_EMBED||PREVIEW_EMBED){saveStatus.textContent="example";return;}
     saveStatus.textContent="saving…";
     clearTimeout(saveTimer);
     saveTimer=setTimeout(flushCodeSave,750);
@@ -2880,7 +2887,7 @@ for i in range(4):
   });
 
   function fitWorld(){
-    var mobile=window.innerWidth<=840&&!REFERENCE_EMBED;
+    var mobile=window.innerWidth<=840&&!REFERENCE_EMBED&&!PREVIEW_EMBED;
     var stageWidth=worldStage.offsetWidth;
     var stageHeight=worldStage.offsetHeight;
     var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
@@ -2948,7 +2955,24 @@ for i in range(4):
   }
   clearWorld();
   setOutput(TRACE_EMBED?'<span class="muted">Trace example ready.</span>':'<span class="muted">print() output will appear here.</span>');
-  if(TRACE_EMBED) showExecutingLine(1);
+  if(PREVIEW_EMBED){
+    var previewAttempts=0;
+    function finishPreview(){
+      if(typeof Sk==="undefined"){
+        previewAttempts++;
+        if(previewAttempts<25){setTimeout(finishPreview,160);return}
+        document.body.classList.add("preview-failed");
+        return;
+      }
+      requestAnimationFrame(function(){
+        fitWorld();
+        runCode(false,{check:true}).then(function(result){
+          document.body.classList.add(result&&result.ok?"preview-ready":"preview-failed");
+        }).catch(function(){document.body.classList.add("preview-failed")});
+      });
+    }
+    finishPreview();
+  }else if(TRACE_EMBED) showExecutingLine(1);
   else editor.focus();
 })();
 </script>
