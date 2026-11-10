@@ -1,0 +1,90 @@
+/* A rendered example from the same Turtle engine as the student editor.
+   The preview runs supplied code once and exposes only the finished world. */
+html:has(body.preview-embed),body.preview-embed{
+  margin:0!important;
+  width:100%!important;
+  height:100%!important;
+  overflow:hidden!important;
+  background:#f6f9fa!important;
+}
+body.preview-embed .app{
+  display:block!important;
+  height:100dvh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+body.preview-embed .appbar,
+body.preview-embed .layoutbar,
+body.preview-embed .code-panel,
+body.preview-embed .editor-divider,
+body.preview-embed .command-library,
+body.preview-embed .library-divider,
+body.preview-embed .commands-overlay,
+body.preview-embed .world-panel>.panel-head,
+body.preview-embed .world-info,
+body.preview-embed .console,
+body.preview-embed .output-resize-handle,
+body.preview-embed .motion-status{
+  display:none!important;
+}
+body.preview-embed .workspace{
+  display:block!important;
+  width:100%!important;
+  height:100dvh!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+body.preview-embed .world-panel{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  height:100%!important;
+  width:100%!important;
+  min-height:0!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#f6f9fa!important;
+  overflow:hidden!important;
+  position:relative;
+}
+body.preview-embed .world-stage{
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  position:relative!important;
+  height:100%!important;
+  min-height:0!important;
+  width:100%!important;
+  margin:0!important;
+  padding:7px!important;
+  background:#f6f9fa!important;
+  overflow:hidden!important;
+  opacity:0;
+  transition:opacity .12s ease;
+}
+body.preview-embed.preview-ready .world-stage,
+body.preview-embed.preview-failed .world-stage{opacity:1}
+body.preview-embed .world-wrap{
+  background:#fff;
+  border:1px solid #bfcbd1!important;
+  box-shadow:0 1px 5px rgba(26,55,75,.08)!important;
+}
+body.preview-embed:not(.preview-ready):not(.preview-failed) .world-panel:after{
+  content:"Rendering example…";
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  font:600 12px/1.5 Inter,system-ui,sans-serif;
+  color:#6c808a;
+}
+body.preview-embed.preview-failed .world-panel:after{
+  content:"Example could not load";
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#f6f9fa;
+  padding:8px;
+  font:600 12px/1.5 Inter,system-ui,sans-serif;
+  color:#a04c3e;
+}
