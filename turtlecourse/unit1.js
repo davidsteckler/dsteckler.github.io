@@ -259,7 +259,7 @@ function showFinish(){
   el("lessonSubtitle").textContent="You have worked through the eight activities in Tracy's World.";
   el("lessonBadge").textContent="8 of 8";
   el("activityCounter").textContent="Finished";
-  body.innerHTML='<div class="unit-done"><h3>You've finished Unit 1.</h3><p>You have run programs, tested changes, written drawing commands, read trace tables, and used color.</p></div><div class="resource-links"><a href="/turtle/" target="_blank" rel="noopener">Keep experimenting in Turtle ↗</a><a href="/tracetable/" target="_blank" rel="noopener">Review trace tables ↗</a></div><p>Your completion record stays in this browser.</p>';
+  body.innerHTML='<div class="unit-done"><h3>You have finished Unit 1.</h3><p>You have run programs, tested changes, written drawing commands, read trace tables, and used color.</p></div><div class="resource-links"><a href="/turtle/" target="_blank" rel="noopener">Keep experimenting in Turtle ↗</a><a href="/tracetable/" target="_blank" rel="noopener">Review trace tables ↗</a></div><p>Your completion record stays in this browser.</p>';
   previous.disabled=false;action.textContent="Review Unit 1 ↺";
   history.replaceState(null,"","#complete");
   updateProgress();setStatus("All 8 activities completed on this device");
