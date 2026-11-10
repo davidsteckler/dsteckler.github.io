@@ -39,7 +39,8 @@ function parse(code){
     return {name:match[1].toLowerCase(),value:value};
   }).filter(Boolean);
 }
-function run(canvas,code,kind){
+function run(canvas,code,kind,options){
+  var overlay=!!(options&&options.overlay);
   if(!canvas||typeof canvas.getContext!=="function")return false;
   var ctx=canvas.getContext("2d");
   if(!ctx)return false;
@@ -47,6 +48,7 @@ function run(canvas,code,kind){
   var ops=parse(code);
   var background="#ffffff";
   ops.forEach(function(op){if(op.name==="bgcolor" && typeof op.value==="string")background=op.value});
+  if(!overlay){
   ctx.fillStyle=background;ctx.fillRect(0,0,400,400);
   ctx.save();ctx.strokeStyle="rgba(32,37,37,.075)";ctx.lineWidth=1;
   ctx.beginPath();
@@ -60,6 +62,7 @@ function run(canvas,code,kind){
   ctx.fillStyle="rgba(40,50,52,.65)";ctx.font="9px Consolas,monospace";
   ctx.fillText("−200",5,214);ctx.fillText("200",372,214);
   ctx.fillText("200",204,12);ctx.fillText("−200",204,391);
+  }
   // Tracy starts at (0, 0), facing right, exactly as in the editable Turtle world.
   var state={x:0,y:0,heading:0,down:true,color:"#000000",size:1};
   function point(x,y){return [200+x,200-y]}
@@ -77,8 +80,11 @@ function run(canvas,code,kind){
       if(state.down){
         var a=point(state.x,state.y),b=point(x,y);
         ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);
-        ctx.strokeStyle=state.color;ctx.lineWidth=state.size;
+        ctx.strokeStyle=overlay?"#00a7b5":state.color;ctx.lineWidth=overlay?3.2:state.size;
+        ctx.globalAlpha=overlay?.83:1;
+        if(overlay)ctx.setLineDash([7,5]);
         ctx.lineCap="round";ctx.stroke();
+        if(overlay){ctx.setLineDash([]);ctx.globalAlpha=1}
       }
       state.x=x;state.y=y;return;
     }
@@ -95,12 +101,15 @@ function run(canvas,code,kind){
           var p=point(xx,yy);
           if(i===0)ctx.moveTo(p[0],p[1]);else ctx.lineTo(p[0],p[1]);
         }
-        ctx.strokeStyle=state.color;ctx.lineWidth=state.size;
+        ctx.strokeStyle=overlay?"#00a7b5":state.color;ctx.lineWidth=overlay?3.2:state.size;
+        ctx.globalAlpha=overlay?.83:1;
+        if(overlay)ctx.setLineDash([7,5]);
         ctx.lineCap="round";ctx.lineJoin="round";ctx.stroke();
+        if(overlay){ctx.setLineDash([]);ctx.globalAlpha=1}
       }
     }
   });
-  drawSprite(ctx,state);
+  if(!overlay)drawSprite(ctx,state);
   canvas.dataset.rendered="true";
   return true;
 }
