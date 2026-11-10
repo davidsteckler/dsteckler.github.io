@@ -114,52 +114,42 @@ function quizContent(){
       }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div>';
   }).join("")+'<div class="mini-note">You can change an answer and check again. A score of 3 out of 3 completes this activity.</div>';
 }
+// Both the small reference and the overlay use the exact same example commands.
+var EXAMPLE_PROGRAMS={
+  stretched:Array(5).fill("circle(35)\nforward(40)").join("\n"),
+  coil:[
+    "circle(22)","forward(18)",
+    "circle(35)","forward(30)",
+    "circle(26)","forward(20)",
+    "circle(40)","forward(25)",
+    "circle(30)","forward(24)",
+    "circle(20)","forward(18)"
+  ].join("\n"),
+  colors:[
+    'bgcolor("#27A9E1")',
+    'color("blue")',
+    "circle(50)","forward(50)",
+    'color("#E6E6FA")',
+    "circle(50)","forward(50)"
+  ].join("\n")
+};
+var EXAMPLE_FOR_LESSON={
+  "1.1.4":"stretched",
+  "1.1.7":"coil",
+  "1.1.8":"colors"
+};
 function exampleImage(kind){
-  // Each preview uses the real 400×400 Turtle canvas and executes this code
-  // automatically in a locked frame. The student's editor is separate.
-  var programs={
-    stretched:Array(5).fill("circle(35)\nforward(40)").join("\n"),
-    coil:[
-      "circle(22)","forward(18)",
-      "circle(35)","forward(30)",
-      "circle(26)","forward(20)",
-      "circle(40)","forward(25)",
-      "circle(30)","forward(24)",
-      "circle(20)","forward(18)"
-    ].join("\n"),
-    colors:[
-      'bgcolor("#27A9E1")',
-      'color("blue")',
-      "circle(50)",
-      "forward(50)",
-      'color("#E6E6FA")',
-      "circle(50)",
-      "forward(50)"
-    ].join("\n")
-  };
   var descriptions={
-    stretched:"Five circles, each radius 35, moving forward 40 pixels after each ring.",
-    coil:"One example of a coil using six rings of different sizes.",
+    stretched:"Five circles, radius 35, moving forward 40 after each ring.",
+    coil:"One possible coil using six circles of different sizes.",
     colors:"Two circles in blue and lavender on a #27A9E1 background."
   };
-  var exampleCode=(programs[kind]||"").split("\n").map(function(line,i){
-    return '<div class="example-code-line"><span class="example-code-number" aria-hidden="true">'+(i+1)+'</span><code>'+escapeHtml(line)+'</code></div>';
-  }).join("");
   return '<figure class="example-figure">'+
-    '<div class="example-figure-head">'+
-      '<strong>Example reference</strong>'+
-      '<div class="example-view-toggle" role="group" aria-label="Example view">'+
-        '<button type="button" class="example-view-button active" data-example-view="drawing" aria-pressed="true">Drawing</button>'+
-        '<button type="button" class="example-view-button" data-example-view="code" aria-pressed="false">Show code</button>'+
-      '</div>'+
+    '<div class="example-figure-head"><strong>Example drawing</strong><span>Compare in Turtle World →</span></div>'+
+    '<div class="example-live-stage">'+
+      '<canvas class="example-world-canvas" width="400" height="400" data-example-kind="'+escapeHtml(kind)+'" data-example-code="'+encodeURIComponent(EXAMPLE_PROGRAMS[kind]||"")+'" role="img" aria-label="'+escapeHtml(descriptions[kind])+'"></canvas>'+
     '</div>'+
-    '<div class="example-live-stage" data-example-panel="drawing">'+
-      '<canvas class="example-world-canvas" width="400" height="400" data-example-kind="'+escapeHtml(kind)+'" data-example-code="'+encodeURIComponent(programs[kind]||"")+'" role="img" aria-label="'+escapeHtml(descriptions[kind])+'"></canvas>'+
-    '</div>'+
-    '<div class="example-reference-code" data-example-panel="code" hidden aria-label="Code used to create the example drawing">'+
-       exampleCode+
-    '</div>'+
-    '<figcaption>'+escapeHtml(descriptions[kind])+'</figcaption>'+
+    '<figcaption>'+escapeHtml(descriptions[kind])+' Use <strong>Show example</strong> in Turtle World to overlay this drawing on your own.</figcaption>'+
   '</figure>';
 }
 
@@ -242,7 +232,9 @@ function render(){
   if(expandEditorBtn){expandEditorBtn.setAttribute("aria-pressed","false");expandEditorBtn.textContent="⤢ Expand editor"}
   editorReady=false;pendingCheck=null;
   if(l.editor){
-    var url="/turtle/?embed=course&ui=unit1-console-v2&rev=unit1-20261110-6&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"");
+    var referenceKind=EXAMPLE_FOR_LESSON[l.id];
+    var referenceCode=referenceKind?EXAMPLE_PROGRAMS[referenceKind]:"";
+    var url="/turtle/?embed=course&ui=unit1-console-v2&rev=unit1-overlay-v1&lesson="+encodeURIComponent("turtlecourse-"+l.id)+"&code="+encodeURIComponent(STARTERS[l.id]||"")+(referenceCode?"&overlay="+encodeURIComponent(referenceCode):"");
     if(frame.getAttribute("src")!==url)frame.setAttribute("src",url);
     else editorReady=!!frame.contentWindow;
   }else{
@@ -368,21 +360,6 @@ function handleAction(){
   if(["1.1.4","1.1.7","1.1.8"].indexOf(id)>-1){if(state.checks[id])completeAndNext();else requestCodeCheck();return}
 }
 menu.addEventListener("click",function(event){var btn=event.target.closest("[data-index]");if(btn)gotoIndex(Number(btn.dataset.index))});
-body.addEventListener("click",function(event){
-  var control=event.target.closest("[data-example-view]");
-  if(!control || !body.contains(control))return;
-  var card=control.closest(".example-figure");
-  if(!card)return;
-  var selected=control.dataset.exampleView;
-  card.querySelectorAll("[data-example-view]").forEach(function(button){
-    var active=button.dataset.exampleView===selected;
-    button.classList.toggle("active",active);
-    button.setAttribute("aria-pressed",String(active));
-  });
-  card.querySelectorAll("[data-example-panel]").forEach(function(panel){
-    panel.hidden=panel.dataset.examplePanel!==selected;
-  });
-});
 body.addEventListener("input",function(event){
   var target=event.target;if(!target.dataset.answer)return;
   if(target.type==="radio" && !target.checked)return;
