@@ -2783,6 +2783,21 @@ for i in range(4):
     window.addEventListener("message",async function(event){
       if(event.origin!==window.location.origin)return;
       var data=event.data||{};
+      if(data.type==="turtlecourse-reset-starter"){
+        if(!UNIT1_EMBED || data.lesson!==COURSE_LESSON || typeof data.code!=="string")return;
+        var resetOK=false;
+        try{
+          window.replaceTurtleCode(data.code,"Reset to starter code");
+          clearRun();
+          resetOK=true;
+        }catch(err){}
+        window.parent.postMessage({
+          type:"turtlecourse-starter-reset-result",
+          lesson:COURSE_LESSON,
+          ok:resetOK
+        },window.location.origin);
+        return;
+      }
       if(data.type==="pythoncourse-insert-text"){
         var insertText=String(data.text||"");
         if(insertText){
