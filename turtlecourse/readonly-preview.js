@@ -60,8 +60,8 @@ function run(canvas,code,kind){
   ctx.fillStyle="rgba(40,50,52,.65)";ctx.font="9px Consolas,monospace";
   ctx.fillText("−200",5,214);ctx.fillText("200",372,214);
   ctx.fillText("200",204,12);ctx.fillText("−200",204,391);
-  var startX=kind==="stretched"?-110:kind==="coil"?-75:-52;
-  var state={x:startX,y:-32,heading:0,down:true,color:"#000000",size:1};
+  // Tracy starts at (0, 0), facing right, exactly as in the editable Turtle world.
+  var state={x:0,y:0,heading:0,down:true,color:"#000000",size:1};
   function point(x,y){return [200+x,200-y]}
   ops.forEach(function(op){
     var n=Number(op.value);
