@@ -17,7 +17,13 @@
     const panel=document.querySelector('.code-panel');
     const heading=panel&&panel.querySelector('.panel-head');
     const bar=document.querySelector('.layoutbar');
-    if(heading&&bar)heading.insertAdjacentElement('afterend',bar);
+    if(heading&&bar){
+      heading.insertAdjacentElement('afterend',bar);
+      const codeLabel=bar.querySelector('label[for="codeFontSize"]');
+      const outputLabel=bar.querySelector('label[for="outputFontSize"]');
+      if(codeLabel)codeLabel.textContent='Code';
+      if(outputLabel)outputLabel.textContent='Output';
+    }
   }
   function apply(save=false){
     for(const [id,field,unit] of controls){
