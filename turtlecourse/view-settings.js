@@ -59,6 +59,13 @@
     });
     setSize("--tc-side-width",settings.sidebar);
     setSize("--tc-instructions-width",settings.instructions);
+    [["sidebarDivider","sidebar"],["lessonDivider","instructions"]].forEach(function(pair){
+      var handle=document.getElementById(pair[0]);
+      if(handle){
+        handle.setAttribute("aria-valuenow",settings[pair[1]]);
+        handle.setAttribute("aria-valuetext",settings[pair[1]]+" pixels");
+      }
+    });
     setSize("--tc-editor-height",settings.height);
     setSize("--tc-nav-title",12.5*settings.menu/100);
     setSize("--tc-nav-type",11*settings.menu/100);
