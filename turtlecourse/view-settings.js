@@ -7,11 +7,11 @@
   if(!toggle||!panel)return;
   var storageKey="dsteckler-turtlecourse-view-v1";
   var controls=[
-    {key:"sidebar",label:"Sidebar width",min:210,max:340,step:10,initial:240,unit:"px"},
+    {key:"sidebar",label:"Sidebar width",min:200,max:440,step:10,initial:240,unit:"px"},
     {key:"menu",label:"Menu text",min:90,max:125,step:5,initial:100,unit:"%"},
     {key:"interface",label:"Headings & UI",min:90,max:120,step:5,initial:100,unit:"%"},
     {key:"lesson",label:"Lesson text",min:90,max:130,step:5,initial:100,unit:"%"},
-    {key:"instructions",label:"Instructions width",min:270,max:500,step:5,initial:305,unit:"px"},
+    {key:"instructions",label:"Instructions width",min:230,max:700,step:5,initial:305,unit:"px"},
     {key:"height",label:"Editor height",min:680,max:1180,step:20,initial:820,unit:"px"},
     {key:"code",label:"Code size",min:12,max:40,step:2,initial:16,unit:"px"},
     {key:"drawing",label:"Drawing zoom",min:50,max:300,step:10,initial:100,unit:"%"},
@@ -92,6 +92,81 @@
   });
   document.addEventListener("keydown",function(e){
     if(e.key==="Escape"&&!panel.hidden){close();toggle.focus()}
+  });
+  /* Direct manipulation of the same persisted widths as the settings sliders. */
+  function installDivider(id,settingKey,minimum,maximum,getLimit){
+    var divider=document.getElementById(id);
+    if(!divider)return;
+    var slider=document.getElementById("tc-"+settingKey);
+    var output=document.getElementById("tc-"+settingKey+"-value");
+    var option=controls.filter(function(c){return c.key===settingKey})[0];
+    var drag=null;
+    function bounds(){
+      var dynamic=typeof getLimit==="function"?getLimit():maximum;
+      return {min:minimum,max:Math.max(minimum,Math.min(maximum,dynamic))};
+    }
+    function setWidth(next,save){
+      var range=bounds();
+      var val=Math.round(Math.max(range.min,Math.min(range.max,next)));
+      settings[settingKey]=val;
+      root.style.setProperty(settingKey==="sidebar"?"--tc-side-width":"--tc-instructions-width",val+"px");
+      divider.setAttribute("aria-valuemin",range.min);
+      divider.setAttribute("aria-valuemax",range.max);
+      divider.setAttribute("aria-valuenow",val);
+      divider.setAttribute("aria-valuetext",val+" pixels");
+      if(slider)slider.value=val;
+      if(output)output.textContent=val+" px";
+      if(save)try{localStorage.setItem(storageKey,JSON.stringify(settings));}catch(e){}
+    }
+    divider.addEventListener("pointerdown",function(event){
+      if(event.button!==0||window.getComputedStyle(divider).display==="none")return;
+      var item=settingKey==="sidebar"?document.querySelector(".sidebar"):document.querySelector(".assignment-card");
+      drag={id:event.pointerId,startX:event.clientX,startWidth:item.getBoundingClientRect().width};
+      divider.setPointerCapture(event.pointerId);
+      divider.classList.add("dragging");
+      document.body.classList.add("course-panels-resizing");
+      event.preventDefault();
+    });
+    divider.addEventListener("pointermove",function(event){
+      if(!drag||event.pointerId!==drag.id)return;
+      setWidth(drag.startWidth+event.clientX-drag.startX,false);
+    });
+    function stop(event){
+      if(!drag||(event&&event.pointerId!==drag.id))return;
+      drag=null;
+      divider.classList.remove("dragging");
+      document.body.classList.remove("course-panels-resizing");
+      setWidth(settings[settingKey],true);
+    }
+    divider.addEventListener("pointerup",function(event){
+      if(drag&&event.pointerId===drag.id){
+        if(divider.hasPointerCapture(event.pointerId))divider.releasePointerCapture(event.pointerId);
+        stop(event);
+      }
+    });
+    divider.addEventListener("pointercancel",stop);
+    divider.addEventListener("lostpointercapture",stop);
+    divider.addEventListener("keydown",function(event){
+      var step=event.shiftKey?30:10;
+      var next;
+      if(event.key==="ArrowLeft")next=settings[settingKey]-step;
+      else if(event.key==="ArrowRight")next=settings[settingKey]+step;
+      else if(event.key==="Home")next=bounds().min;
+      else if(event.key==="End")next=bounds().max;
+      else return;
+      event.preventDefault();
+      setWidth(next,true);
+    });
+    divider.addEventListener("dblclick",function(){setWidth(option.initial,true)});
+    setWidth(settings[settingKey],false);
+    window.addEventListener("resize",function(){if(!drag)setWidth(settings[settingKey],false)});
+  }
+  installDivider("sidebarDivider","sidebar",200,440,function(){
+    return window.innerWidth-400;
+  });
+  installDivider("lessonDivider","instructions",230,700,function(){
+    var work=document.getElementById("workspace");
+    return work?work.clientWidth-445:700;
   });
   if(frame)frame.addEventListener("load",function(){requestAnimationFrame(applyEmbedded)});
   window.addEventListener("message",function(event){
