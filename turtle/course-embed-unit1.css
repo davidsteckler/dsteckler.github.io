@@ -1,7 +1,8 @@
 /* Unit 1-only styling for the embedded Turtle sandbox.
    Other Turtle pages and embedded uses keep their existing layouts. */
+/* Let the existing editor/world divider control the actual widths. */
 body.course-embed.unit1-embed .workspace{
-  grid-template-columns:minmax(460px,1.75fr) 8px minmax(300px,.95fr)!important;
+  grid-template-columns:minmax(260px,var(--code-fr)) 10px minmax(285px,var(--world-fr))!important;
   gap:5px!important;padding:7px!important;
 }
 body.course-embed.unit1-embed .code-panel .CodeMirror{
@@ -104,9 +105,9 @@ body.course-embed.unit1-embed .unit1-error-raw code{
 body.course-embed.unit1-embed.unit1-has-error .console{
   border-top-color:#d96f5b;
 }
-@media(min-width:711px) and (max-width:1050px){
+@media(min-width:841px) and (max-width:1050px){
   body.course-embed.unit1-embed .workspace{
-    grid-template-columns:minmax(365px,1.4fr) 7px minmax(245px,.85fr)!important;
+    grid-template-columns:minmax(260px,var(--code-fr)) 10px minmax(275px,var(--world-fr))!important;
   }
 }
 @media(max-width:710px){
@@ -230,5 +231,23 @@ body.course-embed.unit1-embed .layoutbar .reset-layout{
   body.course-embed.unit1-embed .layoutbar .display-control label{font-size:10px}
   body.course-embed.unit1-embed .layoutbar .display-control output{
     min-width:29px;font-size:9px;
+  }
+}
+
+
+/* Clear visual affordance for the functional code ↔ Turtle World split. */
+@media(min-width:841px){
+  body.course-embed.unit1-embed #editorDivider{
+    cursor:col-resize!important;touch-action:none;min-width:10px;
+    border-radius:6px;
+  }
+  body.course-embed.unit1-embed #editorDivider::before{
+    width:4px;height:60px;border-radius:6px;background:#a9b7b7;
+    transition:background .15s ease,width .15s ease;
+  }
+  body.course-embed.unit1-embed #editorDivider:hover::before,
+  body.course-embed.unit1-embed #editorDivider.dragging::before,
+  body.course-embed.unit1-embed #editorDivider:focus-visible::before{
+    width:5px;background:#16818d;
   }
 }
