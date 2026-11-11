@@ -188,6 +188,45 @@
     var work=document.getElementById("workspace");
     return work?work.clientWidth-630:650;
   });
+  // Both grips share one viewport Y coordinate. Their containers begin at
+  // different document heights, so a fixed local 'top' cannot align them.
+  var gripFramePending=false;
+  function positionDividerGrips(){
+    var left=document.getElementById("sidebarDivider");
+    var right=document.getElementById("lessonDivider");
+    if(!left||!right)return;
+    if(getComputedStyle(left).display==="none"||getComputedStyle(right).display==="none"){
+      left.style.removeProperty("--tc-grip-top");
+      right.style.removeProperty("--tc-grip-top");
+      return;
+    }
+    var l=left.getBoundingClientRect(),r=right.getBoundingClientRect();
+    var gripHeight=39,pad=16;
+    var first=Math.max(l.top+pad,r.top+pad,0);
+    var last=Math.min(l.bottom-gripHeight-pad,r.bottom-gripHeight-pad,window.innerHeight-gripHeight-pad);
+    // Align at the midpoint of the visible overlap, keeping each grip in
+    // the part of its divider that can actually be dragged.
+    if(last<first)return;
+    var sharedY=Math.round((first+last)/2);
+    left.style.setProperty("--tc-grip-top",Math.round(sharedY-l.top)+"px");
+    right.style.setProperty("--tc-grip-top",Math.round(sharedY-r.top)+"px");
+  }
+  function scheduleGripPosition(){
+    if(gripFramePending)return;
+    gripFramePending=true;
+    requestAnimationFrame(function(){gripFramePending=false;positionDividerGrips()});
+  }
+  window.addEventListener("resize",scheduleGripPosition);
+  window.addEventListener("scroll",scheduleGripPosition,{passive:true});
+  if(typeof ResizeObserver!=="undefined"){
+    var dividerObserver=new ResizeObserver(scheduleGripPosition);
+    ["workspace","lessonBody","lessonTitle"].forEach(function(id){
+      var node=document.getElementById(id);
+      if(node)dividerObserver.observe(node);
+    });
+  }
+  document.getElementById("lessonMenu")?.addEventListener("click",scheduleGripPosition);
+  scheduleGripPosition();
   if(frame)frame.addEventListener("load",function(){requestAnimationFrame(applyEmbedded)});
   window.addEventListener("message",function(event){
     if(!frame||event.origin!==window.location.origin||event.source!==frame.contentWindow)return;
