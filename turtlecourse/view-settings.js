@@ -13,9 +13,9 @@
     {key:"lesson",label:"Lesson text",min:90,max:130,step:5,initial:100,unit:"%"},
     {key:"instructions",label:"Instructions width",min:270,max:500,step:5,initial:305,unit:"px"},
     {key:"height",label:"Editor height",min:680,max:1180,step:20,initial:820,unit:"px"},
-    {key:"code",label:"Code size",min:12,max:32,step:1,initial:17,unit:"px"},
-    {key:"drawing",label:"Drawing zoom",min:75,max:175,step:5,initial:100,unit:"%"},
-    {key:"output",label:"Output text",min:12,max:24,step:1,initial:14,unit:"px"}
+    {key:"code",label:"Code size",min:12,max:40,step:2,initial:16,unit:"px"},
+    {key:"drawing",label:"Drawing zoom",min:50,max:300,step:10,initial:100,unit:"%"},
+    {key:"output",label:"Output text",min:12,max:40,step:2,initial:14,unit:"px"}
   ];
   var settings={};
   controls.forEach(function(c){settings[c.key]=c.initial});
