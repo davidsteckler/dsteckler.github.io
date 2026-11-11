@@ -4,7 +4,7 @@
   const unit1=document.body.classList.contains('unit1-embed');
   if(!workbench||workbench.isTrace||(workbench.isCourse&&!unit1))return;
   const key=unit1?'dsteckler-turtlecourse-view-v1':'dsteckler-turtle-display-v1';
-  const defaults={code:unit1?17:16,drawing:100,output:14};
+  const defaults={code:16,drawing:100,output:14};
   const controls=[['codeFontSize','code',' px'],['drawingZoom','drawing','%'],['outputFontSize','output',' px']];
   let settings={...defaults};
   try{
