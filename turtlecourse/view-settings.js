@@ -5,13 +5,13 @@
   var panel=document.getElementById("viewSettingsPanel");
   var frame=document.getElementById("editorFrame");
   if(!toggle||!panel)return;
-  var storageKey="dsteckler-turtlecourse-view-v1";
+  var storageKey="dsteckler-turtlecourse-view-v2";
   var controls=[
-    {key:"sidebar",label:"Sidebar width",min:200,max:440,step:10,initial:240,unit:"px"},
+    {key:"sidebar",label:"Sidebar width",min:220,max:390,step:10,initial:260,unit:"px"},
     {key:"menu",label:"Menu text",min:90,max:125,step:5,initial:100,unit:"%"},
     {key:"interface",label:"Headings & UI",min:90,max:120,step:5,initial:100,unit:"%"},
     {key:"lesson",label:"Lesson text",min:90,max:130,step:5,initial:100,unit:"%"},
-    {key:"instructions",label:"Instructions width",min:230,max:700,step:5,initial:305,unit:"px"},
+    {key:"instructions",label:"Instructions width",min:280,max:650,step:5,initial:350,unit:"px"},
     {key:"height",label:"Editor height",min:680,max:1180,step:20,initial:820,unit:"px"},
     {key:"code",label:"Code size",min:12,max:40,step:2,initial:16,unit:"px"},
     {key:"drawing",label:"Drawing zoom",min:50,max:300,step:10,initial:100,unit:"%"},
@@ -21,9 +21,22 @@
   controls.forEach(function(c){settings[c.key]=c.initial});
   try{
     var saved=JSON.parse(localStorage.getItem(storageKey)||"null");
-    if(saved&&typeof saved==="object")controls.forEach(function(c){
-      if(Number.isFinite(saved[c.key]))settings[c.key]=saved[c.key];
-    });
+    if(saved&&typeof saved==="object"){
+      controls.forEach(function(c){
+        if(Number.isFinite(saved[c.key]))settings[c.key]=saved[c.key];
+      });
+    }else{
+      // Keep typography and drawing preferences, but discard the broken panel
+      // widths saved by the old auto-placement layout.
+      var legacy=JSON.parse(localStorage.getItem("dsteckler-turtlecourse-view-v1")||"null");
+      if(legacy&&typeof legacy==="object"){
+        controls.forEach(function(c){
+          if(c.key!=="sidebar"&&c.key!=="instructions"&&Number.isFinite(legacy[c.key])){
+            settings[c.key]=legacy[c.key];
+          }
+        });
+      }
+    }
   }catch(e){}
   panel.innerHTML=
     '<div class="view-settings-heading"><strong>Adjust view</strong><p>Fine-tune the course to your screen.</p></div>'+
@@ -168,12 +181,12 @@
     setWidth(settings[settingKey],false);
     window.addEventListener("resize",function(){if(!drag)setWidth(settings[settingKey],false)});
   }
-  installDivider("sidebarDivider","sidebar",200,440,function(){
-    return window.innerWidth-400;
+  installDivider("sidebarDivider","sidebar",220,390,function(){
+    return window.innerWidth-740;
   });
-  installDivider("lessonDivider","instructions",230,700,function(){
+  installDivider("lessonDivider","instructions",280,650,function(){
     var work=document.getElementById("workspace");
-    return work?work.clientWidth-445:700;
+    return work?work.clientWidth-630:650;
   });
   if(frame)frame.addEventListener("load",function(){requestAnimationFrame(applyEmbedded)});
   window.addEventListener("message",function(event){
