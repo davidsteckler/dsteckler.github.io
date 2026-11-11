@@ -93,3 +93,56 @@
   .lesson-nav{min-width:164px;max-width:164px;flex:0 0 164px;grid-template-columns:28px minmax(0,1fr);gap:7px}
   .lesson-tick{display:none}
 }
+
+
+/* Resize the two boundaries marked by the course layout, without extra toolbars. */
+@media(min-width:721px){
+  .layout{
+    grid-template-columns:var(--tc-side-width) 8px minmax(0,1fr)!important;
+  }
+  .sidebar-divider{display:block}
+}
+.course-panel-divider{
+  display:none;position:relative;min-width:8px;
+  cursor:col-resize;touch-action:none;user-select:none;
+  background:transparent;outline-offset:-2px;
+  z-index:5;
+}
+.course-panel-divider::before{
+  content:"";position:absolute;inset:0 2px;
+  background:#e2e9eb;border-radius:5px;
+  transition:background .15s ease;
+}
+.course-panel-divider > span{
+  position:absolute;top:clamp(115px,31vh,370px);
+  left:50%;transform:translateX(-50%);
+  width:3px;height:39px;border-radius:3px;
+  background:#b8c9ce;opacity:.55;
+  transition:opacity .15s ease,background .15s ease;
+}
+.course-panel-divider:hover::before,
+.course-panel-divider:focus-visible::before,
+.course-panel-divider.dragging::before{background:#d4e6e9}
+.course-panel-divider:hover > span,
+.course-panel-divider:focus-visible > span,
+.course-panel-divider.dragging > span{background:#158894;opacity:1}
+.course-panel-divider:focus-visible{outline:2px solid #178b98}
+body.course-panels-resizing{
+  cursor:col-resize!important;user-select:none!important;
+}
+body.course-panels-resizing iframe{pointer-events:none!important}
+@media(min-width:1251px){
+  .workspace:not(.no-editor):not(.focus-editor){
+    grid-template-columns:minmax(230px,var(--tc-instructions-width)) 8px minmax(420px,1fr)!important;
+    gap:5px!important;
+  }
+  .workspace:not(.no-editor):not(.focus-editor) .lesson-divider{display:block}
+}
+.workspace.no-editor .lesson-divider,
+.workspace.focus-editor .lesson-divider{display:none!important}
+@media(max-width:1250px){
+  .lesson-divider{display:none!important}
+}
+@media(max-width:720px){
+  .sidebar-divider,.lesson-divider{display:none!important}
+}
