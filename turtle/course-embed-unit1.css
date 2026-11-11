@@ -162,39 +162,73 @@ body.unit1-embed .world-head-actions{gap:6px;flex-wrap:nowrap}
 body.unit1-embed .world-panel>.panel-head{padding-left:10px;padding-right:8px}
 
 
-/* Course display sliders live directly above the editable Python code. */
+/* A quiet, one-line display toolbar inside Unit 1's code editor. */
 body.course-embed.unit1-embed .code-panel{
   grid-template-rows:minmax(47px,auto) auto minmax(0,1fr)!important;
 }
 body.course-embed.unit1-embed .layoutbar{
-  display:flex!important;align-items:center;flex-wrap:wrap;
-  min-height:0;padding:8px 12px;gap:7px 12px;
-  background:#263132;color:#dce6e7;
-  border-bottom:1px solid #3a484a;
+  display:block!important;
+  min-height:0;height:auto;
+  margin:0;padding:0 9px;gap:0;
+  background:#252d2f;
+  border:0;border-bottom:1px solid #3a4749;
 }
 body.course-embed.unit1-embed .layoutbar .display-controls{
-  display:flex;flex-wrap:wrap;gap:7px 13px;align-items:center;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:center;gap:0;
+  width:100%;min-width:0;
 }
-body.course-embed.unit1-embed .layoutbar .display-control{gap:6px}
+body.course-embed.unit1-embed .layoutbar .display-control{
+  display:grid;
+  grid-template-columns:max-content minmax(28px,1fr) max-content;
+  align-items:center;min-width:0;
+  gap:7px;padding:9px 10px;
+}
+body.course-embed.unit1-embed .layoutbar .display-control+.display-control{
+  border-left:1px solid rgba(255,255,255,.09);
+}
 body.course-embed.unit1-embed .layoutbar .display-control label{
-  color:#d0e0e2;font-size:11px;font-weight:700;
+  color:#a9babd;white-space:nowrap;
+  font-size:11px;font-weight:600;line-height:1.2;
 }
 body.course-embed.unit1-embed .layoutbar .display-control input[type="range"]{
-  width:74px;min-width:55px;accent-color:#38b1ba;
+  display:block;width:100%!important;min-width:28px;
+  height:14px;margin:0;padding:0;
+  appearance:none;-webkit-appearance:none;
+  accent-color:#85bdc1;background:transparent;
+  cursor:pointer;outline-offset:3px;
+}
+body.course-embed.unit1-embed .layoutbar .display-control input[type="range"]::-webkit-slider-runnable-track{
+  height:3px;background:#5a6e71;border-radius:4px;border:0;
+}
+body.course-embed.unit1-embed .layoutbar .display-control input[type="range"]::-webkit-slider-thumb{
+  appearance:none;-webkit-appearance:none;
+  width:12px;height:12px;margin-top:-4.5px;
+  border:1px solid #b7dadb;border-radius:50%;
+  background:#89c1c4;box-shadow:none;
+}
+body.course-embed.unit1-embed .layoutbar .display-control input[type="range"]::-moz-range-track{
+  height:3px;background:#5a6e71;border-radius:4px;border:0;
+}
+body.course-embed.unit1-embed .layoutbar .display-control input[type="range"]::-moz-range-thumb{
+  width:10px;height:10px;border-radius:50%;
+  border:1px solid #b7dadb;background:#89c1c4;
 }
 body.course-embed.unit1-embed .layoutbar .display-control output{
-  min-width:36px;color:#b2c7cb;font-size:10px;
+  min-width:34px;margin:0;
+  text-align:right;white-space:nowrap;
+  color:#becdd0;font:600 10px/1.2 Consolas,monospace;
 }
-body.course-embed.unit1-embed .layoutbar .display-step{
-  width:23px;height:23px;border-radius:5px;
-  border-color:#526164;background:#314044;color:#b9dcdd;font-size:14px;
-}
+body.course-embed.unit1-embed .layoutbar .display-step,
 body.course-embed.unit1-embed .layoutbar .reset-layout{
-  margin-left:auto;padding:4px 5px;color:#8ecbd0;font-size:10px;
+  display:none!important;
 }
-@media(max-width:800px){
-  body.course-embed.unit1-embed .layoutbar{padding:7px 9px;gap:5px 8px}
-  body.course-embed.unit1-embed .layoutbar .display-controls{gap:7px 11px}
-  body.course-embed.unit1-embed .layoutbar .display-control input[type="range"]{width:63px}
-  body.course-embed.unit1-embed .layoutbar .display-step{display:none}
+@media(max-width:560px){
+  body.course-embed.unit1-embed .layoutbar{padding:0 4px}
+  body.course-embed.unit1-embed .layoutbar .display-control{gap:4px;padding:10px 5px}
+  body.course-embed.unit1-embed .layoutbar .display-control label{font-size:10px}
+  body.course-embed.unit1-embed .layoutbar .display-control output{
+    min-width:29px;font-size:9px;
+  }
 }
