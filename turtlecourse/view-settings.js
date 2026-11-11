@@ -13,7 +13,7 @@
     {key:"lesson",label:"Lesson text",min:90,max:130,step:5,initial:100,unit:"%"},
     {key:"instructions",label:"Instructions width",min:270,max:500,step:5,initial:305,unit:"px"},
     {key:"height",label:"Editor height",min:680,max:1180,step:20,initial:820,unit:"px"},
-    {key:"code",label:"Code size",min:12,max:26,step:1,initial:15,unit:"px"},
+    {key:"code",label:"Code size",min:12,max:32,step:1,initial:17,unit:"px"},
     {key:"drawing",label:"Drawing zoom",min:75,max:175,step:5,initial:100,unit:"%"},
     {key:"output",label:"Output text",min:12,max:24,step:1,initial:14,unit:"px"}
   ];
@@ -40,7 +40,12 @@
     try{
       var app=frame&&frame.contentWindow&&frame.contentWindow.TurtleWorkbench;
       if(app&&typeof app.setDisplay==="function"){
-        app.setDisplay({code:settings.code,drawing:settings.drawing,output:settings.output});
+        var embedded=frame.contentWindow;
+        if(typeof embedded.syncTurtleDisplaySettings==="function"){
+          embedded.syncTurtleDisplaySettings({code:settings.code,drawing:settings.drawing,output:settings.output});
+        }else{
+          app.setDisplay({code:settings.code,drawing:settings.drawing,output:settings.output});
+        }
       }
     }catch(e){}
   }
@@ -89,5 +94,13 @@
     if(e.key==="Escape"&&!panel.hidden){close();toggle.focus()}
   });
   if(frame)frame.addEventListener("load",function(){requestAnimationFrame(applyEmbedded)});
+  window.addEventListener("message",function(event){
+    if(!frame||event.origin!==window.location.origin||event.source!==frame.contentWindow)return;
+    var data=event.data||{};
+    if(data.type!=="turtlecourse-display-changed"||["code","drawing","output"].indexOf(data.key)<0)return;
+    if(!Number.isFinite(Number(data.value)))return;
+    settings[data.key]=Number(data.value);
+    apply(true);
+  });
   apply(false);
 })();
