@@ -43,7 +43,7 @@
         '<output for="tc-'+c.key+'" id="tc-'+c.key+'-value"></output></div>';
     }).join("")+
     '<div class="view-settings-bottom"><button id="resetCourseView" type="button">Reset all</button><button id="closeCourseView" type="button">Done</button></div>'+
-    '<p class="view-credits notranslate" translate="no">Translation idea: Sky Eid El Boustany · Neon glow idea: Shawn Gardner · Error cursor idea: Bianca Mascia</p>';
+    '<details class="credits view-credits notranslate" translate="no"><summary>♥ Student ideas</summary><span>Translation: Sky Eid El Boustany</span><span>Neon glow: Shawn Gardner</span><span>Error cursor: Bianca Mascia</span></details>';
 
   function save(){try{localStorage.setItem(storageKey,JSON.stringify(settings))}catch(e){}}
   function px(name,n){root.style.setProperty(name,n+"px")}

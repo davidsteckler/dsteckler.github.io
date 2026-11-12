@@ -864,7 +864,7 @@
 <link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
-<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=16-cursor">
+<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=18-drag">
 <link rel="stylesheet" href="/turtle/preview-embed.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1288,6 +1288,7 @@ for i in range(4):
   var editorDivider = document.getElementById("editorDivider");
   var libraryDivider = document.getElementById("libraryDivider");
   var outputDivider = document.getElementById("outputDivider");
+  function OUTPUT_MAX(){return document.body.classList.contains("unit1-embed")?Math.max(290,Math.round(window.innerHeight*0.6)):290}
   var LAYOUT_KEY = UNIT1_EMBED ? "dsteckler-turtlecourse-editor-split-v1" : "dsteckler-turtle-layout-v3";
   var layoutDefaults = { editor:UNIT1_EMBED?48:53, library:300, mobile:355, output:150, libraryVisible:true }; // 150px keeps the desktop workspace in one viewport
   var layoutState = Object.assign({},layoutDefaults);
@@ -1305,7 +1306,7 @@ for i in range(4):
     layoutState.editor=clamp(layoutState.editor,30,70);
     layoutState.library=clamp(layoutState.library,250,660);
     layoutState.mobile=clamp(layoutState.mobile,220,650);
-    layoutState.output=clamp(layoutState.output,100,290);
+    layoutState.output=clamp(layoutState.output,100,OUTPUT_MAX());
     workspace.style.setProperty("--code-fr",layoutState.editor+"fr");
     workspace.style.setProperty("--world-fr",(100-layoutState.editor)+"fr");
     workspace.style.setProperty("--library-width",layoutState.library+"px");
@@ -1385,7 +1386,7 @@ for i in range(4):
     });
     outputDivider.addEventListener("pointermove",function(e){
       if(!dragging)return;
-      layoutState.output=clamp(startOutput+(startY-e.clientY),100,290);
+      layoutState.output=clamp(startOutput+(startY-e.clientY),100,OUTPUT_MAX());
       applyLayout(true);
     });
     outputDivider.addEventListener("pointerup",finish);
@@ -1393,7 +1394,7 @@ for i in range(4):
     outputDivider.addEventListener("keydown",function(e){
       if(e.key!=="ArrowUp"&&e.key!=="ArrowDown")return;
       e.preventDefault();
-      layoutState.output=clamp(layoutState.output+(e.key==="ArrowUp"?10:-10),100,290);
+      layoutState.output=clamp(layoutState.output+(e.key==="ArrowUp"?10:-10),100,OUTPUT_MAX());
       applyLayout(true);
     });
   })();
@@ -1508,7 +1509,7 @@ for i in range(4):
     bar.textContent="";
     var b=document.createElement("b");b.textContent=info.line?"⚠ Line "+info.line:"⚠ Error";bar.appendChild(b);
     var t=document.createElement("span");t.textContent=info.title;bar.appendChild(t);
-    if(info.line){var g=document.createElement("em");g.textContent="Show me the mistake →";bar.appendChild(g)}
+    if(info.line){var g=document.createElement("em");g.textContent="Show me →";g.title="Put the cursor on the mistake";bar.appendChild(g)}
     bar.classList.remove("stale");bar.hidden=false;
   }
   function hideCodeErrorBar(){var bar=document.getElementById("unit1ErrorBar");if(bar)bar.hidden=true;hideWorldErrorPopup()}
@@ -1570,9 +1571,34 @@ for i in range(4):
     x.addEventListener("click",function(e){e.stopPropagation();hideWorldErrorPopup()});
     var more=document.createElement("div");more.className="uwe-more";more.textContent="Click to jump to the mistake · more details below ↓";
     pop.appendChild(x);pop.appendChild(raw);pop.appendChild(more);
-    pop.onclick=function(){if(info.line)goToErrorLine(info.line,info)};
-    pop.title=info.line?"Click to go to line "+info.line:"";
-    pop.classList.remove("uwe-in");void pop.offsetWidth;pop.classList.add("uwe-in");
+    var grip=document.createElement("span");grip.className="uwe-grip";grip.setAttribute("aria-hidden","true");pop.appendChild(grip);
+    pop.title=(info.line?"Click to jump to the mistake. ":"")+"Drag to move.";
+    pop.onclick=function(){if(pop.dataset.justDragged){delete pop.dataset.justDragged;return}if(info.line)goToErrorLine(info.line,info)};
+    if(!pop.dataset.dragReady){
+      pop.dataset.dragReady="1";
+      var drag=null;
+      pop.addEventListener("pointerdown",function(e){
+        if(e.button!==0||e.target.closest(".uwe-close"))return;
+        var r=pop.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+        drag={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top,sx:e.clientX,sy:e.clientY,moved:false,sr:sr,w:r.width,h:r.height};
+        pop.setPointerCapture(e.pointerId);
+      });
+      pop.addEventListener("pointermove",function(e){
+        if(!drag||e.pointerId!==drag.id)return;
+        if(!drag.moved&&Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)<5)return;
+        drag.moved=true;pop.classList.add("dragged","dragging");
+        var sr=stage.getBoundingClientRect();
+        var x=Math.min(Math.max(e.clientX-drag.dx-sr.left,-drag.w*0.6),sr.width-drag.w*0.4);
+        var y=Math.min(Math.max(e.clientY-drag.dy-sr.top,0),sr.height-30);
+        pop.style.left=x+"px";pop.style.top=y+"px";
+        stage.dataset.popX=x;stage.dataset.popY=y;
+      });
+      function end(e){if(!drag)return;if(drag.moved)pop.dataset.justDragged="1";pop.classList.remove("dragging");drag=null}
+      pop.addEventListener("pointerup",end);pop.addEventListener("pointercancel",end);
+    }
+    // Reopen where the student last dragged it.
+    if(stage.dataset.popX){pop.classList.add("dragged");pop.style.left=stage.dataset.popX+"px";pop.style.top=stage.dataset.popY+"px"}
+    pop.classList.remove("uwe-in");void pop.offsetWidth;if(!pop.classList.contains("dragged"))pop.classList.add("uwe-in");
     pop.hidden=false;
   }
   function hideWorldErrorPopup(){var pop=document.getElementById("unit1WorldError");if(pop)pop.hidden=true}
