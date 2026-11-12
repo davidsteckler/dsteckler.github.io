@@ -864,7 +864,7 @@
 <link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
-<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=11-errors">
+<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=13-lang">
 <link rel="stylesheet" href="/turtle/preview-embed.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1074,6 +1074,7 @@ for i in range(4):
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script src="/turtle/neon.js?v=20261030"></script>
 <script src="/turtlecourse/readonly-preview.js?v=5-overlay"></script>
+<script defer src="/turtlecourse/language.js?v=2"></script>
 
 <script>
 (function(){
@@ -1510,7 +1511,40 @@ for i in range(4):
     if(info.line){var g=document.createElement("em");g.textContent="Go to line →";bar.appendChild(g)}
     bar.classList.remove("stale");bar.hidden=false;
   }
-  function hideCodeErrorBar(){var bar=document.getElementById("unit1ErrorBar");if(bar)bar.hidden=true}
+  function hideCodeErrorBar(){var bar=document.getElementById("unit1ErrorBar");if(bar)bar.hidden=true;hideWorldErrorPopup()}
+  function goToErrorLine(n){
+    if(!n)return;editor.focus();
+    editor.setCursor({line:n-1,ch:editor.getLine(n-1).length});
+    editor.scrollIntoView({line:n-1,ch:0},90);
+  }
+  function showWorldErrorPopup(info){
+    var stage=document.getElementById("worldStage");if(!stage)return;
+    var pop=document.getElementById("unit1WorldError");
+    if(!pop){
+      pop=document.createElement("div");pop.id="unit1WorldError";pop.className="unit1-world-error";
+      pop.setAttribute("role","alert");
+      stage.appendChild(pop);
+    }
+    pop.innerHTML="";
+    var top=document.createElement("div");top.className="uwe-top";
+    var badge=document.createElement("span");badge.className="uwe-badge";
+    badge.textContent="⚠ "+info.name+(info.line?" · Line "+info.line:"");top.appendChild(badge);
+    var x=document.createElement("button");x.type="button";x.className="uwe-close";x.setAttribute("aria-label","Close");x.textContent="✕";
+    x.addEventListener("click",hideWorldErrorPopup);top.appendChild(x);pop.appendChild(top);
+    var title=document.createElement("div");title.className="uwe-title";title.textContent=info.title;pop.appendChild(title);
+    if(info.line&&info.lineText){var src=document.createElement("code");src.className="uwe-src";src.textContent=info.line+" | "+info.lineText;pop.appendChild(src)}
+    var raw=document.createElement("div");raw.className="uwe-raw";
+    raw.textContent=(info.name&&info.message)?info.name+": "+info.message+(info.line&&!/line \d/.test(info.message)?" on line "+info.line:""):String(info.raw||"").split("\n").filter(Boolean).pop()||"";
+    pop.appendChild(raw);
+    if(info.hint){var h=document.createElement("div");h.className="uwe-hint";h.textContent="💡 "+info.hint;pop.appendChild(h)}
+    if(info.line){
+      var go=document.createElement("button");go.type="button";go.className="uwe-go";go.textContent="Go to line "+info.line+" →";
+      go.addEventListener("click",function(){goToErrorLine(info.line)});pop.appendChild(go);
+    }
+    pop.classList.remove("uwe-in");void pop.offsetWidth;pop.classList.add("uwe-in");
+    pop.hidden=false;
+  }
+  function hideWorldErrorPopup(){var pop=document.getElementById("unit1WorldError");if(pop)pop.hidden=true}
   function highlightError(line,token){
     clearErrorHighlight();
     var n=Number(line);
@@ -1736,7 +1770,7 @@ for i in range(4):
       info.line=last;info.lineText=editor.getLine(last-1).trim();
     }
     highlightError(info.line,info.token);
-    if(UNIT1_EMBED)showCodeErrorBar(info);
+    if(UNIT1_EMBED){showCodeErrorBar(info);showWorldErrorPopup(info)}
     if(UNIT1_EMBED){
       document.body.classList.add("unit1-has-error");
       output.textContent="";

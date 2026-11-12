@@ -336,3 +336,30 @@ body.unit1-embed .unit1-error-bar.stale em::after{content:" · run again to re-c
 body.course-embed.unit1-embed .code-panel{display:flex!important;flex-direction:column}
 body.course-embed.unit1-embed .code-panel>.panel-head{flex:none}
 body.course-embed.unit1-embed .code-panel>.CodeMirror{flex:1 1 auto;min-height:0;height:auto}
+/* Big red error pop-up over Turtle World (closes with ✕ or on the next run). */
+body.unit1-embed #worldStage{position:relative}
+body.unit1-embed .unit1-world-error{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;
+  width:min(92%,420px);max-height:92%;overflow:auto;
+  background:#2a1517;color:#ffe9e2;border:2px solid #ff8a70;border-radius:12px;
+  box-shadow:0 18px 40px rgba(60,10,5,.35),0 0 0 6px rgba(255,138,112,.18);
+  padding:12px 14px 13px;font:500 13px/1.45 Inter,"Segoe UI",system-ui,sans-serif;text-align:left;
+}
+body.unit1-embed .unit1-world-error[hidden]{display:none}
+body.unit1-embed .unit1-world-error.uwe-in{animation:uweIn .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes uweIn{0%{opacity:0;transform:translate(-50%,-44%) scale(.9)}60%{transform:translate(-50%,-50%) scale(1.02)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+body.unit1-embed .uwe-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+body.unit1-embed .uwe-badge{background:#ff8a70;color:#2a0f09;border-radius:6px;padding:2px 8px;font:800 12px/1.5 Consolas,monospace}
+body.unit1-embed .uwe-close{border:0;background:transparent;color:#ffb09d;font-size:16px;cursor:pointer;line-height:1;padding:2px 4px}
+body.unit1-embed .uwe-close:hover{color:#fff}
+body.unit1-embed .uwe-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:7px}
+body.unit1-embed .uwe-src{display:block;white-space:pre-wrap;background:#3d1d20;border:1px solid #6b3b35;border-radius:7px;padding:6px 9px;color:#ffd9cc;font:650 13.5px/1.4 Consolas,monospace;margin-bottom:6px}
+body.unit1-embed .uwe-raw{font:600 12px/1.45 Consolas,monospace;color:#ffb8a6;margin-bottom:6px;overflow-wrap:anywhere}
+body.unit1-embed .uwe-hint{background:#173a33;color:#c9f5e6;border-radius:7px;padding:7px 9px;font-weight:600;margin-bottom:9px}
+body.unit1-embed .uwe-go{border:0;background:#ff8a70;color:#2a0f09;font-weight:800;border-radius:7px;padding:6px 12px;cursor:pointer}
+body.unit1-embed .uwe-go:hover{background:#ffb09d}
+@media(prefers-reduced-motion:reduce){body.unit1-embed .unit1-world-error.uwe-in{animation:none}}
+/* Course translation: hide Google's banner/tooltips inside the editor. */
+body.unit1-embed{top:0!important;position:static!important}
+.goog-te-banner-frame,iframe.skiptranslate,.skiptranslate>iframe,#goog-gt-tt,.goog-te-balloon-frame,.VIpgJd-ZVi9od-ORHb-OEVmcd,#google_translate_element{display:none!important}
+font{background:none!important;box-shadow:none!important}
