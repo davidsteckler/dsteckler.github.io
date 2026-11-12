@@ -97,6 +97,13 @@ function field(key,title,hint,rows){
     (rows?'<textarea id="answer-'+key+'" data-answer="'+key+'" rows="'+rows+'"></textarea>':'<input id="answer-'+key+'" data-answer="'+key+'" type="text" autocomplete="off">')+
     (hint?'<div class="field-help">'+hint+'</div>':'')+'</div>';
 }
+/* Chapters: [seconds, "title"]. Students can jump to any chapter, but only
+   parts they actually watch count toward the WATCH_NEEDED percentage. */
+var WATCH_NEEDED=90;
+var VIDEO_CHAPTERS={
+  "1.1.1":[],
+  "1.1.6":[]
+};
 var VIDEO_PROMPTS={
   "1.1.1":["What is Tracy, and where does she start?","What does the number inside circle() or forward() change?","What happens when a command is typed incorrectly?"],
   "1.1.6":["What goes in each column of a trace table?","Why do we write down the line number for each step?","How do you start a new sandbox program?"]
@@ -106,15 +113,20 @@ function videoContent(videoId,intro){
   return '<h2>'+intro+'</h2>'+
     '<div class="video-layout">'+
       '<div class="video-main">'+
-        '<div class="video-wrap"><iframe class="youtube-frame" id="ytPlayer" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?enablejsapi=1&rel=0&origin='+encodeURIComponent(location.origin)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'+
-        '<div class="video-tools" role="toolbar" aria-label="Video controls">'+
-          '<button type="button" class="vt-btn" data-video-skip="-10" title="Back 10 seconds">↺ 10s</button>'+
-          '<button type="button" class="vt-btn" data-video-skip="10" title="Forward 10 seconds">10s ↻</button>'+
-          '<span class="vt-label">Speed</span>'+
-          [0.75,1,1.25,1.5].map(function(r){return '<button type="button" class="vt-btn vt-speed'+(r===1?' on':'')+'" data-video-speed="'+r+'">'+r+'×</button>'}).join("")+
-          '<span class="vt-status" id="videoStatus" aria-live="polite"></span>'+
+        '<div class="vp-box" id="vpBox">'+
+          '<div class="video-wrap"><iframe class="youtube-frame" id="ytPlayer" data-video="'+escapeHtml(videoId)+'" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?enablejsapi=1&rel=0&controls=0&disablekb=1&fs=0&iv_load_policy=3&playsinline=1&origin='+encodeURIComponent(location.origin)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'+
+          '<div class="vp-bar" role="toolbar" aria-label="Video controls">'+
+            '<button type="button" class="vp-play" id="vpPlay" title="Play / pause (Space when not typing)">▶</button>'+
+            '<button type="button" class="vt-btn" data-video-skip="-10" title="Back 10 seconds">↺ 10s</button>'+
+            '<div class="vp-track" id="vpTrack" title="Click a part you\'ve already watched to go back. Use chapters to jump ahead."><div class="vp-watched" id="vpWatched"></div><div class="vp-ticks" id="vpTicks"></div><div class="vp-head" id="vpHead"></div></div>'+
+            '<span class="vp-time" id="vpTime">0:00 / –:––</span>'+
+            '<select class="vp-speed" id="vpSpeed" aria-label="Playback speed">'+[0.75,1,1.25,1.5].map(function(r){return '<option value="'+r+'"'+(r===1?' selected':'')+'>'+r+'×</option>'}).join("")+'</select>'+
+            '<button type="button" class="vt-btn" id="vpFull" title="Full screen">⛶</button>'+
+          '</div>'+
         '</div>'+
-        '<p class="linkline">When you finish, select <strong>Mark watched &amp; Next</strong>. Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a></p>'+
+        '<div class="vp-meter"><div class="vp-meter-bar"><span id="vpMeterFill"></span></div><span id="vpMeterText">Watched 0% · watch at least '+WATCH_NEEDED+'% to continue</span><span class="vt-status" id="videoStatus" aria-live="polite"></span></div>'+
+        '<div class="chapters" id="chapterList"></div>'+
+        '<p class="linkline">Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a> and tell your teacher.</p>'+
       '</div>'+
       '<aside class="notes-panel" aria-label="Your notes">'+
         '<div class="notes-head"><strong>My notes</strong><span id="notesSaved">Saves automatically</span></div>'+
@@ -363,14 +375,101 @@ function withYT(cb){
   tag.onerror=function(){ytApiState="failed";videoStatus("Video tools unavailable on this network — notes still save.")};
   document.head.appendChild(tag);
 }
+var vpTimer=null,vpDur=0,vpLastT=null,vpSaveTick=0,vpFallbackTimer=null;
+function watchData(){var d=answers();if(typeof d.watched!=="string")d.watched="";return d}
+function watchedBits(){return watchData().watched}
+function markSecond(sec){
+  var d=watchData(),w=d.watched;if(!vpDur||sec<0||sec>=vpDur)return;
+  if(w.length<vpDur)w=w+"0".repeat(vpDur-w.length);
+  if(w[sec]==="1")return;
+  d.watched=w.slice(0,sec)+"1"+w.slice(sec+1);
+}
+function watchedPct(){var w=watchedBits();if(!vpDur)return 0;var n=0;for(var i=0;i<Math.min(w.length,vpDur);i++)if(w[i]==="1")n++;return Math.round(n/vpDur*100)}
+function furthestWatched(){var w=watchedBits();return w.lastIndexOf("1")}
+function videoUnlocked(){var id=LESSONS[currentIndex].id;return !!state.done[id]||!!state.checks[id]}
+function paintVideo(){
+  if(!el("vpTrack"))return;
+  var t=playerOk()?ytPlayer.getCurrentTime():0,w=watchedBits();
+  el("vpTime").textContent=fmtTime(t)+" / "+(vpDur?fmtTime(vpDur):"–:––");
+  if(vpDur){
+    el("vpHead").style.left=(t/vpDur*100)+"%";
+    // watched segments → gradient stops
+    var stops=[],i=0;
+    while(i<vpDur){var on=w[i]==="1",j=i;while(j<vpDur&&(w[j]==="1")===on)j++;stops.push((on?"var(--vp-on)":"transparent")+" "+(i/vpDur*100)+"% "+(j/vpDur*100)+"%");i=j}
+    el("vpWatched").style.background="linear-gradient(90deg,"+stops.join(",")+")";
+  }
+  var pct=watchedPct(),unlocked=videoUnlocked();
+  el("vpMeterFill").style.width=Math.min(100,pct/WATCH_NEEDED*100)+"%";
+  el("vpMeterFill").parentNode.classList.toggle("done",unlocked);
+  el("vpMeterText").textContent=unlocked?"✓ Watched "+pct+"% · you can continue":"Watched "+pct+"% · watch at least "+WATCH_NEEDED+"% to continue";
+  paintChapters(t);
+  if(!unlocked&&pct>=WATCH_NEEDED){state.checks[LESSONS[currentIndex].id]=true;persist();refreshAction();makeFeedback(true,"Video watched. Click Mark watched & Next to continue.",[])}
+}
+function paintChapters(t){
+  var list=el("chapterList"),ch=VIDEO_CHAPTERS[LESSONS[currentIndex].id]||[];
+  if(!list)return;
+  if(!ch.length){list.hidden=true;return}
+  list.hidden=false;
+  var w=watchedBits();
+  if(!list.dataset.built||list.dataset.built!==String(vpDur)){
+    list.dataset.built=String(vpDur);
+    list.innerHTML='<div class="watch-label">Chapters</div>'+ch.map(function(c,i){return '<button type="button" class="chapter" data-chapter="'+i+'"><span class="ch-time">'+fmtTime(c[0])+'</span><span class="ch-title">'+escapeHtml(c[1])+'</span><span class="ch-state"></span></button>'}).join("");
+    el("vpTicks").innerHTML=vpDur?ch.map(function(c){return '<i style="left:'+(c[0]/vpDur*100)+'%"></i>'}).join(""):"";
+  }
+  ch.forEach(function(c,i){
+    var start=c[0],end=i+1<ch.length?ch[i+1][0]:(vpDur||start+1),n=0,tot=Math.max(1,end-start);
+    for(var k=start;k<end;k++)if(w[k]==="1")n++;
+    var btn=list.querySelector('[data-chapter="'+i+'"]');if(!btn)return;
+    var done=n/tot>=0.9;
+    btn.classList.toggle("watched",done);
+    btn.classList.toggle("current",t>=start&&t<end);
+    btn.querySelector(".ch-state").textContent=done?"✓":(n?Math.round(n/tot*100)+"%":"");
+  });
+}
+function videoTick(){
+  if(!playerOk())return;
+  if(!vpDur){var d0=Math.floor(ytPlayer.getDuration()||0);if(d0>0){vpDur=d0;paintChapters(0)}}
+  var st=ytPlayer.getPlayerState&&ytPlayer.getPlayerState(),t=ytPlayer.getCurrentTime();
+  el("vpPlay")&&(el("vpPlay").textContent=st===1?"❚❚":"▶");
+  if(st===1&&vpLastT!==null&&t>=vpLastT&&t-vpLastT<2.5){
+    for(var s0=Math.floor(vpLastT);s0<=Math.floor(t);s0++)markSecond(s0);
+    if(++vpSaveTick%8===0)persist();
+  }
+  vpLastT=t;
+  paintVideo();
+}
+function videoFallback(reason){
+  // Tracking isn't possible (YouTube API blocked): give back normal controls and don't lock students out.
+  var f=el("ytPlayer");if(!f||f.dataset.fallback)return;
+  f.dataset.fallback="1";
+  f.src=f.src.replace("controls=0","controls=1").replace("&disablekb=1","").replace("&fs=0","");
+  var bar=document.querySelector(".vp-bar");if(bar)bar.hidden=true;
+  var id=LESSONS[currentIndex].id;state.checks[id]=true;persist();refreshAction();
+  var m=el("vpMeterText");if(m)m.textContent="Watch-time tracking isn't available on this network. Watch the whole video, then continue.";
+}
 function setupVideo(){
-  ytPlayer=null;
+  ytPlayer=null;vpDur=0;vpLastT=null;clearInterval(vpTimer);clearTimeout(vpFallbackTimer);
   var frameEl=el("ytPlayer");if(!frameEl)return;
+  vpFallbackTimer=setTimeout(function(){if(!playerOk())videoFallback("timeout")},12000);
   withYT(function(){
     if(!document.body.contains(frameEl))return;
-    try{ytPlayer=new YT.Player(frameEl,{events:{onReady:function(){videoStatus("")}}})}catch(e){ytPlayer=null}
+    try{ytPlayer=new YT.Player(frameEl,{events:{
+      onReady:function(){clearTimeout(vpFallbackTimer);videoStatus("");vpDur=Math.floor(ytPlayer.getDuration()||0);paintVideo()},
+      onStateChange:function(){vpLastT=playerOk()?ytPlayer.getCurrentTime():null;videoTick()},
+      onError:function(){videoFallback("error")}
+    }})}catch(e){ytPlayer=null}
   });
-  renderStamps();
+  if(ytApiState==="failed")videoFallback("blocked");
+  vpTimer=setInterval(function(){if(!el("vpTrack")){clearInterval(vpTimer);persist();return}videoTick()},500);
+  renderStamps();paintVideo();
+}
+function videoSeek(t,allowAhead){
+  if(!needPlayer())return false;
+  if(!allowAhead){
+    var limit=Math.max(furthestWatched()+1,Math.floor(ytPlayer.getCurrentTime()));
+    if(t>limit+1){videoStatus("Use the chapters to jump ahead.");setTimeout(function(){videoStatus("")},2500);return false}
+  }
+  ytPlayer.seekTo(t,true);vpLastT=t;return true;
 }
 function playerOk(){return ytPlayer&&typeof ytPlayer.getCurrentTime==="function"}
 function needPlayer(){if(playerOk())return true;videoStatus("Start the video first, then try again.");return false}
@@ -407,15 +506,26 @@ body.addEventListener("click",function(event){
     return;
   }
   if(t.dataset.prompt){insertAtCursor("Q: "+t.dataset.prompt+"\nA: ");t.classList.add("used");return}
-  if(t.dataset.seek){if(!needPlayer())return;ytPlayer.seekTo(parseTime(t.dataset.seek),true);ytPlayer.playVideo();return}
-  if(t.dataset.videoSkip){if(!needPlayer())return;ytPlayer.seekTo(Math.max(0,ytPlayer.getCurrentTime()+Number(t.dataset.videoSkip)),true);return}
+  if(t.dataset.seek){if(videoSeek(parseTime(t.dataset.seek),true))ytPlayer.playVideo();return}
+  if(t.dataset.videoSkip){if(!needPlayer())return;videoSeek(Math.max(0,ytPlayer.getCurrentTime()+Number(t.dataset.videoSkip)),false);return}
+  if(t.dataset.chapter!==undefined){var c=(VIDEO_CHAPTERS[LESSONS[currentIndex].id]||[])[Number(t.dataset.chapter)];if(c&&videoSeek(c[0],true))ytPlayer.playVideo();return}
+  if(t.id==="vpPlay"){if(!needPlayer())return;if(ytPlayer.getPlayerState()===1)ytPlayer.pauseVideo();else ytPlayer.playVideo();return}
+  if(t.id==="vpFull"){var box=el("vpBox");if(document.fullscreenElement)document.exitFullscreen();else if(box.requestFullscreen)box.requestFullscreen();return}
   if(t.dataset.videoSpeed){
     if(!needPlayer())return;ytPlayer.setPlaybackRate(Number(t.dataset.videoSpeed));
     body.querySelectorAll(".vt-speed").forEach(function(b){b.classList.toggle("on",b===t)});return;
   }
 });
+body.addEventListener("change",function(e){if(e.target.id==="vpSpeed"&&playerOk())ytPlayer.setPlaybackRate(Number(e.target.value))});
+body.addEventListener("click",function(e){
+  var tr=e.target.closest("#vpTrack");if(!tr||!vpDur)return;
+  var r=tr.getBoundingClientRect();videoSeek(Math.floor((e.clientX-r.left)/r.width*vpDur),false);
+});
 body.addEventListener("input",function(event){if(event.target.id==="answer-notes"){renderStamps();var s=el("notesSaved");if(s)s.textContent="Saved ✓"}});
 document.addEventListener("keydown",function(event){
+  if(event.key===" "&&el("vpPlay")&&!/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test((event.target.tagName||""))&&!event.target.isContentEditable){
+    event.preventDefault();el("vpPlay").click();return;
+  }
   if(!event.altKey||!el("answer-notes"))return;
   var k=event.key.toLowerCase();
   if(k==="t"){event.preventDefault();stampNow()}else if(k==="n"){event.preventDefault();pauseAndWrite()}
@@ -431,8 +541,9 @@ function restoreDraft(){
 }
 function refreshAction(){
   var l=LESSONS[currentIndex],checked=!!state.checks[l.id];
-  if(l.type==="video")action.textContent="Mark watched & Next →";
-  else if(["1.1.4","1.1.7","1.1.8"].indexOf(l.id)!==-1||l.id==="1.1.5"||l.id==="1.1.3"){
+  if(l.type==="video"){var ok=videoUnlocked();action.textContent=ok?"Mark watched & Next →":"Watch the video to continue";action.classList.toggle("locked",!ok);return}
+  action.classList.remove("locked");
+  if(["1.1.4","1.1.7","1.1.8"].indexOf(l.id)!==-1||l.id==="1.1.5"||l.id==="1.1.3"){
     action.textContent=checked?"Save & Next →":("Check "+(l.id==="1.1.3"?"answers":"my work"));
   }else action.textContent="Save & Next →";
 }
@@ -471,7 +582,7 @@ function render(){
   setStatus(state.done[l.id]?"Previously completed · progress saved":"Answers save automatically on this device");
   el("headScore").hidden=true;el("headRetake").hidden=true;
   if(l.id==="1.1.3")quizPaint();
-  if(state.checks[l.id]&&l.id!=="1.1.3") {
+  if(state.checks[l.id]&&l.id!=="1.1.3"&&l.type!=="video") {
     var message=l.id==="1.1.5"?"All six rows correct.":"Your program passed its last check.";
     makeFeedback(true,message,[]);
   }
@@ -568,7 +679,10 @@ function requestCodeCheck(){
 function handleAction(){
   if(finishView){gotoIndex(0);return}
   var l=LESSONS[currentIndex],id=l.id;
-  if(l.type==="video"){completeAndNext();return}
+  if(l.type==="video"){
+    if(!videoUnlocked()){makeFeedback(false,"Keep watching!",["You've watched "+watchedPct()+"% so far. Watch at least "+WATCH_NEEDED+"% to continue. Chapters help you find your place."]);return}
+    persist();completeAndNext();return;
+  }
   if(id==="1.1.2"){
     var d=answers(),needs=["count","capitalPrediction","capitalResult","parenPrediction","parenResult"];
     var missing=needs.filter(function(k){return !String(d[k]||"").trim()});

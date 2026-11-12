@@ -296,7 +296,7 @@ body.course-panels-resizing iframe{pointer-events:none!important}
 
 /* ---------- Video lessons: video + notes side by side ---------- */
 .workspace.video-mode .assignment-card{width:min(100%,1500px)}
-.video-layout{display:grid;grid-template-columns:minmax(0,calc((100dvh - var(--topbar) - 290px) * 16 / 9)) minmax(280px,1fr);gap:16px;align-items:stretch}
+.video-layout{display:grid;grid-template-columns:minmax(0,calc((100dvh - var(--topbar) - 360px) * 16 / 9)) minmax(280px,1fr);gap:16px;align-items:stretch}
 .video-main{min-width:0}
 .video-layout .video-wrap{max-width:calc((100dvh - var(--topbar) - 290px) * 16 / 9);min-width:min(100%,420px);margin:0}
 .video-tools{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:9px}
@@ -563,3 +563,39 @@ details.credits[open] summary{margin-bottom:3px}
 body.rail-collapsed .sidebar details.credits{display:none}
 .sidebar-end{border-top:1px solid var(--line)}
 .sidebar>details.credits,.sidebar>.sidebar-end{flex:none}
+
+/* ---------- Tracked video player (no skipping ahead; chapters to jump) ---------- */
+.vp-box{--vp-on:#3fb7a9;background:#101d2a;border-radius:12px;overflow:hidden}
+.vp-box .video-wrap{max-width:none!important;min-width:0!important;margin:0!important}
+.vp-box .youtube-frame{border-radius:0}
+.vp-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#132433;color:#dce9ee}
+.vp-bar[hidden]{display:none}
+.vp-play{width:36px;height:32px;border-radius:8px;border:0;background:var(--teal);color:#fff;font-size:14px;font-weight:800;flex:none}
+.vp-play:hover{background:#12a0a6}
+.vp-bar .vt-btn{background:#1f3547;border-color:#2e4a5f;color:#dce9ee;min-height:30px}
+.vp-bar .vt-btn:hover{background:#28455b}
+.vp-track{position:relative;flex:1;height:10px;border-radius:6px;background:#2a3f50;cursor:pointer;min-width:60px}
+.vp-watched{position:absolute;inset:0;border-radius:6px}
+.vp-ticks i{position:absolute;top:-3px;bottom:-3px;width:2px;background:#f0c96a;border-radius:2px;transform:translateX(-1px)}
+.vp-head{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(63,183,169,.45);transform:translate(-50%,-50%);left:0;pointer-events:none}
+.vp-time{font:600 12px Consolas,monospace;white-space:nowrap;color:#b8cdd6}
+.vp-speed{background:#1f3547;border:1px solid #2e4a5f;color:#dce9ee;border-radius:7px;height:30px;font:700 12px Inter,sans-serif;padding:0 6px}
+.vp-box:fullscreen{display:flex;flex-direction:column;border-radius:0}
+.vp-box:fullscreen .video-wrap{flex:1;display:flex}
+.vp-box:fullscreen .youtube-frame{height:100%;aspect-ratio:auto}
+.vp-meter{display:flex;align-items:center;gap:10px;margin-top:9px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.vp-meter-bar{width:140px;height:8px;border-radius:6px;background:#e8e1d3;overflow:hidden}
+.vp-meter-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#e8705a);transition:width .4s}
+.vp-meter-bar.done span{background:linear-gradient(90deg,var(--teal),#2bb3a3)}
+.chapters{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.chapters[hidden]{display:none}
+.chapters .watch-label{width:100%;margin:0 0 2px}
+.chapter{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px 5px 6px;font-size:12.5px;cursor:pointer}
+.chapter:hover{border-color:var(--teal);background:var(--aqua)}
+.chapter .ch-time{font:700 11px Consolas,monospace;background:#eef3f5;color:var(--teal-dark);border-radius:12px;padding:2px 7px}
+.chapter .ch-state{font-size:11px;font-weight:800;color:var(--muted)}
+.chapter.watched{border-color:#9fd6c2;background:#eef8f3}
+.chapter.watched .ch-state{color:var(--green)}
+.chapter.current{border-color:var(--teal);box-shadow:0 0 0 2px rgba(13,138,143,.18)}
+.chapter.current .ch-time{background:var(--teal);color:#fff}
+#actionButton.locked{background:#b9c6c8;border-color:#b9c6c8;box-shadow:none}
