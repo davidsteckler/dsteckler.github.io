@@ -10,7 +10,7 @@
   if(!toggle||!panel)return;
   var storageKey="dsteckler-turtlecourse-view-v3";
   var controls=[
-    {group:"Layout",key:"split",label:"Instructions",min:25,max:60,step:1,initial:40,unit:"%"},
+    {group:"Layout",key:"split",label:"Instructions",min:15,max:65,step:1,initial:40,unit:"%"},
     {key:"sidebar",label:"Lesson list",min:200,max:340,step:10,initial:236,unit:"px"},
     {group:"Text",key:"lesson",label:"Lesson text",min:85,max:140,step:5,initial:100,unit:"%"},
     {key:"menu",label:"Lesson list text",min:85,max:125,step:5,initial:100,unit:"%"},
@@ -107,7 +107,9 @@
     function set(v,persist){settings[key]=Math.round(clamp(c,v));apply(persist);sync()}
     divider.addEventListener("pointerdown",function(e){
       if(e.button!==0)return;
-      drag={id:e.pointerId,x:e.clientX,start:settings[key]};
+      var start=settings[key];
+      if(key==="split"){var ws=document.getElementById("workspace"),card=document.querySelector(".assignment-card");if(ws&&card&&ws.clientWidth)start=card.getBoundingClientRect().width/ws.clientWidth*100}
+      drag={id:e.pointerId,x:e.clientX,start:start};
       divider.setPointerCapture(e.pointerId);divider.classList.add("dragging");
       document.body.classList.add("course-panels-resizing");e.preventDefault();
     });

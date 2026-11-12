@@ -114,7 +114,7 @@ function videoContent(videoId,intro){
     '<div class="video-layout">'+
       '<div class="video-main">'+
         '<div class="vp-box" id="vpBox">'+
-          '<div class="video-wrap"><iframe class="youtube-frame" id="ytPlayer" data-video="'+escapeHtml(videoId)+'" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?enablejsapi=1&rel=0&controls=0&disablekb=1&fs=0&iv_load_policy=3&playsinline=1&origin='+encodeURIComponent(location.origin)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'+
+          '<div class="video-wrap"><div class="cp-overlay" id="cpOverlay" hidden></div><iframe class="youtube-frame" id="ytPlayer" data-video="'+escapeHtml(videoId)+'" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?enablejsapi=1&rel=0&controls=0&disablekb=1&fs=0&iv_load_policy=3&playsinline=1&origin='+encodeURIComponent(location.origin)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'+
           '<div class="vp-bar" role="toolbar" aria-label="Video controls">'+
             '<button type="button" class="vp-play" id="vpPlay" title="Play / pause (Space when not typing)">▶</button>'+
             '<button type="button" class="vt-btn" data-video-skip="-10" title="Back 10 seconds">↺ 10s</button>'+
@@ -132,6 +132,9 @@ function videoContent(videoId,intro){
         '<p class="linkline">Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a> and tell your teacher.</p>'+
       '</div>'+
       '<aside class="notes-panel" aria-label="Your notes">'+
+        (vxTranscript(id).length?'<div class="np-tabs" role="tablist"><button type="button" role="tab" class="np-tab on" data-tab="notes" aria-selected="true">📝 My notes</button><button type="button" role="tab" class="np-tab" data-tab="transcript" aria-selected="false">💬 Transcript</button></div>'+
+          '<div class="transcript" id="transcriptPane" hidden><div class="tr-tip">Click a line to jump there. The line being spoken is highlighted.</div>'+vxTranscript(id).map(function(l,i){return '<button type="button" class="tr-line" data-tline="'+i+'"><span class="tr-time">'+fmtTime(l[0])+'</span><span class="tr-text">'+escapeHtml(l[1])+'</span></button>'}).join("")+'</div>':'')+
+        '<div class="notes-pane" id="notesPane">'+
         '<div class="notes-head"><strong>My notes</strong><span id="notesSaved">Saves automatically</span></div>'+
         (prompts.length?'<div class="watch-for"><div class="watch-label">Watch for</div>'+prompts.map(function(q){return '<button type="button" class="watch-q" data-prompt="'+escapeHtml(q)+'" title="Add this question to your notes">+ '+escapeHtml(q)+'</button>'}).join("")+'</div>':'')+
         '<textarea id="answer-notes" class="notes-text" data-answer="notes" spellcheck="true" placeholder="Type notes while you watch.&#10;&#10;Tip: click ⏱ Add time to stamp the moment — click the stamp later to jump back."></textarea>'+
@@ -141,6 +144,7 @@ function videoContent(videoId,intro){
           '<button type="button" class="vt-btn" id="copyNotesBtn" title="Copy your notes">Copy</button>'+
         '</div>'+
         '<div class="stamp-list" id="stampList" aria-label="Jump to a moment"></div>'+
+        '</div>'+
       '</aside>'+
     '</div>';
 }
@@ -405,8 +409,10 @@ function paintVideo(){
   el("vpMeterFill").style.width=Math.min(100,pct/WATCH_NEEDED*100)+"%";
   el("vpMeterFill").parentNode.classList.toggle("done",unlocked);
   el("vpMeterText").textContent=unlocked?"✓ Watched "+pct+"% · you can continue":"Watched "+pct+"% · watch at least "+WATCH_NEEDED+"% to continue";
-  paintChapters(t);
-  if(!unlocked&&pct>=WATCH_NEEDED){state.checks[LESSONS[currentIndex].id]=true;persist();refreshAction();makeFeedback(true,"Video watched. Click Mark watched & Next to continue.",[])}
+  paintChapters(t);paintTranscript(t);
+  var cps=vxCheckpoints(LESSONS[currentIndex].id),cdone=cps.filter(function(_,i){var c=cpState()[i];return c&&c.ok}).length;
+  if(cps.length&&!unlocked)el("vpMeterText").textContent+=" · checkpoints "+cdone+"/"+cps.length;
+  if(!unlocked&&pct>=WATCH_NEEDED&&checkpointsDone()){state.checks[LESSONS[currentIndex].id]=true;persist();refreshAction();makeFeedback(true,"Video watched. Click Mark watched & Next to continue.",[])}
 }
 function paintChapters(t){
   var list=el("chapterList"),ch=VIDEO_CHAPTERS[LESSONS[currentIndex].id]||[];
@@ -433,7 +439,12 @@ function videoTick(){
   if(!playerOk())return;
   if(!vpDur){var d0=Math.floor(ytPlayer.getDuration()||0);if(d0>0){vpDur=d0;paintChapters(0)}}
   var st=ytPlayer.getPlayerState&&ytPlayer.getPlayerState(),t=ytPlayer.getCurrentTime();
+  if(cpOpen!==null&&st===1){ytPlayer.pauseVideo();return}
   el("vpPlay")&&(el("vpPlay").textContent=st===1?"❚❚":"▶");
+  if(st===1&&vpLastT!==null&&t>=vpLastT&&t-vpLastT<2.5&&cpOpen===null){
+    var cps=vxCheckpoints(LESSONS[currentIndex].id),cs=cpState();
+    for(var ci=0;ci<cps.length;ci++){if(!(cs[ci]&&cs[ci].ok)&&cps[ci].at>vpLastT-0.01&&cps[ci].at<=t+0.01){vpLastT=t;showCheckpoint(ci);paintVideo();return}}
+  }
   if(st===1&&vpLastT!==null&&t>=vpLastT&&t-vpLastT<2.5){
     for(var s0=Math.floor(vpLastT);s0<=Math.floor(t);s0++)markSecond(s0);
     if(++vpSaveTick%8===0)persist();
@@ -449,6 +460,50 @@ function videoFallback(reason){
   var bar=document.querySelector(".vp-bar");if(bar)bar.hidden=true;
   var id=LESSONS[currentIndex].id;state.checks[id]=true;persist();refreshAction();
   var m=el("vpMeterText");if(m)m.textContent="Watch-time tracking isn't available on this network. Watch the whole video, then continue.";
+}
+function vxTranscript(id){var x=window.TurtleCourseVideoExtras;return (x&&x.transcripts[id])||[]}
+function vxCheckpoints(id){var x=window.TurtleCourseVideoExtras;return (x&&x.checkpoints[id])||[]}
+function cpState(){var d=answers();if(!d.cp||typeof d.cp!=="object")d.cp={};return d.cp}
+function checkpointsDone(){var id=LESSONS[currentIndex].id,c=cpState();return vxCheckpoints(id).every(function(_,i){return c[i]&&c[i].ok})}
+var cpOpen=null;
+function showCheckpoint(i){
+  var id=LESSONS[currentIndex].id,cp=vxCheckpoints(id)[i],box=el("cpOverlay");if(!cp||!box)return;
+  cpOpen=i;if(playerOk())ytPlayer.pauseVideo();
+  var st=cpState()[i]||{wrong:[]};
+  box.innerHTML='<div class="cp-card"><div class="cp-kicker">⏸ Checkpoint '+(i+1)+' of '+vxCheckpoints(id).length+' · predict before you watch</div>'+
+    '<div class="cp-q">'+escapeHtml(cp.q)+'</div><div class="cp-choices">'+cp.choices.map(function(c,j){
+      var crossed=(st.wrong||[]).indexOf(j)>-1;
+      return '<button type="button" class="cp-choice'+(crossed?' crossed':'')+'" data-cp="'+i+'" data-choice="'+j+'"'+(crossed?' disabled':'')+'><b>'+"ABCD"[j]+'</b>'+escapeHtml(c)+'</button>';
+    }).join("")+'</div><div class="cp-feedback" id="cpFeedback" aria-live="polite"></div></div>';
+  box.hidden=false;
+  var first=box.querySelector(".cp-choice:not([disabled])");if(first)first.focus();
+}
+function answerCheckpoint(i,j){
+  var id=LESSONS[currentIndex].id,cp=vxCheckpoints(id)[i],c=cpState();
+  c[i]=c[i]||{wrong:[]};
+  var fb=el("cpFeedback"),btn=el("cpOverlay").querySelector('[data-choice="'+j+'"]');
+  if(j===cp.answer){
+    c[i].ok=true;if(c[i].first===undefined)c[i].first=true;persist();
+    btn.classList.add("right");fb.className="cp-feedback good";fb.textContent="✓ Nice thinking! Let's watch and see.";
+    el("cpOverlay").querySelectorAll(".cp-choice").forEach(function(b){b.disabled=true});
+    setTimeout(function(){el("cpOverlay").hidden=true;cpOpen=null;if(playerOk())ytPlayer.playVideo();paintVideo()},1300);
+  }else{
+    if(c[i].first===undefined)c[i].first=false;
+    if(c[i].wrong.indexOf(j)<0)c[i].wrong.push(j);persist();
+    btn.classList.add("wrong","crossed");btn.disabled=true;
+    fb.className="cp-feedback bad";fb.textContent="Not quite. "+(cp.hints[j]||"Try again.");
+    btn.parentNode.classList.remove("shake");void btn.parentNode.offsetWidth;btn.parentNode.classList.add("shake");
+  }
+}
+function paintTranscript(t){
+  var pane=el("transcriptPane");if(!pane||pane.hidden)return;
+  var lines=vxTranscript(LESSONS[currentIndex].id),cur=-1;
+  for(var i=0;i<lines.length;i++){if(lines[i][0]<=t)cur=i;else break}
+  if(String(cur)===pane.dataset.cur)return;
+  pane.dataset.cur=String(cur);
+  pane.querySelectorAll(".tr-line.now").forEach(function(n){n.classList.remove("now")});
+  var now=pane.querySelector('[data-tline="'+cur+'"]');
+  if(now){now.classList.add("now");if(!pane.matches(":hover"))now.scrollIntoView({block:"center",behavior:"smooth"})}
 }
 function setupVideo(){
   ytPlayer=null;vpDur=0;vpLastT=null;clearInterval(vpTimer);clearTimeout(vpFallbackTimer);
@@ -512,7 +567,15 @@ body.addEventListener("click",function(event){
   if(t.dataset.seek){if(videoSeek(parseTime(t.dataset.seek),true))ytPlayer.playVideo();return}
   if(t.dataset.videoSkip){if(!needPlayer())return;videoSeek(Math.max(0,ytPlayer.getCurrentTime()+Number(t.dataset.videoSkip)),false);return}
   if(t.dataset.chapter!==undefined){var c=(VIDEO_CHAPTERS[LESSONS[currentIndex].id]||[])[Number(t.dataset.chapter)];if(c&&videoSeek(c[0],true))ytPlayer.playVideo();return}
-  if(t.id==="vpPlay"){if(!needPlayer())return;if(ytPlayer.getPlayerState()===1)ytPlayer.pauseVideo();else ytPlayer.playVideo();return}
+  if(t.dataset.choice!==undefined){answerCheckpoint(Number(t.dataset.cp),Number(t.dataset.choice));return}
+  if(t.dataset.tline!==undefined){var ln=vxTranscript(LESSONS[currentIndex].id)[Number(t.dataset.tline)];if(ln&&videoSeek(ln[0],true)){if(cpOpen===null)ytPlayer.playVideo();paintVideo()}return}
+  if(t.dataset.tab){
+    body.querySelectorAll(".np-tab").forEach(function(b){var on=b===t;b.classList.toggle("on",on);b.setAttribute("aria-selected",String(on))});
+    el("notesPane").hidden=t.dataset.tab!=="notes";el("transcriptPane").hidden=t.dataset.tab!=="transcript";
+    if(t.dataset.tab==="transcript"){el("transcriptPane").dataset.cur="";paintVideo()}
+    return;
+  }
+  if(t.id==="vpPlay"){if(cpOpen!==null)return;if(!needPlayer())return;if(ytPlayer.getPlayerState()===1)ytPlayer.pauseVideo();else ytPlayer.playVideo();return}
   if(t.id==="vpFull"){var box=el("vpBox");if(document.fullscreenElement)document.exitFullscreen();else if(box.requestFullscreen)box.requestFullscreen();return}
   if(t.dataset.videoSpeed){
     if(!needPlayer())return;ytPlayer.setPlaybackRate(Number(t.dataset.videoSpeed));
@@ -525,10 +588,11 @@ body.addEventListener("change",function(e){
     var v=e.target.value,l=LESSONS[currentIndex],ch=VIDEO_CHAPTERS[l.id]||[],d=watchData();e.target.value="";
     if(v==="all"){
       if(!confirm("Reset all watch progress for this video? It will look like you've never watched it."))return;
-      d.watched="";delete state.checks[l.id];delete state.done[l.id];
+      d.watched="";delete d.cp;delete state.checks[l.id];delete state.done[l.id];el("cpOverlay").hidden=true;cpOpen=null;
       if(playerOk()){ytPlayer.pauseVideo();ytPlayer.seekTo(0,true)}vpLastT=0;
     }else{
       var i=Number(v),start=ch[i][0],end=i+1<ch.length?ch[i+1][0]:vpDur;
+      vxCheckpoints(l.id).forEach(function(c,k){if(c.at>=start&&c.at<end&&d.cp)delete d.cp[k]});
       var w=d.watched;for(var k=start;k<end&&k<w.length;k++)w=w.slice(0,k)+"0"+w.slice(k+1);d.watched=w;
       if(watchedPct()<WATCH_NEEDED){delete state.checks[l.id];delete state.done[l.id]}
       if(playerOk()){ytPlayer.seekTo(start,true);ytPlayer.pauseVideo()}vpLastT=start;
@@ -545,6 +609,8 @@ body.addEventListener("click",function(e){
 body.addEventListener("input",function(event){if(event.target.id==="answer-notes"){renderStamps();var s=el("notesSaved");if(s)s.textContent="Saved ✓"}});
 document.addEventListener("keydown",function(event){
   var typing=/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName||"")||event.target.isContentEditable;
+  if(cpOpen!==null&&/^[a-dA-D1-4]$/.test(event.key)&&!typing){var cb=el("cpOverlay").querySelector('[data-choice="'+("abcd".indexOf(event.key.toLowerCase())>-1?"abcd".indexOf(event.key.toLowerCase()):Number(event.key)-1)+'"]');if(cb&&!cb.disabled){event.preventDefault();cb.click()}return}
+  if(cpOpen!==null&&(event.key===" "||event.key.indexOf("Arrow")===0)&&!typing&&event.target.tagName!=="BUTTON"){event.preventDefault();return}
   if(el("vpPlay")&&!typing&&!event.altKey&&!event.ctrlKey&&!event.metaKey){
     if(event.key===" "&&event.target.tagName!=="BUTTON"){event.preventDefault();el("vpPlay").click();return}
     if((event.key==="ArrowLeft"||event.key==="ArrowRight")&&playerOk()){
@@ -711,7 +777,7 @@ function handleAction(){
   if(finishView){gotoIndex(0);return}
   var l=LESSONS[currentIndex],id=l.id;
   if(l.type==="video"){
-    if(!videoUnlocked()){makeFeedback(false,"Keep watching!",["You've watched "+watchedPct()+"% so far. Watch at least "+WATCH_NEEDED+"% to continue. Chapters help you find your place."]);return}
+    if(!videoUnlocked()){var cpsN=vxCheckpoints(id).length;makeFeedback(false,"Keep watching!",["You've watched "+watchedPct()+"% so far. Watch at least "+WATCH_NEEDED+"% to continue."].concat(cpsN&&!checkpointsDone()?["Answer every checkpoint question in the video ("+vxCheckpoints(id).filter(function(_,i){var c=cpState()[i];return c&&c.ok}).length+"/"+cpsN+" done)."]:[]));return}
     persist();completeAndNext();return;
   }
   if(id==="1.1.2"){
