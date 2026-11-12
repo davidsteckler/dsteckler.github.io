@@ -251,3 +251,34 @@ body.course-embed.unit1-embed .layoutbar .reset-layout{
     width:5px;background:#16818d;
   }
 }
+
+
+/* v12 course shell: the Code / Drawing / Output sliders now live only in the
+   course's "View" panel (they stay in sync), so the editor gets that row back. */
+body.course-embed.unit1-embed .layoutbar{display:none!important}
+body.course-embed.unit1-embed .code-panel{grid-template-rows:minmax(47px,auto) minmax(0,1fr)!important}
+body.course-embed.unit1-embed .appbar{min-height:46px;padding:5px 8px}
+body.course-embed.unit1-embed .app{grid-template-rows:46px minmax(0,1fr)}
+/* Keep code and Turtle World side by side in the course's narrower frame. */
+@media(min-width:600px) and (max-width:840px){
+  body.course-embed.unit1-embed{overflow:hidden}
+  body.course-embed.unit1-embed .app{display:grid;height:100dvh;min-height:0;overflow:hidden}
+  body.course-embed.unit1-embed .appbar{position:static}
+  body.course-embed.unit1-embed .toolbar{display:flex;width:auto}
+  body.course-embed.unit1-embed .workspace{
+    display:grid!important;height:100%;overflow:hidden;
+    grid-template-columns:minmax(230px,var(--code-fr)) 10px minmax(260px,var(--world-fr))!important;
+  }
+  body.course-embed.unit1-embed .code-panel{height:100%!important;min-height:0!important}
+  body.course-embed.unit1-embed .world-panel{height:100%!important;grid-template-rows:42px minmax(200px,1fr) 0 0 170px!important}
+  body.course-embed.unit1-embed .editor-divider{display:block!important}
+}
+/* Keep the code-panel buttons on one row in narrower frames. */
+body.course-embed.unit1-embed .code-panel .panel-head{flex-wrap:nowrap;gap:6px}
+body.course-embed.unit1-embed .editor-head-start{flex-wrap:nowrap!important;min-width:0}
+@media(max-width:1100px){
+  body.course-embed.unit1-embed .code-panel .panel-head .btn,
+  body.course-embed.unit1-embed #resetToStarterBtn{font-size:11px;padding:0 7px;height:28px}
+  body.course-embed.unit1-embed .code-panel .panel-head .file-status,
+  body.course-embed.unit1-embed #saveStatus{display:none}
+}

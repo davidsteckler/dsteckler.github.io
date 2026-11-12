@@ -71,15 +71,14 @@ function setStatus(text){saveState.textContent=text||"Answers are saved on this 
 function markDone(){state.done[LESSONS[currentIndex].id]=true;persist();updateProgress();renderMenu()}
 function makeFeedback(good,title,details){
   var container=el("activityFeedback");
-  if(!container){container=document.createElement("div");container.id="activityFeedback";body.appendChild(container)}
   container.className="feedback "+(good?"good":"bad");
   container.innerHTML="<strong>"+escapeHtml(title)+"</strong>"+(details&&details.length?"<ul>"+details.map(function(d){return "<li>"+escapeHtml(d)+"</li>"}).join("")+"</ul>":"");
-  container.scrollIntoView({block:"nearest",behavior:"smooth"});
+  container.hidden=false;
 }
 function renderMenu(){
   menu.innerHTML=LESSONS.map(function(l,i){
     var active=i===currentIndex&&!finishView,complete=!!state.done[l.id];
-    return '<button type="button" class="lesson-nav'+(active?' active':'')+'" data-index="'+i+'" '+(active?'aria-current="step"':'')+'><span class="lesson-num">'+String(i+1).padStart(2,"0")+'</span><span><span class="lesson-name">'+escapeHtml(l.short)+'</span><span class="lesson-type">'+escapeHtml(l.kind)+'</span></span><span class="lesson-tick" aria-label="'+(complete?'Completed':'Not complete')+'">'+(complete?'✓':'')+'</span></button>';
+    return '<button type="button" class="lesson-nav'+(active?' active':'')+(complete?' done':'')+'" data-index="'+i+'" title="'+escapeHtml(l.id+' '+l.short+' · '+l.kind)+'" '+(active?'aria-current="step"':'')+'><span class="lesson-num">'+String(i+1).padStart(2,"0")+'</span><span class="lesson-text"><span class="lesson-name">'+escapeHtml(l.short)+'</span><span class="lesson-type">'+escapeHtml(l.kind)+'</span></span><span class="lesson-tick" aria-label="'+(complete?'Completed':'Not complete')+'">'+(complete?'✓':'')+'</span></button>';
   }).join("");
 }
 function field(key,title,hint,rows){
@@ -88,10 +87,9 @@ function field(key,title,hint,rows){
     (hint?'<div class="field-help">'+hint+'</div>':'')+'</div>';
 }
 function videoContent(videoId,intro){
-  return '<h2>'+intro+'</h2><div class="mini-note">Watch the video before continuing. You can pause and replay it at any time.</div>'+
-    '<iframe class="youtube-frame" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>'+
-    '<p class="linkline">Video not loading at school? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube</a>.</p>'+
-    '<p class="mini-note">After watching, select <strong>Mark watched &amp; Next</strong>. Your progress saves on this browser.</p>';
+  return '<h2>'+intro+'</h2>'+
+    '<div class="video-wrap"><iframe class="youtube-frame" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>'+
+    '<p class="linkline">When you finish, select <strong>Mark watched &amp; Next</strong>. Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a></p></div>';
 }
 function slinkyContent(){
   return '<h2>Run the Slinky program</h2><p>The code is already in your editor. Click <strong>Run</strong>, watch Tracy draw, and type your responses below. You can change the code for each experiment.</p>'+
@@ -145,18 +143,17 @@ function exampleImage(kind){
     colors:"Two circles in blue and lavender on a #27A9E1 background."
   };
   return '<figure class="example-figure">'+
-    '<div class="example-figure-head"><strong>Example drawing</strong><span>Compare in Turtle World →</span></div>'+
+    '<div class="example-figure-head"><strong>Goal drawing</strong></div>'+
     '<div class="example-live-stage">'+
       '<canvas class="example-world-canvas" width="400" height="400" data-example-kind="'+escapeHtml(kind)+'" data-example-code="'+encodeURIComponent(EXAMPLE_PROGRAMS[kind]||"")+'" role="img" aria-label="'+escapeHtml(descriptions[kind])+'"></canvas>'+
     '</div>'+
-    '<figcaption>'+escapeHtml(descriptions[kind])+' Use <strong>Show example</strong> in Turtle World to overlay this drawing on your own.</figcaption>'+
+    '<figcaption>Tip: click <strong>Show example</strong> above Turtle World to lay this over your drawing.</figcaption>'+
   '</figure>';
 }
 
 function stretchedContent(){
-  return '<h2>Make a stretched-out slinky</h2><p>Write your own program in <code>main.py</code>. Click <strong>Run</strong> to inspect the drawing, then use <strong>Check my work</strong> when ready.</p>'+
-  exampleImage('stretched')+
-  '<p>Your program should have:</p><ul><li><strong>Five rings</strong></li><li>Each circle with a <strong>radius of 35</strong></li><li>Tracy moving forward <strong>40 pixels after every circle</strong></li></ul>'+
+  return '<h2>Make a stretched-out slinky</h2><p>Write your own program in <code>main.py</code>. Click <strong>Run</strong> to see the drawing, then <strong>Check my work</strong>.</p>'+
+  '<div class="example-row"><div><strong>Your program should have:</strong><ul class="task-list"><li><span><strong>Five rings</strong></span></li><li><span>Every circle has a <strong>radius of 35</strong></span></li><li><span>Tracy moves forward <strong>40 pixels after every circle</strong></span></li></ul></div>'+exampleImage('stretched')+'</div>'+
   '<div class="mini-note">You already saw the original slinky in 1.1.2. Compare your new spacing with that example. The checker looks at the commands your program executes.</div>'+
   '<div class="resource-links"><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command reference ↗</a></div>';
 }
@@ -166,22 +163,20 @@ function traceContent(){
   }).join("");
   return '<h2>Complete a trace table</h2><p>A trace table helps us test a program by writing down the lines that run, in order.</p>'+
     '<p>Read the program from top to bottom. For each step, fill in the <strong>line number</strong> and the <strong>exact command</strong> that runs.</p>'+
-    '<pre class="codebox">'+TRACE.map(function(line,i){return (i+1)+'   '+line}).join("\n")+'</pre>'+
-    '<table class="trace-table"><thead><tr><th>Step</th><th>Line number</th><th>Command</th></tr></thead><tbody>'+table+'</tbody></table>'+
+    '<div class="trace-layout"><pre class="codebox">'+TRACE.map(function(line,i){return (i+1)+'   '+line}).join("\n")+'</pre>'+
+    '<table class="trace-table"><thead><tr><th>Step</th><th>Line</th><th>Command</th></tr></thead><tbody>'+table+'</tbody></table></div>'+
     '<div class="mini-note">In this first example, each line runs once. Later, loops and functions will make the order more interesting.</div>'+
     '<div class="resource-links"><a href="/tracetable/" target="_blank" rel="noopener">Explore the animated trace table ↗</a></div>';
 }
 function coilContent(){
   return '<h2>Slinky Coil Challenge</h2><p>Create a fun slinky-like pattern using only <code>circle()</code> and <code>forward()</code>.</p>'+
-  exampleImage('coil')+
-  '<h3>Requirements</h3><ul><li>Use <code>circle()</code> at least <strong>6 times</strong>.</li><li>Use <code>forward()</code> at least <strong>6 times</strong>.</li><li>Use at least <strong>2 different sizes</strong> for your circles.</li></ul>'+
+  '<div class="example-row"><div><strong>Requirements</strong><ul class="task-list"><li><span>Use <code>circle()</code> at least <strong>6 times</strong></span></li><li><span>Use <code>forward()</code> at least <strong>6 times</strong></span></li><li><span>Use at least <strong>2 different sizes</strong> of circle</span></li></ul></div>'+exampleImage('coil')+'</div>'+
   '<div class="mini-note">Experiment with different circle sizes and forward distances. Your drawing can look different from the example. Add a comment describing what your pattern looks like to you.</div>'+
   '<p>Click <strong>Run</strong> to view your creation, then check your program when ready.</p>';
 }
 function colorsContent(){
   return '<h2>Color &amp; Background Color</h2><p>You start with two red circles. Change the background and draw the circles with two new pen colors.</p>'+
-  exampleImage('colors')+
-  '<h3>Change these three things</h3><ol><li>Add <code>bgcolor("#27A9E1")</code> near the top to change the background.</li><li>Change <code>color("red")</code> to another built-in color, like <code>"blue"</code>.</li><li>Add a new <code>color("#...")</code> before the second circle, using a six-digit hex color.</li></ol>'+
+  '<div class="example-row"><div><strong>Change these three things</strong><ul class="task-list"><li><span>Add <code>bgcolor("#27A9E1")</code> near the top to change the background.</span></li><li><span>Change <code>color("red")</code> to another built-in color, like <code>"blue"</code>.</span></li><li><span>Add a new <code>color("#...")</code> before the second circle, using a six-digit hex color.</span></li></ul></div>'+exampleImage('colors')+'</div>'+
   '<div class="mini-note">The second <code>color()</code> should come before the second <code>circle(50)</code>. Keep the two circles and their forward movements in your program.</div>'+
   '<div class="resource-links"><a href="/hex/" target="_blank" rel="noopener">Hex color picker ↗</a><a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a></div>';
 }
@@ -217,19 +212,22 @@ function refreshAction(){
 function render(){
   finishView=false;
   var l=LESSONS[currentIndex];
-  el("breadcrumb").textContent="Unit 1 / Tracy's World / "+l.id;
+  el("breadcrumb").textContent="Unit 1 · Tracy's World · Activity "+(currentIndex+1)+" of "+LESSONS.length;
   el("lessonTitle").textContent=l.id+" "+l.name;
   el("lessonSubtitle").textContent=l.subtitle;
   el("lessonBadge").textContent=l.kind;
-  el("activityCounter").textContent=(currentIndex+1)+" of "+LESSONS.length;
+  el("activityCounter").textContent="Instructions";
+  document.title=l.id+" "+l.short+" · Python Turtle Course";
+  el("activityFeedback").hidden=true;
   body.innerHTML=contentFor(l.id);
+  body.scrollTop=0;
   if(window.TurtleCourseExamples)window.TurtleCourseExamples.render(body);
   restoreDraft();
   previous.disabled=currentIndex===0;
   workspace.classList.toggle("no-editor",!l.editor);
   editorCard.hidden=!l.editor;
   workspace.classList.remove("focus-editor");
-  if(expandEditorBtn){expandEditorBtn.setAttribute("aria-pressed","false");expandEditorBtn.textContent="⤢ Expand editor"}
+  setFocusEditor(false);
   editorReady=false;pendingCheck=null;
   if(l.editor){
     var referenceKind=EXAMPLE_FOR_LESSON[l.id];
@@ -249,6 +247,10 @@ function render(){
   history.replaceState(null,"","#"+l.id);
 }
 function gotoIndex(i){if(i<0||i>=LESSONS.length)return;currentIndex=i;render();window.scrollTo({top:0,behavior:"auto"})}
+function setFocusEditor(on){
+  workspace.classList.toggle("focus-editor",on);
+  if(expandEditorBtn){expandEditorBtn.setAttribute("aria-pressed",String(on))}
+}
 function completeAndNext(){
   markDone();
   setStatus("Saved · activity "+(currentIndex+1)+" completed");
@@ -260,7 +262,7 @@ function showFinish(){
   el("lessonTitle").textContent="Unit 1 complete";
   el("lessonSubtitle").textContent="You have worked through the eight activities in Tracy's World.";
   el("lessonBadge").textContent="8 of 8";
-  el("activityCounter").textContent="Finished";
+  el("activityCounter").textContent="Finished";el("activityFeedback").hidden=true;
   body.innerHTML='<div class="unit-done"><h3>You have finished Unit 1.</h3><p>You have run programs, tested changes, written drawing commands, read trace tables, and used color.</p></div><div class="resource-links"><a href="/turtle/" target="_blank" rel="noopener">Keep experimenting in Turtle ↗</a><a href="/tracetable/" target="_blank" rel="noopener">Review trace tables ↗</a></div><p>Your completion record stays in this browser.</p>';
   previous.disabled=false;action.textContent="Review Unit 1 ↺";
   history.replaceState(null,"","#complete");
@@ -374,11 +376,8 @@ body.addEventListener("change",function(event){
   if(id==="1.1.3"||id==="1.1.5")state.checks[id]=false;
   persist();refreshAction();setStatus("Draft saved on this device");
 });
-if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){
-  var expanded=workspace.classList.toggle("focus-editor");
-  expandEditorBtn.setAttribute("aria-pressed",String(expanded));
-  expandEditorBtn.textContent=expanded?"↙ Show instructions":"⤢ Expand editor";
-});
+if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){setFocusEditor(true);el("showInstructionsBtn").focus()});
+el("showInstructionsBtn").addEventListener("click",function(){setFocusEditor(false);expandEditorBtn.focus()});
 previous.addEventListener("click",function(){if(finishView)gotoIndex(7);else gotoIndex(currentIndex-1)});
 action.addEventListener("click",handleAction);
 frame.addEventListener("load",function(){editorReady=true});
