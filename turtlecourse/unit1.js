@@ -107,7 +107,7 @@ function slinkyContent(){
     '<section class="slinky-part"><div class="slinky-part-head"><span>PART 3</span><h3>Remove parentheses</h3></div>'+
     '<ol><li>Change <code>Circle</code> back to <code>circle</code>.</li><li>Before running, predict what will happen if you remove the parentheses from the <strong>first</strong> <code>circle(35)</code>.</li></ol>'+
     field("parenPrediction","What do you predict will happen?","PREDICTION → Write this before you run the changed program.",2)+
-    '<ol start="3"><li>Remove <code>(35)</code> from that first line so it reads <code>circle</code>.</li><li>Click <strong>Run</strong>.</li></ol>'+
+    '<ol start="3"><li>Remove the two parentheses from the first command. Keep the number <code>35</code> in place.</li><li>Click <strong>Run</strong>.</li></ol>'+
     field("parenResult","What actually happened?","RESULT → Describe what Tracy drew or what appeared in Output.",2)+'</section>'+
     '<div class="mini-note">Once you have tested all three versions and recorded your five responses, click <strong>Save &amp; Next</strong>. Your answers save here; the Turtle editor keeps your code separately.</div>';
 }
@@ -360,7 +360,7 @@ function handleAction(){
     var seen=state.experiments[id]||{};
     if(!state.done[id]&&!seen.original){makeFeedback(false,"Run the original Slinky first.",["Click Run with the five original circle(35) commands."]);return}
     if(!state.done[id]&&!seen.capital){makeFeedback(false,"Test the capital letter change.",["Write your prediction, change the first line to Circle(35), and click Run."]);return}
-    if(!state.done[id]&&!seen.paren){makeFeedback(false,"Test the missing parentheses.",["Write your prediction, change the first line to circle without parentheses, and click Run."]);return}
+    if(!state.done[id]&&!seen.paren){makeFeedback(false,"Test the missing parentheses.",["Write your prediction, remove both parentheses from the first command (keep 35), and click Run."]);return}
     if(!/^\s*(5|five)\s*$/i.test(String(d.count))){makeFeedback(false,"Take another look at Part 1.",["Count the circles in the original Slinky program."]);return}
     completeAndNext();return;
   }
@@ -418,7 +418,7 @@ window.addEventListener("message",function(event){
         steps.original=true;
       }else if(firstLine==="Circle(35)"&&steps.original&&String(answers().capitalPrediction||"").trim()&&data.run&&!data.run.ok){
         steps.capital=true;
-      }else if(firstLine==="circle"&&steps.capital&&String(answers().parenPrediction||"").trim()&&data.run&&data.run.ok){
+      }else if(/^circle\s*35$/.test(firstLine)&&steps.capital&&String(answers().parenPrediction||"").trim()&&data.run&&!data.run.ok){
         steps.paren=true;
       }
       state.experiments[id]=steps;
@@ -427,7 +427,7 @@ window.addEventListener("message",function(event){
       else if(steps.capital)setStatus("Capital letter tested · continue with parentheses");
       else if(steps.original)setStatus("Original Slinky ran · continue to your prediction");
     }
-    if(data.run&&data.run.ok){state.ran[id]=true;persist();setStatus("Program ran · code is saved separately")}
+    if(data.run&&data.run.ok){state.ran[id]=true;persist();if(id!=="1.1.2")setStatus("Program ran · code is saved separately")}
     if(state.checks[id]&&state.validatedCode[id]&&typeof data.code==="string"&&data.code!==state.validatedCode[id]){
       state.checks[id]=false;persist();refreshAction();
     }
