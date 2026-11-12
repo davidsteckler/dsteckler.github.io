@@ -101,7 +101,7 @@ function field(key,title,hint,rows){
    parts they actually watch count toward the WATCH_NEEDED percentage. */
 var WATCH_NEEDED=90;
 var VIDEO_CHAPTERS={
-  "1.1.1":[[0,"The forward() command"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors, parentheses & tips"]],
+  "1.1.1":[[0,"Meet Tracy: forward()"],[48,"Starting spot (0, 0)"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors & missing parentheses"],[263,"Keyboard tips & finishing up"]],
   "1.1.6":[]
 };
 var VIDEO_PROMPTS={
@@ -124,7 +124,10 @@ function videoContent(videoId,intro){
             '<button type="button" class="vt-btn" id="vpFull" title="Full screen">⛶</button>'+
           '</div>'+
         '</div>'+
-        '<div class="vp-meter"><div class="vp-meter-bar"><span id="vpMeterFill"></span></div><span id="vpMeterText">Watched 0% · watch at least '+WATCH_NEEDED+'% to continue</span><span class="vt-status" id="videoStatus" aria-live="polite"></span></div>'+
+        '<div class="vp-meter"><div class="vp-meter-bar"><span id="vpMeterFill"></span></div><span id="vpMeterText">Watched 0% · watch at least '+WATCH_NEEDED+'% to continue</span><span class="vt-status" id="videoStatus" aria-live="polite"></span>'+
+          '<select class="vp-reset" id="vpReset" aria-label="Reset watch progress" title="Start over: clears watch progress so you can see the video fresh"><option value="">↺ Reset…</option><option value="all">Whole video</option>'+(VIDEO_CHAPTERS[id]||[]).map(function(c,i){return '<option value="'+i+'">Chapter '+(i+1)+': '+escapeHtml(c[1])+'</option>'}).join("")+'</select>'+
+        '</div>'+
+        '<div class="vp-keys">Keys: <kbd>Space</kbd> play/pause · <kbd>←</kbd><kbd>→</kbd> 5 sec · '+((VIDEO_CHAPTERS[id]||[]).length?'<kbd>1</kbd>–<kbd>'+(VIDEO_CHAPTERS[id]||[]).length+'</kbd> chapters · ':'')+'→ only moves through parts you\'ve watched</div>'+
         '<div class="chapters" id="chapterList"></div>'+
         '<p class="linkline">Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a> and tell your teacher.</p>'+
       '</div>'+
@@ -467,7 +470,7 @@ function videoSeek(t,allowAhead){
   if(!needPlayer())return false;
   if(!allowAhead){
     var limit=Math.max(furthestWatched()+1,Math.floor(ytPlayer.getCurrentTime()));
-    if(t>limit+1){videoStatus("Use the chapters to jump ahead.");setTimeout(function(){videoStatus("")},2500);return false}
+    if(t>limit+1){videoStatus("You haven't watched past here yet. Use a chapter to jump ahead.");setTimeout(function(){videoStatus("")},2500);return false}
   }
   ytPlayer.seekTo(t,true);vpLastT=t;return true;
 }
@@ -516,15 +519,43 @@ body.addEventListener("click",function(event){
     body.querySelectorAll(".vt-speed").forEach(function(b){b.classList.toggle("on",b===t)});return;
   }
 });
-body.addEventListener("change",function(e){if(e.target.id==="vpSpeed"&&playerOk())ytPlayer.setPlaybackRate(Number(e.target.value))});
+body.addEventListener("change",function(e){
+  if(e.target.id==="vpSpeed"&&playerOk())ytPlayer.setPlaybackRate(Number(e.target.value));
+  if(e.target.id==="vpReset"&&e.target.value!==""){
+    var v=e.target.value,l=LESSONS[currentIndex],ch=VIDEO_CHAPTERS[l.id]||[],d=watchData();e.target.value="";
+    if(v==="all"){
+      if(!confirm("Reset all watch progress for this video? It will look like you've never watched it."))return;
+      d.watched="";delete state.checks[l.id];delete state.done[l.id];
+      if(playerOk()){ytPlayer.pauseVideo();ytPlayer.seekTo(0,true)}vpLastT=0;
+    }else{
+      var i=Number(v),start=ch[i][0],end=i+1<ch.length?ch[i+1][0]:vpDur;
+      var w=d.watched;for(var k=start;k<end&&k<w.length;k++)w=w.slice(0,k)+"0"+w.slice(k+1);d.watched=w;
+      if(watchedPct()<WATCH_NEEDED){delete state.checks[l.id];delete state.done[l.id]}
+      if(playerOk()){ytPlayer.seekTo(start,true);ytPlayer.pauseVideo()}vpLastT=start;
+    }
+    persist();updateProgress();renderMenu();refreshAction();el("activityFeedback").hidden=true;
+    var list=el("chapterList");if(list)delete list.dataset.built;paintVideo();
+    setStatus(v==="all"?"Video progress reset":"Chapter "+(Number(v)+1)+" progress reset");
+  }
+});
 body.addEventListener("click",function(e){
   var tr=e.target.closest("#vpTrack");if(!tr||!vpDur)return;
   var r=tr.getBoundingClientRect();videoSeek(Math.floor((e.clientX-r.left)/r.width*vpDur),false);
 });
 body.addEventListener("input",function(event){if(event.target.id==="answer-notes"){renderStamps();var s=el("notesSaved");if(s)s.textContent="Saved ✓"}});
 document.addEventListener("keydown",function(event){
-  if(event.key===" "&&el("vpPlay")&&!/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test((event.target.tagName||""))&&!event.target.isContentEditable){
-    event.preventDefault();el("vpPlay").click();return;
+  var typing=/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName||"")||event.target.isContentEditable;
+  if(el("vpPlay")&&!typing&&!event.altKey&&!event.ctrlKey&&!event.metaKey){
+    if(event.key===" "&&event.target.tagName!=="BUTTON"){event.preventDefault();el("vpPlay").click();return}
+    if((event.key==="ArrowLeft"||event.key==="ArrowRight")&&playerOk()){
+      event.preventDefault();
+      var nt=ytPlayer.getCurrentTime()+(event.key==="ArrowRight"?5:-5);
+      videoSeek(Math.max(0,Math.min(vpDur||nt,nt)),false);paintVideo();return;
+    }
+    var ch=VIDEO_CHAPTERS[LESSONS[currentIndex].id]||[];
+    if(/^[1-9]$/.test(event.key)&&ch[Number(event.key)-1]&&playerOk()){
+      event.preventDefault();videoSeek(ch[Number(event.key)-1][0],true);ytPlayer.playVideo();return;
+    }
   }
   if(!event.altKey||!el("answer-notes"))return;
   var k=event.key.toLowerCase();
