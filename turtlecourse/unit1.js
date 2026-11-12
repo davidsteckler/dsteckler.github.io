@@ -83,7 +83,7 @@ function markDone(){state.done[LESSONS[currentIndex].id]=true;persist();updatePr
 function makeFeedback(good,title,details){
   var container=el("activityFeedback");
   container.className="feedback "+(good?"good":"bad");
-  container.innerHTML="<strong>"+escapeHtml(title)+"</strong>"+(details&&details.length?"<ul>"+details.map(function(d){return "<li>"+escapeHtml(d)+"</li>"}).join("")+"</ul>":"");
+  container.innerHTML='<button type="button" class="fb-close" aria-label="Close message" title="Close">✕</button>'+"<strong>"+escapeHtml(title)+"</strong>"+(details&&details.length?"<ul>"+details.map(function(d){return "<li>"+escapeHtml(d)+"</li>"}).join("")+"</ul>":"");
   container.hidden=false;
 }
 function renderMenu(){
@@ -829,6 +829,7 @@ body.addEventListener("change",function(event){
   persist();refreshAction();setStatus("Draft saved on this device");
 });
 if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){setFocusEditor(true);el("showInstructionsBtn").focus()});
+el("activityFeedback").addEventListener("click",function(e){if(e.target.closest(".fb-close"))el("activityFeedback").hidden=true});
 el("showInstructionsBtn").addEventListener("click",function(){setFocusEditor(false);expandEditorBtn.focus()});
 previous.addEventListener("click",function(){if(finishView)gotoIndex(7);else gotoIndex(currentIndex-1)});
 action.addEventListener("click",handleAction);

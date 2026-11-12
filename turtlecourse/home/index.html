@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#15304a">
+  <meta name="description" content="Comp Sci Discoveries 2026–2027: Python Turtle course home. Units, lessons and your progress.">
+  <title>Python Turtle Course · Home | David Steckler</title>
+  <link rel="canonical" href="https://dsteckler.com/turtlecourse/home/">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-V55DVP2SHR"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","G-V55DVP2SHR");</script>
+  <style>
+    :root{
+      --paper:#f3ede2;--paper-2:#faf7f1;--line:#e3dccf;--ink:#1d3142;--muted:#6b7680;
+      --teal:#0d8a8f;--teal-dark:#0a6d72;--aqua:#e3f3f1;--coral:#e8705a;--gold:#e0a530;--navy:#15304a;--green:#21805a;
+      --head:"Lexend","Inter","Segoe UI",system-ui,sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--paper);color:var(--ink);font-family:"Inter","Segoe UI",system-ui,sans-serif}
+    button,input{font:inherit;color:inherit}
+    a{color:var(--teal-dark)}
+    :focus-visible{outline:3px solid #76cad1;outline-offset:2px}
+    [hidden]{display:none!important}
+    /* Top bar (matches the lesson pages) */
+    .topbar{height:54px;display:flex;align-items:center;gap:18px;padding:0 16px;color:#fff;
+      background:linear-gradient(100deg,#15304a 0%,#18405a 60%,#165a63 100%);box-shadow:0 2px 10px rgba(15,35,55,.18);position:sticky;top:0;z-index:20}
+    .brand{display:flex;gap:9px;align-items:center;text-decoration:none;color:#fff}
+    .brandmark{width:32px;height:32px;display:grid;place-items:center;background:var(--teal);border-radius:9px;font:800 13px Consolas,monospace;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+    .brandtext{display:grid;line-height:1.2}.brandtext strong{font-size:13.5px}.brandtext span{font-size:11px;color:#a9c4cf}
+    .topbar-actions{margin-left:auto;display:flex;align-items:center;gap:6px}
+    .toplinks a{padding:7px 9px;text-decoration:none;font-size:12px;color:#cfe2e8;font-weight:650;border-radius:7px}
+    .toplinks a:hover{background:rgba(255,255,255,.1);color:#fff}
+    .lang-picker{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 4px 0 9px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:12px}
+    .lang-picker select{appearance:none;background:transparent;border:0;color:#fff;font:700 12px Inter,sans-serif;padding:0 14px 0 0;cursor:pointer;outline:none}
+    .lang-picker select option{color:var(--ink)}
+    body{top:0!important}.goog-te-banner-frame,iframe.skiptranslate,.skiptranslate>iframe,#goog-gt-tt,.VIpgJd-ZVi9od-ORHb-OEVmcd{display:none!important}
+    font{background:none!important;box-shadow:none!important}
+
+    main{max-width:1120px;margin:0 auto;padding:26px 18px 60px}
+    .hero{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .hero-icon{width:62px;height:62px;border-radius:16px;display:grid;place-items:center;font-size:30px;
+      background:radial-gradient(circle at 30% 30%,#2bb3a3,#0d6f74);box-shadow:0 6px 16px rgba(13,138,143,.3)}
+    .hero h1{margin:0;font-family:var(--head);font-weight:600;font-size:clamp(22px,3vw,30px);letter-spacing:-.02em;color:var(--navy)}
+    .hero p{margin:3px 0 0;color:var(--muted);font-size:14px}
+
+    .next{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px;box-shadow:0 6px 22px rgba(70,50,20,.06)}
+    .next-play{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:#fff;font-size:18px;text-decoration:none;box-shadow:0 4px 10px rgba(13,138,143,.3)}
+    .next-play:hover{background:var(--teal-dark)}
+    .next-label{font:750 10.5px/1.2 Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .next-title{font-family:var(--head);font-weight:600;font-size:17px;color:var(--navy);text-decoration:none}
+    .next-title:hover{color:var(--teal-dark)}
+    .next-legend{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--muted);justify-content:flex-end}
+    .next-legend span{display:inline-flex;align-items:center;gap:5px}
+
+    .search{display:flex;align-items:center;gap:8px;margin:0 0 16px}
+    .search input{flex:1;max-width:520px;height:40px;border:1px solid #d9d1c1;border-radius:10px;background:#fffdf9;padding:0 12px 0 36px;font-size:14px;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7680' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px 50%}
+    .search input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,138,143,.16)}
+    .expand-all{border:1px solid var(--line);background:#fff;border-radius:9px;height:40px;padding:0 12px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer}
+    .expand-all:hover{color:var(--teal-dark);border-color:var(--teal)}
+
+    /* Units */
+    .unit{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;margin-bottom:14px}
+    .unit-card{background:#fff;border:1px solid var(--line);border-left:6px solid var(--unit);border-radius:12px;overflow:hidden;box-shadow:0 6px 22px rgba(70,50,20,.05)}
+    .unit-head{width:100%;display:flex;align-items:center;gap:14px;text-align:left;border:0;background:transparent;padding:16px 18px;cursor:pointer}
+    .unit-head:hover{background:#fcfaf6}
+    .unit-title{font-family:var(--head);font-weight:600;font-size:17px;color:var(--navy)}
+    .unit-sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .unit-bar{height:7px;border-radius:6px;background:#ece5d8;overflow:hidden;margin-top:9px;max-width:620px}
+    .unit-bar span{display:block;height:100%;background:var(--unit);border-radius:6px;transition:width .4s}
+    .unit-meta{margin-left:auto;display:flex;align-items:center;gap:12px;flex:none;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .chev{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;transition:transform .2s;font-size:13px;color:var(--muted)}
+    .unit.open .unit-head .chev,.lesson.open .chev{transform:rotate(90deg)}
+    .unit-score{border-radius:12px;display:grid;place-content:center;text-align:center;background:#c9cfd2;color:#fff;min-height:96px;align-self:start}
+    .unit-score b{font-family:var(--head);font-size:30px;font-weight:700;line-height:1}
+    .unit-score span{font-size:10.5px;font-weight:800;letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
+    .unit-score.started{background:var(--navy)}.unit-score.done{background:var(--green)}
+    .unit-score a{display:block;margin:10px auto 0;color:#fff;font-size:12px;font-weight:800;text-decoration:none;background:rgba(255,255,255,.18);border-radius:7px;padding:6px 14px}
+    .unit-score a:hover{background:rgba(255,255,255,.3)}
+
+    .lessons{border-top:1px solid var(--line)}
+    .lesson{border-bottom:1px solid #efe9dd}
+    .lesson:last-child{border-bottom:0}
+    .lesson-head{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;text-align:left;padding:11px 18px;cursor:pointer}
+    .lesson-head:hover{background:#fcfaf6}
+    .lesson-num{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 12px Consolas,monospace;background:#e7e1d5;color:var(--muted)}
+    .lesson.started .lesson-num{background:var(--gold);color:#fff}
+    .lesson.complete .lesson-num{background:var(--green);color:#fff}
+    .lesson-name{font-weight:650;font-size:14.5px;flex:1;min-width:0}
+    .lesson-soon{font-size:11px;font-weight:700;color:#a49d90;background:#f3efe6;border-radius:20px;padding:2px 9px}
+    .dots{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}
+    .dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#e7e1d5;color:#fff;text-decoration:none;transition:transform .12s}
+    .dot svg{width:15px;height:15px}
+    .dot:hover{transform:scale(1.12)}
+    .dot.done{background:var(--type)}
+    .dot.up-next{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--gold)}
+    .lesson-head .chev{width:24px;height:24px;font-size:11px}
+    .acts{background:var(--paper-2);border-top:1px solid #efe9dd}
+    .act{display:flex;align-items:center;gap:12px;padding:10px 18px 10px 64px;text-decoration:none;color:var(--ink);border-bottom:1px solid #f0ebe1}
+    .act:last-child{border-bottom:0}
+    .act:hover{background:#fff}
+    .act-icon{flex:none;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--type-bg);color:var(--type)}
+    .act-icon svg{width:16px;height:16px}
+    .act-kind{width:110px;flex:none;font-size:12px;color:var(--muted)}
+    .act-name{flex:1;font-weight:650;font-size:14px}
+    .act-state{flex:none;font-size:12px;font-weight:800;color:var(--muted)}
+    .act.done .act-state{color:var(--green)}
+    .act.up-next .act-state{color:#b87b0a}
+
+    .type-video{--type:#c4453a;--type-bg:#fdeceb}.type-example{--type:#7654c4;--type-bg:#f1edfb}
+    .type-quiz{--type:#b83280;--type-bg:#fbebf4}.type-assignment{--type:#1f6fb2;--type-bg:#e8f1fa}.type-project{--type:#b8760a;--type-bg:#fdf3df}
+    .legend-dot{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--type);color:#fff}
+    .legend-dot svg{width:10px;height:10px}
+
+    .empty{padding:30px;text-align:center;color:var(--muted)}
+    footer{max-width:1120px;margin:0 auto;padding:0 18px 30px;color:#9a9488;font-size:11.5px}
+    mark{background:#fff0b8;border-radius:3px;padding:0 1px}
+
+    @media(max-width:760px){
+      .unit{grid-template-columns:1fr}
+      .unit-score{min-height:0;padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+      .unit-score b{font-size:20px}.unit-score a{margin:0}
+      .unit-meta .count{display:none}
+      .lesson-head{flex-wrap:wrap}.dots{width:100%;justify-content:flex-start;padding-left:46px}
+      .act{padding-left:18px}.act-kind{display:none}
+      .next{flex-wrap:wrap}.next-legend{margin-left:0;justify-content:flex-start}
+      .toplinks{display:none}.brandtext span{display:none}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/turtlecourse/home/" aria-label="Python Turtle Course home">
+      <span class="brandmark">&gt;_</span>
+      <span class="brandtext"><strong>Python Turtle Course</strong><span>Comp Sci Discoveries</span></span>
+    </a>
+    <div class="topbar-actions">
+      <nav class="toplinks" aria-label="Other learning tools">
+        <a href="/turtle/" target="_blank" rel="noopener">Sandbox ↗</a>
+        <a href="/tracetable/" target="_blank" rel="noopener">Trace Tables ↗</a>
+        <a href="/turtlereference/" target="_blank" rel="noopener">Commands ↗</a>
+      </nav>
+      <div class="view-settings"></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-icon" aria-hidden="true">🐢</div>
+      <div>
+        <h1>Comp Sci Discoveries 2026–2027</h1>
+        <p>Learn Python with Tracy the Turtle. Pick up where you left off, or open any unit below.</p>
+      </div>
+    </section>
+
+    <section class="next" id="nextBox" aria-label="Next assignment">
+      <a class="next-play" id="nextPlay" href="/turtlecourse/#1.1.1" aria-label="Start next assignment">▶</a>
+      <div>
+        <div class="next-label" id="nextLabel">Start here</div>
+        <a class="next-title" id="nextTitle" href="/turtlecourse/#1.1.1">1.1.1 Intro to Python with Tracy the Turtle</a>
+      </div>
+      <div class="next-legend" id="legend" aria-label="Activity types"></div>
+    </section>
+
+    <div class="search">
+      <input id="search" type="search" placeholder="Search for an activity or lesson" aria-label="Search for an activity or lesson" autocomplete="off">
+      <button class="expand-all" id="expandAll" type="button">Expand all</button>
+    </div>
+
+    <div id="units"></div>
+    <div class="empty" id="empty" hidden>No activities match your search.</div>
+  </main>
+  <footer>Progress is saved on this browser. For graded work, follow your teacher's submission directions.</footer>
+
+<script>
+(function(){
+"use strict";
+var ICON={
+  video:'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 7.6v4.8l4-2.4z" fill="currentColor"/></svg>',
+  example:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 6 3 10l4 4M13 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  quiz:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.9 8.1a2.2 2.2 0 1 1 3.2 2c-.7.4-1.1.8-1.1 1.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="10" cy="14.2" r="1" fill="currentColor"/></svg>',
+  assignment:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.8 3.5 16.5 7.2 8 15.7l-4.3.6.6-4.3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  project:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L2.8 8.1l5-.7z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>'
+};
+var KIND={video:"Video",example:"Example",quiz:"Quiz",assignment:"Assignment",project:"Project"};
+/* Course outline. Activities with an `id` link to the lesson page; lessons
+   without activities are shown as coming soon. Keep 1.1 in sync with
+   LESSONS in /turtlecourse/unit1.js. */
+var COURSE=[
+  {n:1,title:"Tracy's World",sub:"Unit 1: Python Basics",color:"#6dbb3a",lessons:[
+    {n:"1.1",title:"Intro to Python with Tracy the Turtle",acts:[
+      {id:"1.1.1",type:"video",name:"Intro to Python with Tracy the Turtle"},
+      {id:"1.1.2",type:"example",name:"Slinky (Example Program)"},
+      {id:"1.1.3",type:"quiz",name:"Intro to Tracy"},
+      {id:"1.1.4",type:"assignment",name:"Stretched Slinky"},
+      {id:"1.1.5",type:"assignment",name:"Sequencing with Trace Tables"},
+      {id:"1.1.6",type:"video",name:"How Trace Tables Work & How to Make a Sandbox Program"},
+      {id:"1.1.7",type:"project",name:"Slinky Coil Challenge"},
+      {id:"1.1.8",type:"assignment",name:"Color & Background Color"}
+    ]},
+    {n:"1.2",title:"Programming with Tracy",acts:[]},
+    {n:"1.3",title:"Tracy's Grid World",acts:[]},
+    {n:"1.4",title:"Tracy's World Quiz",acts:[]}
+  ]},
+  {n:2,title:"Moving Tracy",sub:"Unit 2: Python Basics",color:"#1fa3d8",lessons:[]},
+  {n:3,title:"Designing and Communicating Solutions",sub:"Unit 3: Python Basics",color:"#f0a21a",lessons:[]},
+  {n:4,title:"[Project] Design a Mural",sub:"Unit 4: Python Basics",color:"#a8322b",lessons:[]}
+];
+var KEY="dsteckler-turtlecourse-unit1-v1",UI_KEY="dsteckler-turtlecourse-home-v1";
+var done={};try{var st=JSON.parse(localStorage.getItem(KEY)||"null");if(st&&st.done)done=st.done}catch(e){}
+var ui={open:{"u1":true,"l1.1":true}};try{var u=JSON.parse(localStorage.getItem(UI_KEY)||"null");if(u&&u.open)ui=u}catch(e){}
+function saveUi(){try{localStorage.setItem(UI_KEY,JSON.stringify(ui))}catch(e){}}
+function esc(x){return String(x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function href(a){return "/turtlecourse/#"+a.id}
+
+var all=[];COURSE.forEach(function(u){u.lessons.forEach(function(l){l.acts.forEach(function(a){all.push(a)})})});
+var next=all.filter(function(a){return !done[a.id]})[0];
+
+// Next assignment + legend
+if(next){
+  document.getElementById("nextLabel").textContent=all.some(function(a){return done[a.id]})?"Next assignment":"Start here";
+  document.getElementById("nextTitle").textContent=next.id+" "+next.name;
+  document.getElementById("nextTitle").href=document.getElementById("nextPlay").href=href(next);
+}else{
+  document.getElementById("nextLabel").textContent="All available activities complete";
+  document.getElementById("nextTitle").textContent="Review Unit 1";
+}
+document.getElementById("legend").innerHTML=Object.keys(KIND).map(function(t){return '<span class="type-'+t+'"><i class="legend-dot">'+ICON[t]+'</i>'+KIND[t]+'</span>'}).join("");
+
+function render(q){
+  q=(q||"").trim().toLowerCase();
+  var hl=function(text){if(!q)return esc(text);var i=text.toLowerCase().indexOf(q);return i<0?esc(text):esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+q.length))+"</mark>"+esc(text.slice(i+q.length))};
+  var shown=0;
+  var html=COURSE.map(function(u){
+    var acts=[];u.lessons.forEach(function(l){acts=acts.concat(l.acts)});
+    var finished=acts.filter(function(a){return done[a.id]}).length,pct=acts.length?Math.round(finished/acts.length*100):0;
+    var uMatch=!q||(u.title+" "+u.sub).toLowerCase().indexOf(q)>-1;
+    var lessonsHtml=u.lessons.map(function(l){
+      var lMatch=uMatch||(l.n+" "+l.title).toLowerCase().indexOf(q)>-1;
+      var aMatches=l.acts.filter(function(a){return lMatch||(a.id+" "+a.name+" "+KIND[a.type]).toLowerCase().indexOf(q)>-1});
+      if(q&&!lMatch&&!aMatches.length)return "";
+      var ld=l.acts.filter(function(a){return done[a.id]}).length,cls=l.acts.length&&ld===l.acts.length?"complete":ld?"started":"";
+      var open=q?aMatches.length>0:!!ui.open["l"+l.n];
+      var dots=l.acts.map(function(a){return '<a class="dot type-'+a.type+(done[a.id]?' done':'')+(next&&a.id===next.id?' up-next':'')+'" href="'+href(a)+'" title="'+esc(a.id+" "+a.name+" · "+KIND[a.type]+(done[a.id]?" · done":""))+'" onclick="event.stopPropagation()">'+ICON[a.type]+'</a>'}).join("");
+      shown+=q?aMatches.length+(lMatch?1:0):1;
+      return '<div class="lesson '+cls+(open?' open':'')+'" data-lesson="'+l.n+'">'+
+        '<button type="button" class="lesson-head" aria-expanded="'+open+'"'+(l.acts.length?'':' disabled')+'>'+
+          '<span class="lesson-num">'+esc(l.n)+'</span><span class="lesson-name">'+hl(l.title)+'</span>'+
+          (l.acts.length?'<span class="dots">'+dots+'</span><span class="chev" aria-hidden="true">›</span>':'<span class="lesson-soon">Coming soon</span>')+
+        '</button>'+
+        (l.acts.length?'<div class="acts"'+(open?'':' hidden')+'>'+(q?aMatches:l.acts).map(function(a){
+          var isNext=next&&a.id===next.id;
+          return '<a class="act'+(done[a.id]?' done':'')+(isNext?' up-next':'')+'" href="'+href(a)+'"><span class="act-icon type-'+a.type+'">'+ICON[a.type]+'</span><span class="act-kind">'+KIND[a.type]+'</span><span class="act-name">'+hl(a.id+" "+a.name)+'</span><span class="act-state">'+(done[a.id]?"✓ Done":isNext?"▶ Up next":"")+'</span></a>';
+        }).join("")+'</div>':'')+
+      '</div>';
+    }).join("");
+    if(q&&!uMatch&&!lessonsHtml)return "";
+    if(q&&uMatch&&!u.lessons.length)shown++;
+    var open=q?true:!!ui.open["u"+u.n];
+    var state=pct===100?"done":pct>0?"started":"";
+    return '<section class="unit'+(open?' open':'')+'" data-unit="'+u.n+'" style="--unit:'+u.color+'">'+
+      '<div class="unit-card">'+
+        '<button type="button" class="unit-head" aria-expanded="'+open+'">'+
+          '<div style="flex:1;min-width:0"><div class="unit-title">'+u.n+'. '+hl(u.title)+'</div><div class="unit-sub">'+esc(u.sub)+'</div>'+
+          '<div class="unit-bar"><span style="width:'+pct+'%"></span></div></div>'+
+          '<span class="unit-meta"><span class="count">'+(u.lessons.length?u.lessons.length+" lessons":"Coming soon")+'</span><span class="chev" aria-hidden="true">›</span></span>'+
+        '</button>'+
+        '<div class="lessons"'+(open&&u.lessons.length?'':' hidden')+'>'+lessonsHtml+'</div>'+
+      '</div>'+
+      '<div class="unit-score '+state+'"><b>'+pct+'%</b><span>'+(pct===100?"Complete":pct?"Completed":"Not started")+'</span>'+
+        (acts.length&&pct<100?'<a href="'+href(acts.filter(function(a){return !done[a.id]})[0])+'">'+(pct?"Resume":"Start")+'</a>':'')+'</div>'+
+    '</section>';
+  }).join("");
+  document.getElementById("units").innerHTML=html;
+  document.getElementById("empty").hidden=!q||shown>0;
+}
+render();
+
+document.getElementById("units").addEventListener("click",function(e){
+  var uh=e.target.closest(".unit-head"),lh=e.target.closest(".lesson-head");
+  if(lh){var l=lh.parentNode,k="l"+l.dataset.lesson;ui.open[k]=!l.classList.contains("open");saveUi();render(document.getElementById("search").value);return}
+  if(uh){var u=uh.closest(".unit"),k2="u"+u.dataset.unit;ui.open[k2]=!u.classList.contains("open");saveUi();render(document.getElementById("search").value)}
+});
+document.getElementById("search").addEventListener("input",function(e){render(e.target.value)});
+document.getElementById("expandAll").addEventListener("click",function(){
+  var anyClosed=COURSE.some(function(u){return !ui.open["u"+u.n]||u.lessons.some(function(l){return l.acts.length&&!ui.open["l"+l.n]})});
+  COURSE.forEach(function(u){ui.open["u"+u.n]=anyClosed;u.lessons.forEach(function(l){ui.open["l"+l.n]=anyClosed})});
+  this.textContent=anyClosed?"Collapse all":"Expand all";saveUi();render(document.getElementById("search").value);
+});
+})();
+</script>
+<script defer src="/turtlecourse/language.js?v=3"></script>
+</body>
+</html>
