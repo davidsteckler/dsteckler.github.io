@@ -86,10 +86,37 @@ function field(key,title,hint,rows){
     (rows?'<textarea id="answer-'+key+'" data-answer="'+key+'" rows="'+rows+'"></textarea>':'<input id="answer-'+key+'" data-answer="'+key+'" type="text" autocomplete="off">')+
     (hint?'<div class="field-help">'+hint+'</div>':'')+'</div>';
 }
+var VIDEO_PROMPTS={
+  "1.1.1":["What is Tracy, and where does she start?","What does the number inside circle() or forward() change?","What happens when a command is typed incorrectly?"],
+  "1.1.6":["What goes in each column of a trace table?","Why do we write down the line number for each step?","How do you start a new sandbox program?"]
+};
 function videoContent(videoId,intro){
+  var id=LESSONS[currentIndex].id,prompts=VIDEO_PROMPTS[id]||[];
   return '<h2>'+intro+'</h2>'+
-    '<div class="video-wrap"><iframe class="youtube-frame" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>'+
-    '<p class="linkline">When you finish, select <strong>Mark watched &amp; Next</strong>. Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a></p></div>';
+    '<div class="video-layout">'+
+      '<div class="video-main">'+
+        '<div class="video-wrap"><iframe class="youtube-frame" id="ytPlayer" src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?enablejsapi=1&rel=0&origin='+encodeURIComponent(location.origin)+'" title="'+escapeHtml(intro)+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>'+
+        '<div class="video-tools" role="toolbar" aria-label="Video controls">'+
+          '<button type="button" class="vt-btn" data-video-skip="-10" title="Back 10 seconds">↺ 10s</button>'+
+          '<button type="button" class="vt-btn" data-video-skip="10" title="Forward 10 seconds">10s ↻</button>'+
+          '<span class="vt-label">Speed</span>'+
+          [0.75,1,1.25,1.5].map(function(r){return '<button type="button" class="vt-btn vt-speed'+(r===1?' on':'')+'" data-video-speed="'+r+'">'+r+'×</button>'}).join("")+
+          '<span class="vt-status" id="videoStatus" aria-live="polite"></span>'+
+        '</div>'+
+        '<p class="linkline">When you finish, select <strong>Mark watched &amp; Next</strong>. Video not loading? <a href="https://www.youtube.com/watch?v='+encodeURIComponent(videoId)+'" target="_blank" rel="noopener">Open it on YouTube ↗</a></p>'+
+      '</div>'+
+      '<aside class="notes-panel" aria-label="Your notes">'+
+        '<div class="notes-head"><strong>My notes</strong><span id="notesSaved">Saves automatically</span></div>'+
+        (prompts.length?'<div class="watch-for"><div class="watch-label">Watch for</div>'+prompts.map(function(q){return '<button type="button" class="watch-q" data-prompt="'+escapeHtml(q)+'" title="Add this question to your notes">+ '+escapeHtml(q)+'</button>'}).join("")+'</div>':'')+
+        '<textarea id="answer-notes" class="notes-text" data-answer="notes" spellcheck="true" placeholder="Type notes while you watch.&#10;&#10;Tip: click ⏱ Add time to stamp the moment — click the stamp later to jump back."></textarea>'+
+        '<div class="notes-actions">'+
+          '<button type="button" class="vt-btn primary" id="stampBtn" title="Insert the current video time (Alt+T)">⏱ Add time</button>'+
+          '<button type="button" class="vt-btn" id="pauseNoteBtn" title="Pause the video and jump to your notes (Alt+N)">❚❚ Pause &amp; write</button>'+
+          '<button type="button" class="vt-btn" id="copyNotesBtn" title="Copy your notes">Copy</button>'+
+        '</div>'+
+        '<div class="stamp-list" id="stampList" aria-label="Jump to a moment"></div>'+
+      '</aside>'+
+    '</div>';
 }
 function slinkyContent(){
   return '<h2>Run the Slinky program</h2>'+
@@ -199,6 +226,79 @@ function contentFor(id){
     default:return "";
   }
 }
+/* ---- Video lessons: YouTube player API for timestamps, speed, skipping ---- */
+var ytPlayer=null,ytApiState="none",ytQueue=[];
+function fmtTime(t){t=Math.max(0,Math.floor(t));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0")}
+function parseTime(x){var m=/^(\d+):(\d{2})$/.exec(x);return m?Number(m[1])*60+Number(m[2]):null}
+function videoStatus(msg){var n=el("videoStatus");if(n)n.textContent=msg||""}
+function withYT(cb){
+  if(window.YT&&window.YT.Player){cb();return}
+  ytQueue.push(cb);
+  if(ytApiState!=="none")return;
+  ytApiState="loading";
+  var prev=window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady=function(){ytApiState="ready";if(prev)try{prev()}catch(e){};var q=ytQueue;ytQueue=[];q.forEach(function(f){f()})};
+  var tag=document.createElement("script");tag.src="https://www.youtube.com/iframe_api";
+  tag.onerror=function(){ytApiState="failed";videoStatus("Video tools unavailable on this network — notes still save.")};
+  document.head.appendChild(tag);
+}
+function setupVideo(){
+  ytPlayer=null;
+  var frameEl=el("ytPlayer");if(!frameEl)return;
+  withYT(function(){
+    if(!document.body.contains(frameEl))return;
+    try{ytPlayer=new YT.Player(frameEl,{events:{onReady:function(){videoStatus("")}}})}catch(e){ytPlayer=null}
+  });
+  renderStamps();
+}
+function playerOk(){return ytPlayer&&typeof ytPlayer.getCurrentTime==="function"}
+function needPlayer(){if(playerOk())return true;videoStatus("Start the video first, then try again.");return false}
+function notesBox(){return el("answer-notes")}
+function saveNotes(){var n=notesBox();if(n)n.dispatchEvent(new Event("input",{bubbles:true}))}
+function insertAtCursor(text){
+  var n=notesBox();if(!n)return;
+  var start=n.selectionStart!=null?n.selectionStart:n.value.length,end=n.selectionEnd!=null?n.selectionEnd:start;
+  var before=n.value.slice(0,start),pre=(before&&!/\n$/.test(before))?"\n":"";
+  n.value=before+pre+text+n.value.slice(end);
+  var pos=(before+pre+text).length;n.focus();n.setSelectionRange(pos,pos);saveNotes();
+}
+function renderStamps(){
+  var list=el("stampList"),n=notesBox();if(!list||!n)return;
+  var seen={},chips=[];
+  (n.value.match(/\[(\d+:\d{2})\]/g)||[]).forEach(function(m){var t=m.slice(1,-1);if(!seen[t]){seen[t]=1;chips.push(t)}});
+  chips.sort(function(a,b){return parseTime(a)-parseTime(b)});
+  list.innerHTML=chips.length?'<span class="watch-label">Jump to</span>'+chips.map(function(t){return '<button type="button" class="stamp-chip" data-seek="'+t+'">▶ '+t+'</button>'}).join(""):"";
+}
+function stampNow(){if(!needPlayer())return;insertAtCursor("["+fmtTime(ytPlayer.getCurrentTime())+"] ");videoStatus("")}
+function pauseAndWrite(){
+  if(playerOk()){try{ytPlayer.pauseVideo()}catch(e){}}
+  var n=notesBox();if(!n)return;
+  if(playerOk())insertAtCursor("["+fmtTime(ytPlayer.getCurrentTime())+"] ");else n.focus();
+}
+body.addEventListener("click",function(event){
+  var t=event.target.closest("button");if(!t||!body.contains(t))return;
+  if(t.id==="stampBtn"){stampNow();return}
+  if(t.id==="pauseNoteBtn"){pauseAndWrite();return}
+  if(t.id==="copyNotesBtn"){
+    var n=notesBox();if(!n)return;
+    var text=LESSONS[currentIndex].id+" "+LESSONS[currentIndex].name+" — notes\n\n"+n.value;
+    (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject()).then(function(){t.textContent="Copied ✓";setTimeout(function(){t.textContent="Copy"},1500)},function(){n.select();document.execCommand("copy")});
+    return;
+  }
+  if(t.dataset.prompt){insertAtCursor("Q: "+t.dataset.prompt+"\nA: ");t.classList.add("used");return}
+  if(t.dataset.seek){if(!needPlayer())return;ytPlayer.seekTo(parseTime(t.dataset.seek),true);ytPlayer.playVideo();return}
+  if(t.dataset.videoSkip){if(!needPlayer())return;ytPlayer.seekTo(Math.max(0,ytPlayer.getCurrentTime()+Number(t.dataset.videoSkip)),true);return}
+  if(t.dataset.videoSpeed){
+    if(!needPlayer())return;ytPlayer.setPlaybackRate(Number(t.dataset.videoSpeed));
+    body.querySelectorAll(".vt-speed").forEach(function(b){b.classList.toggle("on",b===t)});return;
+  }
+});
+body.addEventListener("input",function(event){if(event.target.id==="answer-notes"){renderStamps();var s=el("notesSaved");if(s)s.textContent="Saved ✓"}});
+document.addEventListener("keydown",function(event){
+  if(!event.altKey||!el("answer-notes"))return;
+  var k=event.key.toLowerCase();
+  if(k==="t"){event.preventDefault();stampNow()}else if(k==="n"){event.preventDefault();pauseAndWrite()}
+});
 function restoreDraft(){
   var data=answers();
   body.querySelectorAll("[data-answer]").forEach(function(input){
@@ -229,6 +329,8 @@ function render(){
   body.scrollTop=0;
   if(window.TurtleCourseExamples)window.TurtleCourseExamples.render(body);
   restoreDraft();
+  workspace.classList.toggle("video-mode",l.kind==="Video");
+  if(l.kind==="Video")setupVideo();
   previous.disabled=currentIndex===0;
   workspace.classList.toggle("no-editor",!l.editor);
   editorCard.hidden=!l.editor;
@@ -263,7 +365,7 @@ function completeAndNext(){
   if(currentIndex<LESSONS.length-1){gotoIndex(currentIndex+1)}else showFinish();
 }
 function showFinish(){
-  finishView=true;renderMenu();workspace.classList.add("no-editor");editorCard.hidden=true;frame.removeAttribute("src");
+  finishView=true;renderMenu();workspace.classList.add("no-editor");workspace.classList.remove("video-mode");editorCard.hidden=true;frame.removeAttribute("src");
   el("breadcrumb").textContent="Unit 1 / Tracy's World";
   el("lessonTitle").textContent="Unit 1 complete";
   el("lessonSubtitle").textContent="You have worked through the eight activities in Tracy's World.";
