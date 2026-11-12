@@ -31,9 +31,9 @@ var STARTERS={
 };
 var TRACE=["forward(100)","circle(10)","forward(10)","circle(20)","circle(30)","forward(30)"];
 var QUIZ=[
-  {q:"How would I tell Tracy to move forward 100 pixels?",options:["forward 100","move(100)","Tracy, move forward 100 pixels","forward(100)"],correct:3,hint:"A Python command needs the exact function name and parentheses."},
-  {q:"When using the circle() command, what value do we put inside the parentheses?",options:["The radius of the circle","The center of the circle","The diameter of the circle","The width of the circle"],correct:0,hint:"Look at how the number 35 is used in the Slinky example."},
-  {q:"When Tracy is facing right, from what location does she start drawing her circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,hint:"Run a single circle and look at where Tracy begins."}
+  {q:"How would I tell Tracy to move forward 100 pixels?",options:["forward 100","move(100)","Tracy, move forward 100 pixels","forward(100)"],correct:3,hint:"A Python command needs the exact function name and parentheses.",why:"forward(100) uses the exact command name, with the distance inside parentheses."},
+  {q:"When using the circle() command, what value do we put inside the parentheses?",options:["The radius of the circle","The center of the circle","The diameter of the circle","The width of the circle"],correct:0,hint:"Look at how the number 35 is used in the Slinky example.",why:"The number is the radius: the distance from the center of the circle to its edge."},
+  {q:"When Tracy is facing right, from what location does she start drawing her circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,hint:"Run a single circle and look at where Tracy begins.",why:"Facing right, Tracy curves up and to the left, so the circle sits above her. She starts at the bottom."}
 ];
 var KEY="dsteckler-turtlecourse-unit1-v1";
 var state={done:{},draft:{},checks:{},ran:{},validatedCode:{},experiments:{}};
@@ -137,14 +137,85 @@ function slinkyContent(){
     '<div class="mini-note">Once you have tested all three versions and recorded your five responses, click <strong>Save &amp; Next</strong>. Your answers save here; the Turtle editor keeps your code separately.</div>';
 }
 function quizContent(){
-  return '<h2>Check for understanding</h2><p>Choose an answer for each question. Use <strong>Check answers</strong> to see what you understand before moving on.</p>'+
+  var d=answers();
+  return '<div class="quiz-top"><div><h2>Check for understanding</h2><p>Pick one answer for each question, then click <strong>Check answers</strong>. You\'ll see the right answers and can retake the quiz any time.</p></div>'+
+    '</div>'+
+    '<div class="quiz-progress" id="quizProgress">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"></span>'}).join("")+'</div>'+
   QUIZ.map(function(q,i){
-    return '<div class="quiz-block"><div class="quiz-count">Question '+(i+1)+' of 3</div><div class="quiz-title">'+escapeHtml(q.q.replace("circle()","circle()"))+'</div>'+
+    return '<div class="quiz-block" id="quizBlock'+i+'"><div class="quiz-count">Question '+(i+1)+' of '+QUIZ.length+'</div><div class="quiz-title">'+escapeHtml(q.q)+'</div>'+
       '<div class="radio-options">'+q.options.map(function(o,j){
-        return '<label class="radio-option"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span>'+escapeHtml(o)+'</span></label>';
+        return '<label class="radio-option" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter">'+"ABCD"[j]+'</span><span class="opt-text">'+escapeHtml(o)+'</span><span class="opt-tag"></span></label>';
       }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div>';
-  }).join("")+'<div class="mini-note">You can change an answer and check again. A score of 3 out of 3 completes this activity.</div>';
+  }).join("")+
+  '<div class="quiz-actions"><button type="button" class="btn" id="quizRetake">↺ Retake quiz</button></div>';
 }
+function quizReveal(animate){
+  var d=answers(),pass=0;
+  QUIZ.forEach(function(q,i){
+    var pick=d["q"+i]===undefined?null:Number(d["q"+i]),ok=pick===q.correct;if(ok)pass++;
+    var block=el("quizBlock"+i),res=el("quizResult"+i);
+    block.classList.remove("is-right","is-wrong","anim");
+    block.classList.add(ok?"is-right":"is-wrong","revealed");
+    block.querySelectorAll(".radio-option").forEach(function(opt){
+      var j=Number(opt.dataset.opt),tag=opt.querySelector(".opt-tag");
+      opt.classList.remove("opt-correct","opt-wrong");
+      opt.querySelector("input").disabled=true;
+      if(j===q.correct){opt.classList.add("opt-correct");tag.textContent=ok?"✓ Your answer":"✓ Correct answer"}
+      else if(j===pick){opt.classList.add("opt-wrong");tag.textContent="✗ Your answer"}
+      else tag.textContent="";
+    });
+    res.className="quiz-result "+(ok?"good":"bad");
+    res.innerHTML=(ok?"<strong>Correct!</strong> ":pick===null?"<strong>No answer chosen.</strong> ":"<strong>Not quite.</strong> ")+escapeHtml(q.why);
+    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className=ok?"right":"wrong";
+    if(animate){void block.offsetWidth;block.classList.add("anim");block.style.animationDelay=(i*.18)+"s"}
+  });
+  d.score=pass;d.best=Math.max(Number(d.best)||0,pass);d.revealed=true;
+  setHeadScore(pass,d,animate);
+  return pass;
+}
+function setHeadScore(pass,d,animate){
+  var hs=el("headScore"),cls=pass===null?"":pass===QUIZ.length?"perfect":pass>0?"some":"none";
+  hs.hidden=false;el("headRetake").hidden=false;
+  hs.className="head-score "+cls;
+  hs.innerHTML='<span>Score</span><b>'+(pass===null?"–":pass)+"/"+QUIZ.length+'</b>'+(d.best!==undefined&&(pass===null||d.attempts>1)?'<em>Best '+d.best+'/'+QUIZ.length+'</em>':'');
+  if(animate){hs.classList.remove("pop");void hs.offsetWidth;hs.classList.add("pop")}
+}
+function quizCheck(){
+  var d=answers(),unanswered=QUIZ.filter(function(_,i){return d["q"+i]===undefined}).length;
+  if(unanswered){
+    QUIZ.forEach(function(_,i){var r=el("quizResult"+i);if(d["q"+i]===undefined){r.className="quiz-result bad";r.textContent="Choose an answer.";var b=el("quizBlock"+i);b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")}});
+    makeFeedback(false,"Answer all "+QUIZ.length+" questions first.",[]);return;
+  }
+  d.attempts=(Number(d.attempts)||0)+1;
+  var pass=quizReveal(true);
+  state.checks["1.1.3"]=true;persist();refreshAction();
+  if(pass===QUIZ.length){makeFeedback(true,"Perfect score! "+pass+" / "+QUIZ.length+". Click Save & Next to continue.",[]);celebrate()}
+  else makeFeedback(false,pass+" / "+QUIZ.length+" correct. Read the explanations, then retake the quiz or continue.",[]);
+}
+function quizRetake(){
+  var d=answers();
+  QUIZ.forEach(function(_,i){delete d["q"+i]});delete d.revealed;delete d.score;
+  state.checks["1.1.3"]=false;persist();
+  var keep={best:d.best,attempts:d.attempts};
+  body.innerHTML=quizContent();restoreDraft();
+  setHeadScore(null,d,false);
+  el("activityFeedback").hidden=true;refreshAction();body.scrollTop=0;
+  setStatus("New attempt · choose your answers");
+}
+function celebrate(){
+  var layer=document.createElement("div");layer.className="confetti";layer.setAttribute("aria-hidden","true");
+  var colors=["#087f8c","#24835b","#d29d43","#e8705a","#5b8def","#9b6bd6"];
+  for(var i=0;i<70;i++){
+    var c=document.createElement("i");
+    c.style.left=(Math.random()*100)+"%";c.style.background=colors[i%colors.length];
+    c.style.animationDelay=(Math.random()*.5)+"s";c.style.animationDuration=(1.6+Math.random()*1.3)+"s";
+    c.style.setProperty("--drift",(Math.random()*160-80)+"px");c.style.setProperty("--spin",(Math.random()*720-360)+"deg");
+    layer.appendChild(c);
+  }
+  document.body.appendChild(layer);setTimeout(function(){layer.remove()},3400);
+}
+body.addEventListener("click",function(e){if(e.target.closest("#quizRetake"))quizRetake()});
+el("headRetake").addEventListener("click",quizRetake);
 // Both the small reference and the overlay use the exact same example commands.
 var EXAMPLE_PROGRAMS={
   stretched:Array(5).fill("circle(35)\nforward(40)").join("\n"),
@@ -348,8 +419,10 @@ function render(){
   }
   renderMenu();refreshAction();updateProgress();
   setStatus(state.done[l.id]?"Previously completed · progress saved":"Answers save automatically on this device");
-  if(state.checks[l.id]) {
-    var message=l.id==="1.1.3"?"3 out of 3 correct.":l.id==="1.1.5"?"All six rows correct.":"Your program passed its last check.";
+  el("headScore").hidden=true;el("headRetake").hidden=true;
+  if(l.id==="1.1.3"){if(answers().revealed)quizReveal(false);else setHeadScore(null,answers(),false)}
+  if(state.checks[l.id]&&l.id!=="1.1.3") {
+    var message=l.id==="1.1.5"?"All six rows correct.":"Your program passed its last check.";
     makeFeedback(true,message,[]);
   }
   history.replaceState(null,"","#"+l.id);
@@ -365,7 +438,7 @@ function completeAndNext(){
   if(currentIndex<LESSONS.length-1){gotoIndex(currentIndex+1)}else showFinish();
 }
 function showFinish(){
-  finishView=true;renderMenu();workspace.classList.add("no-editor");workspace.classList.remove("video-mode");editorCard.hidden=true;frame.removeAttribute("src");
+  finishView=true;el("headScore").hidden=true;el("headRetake").hidden=true;renderMenu();workspace.classList.add("no-editor");workspace.classList.remove("video-mode");editorCard.hidden=true;frame.removeAttribute("src");
   el("breadcrumb").textContent="Unit 1 / Tracy's World";
   el("lessonTitle").textContent="Unit 1 complete";
   el("lessonSubtitle").textContent="You have worked through the eight activities in Tracy's World.";
@@ -375,17 +448,6 @@ function showFinish(){
   previous.disabled=false;action.textContent="Review Unit 1 ↺";
   history.replaceState(null,"","#complete");
   updateProgress();setStatus("All 8 activities completed on this device");
-}
-function quizCheck(){
-  var data=answers(),unanswered=0,pass=0,notes=[];
-  QUIZ.forEach(function(q,i){
-    var p=el("quizResult"+i);p.className="quiz-result";
-    if(data["q"+i]===undefined){unanswered++;p.textContent="Choose an answer.";p.classList.add("bad");return}
-    if(Number(data["q"+i])===q.correct){pass++;p.textContent="✓ Correct";p.classList.add("good")}
-    else{p.textContent="Try again. "+q.hint;p.classList.add("bad")}
-  });
-  if(pass===3){state.checks["1.1.3"]=true;persist();refreshAction();makeFeedback(true,"3 / 3 correct. Save and continue.",[])}
-  else{state.checks["1.1.3"]=false;persist();refreshAction();makeFeedback(false,pass+" / 3 correct.",[unanswered?"Answer all three questions.":"Review the questions marked Try again."])}
 }
 function traceCheck(){
   var data=answers(),bad=[];

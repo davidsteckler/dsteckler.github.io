@@ -864,7 +864,7 @@
 <link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
-<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=8-shell">
+<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=11-errors">
 <link rel="stylesheet" href="/turtle/preview-embed.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1492,6 +1492,25 @@ for i in range(4):
     }
   }
 
+  function showCodeErrorBar(info){
+    var bar=document.getElementById("unit1ErrorBar");
+    if(!bar){
+      bar=document.createElement("button");bar.type="button";bar.id="unit1ErrorBar";bar.className="unit1-error-bar";
+      var cm=document.querySelector(".code-panel .CodeMirror");cm.parentNode.insertBefore(bar,cm);
+      editor.on("change",function(){bar.classList.add("stale")});
+      bar.addEventListener("click",function(){
+        var n=Number(bar.dataset.line);if(!n)return;
+        editor.focus();editor.setCursor({line:n-1,ch:editor.getLine(n-1).length});editor.scrollIntoView({line:n-1,ch:0},90);
+      });
+    }
+    bar.dataset.line=info.line||"";
+    bar.textContent="";
+    var b=document.createElement("b");b.textContent=info.line?"⚠ Line "+info.line:"⚠ Error";bar.appendChild(b);
+    var t=document.createElement("span");t.textContent=info.title;bar.appendChild(t);
+    if(info.line){var g=document.createElement("em");g.textContent="Go to line →";bar.appendChild(g)}
+    bar.classList.remove("stale");bar.hidden=false;
+  }
+  function hideCodeErrorBar(){var bar=document.getElementById("unit1ErrorBar");if(bar)bar.hidden=true}
   function highlightError(line,token){
     clearErrorHighlight();
     var n=Number(line);
@@ -1572,7 +1591,7 @@ for i in range(4):
   }
 
   function setOutput(html){
-    if(UNIT1_EMBED)document.body.classList.remove("unit1-has-error");
+    if(UNIT1_EMBED){document.body.classList.remove("unit1-has-error");hideCodeErrorBar()}
     output.innerHTML = html;
     output.scrollTop = output.scrollHeight;
   }
@@ -1710,7 +1729,14 @@ for i in range(4):
 
   function renderError(err){
     var info=analyzeError(err);
+    if(UNIT1_EMBED&&info.line&&info.line>editor.lineCount()){
+      // Python noticed the problem after the end of the file: point at the last real line.
+      var last=editor.lineCount();
+      while(last>1&&!editor.getLine(last-1).trim())last--;
+      info.line=last;info.lineText=editor.getLine(last-1).trim();
+    }
     highlightError(info.line,info.token);
+    if(UNIT1_EMBED)showCodeErrorBar(info);
     if(UNIT1_EMBED){
       document.body.classList.add("unit1-has-error");
       output.textContent="";
