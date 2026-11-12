@@ -101,7 +101,7 @@ function field(key,title,hint,rows){
    parts they actually watch count toward the WATCH_NEEDED percentage. */
 var WATCH_NEEDED=90;
 var VIDEO_CHAPTERS={
-  "1.1.1":[],
+  "1.1.1":[[0,"The forward() command"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors, parentheses & tips"]],
   "1.1.6":[]
 };
 var VIDEO_PROMPTS={
