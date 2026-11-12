@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f1e9">
+  <meta name="description" content="The world's smallest violin. A tiny performance for your troubles.">
+  <title>World's Smallest Violin</title>
+  <style>
+    :root { color-scheme: light; --ink:#2b2926; --muted:#81786e; --paper:#f5f1e9; --wood:#a54e32; --gold:#cc9a59; }
+    * { box-sizing:border-box }
+    html,body { width:100%; min-height:100%; margin:0; }
+    body {
+      background: radial-gradient(ellipse at 50% 44%, #fffdf8 0%, #f5f1e9 58%, #eae3d7 120%);
+      color:var(--ink); font-family:Georgia, 'Times New Roman', serif;
+      overflow:hidden; -webkit-tap-highlight-color:transparent;
+    }
+    main { min-height:100svh; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:clamp(20px,4vh,48px) 20px; position:relative; isolation:isolate; }
+    .topline { font:600 11px/1.5 system-ui,-apple-system,sans-serif; letter-spacing:.25em; color:#ab8e74; text-transform:uppercase; margin:0 0:14px; }
+    h1 { font-size:clamp(34px,5vw,67px); line-height:1.04; text-align:center; font-weight:400; letter-spacing:-.055em; max-width:850px; margin:0; }
+    .subtitle { font-family:system-ui,-apple-system,sans-serif; color:var(--muted); font-size:clamp(13px,1.5vw,16px); text-align:center; margin:15px 0 0; font-weight:400; }
+    .stage { display:grid; place-items:center; margin:clamp(10px,2.4vh,28px) 0 0; position:relative; width:min(76vw,480px); height:min(52vh,440px); min-height:240px; }
+    .stage::before { content:""; position:absolute; inset:12% 14% 0; border-radius:50%; background:radial-gradient(ellipse at center,#f4e5cf 0%,rgba(243,225,199,.36) 39%,transparent 73%); filter:blur(18px); pointer-events:none; }
+    .stage::after { content:""; position:absolute; left:21%; right:21%; height:13px; bottom:3%; border-radius:50%; background:#53433222; filter:blur(12px); pointer-events:none; }
+    .violin-button { -webkit-appearance:none; appearance:none; border:0; background:transparent; cursor:pointer; padding:0; width:100%; height:100%; position:relative; z-index:1; display:grid; place-items:center; transition:transform .24s ease; touch-action:manipulation; }
+    .violin-button:hover { transform:scale(1.035); }
+    .violin-button:active { transform:scale(.985); }
+    .violin-button:focus-visible { outline:3px solid #b47943; outline-offset:-13px; border-radius:30px; }
+    svg.violin { display:block; width:100%; height:100%; overflow:visible; filter:drop-shadow(0 14px 15px rgba(70,38,21,.12)); }
+    .instrument { transform-origin:260px 250px; transform:rotate(-24deg); transition:transform .4s ease; }
+    .playing .instrument { animation:violin-sway 2.35s ease-in-out infinite; }
+    .bow { transform-origin:260px 250px; transform:translate(-18px,0) rotate(27deg); }
+    .playing .bow { animation:bowing 1.05s ease-in-out infinite alternate; }
+    @keyframes bowing { from { transform:translate(-42px,14px) rotate(27deg); } to { transform:translate(29px,-20px) rotate(27deg); } }
+    @keyframes violin-sway { 0%,100% { transform:rotate(-24deg) translateY(0); } 50% { transform:rotate(-21deg) translateY(-3px); } }
+    .note { opacity:0; font-family:Georgia,serif; font-size:35px; fill:#b88b60; }
+    .playing .note-a { animation:note-rise 2.7s .1s infinite ease-out; }
+    .playing .note-b { animation:note-rise 2.7s 1s infinite ease-out; }
+    .playing .note-c { animation:note-rise 2.7s 1.85s infinite ease-out; }
+    @keyframes note-rise { 0% { opacity:0; transform:translateY(16px) scale(.7); } 20% {opacity:.9;} 70%{opacity:.6;} 100%{opacity:0;transform:translateY(-78px) translateX(18px) scale(1.1);} }
+    .status { display:flex; justify-content:center; align-items:center; gap:9px; margin:-5px 0 0; text-align:center; font-family:system-ui,-apple-system,sans-serif; font-size:12px; font-weight:650; letter-spacing:.13em; text-transform:uppercase; color:#8e765d; min-height:26px; }
+    .dot { width:6px; height:6px; background:#b89a77; border-radius:50%; }
+    .playing .dot { background:#a54e32; box-shadow:0 0 0 4px #a54e321b; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 50% { box-shadow:0 0 0 8px #a54e320c; } }
+    .footer { position:absolute; bottom:clamp(14px,3vh,30px); color:#afa398; font:11px/1.5 system-ui,-apple-system,sans-serif; text-align:center; letter-spacing:.02em; padding:0 16px; }
+    @media(max-height:680px) { .topline{margin-bottom:8px;} h1{font-size:clamp(30px,5vw,50px);} .subtitle{margin-top:9px;} .stage{height:43vh;min-height:185px;margin-top:5px;} .status{margin-top:-8px;} }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after{ animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+<main id="page">
+  <p class="topline">A very special performance</p>
+  <h1>The world's smallest violin.</h1>
+  <p class="subtitle">Playing a song just for your troubles.</p>
+
+  <div class="stage">
+    <button class="violin-button" id="violinButton" type="button" aria-label="Play the tiny violin" aria-pressed="false" title="Click to play or stop">
+      <svg class="violin" viewBox="0 0 520 520" role="img" aria-label="A little wooden violin with a moving bow">
+        <defs>
+          <linearGradient id="varnish" x1="0" x2="1" y1=".1" y2=".9">
+            <stop offset="0" stop-color="#df9a59"/>
+            <stop offset=".30" stop-color="#bf703e"/>
+            <stop offset=".73" stop-color="#a74e32"/>
+            <stop offset="1" stop-color="#833922"/>
+          </linearGradient>
+          <linearGradient id="neck" x1="0" x2="1">
+            <stop offset="0" stop-color="#402c26"/>
+            <stop offset=".55" stop-color="#654537"/>
+            <stop offset="1" stop-color="#2d211f"/>
+          </linearGradient>
+          <linearGradient id="bowWood" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#5b3426"/>
+            <stop offset=".45" stop-color="#c88d59"/>
+            <stop offset="1" stop-color="#4d2b23"/>
+          </linearGradient>
+        </defs>
+
+        <text class="note note-a" x="365" y="235">♪</text>
+        <text class="note note-b" x="127" y="290">♫</text>
+        <text class="note note-c" x="380" y="345">♪</text>
+
+        <g class="instrument">
+          <!-- Scroll, pegbox, and pegs -->
+          <path d="M253 100 C238 91 239 73 255 66 C273 58 287 43 281 28 C278 19 265 17 256 25 C249 32 254 40 263 37" fill="none" stroke="#523022" stroke-width="13" stroke-linecap="round"/>
+          <path d="M252 100 L250 65 Q250 53 259 51 Q269 54 269 65 L267 100Z" fill="#7a4935" stroke="#4b3026" stroke-width="3"/>
+          <g fill="#503226" stroke="#382821" stroke-width="2">
+            <path d="M250 79 L232 71 L231 83 L250 88Z"/>
+            <path d="M269 76 L287 68 L288 80 L269 87Z"/>
+            <path d="M250 95 L232 87 L231 98 L250 103Z"/>
+            <path d="M269 92 L287 85 L288 96 L269 102Z"/>
+          </g>
+          <!-- Neck and ebony fingerboard -->
+          <path d="M248 96 L272 96 L279 208 L241 208Z" fill="url(#neck)" stroke="#503428" stroke-width="3"/>
+          <path d="M250 93 L270 93 L273 219 L247 219Z" fill="#332b28"/>
+          <path d="M251 93 L255 93 L251 216 L247 217Z" fill="#6a5650" opacity=".45"/>
+          <!-- Back edge -->
+          <path d="M260 174 C233 156 198 166 195 203 C193 226 206 239 217 249 C231 260 227 271 209 286 C188 304 184 327 195 353 C208 383 232 395 260 381 C288 395 312 383 325 353 C336 327 332 304 311 286 C293 271 289 260 303 249 C314 239 327 226 325 203 C322 166 287 156 260 174Z"
+                fill="#703723" stroke="#643322" stroke-width="8" stroke-linejoin="round"/>
+          <!-- Violin front -->
+          <path d="M260 177 C234 159 201 169 200 205 C199 224 211 238 223 249 C236 260 233 277 214 291 C193 308 190 330 200 351 C213 381 236 387 260 375 C284 387 307 381 320 351 C330 330 327 308 306 291 C287 277 284 260 297 249 C309 238 321 224 320 205 C319 169 286 159 260 177Z"
+                fill="url(#varnish)" stroke="#e0a16c" stroke-width="3"/>
+          <!-- Highlights and violin purfling -->
+          <path d="M259 186 C231 168 210 176 209 205 C207 231 239 245 238 268 C238 293 198 305 208 345 C219 369 239 376 260 366 C281 376 301 369 312 345 C322 305 282 293 282 268 C281 245 313 231 311 205 C310 176 289 168 261 186"
+                fill="none" stroke="#713b29" stroke-width="2" opacity=".63"/>
+          <path d="M214 207 C215 187 229 181 245 186" fill="none" stroke="#ffe0a0" stroke-width="5" stroke-linecap="round" opacity=".25"/>
+          <path d="M208 331 C208 359 233 376 254 368" fill="none" stroke="#f9c17b" stroke-width="7" opacity=".17" stroke-linecap="round"/>
+          <!-- F-holes -->
+          <g fill="none" stroke="#492d24" stroke-linecap="round">
+            <path d="M236 250 C219 260 221 278 232 286 C241 293 232 307 223 315" stroke-width="4.5"/>
+            <path d="M284 250 C301 260 299 278 288 286 C279 293 288 307 297 315" stroke-width="4.5"/>
+          </g>
+          <g fill="#492d24">
+            <ellipse cx="238" cy="249" rx="5" ry="6" transform="rotate(20 238 249)"/>
+            <ellipse cx="282" cy="249" rx="5" ry="6" transform="rotate(-20 282 249)"/>
+            <ellipse cx="221" cy="317" rx="4.5" ry="5.5"/>
+            <ellipse cx="299" cy="317" rx="4.5" ry="5.5"/>
+          </g>
+          <!-- Saddle, tailpiece and bridge -->
+          <path d="M249 331 Q260 327 271 331 L267 365 Q260 369 253 365Z" fill="#382b25"/>
+          <path d="M254 365 L266 365 L263 377 L257 377Z" fill="#46322a"/>
+          <path d="M243 273 Q260 265 277 273 L275 283 Q260 279 245 283Z" fill="#eed5a7" stroke="#cfa472" stroke-width="1.5"/>
+          <!-- Strings -->
+          <g stroke="#f9ebca" stroke-width="1" opacity=".8">
+            <path d="M253 94 L254 363"/>
+            <path d="M258 94 L258 364"/>
+            <path d="M263 94 L262 364"/>
+            <path d="M268 94 L266 363"/>
+          </g>
+          <!-- Chin rest -->
+          <path d="M285 353 Q303 348 313 357 Q302 380 281 374 Q273 370 285 353Z" fill="#3d2a25" stroke="#281f1d" stroke-width="2"/>
+          <path d="M284 362 Q297 356 306 362" fill="none" stroke="#77544a" stroke-width="2" opacity=".5"/>
+        </g>
+
+        <!-- Bow runs across strings; this group moves while the music plays -->
+        <g class="bow">
+          <path d="M104 251 Q259 233 423 253" fill="none" stroke="#f6e8c8" stroke-width="6" stroke-linecap="round"/>
+          <path d="M91 242 Q264 233 435 238" fill="none" stroke="url(#bowWood)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M102 244 L127 246" fill="none" stroke="#2f2926" stroke-width="11" stroke-linecap="round"/>
+          <path d="M119 237 L119 252" stroke="#c7a47c" stroke-width="3"/>
+          <circle cx="429" cy="238" r="5" fill="#7b4d2c"/>
+        </g>
+      </svg>
+    </button>
+  </div>
+
+  <div class="status" aria-live="polite"><span class="dot"></span><span id="statusLabel">Click the violin to play</span></div>
+  <div class="footer">An exceptionally small amount of sympathy.</div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const page = document.getElementById('page');
+  const button = document.getElementById('violinButton');
+  const label = document.getElementById('statusLabel');
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  let audioContext, compressor, dry, delay, feedback, wet;
+  let playing = false, sessionBus = null, repeatTimer = null;
+
+  // A short original, wistful violin tune. Stored as MIDI note number + seconds.
+  const score = [
+    [74,.86],[72,.86],[70,1.15],[69,.63],[67,1.35],
+    [69,.78],[70,1.04],[69,1.27],
+    [65,.82],[67,.78],[69,.94],[74,1.15],
+    [72,.86],[70,.97],[69,.93],[62,1.75]
+  ];
+
+  function setupAudio() {
+    if (!AudioContextClass) throw Error('Audio playback is unavailable');
+    if (audioContext) return;
+    audioContext = new AudioContextClass();
+    compressor = audioContext.createDynamicsCompressor();
+    compressor.threshold.value = -18;
+    compressor.knee.value = 18;
+    compressor.ratio.value = 2;
+    compressor.attack.value = .015;
+    compressor.release.value = .24;
+    const output = audioContext.createGain();
+    output.gain.value = .72;
+    compressor.connect(output).connect(audioContext.destination);
+
+    dry = audioContext.createGain();
+    dry.gain.value = .85;
+    dry.connect(compressor);
+    delay = audioContext.createDelay(.8);
+    delay.delayTime.value = .22;
+    feedback = audioContext.createGain();
+    feedback.gain.value = .20;
+    wet = audioContext.createGain();
+    wet.gain.value = .14;
+    delay.connect(feedback).connect(delay);
+    delay.connect(wet).connect(compressor);
+  }
+
+  function soundNote(midi, at, duration, bus, volume=1) {
+    const ctx = audioContext;
+    const hz = 440 * Math.pow(2, (midi - 69) / 12);
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = Math.min(3100, 1700 + hz * 1.5);
+    filter.Q.value = .38;
+
+    const envelope = ctx.createGain();
+    envelope.gain.setValueAtTime(.0001, at);
+    envelope.gain.linearRampToValueAtTime(.5 * volume, at + .11);
+    envelope.gain.linearRampToValueAtTime(.34 * volume, at + .28);
+    envelope.gain.setValueAtTime(.34 * volume, at + Math.max(.29,duration - .20));
+    envelope.gain.exponentialRampToValueAtTime(.0001, at + duration + .17);
+    filter.connect(envelope).connect(bus);
+
+    const vibrato = ctx.createOscillator();
+    const vibratoDepth = ctx.createGain();
+    vibrato.type = 'sine';
+    vibrato.frequency.value = 5.2;
+    vibratoDepth.gain.setValueAtTime(0, at);
+    vibratoDepth.gain.linearRampToValueAtTime(8, at + .24);
+    vibrato.connect(vibratoDepth);
+    vibrato.start(at);
+    vibrato.stop(at + duration + .18);
+
+    // Additive harmonics make the bowed string sound, without external audio files.
+    const partials = [[1,.40,'sawtooth'],[2,.23,'sine'],[3,.14,'sine'],[4,.075,'sine']];
+    partials.forEach(([multiple,level,wave],i) => {
+      const osc = ctx.createOscillator();
+      const partGain = ctx.createGain();
+      osc.type = wave;
+      osc.frequency.value = hz * multiple;
+      osc.detune.value = [-3,0,2,-2][i];
+      vibratoDepth.connect(osc.detune);
+      partGain.gain.value = level;
+      osc.connect(partGain).connect(filter);
+      osc.start(at);
+      osc.stop(at + duration + .18);
+    });
+  }
+
+  function playPhrase(bus) {
+    if (!playing || bus !== sessionBus) return;
+    const start = audioContext.currentTime + .055;
+    let t = start;
+    score.forEach(([midi,duration], index) => {
+      soundNote(midi, t, duration + .08, bus, .94);
+      if (index === 0 || index === 8) soundNote(50, t, Math.min(duration + 2.2, 3.1), bus, .12);
+      t += duration;
+    });
+    repeatTimer = window.setTimeout(() => playPhrase(bus), (t - start + .6) * 1000);
+  }
+
+  function setVisualState(value) {
+    page.classList.toggle('playing', value);
+    button.setAttribute('aria-pressed', String(value));
+    button.setAttribute('aria-label', value ? 'Stop the tiny violin' : 'Play the tiny violin');
+    label.textContent = value ? 'Playing · click to stop' : 'Click the violin to play';
+  }
+
+  function stop() {
+    playing = false;
+    clearTimeout(repeatTimer);
+    if (sessionBus && audioContext) {
+      const bus = sessionBus;
+      bus.gain.cancelScheduledValues(audioContext.currentTime);
+      bus.gain.setTargetAtTime(.0001, audioContext.currentTime, .055);
+      sessionBus = null;
+      window.setTimeout(() => { try { bus.disconnect(); } catch (_) {} }, 1200);
+    }
+    setVisualState(false);
+  }
+
+  async function start() {
+    try {
+      setupAudio();
+      await audioContext.resume();
+      if (playing) return;
+      const bus = audioContext.createGain();
+      bus.gain.value = .9;
+      bus.connect(dry);
+      bus.connect(delay);
+      sessionBus = bus;
+      playing = true;
+      setVisualState(true);
+      playPhrase(bus);
+    } catch (err) {
+      label.textContent = 'Your browser could not play sound';
+    }
+  }
+
+  button.addEventListener('click', () => { playing ? stop() : start(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && playing) stop(); });
+})();
+</script>
+</body>
+</html>
