@@ -1,206 +1,24 @@
-/* Turtle Course presentation: stacked navigation and optional screen adjustments. */
-:root{
-  --tc-side-width:260px;--tc-instructions-width:350px;
-  --tc-editor-height:700px;--tc-nav-title:12.5px;--tc-nav-type:11px;
-  --tc-unit-title:14px;--tc-unit-sub:12px;--tc-side-title:21px;
-  --tc-copy:14px;--tc-copy-title:20px;--tc-copy-sub:14px;
-  --tc-ui-heading:28px;--tc-ui-small:13px;--tc-ui-button:12px;
-}
-.lesson-nav{
-  grid-template-columns:34px minmax(0,1fr) 14px;
-  align-items:center;gap:10px;padding:10px 9px;min-height:54px;
-}
-.lesson-nav > span:nth-child(2){
-  display:flex;flex-direction:column;align-items:stretch;
-  min-width:0;gap:4px;
-}
-.lesson-name{
-  display:block;min-width:0;font-size:var(--tc-nav-title);
-  font-weight:730;line-height:1.35;letter-spacing:-.01em;
-  overflow-wrap:break-word;white-space:normal;
-}
-.lesson-type{
-  display:block;min-width:0;font-size:var(--tc-nav-type);
-  font-weight:450;line-height:1.35;margin:0;color:var(--muted);
-  overflow-wrap:break-word;white-space:normal;
-}
-.lesson-num{align-self:center}
-.lesson-tick{align-self:center;text-align:center;line-height:1}
-.unit-heading strong{display:block;font-size:var(--tc-unit-title);line-height:1.36}
-.unit-heading span{display:block;margin-top:5px;font-size:var(--tc-unit-sub);line-height:1.36}
-.sidebar-head h2{font-size:var(--tc-side-title)}
-.sidebar-head p{font-size:var(--tc-ui-small)}
-.card-body{font-size:var(--tc-copy)}
-.card-body h2{font-size:var(--tc-copy-title)}
-.card-body h3,.quiz-title{font-size:var(--tc-copy-sub)}
-.main-head h1{font-size:clamp(23px,var(--tc-ui-heading),38px)}
-.main-sub,.editor-head strong{font-size:var(--tc-ui-small)}
-.card-head strong,.btn{font-size:var(--tc-ui-button)}
-.topbar-actions{display:flex;align-items:center;gap:10px;min-width:0}
-.view-settings{position:relative;flex:0 0 auto}
+/* "View" popover: compact sliders, one per row, all aligned. */
+.view-settings{position:relative}
 .view-settings-toggle{
-  min-height:34px;padding:7px 11px;border-radius:8px;
-  border:1px solid #cfdee2;background:#f5f9f9;color:#315966;
-  font-size:12px;font-weight:750;white-space:nowrap;
+  min-height:32px;padding:5px 11px;border-radius:8px;border:1px solid #cfdee2;background:#f5f9f9;
+  color:#315966;font-size:12px;font-weight:750;white-space:nowrap;
 }
-.view-settings-toggle:hover,.view-settings-toggle[aria-expanded="true"]{
-  background:#eaf5f5;border-color:#b6d6d9;
-}
+.view-settings-toggle:hover,.view-settings-toggle[aria-expanded="true"]{background:#e6f3f3;border-color:#b6d6d9}
 .view-settings-panel{
-  position:absolute;z-index:60;right:0;top:calc(100% + 10px);
-  width:min(372px,calc(100vw - 24px));max-height:min(78dvh,730px);overflow-y:auto;
-  background:#fff;border:1px solid #cfdee2;border-radius:12px;
-  padding:16px;box-shadow:0 16px 42px rgba(16,38,56,.18);
+  position:absolute;z-index:60;right:0;top:calc(100% + 8px);
+  width:min(330px,calc(100vw - 20px));max-height:calc(100dvh - 80px);overflow-y:auto;
+  background:#fff;border:1px solid #cfdee2;border-radius:12px;padding:12px 14px;
+  box-shadow:0 16px 42px rgba(16,38,56,.18);
 }
-.view-settings-panel[hidden]{display:none!important}
-.view-settings-heading{margin-bottom:11px}
-.view-settings-heading strong{display:block;font-size:15px;line-height:1.3}
-.view-settings-heading p{color:var(--muted);font-size:11px;line-height:1.4;margin:4px 0 0}
-.view-settings-sliders{display:grid;gap:1px}
-.view-slider{
-  display:grid;grid-template-columns:110px minmax(0,1fr) 48px;
-  gap:9px;align-items:center;padding:8px 0;min-width:0;
-  border-bottom:1px solid #edf1f2;
-}
-.view-slider:last-child{border-bottom:0}
-.view-slider label{font-size:11.5px;font-weight:680;color:#405966;line-height:1.35}
-.view-slider input{width:100%;min-width:0;accent-color:var(--teal);cursor:pointer}
-.view-slider output{font:700 11px/1.3 Consolas,monospace;color:#586f7d;text-align:right;white-space:nowrap}
-.view-settings-bottom{
-  display:flex;justify-content:space-between;align-items:center;gap:8px;
-  padding-top:13px;
-}
-.view-settings-bottom button{
-  font-size:12px;font-weight:700;color:#315966;background:#f5f9f9;
-  border:1px solid #d2e0e3;border-radius:7px;padding:8px 11px;
-}
+.view-settings-heading{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.view-settings-heading strong{font-size:13.5px}
+.view-settings-heading span{color:var(--muted);font-size:10.5px}
+.view-group{font:750 10px/1 Consolas,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin:12px 0 2px}
+.view-slider{display:grid;grid-template-columns:96px minmax(0,1fr) 46px;gap:9px;align-items:center;padding:5px 0}
+.view-slider label{font-size:11.5px;font-weight:650;color:#405966}
+.view-slider input{width:100%;min-width:0;accent-color:var(--teal);cursor:pointer;margin:0}
+.view-slider output{font:700 10.5px/1 Consolas,monospace;color:#586f7d;text-align:right;white-space:nowrap}
+.view-settings-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;margin-top:6px;border-top:1px solid #edf1f2}
+.view-settings-bottom button{font-size:12px;font-weight:700;color:#315966;background:#f5f9f9;border:1px solid #d2e0e3;border-radius:7px;padding:6px 11px}
 .view-settings-bottom button:hover{background:#e8f4f4}
-.view-settings-bottom span{font-size:10px;color:var(--muted)}
-@media(min-width:1251px){
-  .layout{grid-template-columns:var(--tc-side-width) minmax(0,1fr)}
-  .workspace:not(.no-editor):not(.focus-editor){
-    grid-template-columns:minmax(270px,var(--tc-instructions-width)) minmax(0,1fr)!important;
-  }
-  .editor-frame{height:var(--tc-editor-height)}
-}
-@media(min-width:721px) and (max-width:1250px){
-  .layout{grid-template-columns:var(--tc-side-width) minmax(0,1fr)}
-  .editor-frame{height:var(--tc-editor-height)}
-}
-@media(max-width:720px){
-  .topbar-actions{width:100%;gap:8px;flex-wrap:wrap;justify-content:space-between}
-  .toplinks{width:auto;flex-wrap:wrap}
-  .lesson-nav{min-width:164px;max-width:164px;flex:0 0 164px;grid-template-columns:28px minmax(0,1fr);gap:7px}
-  .lesson-tick{display:none}
-}
-
-
-/* Resize the two boundaries marked by the course layout, without extra toolbars. */
-@media(min-width:721px){
-  .layout{
-    grid-template-columns:var(--tc-side-width) 8px minmax(0,1fr)!important;
-  }
-  .sidebar-divider{display:block}
-}
-.course-panel-divider{
-  display:none;position:relative;min-width:8px;
-  cursor:col-resize;touch-action:none;user-select:none;
-  background:transparent;outline-offset:-2px;
-  z-index:5;
-}
-.course-panel-divider::before{
-  content:"";position:absolute;inset:0 2px;
-  background:#e2e9eb;border-radius:5px;
-  transition:background .15s ease;
-}
-.course-panel-divider > span{
-  position:absolute;top:var(--tc-grip-top,clamp(115px,31vh,370px));
-  left:50%;transform:translateX(-50%);
-  width:3px;height:39px;border-radius:3px;
-  background:#b8c9ce;opacity:.55;
-  transition:opacity .15s ease,background .15s ease;
-}
-.course-panel-divider:hover::before,
-.course-panel-divider:focus-visible::before,
-.course-panel-divider.dragging::before{background:#d4e6e9}
-.course-panel-divider:hover > span,
-.course-panel-divider:focus-visible > span,
-.course-panel-divider.dragging > span{background:#158894;opacity:1}
-.course-panel-divider:focus-visible{outline:2px solid #178b98}
-body.course-panels-resizing{
-  cursor:col-resize!important;user-select:none!important;
-}
-body.course-panels-resizing iframe{pointer-events:none!important}
-@media(min-width:1251px){
-  .workspace:not(.no-editor):not(.focus-editor){
-    grid-template-columns:minmax(230px,var(--tc-instructions-width)) 8px minmax(420px,1fr)!important;
-    gap:5px!important;
-  }
-  .workspace:not(.no-editor):not(.focus-editor) .lesson-divider{display:block}
-}
-.workspace.no-editor .lesson-divider,
-.workspace.focus-editor .lesson-divider{display:none!important}
-@media(max-width:1250px){
-  .lesson-divider{display:none!important}
-}
-@media(max-width:720px){
-  .sidebar-divider,.lesson-divider{display:none!important}
-}
-
-
-/* Full-width layout: explicit grid placement prevents auto-placement/wrapping. */
-@media(min-width:721px){
-  .layout{
-    display:grid!important;
-    width:100%!important;max-width:none!important;
-    grid-template-areas:"course-menu menu-handle course-main"!important;
-    grid-template-columns:var(--tc-side-width) 8px minmax(0,1fr)!important;
-    grid-template-rows:minmax(0,auto)!important;
-    gap:0!important;align-items:stretch!important;
-  }
-  .layout>.sidebar{grid-area:course-menu;min-width:0}
-  .layout>.sidebar-divider{grid-area:menu-handle;align-self:stretch}
-  .layout>.main{
-    grid-area:course-main;
-    display:block;min-width:0;max-width:none!important;
-    width:100%!important;margin:0!important;
-    overflow:visible;
-  }
-  .main-head{min-width:0;width:100%}
-  .workspace{min-width:0;width:100%!important;max-width:none!important}
-}
-@media(min-width:1251px){
-  .workspace:not(.no-editor):not(.focus-editor){
-    display:grid!important;
-    grid-template-areas:"course-assignment course-handle course-editor"!important;
-    grid-template-columns:minmax(280px,var(--tc-instructions-width)) 8px minmax(0,1fr)!important;
-    grid-template-rows:minmax(0,auto)!important;
-    align-items:start!important;gap:8px!important;
-    width:100%!important;max-width:none!important;
-  }
-  .workspace:not(.no-editor):not(.focus-editor)>.assignment-card{
-    grid-area:course-assignment;min-width:0;margin:0!important;
-  }
-  .workspace:not(.no-editor):not(.focus-editor)>.lesson-divider{
-    grid-area:course-handle;display:block;align-self:stretch;
-  }
-  .workspace:not(.no-editor):not(.focus-editor)>.editor-card{
-    grid-area:course-editor;min-width:0;width:100%!important;
-  }
-  .workspace:not(.no-editor):not(.focus-editor) .editor-frame{width:100%}
-  .workspace.focus-editor:not(.no-editor){
-    display:grid!important;
-    grid-template-areas:"course-editor"!important;
-    grid-template-columns:minmax(0,1fr)!important;
-    gap:0!important;
-  }
-  .workspace.focus-editor>.editor-card{grid-area:course-editor}
-}
-@media(max-width:1250px){
-  .workspace:not(.no-editor)>.lesson-divider{display:none!important}
-}
-@media(max-width:720px){
-  .layout{display:block!important;width:100%!important}
-  .layout>.main{width:100%!important;min-width:0}
-  .workspace{min-width:0;width:100%!important}
-}
