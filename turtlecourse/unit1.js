@@ -2,15 +2,23 @@
 "use strict";
 
 var LESSONS=[
-  {id:"1.1.1",name:"Intro to Python with Tracy the Turtle",short:"Intro to Python",kind:"Video",subtitle:"Meet Tracy and see what a program can tell her to do.",editor:false},
-  {id:"1.1.2",name:"Slinky (Example Program)",short:"Slinky example",kind:"Example program",subtitle:"Run a program, predict changes, and notice what the error messages tell you.",editor:true},
-  {id:"1.1.3",name:"Intro to Tracy",short:"Check for understanding",kind:"Quiz · 3 questions",subtitle:"Check what you know about commands and circles.",editor:false},
-  {id:"1.1.4",name:"Stretched Slinky",short:"Stretched Slinky",kind:"Coding exercise",subtitle:"Write the commands yourself and compare your output with the instructions.",editor:true},
-  {id:"1.1.5",name:"Sequencing with Trace Tables",short:"Trace tables",kind:"Trace table",subtitle:"Read a program one instruction at a time and record the order.",editor:false},
-  {id:"1.1.6",name:"How Trace Tables Work & How to Make a Sandbox Program",short:"Trace table video",kind:"Video",subtitle:"Watch how to complete a trace table and make your own sandbox program.",editor:false},
-  {id:"1.1.7",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Coding challenge",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
-  {id:"1.1.8",name:"Color & Background Color",short:"Color & background",kind:"Coding exercise",subtitle:"Give the drawing a new background and use different pen colors.",editor:true}
+  {id:"1.1.1",name:"Intro to Python with Tracy the Turtle",short:"Intro to Python",kind:"Video",type:"video",subtitle:"Meet Tracy and see what a program can tell her to do.",editor:false},
+  {id:"1.1.2",name:"Slinky (Example Program)",short:"Slinky example",kind:"Example",type:"example",subtitle:"Run a program, predict changes, and notice what the error messages tell you.",editor:true},
+  {id:"1.1.3",name:"Intro to Tracy",short:"Check for understanding",kind:"Quiz · 3 questions",type:"quiz",subtitle:"Check what you know about commands and circles.",editor:false},
+  {id:"1.1.4",name:"Stretched Slinky",short:"Stretched Slinky",kind:"Assignment",type:"assignment",subtitle:"Write the commands yourself and compare your output with the instructions.",editor:true},
+  {id:"1.1.5",name:"Sequencing with Trace Tables",short:"Trace tables",kind:"Assignment · Trace table",type:"assignment",subtitle:"Read a program one instruction at a time and record the order.",editor:false},
+  {id:"1.1.6",name:"How Trace Tables Work & How to Make a Sandbox Program",short:"Trace table video",kind:"Video",type:"video",subtitle:"Watch how to complete a trace table and make your own sandbox program.",editor:false},
+  {id:"1.1.7",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Project · Challenge",type:"project",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
+  {id:"1.1.8",name:"Color & Background Color",short:"Color & background",kind:"Assignment",type:"assignment",subtitle:"Give the drawing a new background and use different pen colors.",editor:true}
 ];
+/* Activity types: icon + label shown in the lesson list and the title bar. */
+var TYPE_INFO={
+  video:{label:"Video",icon:'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 7.6v4.8l4-2.4z" fill="currentColor"/></svg>'},
+  example:{label:"Example",icon:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 6 3 10l4 4M13 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'},
+  quiz:{label:"Quiz",icon:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7.9 8.1a2.2 2.2 0 1 1 3.2 2c-.7.4-1.1.8-1.1 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14.2" r="1" fill="currentColor"/></svg>'},
+  assignment:{label:"Assignment",icon:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.8 3.5 16.5 7.2 8 15.7l-4.3.6.6-4.3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m11.2 5.1 3.7 3.7" stroke="currentColor" stroke-width="1.7"/></svg>'},
+  project:{label:"Project",icon:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L2.8 8.1l5-.7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'}
+};
 var SLINKY=[
   "circle(35)",
   "forward(20)",
@@ -81,7 +89,7 @@ function makeFeedback(good,title,details){
 function renderMenu(){
   menu.innerHTML=LESSONS.map(function(l,i){
     var active=i===currentIndex&&!finishView,complete=!!state.done[l.id];
-    return '<button type="button" class="lesson-nav'+(active?' active':'')+(complete?' done':'')+'" data-index="'+i+'" title="'+escapeHtml(l.id+' '+l.short+' · '+l.kind)+'" '+(active?'aria-current="step"':'')+'><span class="lesson-num">'+String(i+1).padStart(2,"0")+'</span><span class="lesson-text"><span class="lesson-name">'+escapeHtml(l.short)+'</span><span class="lesson-type">'+escapeHtml(l.kind)+'</span></span><span class="lesson-tick" aria-label="'+(complete?'Completed':'Not complete')+'">'+(complete?'✓':'')+'</span></button>';
+    return '<button type="button" class="lesson-nav'+(active?' active':'')+(complete?' done':'')+'" data-index="'+i+'" title="'+escapeHtml(l.id+' '+l.short+' · '+l.kind)+'" '+(active?'aria-current="step"':'')+'><span class="lesson-num type-'+l.type+'" aria-label="'+TYPE_INFO[l.type].label+'">'+TYPE_INFO[l.type].icon+'</span><span class="lesson-text"><span class="lesson-name">'+escapeHtml(l.short)+'</span><span class="lesson-type">'+escapeHtml(l.kind)+'</span></span><span class="lesson-tick" aria-label="'+(complete?'Completed':'Not complete')+'">'+(complete?'✓':'')+'</span></button>';
   }).join("");
 }
 function field(key,title,hint,rows){
@@ -423,7 +431,7 @@ function restoreDraft(){
 }
 function refreshAction(){
   var l=LESSONS[currentIndex],checked=!!state.checks[l.id];
-  if(l.kind==="Video")action.textContent="Mark watched & Next →";
+  if(l.type==="video")action.textContent="Mark watched & Next →";
   else if(["1.1.4","1.1.7","1.1.8"].indexOf(l.id)!==-1||l.id==="1.1.5"||l.id==="1.1.3"){
     action.textContent=checked?"Save & Next →":("Check "+(l.id==="1.1.3"?"answers":"my work"));
   }else action.textContent="Save & Next →";
@@ -434,7 +442,7 @@ function render(){
   el("breadcrumb").textContent="Unit 1 · Tracy's World · Activity "+(currentIndex+1)+" of "+LESSONS.length;
   el("lessonTitle").textContent=l.id+" "+l.name;
   el("lessonSubtitle").textContent=l.subtitle;
-  el("lessonBadge").textContent=l.kind;
+  el("lessonBadge").innerHTML=TYPE_INFO[l.type].icon+'<span>'+escapeHtml(l.kind)+'</span>';el("lessonBadge").className="meta-pill type-"+l.type;
   el("activityCounter").textContent="Instructions";
   document.title=l.id+" "+l.short+" · Python Turtle Course";
   el("activityFeedback").hidden=true;
@@ -442,8 +450,8 @@ function render(){
   body.scrollTop=0;
   if(window.TurtleCourseExamples)window.TurtleCourseExamples.render(body);
   restoreDraft();
-  workspace.classList.toggle("video-mode",l.kind==="Video");
-  if(l.kind==="Video")setupVideo();
+  workspace.classList.toggle("video-mode",l.type==="video");
+  if(l.type==="video")setupVideo();
   previous.disabled=currentIndex===0;
   workspace.classList.toggle("no-editor",!l.editor);
   editorCard.hidden=!l.editor;
@@ -560,7 +568,7 @@ function requestCodeCheck(){
 function handleAction(){
   if(finishView){gotoIndex(0);return}
   var l=LESSONS[currentIndex],id=l.id;
-  if(l.kind==="Video"){completeAndNext();return}
+  if(l.type==="video"){completeAndNext();return}
   if(id==="1.1.2"){
     var d=answers(),needs=["count","capitalPrediction","capitalResult","parenPrediction","parenResult"];
     var missing=needs.filter(function(k){return !String(d[k]||"").trim()});
