@@ -36,11 +36,11 @@ var QUIZ=[
   {q:"When Tracy is facing right, from what location does she start drawing her circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,hint:"Run a single circle and look at where Tracy begins."}
 ];
 var KEY="dsteckler-turtlecourse-unit1-v1";
-var state={done:{},draft:{},checks:{},ran:{},validatedCode:{}};
+var state={done:{},draft:{},checks:{},ran:{},validatedCode:{},experiments:{}};
 try{
   var stored=JSON.parse(localStorage.getItem(KEY)||"null");
   if(stored && typeof stored==="object"){
-    ["done","draft","checks","ran","validatedCode"].forEach(function(k){
+    ["done","draft","checks","ran","validatedCode","experiments"].forEach(function(k){
       if(stored[k] && typeof stored[k]==="object")state[k]=stored[k];
     });
   }
@@ -94,16 +94,22 @@ function videoContent(videoId,intro){
     '<p class="mini-note">After watching, select <strong>Mark watched &amp; Next</strong>. Your progress saves on this browser.</p>';
 }
 function slinkyContent(){
-  return '<h2>Run the Slinky program</h2><p>The code is already in your editor. Click <strong>Run</strong>, watch Tracy draw, and type your responses below. You can change the code for each experiment.</p>'+
-    '<div class="mini-note">Tracy starts at the center of her 400 × 400 world, facing right. <code>circle(35)</code> draws a circle with radius 35.</div>'+
-    '<h3>Part 1 · Run the program</h3>'+field("count","How many circles are drawn?","Click Run before answering.",0)+
-    '<h3>Part 2 · Capital letter</h3><p>Change only the <strong>first</strong> <code>circle</code> to <code>Circle</code>, then run again.</p>'+
-    field("capitalPrediction","What do you predict will happen?","Make your prediction before running.",2)+
-    field("capitalResult","What actually happened?","Include any error message you notice.",2)+
-    '<h3>Part 3 · Remove parentheses</h3><p>Change <code>Circle</code> back to <code>circle</code>. Predict the effect of removing the parentheses from the first command, then try it.</p>'+
-    field("parenPrediction","What do you predict?","",2)+
-    field("parenResult","What actually happened?","Describe exactly how you changed that first line.",2)+
-    '<div class="mini-note">Save your answers here before moving on. Your code in the Turtle editor is autosaved separately.</div>';
+  return '<h2>Run the Slinky program</h2>'+
+    '<p>The original code is already loaded in <code>main.py</code>. Work through the three experiments in order. Type each response in the box below its question.</p>'+
+    '<section class="slinky-part"><div class="slinky-part-head"><span>PART 1</span><h3>Run the program</h3></div>'+
+    '<ol><li>Click <strong>Run</strong>.</li><li>Count the circles that Tracy draws.</li></ol>'+
+    field("count","How many circles are drawn?","ANSWER →",0)+'</section>'+
+    '<section class="slinky-part"><div class="slinky-part-head"><span>PART 2</span><h3>Capital letter</h3></div>'+
+    '<ol><li>Before changing the code, predict what will happen if <code>circle</code> becomes <code>Circle</code>.</li></ol>'+
+    field("capitalPrediction","What do you predict will happen?","PREDICTION → Write this before you run the changed program.",2)+
+    '<ol start="2"><li>Change the <strong>first</strong> <code>circle</code> to <code>Circle</code>.</li><li>Click <strong>Run</strong>.</li></ol>'+
+    field("capitalResult","What actually happened?","RESULT → Describe what Tracy drew or what appeared in Output.",2)+'</section>'+
+    '<section class="slinky-part"><div class="slinky-part-head"><span>PART 3</span><h3>Remove parentheses</h3></div>'+
+    '<ol><li>Change <code>Circle</code> back to <code>circle</code>.</li><li>Before running, predict what will happen if you remove the parentheses from the <strong>first</strong> <code>circle(35)</code>.</li></ol>'+
+    field("parenPrediction","What do you predict will happen?","PREDICTION → Write this before you run the changed program.",2)+
+    '<ol start="3"><li>Remove <code>(35)</code> from that first line so it reads <code>circle</code>.</li><li>Click <strong>Run</strong>.</li></ol>'+
+    field("parenResult","What actually happened?","RESULT → Describe what Tracy drew or what appeared in Output.",2)+'</section>'+
+    '<div class="mini-note">Once you have tested all three versions and recorded your five responses, click <strong>Save &amp; Next</strong>. Your answers save here; the Turtle editor keeps your code separately.</div>';
 }
 function quizContent(){
   return '<h2>Check for understanding</h2><p>Choose an answer for each question. Use <strong>Check answers</strong> to see what you understand before moving on.</p>'+
@@ -351,7 +357,10 @@ function handleAction(){
     var d=answers(),needs=["count","capitalPrediction","capitalResult","parenPrediction","parenResult"];
     var missing=needs.filter(function(k){return !String(d[k]||"").trim()});
     if(missing.length){makeFeedback(false,"Finish all five responses.",["Predict, run, and record what happened in each experiment."]);return}
-    if(!state.ran[id]){makeFeedback(false,"Run the program in the editor first.",["Use the green Run button in the Turtle editor."]);return}
+    var seen=state.experiments[id]||{};
+    if(!state.done[id]&&!seen.original){makeFeedback(false,"Run the original Slinky first.",["Click Run with the five original circle(35) commands."]);return}
+    if(!state.done[id]&&!seen.capital){makeFeedback(false,"Test the capital letter change.",["Write your prediction, change the first line to Circle(35), and click Run."]);return}
+    if(!state.done[id]&&!seen.paren){makeFeedback(false,"Test the missing parentheses.",["Write your prediction, change the first line to circle without parentheses, and click Run."]);return}
     if(!/^\s*(5|five)\s*$/i.test(String(d.count))){makeFeedback(false,"Take another look at Part 1.",["Count the circles in the original Slinky program."]);return}
     completeAndNext();return;
   }
@@ -391,6 +400,7 @@ window.addEventListener("message",function(event){
       delete state.checks[id];
       delete state.validatedCode[id];
       delete state.ran[id];
+      delete state.experiments[id];
       persist();
       refreshAction();
       setStatus("Original starter restored · previous code stays in History");
@@ -400,6 +410,23 @@ window.addEventListener("message",function(event){
     return;
   }
   if(data.type==="pythoncourse-run-complete"){
+    if(id==="1.1.2"&&typeof data.code==="string"){
+      var steps=state.experiments[id]||{};
+      var firstLine=data.code.split(/\r?\n/).map(function(line){return line.trim()}).find(function(line){return !!line&&line.charAt(0)!=="#"})||"";
+      var executed=(data.runtime&&Array.isArray(data.runtime.calls))?data.runtime.calls:[];
+      if(firstLine==="circle(35)"&&data.run&&data.run.ok&&executed.filter(function(op){return op.name==="circle"}).length===5){
+        steps.original=true;
+      }else if(firstLine==="Circle(35)"&&steps.original&&String(answers().capitalPrediction||"").trim()&&data.run&&!data.run.ok){
+        steps.capital=true;
+      }else if(firstLine==="circle"&&steps.capital&&String(answers().parenPrediction||"").trim()&&data.run&&data.run.ok){
+        steps.paren=true;
+      }
+      state.experiments[id]=steps;
+      persist();
+      if(steps.paren)setStatus("All three versions tested · record your results");
+      else if(steps.capital)setStatus("Capital letter tested · continue with parentheses");
+      else if(steps.original)setStatus("Original Slinky ran · continue to your prediction");
+    }
     if(data.run&&data.run.ok){state.ran[id]=true;persist();setStatus("Program ran · code is saved separately")}
     if(state.checks[id]&&state.validatedCode[id]&&typeof data.code==="string"&&data.code!==state.validatedCode[id]){
       state.checks[id]=false;persist();refreshAction();
