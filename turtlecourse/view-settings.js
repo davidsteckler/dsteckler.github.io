@@ -42,7 +42,8 @@
         '<input id="tc-'+c.key+'" type="range" min="'+c.min+'" max="'+c.max+'" step="'+c.step+'">'+
         '<output for="tc-'+c.key+'" id="tc-'+c.key+'-value"></output></div>';
     }).join("")+
-    '<div class="view-settings-bottom"><button id="resetCourseView" type="button">Reset all</button><button id="closeCourseView" type="button">Done</button></div>';
+    '<div class="view-settings-bottom"><button id="resetCourseView" type="button">Reset all</button><button id="closeCourseView" type="button">Done</button></div>'+
+    '<p class="view-credits notranslate" translate="no">Translation idea: Sky Eid El Boustany · Neon glow idea: Shawn Gardner</p>';
 
   function save(){try{localStorage.setItem(storageKey,JSON.stringify(settings))}catch(e){}}
   function px(name,n){root.style.setProperty(name,n+"px")}

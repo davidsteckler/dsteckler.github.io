@@ -32,7 +32,7 @@
   var host=document.querySelector(".topbar-actions");
   if(host){
     var wrap=document.createElement("label");wrap.className="lang-picker notranslate";wrap.setAttribute("translate","no");
-    wrap.title="Change the course language";
+    wrap.title="Change the course language (idea by Sky Eid El Boustany)";
     wrap.innerHTML='<span aria-hidden="true">🌐</span><select aria-label="Language">'+
       LANGS.map(function(l){return '<option value="'+l[0]+'"'+(l[0]===current?" selected":"")+'>'+l[1]+'</option>'}).join("")+'</select>';
     host.insertBefore(wrap,host.querySelector(".view-settings"));
