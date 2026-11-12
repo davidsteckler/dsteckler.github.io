@@ -31,9 +31,12 @@ var STARTERS={
 };
 var TRACE=["forward(100)","circle(10)","forward(10)","circle(20)","circle(30)","forward(30)"];
 var QUIZ=[
-  {q:"How would I tell Tracy to move forward 100 pixels?",options:["forward 100","move(100)","Tracy, move forward 100 pixels","forward(100)"],correct:3,hint:"A Python command needs the exact function name and parentheses.",why:"forward(100) uses the exact command name, with the distance inside parentheses."},
-  {q:"When using the circle() command, what value do we put inside the parentheses?",options:["The radius of the circle","The center of the circle","The diameter of the circle","The width of the circle"],correct:0,hint:"Look at how the number 35 is used in the Slinky example.",why:"The number is the radius: the distance from the center of the circle to its edge."},
-  {q:"When Tracy is facing right, from what location does she start drawing her circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,hint:"Run a single circle and look at where Tracy begins.",why:"Facing right, Tracy curves up and to the left, so the circle sits above her. She starts at the bottom."}
+  {q:"How would I tell Tracy to move forward 100 pixels?",options:["forward 100","move(100)","Tracy, move forward 100 pixels","forward(100)"],correct:3,
+   feedback:["Close! Python needs something around the number. Look at how every command in the Slinky program is written.","Tracy doesn't know a command called move. Which command name made her go straight in the Slinky program?","Python can't read English sentences. It needs a command name with the value written in a special way.",""]},
+  {q:"When using the circle() command, what value do we put inside the parentheses?",options:["The radius of the circle","The center of the circle","The diameter of the circle","The width of the circle"],correct:0,
+   feedback:["","You never type a location inside circle(). The number is a distance. Think about what circle(35) measured.","Close! The diameter goes all the way across the circle. The number Tracy uses is only part of that distance.","Width is all the way across the circle. The number Tracy uses is only part of that distance."]},
+  {q:"When Tracy is facing right, from what location does she start drawing her circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,
+   feedback:["Run circle(50) in the Sandbox and watch Tracy. When she's done, is the circle above her or below her?","","Tracy is facing right, so her first step goes to the right, not up or down. Where would that put her on the circle?","Tracy draws the outline of the circle, so she's standing on its edge, not inside it."]}
 ];
 var KEY="dsteckler-turtlecourse-unit1-v1";
 var state={done:{},draft:{},checks:{},ran:{},validatedCode:{},experiments:{}};
@@ -136,69 +139,100 @@ function slinkyContent(){
     field("parenResult","What actually happened?","RESULT → Describe what Tracy drew or what appeared in Output.",2)+'</section>'+
     '<div class="mini-note">Once you have tested all three versions and recorded your five responses, click <strong>Save &amp; Next</strong>. Your answers save here; the Turtle editor keeps your code separately.</div>';
 }
+/* Quiz rules: all answers must be correct to move on. Wrong picks are crossed
+   out with a hint (never the answer), and the first-try score is what counts. */
+var QUIZ_WAIT=5;
+function quizData(){var d=answers();if(!d.qz)d.qz={tries:[0,0,0],locked:[[],[],[]],solved:[false,false,false],first:[null,null,null]};return d.qz}
 function quizContent(){
-  var d=answers();
-  return '<div class="quiz-top"><div><h2>Check for understanding</h2><p>Pick one answer for each question, then click <strong>Check answers</strong>. You\'ll see the right answers and can retake the quiz any time.</p></div>'+
-    '</div>'+
+  return '<h2>Check for understanding</h2><p>Pick one answer for each question, then click <strong>Check answers</strong>. Your <strong>first-try score</strong> is recorded, so think before you answer. If you miss one, you\'ll get a hint and can try that question again. You need all '+QUIZ.length+' right to move on.</p>'+
     '<div class="quiz-progress" id="quizProgress">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"></span>'}).join("")+'</div>'+
   QUIZ.map(function(q,i){
-    return '<div class="quiz-block" id="quizBlock'+i+'"><div class="quiz-count">Question '+(i+1)+' of '+QUIZ.length+'</div><div class="quiz-title">'+escapeHtml(q.q)+'</div>'+
+    return '<div class="quiz-block" id="quizBlock'+i+'"><div class="quiz-count">Question '+(i+1)+' of '+QUIZ.length+'<span class="quiz-tries" id="quizTries'+i+'"></span></div><div class="quiz-title">'+escapeHtml(q.q)+'</div>'+
       '<div class="radio-options">'+q.options.map(function(o,j){
         return '<label class="radio-option" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter">'+"ABCD"[j]+'</span><span class="opt-text">'+escapeHtml(o)+'</span><span class="opt-tag"></span></label>';
       }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div>';
-  }).join("")+
-  '<div class="quiz-actions"><button type="button" class="btn" id="quizRetake">↺ Retake quiz</button></div>';
+  }).join("");
 }
-function quizReveal(animate){
-  var d=answers(),pass=0;
+function quizPaint(){
+  var z=quizData(),d=answers();
   QUIZ.forEach(function(q,i){
-    var pick=d["q"+i]===undefined?null:Number(d["q"+i]),ok=pick===q.correct;if(ok)pass++;
-    var block=el("quizBlock"+i),res=el("quizResult"+i);
-    block.classList.remove("is-right","is-wrong","anim");
-    block.classList.add(ok?"is-right":"is-wrong","revealed");
+    var block=el("quizBlock"+i);if(!block)return;
+    block.classList.toggle("solved",z.solved[i]);
     block.querySelectorAll(".radio-option").forEach(function(opt){
-      var j=Number(opt.dataset.opt),tag=opt.querySelector(".opt-tag");
-      opt.classList.remove("opt-correct","opt-wrong");
-      opt.querySelector("input").disabled=true;
-      if(j===q.correct){opt.classList.add("opt-correct");tag.textContent=ok?"✓ Your answer":"✓ Correct answer"}
-      else if(j===pick){opt.classList.add("opt-wrong");tag.textContent="✗ Your answer"}
-      else tag.textContent="";
+      var j=Number(opt.dataset.opt),inp=opt.querySelector("input"),tag=opt.querySelector(".opt-tag");
+      var crossed=z.locked[i].indexOf(j)>-1;
+      opt.classList.toggle("opt-crossed",crossed);
+      opt.classList.toggle("opt-correct",z.solved[i]&&j===q.correct);
+      inp.disabled=crossed||z.solved[i];
+      tag.textContent=crossed?"✗ Not this one":(z.solved[i]&&j===q.correct?"✓ Correct":"");
     });
-    res.className="quiz-result "+(ok?"good":"bad");
-    res.innerHTML=(ok?"<strong>Correct!</strong> ":pick===null?"<strong>No answer chosen.</strong> ":"<strong>Not quite.</strong> ")+escapeHtml(q.why);
-    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className=ok?"right":"wrong";
-    if(animate){void block.offsetWidth;block.classList.add("anim");block.style.animationDelay=(i*.18)+"s"}
+    var res=el("quizResult"+i),lastWrong=z.locked[i][z.locked[i].length-1];
+    if(z.solved[i]){res.className="quiz-result good";res.innerHTML="<strong>Correct!</strong>"+(z.first[i]?" First try.":"")}
+    else if(lastWrong!==undefined){res.className="quiz-result bad";res.innerHTML="<strong>Not quite. Hint:</strong> "+escapeHtml(q.feedback[lastWrong])}
+    else{res.className="quiz-result";res.textContent=""}
+    el("quizTries"+i).textContent=z.tries[i]>1||(!z.solved[i]&&z.tries[i])?" · try "+(z.tries[i]+(z.solved[i]?0:1)):"";
+    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className=z.solved[i]?(z.first[i]?"right":"later"):(z.tries[i]?"wrong":"");
   });
-  d.score=pass;d.best=Math.max(Number(d.best)||0,pass);d.revealed=true;
-  setHeadScore(pass,d,animate);
-  return pass;
+  setHeadScore();
 }
-function setHeadScore(pass,d,animate){
-  var hs=el("headScore"),cls=pass===null?"":pass===QUIZ.length?"perfect":pass>0?"some":"none";
+function setHeadScore(animate){
+  var z=quizData(),d=answers(),hs=el("headScore");
+  var checked=z.first.filter(function(x){return x!==null}).length,firstRight=z.first.filter(function(x){return x===true}).length;
   hs.hidden=false;el("headRetake").hidden=false;
-  hs.className="head-score "+cls;
-  hs.innerHTML='<span>Score</span><b>'+(pass===null?"–":pass)+"/"+QUIZ.length+'</b>'+(d.best!==undefined&&(pass===null||d.attempts>1)?'<em>Best '+d.best+'/'+QUIZ.length+'</em>':'');
+  hs.className="head-score "+(checked<QUIZ.length?"":firstRight===QUIZ.length?"perfect":firstRight>0?"some":"none");
+  hs.title="First-try score: questions answered correctly on the first attempt";
+  hs.innerHTML='<span>First try</span><b>'+(checked?firstRight:"–")+"/"+QUIZ.length+'</b>'+(d.best!==undefined?'<em>Best '+d.best+'/'+QUIZ.length+'</em>':'');
   if(animate){hs.classList.remove("pop");void hs.offsetWidth;hs.classList.add("pop")}
 }
+var quizCooldown=null;
+function startCooldown(){
+  var left=QUIZ_WAIT;clearInterval(quizCooldown);action.disabled=true;
+  action.textContent="Read the hint… "+left;
+  quizCooldown=setInterval(function(){
+    left--;
+    if(left<=0||LESSONS[currentIndex].id!=="1.1.3"){clearInterval(quizCooldown);quizCooldown=null;action.disabled=false;refreshAction();return}
+    action.textContent="Read the hint… "+left;
+  },1000);
+}
 function quizCheck(){
-  var d=answers(),unanswered=QUIZ.filter(function(_,i){return d["q"+i]===undefined}).length;
-  if(unanswered){
-    QUIZ.forEach(function(_,i){var r=el("quizResult"+i);if(d["q"+i]===undefined){r.className="quiz-result bad";r.textContent="Choose an answer.";var b=el("quizBlock"+i);b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")}});
-    makeFeedback(false,"Answer all "+QUIZ.length+" questions first.",[]);return;
+  if(quizCooldown)return;
+  var z=quizData(),d=answers(),open=[],missing=[];
+  QUIZ.forEach(function(_,i){if(!z.solved[i]){open.push(i);if(d["q"+i]===undefined)missing.push(i)}});
+  if(missing.length){
+    missing.forEach(function(i){var r=el("quizResult"+i);r.className="quiz-result bad";r.textContent="Choose an answer.";var b=el("quizBlock"+i);b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")});
+    makeFeedback(false,"Answer every question first.",[]);return;
   }
-  d.attempts=(Number(d.attempts)||0)+1;
-  var pass=quizReveal(true);
-  state.checks["1.1.3"]=true;persist();refreshAction();
-  if(pass===QUIZ.length){makeFeedback(true,"Perfect score! "+pass+" / "+QUIZ.length+". Click Save & Next to continue.",[]);celebrate()}
-  else makeFeedback(false,pass+" / "+QUIZ.length+" correct. Read the explanations, then retake the quiz or continue.",[]);
+  var wrong=0;
+  open.forEach(function(i){
+    var q=QUIZ[i],pick=Number(d["q"+i]),ok=pick===q.correct,block=el("quizBlock"+i);
+    z.tries[i]++;
+    if(z.first[i]===null)z.first[i]=ok;
+    if(ok)z.solved[i]=true;else{wrong++;if(z.locked[i].indexOf(pick)<0)z.locked[i].push(pick);delete d["q"+i];var inp=block.querySelector('input[value="'+pick+'"]');if(inp)inp.checked=false}
+    block.classList.remove("anim-right","anim-wrong");void block.offsetWidth;block.classList.add(ok?"anim-right":"anim-wrong");
+  });
+  quizPaint();setHeadScore(z.first.every(function(x){return x!==null})&&open.length===QUIZ.length);
+  var allDone=z.solved.every(Boolean);
+  if(allDone){
+    var firstRight=z.first.filter(function(x){return x===true}).length;
+    d.best=Math.max(Number(d.best)||0,firstRight);setHeadScore();
+    state.checks["1.1.3"]=true;persist();refreshAction();
+    makeFeedback(true,"All "+QUIZ.length+" correct! First-try score: "+firstRight+"/"+QUIZ.length+". Click Save & Next to continue.",[]);
+    if(firstRight===QUIZ.length)celebrate();
+  }else{
+    state.checks["1.1.3"]=false;persist();
+    makeFeedback(false,wrong+" answer"+(wrong>1?"s need":" needs")+" another look. Read the hint under each red question, then choose again.",[]);
+    var firstBad=open.filter(function(i){return !z.solved[i]})[0];
+    el("quizBlock"+firstBad).scrollIntoView({block:"center",behavior:"smooth"});
+    startCooldown();
+  }
 }
 function quizRetake(){
+  if(!confirm("Start the quiz over? Your answers will be cleared. Your best first-try score is kept."))return;
   var d=answers();
-  QUIZ.forEach(function(_,i){delete d["q"+i]});delete d.revealed;delete d.score;
+  QUIZ.forEach(function(_,i){delete d["q"+i]});delete d.qz;
+  clearInterval(quizCooldown);quizCooldown=null;action.disabled=false;
   state.checks["1.1.3"]=false;persist();
-  var keep={best:d.best,attempts:d.attempts};
-  body.innerHTML=quizContent();restoreDraft();
-  setHeadScore(null,d,false);
+  body.innerHTML=quizContent();quizPaint();
   el("activityFeedback").hidden=true;refreshAction();body.scrollTop=0;
   setStatus("New attempt · choose your answers");
 }
@@ -265,8 +299,16 @@ function traceContent(){
   var table=TRACE.map(function(command,i){
     return '<tr><td>'+(i+1)+'</td><td><input class="line-field" aria-label="Line number for step '+(i+1)+'" data-answer="line'+i+'" inputmode="numeric" autocomplete="off"></td><td><input aria-label="Command for step '+(i+1)+'" data-answer="command'+i+'" autocomplete="off" spellcheck="false"></td></tr>';
   }).join("");
-  return '<h2>Complete a trace table</h2><p>A trace table helps us test a program by writing down the lines that run, in order.</p>'+
-    '<p>Read the program from top to bottom. For each step, fill in the <strong>line number</strong> and the <strong>exact command</strong> that runs.</p>'+
+  var ex=["circle(50)","forward(25)","circle(20)"];
+  return '<h2>Sequencing with Trace Tables</h2>'+
+    '<p>A <strong>trace table</strong> is a way to test a program by stepping through each line of code as the program runs. We\'ll come back to trace tables all year. For now, here\'s a simple start.</p>'+
+    '<div class="trace-example"><div class="trace-example-label">Example</div>'+
+      '<div class="trace-layout"><pre class="codebox">'+ex.map(function(l,i){return (i+1)+'   '+l}).join("\n")+'</pre>'+
+      '<table class="trace-table trace-filled"><thead><tr><th>Step</th><th>Line</th><th>Command</th></tr></thead><tbody>'+
+        ex.map(function(l,i){return '<tr><td>'+(i+1)+'</td><td class="mono">'+(i+1)+'</td><td class="mono">'+l+'</td></tr>'}).join("")+'</tbody></table></div>'+
+      '<p class="trace-why">Line 1 runs first, then line 2, and the program ends with line 3. Each step is one command, written exactly as it appears in the code.</p></div>'+
+    '<h3>Your turn: complete the trace table for this program</h3>'+
+    '<p>Fill in the <strong>line number</strong> and the <strong>exact command</strong> for each step, in the order they run.</p>'+
     '<div class="trace-layout"><pre class="codebox">'+TRACE.map(function(line,i){return (i+1)+'   '+line}).join("\n")+'</pre>'+
     '<table class="trace-table"><thead><tr><th>Step</th><th>Line</th><th>Command</th></tr></thead><tbody>'+table+'</tbody></table></div>'+
     '<div class="mini-note">In this first example, each line runs once. Later, loops and functions will make the order more interesting.</div>'+
@@ -420,7 +462,7 @@ function render(){
   renderMenu();refreshAction();updateProgress();
   setStatus(state.done[l.id]?"Previously completed · progress saved":"Answers save automatically on this device");
   el("headScore").hidden=true;el("headRetake").hidden=true;
-  if(l.id==="1.1.3"){if(answers().revealed)quizReveal(false);else setHeadScore(null,answers(),false)}
+  if(l.id==="1.1.3")quizPaint();
   if(state.checks[l.id]&&l.id!=="1.1.3") {
     var message=l.id==="1.1.5"?"All six rows correct.":"Your program passed its last check.";
     makeFeedback(true,message,[]);
