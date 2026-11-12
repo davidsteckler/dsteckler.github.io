@@ -864,7 +864,7 @@
 <link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
-<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=15-neon">
+<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=16-cursor">
 <link rel="stylesheet" href="/turtle/preview-embed.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1501,22 +1501,60 @@ for i in range(4):
       var cm=document.querySelector(".code-panel .CodeMirror");cm.parentNode.insertBefore(bar,cm);
       editor.on("change",function(){bar.classList.add("stale")});
       bar.addEventListener("click",function(){
-        var n=Number(bar.dataset.line);if(!n)return;
-        editor.focus();editor.setCursor({line:n-1,ch:editor.getLine(n-1).length});editor.scrollIntoView({line:n-1,ch:0},90);
+        goToErrorLine(bar.dataset.line);
       });
     }
     bar.dataset.line=info.line||"";
     bar.textContent="";
     var b=document.createElement("b");b.textContent=info.line?"⚠ Line "+info.line:"⚠ Error";bar.appendChild(b);
     var t=document.createElement("span");t.textContent=info.title;bar.appendChild(t);
-    if(info.line){var g=document.createElement("em");g.textContent="Go to line →";bar.appendChild(g)}
+    if(info.line){var g=document.createElement("em");g.textContent="Show me the mistake →";bar.appendChild(g)}
     bar.classList.remove("stale");bar.hidden=false;
   }
   function hideCodeErrorBar(){var bar=document.getElementById("unit1ErrorBar");if(bar)bar.hidden=true;hideWorldErrorPopup()}
-  function goToErrorLine(n){
-    if(!n)return;editor.focus();
-    editor.setCursor({line:n-1,ch:editor.getLine(n-1).length});
-    editor.scrollIntoView({line:n-1,ch:0},90);
+  /* Put the cursor on the likely mistake (idea by Bianca Mascia):
+     a misspelled/unknown name is selected; a missing ")" or quote puts the
+     cursor where it belongs; otherwise the cursor goes to the first non-space
+     character that looks wrong, or the end of the line. */
+  var lastErrorInfo=null;
+  function errorSpot(n,info){
+    var text=editor.getLine(n-1)||"",tok=info&&info.token;
+    if(tok){
+      var re=new RegExp("(^|[^A-Za-z0-9_])("+tok.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")(?![A-Za-z0-9_])");
+      var m=re.exec(text);
+      if(m){var st=m.index+m[1].length;return {from:st,to:st+tok.length,found:true}}
+    }
+    var depth=0,quote=null,openAt=-1;
+    for(var i=0;i<text.length;i++){
+      var c=text[i];
+      if(quote){if(c===quote)quote=null;continue}
+      if(c==='"'||c==="'"){quote=c;openAt=i;continue}
+      if(c==="#")break;
+      if(c==="(")depth++;
+      else if(c===")"){if(depth===0)return {from:i,to:i+1,found:true};depth--}
+    }
+    var end=text.replace(/\s+$/,"").length;
+    if(quote||depth>0)return {from:end,to:end,found:true};
+    if(info&&/SyntaxError/.test(info.name)){
+      var bad=/[A-Za-z_]\w*\s+\d/.exec(text);   // e.g. "circle 35" (missing parentheses)
+      if(bad){var sp=bad.index+bad[0].search(/\s/);return {from:sp,to:sp+1,found:true}}
+    }
+    return {from:end,to:end};
+  }
+  function goToErrorLine(n,info){
+    n=Number(n);if(!n||n>editor.lineCount())return;
+    info=info||lastErrorInfo;
+    var spot=errorSpot(n,info);
+    // Python often reports an unclosed "(" or quote on the NEXT line: look one line up.
+    if(info&&/SyntaxError/.test(info.name)&&n>1&&!spot.found){
+      var prev=editor.getLine(n-2)||"",d=0,q=null;
+      for(var k=0;k<prev.length;k++){var c=prev[k];if(q){if(c===q)q=null;continue}if(c==='"'||c==="'"){q=c;continue}if(c==="#")break;if(c==="(")d++;else if(c===")")d--}
+      if(d>0||q){n=n-1;var e=prev.replace(/\s+$/,"").length;spot={from:e,to:e,found:true}}
+    }
+    editor.focus();
+    if(spot.to>spot.from)editor.setSelection({line:n-1,ch:spot.from},{line:n-1,ch:spot.to});
+    else editor.setCursor({line:n-1,ch:spot.from});
+    editor.scrollIntoView({line:n-1,ch:spot.from},90);
   }
   function showWorldErrorPopup(info){
     var stage=document.getElementById("worldStage");if(!stage)return;
@@ -1530,9 +1568,9 @@ for i in range(4):
     raw.textContent=(info.name&&info.message)?info.name+": "+info.message+(info.line&&!/line \d/.test(info.message)?" on line "+info.line:""):String(info.raw||"").split("\n").filter(Boolean).pop()||"";
     var x=document.createElement("button");x.type="button";x.className="uwe-close";x.setAttribute("aria-label","Close");x.textContent="✕";
     x.addEventListener("click",function(e){e.stopPropagation();hideWorldErrorPopup()});
-    var more=document.createElement("div");more.className="uwe-more";more.textContent="More details below ↓";
+    var more=document.createElement("div");more.className="uwe-more";more.textContent="Click to jump to the mistake · more details below ↓";
     pop.appendChild(x);pop.appendChild(raw);pop.appendChild(more);
-    pop.onclick=function(){if(info.line)goToErrorLine(info.line)};
+    pop.onclick=function(){if(info.line)goToErrorLine(info.line,info)};
     pop.title=info.line?"Click to go to line "+info.line:"";
     pop.classList.remove("uwe-in");void pop.offsetWidth;pop.classList.add("uwe-in");
     pop.hidden=false;
@@ -1763,7 +1801,7 @@ for i in range(4):
       info.line=last;info.lineText=editor.getLine(last-1).trim();
     }
     highlightError(info.line,info.token);
-    if(UNIT1_EMBED){showCodeErrorBar(info);showWorldErrorPopup(info)}
+    if(UNIT1_EMBED){lastErrorInfo=info;showCodeErrorBar(info);showWorldErrorPopup(info)}
     if(UNIT1_EMBED){
       document.body.classList.add("unit1-has-error");
       output.textContent="";
@@ -1775,11 +1813,8 @@ for i in range(4):
       if(info.line){
         var jump=document.createElement("button");
         jump.type="button";jump.className="error-line-button";jump.textContent="Find line "+info.line;
-        jump.addEventListener("click",function(){
-          editor.focus();
-          editor.setCursor({line:Math.max(0,info.line-1),ch:0});
-          editor.scrollIntoView({line:Math.max(0,info.line-1),ch:0},90);
-        });
+        jump.title="Put the cursor on the mistake";
+        jump.addEventListener("click",function(){goToErrorLine(info.line,info)});
         header.appendChild(jump);
       }
       simple.appendChild(header);
