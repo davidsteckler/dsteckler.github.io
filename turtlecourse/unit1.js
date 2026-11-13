@@ -38,12 +38,15 @@ var STARTERS={
 };
 var TRACE=["forward(100)","circle(10)","forward(10)","circle(20)","circle(30)","forward(30)"];
 var QUIZ=[
-  {q:"How would I tell Tracy to move forward 100 pixels?",options:["forward 100","move(100)","Tracy, move forward 100 pixels","forward(100)"],correct:3,
-   feedback:["Close! Python needs something around the number. Look at how every command in the Slinky program is written.","Tracy doesn't know a command called move. Which command name made her go straight in the Slinky program?","Python can't read English sentences. It needs a command name with the value written in a special way.",""]},
+  {q:"How would I tell the turtle to move forward 100 pixels?",options:["forward 100","move(100)","Turtle, move forward 100 pixels","forward(100)"],correct:3,
+   yay:"Yes! That's exactly how I move. 🐢💨",
+   feedback:["Close! I need something around the number. Look at how every command in the Slinky program is written.","I don't know a command called move. Which command made me go straight in the Slinky program?","I can't read English sentences! I need a command name, with the number written a special way.",""]},
   {q:"When using the circle() command, what value do we put inside the parentheses?",options:["The radius of the circle","The center of the circle","The diameter of the circle","The width of the circle"],correct:0,
-   feedback:["","You never type a location inside circle(). The number is a distance. Think about what circle(35) measured.","Close! The diameter goes all the way across the circle. The number Tracy uses is only part of that distance.","Width is all the way across the circle. The number Tracy uses is only part of that distance."]},
-  {q:"When Tracy is facing right, from what location does she start drawing her circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,
-   feedback:["Run circle(50) in the Sandbox and watch Tracy. When she's done, is the circle above her or below her?","","Tracy is facing right, so her first step goes to the right, not up or down. Where would that put her on the circle?","Tracy draws the outline of the circle, so she's standing on its edge, not inside it."]}
+   yay:"Right! That number is my radius: center to edge. ⭕",
+   feedback:["","You never type a location inside circle(). The number is a distance. Think about what circle(35) measured.","Hmm… the diameter goes all the way across my circle. The number I use is only part of that distance!","Width goes all the way across my circle. The number I use is only part of that distance."]},
+  {q:"When the turtle is facing right, where does it start drawing its circle?",options:["The top of the circle","The bottom of the circle","The left side of the circle","The middle of the circle"],correct:1,
+   yay:"Yep! Facing right, I start at the bottom and curve up. 🐢",
+   feedback:["Run circle(50) in the Sandbox and watch me. When I'm done, is the circle above me or below me?","","I'm facing right, so my first step goes right, not up or down. Where does that put me on the circle?","I draw the outline of the circle, so I'm standing on its edge, never in the middle."]}
 ];
 var KEY="dsteckler-turtlecourse-unit1-v1";
 /* One-time renumbering (Nov 2026): the 1.1.6 video was removed, so
@@ -195,18 +198,26 @@ function slinkyContent(){
    out with a hint (never the answer), and the first-try score is what counts. */
 var QUIZ_WAIT=5;
 function quizData(){var d=answers();if(!d.qz)d.qz={tries:[0,0,0],locked:[[],[],[]],solved:[false,false,false],first:[null,null,null]};if(!d.qz.lastWrong)d.qz.lastWrong=[null,null,null];return d.qz}
+var TURTLE_TOP='<svg class="tq-turtle" viewBox="-20 -16 40 32" aria-hidden="true"><g stroke="#173b3d" stroke-width="1.6" stroke-linejoin="round"><path d="M-12 0-17-2.5-17 2.5z" fill="#8fc6ae"/><ellipse cx="-5" cy="-8" rx="4" ry="2.4" transform="rotate(-20 -5 -8)" fill="#8fc6ae"/><ellipse cx="-5" cy="8" rx="4" ry="2.4" transform="rotate(20 -5 8)" fill="#8fc6ae"/><ellipse cx="5" cy="-8" rx="4" ry="2.4" transform="rotate(-30 5 -8)" fill="#8fc6ae"/><ellipse cx="5" cy="8" rx="4" ry="2.4" transform="rotate(30 5 8)" fill="#8fc6ae"/><ellipse cx="-1" cy="0" rx="10" ry="7.5" fill="#2f8f6b"/><circle cx="11" cy="0" r="4.6" fill="#8fc6ae"/></g><path d="M-7-3.5 5 3.5M-7 3.5 5-3.5" stroke="#fff" stroke-opacity=".45" stroke-width="1.1"/><circle cx="12.5" cy="-1.6" r="1" fill="#173b3d"/><circle cx="12.5" cy="1.6" r="1" fill="#173b3d"/></svg>';
+var TURTLE_WAVE='<svg viewBox="0 0 160 130" aria-hidden="true"><g stroke="#173b3d" stroke-width="4" stroke-linejoin="round"><ellipse cx="72" cy="86" rx="46" ry="30" fill="#2f8f6b"/><path d="M44 78 Q72 52 100 78" fill="none" stroke="#bfe6d3" stroke-width="3.5"/><circle cx="126" cy="70" r="17" fill="#8fc6ae"/><ellipse cx="44" cy="116" rx="11" ry="7" fill="#8fc6ae"/><ellipse cx="98" cy="116" rx="11" ry="7" fill="#8fc6ae"/><path d="M112 52 Q126 30 140 38" fill="none" stroke="#8fc6ae" stroke-width="9" stroke-linecap="round"/></g><circle cx="131" cy="66" r="3.8" fill="#173b3d"/><path d="M123 77 Q131 84 139 76" stroke="#173b3d" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>';
+var HEX='<svg viewBox="0 0 44 48" aria-hidden="true"><path d="M22 2 41 13v22L22 46 3 35V13z" fill="currentColor" stroke="#173b2c" stroke-width="2.5" stroke-linejoin="round"/><path d="M22 9 35 16.5v15L22 39 9 31.5v-15z" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/></svg>';
 function quizContent(){
   var looksLikeCode=function(o){return /^[a-z_]+\s*\(.*\)$|^[a-z_]+ \d+$/i.test(o.trim())};
-  return '<div class="cs50quiz">'+
-    '<div class="qz-intro"><h2>Check for Understanding</h2>'+
-    '<p>Answer each question, then click <b>Check</b> beneath it. If you’re wrong, you’ll get a hint, not the answer. Think it through and try again. Your <b>first-try score</b> is recorded, and all '+QUIZ.length+' must be correct to continue.</p></div>'+
-    '<div class="quiz-progress" id="quizProgress" aria-hidden="true">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"><b>'+(i+1)+'</b></span>'}).join("")+'</div>'+
+  var fmtQ=function(t){return escapeHtml(t).replace(/([a-z_]+\(\))/g,"<code>$1</code>")};
+  return '<div class="tq">'+
+    '<div class="tq-title"><div class="tq-wave">'+TURTLE_WAVE+'</div><div><h2>Turtle Check-in</h2>'+
+      '<p>Help the turtle finish its path! Pick an answer and press <b>Check</b>. Wrong? The turtle gives you a hint, never the answer.</p></div></div>'+
+    '<div class="tq-trail" id="quizProgress" aria-hidden="true"><div class="tq-line"></div><div class="tq-ink" id="tqInk"></div>'+
+      QUIZ.map(function(_,i){var x=QUIZ.length>1?i/(QUIZ.length-1)*100:0;return '<span class="tq-stop" data-dot="'+i+'" style="left:'+x+'%">'+HEX+'<b>'+(i+1)+'</b></span>'}).join("")+
+      '<span class="tq-walker" id="tqWalker">'+TURTLE_TOP+'</span><span class="tq-flag">🏁</span></div>'+
   QUIZ.map(function(q,i){
     return '<section class="quiz-block" id="quizBlock'+i+'" aria-labelledby="quizQ'+i+'">'+
-      '<div class="qz-head"><span class="qz-num">'+(i+1)+'.</span><div><div class="quiz-title" id="quizQ'+i+'">'+escapeHtml(q.q)+'</div><div class="quiz-count"><span class="quiz-tries" id="quizTries'+i+'"></span></div></div></div>'+
+      '<div class="qz-head"><span class="tq-hex">'+HEX+'<b>'+(i+1)+'</b></span><div><div class="quiz-title" id="quizQ'+i+'">'+fmtQ(q.q)+'</div><div class="quiz-count"><span class="quiz-tries" id="quizTries'+i+'"></span></div></div></div>'+
       '<div class="radio-options" role="radiogroup" aria-labelledby="quizQ'+i+'">'+q.options.map(function(o,j){
-        return '<label class="radio-option'+(looksLikeCode(o)?' opt-code':'')+'" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter" aria-hidden="true"></span><span class="opt-text">'+(looksLikeCode(o)?'<code>'+escapeHtml(o)+'</code>':escapeHtml(o))+'</span><span class="opt-tag"></span></label>';
-      }).join("")+'</div><div class="qz-foot"><button type="button" class="btn qz-check" data-qcheck="'+i+'">Check</button><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div></section>';
+        return '<label class="radio-option" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="tq-dot" aria-hidden="true"></span><span class="opt-text">'+(looksLikeCode(o)?'<code>'+escapeHtml(o)+'</code>':escapeHtml(o))+'</span><span class="opt-tag"></span></label>';
+      }).join("")+'</div>'+
+      '<div class="tq-say" id="quizSay'+i+'" hidden>'+TURTLE_TOP+'<div class="tq-bubble quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div>'+
+      '<div class="tq-actions"><button type="button" class="btn qz-check" data-qcheck="'+i+'">Check</button></div></section>';
   }).join("")+'</div>';
 }
 function quizPaint(){
@@ -225,15 +236,24 @@ function quizPaint(){
       inp.disabled=z.solved[i];
       tag.textContent=z.solved[i]&&j===q.correct?"✓ Correct":(showWrong&&j===pick?"Not quite":"");
     });
-    var res=el("quizResult"+i);
-    if(z.solved[i]){res.className="quiz-result good";res.innerHTML="<strong>Correct!</strong>"+(z.first[i]?" First try. 🎯":" Nice work figuring it out.")}
-    else if(z.lastWrong[i]!==null){res.className="quiz-result bad";res.innerHTML="<strong>Not quite. Think about this:</strong> "+escapeHtml(q.feedback[z.lastWrong[i]])}
-    else{res.className="quiz-result";res.textContent=""}
+    var res=el("quizResult"+i),say=el("quizSay"+i);
+    if(z.solved[i]){res.className="tq-bubble quiz-result good";res.textContent=z.first[i]?q.yay:"You figured it out! 🐢"}
+    else if(z.lastWrong[i]!==null){res.className="tq-bubble quiz-result bad";res.textContent=q.feedback[z.lastWrong[i]]}
+    else{res.className="tq-bubble quiz-result";res.textContent=""}
+    if(say)say.hidden=!res.textContent;
+    block.classList.toggle("tq-up",!z.solved[i]&&z.lastWrong[i]===null&&QUIZ.slice(0,i).every(function(_,k){return z.solved[k]}));
     var btn=block.querySelector(".qz-check");
     if(btn){btn.hidden=z.solved[i];if(!quizWait[i]){btn.disabled=pick===null;btn.textContent=z.tries[i]?"Check again":"Check"}}
     el("quizTries"+i).textContent=z.tries[i]&&!z.solved[i]?"Attempt "+(z.tries[i]+1):(z.solved[i]&&z.tries[i]>1?"Solved on attempt "+z.tries[i]:"");
-    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className=z.solved[i]?(z.first[i]?"right":"later"):(z.tries[i]?"wrong":"");
+    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className="tq-stop "+(z.solved[i]?"right":(z.tries[i]?"wrong":""));
   });
+  // the turtle walks to the first unsolved question; ink covers the solved path
+  var solvedN=0;while(solvedN<QUIZ.length&&z.solved[solvedN])solvedN++;
+  var pos=QUIZ.length>1?Math.min(solvedN,QUIZ.length-1)/(QUIZ.length-1)*100:0;
+  if(solvedN>=QUIZ.length)pos=100;
+  var walker=el("tqWalker"),ink=el("tqInk");
+  if(walker)walker.style.left=(solvedN>=QUIZ.length?"calc(100% + 18px)":pos+"%");
+  if(ink)ink.style.width=pos+"%";
   setHeadScore();
 }
 function setHeadScore(animate){

@@ -852,3 +852,85 @@ html,body{background:var(--paper)}
 .cs50quiz .quiz-block.anim-right .opt-correct{animation:rightPulse .7s ease}
 @media(max-width:899px){.card-body:has(.cs50quiz){padding:20px 16px}}
 .cs50quiz .radio-option .opt-text{flex:0 1 auto}.cs50quiz .radio-option .opt-tag{margin-left:6px}
+
+/* ================= Quiz: Turtle Notebook =================
+   Graph paper like Turtle World; the turtle guides with speech bubbles;
+   progress is the turtle walking its inked path; shell-hexagon numbers. */
+.workspace.no-editor .assignment-card:has(.tq){width:min(100%,900px)}
+.card-body:has(.tq){padding:0;background:#fbfcf6;
+  background-image:linear-gradient(#dfe9e3 1px,transparent 1px),linear-gradient(90deg,#dfe9e3 1px,transparent 1px);background-size:24px 24px}
+.tq{--sh:#2f8f6b;--sh-dk:#1f6b4f;--sh-lt:#d9f0e4;--sky:#3a8fd6;--oops:#d9603f;--oops-lt:#fde8df;--tq-ink:#1f3a2e;--tq-muted:#5b6f63;--tq-line:#cfdccf;
+  padding:24px 30px 30px;color:var(--tq-ink);font-family:Nunito,"Inter",system-ui,sans-serif;font-size:16px}
+@media(max-width:899px){.tq{padding:16px 12px}}
+.tq code{font-family:"JetBrains Mono",Consolas,monospace;font-size:.92em;background:#e3f3ea;color:#11553b;padding:1px 6px;border-radius:5px;border:0}
+.tq-title{display:flex;align-items:center;gap:14px}
+.tq-wave{flex:none;width:84px}.tq-wave svg{display:block;width:100%;height:auto}
+.tq-title h2{font-family:"Patrick Hand",cursive!important;font-weight:400!important;font-size:36px!important;margin:0!important;color:var(--sh-dk)!important;line-height:1;letter-spacing:0}
+.tq-title p{margin:4px 0 0;color:var(--tq-muted);font-size:15px;line-height:1.45}
+/* progress trail */
+.tq-trail{position:relative;height:54px;margin:12px 26px 10px 16px}
+.tq-line{position:absolute;left:0;right:0;top:30px;border-top:3px dashed #b9cfc2}
+.tq-ink{position:absolute;left:0;top:28.5px;height:6px;width:0;background:var(--sh);border-radius:3px;transition:width .8s ease}
+.tq-stop{position:absolute;top:16px;width:28px;height:30px;transform:translateX(-50%);display:grid;place-items:center;color:#b9cfc2}
+.tq-stop svg,.tq-hex svg{position:absolute;inset:0;width:100%;height:100%}
+.tq-stop b{position:relative;font-size:12.5px;font-weight:900;color:#fff}
+.tq-stop.right{color:var(--sh)}.tq-stop.wrong{color:var(--oops)}
+.tq-walker{position:absolute;top:-4px;left:0;transform:translateX(-50%);width:46px;transition:left .9s cubic-bezier(.4,.1,.3,1);z-index:2}
+.tq-walker svg{display:block;width:100%;height:auto;animation:tqWaddle .5s ease-in-out infinite alternate}
+@keyframes tqWaddle{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+.tq-flag{position:absolute;right:-24px;top:4px;font-size:22px}
+/* question blocks */
+.tq .quiz-block,.tq .quiz-block:last-of-type{background:none;border:0;border-top:2px dashed #cfdccf;border-radius:0;box-shadow:none;padding:18px 0 8px!important;margin:0}
+.tq .quiz-block:first-of-type{border-top:0}
+.tq .qz-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.tq-hex{flex:none;width:44px;height:48px;display:grid;place-items:center;position:relative;color:#9fb8a8}
+.tq-hex b{position:relative;color:#fff;font-weight:900;font-size:18px}
+.tq .quiz-block.tq-up .tq-hex{color:var(--sky)}
+.tq .quiz-block.has-wrong .tq-hex{color:var(--oops)}
+.tq .quiz-block.solved .tq-hex{color:var(--sh)}
+.tq .quiz-title{font:800 19px/1.35 Nunito,sans-serif!important;color:var(--tq-ink)!important;margin:0!important;padding-top:8px}
+.tq .quiz-count,.tq .quiz-tries{font-size:13px;font-weight:700;color:var(--tq-muted)}
+/* answer tiles */
+.tq .radio-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 0 56px}
+@container (max-width:600px){.tq .radio-options{grid-template-columns:1fr;margin-left:0}}
+.tq .radio-option{position:relative;display:flex;align-items:center;gap:12px;min-height:0;padding:12px 14px;background:#fff!important;border:2.5px solid var(--tq-line)!important;border-radius:14px;
+  box-shadow:0 3px 0 var(--tq-line)!important;font:700 16px/1.35 Nunito,sans-serif;color:var(--tq-ink);opacity:1}
+.tq .radio-option:hover:not(:has(input:disabled)){border-color:#9fc7b2!important;transform:translateY(-1px)}
+.tq .radio-option input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.tq .radio-option:has(input:focus-visible){outline:3px solid #76cad1;outline-offset:2px}
+.tq .opt-letter{display:none}
+.tq-dot{flex:none;width:26px;height:26px;border-radius:50%;border:2.5px solid #9fb8a8;display:grid;place-items:center;background:#fff;color:#fff;font-weight:900;font-size:14px}
+.tq .opt-text{flex:1}
+.tq .opt-tag{position:static;margin-left:auto;background:none;padding:0;font-size:12.5px!important;font-weight:900;line-height:1.2}
+.tq .radio-option:has(input:checked):not(.opt-correct):not(.opt-wrong-now){border-color:var(--sky)!important;box-shadow:0 3px 0 #2a6fae!important;background:#eef6fd!important}
+.tq .radio-option:has(input:checked):not(.opt-correct):not(.opt-wrong-now) .tq-dot{border-color:var(--sky);background:radial-gradient(circle,var(--sky) 45%,#fff 50%)}
+.tq .radio-option.opt-wrong-now,.tq .radio-option.opt-wrong-now:has(input:checked){border-color:var(--oops)!important;box-shadow:0 3px 0 #b8492c!important;background:var(--oops-lt)!important}
+.tq .radio-option.opt-wrong-now .tq-dot{border-color:var(--oops);background:radial-gradient(circle,var(--oops) 45%,#fff 50%)}
+.tq .radio-option.opt-wrong-now .opt-tag{color:var(--oops)}
+.tq .radio-option.opt-correct{border-color:var(--sh)!important;box-shadow:0 3px 0 var(--sh-dk)!important;background:var(--sh-lt)!important}
+.tq .radio-option.opt-correct .tq-dot{border-color:var(--sh);background:var(--sh)}
+.tq .radio-option.opt-correct .tq-dot::after{content:"✓"}
+.tq .radio-option.opt-correct .opt-tag{color:var(--sh-dk)}
+.tq .quiz-block.solved .radio-option:not(.opt-correct){opacity:.5}
+/* the turtle's speech bubble */
+.tq-say{display:flex;gap:10px;align-items:flex-end;margin:14px 0 2px 56px}
+.tq-say[hidden]{display:none}
+@container (max-width:600px){.tq-say{margin-left:0}}
+.tq-say .tq-turtle{flex:none;width:44px;height:auto}
+.tq .tq-bubble{position:relative;flex:0 1 auto;max-width:540px;background:#fff!important;border:2.5px solid var(--oops)!important;border-radius:16px;padding:9px 14px!important;margin:0!important;
+  font:400 21px/1.25 "Patrick Hand",cursive;color:#7a2f1c;animation:tqPop .35s cubic-bezier(.2,1.4,.4,1)}
+.tq .tq-bubble::before{content:"";position:absolute;left:-12px;bottom:12px;border:10px solid transparent;border-right-color:var(--oops)}
+.tq .tq-bubble::after{content:"";position:absolute;left:-7px;bottom:14px;border:8px solid transparent;border-right-color:#fff}
+.tq .tq-bubble.good{border-color:var(--sh)!important;color:var(--sh-dk)}
+.tq .tq-bubble.good::before{border-right-color:var(--sh)}
+@keyframes tqPop{0%{opacity:0;transform:translateY(6px) scale(.95)}100%{opacity:1;transform:none}}
+/* check button */
+.tq-actions{display:flex;justify-content:flex-end;margin-top:10px}
+.tq .qz-check{font:900 15px Nunito,sans-serif;border:0!important;border-radius:12px;padding:10px 22px;min-height:0;color:#fff!important;background:var(--sh)!important;box-shadow:0 4px 0 var(--sh-dk)!important;margin:0}
+.tq .qz-check:hover:not(:disabled){background:#33a079!important;transform:translateY(-1px)}
+.tq .qz-check:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--sh-dk)!important}
+.tq .qz-check:disabled,.tq .qz-check:disabled:hover{background:#a8b9ae!important;box-shadow:0 4px 0 #8a9b90!important;color:#fff!important}
+.tq .quiz-block.anim-wrong{animation:none}
+.tq .quiz-block.anim-wrong .opt-wrong-now{animation:wrongShake .45s ease}
+.tq .quiz-block.anim-right .opt-correct{animation:rightPulse .7s ease}
+@media(prefers-reduced-motion:reduce){.tq-walker svg,.tq .tq-bubble{animation:none}}
