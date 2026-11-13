@@ -864,7 +864,7 @@
 <link rel="stylesheet" href="sidebar.css?v=7">
 <link rel="stylesheet" href="display.css?v=2">
 <link rel="stylesheet" href="files.css?v=2">
-<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=19-press">
+<link rel="stylesheet" href="/turtle/course-embed-unit1.css?v=20-cursor">
 <link rel="stylesheet" href="/turtle/preview-embed.css?v=1">
 <link rel="stylesheet" href="/learn/student-nav.css?v=2">
 <script defer src="/learn/student-nav.js?v=2"></script>
@@ -1509,6 +1509,7 @@ for i in range(4):
     bar.textContent="";
     var b=document.createElement("b");b.textContent=info.line?"⚠ Line "+info.line:"⚠ Error";bar.appendChild(b);
     var t=document.createElement("span");t.textContent=info.title;bar.appendChild(t);
+    var pn=parseNote(info);if(pn){var nn=document.createElement("small");nn.className="ueb-note";nn.textContent=pn;t.appendChild(nn)}
     if(info.line){var g=document.createElement("em");g.textContent="Show me →";g.title="Put the cursor on the mistake";bar.appendChild(g)}
     bar.classList.remove("stale");bar.hidden=false;
   }
@@ -1542,19 +1543,16 @@ for i in range(4):
     }
     return {from:end,to:end};
   }
+  function parseNote(info){
+    if(!info||!/SyntaxError|ParseError|IndentationError|TokenError/.test(info.name||"")||!info.line||info.line<2)return "";
+    return "Parse errors can start earlier: if line "+info.line+" looks right, check line "+(info.line-1)+" for a missing ) or quote.";
+  }
   function goToErrorLine(n,info){
     n=Number(n);if(!n||n>editor.lineCount())return;
     info=info||lastErrorInfo;
     var spot=errorSpot(n,info);
-    // Python often reports an unclosed "(" or quote on the NEXT line: look one line up.
-    if(info&&/SyntaxError/.test(info.name)&&n>1&&!spot.found){
-      var prev=editor.getLine(n-2)||"",d=0,q=null;
-      for(var k=0;k<prev.length;k++){var c=prev[k];if(q){if(c===q)q=null;continue}if(c==='"'||c==="'"){q=c;continue}if(c==="#")break;if(c==="(")d++;else if(c===")")d--}
-      if(d>0||q){n=n-1;var e=prev.replace(/\s+$/,"").length;spot={from:e,to:e,found:true}}
-    }
     editor.focus();
-    if(spot.to>spot.from)editor.setSelection({line:n-1,ch:spot.from},{line:n-1,ch:spot.to});
-    else editor.setCursor({line:n-1,ch:spot.from});
+    editor.setCursor({line:n-1,ch:spot.from});
     editor.scrollIntoView({line:n-1,ch:spot.from},90);
   }
   function showWorldErrorPopup(info){
@@ -1570,7 +1568,9 @@ for i in range(4):
     var x=document.createElement("button");x.type="button";x.className="uwe-close";x.setAttribute("aria-label","Close");x.textContent="✕";
     x.addEventListener("click",function(e){e.stopPropagation();hideWorldErrorPopup()});
     var more=document.createElement("div");more.className="uwe-more";more.textContent="Click to jump to the mistake · more details below ↓";
-    pop.appendChild(x);pop.appendChild(raw);pop.appendChild(more);
+    pop.appendChild(x);pop.appendChild(raw);
+    var pn2=parseNote(info);if(pn2){var pnd=document.createElement("div");pnd.className="uwe-note";pnd.textContent="⚠ "+pn2;pop.appendChild(pnd)}
+    pop.appendChild(more);
     var grip=document.createElement("span");grip.className="uwe-grip";grip.setAttribute("aria-hidden","true");pop.appendChild(grip);
     pop.title=(info.line?"Click to jump to the mistake. ":"")+"Drag to move.";
     pop.onclick=function(){if(pop.dataset.justDragged){delete pop.dataset.justDragged;return}if(info.line)goToErrorLine(info.line,info)};
@@ -1846,6 +1846,7 @@ for i in range(4):
       simple.appendChild(header);
       var title=document.createElement("div");title.className="unit1-error-title";
       title.textContent=info.title;simple.appendChild(title);
+      var pn3=parseNote(info);if(pn3){var cn=document.createElement("div");cn.className="unit1-error-note";cn.textContent="⚠ "+pn3;simple.appendChild(cn)}
       if(info.line && info.lineText){
         var sourceLine=document.createElement("code");sourceLine.className="unit1-error-source";
         sourceLine.textContent=info.line+" | "+info.lineText;simple.appendChild(sourceLine);

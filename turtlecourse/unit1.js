@@ -7,8 +7,8 @@ var LESSONS=[
   {id:"1.1.3",name:"Intro to Tracy",short:"Check for understanding",kind:"Quiz · 3 questions",type:"quiz",subtitle:"Check what you know about commands and circles.",editor:false},
   {id:"1.1.4",name:"Stretched Slinky",short:"Stretched Slinky",kind:"Assignment",type:"assignment",subtitle:"Write the commands yourself and compare your output with the instructions.",editor:true},
   {id:"1.1.5",name:"Sequencing with Trace Tables",short:"Trace tables",kind:"Assignment · Trace table",type:"assignment",subtitle:"Read a program one instruction at a time and record the order.",editor:false},
-  {id:"1.1.7",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Project · Challenge",type:"project",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
-  {id:"1.1.8",name:"Color & Background Color",short:"Color & background",kind:"Assignment",type:"assignment",subtitle:"Give the drawing a new background and use different pen colors.",editor:true}
+  {id:"1.1.6",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Project · Challenge",type:"project",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
+  {id:"1.1.7",name:"Color & Background Color",short:"Color & background",kind:"Assignment",type:"assignment",subtitle:"Give the drawing a new background and use different pen colors.",editor:true}
 ];
 /* Activity types: icon + label shown in the lesson list and the title bar. */
 var TYPE_INFO={
@@ -33,8 +33,8 @@ var SLINKY=[
 var STARTERS={
   "1.1.2":SLINKY,
   "1.1.4":"",
-  "1.1.7":"",
-  "1.1.8":"color(\"red\")\ncircle(50)\nforward(50)\n\ncircle(50)\nforward(50)"
+  "1.1.6":"",
+  "1.1.7":"color(\"red\")\ncircle(50)\nforward(50)\n\ncircle(50)\nforward(50)"
 };
 var TRACE=["forward(100)","circle(10)","forward(10)","circle(20)","circle(30)","forward(30)"];
 var QUIZ=[
@@ -46,6 +46,32 @@ var QUIZ=[
    feedback:["Run circle(50) in the Sandbox and watch Tracy. When she's done, is the circle above her or below her?","","Tracy is facing right, so her first step goes to the right, not up or down. Where would that put her on the circle?","Tracy draws the outline of the circle, so she's standing on its edge, not inside it."]}
 ];
 var KEY="dsteckler-turtlecourse-unit1-v1";
+/* One-time renumbering (Nov 2026): the 1.1.6 video was removed, so
+   1.1.7 → 1.1.6 and 1.1.8 → 1.1.7. Moves progress, answers and saved editor code. */
+(function migrateIds(){
+  try{
+    if(localStorage.getItem("dsteckler-turtlecourse-ids-v2"))return;
+    var moves=[["1.1.7","1.1.6"],["1.1.8","1.1.7"]];
+    var raw=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(raw&&typeof raw==="object"){
+      Object.keys(raw).forEach(function(group){
+        var g=raw[group];if(!g||typeof g!=="object")return;
+        delete g["1.1.6"];
+        moves.forEach(function(m){if(m[0] in g){g[m[1]]=g[m[0]];delete g[m[0]]}});
+      });
+      localStorage.setItem(KEY,JSON.stringify(raw));
+    }
+    var pre="dsteckler-pythoncourse-turtlecourse-",keys=[];
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf(pre)===0)keys.push(k)}
+    moves.forEach(function(m){
+      keys.forEach(function(k){
+        if(k.indexOf(pre+m[0])===0){var nk=pre+m[1]+k.slice((pre+m[0]).length);localStorage.setItem(nk,localStorage.getItem(k));localStorage.removeItem(k)}
+      });
+      keys=keys.map(function(k){return k.indexOf(pre+m[0])===0?pre+m[1]+k.slice((pre+m[0]).length):k});
+    });
+    localStorage.setItem("dsteckler-turtlecourse-ids-v2","1");
+  }catch(e){}
+})();
 var state={done:{},draft:{},checks:{},ran:{},validatedCode:{},experiments:{}};
 try{
   var stored=JSON.parse(localStorage.getItem(KEY)||"null");
@@ -101,12 +127,10 @@ function field(key,title,hint,rows){
    parts they actually watch count toward the WATCH_NEEDED percentage. */
 var WATCH_NEEDED=90;
 var VIDEO_CHAPTERS={
-  "1.1.1":[[0,"Meet Tracy: forward()"],[48,"Starting spot (0, 0)"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors & missing parentheses"],[263,"Keyboard tips & finishing up"]],
-  "1.1.6":[]
+  "1.1.1":[[0,"Meet Tracy: forward()"],[48,"Starting spot (0, 0)"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors & missing parentheses"],[263,"Keyboard tips & finishing up"]]
 };
 var VIDEO_PROMPTS={
-  "1.1.1":["What is Tracy, and where does she start?","What does the number inside circle() or forward() change?","What happens when a command is typed incorrectly?"],
-  "1.1.6":["What goes in each column of a trace table?","Why do we write down the line number for each step?","How do you start a new sandbox program?"]
+  "1.1.1":["What is Tracy, and where does she start?","What does the number inside circle() or forward() change?","What happens when a command is typed incorrectly?"]
 };
 function videoContent(videoId,intro){
   var id=LESSONS[currentIndex].id,prompts=VIDEO_PROMPTS[id]||[];
@@ -353,8 +377,8 @@ var EXAMPLE_PROGRAMS={
 };
 var EXAMPLE_FOR_LESSON={
   "1.1.4":"stretched",
-  "1.1.7":"coil",
-  "1.1.8":"colors"
+  "1.1.6":"coil",
+  "1.1.7":"colors"
 };
 function exampleImage(kind){
   var descriptions={
@@ -415,9 +439,8 @@ function contentFor(id){
     case "1.1.3":return quizContent();
     case "1.1.4":return stretchedContent();
     case "1.1.5":return traceContent();
-    case "1.1.6":return videoContent("nY53Th82CRU","How Trace Tables Work");
-    case "1.1.7":return coilContent();
-    case "1.1.8":return colorsContent();
+    case "1.1.6":return coilContent();
+    case "1.1.7":return colorsContent();
     default:return "";
   }
 }
@@ -725,7 +748,7 @@ function refreshAction(){
   var l=LESSONS[currentIndex],checked=!!state.checks[l.id];
   if(l.type==="video"){var ok=videoUnlocked();action.textContent=ok?"Mark watched & Next →":"Watch the video to continue";action.classList.toggle("locked",!ok);return}
   action.classList.remove("locked");
-  if(["1.1.4","1.1.7","1.1.8"].indexOf(l.id)!==-1||l.id==="1.1.5"||l.id==="1.1.3"){
+  if(["1.1.4","1.1.6","1.1.7"].indexOf(l.id)!==-1||l.id==="1.1.5"||l.id==="1.1.3"){
     action.textContent=checked?"Save & Next →":("Check "+(l.id==="1.1.3"?"answers":"my work"));
   }else action.textContent="Save & Next →";
 }
@@ -804,7 +827,7 @@ function traceCheck(){
 function checkCommands(data,id){
   if(!data.run || !data.run.ok)return {ok:false,detail:[data.run&&data.run.error?data.run.error:"Your program did not finish running."]};
   var calls=(data.runtime&&Array.isArray(data.runtime.calls)?data.runtime.calls:[]);
-  if(id==="1.1.8"){
+  if(id==="1.1.7"){
     var colors=calls.filter(function(c){return c.name==="color" && typeof c.str==="string"}).map(function(c){return c.str});
     var backs=calls.filter(function(c){return c.name==="bgcolor"});
     var circles=calls.filter(function(c){return c.name==="circle"});
@@ -819,7 +842,7 @@ function checkCommands(data,id){
     ];
     return {ok:checks.every(function(c){return c.pass}),detail:checks.map(function(c){return (c.pass?"✓ ":"• ")+c.msg})};
   }
-  if(id==="1.1.7"){
+  if(id==="1.1.6"){
     var rings=calls.filter(function(c){return c.name==="circle"});
     var moves=calls.filter(function(c){return c.name==="forward"});
     var radii=new Set(rings.map(function(c){return Number(c.num)}));
@@ -878,7 +901,7 @@ function handleAction(){
   }
   if(id==="1.1.3"){if(state.checks[id])completeAndNext();else quizCheck();return}
   if(id==="1.1.5"){if(state.checks[id])completeAndNext();else traceCheck();return}
-  if(["1.1.4","1.1.7","1.1.8"].indexOf(id)>-1){if(state.checks[id])completeAndNext();else requestCodeCheck();return}
+  if(["1.1.4","1.1.6","1.1.7"].indexOf(id)>-1){if(state.checks[id])completeAndNext();else requestCodeCheck();return}
 }
 menu.addEventListener("click",function(event){var btn=event.target.closest("[data-index]");if(btn)gotoIndex(Number(btn.dataset.index))});
 body.addEventListener("input",function(event){
@@ -959,7 +982,6 @@ window.addEventListener("hashchange",function(){
   if(ix>=0&&ix!==currentIndex)gotoIndex(ix);
 });
 var hash=decodeURIComponent(location.hash.slice(1));
-if(hash==="1.1.6"){hash="1.1.5";history.replaceState(null,"","#1.1.5")}  // trace table video was removed
 var startIndex=LESSONS.findIndex(function(l){return l.id===hash});
 if(startIndex>=0)currentIndex=startIndex;
 if(hash==="complete"&&doneCount()===LESSONS.length)showFinish();else render();
