@@ -84,6 +84,7 @@ function makeFeedback(good,title,details){
   container.className="feedback "+(good?"good":"bad");
   container.innerHTML='<button type="button" class="fb-close" aria-label="Close message" title="Close">✕</button>'+"<strong>"+escapeHtml(title)+"</strong>"+(details&&details.length?"<ul>"+details.map(function(d){return "<li>"+escapeHtml(d)+"</li>"}).join("")+"</ul>":"");
   container.hidden=false;
+  if(!good)buzz(60);
 }
 function renderMenu(){
   menu.innerHTML=LESSONS.map(function(l,i){
@@ -244,7 +245,7 @@ function quizCheck(){
     d.best=Math.max(Number(d.best)||0,firstRight);setHeadScore();
     state.checks["1.1.3"]=true;persist();refreshAction();
     makeFeedback(true,"All "+QUIZ.length+" correct! First-try score: "+firstRight+"/"+QUIZ.length+". Click Save & Next to continue.",[]);
-    if(firstRight===QUIZ.length)celebrate();
+    celebrate(firstRight===QUIZ.length?"Perfect score!":"All correct!");
   }else{
     state.checks["1.1.3"]=false;persist();
     makeFeedback(false,wrong+" answer"+(wrong>1?"s need":" needs")+" another look. Read the hint under each red question, then choose again.",[]);
@@ -263,17 +264,71 @@ function quizRetake(){
   el("activityFeedback").hidden=true;refreshAction();body.scrollTop=0;
   setStatus("New attempt · choose your answers");
 }
-function celebrate(){
+/* Celebration: confetti burst + Tracy in a party hat + a short party sound.
+   Sound is synthesized (no audio files) and can be turned off in View. */
+/* Phone vibration (Android/Chrome; iPhones ignore it). Off with the View toggle. */
+function buzz(pattern){
+  try{if(localStorage.getItem("dsteckler-turtlecourse-haptics")==="off")return}catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate(pattern)}catch(e){}
+}
+function partySound(){
+  try{if(localStorage.getItem("dsteckler-turtlecourse-sound")==="off")return}catch(e){}
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    var ctx=celebrate.ctx||(celebrate.ctx=new AC());if(ctx.state==="suspended")ctx.resume();
+    var now=ctx.currentTime,master=ctx.createGain();master.gain.value=0.22;master.connect(ctx.destination);
+    // party horn: a buzzy upward sweep
+    var horn=ctx.createOscillator(),hg=ctx.createGain();horn.type="sawtooth";
+    horn.frequency.setValueAtTime(330,now);horn.frequency.exponentialRampToValueAtTime(660,now+0.28);
+    hg.gain.setValueAtTime(0.0001,now);hg.gain.exponentialRampToValueAtTime(0.5,now+0.03);hg.gain.exponentialRampToValueAtTime(0.0001,now+0.4);
+    var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=2200;
+    horn.connect(lp);lp.connect(hg);hg.connect(master);horn.start(now);horn.stop(now+0.42);
+    // "ta-da!" arpeggio: C5 E5 G5 C6
+    [523.25,659.25,783.99,1046.5].forEach(function(f,i){
+      var o=ctx.createOscillator(),g=ctx.createGain(),t=now+0.42+i*0.11,len=i===3?0.7:0.18;
+      o.type="triangle";o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.6,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+len);
+      o.connect(g);g.connect(master);o.start(t);o.stop(t+len+0.05);
+    });
+    // little pops for the confetti
+    for(var k=0;k<6;k++){
+      var t2=now+0.45+Math.random()*0.9,n=ctx.createBufferSource(),buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate),d=buf.getChannelData(0);
+      for(var j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*(1-j/d.length);
+      n.buffer=buf;var pg=ctx.createGain();pg.gain.value=0.25;n.connect(pg);pg.connect(master);n.start(t2);
+    }
+  }catch(e){}
+}
+var TRACY_HAT='<svg viewBox="0 0 160 150" aria-hidden="true">'+
+  // party hat
+  '<g transform="rotate(-14 98 36)"><path d="M98 2 L120 62 L76 62 Z" fill="#ff6fa8" stroke="#173b3d" stroke-width="3" stroke-linejoin="round"/>'+
+  '<path d="M90 24 L106 24 M84 40 L112 40" stroke="#ffd25c" stroke-width="6" stroke-linecap="round"/>'+
+  '<circle cx="98" cy="4" r="7" fill="#ffd25c" stroke="#173b3d" stroke-width="3"/></g>'+
+  // turtle (side view, facing right)
+  '<ellipse cx="72" cy="104" rx="46" ry="30" fill="#2f9e8f" stroke="#173b3d" stroke-width="3.5"/>'+
+  '<path d="M44 96 Q72 70 100 96 M56 116 L88 116 M72 76 L72 132" stroke="#8fd3c2" stroke-width="3" fill="none" opacity=".8"/>'+
+  '<circle cx="126" cy="90" r="17" fill="#8fc6ae" stroke="#173b3d" stroke-width="3.5"/>'+
+  '<circle cx="131" cy="86" r="3.6" fill="#173b3d"/><path d="M124 97 Q131 103 138 96" stroke="#173b3d" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+  '<ellipse cx="44" cy="134" rx="11" ry="7" fill="#8fc6ae" stroke="#173b3d" stroke-width="3"/><ellipse cx="98" cy="134" rx="11" ry="7" fill="#8fc6ae" stroke="#173b3d" stroke-width="3"/>'+
+  '<path d="M27 104 L14 99 L16 110 Z" fill="#8fc6ae" stroke="#173b3d" stroke-width="3" stroke-linejoin="round"/>'+
+  '</svg>';
+function celebrate(message){
+  partySound();buzz([40,60,40,60,120]);
   var layer=document.createElement("div");layer.className="confetti";layer.setAttribute("aria-hidden","true");
-  var colors=["#087f8c","#24835b","#d29d43","#e8705a","#5b8def","#9b6bd6"];
-  for(var i=0;i<70;i++){
+  var colors=["#0d8a8f","#21805a","#e0a530","#e8705a","#5b8def","#9b6bd6","#ff6fa8"];
+  for(var i=0;i<110;i++){
     var c=document.createElement("i");
     c.style.left=(Math.random()*100)+"%";c.style.background=colors[i%colors.length];
-    c.style.animationDelay=(Math.random()*.5)+"s";c.style.animationDuration=(1.6+Math.random()*1.3)+"s";
-    c.style.setProperty("--drift",(Math.random()*160-80)+"px");c.style.setProperty("--spin",(Math.random()*720-360)+"deg");
+    if(i%4===0)c.style.borderRadius="50%";
+    c.style.animationDelay=(Math.random()*.6)+"s";c.style.animationDuration=(1.8+Math.random()*1.5)+"s";
+    c.style.setProperty("--drift",(Math.random()*220-110)+"px");c.style.setProperty("--spin",(Math.random()*900-450)+"deg");
     layer.appendChild(c);
   }
-  document.body.appendChild(layer);setTimeout(function(){layer.remove()},3400);
+  var party=document.createElement("div");party.className="party-pop";party.setAttribute("role","status");
+  party.innerHTML='<div class="party-tracy">'+TRACY_HAT+'</div><div class="party-text">'+escapeHtml(message||"You did it!")+'</div>';
+  document.body.appendChild(layer);document.body.appendChild(party);
+  party.addEventListener("click",function(){party.remove()});
+  setTimeout(function(){party.classList.add("out")},2600);
+  setTimeout(function(){layer.remove();party.remove()},3600);
 }
 body.addEventListener("click",function(e){if(e.target.closest("#quizRetake"))quizRetake()});
 el("headRetake").addEventListener("click",quizRetake);
@@ -743,7 +798,7 @@ function traceCheck(){
     var line=String(data["line"+i]||"").trim(),text=String(data["command"+i]||"").replace(/\s+/g,"");
     if(line!==String(i+1)||text!==cmd.replace(/\s+/g,""))bad.push("Step "+(i+1)+" needs another look.");
   });
-  if(bad.length===0){state.checks["1.1.5"]=true;persist();refreshAction();makeFeedback(true,"All six steps are correct. Save and continue.",[])}
+  if(bad.length===0){state.checks["1.1.5"]=true;persist();refreshAction();makeFeedback(true,"All six steps are correct. Save and continue.",[]);celebrate("Trace table complete!")}
   else{state.checks["1.1.5"]=false;persist();refreshAction();makeFeedback(false,"Check your line numbers and commands.",bad)}
 }
 function checkCommands(data,id){
@@ -895,6 +950,7 @@ window.addEventListener("message",function(event){
   if(result.ok)state.validatedCode[id]=data.code;
   persist();refreshAction();
   makeFeedback(result.ok,result.ok?"Your program meets the requirements. Save and continue.":"Not quite yet. Compare your output and try again.",result.detail);
+  if(result.ok)celebrate("Your code passed! 🎉");
 });
 window.addEventListener("hashchange",function(){
   var id=decodeURIComponent(window.location.hash.slice(1));

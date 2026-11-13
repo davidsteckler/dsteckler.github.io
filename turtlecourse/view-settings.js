@@ -42,6 +42,9 @@
         '<input id="tc-'+c.key+'" type="range" min="'+c.min+'" max="'+c.max+'" step="'+c.step+'">'+
         '<output for="tc-'+c.key+'" id="tc-'+c.key+'-value"></output></div>';
     }).join("")+
+    '<div class="view-group">Feedback</div>'+
+    '<label class="view-check"><input type="checkbox" id="tcSound"> Celebration sound</label>'+
+    '<label class="view-check"><input type="checkbox" id="tcHaptics"> Vibrate on phones</label>'+
     '<div class="view-settings-bottom"><button id="resetCourseView" type="button">Reset all</button><button id="closeCourseView" type="button">Done</button></div>'+
     '<details class="credits view-credits notranslate" translate="no"><summary>♥ Student ideas</summary><span>Translation: Sky Eid El Boustany</span><span>Neon glow: Shawn Gardner</span><span>Error cursor: Bianca Mascia</span></details>';
 
@@ -76,6 +79,11 @@
     document.getElementById("tc-"+c.key).addEventListener("input",function(e){settings[c.key]=Number(e.target.value);apply(true)});
   });
 
+  [["tcSound","dsteckler-turtlecourse-sound"],["tcHaptics","dsteckler-turtlecourse-haptics"]].forEach(function(pair){
+    var box=document.getElementById(pair[0]);if(!box)return;
+    try{box.checked=localStorage.getItem(pair[1])!=="off"}catch(e){box.checked=true}
+    box.addEventListener("change",function(){try{localStorage.setItem(pair[1],box.checked?"on":"off")}catch(e){}});
+  });
   /* Popover open/close */
   function close(){panel.hidden=true;toggle.setAttribute("aria-expanded","false")}
   toggle.addEventListener("click",function(){panel.hidden=!panel.hidden;toggle.setAttribute("aria-expanded",String(!panel.hidden))});
