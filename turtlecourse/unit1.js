@@ -981,6 +981,39 @@ window.addEventListener("hashchange",function(){
   var ix=LESSONS.findIndex(function(l){return l.id===id});
   if(ix>=0&&ix!==currentIndex)gotoIndex(ix);
 });
+/* Reset for testing: one activity, or the whole course (progress, answers,
+   quiz/video state and saved editor code). Called from the View menu. */
+function resetActivity(id,silent){
+  ["done","draft","checks","ran","validatedCode","experiments"].forEach(function(g){if(state[g])delete state[g][id]});
+  try{
+    var pre="dsteckler-pythoncourse-turtlecourse-"+id,kill=[];
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k===pre||k.indexOf(pre+"-")===0))kill.push(k)}
+    kill.forEach(function(k){localStorage.removeItem(k)});
+  }catch(e){}
+  persist();
+}
+window.TurtleCourseReset=function(scope){
+  if(scope==="all"){
+    if(!confirm("Reset ALL Unit 1 progress on this browser? This clears every activity's answers, scores, video progress and saved code."))return false;
+    LESSONS.forEach(function(l){resetActivity(l.id,true)});
+    try{localStorage.removeItem("dsteckler-turtlecourse-home-v1")}catch(e){}
+  }else{
+    var l=LESSONS[currentIndex];if(finishView)return false;
+    if(!confirm("Reset "+l.id+" "+l.short+"? This clears its answers, score/progress and saved code so it looks brand new."))return false;
+    resetActivity(l.id);
+  }
+  clearInterval(quizCooldown);quizCooldown=null;action.disabled=false;
+  var ids=scope==="all"?LESSONS.map(function(l){return l.id}):[LESSONS[currentIndex].id];
+  if(frame.getAttribute("src")){
+    // Unload the editor first (it saves on the way out), then wipe its code and reload fresh.
+    var after=function(){frame.removeEventListener("load",after);ids.forEach(function(id){resetActivity(id)});render()};
+    frame.addEventListener("load",after);
+    frame.setAttribute("src","about:blank");
+  }else render();
+  updateProgress();renderMenu();
+  setStatus(scope==="all"?"All progress reset":"Activity reset · fresh start");
+  return true;
+};
 var hash=decodeURIComponent(location.hash.slice(1));
 var startIndex=LESSONS.findIndex(function(l){return l.id===hash});
 if(startIndex>=0)currentIndex=startIndex;

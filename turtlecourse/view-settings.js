@@ -45,6 +45,8 @@
     '<div class="view-group">Feedback</div>'+
     '<label class="view-check"><input type="checkbox" id="tcSound"> Celebration sound</label>'+
     '<label class="view-check"><input type="checkbox" id="tcHaptics"> Vibrate on phones</label>'+
+    '<div class="view-group">Testing</div>'+
+    '<div class="view-reset-row"><button type="button" id="tcResetActivity">↺ Reset this activity</button><button type="button" id="tcResetAll" class="danger">Reset all progress</button></div>'+
     '<div class="view-settings-bottom"><button id="resetCourseView" type="button">Reset all</button><button id="closeCourseView" type="button">Done</button></div>'+
     '<details class="credits view-credits notranslate" translate="no"><summary>♥ Student ideas</summary><span>Translation: Sky Eid El Boustany</span><span>Neon glow: Shawn Gardner</span><span>Error cursor: Bianca Mascia</span></details>';
 
@@ -83,6 +85,13 @@
     var box=document.getElementById(pair[0]);if(!box)return;
     try{box.checked=localStorage.getItem(pair[1])!=="off"}catch(e){box.checked=true}
     box.addEventListener("change",function(){try{localStorage.setItem(pair[1],box.checked?"on":"off")}catch(e){}});
+  });
+  ["tcResetActivity","tcResetAll"].forEach(function(id){
+    var b=document.getElementById(id);if(!b)return;
+    b.addEventListener("click",function(){
+      if(typeof window.TurtleCourseReset!=="function")return;
+      if(window.TurtleCourseReset(id==="tcResetAll"?"all":"one")){panel.hidden=true;toggle.setAttribute("aria-expanded","false")}
+    });
   });
   /* Popover open/close */
   function close(){panel.hidden=true;toggle.setAttribute("aria-expanded","false")}
