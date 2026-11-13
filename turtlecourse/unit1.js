@@ -7,7 +7,6 @@ var LESSONS=[
   {id:"1.1.3",name:"Intro to Tracy",short:"Check for understanding",kind:"Quiz · 3 questions",type:"quiz",subtitle:"Check what you know about commands and circles.",editor:false},
   {id:"1.1.4",name:"Stretched Slinky",short:"Stretched Slinky",kind:"Assignment",type:"assignment",subtitle:"Write the commands yourself and compare your output with the instructions.",editor:true},
   {id:"1.1.5",name:"Sequencing with Trace Tables",short:"Trace tables",kind:"Assignment · Trace table",type:"assignment",subtitle:"Read a program one instruction at a time and record the order.",editor:false},
-  {id:"1.1.6",name:"How Trace Tables Work & How to Make a Sandbox Program",short:"Trace table video",kind:"Video",type:"video",subtitle:"Watch how to complete a trace table and make your own sandbox program.",editor:false},
   {id:"1.1.7",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Project · Challenge",type:"project",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
   {id:"1.1.8",name:"Color & Background Color",short:"Color & background",kind:"Assignment",type:"assignment",subtitle:"Give the drawing a new background and use different pen colors.",editor:true}
 ];
@@ -74,8 +73,8 @@ function answers(){var id=LESSONS[currentIndex].id;if(!state.draft[id])state.dra
 function doneCount(){return LESSONS.filter(function(l){return !!state.done[l.id]}).length}
 function updateProgress(){
   var total=doneCount();
-  el("progressText").textContent=total+" / 8";
-  el("progressFill").style.width=(total/8*100)+"%";
+  el("progressText").textContent=total+" / "+LESSONS.length;
+  el("progressFill").style.width=(total/LESSONS.length*100)+"%";
   el("progressTrack").setAttribute("aria-valuenow",total);
 }
 function setStatus(text){saveState.textContent=text||"Answers are saved on this device"}
@@ -730,13 +729,13 @@ function showFinish(){
   finishView=true;el("headScore").hidden=true;el("headRetake").hidden=true;renderMenu();workspace.classList.add("no-editor");workspace.classList.remove("video-mode");editorCard.hidden=true;frame.removeAttribute("src");
   el("breadcrumb").textContent="Unit 1 / Tracy's World";
   el("lessonTitle").textContent="Unit 1 complete";
-  el("lessonSubtitle").textContent="You have worked through the eight activities in Tracy's World.";
-  el("lessonBadge").textContent="8 of 8";
+  el("lessonSubtitle").textContent="You have worked through all "+LESSONS.length+" activities in Tracy's World.";
+  el("lessonBadge").textContent=LESSONS.length+" of "+LESSONS.length;
   el("activityCounter").textContent="Finished";el("activityFeedback").hidden=true;
   body.innerHTML='<div class="unit-done"><h3>You have finished Unit 1.</h3><p>You have run programs, tested changes, written drawing commands, read trace tables, and used color.</p></div><div class="resource-links"><a href="/turtle/" target="_blank" rel="noopener">Keep experimenting in Turtle ↗</a><a href="/tracetable/" target="_blank" rel="noopener">Review trace tables ↗</a></div><p>Your completion record stays in this browser.</p>';
   previous.disabled=false;action.textContent="Review Unit 1 ↺";
   history.replaceState(null,"","#complete");
-  updateProgress();setStatus("All 8 activities completed on this device");
+  updateProgress();setStatus("All "+LESSONS.length+" activities completed on this device");
 }
 function traceCheck(){
   var data=answers(),bad=[];
@@ -844,7 +843,7 @@ body.addEventListener("change",function(event){
 if(expandEditorBtn)expandEditorBtn.addEventListener("click",function(){setFocusEditor(true);el("showInstructionsBtn").focus()});
 el("activityFeedback").addEventListener("click",function(e){if(e.target.closest(".fb-close"))el("activityFeedback").hidden=true});
 el("showInstructionsBtn").addEventListener("click",function(){setFocusEditor(false);expandEditorBtn.focus()});
-previous.addEventListener("click",function(){if(finishView)gotoIndex(7);else gotoIndex(currentIndex-1)});
+previous.addEventListener("click",function(){if(finishView)gotoIndex(LESSONS.length-1);else gotoIndex(currentIndex-1)});
 action.addEventListener("click",handleAction);
 frame.addEventListener("load",function(){editorReady=true});
 window.addEventListener("message",function(event){
@@ -899,12 +898,13 @@ window.addEventListener("message",function(event){
 });
 window.addEventListener("hashchange",function(){
   var id=decodeURIComponent(window.location.hash.slice(1));
-  if(id==="complete" && doneCount()===8){showFinish();return}
+  if(id==="complete" && doneCount()===LESSONS.length){showFinish();return}
   var ix=LESSONS.findIndex(function(l){return l.id===id});
   if(ix>=0&&ix!==currentIndex)gotoIndex(ix);
 });
 var hash=decodeURIComponent(location.hash.slice(1));
+if(hash==="1.1.6"){hash="1.1.5";history.replaceState(null,"","#1.1.5")}  // trace table video was removed
 var startIndex=LESSONS.findIndex(function(l){return l.id===hash});
 if(startIndex>=0)currentIndex=startIndex;
-if(hash==="complete"&&doneCount()===8)showFinish();else render();
+if(hash==="complete"&&doneCount()===LESSONS.length)showFinish();else render();
 })();
