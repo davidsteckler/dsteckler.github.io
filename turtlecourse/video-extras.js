@@ -59,7 +59,7 @@ window.TurtleCourseVideoExtras={
   },
   checkpoints:{
     "1.1.1":[
-      {at:41,q:"Tracy starts at (0, 0) facing right. What will forward(50) do?",
+      {at:44,q:"Tracy starts at (0, 0) facing right. What will forward(50) do?",
        choices:["Move Tracy 50 pixels to the right","Move Tracy 50 pixels up","Draw a circle with radius 50","Nothing. She needs more instructions"],answer:0,
        hints:["","Which way is Tracy facing when she starts?","That would need a different command. forward() only moves.","The number 50 is all she needs to know how far to go."]},
       {at:76,q:"Tracy is facing right (east). When she runs circle(50), where on the circle does she start drawing?",
