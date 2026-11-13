@@ -60,16 +60,16 @@ window.TurtleCourseVideoExtras={
   },
   checkpoints:{
     "1.1.1":[
-      {at:44,reveal:48,why:"forward() moves Tracy in the direction she's facing. She starts facing right, so she moves 50 pixels to the right.",q:"Tracy starts at (0, 0) facing right. What will forward(50) do?",
+      {at:43,reveal:45,why:"forward() moves Tracy in the direction she's facing. She starts facing right, so she moves 50 pixels to the right.",q:"Tracy starts at (0, 0) facing right. What will forward(50) do?",
        choices:["Move Tracy 50 pixels to the right","Move Tracy 50 pixels up","Draw a circle with radius 50","Nothing. She needs more instructions"],answer:0,
        hints:["","Which way is Tracy facing when she starts?","That would need a different command. forward() only moves.","The number 50 is all she needs to know how far to go."]},
-      {at:76,reveal:81,why:"Facing right, Tracy curves up and around to the left, so the circle sits above her. She starts (and finishes) at the bottom.",q:"Tracy is facing right (east). When she runs circle(50), where on the circle does she start drawing?",
+      {at:76,reveal:80,why:"Facing right, Tracy curves up and around to the left, so the circle sits above her. She starts (and finishes) at the bottom.",q:"Tracy is facing right (east). When she runs circle(50), where on the circle does she start drawing?",
        choices:["At the top of the circle","At the bottom of the circle","In the middle of the circle","On the left side of the circle"],answer:1,
        hints:["Tracy is facing right. To curve around, does she start above the circle or below it?","","Tracy draws the outline, so she's always standing on the edge, never in the middle.","Her first step goes to the right. Picture which part of a circle moves to the right first."]},
-      {at:151,reveal:155,why:"Python needs the parentheses: forward(20). Without them it can't read the line, so it shows a red error.",q:"Line 6 says  forward 20  with no parentheses. What will happen when we click Run?",
+      {at:153,reveal:155,why:"Python needs the parentheses: forward(20). Without them it can't read the line, so it shows a red error.",q:"Line 6 says  forward 20  with no parentheses. What will happen when we click Run?",
        choices:["Tracy moves forward 20 like normal","Tracy moves forward 0","Python shows an error","Tracy draws a circle"],answer:2,
        hints:["Python is very picky. It needs the command written exactly right.","Python won't guess what you meant.","","There's no circle command on that line."]},
-      {at:294,reveal:301,why:"Ctrl+Z is undo. It reverses your last change, so you don't have to retype anything.",q:"Oops! Pressing Enter in the wrong spot dropped part of a line down. What will happen if you press Ctrl+Z?",
+      {at:294,reveal:304,why:"Ctrl+Z is undo. It reverses your last change, so you don't have to retype anything.",q:"Oops! Pressing Enter in the wrong spot dropped part of a line down. What will happen if you press Ctrl+Z?",
        choices:["It deletes the whole program","It undoes the last change","It runs the program","Nothing happens"],answer:1,
        hints:["That works, but it's a lot of extra typing! Is there a shortcut?","","Run only runs your code. It doesn't change it.","Refreshing doesn't undo your last keystroke."]}
     ]
