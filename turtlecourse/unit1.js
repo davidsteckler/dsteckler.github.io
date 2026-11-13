@@ -411,8 +411,8 @@ function paintVideo(){
   el("vpMeterFill").parentNode.classList.toggle("done",unlocked);
   el("vpMeterText").textContent=unlocked?"✓ Watched "+pct+"% · you can continue":"Watched "+pct+"% · watch at least "+WATCH_NEEDED+"% to continue";
   paintChapters(t);paintTranscript(t);
-  var cps=vxCheckpoints(LESSONS[currentIndex].id),cdone=cps.filter(function(_,i){var c=cpState()[i];return c&&c.ok}).length;
-  if(cps.length&&!unlocked)el("vpMeterText").textContent+=" · checkpoints "+cdone+"/"+cps.length;
+  var cps=vxCheckpoints(LESSONS[currentIndex].id),cdone=cps.filter(function(_,i){var c=cpState()[i];return c&&(c.pick!==undefined||c.ok)}).length;
+  if(cps.length&&!unlocked)el("vpMeterText").textContent+=" · predictions "+cdone+"/"+cps.length;
   if(!unlocked&&pct>=WATCH_NEEDED&&checkpointsDone()){state.checks[LESSONS[currentIndex].id]=true;persist();refreshAction();makeFeedback(true,"Video watched. Click Mark watched & Next to continue.",[])}
 }
 function paintChapters(t){
@@ -444,9 +444,10 @@ function videoTick(){
   el("vpPlay")&&(el("vpPlay").textContent=st===1?"❚❚":"▶");
   if(st===1&&vpLastT!==null&&t>=vpLastT&&t-vpLastT<2.5&&cpOpen===null){
     var cps=vxCheckpoints(LESSONS[currentIndex].id),cs=cpState();
-    for(var ci=0;ci<cps.length;ci++){if(!(cs[ci]&&cs[ci].ok)&&cps[ci].at>vpLastT-0.01&&cps[ci].at<=t+0.01){vpLastT=t;showCheckpoint(ci);paintVideo();return}}
+    for(var ci=0;ci<cps.length;ci++){if(!(cs[ci]&&(cs[ci].pick!==undefined||cs[ci].ok))&&cps[ci].at>vpLastT-0.01&&cps[ci].at<=t+0.01){vpLastT=t;showCheckpoint(ci);paintVideo();return}}
   }
   if(st===1&&vpLastT!==null&&t>=vpLastT&&t-vpLastT<2.5){
+    checkReveals(vpLastT,t);
     for(var s0=Math.floor(vpLastT);s0<=Math.floor(t);s0++)markSecond(s0);
     if(++vpSaveTick%8===0)persist();
   }
@@ -477,36 +478,48 @@ function paintVolume(){
 function vxTranscript(id){var x=window.TurtleCourseVideoExtras;return (x&&x.transcripts[id])||[]}
 function vxCheckpoints(id){var x=window.TurtleCourseVideoExtras;return (x&&x.checkpoints[id])||[]}
 function cpState(){var d=answers();if(!d.cp||typeof d.cp!=="object")d.cp={};return d.cp}
-function checkpointsDone(){var id=LESSONS[currentIndex].id,c=cpState();return vxCheckpoints(id).every(function(_,i){return c[i]&&c[i].ok})}
+function checkpointsDone(){var id=LESSONS[currentIndex].id,c=cpState();return vxCheckpoints(id).every(function(_,i){return c[i]&&(c[i].pick!==undefined||c[i].ok)})}
 var cpOpen=null;
 function showCheckpoint(i){
   var id=LESSONS[currentIndex].id,cp=vxCheckpoints(id)[i],box=el("cpOverlay");if(!cp||!box)return;
   cpOpen=i;if(playerOk())ytPlayer.pauseVideo();
-  var st=cpState()[i]||{wrong:[]};
-  box.innerHTML='<div class="cp-card"><div class="cp-kicker">⏸ Checkpoint '+(i+1)+' of '+vxCheckpoints(id).length+' · predict before you watch</div>'+
+  box.innerHTML='<div class="cp-card"><div class="cp-kicker">⏸ Prediction '+(i+1)+' of '+vxCheckpoints(id).length+' · make your best guess, then watch</div>'+
     '<div class="cp-q">'+escapeHtml(cp.q)+'</div><div class="cp-choices">'+cp.choices.map(function(c,j){
-      var crossed=(st.wrong||[]).indexOf(j)>-1;
-      return '<button type="button" class="cp-choice'+(crossed?' crossed':'')+'" data-cp="'+i+'" data-choice="'+j+'"'+(crossed?' disabled':'')+'><b>'+"ABCD"[j]+'</b>'+escapeHtml(c)+'</button>';
-    }).join("")+'</div><div class="cp-feedback" id="cpFeedback" aria-live="polite"></div></div>';
+      return '<button type="button" class="cp-choice" data-cp="'+i+'" data-choice="'+j+'"><b>'+"ABCD"[j]+'</b>'+escapeHtml(c)+'</button>';
+    }).join("")+'</div><div class="cp-feedback" id="cpFeedback" aria-live="polite">There\'s no penalty for guessing wrong. Guessing first helps you notice what happens.</div></div>';
   box.hidden=false;
-  var first=box.querySelector(".cp-choice:not([disabled])");if(first)first.focus();
+  var first=box.querySelector(".cp-choice");if(first)first.focus();
 }
 function answerCheckpoint(i,j){
-  var id=LESSONS[currentIndex].id,cp=vxCheckpoints(id)[i],c=cpState();
-  c[i]=c[i]||{wrong:[]};
-  var fb=el("cpFeedback"),btn=el("cpOverlay").querySelector('[data-choice="'+j+'"]');
-  if(j===cp.answer){
-    c[i].ok=true;if(c[i].first===undefined)c[i].first=true;persist();
-    btn.classList.add("right");fb.className="cp-feedback good";fb.textContent="✓ Nice thinking! Let's watch and see.";
-    el("cpOverlay").querySelectorAll(".cp-choice").forEach(function(b){b.disabled=true});
-    ensureSound();setTimeout(function(){el("cpOverlay").hidden=true;cpOpen=null;if(playerOk())ytPlayer.playVideo();paintVideo()},1300);
-  }else{
-    if(c[i].first===undefined)c[i].first=false;
-    if(c[i].wrong.indexOf(j)<0)c[i].wrong.push(j);persist();
-    btn.classList.add("wrong","crossed");btn.disabled=true;
-    fb.className="cp-feedback bad";fb.textContent="Not quite. "+(cp.hints[j]||"Try again.");
-    btn.parentNode.classList.remove("shake");void btn.parentNode.offsetWidth;btn.parentNode.classList.add("shake");
-  }
+  var c=cpState();c[i]={pick:j};persist();
+  var box=el("cpOverlay"),btn=box.querySelector('[data-choice="'+j+'"]'),fb=el("cpFeedback");
+  box.querySelectorAll(".cp-choice").forEach(function(b){b.disabled=true});
+  btn.classList.add("picked");fb.className="cp-feedback good";fb.textContent="Locked in! Now watch and see if you're right.";
+  ensureSound();
+  setTimeout(function(){box.hidden=true;cpOpen=null;if(playerOk())ytPlayer.playVideo();paintVideo()},1100);
+}
+/* After the answer appears in the video, compare it with the student's prediction. */
+function checkReveals(prevT,t){
+  var cps=vxCheckpoints(LESSONS[currentIndex].id),cs=cpState();
+  cps.forEach(function(cp,i){
+    var st=cs[i];if(!st||st.pick===undefined||st.revealed)return;
+    var at=cp.reveal||cp.at+5;
+    if(at>prevT-0.01&&at<=t+0.01){st.revealed=true;persist();showReveal(cp,st.pick)}
+  });
+}
+function showReveal(cp,pick){
+  var wrap=document.querySelector("#vpBox .video-wrap");if(!wrap)return;
+  var old=document.getElementById("cpReveal");if(old)old.remove();
+  var right=pick===cp.answer,n=document.createElement("div");
+  n.id="cpReveal";n.className="cp-reveal "+(right?"right":"wrong");n.setAttribute("role","status");
+  n.innerHTML='<button type="button" class="cp-reveal-x" aria-label="Close">✕</button>'+
+    '<div class="cpr-head">'+(right?"🎯 You predicted it!":"🤔 Not what you predicted")+'</div>'+
+    '<div class="cpr-line">You guessed: <b>'+escapeHtml(cp.choices[pick])+'</b></div>'+
+    (right?'':'<div class="cpr-line">What happened: <b>'+escapeHtml(cp.choices[cp.answer])+'</b></div>')+
+    (cp.why?'<div class="cpr-why">'+escapeHtml(cp.why)+'</div>':'');
+  wrap.appendChild(n);
+  n.querySelector(".cp-reveal-x").addEventListener("click",function(){n.remove()});
+  setTimeout(function(){if(n.parentNode){n.classList.add("out");setTimeout(function(){n.remove()},400)}},right?6000:9000);
 }
 function paintTranscript(t){
   var pane=el("transcriptPane");if(!pane||pane.hidden)return;
@@ -795,7 +808,7 @@ function handleAction(){
   if(finishView){gotoIndex(0);return}
   var l=LESSONS[currentIndex],id=l.id;
   if(l.type==="video"){
-    if(!videoUnlocked()){var cpsN=vxCheckpoints(id).length;makeFeedback(false,"Keep watching!",["You've watched "+watchedPct()+"% so far. Watch at least "+WATCH_NEEDED+"% to continue."].concat(cpsN&&!checkpointsDone()?["Answer every checkpoint question in the video ("+vxCheckpoints(id).filter(function(_,i){var c=cpState()[i];return c&&c.ok}).length+"/"+cpsN+" done)."]:[]));return}
+    if(!videoUnlocked()){var cpsN=vxCheckpoints(id).length;makeFeedback(false,"Keep watching!",["You've watched "+watchedPct()+"% so far. Watch at least "+WATCH_NEEDED+"% to continue."].concat(cpsN&&!checkpointsDone()?["Make a prediction at every pause in the video ("+vxCheckpoints(id).filter(function(_,i){var c=cpState()[i];return c&&(c.pick!==undefined||c.ok)}).length+"/"+cpsN+" done)."]:[]));return}
     persist();completeAndNext();return;
   }
   if(id==="1.1.2"){
