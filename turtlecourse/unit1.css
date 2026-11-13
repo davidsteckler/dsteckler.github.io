@@ -797,3 +797,58 @@ html,body{background:var(--paper)}
 .radio-option.opt-wrong-now:has(input:checked) .opt-letter{background:#d4553d!important;border-color:#d4553d!important;color:#fff!important}
 .radio-option.opt-wrong-now:has(input:checked){border-color:#d4553d!important;background:#fdeeea!important;box-shadow:none!important}
 .qz-check:disabled,.qz-check:disabled:hover{background:#7f93a6!important;border-color:#7f93a6!important;color:#fff!important}
+
+/* ================= Quiz: CS50-style document look =================
+   White page, black text, real radio buttons, thin rules, one crimson accent. */
+.workspace.no-editor .assignment-card:has(.cs50quiz){width:min(100%,780px)}
+.card-body:has(.cs50quiz){background:#fff;padding:28px 40px 36px}
+.cs50quiz{--cs-ink:#1b1b1b;--cs-muted:#5f6368;--cs-rule:#dee2e6;--cs-crimson:#a51c30;--cs-ok:#198754;--cs-bad:#b02a37;
+  color:var(--cs-ink);font-family:"Inter","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.6}
+.cs50quiz .qz-intro h2{font-family:"Inter","Helvetica Neue",Arial,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.01em;color:var(--cs-ink);margin:0 0 10px}
+.cs50quiz .qz-intro p{color:var(--cs-ink);margin:0 0 18px;font-size:16px}
+.cs50quiz .qz-intro b{font-weight:700}
+/* progress: tiny, quiet */
+.cs50quiz .quiz-progress{display:flex;gap:6px;margin:0 0 6px}
+.cs50quiz .quiz-progress span{flex:1;height:4px;border-radius:2px;background:var(--cs-rule)!important;display:block}
+.cs50quiz .quiz-progress span::after,.cs50quiz .quiz-progress span b{display:none}
+.cs50quiz .quiz-progress span.right{background:var(--cs-ok)!important}
+.cs50quiz .quiz-progress span.later{background:#c98a12!important}
+.cs50quiz .quiz-progress span.wrong{background:var(--cs-bad)!important}
+/* questions: no cards, just rules */
+.cs50quiz .quiz-block,.cs50quiz .quiz-block:last-of-type{background:none;border:0;border-top:1px solid var(--cs-rule);border-radius:0;box-shadow:none;padding:22px 0 6px!important;margin:0}
+.cs50quiz .quiz-block.has-wrong,.cs50quiz .quiz-block.solved{border-left:0}
+.cs50quiz .qz-head{display:flex;gap:8px;margin-bottom:10px}
+.cs50quiz .qz-num{width:auto;height:auto;background:none!important;color:var(--cs-ink)!important;border-radius:0;font:700 17px/1.5 "Inter",Arial,sans-serif}
+.cs50quiz .quiz-title{font:600 17px/1.5 "Inter",Arial,sans-serif!important;color:var(--cs-ink)!important;margin:0!important}
+.cs50quiz .quiz-count{font-size:13px;color:var(--cs-muted)}
+.cs50quiz .quiz-tries{color:var(--cs-muted);font-weight:500}
+/* options: plain list with native-looking radios */
+.cs50quiz .radio-options{display:flex;flex-direction:column;gap:2px;margin:0 0 0 22px}
+.cs50quiz .radio-option{min-height:0;padding:6px 8px;border:0!important;border-radius:6px;background:none!important;box-shadow:none!important;gap:10px;font-size:16px;color:var(--cs-ink)}
+.cs50quiz .radio-option:hover:not(:has(input:disabled)){background:#f6f7f8!important}
+.cs50quiz .radio-option input{position:static;opacity:1;width:17px;height:17px;margin:0;pointer-events:auto;accent-color:var(--cs-crimson);flex:none}
+.cs50quiz .opt-letter{display:none}
+.cs50quiz .opt-text code{font:500 15px/1.4 "SFMono-Regular",Menlo,Consolas,monospace;color:#c7254e;background:#f9f2f4;border:0;padding:2px 5px;border-radius:4px}
+.cs50quiz .opt-tag{position:static;background:none;padding:0;font-size:13px!important;font-weight:600;line-height:inherit}
+.cs50quiz .radio-option.opt-wrong-now,.cs50quiz .radio-option.opt-wrong-now:has(input:checked){background:none!important}
+.cs50quiz .radio-option.opt-wrong-now .opt-tag{color:var(--cs-bad)}
+.cs50quiz .radio-option.opt-wrong-now .opt-tag::before{content:"✗ "}
+.cs50quiz .radio-option.opt-correct{background:none!important}
+.cs50quiz .radio-option.opt-correct .opt-text{font-weight:600}
+.cs50quiz .radio-option.opt-correct .opt-tag{color:var(--cs-ok)}
+.cs50quiz .quiz-block.solved .radio-option:not(.opt-correct){opacity:.55}
+/* check button + feedback line */
+.cs50quiz .qz-foot{display:flex;align-items:baseline;gap:14px;margin:10px 0 8px 22px;flex-wrap:wrap}
+.cs50quiz .qz-check{margin:0;order:0;min-height:0;padding:6px 16px;font-size:14px;font-weight:600;border-radius:6px;background:#fff!important;color:var(--cs-crimson)!important;border:1px solid var(--cs-crimson)!important;box-shadow:none!important}
+.cs50quiz .qz-check:hover:not(:disabled){background:var(--cs-crimson)!important;color:#fff!important;transform:none}
+.cs50quiz .qz-check:disabled,.cs50quiz .qz-check:disabled:hover{background:#fff!important;color:#9aa0a6!important;border-color:#ced4da!important}
+.cs50quiz .quiz-result,.cs50quiz .quiz-result.bad,.cs50quiz .quiz-result.good{flex:1;min-width:240px;background:none!important;border:0!important;padding:0!important;margin:0!important;font-size:15px;line-height:1.5}
+.cs50quiz .quiz-result.bad{color:var(--cs-bad)}
+.cs50quiz .quiz-result.good{color:var(--cs-ok)}
+.cs50quiz .quiz-result strong{font-weight:700}
+/* keep the motion, softer */
+.cs50quiz .quiz-block.anim-wrong{animation:none}
+.cs50quiz .quiz-block.anim-wrong .radio-option.opt-wrong-now{animation:wrongShake .45s ease}
+.cs50quiz .quiz-block.anim-right .opt-correct{animation:rightPulse .7s ease}
+@media(max-width:899px){.card-body:has(.cs50quiz){padding:20px 16px}}
+.cs50quiz .radio-option .opt-text{flex:0 1 auto}.cs50quiz .radio-option .opt-tag{margin-left:6px}

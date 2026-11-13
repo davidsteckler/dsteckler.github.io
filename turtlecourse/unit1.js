@@ -197,18 +197,17 @@ var QUIZ_WAIT=5;
 function quizData(){var d=answers();if(!d.qz)d.qz={tries:[0,0,0],locked:[[],[],[]],solved:[false,false,false],first:[null,null,null]};if(!d.qz.lastWrong)d.qz.lastWrong=[null,null,null];return d.qz}
 function quizContent(){
   var looksLikeCode=function(o){return /^[a-z_]+\s*\(.*\)$|^[a-z_]+ \d+$/i.test(o.trim())};
-  return '<div class="qz-intro"><h2>Check for understanding</h2>'+
-    '<p>Pick an answer, then press <strong>Check</strong> under that question. Wrong? Read the hint and think it through. Every answer stays open.</p>'+
-    '<div class="qz-rules"><span>🎯 First try counts</span><span>💡 Hints, not answers</span><span>✅ All '+QUIZ.length+' to finish</span></div></div>'+
-    '<div class="quiz-progress" id="quizProgress">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"><b>'+(i+1)+'</b></span>'}).join("")+'</div>'+
+  return '<div class="cs50quiz">'+
+    '<div class="qz-intro"><h2>Check for Understanding</h2>'+
+    '<p>Answer each question, then click <b>Check</b> beneath it. If you’re wrong, you’ll get a hint, not the answer. Think it through and try again. Your <b>first-try score</b> is recorded, and all '+QUIZ.length+' must be correct to continue.</p></div>'+
+    '<div class="quiz-progress" id="quizProgress" aria-hidden="true">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"><b>'+(i+1)+'</b></span>'}).join("")+'</div>'+
   QUIZ.map(function(q,i){
     return '<section class="quiz-block" id="quizBlock'+i+'" aria-labelledby="quizQ'+i+'">'+
-      '<div class="qz-head"><span class="qz-num">'+(i+1)+'</span><div><div class="quiz-count">Question '+(i+1)+' of '+QUIZ.length+'<span class="quiz-tries" id="quizTries'+i+'"></span></div>'+
-      '<div class="quiz-title" id="quizQ'+i+'">'+escapeHtml(q.q)+'</div></div></div>'+
-      '<div class="radio-options">'+q.options.map(function(o,j){
-        return '<label class="radio-option'+(looksLikeCode(o)?' opt-code':'')+'" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter">'+"ABCD"[j]+'</span><span class="opt-text">'+escapeHtml(o)+'</span><span class="opt-tag"></span></label>';
-      }).join("")+'</div><div class="qz-foot"><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div><button type="button" class="btn qz-check" data-qcheck="'+i+'">Check</button></div></section>';
-  }).join("");
+      '<div class="qz-head"><span class="qz-num">'+(i+1)+'.</span><div><div class="quiz-title" id="quizQ'+i+'">'+escapeHtml(q.q)+'</div><div class="quiz-count"><span class="quiz-tries" id="quizTries'+i+'"></span></div></div></div>'+
+      '<div class="radio-options" role="radiogroup" aria-labelledby="quizQ'+i+'">'+q.options.map(function(o,j){
+        return '<label class="radio-option'+(looksLikeCode(o)?' opt-code':'')+'" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter" aria-hidden="true"></span><span class="opt-text">'+(looksLikeCode(o)?'<code>'+escapeHtml(o)+'</code>':escapeHtml(o))+'</span><span class="opt-tag"></span></label>';
+      }).join("")+'</div><div class="qz-foot"><button type="button" class="btn qz-check" data-qcheck="'+i+'">Check</button><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div></section>';
+  }).join("")+'</div>';
 }
 function quizPaint(){
   var z=quizData(),d=answers();
@@ -232,7 +231,7 @@ function quizPaint(){
     else{res.className="quiz-result";res.textContent=""}
     var btn=block.querySelector(".qz-check");
     if(btn){btn.hidden=z.solved[i];if(!quizWait[i]){btn.disabled=pick===null;btn.textContent=z.tries[i]?"Check again":"Check"}}
-    el("quizTries"+i).textContent=z.tries[i]&&!z.solved[i]?" · try "+(z.tries[i]+1):(z.solved[i]&&z.tries[i]>1?" · solved on try "+z.tries[i]:"");
+    el("quizTries"+i).textContent=z.tries[i]&&!z.solved[i]?"Attempt "+(z.tries[i]+1):(z.solved[i]&&z.tries[i]>1?"Solved on attempt "+z.tries[i]:"");
     var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className=z.solved[i]?(z.first[i]?"right":"later"):(z.tries[i]?"wrong":"");
   });
   setHeadScore();
