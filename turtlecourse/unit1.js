@@ -194,12 +194,12 @@ function slinkyContent(){
 /* Quiz rules: all answers must be correct to move on. Wrong picks are crossed
    out with a hint (never the answer), and the first-try score is what counts. */
 var QUIZ_WAIT=5;
-function quizData(){var d=answers();if(!d.qz)d.qz={tries:[0,0,0],locked:[[],[],[]],solved:[false,false,false],first:[null,null,null]};return d.qz}
+function quizData(){var d=answers();if(!d.qz)d.qz={tries:[0,0,0],locked:[[],[],[]],solved:[false,false,false],first:[null,null,null]};if(!d.qz.lastWrong)d.qz.lastWrong=[null,null,null];return d.qz}
 function quizContent(){
   var looksLikeCode=function(o){return /^[a-z_]+\s*\(.*\)$|^[a-z_]+ \d+$/i.test(o.trim())};
   return '<div class="qz-intro"><h2>Check for understanding</h2>'+
-    '<p>Pick an answer for each question, then click <strong>Check answers</strong>.</p>'+
-    '<div class="qz-rules"><span>🎯 First try counts</span><span>💡 Hints if you miss</span><span>✅ All '+QUIZ.length+' to finish</span></div></div>'+
+    '<p>Pick an answer, then press <strong>Check</strong> under that question. Wrong? Read the hint and think it through. Every answer stays open.</p>'+
+    '<div class="qz-rules"><span>🎯 First try counts</span><span>💡 Hints, not answers</span><span>✅ All '+QUIZ.length+' to finish</span></div></div>'+
     '<div class="quiz-progress" id="quizProgress">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"><b>'+(i+1)+'</b></span>'}).join("")+'</div>'+
   QUIZ.map(function(q,i){
     return '<section class="quiz-block" id="quizBlock'+i+'" aria-labelledby="quizQ'+i+'">'+
@@ -207,7 +207,7 @@ function quizContent(){
       '<div class="quiz-title" id="quizQ'+i+'">'+escapeHtml(q.q)+'</div></div></div>'+
       '<div class="radio-options">'+q.options.map(function(o,j){
         return '<label class="radio-option'+(looksLikeCode(o)?' opt-code':'')+'" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter">'+"ABCD"[j]+'</span><span class="opt-text">'+escapeHtml(o)+'</span><span class="opt-tag"></span></label>';
-      }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></section>';
+      }).join("")+'</div><div class="qz-foot"><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div><button type="button" class="btn qz-check" data-qcheck="'+i+'">Check</button></div></section>';
   }).join("");
 }
 function quizPaint(){
@@ -215,19 +215,24 @@ function quizPaint(){
   QUIZ.forEach(function(q,i){
     var block=el("quizBlock"+i);if(!block)return;
     block.classList.toggle("solved",z.solved[i]);
+    var pick=d["q"+i]===undefined?null:Number(d["q"+i]);
+    var showWrong=!z.solved[i]&&z.lastWrong[i]!==null&&pick===z.lastWrong[i];
+    block.classList.toggle("has-wrong",!z.solved[i]&&z.lastWrong[i]!==null);
     block.querySelectorAll(".radio-option").forEach(function(opt){
       var j=Number(opt.dataset.opt),inp=opt.querySelector("input"),tag=opt.querySelector(".opt-tag");
-      var crossed=z.locked[i].indexOf(j)>-1;
-      opt.classList.toggle("opt-crossed",crossed);
+      opt.classList.remove("opt-crossed");
       opt.classList.toggle("opt-correct",z.solved[i]&&j===q.correct);
-      inp.disabled=crossed||z.solved[i];
-      tag.textContent=crossed?"✗ Not this one":(z.solved[i]&&j===q.correct?"✓ Correct":"");
+      opt.classList.toggle("opt-wrong-now",showWrong&&j===pick);
+      inp.disabled=z.solved[i];
+      tag.textContent=z.solved[i]&&j===q.correct?"✓ Correct":(showWrong&&j===pick?"Not quite":"");
     });
-    var res=el("quizResult"+i),lastWrong=z.locked[i][z.locked[i].length-1];
-    if(z.solved[i]){res.className="quiz-result good";res.innerHTML="<strong>Correct!</strong>"+(z.first[i]?" First try.":"")}
-    else if(lastWrong!==undefined){res.className="quiz-result bad";res.innerHTML="<strong>Not quite. Hint:</strong> "+escapeHtml(q.feedback[lastWrong])}
+    var res=el("quizResult"+i);
+    if(z.solved[i]){res.className="quiz-result good";res.innerHTML="<strong>Correct!</strong>"+(z.first[i]?" First try. 🎯":" Nice work figuring it out.")}
+    else if(z.lastWrong[i]!==null){res.className="quiz-result bad";res.innerHTML="<strong>Not quite. Think about this:</strong> "+escapeHtml(q.feedback[z.lastWrong[i]])}
     else{res.className="quiz-result";res.textContent=""}
-    el("quizTries"+i).textContent=z.tries[i]>1||(!z.solved[i]&&z.tries[i])?" · try "+(z.tries[i]+(z.solved[i]?0:1)):"";
+    var btn=block.querySelector(".qz-check");
+    if(btn){btn.hidden=z.solved[i];if(!quizWait[i]){btn.disabled=pick===null;btn.textContent=z.tries[i]?"Check again":"Check"}}
+    el("quizTries"+i).textContent=z.tries[i]&&!z.solved[i]?" · try "+(z.tries[i]+1):(z.solved[i]&&z.tries[i]>1?" · solved on try "+z.tries[i]:"");
     var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className=z.solved[i]?(z.first[i]?"right":"later"):(z.tries[i]?"wrong":"");
   });
   setHeadScore();
@@ -241,54 +246,61 @@ function setHeadScore(animate){
   hs.innerHTML='<span>First try</span><b>'+(checked?firstRight:"–")+"/"+QUIZ.length+'</b>'+(d.best!==undefined?'<em>Best '+d.best+'/'+QUIZ.length+'</em>':'');
   if(animate){hs.classList.remove("pop");void hs.offsetWidth;hs.classList.add("pop")}
 }
-var quizCooldown=null;
-function startCooldown(){
-  var left=QUIZ_WAIT;clearInterval(quizCooldown);action.disabled=true;
-  action.textContent="Read the hint… "+left;
-  quizCooldown=setInterval(function(){
-    left--;
-    if(left<=0||LESSONS[currentIndex].id!=="1.1.3"){clearInterval(quizCooldown);quizCooldown=null;action.disabled=false;refreshAction();return}
-    action.textContent="Read the hint… "+left;
+var quizCooldown=null,quizWait={};
+/* After a wrong check, that question's Check button waits a few seconds: read the hint, think, then try. */
+function questionWait(i){
+  var btn=document.querySelector('[data-qcheck="'+i+'"]');if(!btn)return;
+  var left=QUIZ_WAIT;clearInterval(quizWait[i]);btn.disabled=true;btn.textContent="Think… "+left;
+  quizWait[i]=setInterval(function(){
+    left--;var b2=document.querySelector('[data-qcheck="'+i+'"]');
+    if(left<=0||!b2){clearInterval(quizWait[i]);delete quizWait[i];quizPaint();return}
+    b2.textContent="Think… "+left;
   },1000);
 }
+function checkQuestion(i,quiet){
+  var z=quizData(),d=answers(),q=QUIZ[i],block=el("quizBlock"+i);
+  if(z.solved[i]||quizWait[i])return null;
+  if(d["q"+i]===undefined){if(!quiet){var r=el("quizResult"+i);r.className="quiz-result bad";r.textContent="Pick an answer first.";block.classList.remove("nudge");void block.offsetWidth;block.classList.add("nudge")}return null}
+  var pick=Number(d["q"+i]),ok=pick===q.correct;
+  z.tries[i]++;if(z.first[i]===null)z.first[i]=ok;
+  if(ok){z.solved[i]=true;z.lastWrong[i]=null}
+  else{z.lastWrong[i]=pick;if(z.locked[i].indexOf(pick)<0)z.locked[i].push(pick);buzz(60)}
+  block.classList.remove("anim-right","anim-wrong");void block.offsetWidth;block.classList.add(ok?"anim-right":"anim-wrong");
+  persist();quizPaint();
+  if(!ok)questionWait(i);
+  quizFinishIfDone();
+  return ok;
+}
+function quizFinishIfDone(){
+  var z=quizData(),d=answers();
+  if(!z.solved.every(Boolean)){state.checks["1.1.3"]=false;persist();refreshAction();return false}
+  if(state.checks["1.1.3"])return true;
+  var firstRight=z.first.filter(function(x){return x===true}).length;
+  d.best=Math.max(Number(d.best)||0,firstRight);
+  state.checks["1.1.3"]=true;persist();refreshAction();setHeadScore(true);
+  makeFeedback(true,"All "+QUIZ.length+" correct! First-try score: "+firstRight+"/"+QUIZ.length+". Click Save & Next to continue.",[]);
+  celebrate(firstRight===QUIZ.length?"Perfect score!":"All correct!");
+  return true;
+}
+/* Footer button: check every answered question that isn't solved yet. */
 function quizCheck(){
-  if(quizCooldown)return;
-  var z=quizData(),d=answers(),open=[],missing=[];
-  QUIZ.forEach(function(_,i){if(!z.solved[i]){open.push(i);if(d["q"+i]===undefined)missing.push(i)}});
-  if(missing.length){
-    missing.forEach(function(i){var r=el("quizResult"+i);r.className="quiz-result bad";r.textContent="Choose an answer.";var b=el("quizBlock"+i);b.classList.remove("nudge");void b.offsetWidth;b.classList.add("nudge")});
-    makeFeedback(false,"Answer every question first.",[]);return;
+  var z=quizData(),d=answers(),open=QUIZ.map(function(_,i){return i}).filter(function(i){return !z.solved[i]});
+  var ready=open.filter(function(i){return d["q"+i]!==undefined&&!quizWait[i]});
+  if(!ready.length){
+    var first=open.filter(function(i){return d["q"+i]===undefined})[0];
+    if(first!==undefined){checkQuestion(first);el("quizBlock"+first).scrollIntoView({block:"center",behavior:"smooth"})}
+    setStatus("Pick an answer for each question, then check it");return;
   }
-  var wrong=0;
-  open.forEach(function(i){
-    var q=QUIZ[i],pick=Number(d["q"+i]),ok=pick===q.correct,block=el("quizBlock"+i);
-    z.tries[i]++;
-    if(z.first[i]===null)z.first[i]=ok;
-    if(ok)z.solved[i]=true;else{wrong++;if(z.locked[i].indexOf(pick)<0)z.locked[i].push(pick);delete d["q"+i];var inp=block.querySelector('input[value="'+pick+'"]');if(inp)inp.checked=false}
-    block.classList.remove("anim-right","anim-wrong");void block.offsetWidth;block.classList.add(ok?"anim-right":"anim-wrong");
-  });
-  quizPaint();setHeadScore(z.first.every(function(x){return x!==null})&&open.length===QUIZ.length);
-  var allDone=z.solved.every(Boolean);
-  if(allDone){
-    var firstRight=z.first.filter(function(x){return x===true}).length;
-    d.best=Math.max(Number(d.best)||0,firstRight);setHeadScore();
-    state.checks["1.1.3"]=true;persist();refreshAction();
-    makeFeedback(true,"All "+QUIZ.length+" correct! First-try score: "+firstRight+"/"+QUIZ.length+". Click Save & Next to continue.",[]);
-    celebrate(firstRight===QUIZ.length?"Perfect score!":"All correct!");
-  }else{
-    state.checks["1.1.3"]=false;persist();
-    el("activityFeedback").hidden=true;buzz(60);
-    setStatus(wrong+" answer"+(wrong>1?"s need":" needs")+" another look · read the hint, then choose again");
-    var firstBad=open.filter(function(i){return !z.solved[i]})[0];
-    el("quizBlock"+firstBad).scrollIntoView({block:"center",behavior:"smooth"});
-    startCooldown();
-  }
+  ready.forEach(function(i){checkQuestion(i,true)});
+  var bad=open.filter(function(i){return !z.solved[i]});
+  if(bad.length){el("quizBlock"+bad[0]).scrollIntoView({block:"center",behavior:"smooth"});setStatus(bad.length+" question"+(bad.length>1?"s":"")+" still to figure out")}
 }
 function quizRetake(){
   if(!confirm("Start the quiz over? Your answers will be cleared. Your best first-try score is kept."))return;
   var d=answers();
   QUIZ.forEach(function(_,i){delete d["q"+i]});delete d.qz;
   clearInterval(quizCooldown);quizCooldown=null;action.disabled=false;
+  Object.keys(quizWait).forEach(function(k){clearInterval(quizWait[k])});quizWait={};
   state.checks["1.1.3"]=false;persist();
   body.innerHTML=quizContent();quizPaint();
   el("activityFeedback").hidden=true;refreshAction();body.scrollTop=0;
@@ -360,7 +372,8 @@ function celebrate(message){
   setTimeout(function(){party.classList.add("out")},2600);
   setTimeout(function(){layer.remove();party.remove()},3600);
 }
-body.addEventListener("click",function(e){if(e.target.closest("#quizRetake"))quizRetake()});
+body.addEventListener("click",function(e){if(e.target.closest("#quizRetake"))quizRetake();var qc=e.target.closest("[data-qcheck]");if(qc)checkQuestion(Number(qc.dataset.qcheck))});
+body.addEventListener("change",function(e){if(LESSONS[currentIndex].id==="1.1.3"&&e.target.name&&e.target.name.indexOf("quiz-")===0)setTimeout(quizPaint,0)});
 el("headRetake").addEventListener("click",quizRetake);
 // Both the small reference and the overlay use the exact same example commands.
 var EXAMPLE_PROGRAMS={
