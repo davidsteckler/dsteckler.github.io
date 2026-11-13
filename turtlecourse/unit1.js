@@ -196,13 +196,18 @@ function slinkyContent(){
 var QUIZ_WAIT=5;
 function quizData(){var d=answers();if(!d.qz)d.qz={tries:[0,0,0],locked:[[],[],[]],solved:[false,false,false],first:[null,null,null]};return d.qz}
 function quizContent(){
-  return '<h2>Check for understanding</h2><p>Pick one answer for each question, then click <strong>Check answers</strong>. Your <strong>first-try score</strong> is recorded, so think before you answer. If you miss one, you\'ll get a hint and can try that question again. You need all '+QUIZ.length+' right to move on.</p>'+
-    '<div class="quiz-progress" id="quizProgress">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"></span>'}).join("")+'</div>'+
+  var looksLikeCode=function(o){return /^[a-z_]+\s*\(.*\)$|^[a-z_]+ \d+$/i.test(o.trim())};
+  return '<div class="qz-intro"><h2>Check for understanding</h2>'+
+    '<p>Pick an answer for each question, then click <strong>Check answers</strong>.</p>'+
+    '<div class="qz-rules"><span>🎯 First try counts</span><span>💡 Hints if you miss</span><span>✅ All '+QUIZ.length+' to finish</span></div></div>'+
+    '<div class="quiz-progress" id="quizProgress">'+QUIZ.map(function(_,i){return '<span data-dot="'+i+'"><b>'+(i+1)+'</b></span>'}).join("")+'</div>'+
   QUIZ.map(function(q,i){
-    return '<div class="quiz-block" id="quizBlock'+i+'"><div class="quiz-count">Question '+(i+1)+' of '+QUIZ.length+'<span class="quiz-tries" id="quizTries'+i+'"></span></div><div class="quiz-title">'+escapeHtml(q.q)+'</div>'+
+    return '<section class="quiz-block" id="quizBlock'+i+'" aria-labelledby="quizQ'+i+'">'+
+      '<div class="qz-head"><span class="qz-num">'+(i+1)+'</span><div><div class="quiz-count">Question '+(i+1)+' of '+QUIZ.length+'<span class="quiz-tries" id="quizTries'+i+'"></span></div>'+
+      '<div class="quiz-title" id="quizQ'+i+'">'+escapeHtml(q.q)+'</div></div></div>'+
       '<div class="radio-options">'+q.options.map(function(o,j){
-        return '<label class="radio-option" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter">'+"ABCD"[j]+'</span><span class="opt-text">'+escapeHtml(o)+'</span><span class="opt-tag"></span></label>';
-      }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></div>';
+        return '<label class="radio-option'+(looksLikeCode(o)?' opt-code':'')+'" data-opt="'+j+'"><input type="radio" name="quiz-'+i+'" data-answer="q'+i+'" value="'+j+'"><span class="opt-letter">'+"ABCD"[j]+'</span><span class="opt-text">'+escapeHtml(o)+'</span><span class="opt-tag"></span></label>';
+      }).join("")+'</div><div class="quiz-result" id="quizResult'+i+'" aria-live="polite"></div></section>';
   }).join("");
 }
 function quizPaint(){
@@ -272,7 +277,8 @@ function quizCheck(){
     celebrate(firstRight===QUIZ.length?"Perfect score!":"All correct!");
   }else{
     state.checks["1.1.3"]=false;persist();
-    makeFeedback(false,wrong+" answer"+(wrong>1?"s need":" needs")+" another look. Read the hint under each red question, then choose again.",[]);
+    el("activityFeedback").hidden=true;buzz(60);
+    setStatus(wrong+" answer"+(wrong>1?"s need":" needs")+" another look · read the hint, then choose again");
     var firstBad=open.filter(function(i){return !z.solved[i]})[0];
     el("quizBlock"+firstBad).scrollIntoView({block:"center",behavior:"smooth"});
     startCooldown();
