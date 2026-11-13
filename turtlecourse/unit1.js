@@ -2,9 +2,9 @@
 "use strict";
 
 var LESSONS=[
-  {id:"1.1.1",name:"Intro to Python with Tracy the Turtle",short:"Intro to Python",kind:"Video",type:"video",subtitle:"Meet Tracy and see what a program can tell her to do.",editor:false},
+  {id:"1.1.1",name:"Intro to Python with the Turtle",short:"Intro to Python",kind:"Video",type:"video",subtitle:"Meet the turtle and see what a program can tell it to do.",editor:false},
   {id:"1.1.2",name:"Slinky (Example Program)",short:"Slinky example",kind:"Example",type:"example",subtitle:"Run a program, predict changes, and notice what the error messages tell you.",editor:true},
-  {id:"1.1.3",name:"Intro to Tracy",short:"Check for understanding",kind:"Quiz · 3 questions",type:"quiz",subtitle:"Check what you know about commands and circles.",editor:false},
+  {id:"1.1.3",name:"Intro to the Turtle",short:"Check for understanding",kind:"Quiz · 3 questions",type:"quiz",subtitle:"Check what you know about commands and circles.",editor:false},
   {id:"1.1.4",name:"Stretched Slinky",short:"Stretched Slinky",kind:"Assignment",type:"assignment",subtitle:"Write the commands yourself and compare your output with the instructions.",editor:true},
   {id:"1.1.5",name:"Sequencing with Trace Tables",short:"Trace tables",kind:"Assignment · Trace table",type:"assignment",subtitle:"Read a program one instruction at a time and record the order.",editor:false},
   {id:"1.1.6",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Project · Challenge",type:"project",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
@@ -130,10 +130,10 @@ function field(key,title,hint,rows){
    parts they actually watch count toward the WATCH_NEEDED percentage. */
 var WATCH_NEEDED=90;
 var VIDEO_CHAPTERS={
-  "1.1.1":[[0,"Meet Tracy: forward()"],[48,"Starting spot (0, 0)"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors & missing parentheses"],[263,"Keyboard tips & finishing up"]]
+  "1.1.1":[[0,"Meet the turtle: forward()"],[48,"Starting spot (0, 0)"],[63,"The circle() command"],[88,"Building the Slinky"],[145,"Errors & missing parentheses"],[263,"Keyboard tips & finishing up"]]
 };
 var VIDEO_PROMPTS={
-  "1.1.1":["What is Tracy, and where does she start?","What does the number inside circle() or forward() change?","What happens when a command is typed incorrectly?"]
+  "1.1.1":["What is the turtle, and where does it start?","What does the number inside circle() or forward() change?","What happens when a command is typed incorrectly?"]
 };
 function videoContent(videoId,intro){
   var id=LESSONS[currentIndex].id,prompts=VIDEO_PROMPTS[id]||[];
@@ -180,18 +180,18 @@ function slinkyContent(){
   return '<h2>Run the Slinky program</h2>'+
     '<p>The original code is already loaded in <code>main.py</code>. Work through the three experiments in order. Type each response in the box below its question.</p>'+
     '<section class="slinky-part"><div class="slinky-part-head"><span>PART 1</span><h3>Run the program</h3></div>'+
-    '<ol><li>Click <strong>Run</strong>.</li><li>Count the circles that Tracy draws.</li></ol>'+
+    '<ol><li>Click <strong>Run</strong>.</li><li>Count the circles that the turtle draws.</li></ol>'+
     field("count","How many circles are drawn?","ANSWER →",0)+'</section>'+
     '<section class="slinky-part"><div class="slinky-part-head"><span>PART 2</span><h3>Capital letter</h3></div>'+
     '<ol><li>Before changing the code, predict what will happen if <code>circle</code> becomes <code>Circle</code>.</li></ol>'+
     field("capitalPrediction","What do you predict will happen?","PREDICTION → Write this before you run the changed program.",2)+
     '<ol start="2"><li>Change the <strong>first</strong> <code>circle</code> to <code>Circle</code>.</li><li>Click <strong>Run</strong>.</li></ol>'+
-    field("capitalResult","What actually happened?","RESULT → Describe what Tracy drew or what appeared in Output.",2)+'</section>'+
+    field("capitalResult","What actually happened?","RESULT → Describe what the turtle drew or what appeared in Output.",2)+'</section>'+
     '<section class="slinky-part"><div class="slinky-part-head"><span>PART 3</span><h3>Remove parentheses</h3></div>'+
     '<ol><li>Change <code>Circle</code> back to <code>circle</code>.</li><li>Before running, predict what will happen if you remove the parentheses from the <strong>first</strong> <code>circle(35)</code>.</li></ol>'+
     field("parenPrediction","What do you predict will happen?","PREDICTION → Write this before you run the changed program.",2)+
     '<ol start="3"><li>Remove the two parentheses from the first command. Keep the number <code>35</code> in place.</li><li>Click <strong>Run</strong>.</li></ol>'+
-    field("parenResult","What actually happened?","RESULT → Describe what Tracy drew or what appeared in Output.",2)+'</section>'+
+    field("parenResult","What actually happened?","RESULT → Describe what the turtle drew or what appeared in Output.",2)+'</section>'+
     '<div class="mini-note">Once you have tested all three versions and recorded your five responses, click <strong>Save &amp; Next</strong>. Your answers save here; the Turtle editor keeps your code separately.</div>';
 }
 /* Quiz rules: all answers must be correct to move on. Wrong picks are crossed
@@ -325,7 +325,7 @@ function quizRetake(){
   el("activityFeedback").hidden=true;refreshAction();body.scrollTop=0;
   setStatus("New attempt · choose your answers");
 }
-/* Celebration: confetti burst + Tracy in a party hat + a short party sound.
+/* Celebration: confetti burst + the turtle in a party hat + a short party sound.
    Sound is synthesized (no audio files) and can be turned off in View. */
 /* Phone vibration (Android/Chrome; iPhones ignore it). Off with the View toggle. */
 function buzz(pattern){
@@ -435,7 +435,7 @@ function exampleImage(kind){
 
 function stretchedContent(){
   return '<h2>Make a stretched-out slinky</h2><p>Write your own program in <code>main.py</code>. Click <strong>Run</strong> to see the drawing, then <strong>Check my work</strong>.</p>'+
-  '<div class="example-row"><div><strong>Your program should have:</strong><ul class="task-list"><li><span><strong>Five rings</strong></span></li><li><span>Every circle has a <strong>radius of 35</strong></span></li><li><span>Tracy moves forward <strong>40 pixels after every circle</strong></span></li></ul></div>'+exampleImage('stretched')+'</div>'+
+  '<div class="example-row"><div><strong>Your program should have:</strong><ul class="task-list"><li><span><strong>Five rings</strong></span></li><li><span>Every circle has a <strong>radius of 35</strong></span></li><li><span>The turtle moves forward <strong>40 pixels after every circle</strong></span></li></ul></div>'+exampleImage('stretched')+'</div>'+
   '<div class="mini-note">You already saw the original slinky in 1.1.2. Compare your new spacing with that example. The checker looks at the commands your program executes.</div>'+
   '<div class="resource-links"><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command reference ↗</a></div>';
 }
@@ -472,7 +472,7 @@ function colorsContent(){
 }
 function contentFor(id){
   switch(id){
-    case "1.1.1":return videoContent("rOL_hje-rio","Intro to Python with Tracy the Turtle");
+    case "1.1.1":return videoContent("rOL_hje-rio","Intro to Python with the Turtle");
     case "1.1.2":return slinkyContent();
     case "1.1.3":return quizContent();
     case "1.1.4":return stretchedContent();
@@ -793,7 +793,7 @@ function refreshAction(){
 function render(){
   finishView=false;
   var l=LESSONS[currentIndex];
-  el("breadcrumb").textContent="Unit 1 · Tracy's World · Activity "+(currentIndex+1)+" of "+LESSONS.length;
+  el("breadcrumb").textContent="Unit 1 · Turtle's World · Activity "+(currentIndex+1)+" of "+LESSONS.length;
   el("lessonTitle").textContent=l.id+" "+l.name;
   el("lessonSubtitle").textContent=l.subtitle;
   el("lessonBadge").innerHTML=TYPE_INFO[l.type].icon+'<span>'+escapeHtml(l.kind)+'</span>';el("lessonBadge").className="meta-pill type-"+l.type;
@@ -843,9 +843,9 @@ function completeAndNext(){
 }
 function showFinish(){
   finishView=true;el("headScore").hidden=true;el("headRetake").hidden=true;renderMenu();workspace.classList.add("no-editor");workspace.classList.remove("video-mode");editorCard.hidden=true;frame.removeAttribute("src");
-  el("breadcrumb").textContent="Unit 1 / Tracy's World";
+  el("breadcrumb").textContent="Unit 1 / Turtle's World";
   el("lessonTitle").textContent="Unit 1 complete";
-  el("lessonSubtitle").textContent="You have worked through all "+LESSONS.length+" activities in Tracy's World.";
+  el("lessonSubtitle").textContent="You have worked through all "+LESSONS.length+" activities in Turtle's World.";
   el("lessonBadge").textContent=LESSONS.length+" of "+LESSONS.length;
   el("activityCounter").textContent="Finished";el("activityFeedback").hidden=true;
   body.innerHTML='<div class="unit-done"><h3>You have finished Unit 1.</h3><p>You have run programs, tested changes, written drawing commands, read trace tables, and used color.</p></div><div class="resource-links"><a href="/turtle/" target="_blank" rel="noopener">Keep experimenting in Turtle ↗</a><a href="/tracetable/" target="_blank" rel="noopener">Review trace tables ↗</a></div><p>Your completion record stays in this browser.</p>';
