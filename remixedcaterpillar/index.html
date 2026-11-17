@@ -109,6 +109,137 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 @media(max-width:740px){.shell,.top-inner{width:min(100% - 24px,1680px)}.navlinks{gap:9px}.navlinks a{font-size:10px}.navlinks a:nth-child(2){display:none}.intro{padding:22px 0 18px}.intro-mark{display:none}.intro p{font-size:12px}.lesson{display:block}.guide-top{padding:13px}.lesson{padding:16px}.scene-visual{max-width:310px}.studio{gap:10px}.editor-frame{height:1020px;min-height:840px}.color-studio{grid-template-columns:1fr}.check-row{grid-template-columns:1fr 1fr}}
 @media(max-width:530px){.brand em,.navlinks a:first-child{display:none}.navlinks a{font-size:10px}.check-row{grid-template-columns:1fr}.color-controls{gap:6px}.color-controls #colorCode{font-size:10px}.work-head .live{font-size:9px}.scene-visual{max-width:290px}.editor-frame{height:1050px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.progress>div{transition:none}}
+
+/* Remixed Caterpillar classroom layout: a fixed-height studio and vertical steps.
+   Keep the full Turtle editor visible; allow local overflow only on shorter displays. */
+@media (min-width: 1081px) {
+ html,body{height:100%;height:100dvh;overflow:hidden}
+ body{display:flex;flex-direction:column}
+ .topbar{flex:0 0 46px}
+ .top-inner{height:46px}
+ .shell{height:calc(100dvh - 46px);min-height:0;display:flex;flex-direction:column}
+ .intro{flex:0 0 auto;min-height:0;padding:12px 0 13px;gap:12px}
+ .intro .kicker{font-size:9px}
+ .intro h1{font-size:clamp(23px,2.25vw,31px);margin:1px 0 3px;line-height:1.05}
+ .intro p{font-size:11px;max-width:900px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.45}
+ .intro-info{margin-top:6px;gap:5px}
+ .chip{padding:3px 6px;font-size:8px}
+ .intro-mark{display:none}
+ .studio{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:clamp(495px,35.8vw,610px) minmax(0,1fr);gap:10px;align-items:stretch}
+ .guide{height:100%;min-height:0;display:grid;grid-template-columns:clamp(176px,12.4vw,202px) minmax(0,1fr);overflow:hidden}
+ .guide-top{min-height:0;display:flex;flex-direction:column;gap:0;padding:13px 10px 12px;background:#f3f5f0;border-right:1px solid #e1e4dd;border-bottom:0}
+ .guide-topline{padding:0 2px}
+ .tiny-label{font-size:9px;letter-spacing:.04em}
+ .step-number{font-size:10px}
+ .progress{margin:9px 2px 12px;height:4px;flex:0 0 auto}
+ .step-strip{min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(30px,1fr);gap:3px;overflow-y:auto;overflow-x:hidden;padding:0;scrollbar-width:thin;flex:1 1 auto}
+ .step-tab{min-width:0;width:100%;padding:5px 10px;text-align:left;border-radius:6px;font-size:11px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:29px;background:transparent;border:1px solid transparent;color:#56686a;font-weight:740}
+ .step-tab:hover{background:#e4eeea;border-color:#ccddd5}
+ .step-tab[aria-current="step"]{background:#176b73;border-color:#176b73;color:white;box-shadow:none}
+ .rail-preview{flex:0 0 auto;border-top:1px solid #dfe4dc;padding:9px 3px 0;margin-top:10px;min-height:0}
+ .visual-head{margin:0 0 6px;gap:3px}
+ .visual-head strong{font-size:10px;text-transform:uppercase;letter-spacing:.045em}
+ .visual-head span{font-size:9px}
+ .scene-visual{width:min(100%,166px);max-width:none;margin:0 auto;aspect-ratio:1/1;border-radius:5px}
+ .scene-note{display:none}
+ .preview-controls{margin:7px 0 0;display:flex;gap:6px;justify-content:center}
+ .preview-controls label{font-size:9px}
+ .preview-controls select{padding:3px 4px;font-size:10px;max-width:91px}
+ .preview-controls .coord-read{display:none}
+ .guide .lesson{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;padding:16px 17px 12px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+ .lesson h2{font-size:23px;line-height:1.12;margin:0 0 7px}
+ .description{font-size:12px;line-height:1.5;margin-bottom:9px}
+ .to-do{padding:8px 10px;margin-bottom:10px}
+ .to-do strong{font-size:9px;margin-bottom:3px}
+ .to-do p{font-size:11px;line-height:1.45}
+ .code-head{margin:0 0 5px}
+ .code-head strong{font-size:11px}
+ .sample{font-size:11px;line-height:1.46;padding:10px 11px;max-height:165px;flex:0 1 auto}
+ .code-note{font-size:10.5px;line-height:1.5;margin:7px 0 10px}
+ .questions{padding-top:9px}
+ .questions h3{font-size:10px;margin:0 0 3px}
+ .questions p{font-size:11px;line-height:1.48}
+ .color-drawer{border:1px solid #e4e7e0;border-radius:7px;margin-bottom:9px;background:#f6faf7;flex:0 0 auto}
+ .color-drawer summary{padding:7px 9px;cursor:pointer;font-size:10px;font-weight:800;color:#356660}
+ .color-drawer summary small{font-weight:550;color:#84928b;margin-left:5px}
+ .color-drawer .color-studio{display:block;border:0;margin:0;padding:2px 9px 10px;background:transparent;box-shadow:none}
+ .color-drawer .color-studio>div:first-child{display:none}
+ .color-drawer .color-controls{display:flex;gap:5px}
+ .color-drawer .color-controls select{padding:5px;max-width:115px;font-size:10px}
+ .color-drawer .color-controls input[type=color]{width:30px;height:29px}
+ .color-drawer #colorCode{font-size:9px;max-width:100%;overflow-wrap:anywhere;padding:5px}
+ .color-drawer .btn{padding:5px 8px;min-height:27px;font-size:9px}
+ .help{margin:9px 0 0}
+ .help summary{padding:6px 9px;font-size:10px}
+ .help p{font-size:10.5px;padding:0 9px 9px}
+ .actions{margin-top:auto;padding-top:12px;flex:0 0 auto;gap:5px}
+ .actions .btn{padding:7px 9px;min-height:32px;font-size:10px}
+ .step-saved{display:none}
+ .work-panel{height:100%;min-height:0;display:flex;flex-direction:column}
+ .work-head{min-height:47px;padding:8px 12px;flex:0 0 auto}
+ .work-head h2{font-size:13px}
+ .work-head p{font-size:10px}
+ .work-head .live{font-size:9px;padding:5px 7px}
+ .editor-frame{height:100%;min-height:0;flex:1 1 auto;width:100%}
+ .work-footer{display:none}
+ .foot-resources{display:none}
+}
+@media (min-width:1081px) and (max-height:800px) {
+ .intro{padding:8px 0 9px}
+ .intro p{display:none}
+ .intro-info{margin-top:5px}
+ .guide-top{padding:9px 9px}
+ .progress{margin:6px 2px 7px}
+ .step-strip{grid-auto-rows:minmax(27px,1fr);gap:1px}
+ .step-tab{padding:3px 9px;min-height:26px;font-size:10px}
+ .rail-preview{margin-top:6px;padding-top:6px}
+ .scene-visual{width:min(100%,135px)}
+ .visual-head{margin-bottom:4px}
+ .preview-controls{margin-top:4px}
+ .guide .lesson{padding:11px 13px 9px}
+ .lesson h2{font-size:21px;margin-bottom:5px}
+ .description{font-size:11px;margin-bottom:6px}
+ .to-do{padding:6px 8px;margin-bottom:7px}
+ .sample{padding:7px 9px;line-height:1.35;font-size:10px;max-height:143px}
+ .code-note{margin:5px 0 7px;font-size:10px}
+ .questions{padding-top:6px}
+ .questions p{font-size:10px}
+ .color-drawer{margin-bottom:6px}
+ .color-drawer summary{padding:5px 8px}
+ .help{margin-top:6px}
+ .actions{padding-top:7px}
+}
+@media (max-width:1080px) {
+ .studio{display:block}
+ .guide{display:grid;grid-template-columns:190px minmax(0,1fr);margin-bottom:12px}
+ .guide-top{display:flex;flex-direction:column;padding:14px 10px;border-right:1px solid var(--rule);border-bottom:0}
+ .step-strip{display:grid;grid-template-columns:1fr;gap:3px;overflow:visible}
+ .step-tab{width:100%;text-align:left;white-space:normal}
+ .rail-preview{padding-top:13px;margin-top:14px;border-top:1px solid var(--rule)}
+ .scene-visual{width:min(100%,160px)}
+ .scene-note{display:none}
+ .preview-controls{gap:4px}
+ .preview-controls select{max-width:100px}
+ .preview-controls .coord-read{display:none}
+ .lesson{display:block!important;overflow:visible;padding:18px}
+ .editor-frame{height:790px;min-height:700px}
+ .color-drawer{border:1px solid var(--rule);border-radius:8px;margin:12px 0;padding:8px 10px}
+ .color-drawer summary{font-weight:800;cursor:pointer}
+ .color-drawer .color-studio{display:block;margin:8px 0 0;padding:10px}
+ .color-drawer .color-studio>div:first-child{display:none}
+}
+@media (max-width:650px) {
+ .guide{grid-template-columns:1fr}
+ .guide-top{border-right:0;border-bottom:1px solid var(--rule)}
+ .step-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+ .step-tab{text-align:center;font-size:10px;padding:8px 4px}
+ .rail-preview{display:grid;grid-template-columns:minmax(0,170px) 1fr;gap:8px}
+ .rail-preview .visual-head{grid-column:1/-1}
+ .rail-preview .preview-controls{align-self:center}
+ .scene-visual{width:100%;max-width:150px}
+ .color-drawer .color-controls{justify-content:flex-start}
+}
+
 </style>
 </head>
 <body>
@@ -138,12 +269,7 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
    <div class="guide-topline"><span class="tiny-label">Build guide · 12 small steps</span><span class="step-number" id="stepCount">01 / 12</span></div>
    <div class="progress" aria-label="Lesson progress"><div id="progressBar"></div></div>
    <nav class="step-strip" id="stepStrip" aria-label="Choose a project step"></nav>
-  </div>
-  <div class="lesson" aria-live="polite">
-   <h2 id="stepTitle">Your world, your choices</h2>
-   <p class="description" id="stepDescription"></p>
-   <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
-   <div class="visual-head"><strong id="visualTitle">Drawing guide</strong><span>400 × 400</span></div>
+   <div class="rail-preview">   <div class="visual-head"><strong id="visualTitle">Drawing guide</strong><span>400 × 400</span></div>
    <div class="scene-visual"><canvas width="400" height="400" id="guideCanvas" role="img" aria-label="Example caterpillar drawing, shown progressively with each lesson step"></canvas></div>
    <p class="scene-note" id="visualCaption">A drawing guide, not a code solution. Your art can look different.</p>
    <div class="preview-controls">
@@ -152,9 +278,24 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
     <label class="grid-check"><input id="gridToggle" type="checkbox"> Grid</label>
     <span class="coord-read" id="coords">x 0 · y 0</span>
    </div>
+</div>
+  </div>
+  <div class="lesson" aria-live="polite">
+   <h2 id="stepTitle">Your world, your choices</h2>
+   <p class="description" id="stepDescription"></p>
+   <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
    <div class="code-head"><strong id="codeTitle">Small code example</strong><small>Just this step</small></div>
    <pre class="sample"><code id="codeSample"></code></pre>
    <p class="code-note" id="codeNote"></p>
+   <details class="color-drawer"><summary><span aria-hidden="true">◉</span> Color picker <small>optional</small></summary><section class="color-studio" aria-label="Optional color picker">
+ <div><strong>Color lab <span style="font-size:11px;color:#84928f;font-weight:600">· optional</span></strong><p>Pick any color and see the Python line. This helps you choose a color; you still add the line to your editor.</p></div>
+ <div class="color-controls">
+  <select id="colorTarget" aria-label="Choose what you are coloring"><option value="body">Body segment</option><option value="ground">Ground</option><option value="face">Face</option><option value="sky">Sky</option><option value="sun">Sun / moon</option></select>
+  <input id="colorPick" type="color" value="#ea7643" aria-label="Choose a custom color">
+  <code id="colorCode">color("#ea7643")</code>
+  <button class="btn" id="copyColor" type="button">Copy line</button>
+ </div>
+</section></details>
    <div class="questions"><h3>Try it yourself</h3><p id="tryText"></p></div>
    <details class="help" id="helpBox"><summary>Need a hint?</summary><p id="hintText"></p></details>
    <div class="actions">
@@ -170,15 +311,6 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
   <div class="work-footer"><span>Your code stays here when you change tutorial steps. Save or copy your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
  </section>
 </main>
-<section class="color-studio" aria-label="Optional color picker">
- <div><strong>Color lab <span style="font-size:11px;color:#84928f;font-weight:600">· optional</span></strong><p>Pick any color and see the Python line. This helps you choose a color; you still add the line to your editor.</p></div>
- <div class="color-controls">
-  <select id="colorTarget" aria-label="Choose what you are coloring"><option value="body">Body segment</option><option value="ground">Ground</option><option value="face">Face</option><option value="sky">Sky</option><option value="sun">Sun / moon</option></select>
-  <input id="colorPick" type="color" value="#ea7643" aria-label="Choose a custom color">
-  <code id="colorCode">color("#ea7643")</code>
-  <button class="btn" id="copyColor" type="button">Copy line</button>
- </div>
-</section>
 <div class="foot-resources"><span>Tip: Every time you add a shape, run your entire program to see what changes.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
 </div>
 <script>
@@ -262,7 +394,6 @@ function render(){
  $("prevStep").disabled=current===0;
  $("nextStep").textContent=current===steps.length-1?"Back to the beginning ↺":"Next step →";
  Array.from(strip.children).forEach(function(btn,i){btn.setAttribute("aria-current",i===current?"step":"false")});
- if(strip.children[current])strip.children[current].scrollIntoView({block:"nearest",inline:"nearest"});
  if(current===11){var checked={};try{checked=JSON.parse(localStorage.getItem(key+"-checks")||"{}")}catch(e){}
   var text=s.try;var list=document.createElement("div");list.className="check-row";checkTasks.forEach(function(label,i){var wrapper=document.createElement("label"),box=document.createElement("input");box.type="checkbox";box.checked=!!checked[i];box.addEventListener("change",function(){checked[i]=box.checked;try{localStorage.setItem(key+"-checks",JSON.stringify(checked))}catch(e){}});wrapper.append(box,document.createTextNode(label));list.appendChild(wrapper)});
   $("tryText").textContent=text;$("tryText").appendChild(list)
