@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e9">
+<meta name="description" content="Build a Remixed Caterpillar with Tracy the Turtle, one shape at a time. Beginner Python tutorial with a real Turtle editor, drawing guide, and creative choices.">
+<link rel="canonical" href="https://dsteckler.com/remixedcaterpillar/">
+<title>Remixed Caterpillar · Step-by-step Turtle Studio</title>
+<style>
+:root{--bg:#f4f0e9;--paper:#fffdfa;--ink:#253239;--muted:#586770;--subtle:#7a878c;--rule:#dddcd5;--teal:#176b73;--teal-dark:#12515a;--soft:#e8f2f0;--orange:#e18d50;--code:#202a32;--shadow:0 7px 24px #24323d0a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #eeac62;outline-offset:2px}
+button:disabled{cursor:default;opacity:.4}
+a{color:inherit}
+.topbar{background:#fffdf8;border-bottom:1px solid var(--rule)}
+.top-inner{width:min(100% - 42px,1680px);height:59px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:-.015em}
+.brand-mark{width:29px;height:29px;display:grid;place-items:center;border-radius:8px;color:#fff;background:var(--teal);font:800 13px ui-monospace,monospace}
+.brand em{font-style:normal;color:#8a9694;font-weight:650}
+.navlinks{display:flex;align-items:center;gap:18px}
+.navlinks a{text-decoration:none;font-weight:700;font-size:11px;color:#506269}
+.navlinks a:hover{text-decoration:underline;text-underline-offset:4px}
+.shell{width:min(100% - 42px,1680px);margin:auto}
+.intro{padding:25px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:26px}
+.kicker{font:850 11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#b15d39;letter-spacing:.13em;text-transform:uppercase}
+h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;margin:5px 0 9px;font-weight:860}
+.intro p{max-width:680px;margin:0;color:#5a676c;font-size:14px;line-height:1.5}
+.intro-info{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.chip{padding:5px 8px;border-radius:5px;background:#eae6dc;color:#5e645e;font:750 10px/1.2 ui-monospace,Consolas,monospace}
+.chip.accent{background:#e4f0ed;color:#1e615d}
+.intro-mark{border-left:1px solid var(--rule);padding-left:24px;min-width:170px;max-width:230px}
+.intro-mark strong{display:block;font-size:13px}
+.intro-mark small{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.studio{display:grid;grid-template-columns:minmax(355px,400px) minmax(0,1fr);gap:15px;align-items:start}
+.guide,.work-panel{background:var(--paper);border:1px solid var(--rule);border-radius:13px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.guide-top{padding:18px 19px 13px;border-bottom:1px solid #ebe9e1}
+.guide-topline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tiny-label{font:850 10px ui-monospace,Consolas,monospace;letter-spacing:.095em;text-transform:uppercase;color:var(--teal)}
+.step-number{font:750 11px ui-monospace,Consolas,monospace;color:#65747a}
+.progress{height:6px;background:#e9eae3;border-radius:5px;overflow:hidden;margin:12px 0 12px}
+.progress>div{height:100%;width:8%;background:var(--teal);transition:width .2s}
+.step-strip{display:flex;gap:5px;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin}
+.step-tab{white-space:nowrap;border:1px solid #e2e4dc;border-radius:7px;color:#617076;background:#fff;padding:7px 9px;font-size:11px;font-weight:740}
+.step-tab:hover{border-color:#a2c1ba}
+.step-tab[aria-current="step"]{background:#176b73;color:#fff;border-color:#176b73}
+.lesson{padding:20px 19px 19px}
+.lesson h2{font-size:26px;letter-spacing:-.045em;line-height:1.15;margin:0 0 8px}
+.description{margin:0 0 13px;color:#526268;font-size:13px;line-height:1.62}
+.to-do{border-left:3px solid #e5a06b;padding:9px 12px;background:#faf3e9;border-radius:0 7px 7px 0;margin-bottom:16px}
+.to-do strong{display:block;font-size:10px;letter-spacing:.085em;text-transform:uppercase;color:#926037;margin-bottom:4px}
+.to-do p{margin:0;font-size:12px;line-height:1.55}
+.visual-head{display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:8px}
+.visual-head strong{font-size:12px}
+.visual-head span{font:650 10px ui-monospace,Consolas,monospace;color:#889396}
+.scene-visual{position:relative;max-width:286px;width:100%;aspect-ratio:1;margin:0 auto;border:1px solid #cbd8d8;border-radius:8px;overflow:hidden;background:#d4edf4}
+#guideCanvas{width:100%;height:100%;display:block}
+.scene-note{font-size:10px;color:#637177;line-height:1.55;margin:8px 0 11px}
+.preview-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
+.preview-controls label{font-size:10px;font-weight:750;color:#5a6a6e}
+.preview-controls select{font-size:11px;padding:6px 7px;border:1px solid #d9dfd7;border-radius:6px;background:#fff;max-width:155px}
+.grid-check{display:flex;align-items:center;gap:4px}
+.grid-check input{accent-color:#176b73}
+.coord-read{font:10px ui-monospace,Consolas,monospace;color:#718083;margin-left:auto}
+.code-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0 7px}
+.code-head strong{font-size:11px}
+.code-head small{font-size:10px;color:#8a9696}
+.sample{background:var(--code);color:#e5eeed;border-radius:8px;border:1px solid #303f47;overflow:auto;margin:0;max-height:245px;padding:13px 14px;tab-size:4;font:12px/1.66 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.sample code{font:inherit}
+.code-note{font-size:11px;color:#607177;margin:9px 0 14px;line-height:1.6}
+.questions{border-top:1px solid #e6e7e0;padding-top:13px}
+.questions h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a45a37;margin:0 0 5px}
+.questions p{font-size:12px;line-height:1.62;margin:0}
+.help{border:1px solid #e0e3db;border-radius:7px;margin:14px 0 0}
+.help summary{cursor:pointer;font-size:11px;font-weight:760;padding:9px 11px}
+.help p{font-size:11px;color:#5c6d70;line-height:1.65;padding:0 11px 11px;margin:0}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.btn{background:#fff;border:1px solid #d3dcd8;color:#20383d;padding:9px 13px;font-weight:800;font-size:11px;min-height:36px;border-radius:7px}
+.btn:hover{background:#f2f8f5}
+.btn.primary{background:#176b73;border-color:#176b73;color:#fff}
+.btn.primary:hover{background:#12515a}
+.step-saved{font-size:10px;color:#768383}
+.work-panel{position:relative}
+.work-head{padding:14px 17px;min-height:61px;border-bottom:1px solid #e8e7df;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.work-head h2{font-size:15px;letter-spacing:-.018em;margin:0}
+.work-head p{margin:2px 0 0;font-size:11px;color:#718087}
+.work-head .live{font:750 10px ui-monospace,Consolas,monospace;color:#24655d;background:#e7f1ed;border:1px solid #c9e0d9;border-radius:99px;padding:6px 9px;white-space:nowrap}
+.editor-frame{display:block;width:100%;height:min(74vh,770px);min-height:630px;border:0;background:#f0ebe1}
+.work-footer{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #e9e8e2;font-size:11px;color:#627176}
+.work-footer a{font-weight:750;color:#176b73}
+.color-studio{margin-top:15px;border:1px solid var(--rule);border-radius:11px;padding:16px 18px;background:#fffdfa;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.color-studio strong{font-size:13px}
+.color-studio p{margin:3px 0 0;font-size:11px;color:#637277}
+.color-controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.color-controls select{border:1px solid var(--rule);border-radius:7px;background:#fff;padding:7px;font-size:11px}
+.color-controls input[type=color]{width:38px;height:34px;border:1px solid var(--rule);border-radius:5px;background:#fff;padding:3px}
+#colorCode{font:750 11px ui-monospace,Consolas,monospace;color:#32454a;background:#eff2ee;padding:8px 10px;border-radius:6px}
+.foot-resources{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between;margin:20px 0 36px;color:#68787b;font-size:11px}
+.foot-resources a{font-weight:750;color:#176b73}
+.check-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.check-row label{border:1px solid #e1e4df;border-radius:7px;display:flex;gap:7px;align-items:start;padding:8px 10px;font-size:11px;color:#51646a;background:#fafbf8}
+.check-row input{accent-color:var(--teal);margin-top:2px}
+[hidden]{display:none!important}
+@media(max-width:1240px){.studio{grid-template-columns:1fr}.guide{display:grid;grid-template-columns:minmax(315px,1fr) minmax(315px,1fr)}.guide-top{grid-column:1/-1}.lesson{grid-column:1/-1;display:grid;grid-template-columns:1fr minmax(275px,.9fr);gap:0 22px}.lesson h2,.lesson>.description,.lesson>.to-do,.lesson>.code-head,.lesson>.sample,.lesson>.code-note,.lesson>.questions,.lesson>.help,.lesson>.actions{grid-column:1}.lesson>.visual-head,.lesson>.scene-visual,.lesson>.scene-note,.lesson>.preview-controls{grid-column:2}.lesson>.visual-head{grid-row:1}.lesson>.scene-visual{grid-row:2/span 3}.lesson>.scene-note{grid-row:5}.lesson>.preview-controls{grid-row:6}.scene-visual{max-width:350px}.lesson h2{grid-row:1}.lesson>.description{grid-row:2}.lesson>.to-do{grid-row:3}.lesson>.code-head{grid-row:4}.lesson>.sample{grid-row:5}.lesson>.code-note{grid-row:6}.lesson>.questions{grid-row:7}.lesson>.help{grid-row:8}.lesson>.actions{grid-row:9}.editor-frame{height:750px}}
+@media(max-width:740px){.shell,.top-inner{width:min(100% - 24px,1680px)}.navlinks{gap:9px}.navlinks a{font-size:10px}.navlinks a:nth-child(2){display:none}.intro{padding:22px 0 18px}.intro-mark{display:none}.intro p{font-size:12px}.lesson{display:block}.guide-top{padding:13px}.lesson{padding:16px}.scene-visual{max-width:310px}.studio{gap:10px}.editor-frame{height:1020px;min-height:840px}.color-studio{grid-template-columns:1fr}.check-row{grid-template-columns:1fr 1fr}}
+@media(max-width:530px){.brand em,.navlinks a:first-child{display:none}.navlinks a{font-size:10px}.check-row{grid-template-columns:1fr}.color-controls{gap:6px}.color-controls #colorCode{font-size:10px}.work-head .live{font-size:9px}.scene-visual{max-width:290px}.editor-frame{height:1050px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.progress>div{transition:none}}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="top-inner">
+   <a class="brand" href="/turtle/"><span class="brand-mark" aria-hidden="true">&gt;_</span> TURTLE LAB <em>/ classroom projects</em></a>
+   <nav class="navlinks" aria-label="Related tools">
+    <a href="/gridworld/">Coordinate world</a>
+    <a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a>
+    <a href="/turtle/" target="_blank" rel="noopener">Full sandbox ↗</a>
+   </nav>
+ </div>
+</header>
+<div class="shell">
+<section class="intro">
+ <div>
+  <div class="kicker">CodeHS 1.3.12 · Creative Turtle project</div>
+  <h1>Remixed Caterpillar<span style="color:#dc8450">.</span></h1>
+  <p>Build a caterpillar and the world around it, one small piece at a time. Make your own choices about the body, the ground, the sky, and the extra details.</p>
+  <div class="intro-info"><span class="chip accent">NO LOOPS</span><span class="chip accent">NO FUNCTIONS</span><span class="chip">400 × 400 WORLD</span><span class="chip">YOUR COLORS · YOUR DESIGN</span></div>
+ </div>
+ <div class="intro-mark"><strong>One drawing. Many versions.</strong><small>Use the guide to understand each shape. Write the Python yourself in the workspace.</small></div>
+</section>
+<main class="studio">
+ <section class="guide" aria-label="Project walkthrough">
+  <div class="guide-top">
+   <div class="guide-topline"><span class="tiny-label">Build guide · 12 small steps</span><span class="step-number" id="stepCount">01 / 12</span></div>
+   <div class="progress" aria-label="Lesson progress"><div id="progressBar"></div></div>
+   <nav class="step-strip" id="stepStrip" aria-label="Choose a project step"></nav>
+  </div>
+  <div class="lesson" aria-live="polite">
+   <h2 id="stepTitle">Your world, your choices</h2>
+   <p class="description" id="stepDescription"></p>
+   <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
+   <div class="visual-head"><strong id="visualTitle">Drawing guide</strong><span>400 × 400</span></div>
+   <div class="scene-visual"><canvas width="400" height="400" id="guideCanvas" role="img" aria-label="Example caterpillar drawing, shown progressively with each lesson step"></canvas></div>
+   <p class="scene-note" id="visualCaption">A drawing guide, not a code solution. Your art can look different.</p>
+   <div class="preview-controls">
+    <label for="sceneMode">Sky idea</label>
+    <select id="sceneMode" aria-label="Preview a different sky"><option value="day">Sunny day</option><option value="night">Starry night</option><option value="blood">Blood moon</option></select>
+    <label class="grid-check"><input id="gridToggle" type="checkbox"> Grid</label>
+    <span class="coord-read" id="coords">x 0 · y 0</span>
+   </div>
+   <div class="code-head"><strong id="codeTitle">Small code example</strong><small>Just this step</small></div>
+   <pre class="sample"><code id="codeSample"></code></pre>
+   <p class="code-note" id="codeNote"></p>
+   <div class="questions"><h3>Try it yourself</h3><p id="tryText"></p></div>
+   <details class="help" id="helpBox"><summary>Need a hint?</summary><p id="hintText"></p></details>
+   <div class="actions">
+    <button class="btn" id="prevStep" type="button">← Previous</button>
+    <span class="step-saved" id="savedLabel">Step saves on this device</span>
+    <button class="btn primary" id="nextStep" type="button">Next step →</button>
+   </div>
+  </div>
+ </section>
+ <section class="work-panel" aria-label="Live Python Turtle editor">
+  <div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type your code, press Run, and compare your drawing.</p></div><span class="live">REAL PYTHON · AUTO-SAVED</span></div>
+  <iframe id="turtleFrame" class="editor-frame" title="Editable Python Turtle code, Run controls, drawing world and error messages" allow="clipboard-write" loading="eager"></iframe>
+  <div class="work-footer"><span>Your code stays here when you change tutorial steps. Save or copy your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
+ </section>
+</main>
+<section class="color-studio" aria-label="Optional color picker">
+ <div><strong>Color lab <span style="font-size:11px;color:#84928f;font-weight:600">· optional</span></strong><p>Pick any color and see the Python line. This helps you choose a color; you still add the line to your editor.</p></div>
+ <div class="color-controls">
+  <select id="colorTarget" aria-label="Choose what you are coloring"><option value="body">Body segment</option><option value="ground">Ground</option><option value="face">Face</option><option value="sky">Sky</option><option value="sun">Sun / moon</option></select>
+  <input id="colorPick" type="color" value="#ea7643" aria-label="Choose a custom color">
+  <code id="colorCode">color("#ea7643")</code>
+  <button class="btn" id="copyColor" type="button">Copy line</button>
+ </div>
+</section>
+<div class="foot-resources"><span>Tip: Every time you add a shape, run your entire program to see what changes.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
+</div>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var STARTER="# Remixed Caterpillar (1.3.12)\n# Add your drawing commands below, one shape at a time.\nspeed(8)\npensize(2)\n\n";
+var lessonId="remixed-caterpillar";
+$("turtleFrame").src="/turtle/?embed=course&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(STARTER);
+var steps=[
+ {tab:"Plan",title:"Make a plan",description:"Look at the example. The drawing is made from a few simple shapes: a rectangle, filled circles, short lines, and details you choose.",task:"Decide on a setting. Will your caterpillar live under a blue sky, at night, or beneath a blood moon?",code:"speed(8)\npensize(2)",note:"These two commands set the drawing speed and pen thickness. The editor starts with them already added.",try:"Name at least three things you could change about the example. Your colors, sizes, and sky details should make your drawing your own.",hint:"Think in layers: sky first, ground next, body after that, then the face and details. Python runs your lines from top to bottom."},
+ {tab:"Sky",title:"Choose the background",description:"Start with the sky. The background color changes the whole Turtle world without drawing a shape.",task:"Choose a background color. Use bgcolor with a color name inside quotation marks.",code:'bgcolor("lightblue")',note:'For nighttime, try bgcolor("midnightblue") or bgcolor("black"). The sky ideas below are visual inspiration only.',try:"Run your code. Does the entire Turtle world change color? Test at least two colors before choosing one.",hint:'Color names need quotation marks: bgcolor("black"), not bgcolor(black).'},
+ {tab:"Ground",title:"Build a filled rectangle",description:"Your ground is a wide rectangle at the bottom of the world. You already know how to move to coordinates and lift the pen.",task:"Start at the upper-left corner of the ground. Visit the other three corners, then return to where you started. Finish the fill.",code:'color("saddlebrown")\npenup()\ngoto(-200, -155)\npendown()\nbegin_fill()',note:"This is only the beginning of the rectangle. You must figure out the remaining lines. Try the numbered corner markers when Grid is on.",try:"Continue using goto(200, -155), goto(200, -200), goto(-200, -200), and return to (-200, -155). Add end_fill() and penup(). Change the ground color.",hint:"A closed rectangle needs four sides. If only an outline appears, check begin_fill() and end_fill(). If you see a stray line to the ground, lift the pen before the first goto."},
+ {tab:"Circle 1",title:"Draw one body segment",description:"The caterpillar's body is a row of filled circles. Start with one, then build the others yourself.",task:"Use one circle near the left edge of the ground. Make it filled and choose its color.",code:'color("tomato")\npenup()\ngoto(-165, -145)\npendown()\nbegin_fill()\ncircle(30)\nend_fill()\npenup()',note:"This is an example of ONE segment. It does not build the caterpillar. Circle positions are measured from the bottom of each circle when Tracy faces right.",try:"Run your drawing. Experiment with the first circle's radius or x position. Keep its bottom close to the top of your ground.",hint:"With the turtle facing right, circle(30) starts at the bottom of the circle and draws upward. A radius of 30 makes a circle 60 units tall."},
+ {tab:"Body",title:"Add the other circles",description:"Repeat the same drawing pattern by typing it again for each new segment. Make the circles gradually bigger as you move right.",task:"Build a body with at least five filled circles. Each circle should have a color, a start position, and a radius.",code:'color("mediumseagreen")\npenup()\ngoto(-105, -145)\npendown()\nbegin_fill()\ncircle(35)\nend_fill()\npenup()',note:"This is ONE more example segment. Write the remaining segments yourself, one after another. No loops or functions.",try:"Try radii like 30, 35, 40, 45, and 50. Change the x position each time so the circles sit side by side, with some overlap if you want.",hint:"Make the rightmost circle your head. One possible starting point for the head is (130, -145) with radius 50. If circles accidentally connect, check penup() before each goto()."},
+ {tab:"Eyes",title:"Give the head two eyes",description:"Small filled circles work for the eyes too. The same commands work at a much smaller size.",task:"Draw two small eyes inside the biggest circle, using a color that stands out against the face.",code:'color("black")\npenup()\ngoto(120, -100)\npendown()\nbegin_fill()\ncircle(5)\nend_fill()\npenup()',note:"This draws only ONE eye. Choose a different x coordinate for the second eye.",try:"Add a second eye. Which coordinate must change to move the eye right while keeping both eyes at the same height?",hint:"Keep the y coordinate the same and increase x, such as from 120 to 160. A small radius like 4, 5, or 6 works well."},
+ {tab:"Smile",title:"Draw a curved smile",description:"A partial circle makes a smile. The second number in circle controls how much of a circle Tracy draws.",task:"Move the turtle to the lower part of the head, face it diagonally down, and draw part of a circle.",code:"penup()\ngoto(114, -118)\nsetheading(-60)\npendown()\ncircle(30, 120)\npenup()",note:"circle(30, 120) draws 120 degrees of a circle, rather than the whole 360 degrees.",try:"Run the face. Change the heading or the arc size to make a different expression.",hint:"If the smile curves the wrong way, check setheading(-60). Positive and negative angles point the turtle in different directions."},
+ {tab:"Antennae",title:"Add two antennae",description:"Short lines can become antennae. Move to the head without drawing, choose an angle, then draw forward.",task:"Draw two antennas that come out from the top of the caterpillar's head.",code:"penup()\ngoto(108, -71)\nsetheading(120)\npendown()\nforward(46)\npenup()",note:"This example draws ONE antenna. You choose the starting point and angle for the other one.",try:"Draw a second antenna on the other side with a different angle. Try setheading(60) to point up and right.",hint:"setheading(90) means straight up, 0 means right, 180 means left. A heading of 120 leans up-left; 60 leans up-right."},
+ {tab:"Sun / moon",title:"Add something to the sky",description:"The same filled-circle pattern can create a bright sun, a white moon, or a red blood moon.",task:"Choose one sky object. Put a large filled circle high enough that it doesn't collide with your caterpillar.",code:'color("gold")\npenup()\ngoto(115, 95)\npendown()\nbegin_fill()\ncircle(42)\nend_fill()\npenup()',note:"A circle drawn from (115, 95) with radius 42 appears above that starting point. Change the color for a moon or blood moon.",try:"Choose the sky object you want in your artwork and decide on its color, radius, and coordinates.",hint:"A circle's full height is twice its radius. Keep the top of your sky object below y = 200 so it fits in the world."},
+ {tab:"Rays / stars",title:"Add rays or stars",description:"Make short lines around the sun, or make small stars in the night sky. Every line can be drawn with commands you already know.",task:"For a sun, make several short rays around it. For a moon, add stars using short crossing lines.",code:"penup()\ngoto(115, 181)\nsetheading(90)\npendown()\nforward(14)\npenup()",note:"This is ONE ray. For the others, change the start coordinates and heading. You do not need a loop.",try:"Draw at least four rays for a sunny scene, or at least three stars for a nighttime scene.",hint:"To draw each ray: lift the pen, go to a new start point, choose a heading, put the pen down, then move forward. Repeat by typing each group yourself."},
+ {tab:"Sky details",title:"Draw birds or clouds",description:"Birds are a pair of slanted lines. Clouds can be made from a few white circles. You can also add hills, flowers, or something entirely your own.",task:"Choose at least one type of extra detail for the sky and draw it yourself.",code:'color("black")\npenup()\ngoto(-125, 95)\npendown()\ngoto(-108, 111)\ngoto(-91, 95)\npenup()',note:"This is ONE bird. Build more by choosing new coordinates. A cloud can use three small white filled circles placed close together.",try:"Add birds, clouds, or stars. Try to keep them away from the face so your caterpillar is easy to see.",hint:"For a cloud, fill a white circle, lift the pen, move a little to the right, and draw another filled circle. Use separate begin_fill() and end_fill() pairs for each circle."},
+ {tab:"Finish",title:"Make the final remix yours",description:"Your picture should have a recognizable caterpillar, a filled ground, a face, and a sky that you've customized. Run it once more and look at every part.",task:"Check your drawing, fix any stray lines, and make at least three creative decisions that are different from the sample.",code:"hideturtle()",note:"This optional command hides Tracy's pointer at the end so your finished drawing is easier to see.",try:"Compare your world with your plan. Once it works, save your code and follow your class directions for submitting the finished work.",hint:"If something looks wrong, inspect the first place the drawing changes unexpectedly. Check color, penup/pendown, goto positions, and circle radius. Fix one line and run again."}
+];
+var current=0, key="remixed-caterpillar-guide-v1";
+var palette={day:{sky:"#acd9e6",ground:"#af5945",sun:"#ffe32c"},night:{sky:"#132641",ground:"#554c6a",sun:"#f5efce"},blood:{sky:"#291e30",ground:"#574050",sun:"#dd5044"}};
+var edits={body:"#ea7643",ground:null,face:"#ffe66b",sky:null,sun:null};
+var scene="day",showGrid=false;
+try{var stored=JSON.parse(localStorage.getItem(key)||"{}");if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));if(["day","night","blood"].includes(stored.scene))scene=stored.scene;showGrid=!!stored.grid;if(stored.edits&&typeof stored.edits==="object"){Object.keys(edits).forEach(function(k){if(typeof stored.edits[k]==="string"&&/^#[a-fA-F0-9]{6}$/.test(stored.edits[k]))edits[k]=stored.edits[k]})}}catch(e){}
+$("sceneMode").value=scene;$("gridToggle").checked=showGrid;
+var checkTasks=["Background + ground","Five body circles","Two eyes + smile","Two antennae","Sun or moon + extras","Three personal changes"];
+function save(){try{localStorage.setItem(key,JSON.stringify({step:current,scene:scene,grid:showGrid,edits:edits}))}catch(e){}}
+var strip=$("stepStrip");
+steps.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.className="step-tab";b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;b.setAttribute("aria-label","Step "+(i+1)+": "+s.title);b.addEventListener("click",function(){current=i;render()});strip.appendChild(b)});
+var canvas=$("guideCanvas"),ctx=canvas.getContext("2d");
+function sx(x){return x+200}
+function sy(y){return 200-y}
+function disc(x,y,r,fill){ctx.beginPath();ctx.arc(sx(x),sy(y),r,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill()}
+function stroke(points,color,width){ctx.beginPath();ctx.moveTo(sx(points[0][0]),sy(points[0][1]));for(var i=1;i<points.length;i++)ctx.lineTo(sx(points[i][0]),sy(points[i][1]));ctx.strokeStyle=color;ctx.lineWidth=width||2;ctx.lineCap="round";ctx.lineJoin="round";ctx.stroke()}
+function sunRay(cx,cy,r,a){var ang=a*Math.PI/180;stroke([[cx+Math.cos(ang)*(r+7),cy+Math.sin(ang)*(r+7)],[cx+Math.cos(ang)*(r+22),cy+Math.sin(ang)*(r+22)]],scene==="day"?"#ffe93f":"#d5a8c0",2.5)}
+function drawScene(){
+ var p=palette[scene],sky=edits.sky||p.sky,ground=edits.ground||p.ground,face=edits.face||"#ffe66b",sun=edits.sun||p.sun;
+ ctx.clearRect(0,0,400,400);ctx.fillStyle=sky;ctx.fillRect(0,0,400,400);
+ var all=current===0,limit=all?11:current;
+ if(limit>=2){ctx.fillStyle=ground;ctx.fillRect(0,sy(-155),400,45)}
+ if(limit>=3)disc(-165,-115,30,"#f84e4d");
+ if(limit>=4){disc(-105,-110,35,"#149a6a");disc(-35,-105,40,"#4267dc");disc(50,-100,45,edits.body||"#ea7643");disc(133,-95,50,face)}
+ if(limit>=5){disc(119,-96,5,"#111e29");disc(162,-96,5,"#111e29")}
+ if(limit>=6){ctx.beginPath();ctx.arc(sx(141),sy(-103),29,.28*Math.PI,.77*Math.PI);ctx.strokeStyle="#17222c";ctx.lineWidth=3.5;ctx.stroke()}
+ if(limit>=7){stroke([[112,-59],[92,-22]],"#17222c",3);stroke([[164,-56],[184,-19]],"#17222c",3)}
+ if(limit>=8){disc(115,137,42,sun)}
+ if(limit>=9){
+   if(scene==="day"){for(var a=0;a<360;a+=30)sunRay(115,137,42,a)}
+   else{[[-150,145,8],[-74,160,6],[-42,105,7],[10,178,6],[-142,35,6],[54,59,7]].forEach(function(t){stroke([[t[0]-t[2],t[1]],[t[0]+t[2],t[1]]],"#f3e8b8",2);stroke([[t[0],t[1]-t[2]],[t[0],t[1]+t[2]]],"#f3e8b8",2)})}
+ }
+ if(limit>=10){
+   if(scene==="day"){[[-141,157],[-62,170],[15,70]].forEach(function(pt){disc(pt[0]-19,pt[1]-8,17,"#f8faf6");disc(pt[0],pt[1],21,"#f8faf6");disc(pt[0]+20,pt[1]-9,17,"#f8faf6")})}
+   [[-137,87],[-105,119],[-70,90]].forEach(function(pt){stroke([[pt[0]-14,pt[1]-5],[pt[0],pt[1]+10],[pt[0]+14,pt[1]-5]],scene==="day"?"#223743":"#ecdaed",2.5)})
+ }
+ if(showGrid){
+  ctx.save();ctx.strokeStyle=scene==="day"?"#466e7526":"#d0e5f21e";ctx.lineWidth=1;
+  for(var v=0;v<=400;v+=20){ctx.beginPath();ctx.moveTo(v+.5,0);ctx.lineTo(v+.5,400);ctx.stroke();ctx.beginPath();ctx.moveTo(0,v+.5);ctx.lineTo(400,v+.5);ctx.stroke()}
+  ctx.strokeStyle=scene==="day"?"#1d58666e":"#e4eaf06e";ctx.beginPath();ctx.moveTo(200,0);ctx.lineTo(200,400);ctx.moveTo(0,200);ctx.lineTo(400,200);ctx.stroke();ctx.restore();
+  if(current===2){var corners=[[-200,-155,"A"],[200,-155,"B"],[200,-200,"C"],[-200,-200,"D"]];corners.forEach(function(z){ctx.fillStyle="#14384d";ctx.beginPath();ctx.arc(Math.max(10,Math.min(390,sx(z[0]))),Math.max(10,Math.min(390,sy(z[1]))),8,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="bold 10px monospace";ctx.textAlign="center";ctx.fillText(z[2],Math.max(10,Math.min(390,sx(z[0]))),Math.max(10,Math.min(390,sy(z[1])))+3)})}
+ }
+}
+function render(){
+ var s=steps[current];
+ $("stepCount").textContent=String(current+1).padStart(2,"0")+" / "+steps.length;
+ $("progressBar").style.width=((current+1)/steps.length*100)+"%";
+ $("stepTitle").textContent=s.title;
+ $("stepDescription").textContent=s.description;
+ $("taskText").textContent=s.task;
+ $("codeTitle").textContent=current===0?"Starting lines":"One small code example";
+ $("codeSample").textContent=(current===9&&scene!=="day")?"penup()\ngoto(-145, 120)\nsetheading(90)\npendown()\nforward(12)\nbackward(24)\npenup()":s.code;
+ $("codeNote").textContent=current===9&&scene!=="day"?"This is one vertical stroke for a star. Move back to the middle, turn 90 degrees, and draw another stroke. Add more stars yourself.":s.note;
+ $("tryText").textContent=s.try;
+ $("hintText").textContent=s.hint;
+ $("helpBox").open=false;
+ $("visualTitle").textContent=current===0?"Example to remix":current===11?"Review your scene":"Your drawing so far";
+ $("visualCaption").textContent=current===0?"This is inspiration, not a required color scheme. No full solution code is provided.":current===11?"This picture is one possibility. Your drawing should reflect your choices.":"This preview shows the drawing idea. It does not change or run your Python.";
+ $("prevStep").disabled=current===0;
+ $("nextStep").textContent=current===steps.length-1?"Back to the beginning ↺":"Next step →";
+ Array.from(strip.children).forEach(function(btn,i){btn.setAttribute("aria-current",i===current?"step":"false")});
+ if(strip.children[current])strip.children[current].scrollIntoView({block:"nearest",inline:"nearest"});
+ if(current===11){var checked={};try{checked=JSON.parse(localStorage.getItem(key+"-checks")||"{}")}catch(e){}
+  var text=s.try;var list=document.createElement("div");list.className="check-row";checkTasks.forEach(function(label,i){var wrapper=document.createElement("label"),box=document.createElement("input");box.type="checkbox";box.checked=!!checked[i];box.addEventListener("change",function(){checked[i]=box.checked;try{localStorage.setItem(key+"-checks",JSON.stringify(checked))}catch(e){}});wrapper.append(box,document.createTextNode(label));list.appendChild(wrapper)});
+  $("tryText").textContent=text;$("tryText").appendChild(list)
+ }
+ save();drawScene()
+}
+$("prevStep").addEventListener("click",function(){if(current>0){current--;render()}});
+$("nextStep").addEventListener("click",function(){current=current===steps.length-1?0:current+1;render()});
+$("sceneMode").addEventListener("change",function(){scene=this.value;save();render();refreshColor()});
+$("gridToggle").addEventListener("change",function(){showGrid=this.checked;save();drawScene()});
+canvas.addEventListener("pointermove",function(ev){var rect=canvas.getBoundingClientRect();var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);var y=Math.round(200-(ev.clientY-rect.top)/rect.height*400);$("coords").textContent="x "+x+" · y "+y});
+canvas.addEventListener("pointerleave",function(){$("coords").textContent="x 0 · y 0"});
+function refreshColor(){
+ var t=$("colorTarget").value,initial=edits[t]||(t==="sky"?palette[scene].sky:t==="ground"?palette[scene].ground:t==="face"?"#ffe66b":t==="sun"?palette[scene].sun:"#ea7643");
+ $("colorPick").value=initial;
+ $("colorCode").textContent=(t==="sky"?"bgcolor":"color")+'("'+initial+'")'
+}
+$("colorTarget").addEventListener("change",refreshColor);
+$("colorPick").addEventListener("input",function(){edits[$("colorTarget").value]=this.value;refreshColor();save();drawScene()});
+$("copyColor").addEventListener("click",function(){
+ var line=$("colorCode").textContent;var btn=this;
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(line).then(function(){btn.textContent="Copied ✓";setTimeout(function(){btn.textContent="Copy line"},1400)}).catch(function(){btn.textContent="Select the line above"})}
+ else{btn.textContent="Select the line above"}
+});
+render();refreshColor();
+})();
+</script>
+</body>
+</html>
