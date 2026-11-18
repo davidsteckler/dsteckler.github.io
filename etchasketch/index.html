@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e9">
+<meta name="description" content="CodeHS 1.3.11 Etch A Sketch: a step-by-step Tracy Python project with a coordinate drawing guide, left-hand navigation, and a live Turtle editor.">
+<link rel="canonical" href="https://dsteckler.com/etchasketch/">
+<title>Etch A Sketch · Turtle Studio</title>
+<style>
+:root{--bg:#f4f0e9;--paper:#fffdfa;--ink:#253239;--muted:#586770;--subtle:#7a878c;--rule:#dddcd5;--teal:#176b73;--teal-dark:#12515a;--soft:#e8f2f0;--orange:#e18d50;--code:#202a32;--shadow:0 7px 24px #24323d0a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #eeac62;outline-offset:2px}
+button:disabled{cursor:default;opacity:.4}
+a{color:inherit}
+.topbar{background:#fffdf8;border-bottom:1px solid var(--rule)}
+.top-inner{width:min(100% - 42px,1680px);height:59px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:-.015em}
+.brand-mark{width:29px;height:29px;display:grid;place-items:center;border-radius:8px;color:#fff;background:var(--teal);font:800 13px ui-monospace,monospace}
+.brand em{font-style:normal;color:#8a9694;font-weight:650}
+.navlinks{display:flex;align-items:center;gap:18px}
+.navlinks a{text-decoration:none;font-weight:700;font-size:11px;color:#506269}
+.navlinks a:hover{text-decoration:underline;text-underline-offset:4px}
+.shell{width:min(100% - 42px,1680px);margin:auto}
+.intro{padding:25px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:26px}
+.kicker{font:850 11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#b15d39;letter-spacing:.13em;text-transform:uppercase}
+h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;margin:5px 0 9px;font-weight:860}
+.intro p{max-width:680px;margin:0;color:#5a676c;font-size:14px;line-height:1.5}
+.intro-info{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.chip{padding:5px 8px;border-radius:5px;background:#eae6dc;color:#5e645e;font:750 10px/1.2 ui-monospace,Consolas,monospace}
+.chip.accent{background:#e4f0ed;color:#1e615d}
+.intro-mark{border-left:1px solid var(--rule);padding-left:24px;min-width:170px;max-width:230px}
+.intro-mark strong{display:block;font-size:13px}
+.intro-mark small{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.studio{display:grid;grid-template-columns:minmax(355px,400px) minmax(0,1fr);gap:15px;align-items:start}
+.guide,.work-panel{background:var(--paper);border:1px solid var(--rule);border-radius:13px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.guide-top{padding:18px 19px 13px;border-bottom:1px solid #ebe9e1}
+.guide-topline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tiny-label{font:850 10px ui-monospace,Consolas,monospace;letter-spacing:.095em;text-transform:uppercase;color:var(--teal)}
+.step-number{font:750 11px ui-monospace,Consolas,monospace;color:#65747a}
+.progress{height:6px;background:#e9eae3;border-radius:5px;overflow:hidden;margin:12px 0 12px}
+.progress>div{height:100%;width:8%;background:var(--teal);transition:width .2s}
+.step-strip{display:flex;gap:5px;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin}
+.step-tab{white-space:nowrap;border:1px solid #e2e4dc;border-radius:7px;color:#617076;background:#fff;padding:7px 9px;font-size:11px;font-weight:740}
+.step-tab:hover{border-color:#a2c1ba}
+.step-tab[aria-current="step"]{background:#176b73;color:#fff;border-color:#176b73}
+.lesson{padding:20px 19px 19px}
+.lesson h2{font-size:26px;letter-spacing:-.045em;line-height:1.15;margin:0 0 8px}
+.description{margin:0 0 13px;color:#526268;font-size:13px;line-height:1.62}
+.to-do{border-left:3px solid #e5a06b;padding:9px 12px;background:#faf3e9;border-radius:0 7px 7px 0;margin-bottom:16px}
+.to-do strong{display:block;font-size:10px;letter-spacing:.085em;text-transform:uppercase;color:#926037;margin-bottom:4px}
+.to-do p{margin:0;font-size:12px;line-height:1.55}
+.visual-head{display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:8px}
+.visual-head strong{font-size:12px}
+.visual-head span{font:650 10px ui-monospace,Consolas,monospace;color:#889396}
+.scene-visual{position:relative;max-width:286px;width:100%;aspect-ratio:1;margin:0 auto;border:1px solid #cbd8d8;border-radius:8px;overflow:hidden;background:#d4edf4}
+#guideCanvas{width:100%;height:100%;display:block}
+.scene-note{font-size:10px;color:#637177;line-height:1.55;margin:8px 0 11px}
+.preview-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
+.preview-controls label{font-size:10px;font-weight:750;color:#5a6a6e}
+.preview-controls select{font-size:11px;padding:6px 7px;border:1px solid #d9dfd7;border-radius:6px;background:#fff;max-width:155px}
+.grid-check{display:flex;align-items:center;gap:4px}
+.grid-check input{accent-color:#176b73}
+.coord-read{font:10px ui-monospace,Consolas,monospace;color:#718083;margin-left:auto}
+.code-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0 7px}
+.code-head strong{font-size:11px}
+.code-head small{font-size:10px;color:#8a9696}
+.sample{background:var(--code);color:#e5eeed;border-radius:8px;border:1px solid #303f47;overflow:auto;margin:0;max-height:245px;padding:13px 14px;tab-size:4;font:12px/1.66 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.sample code{font:inherit}
+.code-note{font-size:11px;color:#607177;margin:9px 0 14px;line-height:1.6}
+.questions{border-top:1px solid #e6e7e0;padding-top:13px}
+.questions h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a45a37;margin:0 0 5px}
+.questions p{font-size:12px;line-height:1.62;margin:0}
+.help{border:1px solid #e0e3db;border-radius:7px;margin:14px 0 0}
+.help summary{cursor:pointer;font-size:11px;font-weight:760;padding:9px 11px}
+.help p{font-size:11px;color:#5c6d70;line-height:1.65;padding:0 11px 11px;margin:0}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.btn{background:#fff;border:1px solid #d3dcd8;color:#20383d;padding:9px 13px;font-weight:800;font-size:11px;min-height:36px;border-radius:7px}
+.btn:hover{background:#f2f8f5}
+.btn.primary{background:#176b73;border-color:#176b73;color:#fff}
+.btn.primary:hover{background:#12515a}
+.step-saved{font-size:10px;color:#768383}
+.work-panel{position:relative}
+.work-head{padding:14px 17px;min-height:61px;border-bottom:1px solid #e8e7df;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.work-head h2{font-size:15px;letter-spacing:-.018em;margin:0}
+.work-head p{margin:2px 0 0;font-size:11px;color:#718087}
+.work-head .live{font:750 10px ui-monospace,Consolas,monospace;color:#24655d;background:#e7f1ed;border:1px solid #c9e0d9;border-radius:99px;padding:6px 9px;white-space:nowrap}
+.editor-frame{display:block;width:100%;height:min(74vh,770px);min-height:630px;border:0;background:#f0ebe1}
+.work-footer{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #e9e8e2;font-size:11px;color:#627176}
+.work-footer a{font-weight:750;color:#176b73}
+.color-studio{margin-top:15px;border:1px solid var(--rule);border-radius:11px;padding:16px 18px;background:#fffdfa;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.color-studio strong{font-size:13px}
+.color-studio p{margin:3px 0 0;font-size:11px;color:#637277}
+.color-controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.color-controls select{border:1px solid var(--rule);border-radius:7px;background:#fff;padding:7px;font-size:11px}
+.color-controls input[type=color]{width:38px;height:34px;border:1px solid var(--rule);border-radius:5px;background:#fff;padding:3px}
+#colorCode{font:750 11px ui-monospace,Consolas,monospace;color:#32454a;background:#eff2ee;padding:8px 10px;border-radius:6px}
+.foot-resources{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between;margin:20px 0 36px;color:#68787b;font-size:11px}
+.foot-resources a{font-weight:750;color:#176b73}
+.check-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.check-row label{border:1px solid #e1e4df;border-radius:7px;display:flex;gap:7px;align-items:start;padding:8px 10px;font-size:11px;color:#51646a;background:#fafbf8}
+.check-row input{accent-color:var(--teal);margin-top:2px}
+[hidden]{display:none!important}
+@media(max-width:1240px){.studio{grid-template-columns:1fr}.guide{display:grid;grid-template-columns:minmax(315px,1fr) minmax(315px,1fr)}.guide-top{grid-column:1/-1}.lesson{grid-column:1/-1;display:grid;grid-template-columns:1fr minmax(275px,.9fr);gap:0 22px}.lesson h2,.lesson>.description,.lesson>.to-do,.lesson>.code-head,.lesson>.sample,.lesson>.code-note,.lesson>.questions,.lesson>.help,.lesson>.actions{grid-column:1}.lesson>.visual-head,.lesson>.scene-visual,.lesson>.scene-note,.lesson>.preview-controls{grid-column:2}.lesson>.visual-head{grid-row:1}.lesson>.scene-visual{grid-row:2/span 3}.lesson>.scene-note{grid-row:5}.lesson>.preview-controls{grid-row:6}.scene-visual{max-width:350px}.lesson h2{grid-row:1}.lesson>.description{grid-row:2}.lesson>.to-do{grid-row:3}.lesson>.code-head{grid-row:4}.lesson>.sample{grid-row:5}.lesson>.code-note{grid-row:6}.lesson>.questions{grid-row:7}.lesson>.help{grid-row:8}.lesson>.actions{grid-row:9}.editor-frame{height:750px}}
+@media(max-width:740px){.shell,.top-inner{width:min(100% - 24px,1680px)}.navlinks{gap:9px}.navlinks a{font-size:10px}.navlinks a:nth-child(2){display:none}.intro{padding:22px 0 18px}.intro-mark{display:none}.intro p{font-size:12px}.lesson{display:block}.guide-top{padding:13px}.lesson{padding:16px}.scene-visual{max-width:310px}.studio{gap:10px}.editor-frame{height:1020px;min-height:840px}.color-studio{grid-template-columns:1fr}.check-row{grid-template-columns:1fr 1fr}}
+@media(max-width:530px){.brand em,.navlinks a:first-child{display:none}.navlinks a{font-size:10px}.check-row{grid-template-columns:1fr}.color-controls{gap:6px}.color-controls #colorCode{font-size:10px}.work-head .live{font-size:9px}.scene-visual{max-width:290px}.editor-frame{height:1050px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.progress>div{transition:none}}
+
+
+/* Full-screen classroom workspace · compact project toolbar and enlarged visual. */
+:root{--rail-size:clamp(236px,17vw,292px)}
+.top-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.top-identity .brand{gap:7px;white-space:nowrap;letter-spacing:.015em;font-size:11px}
+.top-separator{width:1px;height:24px;background:#d3d5ce;flex:0 0 auto}
+.project-identity{display:flex;gap:9px;align-items:baseline;white-space:nowrap;min-width:0}
+.project-code{color:#a66a4c;font:800 9px ui-monospace,Consolas,monospace;letter-spacing:.06em}
+.project-identity strong{font-size:16px;letter-spacing:-.045em;font-weight:840;color:#253239}
+.title-dot{color:#d78856}
+.top-skills{font:750 9px ui-monospace,Consolas,monospace;color:#5d8079;background:#e8f1ed;padding:5px 7px;border-radius:5px;white-space:nowrap;margin-left:4px}
+@media (min-width:1081px){
+  html,body{width:100%;height:100%;height:100dvh;overflow:hidden}
+  body{display:flex;flex-direction:column}
+  .topbar{flex:0 0 43px;min-height:43px}
+  .top-inner{height:43px;width:min(100% - 26px,1720px)}
+  .navlinks{gap:14px;white-space:nowrap}
+  .navlinks a{font-size:10px}
+  .shell{height:calc(100dvh - 43px);width:min(100% - 26px,1720px);min-height:0;display:flex;flex-direction:column;padding:9px 0 10px}
+  .intro{display:none}
+  .studio{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:clamp(556px,39.2vw,677px) minmax(0,1fr);align-items:stretch;gap:10px}
+  .guide{height:100%;min-height:0;display:grid;grid-template-columns:var(--rail-size) minmax(0,1fr);overflow:hidden}
+  .guide-top{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;padding:12px 11px 11px;background:#f1f5ef;border-right:1px solid #dfe5de;border-bottom:0}
+  .guide-topline{padding:0 2px;gap:6px}
+  .tiny-label{font-size:10px;letter-spacing:.015em;white-space:nowrap}
+  .step-number{font-size:10px;white-space:nowrap}
+  .progress{flex:0 0 5px;height:5px;margin:9px 2px 11px}
+  .step-strip{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(29px,1fr);gap:3px;min-height:0;flex:1 1 auto;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding:0}
+  .step-tab{min-width:0;width:100%;padding:5px 10px;min-height:28px;text-align:left;white-space:nowrap;border:1px solid transparent;border-radius:6px;background:transparent;color:#536366;font-size:11px;line-height:1.3;font-weight:740;box-shadow:none;overflow:hidden;text-overflow:ellipsis}
+  .step-tab:hover{background:#e4eee8;border-color:#ccded3}
+  .step-tab[aria-current="step"]{background:#176b73;border-color:#176b73;color:#fff}
+  .rail-preview{flex:0 0 auto;padding:9px 0 0;margin:9px 0 0;border-top:1px solid #d9dfd8;min-height:0;display:flex;flex-direction:column;align-items:stretch}
+  .visual-head{margin:0 2px 7px}
+  .visual-head strong{font-size:10px;text-transform:uppercase;letter-spacing:.035em}
+  .visual-head span{font-size:9px}
+  .scene-visual{width:min(100%,30dvh,268px);max-width:none;margin:0 auto;aspect-ratio:1/1;border-radius:5px;flex:0 0 auto}
+  .scene-note{display:none}
+  .preview-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin:8px 0 0}
+  .preview-controls label{font-size:10px}
+  .preview-controls select{max-width:122px;padding:5px 6px;font-size:10px}
+  .preview-controls .coord-read{display:none}
+  .guide .lesson{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:16px 18px 12px}
+  .lesson h2{font-size:23px;line-height:1.13;margin:0 0 7px}
+  .description{font-size:12px;line-height:1.52;margin-bottom:10px}
+  .to-do{padding:9px 10px;margin-bottom:11px}
+  .to-do strong{font-size:9px;margin-bottom:4px}
+  .to-do p{font-size:11px;line-height:1.5}
+  .code-head{margin:0 0 7px}
+  .code-head strong{font-size:11px}
+  .sample{font-size:11px;line-height:1.52;padding:10px 11px;max-height:200px;flex:0 1 auto}
+  .code-note{font-size:11px;line-height:1.5;margin:7px 0 11px}
+  .questions{padding-top:10px}
+  .questions h3{font-size:10px;margin:0 0 4px}
+  .questions p{font-size:11px;line-height:1.48}
+  .color-drawer{border:1px solid #e4e7e0;border-radius:7px;margin-bottom:9px;background:#f6faf7;flex:0 0 auto}
+  .color-drawer summary{padding:7px 9px;cursor:pointer;font-size:10px;font-weight:800;color:#356660}
+  .color-drawer summary small{font-weight:550;color:#84928b;margin-left:5px}
+  .color-drawer .color-studio{display:block;border:0;margin:0;padding:2px 9px 10px;background:transparent;box-shadow:none}
+  .color-drawer .color-studio>div:first-child{display:none}
+  .color-drawer .color-controls{display:flex;gap:5px}
+  .color-drawer .color-controls select{padding:5px;max-width:115px;font-size:10px}
+  .color-drawer .color-controls input[type=color]{width:30px;height:29px}
+  .color-drawer #colorCode{font-size:9px;max-width:100%;overflow-wrap:anywhere;padding:5px}
+  .color-drawer .btn{padding:5px 8px;min-height:27px;font-size:9px}
+  .help{margin:9px 0 0}
+  .help summary{padding:6px 9px;font-size:10px}
+  .help p{font-size:10.5px;padding:0 9px 9px}
+  .actions{margin-top:auto;padding-top:12px;flex:0 0 auto;gap:5px}
+  .actions .btn{padding:7px 10px;min-height:32px;font-size:10px}
+  .step-saved{display:none}
+  .work-panel{height:100%;min-height:0;display:flex;flex-direction:column}
+  .work-head{min-height:42px;padding:7px 12px;flex:0 0 auto}
+  .work-head h2{font-size:13px}
+  .work-head p{font-size:10px}
+  .work-head .live{font-size:9px;padding:5px 7px}
+  .editor-frame{width:100%;height:100%;min-height:0;flex:1 1 auto}
+  .work-footer,.foot-resources{display:none}
+}
+@media (min-width:1081px) and (max-height:820px){
+  .shell{padding:6px 0}
+  .guide-top{padding:9px 10px}
+  .progress{margin:6px 2px 8px}
+  .step-strip{grid-auto-rows:minmax(26px,1fr);gap:2px}
+  .step-tab{min-height:25px;padding:3px 8px;font-size:10.5px}
+  .rail-preview{padding-top:6px;margin-top:6px}
+  .scene-visual{width:min(100%,30dvh,254px)}
+  .visual-head{margin-bottom:5px}
+  .preview-controls{margin-top:5px}
+  .preview-controls select{padding:3px 5px}
+  .guide .lesson{padding:12px 14px 9px}
+  .lesson h2{font-size:21px;margin-bottom:6px}
+  .description{font-size:11px;margin-bottom:7px}
+  .to-do{padding:7px 9px;margin-bottom:8px}
+  .sample{max-height:160px;font-size:10.5px;line-height:1.42;padding:8px 9px}
+  .code-note{font-size:10px;margin:5px 0 8px}
+  .questions{padding-top:7px}
+  .questions p{font-size:10px}
+  .color-drawer{margin-bottom:7px}
+  .color-drawer summary{padding:5px 8px}
+  .help{margin-top:6px}
+  .actions{padding-top:8px}
+}
+@media (min-width:1081px) and (max-height:700px){
+  .scene-visual{width:min(100%,27dvh,196px)}
+  .step-strip{grid-auto-rows:minmax(24px,1fr);gap:1px}
+  .step-tab{min-height:23px}
+  .guide-top{padding:6px 9px}
+  .preview-controls{gap:4px}
+  .guide .lesson{padding:10px 12px 7px}
+  .sample{max-height:145px}
+}
+@media(max-width:1270px) and (min-width:1081px){
+  .top-skills{display:none}
+  .project-identity{gap:6px}
+  .project-identity strong{font-size:14px}
+  .navlinks{gap:8px}
+  .navlinks a{font-size:9px}
+}
+@media(max-width:1080px){
+  .top-inner{gap:10px}
+  .project-identity{gap:6px}
+  .project-code{display:none}
+  .project-identity strong{font-size:14px}
+  .top-skills{display:none}
+  .top-separator{height:20px}
+  .studio{display:block}
+  .guide{display:grid;grid-template-columns:minmax(225px,260px) minmax(0,1fr);margin-bottom:12px}
+  .guide-top{display:flex;flex-direction:column;padding:14px 12px;border-right:1px solid var(--rule);border-bottom:0}
+  .step-strip{display:grid;grid-template-columns:1fr;gap:3px;overflow:visible}
+  .step-tab{width:100%;text-align:left;white-space:normal}
+  .rail-preview{padding-top:13px;margin-top:14px;border-top:1px solid var(--rule)}
+  .scene-visual{width:min(100%,238px);max-width:none}
+  .scene-note{display:none}
+  .preview-controls{gap:4px}
+  .preview-controls select{max-width:125px}
+  .preview-controls .coord-read{display:none}
+  .lesson{display:block!important;overflow:visible;padding:18px}
+  .editor-frame{height:790px;min-height:700px}
+  .color-drawer{border:1px solid var(--rule);border-radius:8px;margin:12px 0;padding:8px 10px}
+  .color-drawer summary{font-weight:800;cursor:pointer}
+  .color-drawer .color-studio{display:block;margin:8px 0 0;padding:10px}
+  .color-drawer .color-studio>div:first-child{display:none}
+}
+@media(max-width:650px){
+  .top-inner{width:min(100% - 20px,1680px)}
+  .top-identity .brand{font-size:0;gap:0}
+  .top-identity .brand-mark{font-size:13px}
+  .top-separator{display:none}
+  .project-identity strong{font-size:13px}
+  .navlinks a:first-child,.navlinks a:last-child{display:none}
+  .navlinks a{font-size:10px}
+  .guide{grid-template-columns:1fr}
+  .guide-top{border-right:0;border-bottom:1px solid var(--rule)}
+  .step-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .step-tab{text-align:center;font-size:10px;padding:8px 4px}
+  .rail-preview{display:grid;grid-template-columns:minmax(0,210px) 1fr;gap:8px}
+  .rail-preview .visual-head{grid-column:1/-1}
+  .rail-preview .preview-controls{align-self:center}
+  .scene-visual{width:100%;max-width:205px}
+  .color-drawer .color-controls{justify-content:flex-start}
+}
+
+
+/* Etch A Sketch: larger coordinate preview, roomy lesson, original split-panel studio. */
+:root{--rail-size:clamp(248px,19.5vw,306px)}
+.scene-visual{background:#fff;border-color:#d9dbd5}
+.step-tab{font-variant-numeric:tabular-nums}
+.preview-controls{justify-content:center}
+.preview-controls .grid-check{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:750;color:#516269}
+.preview-controls input{accent-color:var(--teal)}
+.preview-controls .coord-read{margin:0}
+.tip-pill{display:inline-flex;border-radius:6px;padding:6px 8px;background:#edf4f0;color:#356b62;font-size:10px;font-weight:750;white-space:nowrap}
+.lesson .code-note{color:#637277}
+@media(min-width:1081px){
+  .studio{grid-template-columns:clamp(625px,44vw,780px) minmax(0,1fr)}
+  .scene-visual{width:min(100%,36dvh,290px);max-width:290px}
+  .guide .lesson{padding:18px 19px 14px}
+  .lesson h2{font-size:25px}
+  .description{font-size:12px}
+  .to-do p{font-size:12px}
+  .sample{font-size:12px;max-height:205px}
+  .step-strip{grid-auto-rows:minmax(28px,1fr)}
+  .step-tab{font-size:11px;padding-left:10px}
+  .preview-controls{margin-top:8px}
+}
+@media(min-width:1081px) and (max-height:820px){
+  .studio{grid-template-columns:clamp(605px,43vw,750px) minmax(0,1fr)}
+  .scene-visual{width:min(100%,32dvh,265px)}
+  .guide .lesson{padding:12px 14px 9px}
+  .lesson h2{font-size:21px}
+  .description,.to-do p{font-size:11px}
+  .sample{font-size:11px;max-height:165px}
+  .step-strip{grid-auto-rows:minmax(24px,1fr)}
+  .step-tab{font-size:10px}
+}
+@media(min-width:1081px) and (max-height:700px){
+  .scene-visual{width:min(100%,25dvh,210px)}
+  .step-strip{grid-auto-rows:minmax(22px,1fr)}
+  .guide .lesson{padding:10px 12px 7px}
+}
+@media(max-width:1080px){.rail-preview{min-width:0}.scene-visual{width:min(100%,270px);max-width:270px}}
+@media(max-width:650px){.rail-preview .scene-visual{max-width:205px}.step-strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="top-inner">
+  <div class="top-identity"><a class="brand" href="/turtle/"><span class="brand-mark" aria-hidden="true">&gt;_</span> TURTLE LAB</a><span class="top-separator" aria-hidden="true"></span><div class="project-identity"><span class="project-code">CODEHS 1.3.11</span><strong>Etch A Sketch<span class="title-dot">.</span></strong></div><span class="top-skills">COORDINATES · NO LOOPS</span></div>
+  <nav class="navlinks" aria-label="Related tools">
+   <a href="/gridworld/">Coordinate world</a>
+   <a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a>
+   <a href="/turtle/" target="_blank" rel="noopener">Full sandbox ↗</a>
+  </nav>
+ </div>
+</header>
+<div class="shell">
+ <main class="studio">
+  <section class="guide" aria-label="Etch A Sketch walkthrough">
+   <div class="guide-top">
+    <div class="guide-topline"><span class="tiny-label">Build guide · 11 steps</span><span class="step-number" id="stepCount">01 / 11</span></div>
+    <div class="progress" aria-label="Lesson progress"><div id="progressBar"></div></div>
+    <nav class="step-strip" id="stepStrip" aria-label="Choose a project step"></nav>
+    <div class="rail-preview">
+     <div class="visual-head"><strong id="visualTitle">Drawing guide</strong><span>400 × 400</span></div>
+     <div class="scene-visual"><canvas width="400" height="400" id="guideCanvas" role="img" aria-label="Etch A Sketch frame, screen, knobs, and four triangles progressively drawn"></canvas></div>
+     <p class="scene-note" id="visualCaption">A reference drawing that grows with each step.</p>
+     <div class="preview-controls">
+      <label class="grid-check"><input id="gridToggle" type="checkbox" checked> Grid</label>
+      <label class="grid-check"><input id="outlineToggle" type="checkbox"> Show full outline</label>
+      <span class="coord-read" id="coords">x 0 · y 0</span>
+     </div>
+    </div>
+   </div>
+   <div class="lesson" aria-live="polite">
+    <h2 id="stepTitle">Explore the drawing</h2>
+    <p class="description" id="stepDescription"></p>
+    <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
+    <div class="code-head"><strong id="codeTitle">Small code example</strong><small>Just this step</small></div>
+    <pre class="sample"><code id="codeSample"></code></pre>
+    <p class="code-note" id="codeNote"></p>
+    <div class="questions"><h3>Check your work</h3><p id="tryText"></p></div>
+    <details class="help" id="helpBox"><summary>Need a hint?</summary><p id="hintText"></p></details>
+    <div class="actions">
+     <button class="btn" id="prevStep" type="button">← Previous</button>
+     <span class="step-saved" id="savedLabel">Step saves on this device</span>
+     <button class="btn primary" id="nextStep" type="button">Next step →</button>
+    </div>
+   </div>
+  </section>
+  <section class="work-panel" aria-label="Live Python Turtle editor">
+   <div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type your code, press Run, and compare your drawing.</p></div><span class="live">REAL PYTHON · AUTO-SAVED</span></div>
+   <iframe id="turtleFrame" class="editor-frame" title="Editable Python Turtle code, Run controls, drawing world and error messages" allow="clipboard-write" loading="eager"></iframe>
+   <div class="work-footer"><span>Your code stays here when you change steps. Save your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
+  </section>
+ </main>
+ <div class="foot-resources"><span>Tip: Move with penup() before starting any separate shape.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
+</div>
+<script>
+
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var STARTER="# Etch A Sketch (CodeHS 1.3.11)\n# Add each shape as you work through the guide.\nspeed(0)\n\n";
+var lessonId="etch-a-sketch-1-3-11";
+$("turtleFrame").src="/turtle/?embed=course&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(STARTER);
+var steps=[{"tab":"Look at it","title":"Explore the drawing","description":"An Etch A Sketch is made from two rectangles, two circles, and four small triangles. Every part uses coordinates in Tracy's 400 × 400 world.","task":"Study the completed preview. Locate the outside frame, inside screen, two knobs, and four triangles.","code":"speed(0)","note":"The starter program already has speed(0). The speed setting makes drawing happen instantly.","try":"Point out which shapes will need penup() before you start them.","hint":"Moving with penup() changes Tracy's position without leaving a line."},{"tab":"Start at A","title":"Move to the first corner","description":"The outside frame begins at the upper-left corner, A = (-175, 175). Move there before drawing.","task":"Use penup(), goto(-175, 175), and pendown() to get ready to draw the outside frame.","code":"penup()\ngoto(-175, 175)\npendown()","note":"Tracy begins at (0, 0). Lifting the pen keeps the trip to point A invisible.","try":"Run your code. The world should still be empty, because you have only moved into position.","hint":"A negative x goes left. A positive y goes up."},{"tab":"Outer frame","title":"Draw the outside rectangle","description":"Use setx() for a horizontal side and sety() for a vertical side. The frame reaches x = -175 and 175, and y = -175 and 175.","task":"Starting from (-175, 175), go across to x = 175, down to y = -175, left to x = -175, and back up to y = 175.","code":"setx(175)\nsety(-175)","note":"These two lines draw only the top and right sides. Add the bottom and left sides yourself.","try":"Run your code. Do all four sides connect without a diagonal line?","hint":"After sety(-175), use setx(-175), then sety(175)."},{"tab":"Inner screen","title":"Draw the inside screen","description":"The smaller rectangle begins at (-150, 150), uses x = 150 on the right, and stops at y = -100 on the bottom.","task":"Lift the pen and move to (-150, 150). Draw the four sides with setx() and sety(), then return to the starting corner.","code":"penup()\ngoto(-150, 150)\npendown()","note":"The screen has a shorter bottom edge height than the outside frame. Keep its lower boundary at y = -100.","try":"The inside screen should be centered horizontally, with a wide space beneath it for the knobs.","hint":"From the upper-left, setx(150), sety(-100), setx(-150), then sety(150)."},{"tab":"Left knob","title":"Draw the left knob","description":"A circle uses Tracy's current position as its bottom point when Tracy faces right. Your left knob starts at (-125, -160).","task":"Move without drawing to (-125, -160), put the pen down, and make a circle with radius 25.","code":"penup()\ngoto(-125, -160)\npendown()\ncircle(25)","note":"circle(25) draws a circle with a diameter of 50. It sits above its starting point.","try":"The first knob should fit inside the bottom portion of the outside frame.","hint":"Keep the pen up while moving from the screen to the knob."},{"tab":"Right knob","title":"Draw the right knob","description":"The second knob has the same radius and y coordinate as the first. Only the starting x coordinate changes.","task":"Move to (125, -160) without drawing a line. Draw another circle with radius 25.","code":"penup()\ngoto(125, -160)\npendown()","note":"You already used the circle command for the left knob. Use the same radius again.","try":"Are the two knobs at the same height and the same size?","hint":"Add circle(25) after pendown()."},{"tab":"Left arrow","title":"Draw the far-left triangle","description":"The first tiny triangle begins near the left border at (-155, -130). Use goto() to connect three corners.","task":"Start at (-155, -130), visit (-165, -135), then (-155, -140), and return to the first point.","code":"penup()\ngoto(-155, -130)\npendown()","note":"Unlike the rectangles, these triangles have diagonal edges. goto() can change both coordinates at once.","try":"Close the triangle by returning to its first point.","hint":"After pendown(), add three goto() lines for the other two corners and the starting point."},{"tab":"Next arrow","title":"Draw the second triangle","description":"The second triangle sits closer to the center, still on the left side.","task":"Start at (-95, -140). Connect (-85, -135), (-95, -130), then return to (-95, -140).","code":"penup()\ngoto(-95, -140)\npendown()","note":"All three corners use negative x coordinates. The shape points toward the middle.","try":"Both left-side triangles should be separate shapes with no stray connecting line.","hint":"You need penup() before moving from the first triangle to the second."},{"tab":"Right arrow","title":"Draw the third triangle","description":"Now switch to positive x coordinates to build the first triangle on the right.","task":"Start at (90, -140). Connect (85, -130) and (95, -130), then close the triangle.","code":"penup()\ngoto(90, -140)\npendown()","note":"The triangle is small. Watch the signs and the order of the coordinates.","try":"Run the program and look for all three arrows beneath the inner screen.","hint":"The last goto() should return to (90, -140)."},{"tab":"Final arrow","title":"Draw the far-right triangle","description":"One triangle remains, close to the outer right edge.","task":"Start at (160, -130). Connect (165, -140), (155, -140), then return to (160, -130).","code":"penup()\ngoto(160, -130)\npendown()","note":"Use the same pen-up, move, pen-down pattern you've used for the other triangles.","try":"Check that there are four separate triangles total.","hint":"Each triangle ends where it begins, so it has a closed outline."},{"tab":"Finish","title":"Return Tracy to the center","description":"Your Etch A Sketch is complete once both rectangles, both knobs, and all four triangles are visible.","task":"Lift the pen and move Tracy back to (0, 0). Run the entire program and compare it to the completed preview.","code":"penup()\ngoto(0, 0)","note":"Keep penup() before the final goto(), or you will draw a line across your picture.","try":"Check every part: outer frame, inner screen, left and right knobs, four closed triangles, and Tracy at (0, 0).","hint":"If you see a stray diagonal line between shapes, look for a missing penup()."}];
+var current=0, showGrid=true, showOutline=false;
+var key="etch-a-sketch-guide-v1";
+try{
+ var stored=JSON.parse(localStorage.getItem(key)||"{}");
+ if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));
+ if(typeof stored.grid==="boolean")showGrid=stored.grid;
+ if(typeof stored.outline==="boolean")showOutline=stored.outline;
+}catch(e){}
+$("gridToggle").checked=showGrid;
+$("outlineToggle").checked=showOutline;
+function save(){try{localStorage.setItem(key,JSON.stringify({step:current,grid:showGrid,outline:showOutline}))}catch(e){}}
+var strip=$("stepStrip");
+steps.forEach(function(s,i){
+ var b=document.createElement("button");
+ b.type="button";b.className="step-tab";
+ b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;
+ b.setAttribute("aria-label","Step "+(i+1)+": "+s.title);
+ b.addEventListener("click",function(){current=i;render()});
+ strip.appendChild(b);
+});
+var canvas=$("guideCanvas"),ctx=canvas.getContext("2d");
+function sx(x){return x+200}
+function sy(y){return 200-y}
+var shapes=[
+ [[-175,175],[175,175],[175,-175],[-175,-175],[-175,175]],
+ [[-150,150],[150,150],[150,-100],[-150,-100],[-150,150]],
+ {cx:-125,cy:-135,r:25},
+ {cx:125,cy:-135,r:25},
+ [[-155,-130],[-165,-135],[-155,-140],[-155,-130]],
+ [[-95,-140],[-85,-135],[-95,-130],[-95,-140]],
+ [[90,-140],[85,-130],[95,-130],[90,-140]],
+ [[160,-130],[165,-140],[155,-140],[160,-130]]
+];
+function drawShape(shape,ghost){
+ ctx.save();ctx.beginPath();
+ if(Array.isArray(shape)){
+  ctx.moveTo(sx(shape[0][0]),sy(shape[0][1]));
+  for(var j=1;j<shape.length;j++)ctx.lineTo(sx(shape[j][0]),sy(shape[j][1]));
+ }else{ctx.arc(sx(shape.cx),sy(shape.cy),shape.r,0,Math.PI*2)}
+ ctx.lineWidth=ghost?2:2.6;
+ ctx.strokeStyle=ghost?"#c8d0c7":"#253239";
+ if(ghost)ctx.setLineDash([5,6]);
+ ctx.stroke();ctx.restore();
+}
+function drawScene(){
+ ctx.clearRect(0,0,400,400);
+ ctx.fillStyle="#fffefd";ctx.fillRect(0,0,400,400);
+ if(showGrid){
+  ctx.save();ctx.lineWidth=1;ctx.strokeStyle="#e7e9e4";
+  for(var x=0;x<=400;x+=25){
+   ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,400);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(0,x+.5);ctx.lineTo(400,x+.5);ctx.stroke();
+  }
+  ctx.strokeStyle="#b4c7c4";ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(200,0);ctx.lineTo(200,400);ctx.moveTo(0,200);ctx.lineTo(400,200);ctx.stroke();
+  ctx.fillStyle="#889793";ctx.font="11px ui-monospace,monospace";ctx.textAlign="left";
+  ctx.fillText("-200",5,196);ctx.fillText("0",205,196);ctx.fillText("200",370,196);
+  ctx.fillText("200",204,13);ctx.fillText("-200",204,392);ctx.restore();
+ }
+ var count=current===0?shapes.length:Math.max(0,current-1);
+ if(showOutline&&current!==0){
+  for(var k=count;k<shapes.length;k++)drawShape(shapes[k],true);
+ }
+ for(var i=0;i<count;i++)drawShape(shapes[i],false);
+ if(current===1){
+  ctx.beginPath();ctx.arc(sx(-175),sy(175),5,0,Math.PI*2);ctx.fillStyle="#d06d38";ctx.fill();
+  ctx.fillStyle="#9a5433";ctx.font="bold 14px ui-monospace,monospace";ctx.fillText("A",sx(-175)+12,sy(175)+4);
+ }
+ if(current===10){
+  ctx.save();ctx.translate(200,200);
+  ctx.fillStyle="#d68b4e";ctx.beginPath();ctx.moveTo(11,0);ctx.lineTo(-9,-7);ctx.lineTo(-9,7);ctx.closePath();ctx.fill();ctx.restore();
+ }
+}
+function render(){
+ var s=steps[current];
+ $("stepCount").textContent=String(current+1).padStart(2,"0")+" / "+steps.length;
+ $("progressBar").style.width=((current+1)/steps.length*100)+"%";
+ $("stepTitle").textContent=s.title;
+ $("stepDescription").textContent=s.description;
+ $("taskText").textContent=s.task;
+ $("codeTitle").textContent=current===0?"Your starting command":"Small code example";
+ $("codeSample").textContent=s.code;
+ $("codeNote").textContent=s.note;
+ $("tryText").textContent=s.try;
+ $("hintText").textContent=s.hint;
+ $("helpBox").open=false;
+ $("visualTitle").textContent=current===0?"Complete example":current===steps.length-1?"Finished drawing":"Your drawing so far";
+ $("visualCaption").textContent="The example follows the project coordinates; it does not type or run code for you.";
+ $("prevStep").disabled=current===0;
+ $("nextStep").textContent=current===steps.length-1?"Back to beginning ↺":"Next step →";
+ Array.from(strip.children).forEach(function(b,i){b.setAttribute("aria-current",i===current?"step":"false")});
+ save();drawScene();
+}
+$("prevStep").addEventListener("click",function(){if(current>0){current--;render()}});
+$("nextStep").addEventListener("click",function(){current=current===steps.length-1?0:current+1;render()});
+$("gridToggle").addEventListener("change",function(){showGrid=this.checked;save();drawScene()});
+$("outlineToggle").addEventListener("change",function(){showOutline=this.checked;save();drawScene()});
+canvas.addEventListener("pointermove",function(ev){
+ var rect=canvas.getBoundingClientRect();
+ var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);
+ var y=Math.round(200-(ev.clientY-rect.top)/rect.height*400);
+ $("coords").textContent="x "+x+" · y "+y;
+});
+canvas.addEventListener("pointerleave",function(){$("coords").textContent="x 0 · y 0"});
+render();
+})();
+
+</script>
+</body>
+</html>
