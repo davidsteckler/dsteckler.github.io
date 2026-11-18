@@ -205,8 +205,8 @@ function quizContent(){
   var looksLikeCode=function(o){return /^[a-z_]+\s*\(.*\)$|^[a-z_]+ \d+$/i.test(o.trim())};
   var fmtQ=function(t){return escapeHtml(t).replace(/([a-z_]+\(\))/g,"<code>$1</code>")};
   return '<div class="tq">'+
-    '<div class="tq-title"><div class="tq-wave">'+TURTLE_WAVE+'</div><div><h2>Turtle Check-in</h2>'+
-      '<p>Help the turtle finish its path! Pick an answer and press <b>Check</b>. Wrong? The turtle gives you a hint, never the answer.</p></div></div>'+
+    '<div class="tq-title"><div class="tq-title-head"><h2>Quiz</h2><span class="tq-completed" id="tqCompleted" aria-live="polite">0 of '+QUIZ.length+' completed</span></div>'+
+      '<p>Help the turtle finish its path! Pick an answer and press <b>Check</b>. Wrong? The turtle gives you a hint, never the answer.</p></div>'+
     '<div class="tq-trail" id="quizProgress" aria-hidden="true"><div class="tq-line"></div><div class="tq-ink" id="tqInk"></div>'+
       QUIZ.map(function(_,i){var x=QUIZ.length>1?i/(QUIZ.length-1)*100:0;return '<span class="tq-stop" data-dot="'+i+'" style="left:'+x+'%">'+HEX+'<b>'+(i+1)+'</b></span>'}).join("")+
       '<span class="tq-walker" id="tqWalker">'+TURTLE_TOP+'</span><span class="tq-flag">🏁</span></div>'+
@@ -247,6 +247,9 @@ function quizPaint(){
     el("quizTries"+i).textContent=z.tries[i]&&!z.solved[i]?"Attempt "+(z.tries[i]+1):(z.solved[i]&&z.tries[i]>1?"Solved on attempt "+z.tries[i]:"");
     var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className="tq-stop "+(z.solved[i]?"right":(z.tries[i]?"wrong":(QUIZ.slice(0,i).every(function(_,k){return z.solved[k]})?"next":"")));
   });
+  // Keep an explicit completion count beside the quiz heading.
+  var totalSolved=z.solved.filter(Boolean).length,completion=el("tqCompleted");
+  if(completion)completion.textContent=totalSolved+" of "+QUIZ.length+" completed";
   // Only completed questions extend the trail. Keep the turtle at the last
   // completed stop so the next unanswered question never looks finished.
   var solvedN=0;while(solvedN<QUIZ.length&&z.solved[solvedN])solvedN++;
