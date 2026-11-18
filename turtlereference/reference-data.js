@@ -75,10 +75,12 @@ window.TURTLE_REFERENCE = (() => {
     'goto(60, 0)\nsety(100)\nsety(-100)', 'A horizontal line followed by a vertical line at x = 60.',
     'Change 60 to -60.', 'The turtle keeps its heading even when it moves up or down.',
     {related:['setx','goto','ycor']});
-  add('setheading', 'setheading()', 'Move & turn', 'setheading(angle)',
-    'Choose exactly which direction to face.', [['angle', '0 is right, 90 is up, 180 is left, and 270 is down.']],
+  add('setheading', 'setheading() / seth()', 'Move & turn', 'setheading(angle)\nseth(angle)',
+    'Face an exact direction. Both setheading() and the shorter seth() do the same thing; neither command moves the turtle.',
+    [['angle', '0° points right, 90° up, 180° left, 270° down, and 360° right again.']],
     'setheading(90)\nforward(80)\nsetheading(0)\nforward(80)', 'A line upward, followed by a line to the right.',
-    'Set the second heading to 45.', 'A heading is measured from the world’s right direction. left() and right() measure a turn from the current heading.',
+    'Choose one of the five degree examples. Replace setheading() with seth() to see that it works the same way.',
+    'These angles always refer to the world, regardless of where the turtle is facing. 360° returns to the same direction as 0°.',
     {aliases:['seth'], related:['heading','angles','left'], visual:'heading'});
   add('home', 'home()', 'Move & turn', 'home()',
     'Return to the middle and face right again.', [],
