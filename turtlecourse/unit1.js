@@ -267,8 +267,8 @@ function setHeadScore(animate){
     hs.innerHTML='<span>Completed</span><b>'+completed+'/'+QUIZ.length+'</b>';
   }else{
     hs.className="head-score "+(firstRight===QUIZ.length?"perfect":firstRight>0?"some":"none");
-    hs.title="First-try score for this completed attempt; best is from earlier attempts";
-    hs.innerHTML='<span>First try</span><b>'+firstRight+'/'+QUIZ.length+'</b>'+(d.best!==undefined?'<em>Previous best '+d.best+'/'+QUIZ.length+'</em>':'');
+    hs.title="First-try score for this completed attempt; best score across completed attempts";
+    hs.innerHTML='<span>First try</span><b>'+firstRight+'/'+QUIZ.length+'</b>'+(d.best!==undefined?'<em>Best score '+d.best+'/'+QUIZ.length+'</em>':'');
   }
   if(animate){hs.classList.remove("pop");void hs.offsetWidth;hs.classList.add("pop")}
 }
