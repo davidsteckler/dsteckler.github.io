@@ -50,9 +50,24 @@
     edit(id,'other-side','Shift the starting line', [[id==='setx'?'goto(0, 60)':'goto(60, 0)',id==='setx'?'goto(0, -60)':'goto(-60, 0)']], 'Change the starting '+other+' coordinate. The later '+id+'() calls keep that coordinate.', 'The '+axis+' line moves to the other side of the middle.', 'Try a starting coordinate of zero.', ['-60']);
     add(id,'same-destination','Set it twice', 'pensize(4)\n'+id+'(80)\ncolor("coral")\n'+id+'(80)\ndot(12)', 'Setting a coordinate a second time does not add another 80 pixels.', 'One 80-pixel line with a coral dot at its end.', 'Change only the second call to '+id+'(120).', [id+'(80)'], {syntax:id+'(80)\n'+id+'(80)'});
   }
-  first('setheading','Up, then right');
-  edit('setheading','diagonal','Up, then diagonal', [['setheading(0)','setheading(45)']], 'The second heading chooses a diagonal relative to the world.', 'The final line climbs to the right at 45 degrees.', 'Try 135 to climb toward the left.', ['45'], {syntax:'setheading(45)'});
-  edit('setheading','leftward','Up, then left', [['setheading(0)','setheading(180)']], 'A heading of 180 points directly left.', 'An upward line followed by a leftward line.', 'Use 270 for the second heading. Watch the overlap.', ['180'], {syntax:'setheading(180)'});
+  first('setheading','Up, then right', {headingDegrees:0});
+  for (const [angle, direction] of [[0,'right'],[90,'up'],[180,'left'],[270,'down'],[360,'right']]) {
+    const command = 'setheading('+angle+')';
+    add('setheading','degree-'+angle,angle+'° · '+direction,
+      'pensize(5)\ndot(14, "coral")\n'+command+'\nforward(100)',
+      'setheading('+angle+') faces '+direction+'.'+(angle===360?' A full turn faces right again, just like 0°.':''),
+      'A 100-pixel line from the center, pointing '+direction+'.'+(angle===360?' It overlaps the direction for 0°.':''),
+      angle===360?'Compare the 0° example. Both draw the same line.': 'Replace setheading('+angle+') with seth('+angle+'). The drawing stays the same.',
+      [command], {syntax:command+'\nseth('+angle+')',headingDegrees:angle});
+  }
+  add('setheading','shorthand','seth() works too',
+    'pensize(5)\ndot(14, "coral")\nseth(90)\nforward(100)',
+    'seth(90) is a shorter way to write setheading(90). Both face up.',
+    'A 100-pixel line straight up, identical to the 90° example.',
+    'Change seth(90) to setheading(90). Run it again.',
+    ['seth(90)'], {syntax:'seth(90)\nsetheading(90)',headingDegrees:90});
+  edit('setheading','diagonal','Up, then diagonal', [['setheading(0)','setheading(45)']], 'The second heading chooses a diagonal relative to the world.', 'The final line climbs to the right at 45 degrees.', 'Try 135 to climb toward the left.', ['45'], {syntax:'setheading(45)\nseth(45)',headingDegrees:45});
+  edit('setheading','leftward','Up, then left', [['setheading(0)','setheading(180)']], 'A heading of 180 points directly left.', 'An upward line followed by a leftward line.', 'Use 270 for the second heading. Watch the overlap.', ['180'], {syntax:'setheading(180)\nseth(180)',headingDegrees:180});
   first('home','Draw the return');
   edit('home','lifted-return','Lift the pen first', [['home()','penup()\nhome()\ndot(12, "coral")']], 'Lift the pen before returning home. A dot marks the arrival.', 'The two original lines stay. No diagonal return line is added.', 'Add pendown() and forward(40) after the dot.', ['penup()'], {syntax:'penup()\nhome()'});
   edit('home','face-right','Check the direction', [['home()','penup()\nhome()\npendown()\ncolor("coral")\nforward(50)\nprint(heading())']], 'home() resets the heading as well as the position.', 'The coral line starts at the middle and goes right. The heading is 0.', 'Try a different turn before home(). Does its final heading change?', ['forward(50)','heading()'], {syntax:'home()\nprint(heading())'});
