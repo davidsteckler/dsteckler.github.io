@@ -245,11 +245,12 @@ function quizPaint(){
     var btn=block.querySelector(".qz-check");
     if(btn){btn.hidden=z.solved[i];if(!quizWait[i]){btn.disabled=pick===null;btn.textContent=z.tries[i]?"Check again":"Check"}}
     el("quizTries"+i).textContent=z.tries[i]&&!z.solved[i]?"Attempt "+(z.tries[i]+1):(z.solved[i]&&z.tries[i]>1?"Solved on attempt "+z.tries[i]:"");
-    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className="tq-stop "+(z.solved[i]?"right":(z.tries[i]?"wrong":""));
+    var dot=body.querySelector('[data-dot="'+i+'"]');if(dot)dot.className="tq-stop "+(z.solved[i]?"right":(z.tries[i]?"wrong":(QUIZ.slice(0,i).every(function(_,k){return z.solved[k]})?"next":"")));
   });
-  // the turtle walks to the first unsolved question; ink covers the solved path
+  // Only completed questions extend the trail. Keep the turtle at the last
+  // completed stop so the next unanswered question never looks finished.
   var solvedN=0;while(solvedN<QUIZ.length&&z.solved[solvedN])solvedN++;
-  var pos=QUIZ.length>1?Math.min(solvedN,QUIZ.length-1)/(QUIZ.length-1)*100:0;
+  var pos=QUIZ.length>1?Math.max(0,solvedN-1)/(QUIZ.length-1)*100:0;
   if(solvedN>=QUIZ.length)pos=100;
   var walker=el("tqWalker"),ink=el("tqInk");
   if(walker)walker.style.left=(solvedN>=QUIZ.length?"calc(100% + 18px)":pos+"%");
@@ -258,11 +259,17 @@ function quizPaint(){
 }
 function setHeadScore(animate){
   var z=quizData(),d=answers(),hs=el("headScore");
-  var checked=z.first.filter(function(x){return x!==null}).length,firstRight=z.first.filter(function(x){return x===true}).length;
+  var completed=z.solved.filter(Boolean).length,firstRight=z.first.filter(function(x){return x===true}).length;
   hs.hidden=false;el("headRetake").hidden=false;
-  hs.className="head-score "+(checked<QUIZ.length?"":firstRight===QUIZ.length?"perfect":firstRight>0?"some":"none");
-  hs.title="First-try score: questions answered correctly on the first attempt";
-  hs.innerHTML='<span>First try</span><b>'+(checked?firstRight:"–")+"/"+QUIZ.length+'</b>'+(d.best!==undefined?'<em>Best '+d.best+'/'+QUIZ.length+'</em>':'');
+  if(completed<QUIZ.length){
+    hs.className="head-score";
+    hs.title="Questions completed in this quiz attempt";
+    hs.innerHTML='<span>Completed</span><b>'+completed+'/'+QUIZ.length+'</b>';
+  }else{
+    hs.className="head-score "+(firstRight===QUIZ.length?"perfect":firstRight>0?"some":"none");
+    hs.title="First-try score for this completed attempt; best is from earlier attempts";
+    hs.innerHTML='<span>First try</span><b>'+firstRight+'/'+QUIZ.length+'</b>'+(d.best!==undefined?'<em>Previous best '+d.best+'/'+QUIZ.length+'</em>':'');
+  }
   if(animate){hs.classList.remove("pop");void hs.offsetWidth;hs.classList.add("pop")}
 }
 var quizCooldown=null,quizWait={};
