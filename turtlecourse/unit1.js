@@ -4,7 +4,7 @@
 var LESSONS=[
   {id:"1.1.1",name:"Intro to Python with the Turtle",short:"Intro to Python",kind:"Video",type:"video",subtitle:"Meet the turtle and see what a program can tell it to do.",editor:false},
   {id:"1.1.2",name:"Slinky (Example Program)",short:"Slinky example",kind:"Example",type:"example",subtitle:"Run a program, predict changes, and notice what the error messages tell you.",editor:true},
-  {id:"1.1.3",name:"Intro to the Turtle",short:"Check for understanding",kind:"Quiz · 3 questions",type:"quiz",subtitle:"Check what you know about commands and circles.",editor:false},
+  {id:"1.1.3",name:"Quiz",short:"Quiz",kind:"Quiz",type:"quiz",subtitle:"Check what you learned from the video.",editor:false},
   {id:"1.1.4",name:"Stretched Slinky",short:"Stretched Slinky",kind:"Assignment",type:"assignment",subtitle:"Write the commands yourself and compare your output with the instructions.",editor:true},
   {id:"1.1.5",name:"Sequencing with Trace Tables",short:"Trace tables",kind:"Assignment · Trace table",type:"assignment",subtitle:"Read a program one instruction at a time and record the order.",editor:false},
   {id:"1.1.6",name:"Slinky Coil Challenge",short:"Slinky Coil Challenge",kind:"Project · Challenge",type:"project",subtitle:"Practice writing a longer sequence of circle and forward commands.",editor:true},
