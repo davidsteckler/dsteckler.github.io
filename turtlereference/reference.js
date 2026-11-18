@@ -367,6 +367,19 @@
     $('topicWatch').textContent = currentExample.watchFor;
     $('topicVisual').hidden = !currentExample.visual;
     $('topicVisual').innerHTML = entry.id === 'setheading' ? headingDiagram(currentExample.headingDegrees ?? 0) : (diagrams[currentExample.visual] || '');
+    $('headingChoices').hidden = entry.id !== 'setheading';
+    $('headingDirectionButtons').replaceChildren();
+    if (entry.id === 'setheading') {
+      for (const angle of [0, 90, 180, 270, 360]) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = angle+'°';
+        button.title = 'Try setheading('+angle+')';
+        button.setAttribute('aria-pressed', String(currentExample.id === 'degree-'+angle));
+        button.addEventListener('click', () => chooseExample('degree-'+angle));
+        $('headingDirectionButtons').append(button);
+      }
+    }
     $('topicRelated').replaceChildren();
     for (const relatedId of entry.related || []) {
       const related = byId.get(relatedId); if (!related) continue;
