@@ -273,6 +273,35 @@
     const code = typeof drafts[draftKey()] === 'string' ? drafts[draftKey()] : currentExample.code;
     send({kind:'turtle-tutorial-set-code', code, run, requestId:++requestId});
   }
+  function headingDiagram(angle = 0) {
+    const degrees = Number(angle);
+    const normalized = ((degrees % 360) + 360) % 360;
+    const facing = normalized === 0 ? 'right' : normalized === 90 ? 'up' : normalized === 180 ? 'left' : normalized === 270 ? 'down' : 'diagonally';
+    const rotation = -normalized;
+    const selected = '#ba7042', muted = '#4d665b';
+    const labelColor = direction => facing === direction ? selected : muted;
+    return '<svg viewBox="0 0 360 325" role="img" aria-label="Large compass showing '+degrees+' degrees, facing '+facing+'. Zero and 360 both point right.">'
+      + '<text class="heading-current" x="180" y="30" text-anchor="middle">'+degrees+'° · '+facing.toUpperCase()+'</text>'
+      + '<circle cx="180" cy="164" r="100" fill="#eaf3e9" stroke="#c7dacc" stroke-width="2"/>'
+      + '<path d="M180 64V264M80 164H280" stroke="#9db4a6" stroke-width="2" stroke-linecap="round"/>'
+      + '<path d="M180 64l-5 10h10zM280 164l-10-5v10zM80 164l10-5v10zM180 264l-5-10h10z" fill="#90aa9a"/>'
+      + (degrees===360?'<circle cx="180" cy="164" r="85" stroke="#c98752" stroke-width="2.5" stroke-dasharray="6 6" fill="none"/>':'')
+      + '<g transform="rotate('+rotation+' 180 164)">'
+      + '<path d="M180 164H268" stroke="#c27b47" stroke-width="8" stroke-linecap="round"/>'
+      + '<path d="M275 164l-20 -12v24z" fill="#c27b47"/>'
+      + '<g class="diagram-turtle" fill="#176b73" stroke="#176b73" stroke-width="3" stroke-linecap="round">'
+      + '<path d="M174 158l-5-6M186 158l5-6M174 170l-5 6M186 170l5 6M169 164h-5"/>'
+      + '<ellipse cx="180" cy="164" rx="13" ry="10"/><circle cx="197" cy="164" r="5"/>'
+      + '<path d="M174 159h10l5 5-5 5h-10l-5-5z" fill="none" stroke="#a5d4bd" stroke-width="1.5"/>'
+      + '<circle cx="199" cy="162" r="1" fill="#fff"/></g></g>'
+      + '<text x="180" y="57" text-anchor="middle" fill="'+labelColor('up')+'">90° · UP</text>'
+      + '<text x="5" y="168" fill="'+labelColor('left')+'">180° · LEFT</text>'
+      + '<text x="291" y="156" fill="'+labelColor('right')+'">0° / 360°</text>'
+      + '<text x="291" y="175" fill="'+labelColor('right')+'">RIGHT</text>'
+      + '<text x="180" y="283" text-anchor="middle" fill="'+labelColor('down')+'">270° · DOWN</text>'
+      + '<text x="180" y="313" text-anchor="middle" class="heading-footnote">'+(degrees===360?'360° ends in the same direction as 0°':'setheading('+degrees+') = seth('+degrees+')')+'</text>'
+      + '</svg>';
+  }
   const diagrams = {
     heading: '<svg viewBox="0 0 290 168" role="img" aria-label="A turtle facing right at the center of a direction compass: 0 degrees right, 90 degrees up, 180 degrees left, 270 degrees down"><path d="M145 30V138M55 84H235" fill="none" stroke="#acbfb3" stroke-width="1.5"/><path d="M145 34l-4 8h8zM231 84l-8-4v8zM59 84l8 4v-8zM145 134l-4-8h8z" fill="#809c8e"/><circle cx="145" cy="84" r="25" fill="#e0eee4"/><g class="diagram-turtle" fill="#176b73" stroke="#176b73" stroke-width="3" stroke-linecap="round"><path d="M137 79l-5-6M151 79l5-6M137 89l-5 6M151 89l5 6M133 84h-5"/><ellipse cx="144" cy="84" rx="12" ry="9"/><circle cx="160" cy="84" r="5"/></g><path d="M139 79h9l4 5-4 5h-9l-4-5z" fill="none" stroke="#a5d4bd" stroke-width="1.5"/><circle cx="162" cy="82" r="1" fill="#fff"/><text x="145" y="21" text-anchor="middle">90° · up</text><text x="239" y="88">0°</text><text x="16" y="88">180°</text><text x="145" y="118" text-anchor="middle" class="diagram-note">turtle faces right</text><text x="145" y="155" text-anchor="middle">270° · down</text></svg>',
     coordinates: '<svg viewBox="0 0 290 185" role="img" aria-label="Coordinate plane with the origin at the center and point 100 comma 50 above and to the right"><defs><pattern id="refGrid" width="17" height="17" patternUnits="userSpaceOnUse"><path d="M17 0H0V17" fill="none" stroke="#dfe7dd" stroke-width=".7"/></pattern></defs><rect x="60" y="8" width="170" height="170" fill="url(#refGrid)"/><path d="M60 93H230M145 8V178" stroke="#91aa9c"/><path d="M145 93H187.5V71.75" stroke="#cf8063" stroke-dasharray="4 3" fill="none"/><circle cx="145" cy="93" r="4" fill="#176b73"/><circle cx="187.5" cy="71.75" r="5" fill="coral"/><text x="153" y="109">(0, 0)</text><text x="170" y="56">(100, 50)</text><text x="18" y="97">−200</text><text x="234" y="97">200 x</text><text x="149" y="19" class="diagram-note">200 y</text><text x="149" y="176" class="diagram-note">−200</text></svg>',
@@ -316,6 +345,7 @@
     document.title = entry.title + (currentExample.id === 'original' ? '' : ' · ' + currentExample.label) + ' · Python Turtle Reference | David Steckler';
     window.LEARNING_ACTIVITY = {id:'reference:'+exampleKey(),title:entry.title+' · '+currentExample.label,url:'/turtlereference/#'+exampleKey()};
     window.dispatchEvent(new CustomEvent('learning-activity',{detail:window.LEARNING_ACTIVITY}));
+    document.body.dataset.topicId = entry.id;
     $('topicGroup').textContent = entry.group;
     $('topicTitle').textContent = entry.title;
     $('topicSummary').textContent = currentExample.summary;
@@ -323,7 +353,7 @@
     renderTrail();
     renderExampleChoices(); writeSyntax();
     $('topicAliases').hidden = !entry.aliases?.length;
-    $('topicAliases').textContent = entry.aliases?.length ? 'Also find this with: ' + entry.aliases.join(', ') : '';
+    $('topicAliases').textContent = entry.id === 'setheading' ? 'seth(angle) works exactly like setheading(angle).' : (entry.aliases?.length ? 'Also find this with: ' + entry.aliases.join(', ') : '');
     $('parameterSection').hidden = !entry.params.length;
     $('topicParams').replaceChildren();
     for (const [name, explanation] of entry.params) {
@@ -336,7 +366,7 @@
     $('topicExperiment').textContent = currentExample.tryThis;
     $('topicWatch').textContent = currentExample.watchFor;
     $('topicVisual').hidden = !currentExample.visual;
-    $('topicVisual').innerHTML = diagrams[currentExample.visual] || '';
+    $('topicVisual').innerHTML = entry.id === 'setheading' ? headingDiagram(currentExample.headingDegrees ?? 0) : (diagrams[currentExample.visual] || '');
     $('topicRelated').replaceChildren();
     for (const relatedId of entry.related || []) {
       const related = byId.get(relatedId); if (!related) continue;
