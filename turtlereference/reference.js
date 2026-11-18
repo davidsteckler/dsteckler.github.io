@@ -294,11 +294,11 @@
       + '<ellipse cx="180" cy="164" rx="13" ry="10"/><circle cx="197" cy="164" r="5"/>'
       + '<path d="M174 159h10l5 5-5 5h-10l-5-5z" fill="none" stroke="#a5d4bd" stroke-width="1.5"/>'
       + '<circle cx="199" cy="162" r="1" fill="#fff"/></g></g>'
-      + '<text x="180" y="57" text-anchor="middle" fill="'+labelColor('up')+'">90° · UP</text>'
-      + '<text x="5" y="168" fill="'+labelColor('left')+'">180° · LEFT</text>'
-      + '<text x="291" y="156" fill="'+labelColor('right')+'">0° / 360°</text>'
-      + '<text x="291" y="175" fill="'+labelColor('right')+'">RIGHT</text>'
-      + '<text x="180" y="283" text-anchor="middle" fill="'+labelColor('down')+'">270° · DOWN</text>'
+      + '<text x="180" y="57" text-anchor="middle" style="fill:'+labelColor('up')+'">90° · UP</text>'
+      + '<text x="5" y="168" style="fill:'+labelColor('left')+'">180° · LEFT</text>'
+      + '<text x="291" y="156" style="fill:'+labelColor('right')+'">0° / 360°</text>'
+      + '<text x="291" y="175" style="fill:'+labelColor('right')+'">RIGHT</text>'
+      + '<text x="180" y="283" text-anchor="middle" style="fill:'+labelColor('down')+'">270° · DOWN</text>'
       + '<text x="180" y="313" text-anchor="middle" class="heading-footnote">'+(degrees===360?'360° ends in the same direction as 0°':'setheading('+degrees+') = seth('+degrees+')')+'</text>'
       + '</svg>';
   }
