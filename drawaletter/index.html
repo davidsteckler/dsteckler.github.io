@@ -157,6 +157,19 @@ pre{font-size:12px;line-height:1.55;max-height:min(34vh,250px);padding:11px}
  .workspace{min-height:720px}
 }
 
+
+/* Improve legibility in the compact drawing lab. */
+.guidebody .visual{justify-content:flex-start}
+.guidebody .art{display:grid;place-items:center}
+.guidebody #preview{min-height:0}
+.guidebody .vfoot{line-height:1.4}
+@media(min-width:901px){
+ .guidebody .visual .art{max-height:400px}
+ .guidebody .visual{padding-top:17px}
+ .guidebody .steps{padding-top:17px}
+ .guidebody .steps .stepbody{scrollbar-gutter:stable}
+}
+
 </style></head>
 <body>
 <header><a class="brand" href="/turtlecourse/"><i>&gt;_</i><span class="brand-label">Draw a Letter</span><span class="brand-sub">Python Turtle Studio</span></a><nav><a href="/turtlecourse/">Turtle course</a><a href="/turtlereference/">Reference</a><a href="/turtleprojects/">Projects</a></nav></header>
@@ -244,14 +257,15 @@ function smooth(points){
  return output;
 }
 function getPaths(){
+ if(level==="beginner"&&letter==="S")return [[[82,14],[20,14],[20,50],[80,50],[80,90],[20,90]]];
  if(level==="beginner")return GLYPHS[letter].map(function(p){return simplify(p,10)});
- if(level==="medium")return GLYPHS[letter].map(smooth);
+ if(level==="medium")return GLYPHS[letter].map(function(p){return p.slice()});
  return GLYPHS[letter].map(function(p){return simplify(p,3)});
 }
 function world(p,dx,dy){return {x:(p[0]-50+(dx||0))*2.9,y:(50-p[1]-(dy||0))*2.9}}
 function norm(a){return (a+540)%360-180}
 function writer(){
- var state={x:0,y:0,h:0},lines=[];
+ var state={x:0,y:0,h:0,pen:true},lines=[];
  function write(s){lines.push(s)}
  function turnTo(deg){
   var amount=norm(deg-state.h),count=Math.round(Math.abs(amount));
@@ -267,7 +281,12 @@ function writer(){
  function strokes(paths,offX,offY){
   paths.forEach(function(points){
    if(!points.length)return;
-   write("penup()");moveTo(world(points[0],offX,offY));write("pendown()");
+   var start=world(points[0],offX,offY);
+   if(Math.hypot(start.x-state.x,start.y-state.y)>=.55){
+    if(state.pen){write("penup()");state.pen=false}
+    moveTo(start);
+   }
+   if(!state.pen){write("pendown()");state.pen=true}
    for(var i=1;i<points.length;i++)moveTo(world(points[i],offX,offY));
   });
  }
@@ -277,10 +296,10 @@ function makeLesson(){
  var strokes=getPaths(),w=writer();steps=[];
  function add(tab,title,desc,skills,fn){fn(w);steps.push({tab:tab,title:title,desc:desc,skills:skills,code:w.take()})}
  if(level==="beginner"){
-  add("Get ready","Start with a thick pen","A chunky block letter is made with a few long forward moves and turns. The first stroke begins with the pen up so you can move into place.","speed · pensize",function(w){w.write("speed(0)");w.write("pensize(42)");w.write('color("black")')});
+  add("Get ready","Start with a thick pen","A chunky block letter uses long forward moves and turns. Lift the pen to get to the first corner.","speed · pensize",function(w){w.write("speed(0)");w.write("pensize(42)");w.write('color("black")')});
   add("Draw "+letter,"Make your block letter",hint[letter]+" Read each turn and forward distance. Lift your pen before jumping to another part of the letter.","forward · left · right",function(w){w.strokes(strokes,0,0)});
  }else if(level==="medium"){
-  add("Get ready","Get ready for a bubble letter","Keep the pen thick. Smaller forward movements and more turns make the outside smoother and rounder.","pensize · turns",function(w){w.write("speed(0)");w.write("pensize(46)");w.write('color("black")')});
+  add("Get ready","Get ready for a bubble letter","Keep the pen thick. More turning points give your letter rounder edges.","pensize · turns",function(w){w.write("speed(0)");w.write("pensize(46)");w.write('color("black")')});
   if(strokes.length>1){
    add("Main shape","Shape the first part","Begin the outside of "+letter+". Look for how shorter moves change the angles.","forward · turns",function(w){w.strokes([strokes[0]],0,0)});
    add("Finish","Complete the bubble letter",hint[letter]+" The turtle repositions with penup() and turns before the next line.","penup · forward · turns",function(w){w.strokes(strokes.slice(1),0,0)});
