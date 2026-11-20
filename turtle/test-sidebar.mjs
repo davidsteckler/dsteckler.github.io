@@ -95,6 +95,8 @@ try{
   await page.getByRole('button',{name:'Try in practice tab',exact:true}).click();
   assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^pensize\(4\)\nforward\(100\)/);
   await page.locator('.file-return').click();
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),oldCode,'Back returns to the original working file');
+  await page.getByRole('tab',{name:colorPractice,exact:true}).click();
   assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),priorPractice,'Another example preserves the prior practice file');
   await page.getByRole('tab',{name:'try_forward_original.py',exact:true}).click();
   await page.locator('#runBtn').click();await page.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good'));assert(!await page.locator('.error-card').count());
