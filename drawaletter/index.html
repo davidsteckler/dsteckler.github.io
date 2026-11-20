@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e9">
+<meta name="description" content="Learn to draw all 26 letters with Python Turtle: beginner coordinates, medium movements and curves, advanced outlined letters. Step-by-step with a live coding workspace.">
+<link rel="canonical" href="https://dsteckler.com/drawaletter/">
+<title>Draw a Letter | Python Turtle Studio</title>
+<style>
+:root{--bg:#f4f0e9;--paper:#fffdfa;--ink:#27363b;--muted:#64747a;--rule:#e0dfd8;--teal:#176b73;--soft:#e5f0ed;--dark:#202c31}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
+body{font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}button{font:inherit;cursor:pointer}a{color:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid #e7ad71;outline-offset:2px}
+header{height:58px;background:#fffdfa;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:15px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:12px;font-weight:850}
+.brand i{font-style:normal;background:var(--teal);color:#fff;border-radius:8px;width:30px;height:30px;display:grid;place-items:center;font:800 13px monospace}
+header nav{display:flex;gap:17px;font-size:11px;font-weight:750;color:#637278}header nav a{text-decoration:none}header nav a:hover{text-decoration:underline}
+main{max-width:1800px;margin:auto;padding:15px 18px 18px;display:flex;flex-direction:column;gap:13px;height:calc(100dvh - 58px);min-height:660px}
+.intro{display:flex;justify-content:space-between;align-items:end;gap:20px;min-height:71px}
+.eyebrow,.meta{font:800 10px/1.3 ui-monospace,Consolas,monospace;letter-spacing:.07em;text-transform:uppercase;color:var(--teal)}
+h1{font-size:clamp(29px,3vw,39px);letter-spacing:-.06em;line-height:1;margin:5px 0 6px}p{margin:0}
+.intro p{font-size:12px;color:var(--muted)}.aside-note{max-width:300px;text-align:right;color:#7b8582;font-size:11px}
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:193px minmax(340px,.89fr) minmax(430px,1.22fr);gap:12px}
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:14px;min-height:0;min-width:0;overflow:hidden;box-shadow:0 6px 17px #27333707}
+.side{padding:15px 12px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.side strong{font-size:13px}.counter{font:750 10px monospace;color:#7d8987}
+.az{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.letter{aspect-ratio:1;border:1px solid #dfe2dc;border-radius:8px;background:white;font-size:17px;font-weight:850;color:#455258}
+.letter:hover{background:#e7f0ec}.letter[aria-current=true]{background:var(--teal);border-color:var(--teal);color:#fff}
+.sidelinks{margin-top:7px;border-top:1px solid var(--rule);padding-top:11px;display:grid;gap:7px}
+.sidelinks a{text-decoration:none;background:#f6f7f3;border:1px solid #e5e7e1;border-radius:8px;padding:8px;font-size:11px;font-weight:750}
+.sideline{font-size:10px;color:#85908b;margin-top:auto;line-height:1.5}
+.guide{display:flex;flex-direction:column}
+.guidehead{padding:13px 15px;border-bottom:1px solid #eae9e3}
+.guidehead h2{font-size:22px;line-height:1.1;letter-spacing:-.045em;margin:6px 0 4px}
+.guidehead p{color:var(--muted);font-size:11px;line-height:1.4}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:11px}
+.level{background:white;border:1px solid #dfe2dc;border-radius:8px;padding:8px 3px;color:#526368;font-weight:850;font-size:11px}
+.level small{display:block;font-size:9px;font-weight:650;margin-top:2px}
+.level[aria-pressed=true]{background:var(--soft);color:var(--teal);border-color:#88bbb1}
+.visual{padding:10px 13px 9px;border-bottom:1px solid #e9e8e1;flex:0 1 305px;min-height:160px;display:flex;flex-direction:column}
+.vtop{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;font-weight:800}
+.tiny{border:1px solid #dfe2dc;background:#fff;border-radius:6px;padding:5px 9px;font-size:10px;font-weight:800;color:#65716e}
+.art{flex:1;min-height:125px;margin:7px 0;background:linear-gradient(135deg,#fdfcf9,#f5f7f1);border:1px solid #ecebe5;border-radius:10px;display:grid;place-items:center;overflow:hidden}
+#preview{width:100%;height:100%;min-height:120px}
+.vfoot{display:flex;justify-content:space-between;color:#7b8787;font-size:10px}
+.dot{display:inline-block;border-radius:50%;background:#c87840;height:7px;width:7px;margin-right:4px}
+.steps{flex:1;min-height:0;padding:10px 13px;display:flex;flex-direction:column;gap:7px}
+.stepnav{display:flex;gap:5px;overflow-x:auto;scrollbar-width:thin;min-height:32px;flex:0 0 auto}
+.stepnav button{border:1px solid #dfe2dc;background:white;border-radius:7px;padding:5px 10px;white-space:nowrap;font-size:10px;font-weight:800;color:#637271}
+.stepnav button[aria-current=step]{background:var(--teal);color:#fff;border-color:var(--teal)}
+.stepbody{flex:1;min-height:0;overflow:auto;scrollbar-width:thin}
+.stepbody h3{font-size:15px;margin:2px 0 4px;letter-spacing:-.025em}.stepbody p{font-size:11px;line-height:1.45;color:#617076;margin-bottom:9px}
+.codehead{display:flex;justify-content:space-between;color:#7c8886;font:750 10px monospace;margin-bottom:5px;gap:6px}
+pre{font:12px/1.55 "SFMono-Regular",Consolas,monospace;white-space:pre;overflow:auto;background:var(--dark);color:#dfecef;padding:10px 12px;border-radius:8px;margin:0;max-height:152px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.btn{border:1px solid #d9dfda;background:white;color:#3b5354;border-radius:7px;padding:7px 9px;font-size:11px;font-weight:800}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn:hover{filter:brightness(.97)}.btn:disabled{opacity:.38;cursor:default}
+details{margin-top:9px;border-top:1px solid #e7e9e3;padding-top:8px}summary{cursor:pointer;font-size:11px;font-weight:800;color:#5c6b6d}details pre{max-height:175px;margin-top:8px}
+.stepfoot{border-top:1px solid #edece6;padding-top:8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.workspace{display:flex;flex-direction:column}
+.workhead{padding:13px 15px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9e8e2;gap:10px}
+.workhead strong{font-size:15px;letter-spacing:-.025em}.workhead p{font-size:11px;color:var(--muted);margin-top:2px}
+.pill{font:800 9px monospace;border-radius:6px;padding:6px;background:#e6f3eb;color:#276952;white-space:nowrap}
+iframe{border:0;width:100%;height:100%;flex:1;min-height:340px;background:white}
+.workfoot{border-top:1px solid #e9e8e2;padding:9px 13px;display:flex;justify-content:space-between;gap:8px;color:#7c8785;font-size:10px}
+.workfoot a{color:var(--teal);font-weight:850;text-decoration:none}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#19484b;color:white;padding:10px 14px;border-radius:8px;font-weight:750;font-size:12px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:10}.toast.show{opacity:1}
+@media(max-height:780px) and (min-width:1001px){main{padding:10px 15px;gap:9px;min-height:550px}.intro{min-height:60px}.visual{flex-basis:250px}.guidehead{padding:9px 13px}.guidehead h2{font-size:19px}.side{gap:8px}pre{max-height:112px}}
+@media(max-width:1230px) and (min-width:1001px){.layout{grid-template-columns:157px minmax(325px,.94fr) minmax(390px,1.05fr)}.side{padding:12px 8px}.az{gap:4px}.letter{font-size:15px}}
+@media(max-width:1000px){main{height:auto;min-height:0}.layout{grid-template-columns:180px minmax(0,1fr)}.side{grid-row:span 2}.guide{min-height:615px}.workspace{grid-column:2;height:650px}.aside-note{display:none}}
+@media(max-width:650px){header{padding:0 11px}header nav a:last-child{display:none}header nav{gap:8px;font-size:10px}main{padding:11px 9px}.layout{display:flex;flex-direction:column}.side{padding:10px}.az{grid-template-columns:repeat(13,minmax(0,1fr));gap:3px}.letter{font-size:12px;min-height:26px;border-radius:5px}.sidelinks,.sideline{display:none}.guide{min-height:605px}.workspace{height:685px}.workhead{padding:10px}iframe{min-height:575px}}
+</style></head>
+<body>
+<header><a class="brand" href="/turtlecourse/"><i>&gt;_</i>Python Turtle / Draw a Letter</a><nav><a href="/turtlecourse/">Turtle course</a><a href="/turtlereference/">Reference</a><a href="/turtleprojects/">Projects</a></nav></header>
+<main><div class="intro"><div><div class="eyebrow">TURTLE LETTER STUDIO · 26 LETTERS · 3 METHODS EACH</div><h1>Draw a Letter</h1><p>Choose a letter and a method. Follow the steps, then make your own design.</p></div><div class="aside-note">Watch how the same letter changes when you use coordinates, movement, or outlined shapes.</div></div>
+<div class="layout">
+<aside class="panel side" aria-label="Choose a letter"><div class="row"><strong>Choose a letter</strong><span class="counter">A—Z</span></div><div class="az" id="az"></div><div class="sidelinks"><a href="/turtlereference/#position/goto">Using coordinates ↗</a><a href="/turtlereference/#movement/forward">Moving and turning ↗</a><a href="/turtle/" target="_blank" rel="noopener">Open full editor ↗</a></div><div class="sideline">Every letter is a different puzzle. Pick a method that helps you see its shape.</div></aside>
+<section class="panel guide" aria-label="Step-by-step letter tutorial">
+<div class="guidehead"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
+<div class="levels" id="levels"><button type="button" class="level" data-difficulty="beginner">Beginner<small>Coordinates</small></button><button type="button" class="level" data-difficulty="medium">Medium<small>Move &amp; turn</small></button><button type="button" class="level" data-difficulty="advanced">Advanced<small>Outlined style</small></button></div></div>
+<div class="visual"><div class="vtop"><span>Drawing guide <span style="font-weight:600;color:#87928e">· 400 × 400 world</span></span><button type="button" id="gridBtn" class="tiny" aria-pressed="true">Grid on</button></div><div class="art"><svg id="preview" viewBox="-13 -13 126 128" role="img" aria-label="Turtle drawing showing the selected letter"></svg></div><div class="vfoot"><span><i class="dot"></i>Current stroke</span><span id="caption">Preview</span></div></div>
+<div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div id="stepnav" class="stepnav"></div>
+<div class="stepbody"><h3 id="stepTitle"></h3><p id="stepInfo"></p><div class="codehead"><span>PYTHON COMMANDS</span><span id="skills"></span></div><pre id="snippet"></pre>
+<div class="actions"><button type="button" class="btn primary" id="insert">Insert this step into editor ↗</button><button type="button" class="btn" id="copy">Copy code</button></div>
+<details id="complete"><summary>Show the complete example (after you try)</summary><pre id="full"></pre><div class="actions"><button type="button" id="load" class="btn">Load full example into editor</button><button type="button" id="copyAll" class="btn">Copy full code</button></div></details></div>
+<div class="stepfoot"><button type="button" class="btn" id="prev">← Previous</button><span class="counter" id="stepCount"></span><button type="button" class="btn primary" id="next">Next step →</button></div>
+</div></section>
+<section class="panel workspace" aria-label="Live Python Turtle editor"><div class="workhead"><div><strong>Your Turtle workspace</strong><p>Type your code and press Run. Your work is saved automatically.</p></div><span class="pill">REAL PYTHON · LIVE</span></div><iframe id="turtle" title="Editable Python Turtle editor, Run button, and drawing world" allow="clipboard-write" loading="eager"></iframe><div class="workfoot"><span>Switching letters keeps your code in the editor.</span><a href="/turtlereference/" target="_blank" rel="noopener">Command help ↗</a></div></section>
+</div></main><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+"use strict";
+var $=function(k){return document.getElementById(k)},AZ="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+/* Each path is a stroke through coordinates in a 100 × 100 visual grid.
+   Both tutorial code and the preview are derived from this same data. */
+var G={
+A:[[[12,100],[50,2],[88,100]],[[25,65],[75,65]]],
+B:[[[17,2],[17,100]],[[17,2],[62,2],[81,16],[81,35],[63,50],[17,50]],[[17,50],[64,50],[83,65],[83,85],[65,100],[17,100]]],
+C:[[[83,13],[65,2],[35,2],[16,24],[16,77],[35,100],[67,100],[85,87]]],
+D:[[[17,2],[17,100]],[[17,2],[62,2],[84,27],[84,76],[63,100],[17,100]]],
+E:[[[83,2],[17,2],[17,100],[83,100]],[[17,50],[70,50]]],
+F:[[[17,100],[17,2],[84,2]],[[17,50],[71,50]]],
+G:[[[83,17],[64,2],[35,2],[16,26],[16,76],[35,100],[68,100],[85,81],[85,56],[55,56]]],
+H:[[[16,2],[16,100]],[[84,2],[84,100]],[[16,51],[84,51]]],
+I:[[[25,2],[75,2]],[[50,2],[50,100]],[[25,100],[75,100]]],
+J:[[[24,78],[30,94],[51,100],[74,89],[74,2]]],
+K:[[[18,2],[18,100]],[[82,2],[18,57],[86,100]]],
+L:[[[18,2],[18,100],[85,100]]],
+M:[[[11,100],[11,2],[50,56],[89,2],[89,100]]],
+N:[[[17,100],[17,2],[83,100],[83,2]]],
+O:[[[33,2],[67,2],[85,22],[85,79],[67,100],[33,100],[15,79],[15,22],[33,2]]],
+P:[[[17,100],[17,2],[66,2],[83,18],[83,37],[66,52],[17,52]]],
+Q:[[[33,2],[67,2],[85,22],[85,78],[67,100],[33,100],[15,78],[15,22],[33,2]],[[60,71],[88,104]]],
+R:[[[17,100],[17,2],[65,2],[83,18],[83,37],[66,52],[17,52]],[[55,52],[87,100]]],
+S:[[[82,9],[61,2],[34,2],[16,23],[17,41],[80,61],[83,80],[65,100],[35,100],[16,91]]],
+T:[[[12,2],[88,2]],[[50,2],[50,100]]],
+U:[[[16,2],[16,74],[28,94],[50,100],[72,94],[84,74],[84,2]]],
+V:[[[12,2],[50,100],[88,2]]],
+W:[[[8,2],[23,100],[50,43],[77,100],[92,2]]],
+X:[[[16,2],[84,100]],[[84,2],[16,100]]],
+Y:[[[12,2],[50,51],[88,2]],[[50,51],[50,100]]],
+Z:[[[17,2],[83,2],[17,100],[83,100]]]
+};
+var specialS=[[[80,23],[50,3],[20,28],[20,48],[75,77],[75,89],[50,104],[21,82]],[[50,29],[50,49]]];
+var explain={A:"Two slanted sides meet at the top. Add the crossbar.",B:"Make the long spine, followed by two bowls.",C:"Leave an opening on the right side.",D:"A straight spine joins the curved right edge.",E:"A spine supports three horizontal arms.",F:"Draw a spine and two horizontal arms.",G:"Start like C and add an inside bar.",H:"Connect two vertical strokes with a crossbar.",I:"A center line connects two horizontal bars.",J:"The bottom hooks to the left.",K:"The diagonal strokes meet in the middle.",L:"Connect a vertical and a horizontal line.",M:"Two peaks frame the middle valley.",N:"A long diagonal connects two upright lines.",O:"Close the outline with no gap.",P:"A bowl sits at the top of a long stem.",Q:"Draw an O, then add its diagonal tail.",R:"Build P and add a sloping leg.",S:"Travel around the top, cross the middle, and bend around the bottom.",T:"A short stem drops from a wide top bar.",U:"Two sides join at the bottom.",V:"Two slopes meet at a bottom point.",W:"Make two valleys using four diagonal lines.",X:"Two lines cross at the center.",Y:"Two arms meet at the top of a stem.",Z:"Connect the top and bottom with a diagonal."};
+var letter="S",level="beginner",step=0,grid=true,steps=[],whole="";
+$("turtle").src="/turtle/?embed=course&lesson=draw-a-letter-studio&code="+encodeURIComponent('speed(0)\npensize(6)\ncolor("black")\n');
+function xy(p){return [Math.round((p[0]-50)*2),Math.round((50-p[1])*2)]}
+function go(p){var q=xy(p);return "goto("+q[0]+", "+q[1]+")"}
+function phrase(p){return (p[1]<30?"top":p[1]>70?"bottom":"middle")+" "+(p[0]<32?"left":p[0]>68?"right":"center")}
+function a(p,q){var x=xy(p),y=xy(q);return (Math.atan2(y[1]-x[1],y[0]-x[0])*180/Math.PI+360)%360}
+function dist(p,q){var x=xy(p),y=xy(q);return Math.round(Math.hypot(y[0]-x[0],y[1]-x[1]))}
+function paths(){return level==="advanced"&&letter==="S"?specialS:G[letter]}
+function lesson(){
+ var strokes=paths(),setup={tab:"Set up",title:"Prepare your turtle",desc:"Start with speed, pen size, and color. The turtle draws inside a 400 × 400 coordinate world.",code:'speed(0)\npensize(6)\ncolor("black")',active:-1,skills:"speed · pensize"};
+ if(level==="beginner"){
+  steps=[setup];
+  strokes.forEach(function(points,i){steps.push({tab:"Stroke "+(i+1),title:"Draw stroke "+(i+1),desc:"Lift your pen. Move to the "+phrase(points[0])+" of the letter and lower it. Follow the points in order with goto().",code:["penup()",go(points[0]),"pendown()"].concat(points.slice(1).map(go)).join("\n"),active:i,skills:"penup · goto · pendown"})});
+ }else if(level==="medium"&&letter==="S"){
+  steps=[
+  {tab:"Set up",title:"Prepare for two curved halves",desc:"Use two half-circles, a diagonal, and a change of direction to make S.",code:setup.code,active:-1,skills:"circle · setheading"},
+  {tab:"Top curve",title:"Draw the upper half-circle",desc:"Begin on the right and face up. circle(54, 180) travels around the top from right to left.",code:"penup()\ngoto(54, 36)\nsetheading(90)\npendown()\ncircle(54, 180)",active:0,skills:"circle(radius, extent)"},
+  {tab:"Diagonal",title:"Cross the middle",desc:"Draw a diagonal from the end of the first arc to the lower-right starting point.",code:"goto(54, -36)",active:1,skills:"goto"},
+  {tab:"Bottom curve",title:"Turn around the bottom",desc:"Face down, then use a negative radius to curve the opposite way along the bottom.",code:"setheading(270)\ncircle(-54, 180)",active:2,skills:"circle(-54, 180)"}];
+ }else if(level==="medium"){
+  steps=[{tab:"Set up",title:"Prepare for movement",desc:"This method uses forward() to travel and left() or right() to steer. Compare the directions with the coordinate method.",code:setup.code,active:-1,skills:"forward · left · right"}];
+  strokes.forEach(function(points,i){
+   var code=["penup()",go(points[0])],old=0;
+   for(var k=1;k<points.length;k++){
+    var heading=a(points[k-1],points[k]);
+    if(k===1)code.push("setheading("+Math.round(heading)+")","pendown()");
+    else{var turn=((heading-old+540)%360)-180;if(Math.abs(turn)>=1)code.push((turn>=0?"left(":"right(")+Math.round(Math.abs(turn))+")")}
+    code.push("forward("+dist(points[k-1],points[k])+")");old=heading;
+   }
+   steps.push({tab:"Stroke "+(i+1),title:"Steer through stroke "+(i+1),desc:"Begin at the "+phrase(points[0])+". Move forward and use turns to trace this part of the letter.",code:code.join("\n"),active:i,skills:"setheading · forward · turns"});
+  });
+ }else{
+  var codePaths=strokes.map(function(points){return "    ["+points.map(function(p){var q=xy(p);return "("+q[0]+", "+q[1]+")"}).join(", ")+"]"}).join(",\n");
+  steps=[
+  {tab:"Set up",title:"Set up an outlined letter",desc:"Build a letter from a dark, thick stroke and a thinner white stroke traced along the same path.",code:'speed(0)\nbgcolor("white")\ncolor("black")',active:-1,skills:"layers"},
+  {tab:"Make tool",title:"Write a reusable drawing tool",desc:"A function can draw any stroke when you give it a list of points and a pen width.",code:"def draw_stroke(points, width):\n    pensize(width)\n    penup()\n    goto(points[0][0], points[0][1])\n    pendown()\n    for x, y in points[1:]:\n        goto(x, y)\n    penup()",active:-1,skills:"function · for"},
+  {tab:"Map letter",title:"List the strokes",desc:"These points define this letter. Try adjusting coordinates after the first successful run.",code:"strokes = [\n"+codePaths+"\n]",active:-1,skills:"lists · coordinates"},
+  {tab:"Outer",title:"Draw the dark outer layer",desc:"Loop over every stroke with a wide black pen.",code:'color("black")\nfor points in strokes:\n    draw_stroke(points, 24)',active:strokes.length-1,skills:"for · pensize"},
+  {tab:"Inside",title:"Carve the thin light center",desc:"Trace the same paths again in white with a thinner pen. The black edges create an outlined letter.",code:'color("white")\nfor points in strokes:\n    draw_stroke(points, 12)',active:strokes.length,skills:"layers · repetition"}];
+ }
+ whole=steps.map(function(s){return s.code}).join("\n\n")+"\n";
+}
+function svg(tag,attrs,parent){var el=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k])});parent.appendChild(el);return el}
+function d(points){return points.map(function(p,i){return (i?"L":"M")+p[0]+" "+p[1]}).join(" ")}
+function draw(){
+ var el=$("preview");el.replaceChildren();
+ if(grid){for(var v=0;v<=100;v+=10){svg("line",{x1:v,y1:0,x2:v,y2:100,stroke:"#e0e7e0","stroke-width":.6},el);svg("line",{x1:0,y1:v,x2:100,y2:v,stroke:"#e0e7e0","stroke-width":.6},el)}}
+ var strokes=paths(),shapes=strokes.map(d);
+ if(level==="medium"&&letter==="S")shapes=["M77 32 A27 27 0 0 0 23 32","M23 32 L77 68","M77 68 A27 27 0 0 1 23 68"];
+ if(level==="advanced"){
+  shapes.forEach(function(shape){svg("path",{d:shape,fill:"none",stroke:step>=3?"#26343a":"#ccd6d1","stroke-width":24,"stroke-linecap":"square","stroke-linejoin":"bevel"},el);if(step>=4)svg("path",{d:shape,fill:"none",stroke:"#fffdfa","stroke-width":12,"stroke-linecap":"square","stroke-linejoin":"bevel"},el)});
+ }else{
+  shapes.forEach(function(shape,i){var active=step>0&&steps[step].active===i,done=step>0&&i<steps[step].active;svg("path",{d:shape,fill:"none",stroke:active?"#bd733d":done?"#176b73":"#c9d5d0","stroke-width":active?5:4.5,"stroke-linejoin":"round","stroke-linecap":"round"},el)});
+  if(step>0&&steps[step].active>=0){var index=steps[step].active;var p=level==="medium"&&letter==="S"?[[77,32],[23,32],[77,68]][index]:strokes[index][0];svg("circle",{cx:p[0],cy:p[1],r:4.3,fill:"#bd733d",stroke:"white","stroke-width":1.5},el)}
+ }
+ $("caption").textContent=step===0?"See the letter":level==="advanced"?"Layer "+Math.max(0,step-2)+"/2":"Stroke "+(steps[step].active+1)+" / "+shapes.length;
+}
+function render(){
+ lesson();if(step>=steps.length)step=steps.length-1;
+ $("letterLabel").textContent="LETTER "+letter;$("levelNum").textContent=(level==="beginner"?"01":level==="medium"?"02":"03")+" / 03";
+ $("title").textContent="Draw the letter "+letter;
+ $("description").textContent=(level==="beginner"?"Use simple goto() lines. ":level==="medium"?"Try movement, turns"+(letter==="S"?", and half-circles. ":". "):"Build an outlined version using functions, loops and layers. ")+explain[letter];
+ document.querySelectorAll(".level").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.difficulty===level?"true":"false")});
+ var nav=$("stepnav");nav.replaceChildren();
+ steps.forEach(function(s,i){var b=document.createElement("button");b.textContent=s.tab;b.type="button";b.setAttribute("aria-current",i===step?"step":"false");b.addEventListener("click",function(){step=i;render()});nav.appendChild(b)});
+ var s=steps[step];$("stepTitle").textContent=s.title;$("stepInfo").textContent=s.desc;$("snippet").textContent=s.code;$("skills").textContent=s.skills;$("full").textContent=whole;
+ $("countTop").textContent="STEP "+(step+1)+" / "+steps.length;$("stepCount").textContent=(step+1)+" of "+steps.length;$("prev").disabled=step===0;
+ $("next").textContent=step===steps.length-1?"Next letter →":"Next step →";
+ $("complete").open=false;draw();
+ history.replaceState(null,"","#"+letter.toLowerCase()+"/"+level);
+ try{localStorage.setItem("drawaletter-last",letter+"/"+level)}catch(e){}
+}
+function mark(){Array.from($("az").children).forEach(function(b){b.setAttribute("aria-current",b.textContent===letter?"true":"false")})}
+AZ.forEach(function(ch){var b=document.createElement("button");b.type="button";b.className="letter";b.textContent=ch;b.setAttribute("aria-label","Draw the letter "+ch);b.addEventListener("click",function(){letter=ch;step=0;mark();render()});$("az").appendChild(b)});
+document.querySelectorAll(".level").forEach(function(b){b.addEventListener("click",function(){level=b.dataset.difficulty;step=0;render()})});
+$("gridBtn").addEventListener("click",function(){grid=!grid;this.textContent=grid?"Grid on":"Grid off";this.setAttribute("aria-pressed",grid?"true":"false");draw()});
+$("prev").addEventListener("click",function(){if(step>0){step--;render()}});
+$("next").addEventListener("click",function(){if(step<steps.length-1)step++;else{letter=AZ[(AZ.indexOf(letter)+1)%26];step=0;mark()}render()});
+var hide;
+function tell(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(hide);hide=setTimeout(function(){$("toast").classList.remove("show")},1900)}
+function editor(){try{return $("turtle").contentWindow.TurtleWorkbench}catch(e){return null}}
+$("insert").addEventListener("click",function(){var ed=editor();if(!ed){tell("Editor is loading. Try again.");return}try{var cm=ed.editor,old=cm.getValue();cm.replaceRange((old.trim()?"\n\n":"")+steps[step].code+"\n",{line:cm.lineCount(),ch:0});cm.focus();ed.save("Added tutorial step");tell("Step inserted. Press Run.")}catch(e){tell("Could not insert. Try Copy code.")}});
+function copy(s){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(function(){tell("Code copied")}).catch(function(){tell("Please select and copy the code manually.")});else tell("Please select and copy the code manually.")}
+$("copy").addEventListener("click",function(){copy(steps[step].code)});
+$("copyAll").addEventListener("click",function(){copy(whole)});
+$("load").addEventListener("click",function(){var ed=editor();if(!ed){tell("Editor is loading. Try again.");return}if(!confirm("Replace your editor code with the complete "+letter+" example? Previous versions remain in the editor history."))return;try{ed.replace(whole,"Loaded letter "+letter);ed.editor.focus();tell("Example loaded. Press Run.")}catch(e){tell("Could not load the example.")}});
+function applyHash(){var m=location.hash.slice(1).match(/^([a-z])\/(beginner|medium|advanced)$/);if(m){letter=m[1].toUpperCase();level=m[2];step=0;mark();render()}}
+window.addEventListener("hashchange",applyHash);
+var m=location.hash.slice(1).match(/^([a-z])\/(beginner|medium|advanced)$/);
+if(!m){try{var saved=localStorage.getItem("drawaletter-last");if(saved)m=saved.match(/^([A-Z])\/(beginner|medium|advanced)$/)}catch(e){}}
+if(m){letter=m[1].toUpperCase();level=m[2]}
+mark();render();
+})();
+</script></body></html>
