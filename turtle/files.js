@@ -20,10 +20,15 @@
       }
     }
   }catch{}
+  // Reference examples live in their own documents, so a student's working code is never replaced.
+  let lastWorkFile=files.find(f=>f.id===active&&f.kind!=='reference-practice')?.id
+    ||files.find(f=>f.kind!=='reference-practice')?.id||files[0].id;
   const panel=document.querySelector('.code-panel');panel.classList.add('has-files');
   const bar=make('div','file-bar'),tabs=make('div','file-tabs');tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Python files');
   const more=make('details','file-more'),summary=make('summary','file-tool','Files ▾'),menu=make('div','file-menu');
-  more.append(summary,menu);bar.append(tabs,button('+',()=>newFile()),more);bar.children[1].setAttribute('aria-label','New Python file');
+  const backToWork=button('← My code',()=>select(lastWorkFile),'file-tool file-return');
+  backToWork.hidden=true;
+  more.append(summary,menu);bar.append(tabs,button('+',()=>newFile()),backToWork,more);bar.children[1].setAttribute('aria-label','New Python file');
   panel.querySelector('.panel-head').after(bar);
   const sourceLabel=document.getElementById('codeStatus').parentElement;
   const editorElement=wb.editor.getWrapperElement();editorElement.id='pythonEditor';editorElement.setAttribute('role','tabpanel');
@@ -42,13 +47,20 @@
         select(files[next].id);tabs.querySelector('[aria-selected="true"]').focus();
       });tabs.append(tab);
     }
-    sourceLabel.lastChild.textContent=' '+files.find(f=>f.id===active).name;
+    const current=files.find(f=>f.id===active);
+    sourceLabel.lastChild.textContent=' '+current.name;
+    backToWork.hidden=current.kind!=='reference-practice';
+    backToWork.textContent='← '+(files.find(f=>f.id===lastWorkFile)?.name||'My code');
+    backToWork.title='Return to your work without changing the practice file';
     editorElement.setAttribute('aria-labelledby','file-tab-'+active);
     tabs.querySelector('[aria-selected="true"]').scrollIntoView({block:'nearest',inline:'nearest'});
   }
   function select(id){
-    if(!docs.has(id))return;
-    wb.selectFile(id,docs.get(id));active=id;saveProject();render();
+    const file=files.find(f=>f.id===id);
+    if(!file||!docs.has(id))return;
+    wb.selectFile(id,docs.get(id));active=id;
+    if(file.kind!=='reference-practice')lastWorkFile=id;
+    saveProject();render();
   }
   function nameFor(proposed,except){
     const value=String(proposed||'').trim();if(!value)return null;
@@ -57,9 +69,20 @@
     if(files.some(f=>f.name===name&&f.id!==except)){message(name+' is already open. Choose another name.');return null;}
     return name;
   }
-  function addFile(name,code){
-    if(files.length>=50){message('Up to 50 Python files can be open at once.');return;}
-    const id=crypto.randomUUID();files.push({id,name});docs.set(id,new CodeMirror.Doc(code,'python'));select(id);wb.editor.focus();
+  function addFile(name,code,metadata={}){
+    if(files.length>=50){message('Up to 50 Python files can be open at once.');return null;}
+    const id=crypto.randomUUID();files.push({id,name,...metadata});docs.set(id,new CodeMirror.Doc(code,'python'));select(id);wb.editor.focus();
+    return id;
+  }
+  function openReferenceExample(topicId,example,{fresh=false}={}){
+    if(typeof topicId!=='string'||!example||typeof example.id!=='string'||typeof example.code!=='string')return false;
+    const existing=!fresh&&files.find(file=>file.kind==='reference-practice'&&file.topicId===topicId&&file.exampleId===example.id);
+    if(existing){select(existing.id);wb.editor.focus();return true;}
+    const safe=value=>value.replace(/[^A-Za-z0-9_]/g,'_').slice(0,28);
+    const stem='try_'+safe(topicId)+'_'+safe(example.id);
+    let name=stem+'.py',suffix=2;
+    while(files.some(file=>file.name===name))name=stem+'_'+suffix+++'.py';
+    return !!addFile(name,example.code,{kind:'reference-practice',topicId,exampleId:example.id});
   }
   function newFile(){const name=nameFor(prompt('Name your Python file:','drawing.py'));if(name)addFile(name,'');}
   function download(){
@@ -88,7 +111,7 @@
   window.TurtleFiles={read(path){
     const match=/^(?:\.\/)?([A-Za-z_][A-Za-z0-9_]*\.py)$/.exec(path);
     const file=match&&files.find(f=>f.name===match[1]);return file?docs.get(file.id).getValue():undefined;
-  }};
+  },openReferenceExample,returnToWork(){select(lastWorkFile);}};
   wb.selectFile(active,docs.get(active));render();saveProject();
 
   // Image bytes live in IndexedDB, separate from code and history storage.
