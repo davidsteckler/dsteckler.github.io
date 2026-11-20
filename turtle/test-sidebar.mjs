@@ -151,6 +151,14 @@ try{
   assert(mobilePanels.world.y>=mobilePanels.code.y+mobilePanels.code.height-1,'Expanded mobile example stacks code and drawing');
   if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'reference-expanded-mobile.png')});
   await page.locator('.reference-dialog').getByRole('button',{name:'Close',exact:true}).click();
+  const linked=await context.newPage();linked.on('pageerror',error=>errors.push(error.message));
+  await linked.goto(origin+'/turtle/?topic=left&example=small-turn&practice=1');
+  await linked.waitForFunction(()=>window.TurtleFiles&&document.querySelector('.file-tab[aria-selected="true"]')?.textContent==='try_left_small_turn.py');
+  assert.match(await linked.locator('.code-panel .CodeMirror').evaluate(element=>element.CodeMirror.getValue()),/left\(45\)/);
+  assert.equal(await linked.locator('.reference-full-link').getAttribute('href'),'/turtlereference/#left/small-turn');
+  await linked.locator('.file-return').click();
+  assert.equal(await linked.locator('.code-panel .CodeMirror').evaluate(element=>element.CodeMirror.getValue()),oldCode,'Deep-linked practice preserves the original work');
+  await linked.close();
   assert.deepEqual(errors,[]);
   console.log('PASS compact reference code/results, preserved main.py and separate practice tabs, back to code, printed booleans, expanded editable example, modal close, desktop/mobile layout, shared reference, history/diffs/restore, code clearing, Python execution, saved zoom and keyboard tabs.');
 }finally{await browser?.close();server.kill();}
