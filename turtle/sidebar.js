@@ -176,6 +176,7 @@
   if(incomingTopic&&byId.has(incomingTopic)){
     openTopic(incomingTopic,incoming.get('example')||'original');
     workbench.openSidebar();
+    if(incoming.get('practice')==='1')tryPractice(currentExample);
   }
 
   let entries=[],selectedId=null,previewId=null,historyEditor=null,diffRows=[],historyOpen=false;
