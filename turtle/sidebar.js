@@ -46,10 +46,10 @@
     tile.style.backgroundPosition=-(record.tile%atlas.columns)*size+'px '+-Math.floor(record.tile/atlas.columns)*size+'px';
     return tile;
   }
-  function openTopic(id){
+  function openTopic(id,exampleId='original'){
     const topic=byId.get(id);if(!topic)return;
     if(!currentTopic)browseScroll=$('referenceScroll').scrollTop;
-    currentTopic=topic;currentExample=topic.examples?.[0]||topic;
+    currentTopic=topic;currentExample=topic.examples?.find(example=>example.id===exampleId)||topic.examples?.[0]||topic;
     $('referenceBrowse').hidden=true;$('referenceDetail').hidden=false;$('commandEmpty').hidden=true;
     const detail=$('referenceDetail');detail.replaceChildren();
     detail.append(action('← All topics',()=>{browse();$('referenceScroll').scrollTop=browseScroll;},'reference-back'));
@@ -65,7 +65,7 @@
     const runner=make('iframe','reference-engine');runner.title='Example execution engine';runner.hidden=true;runner.tabIndex=-1;runner.setAttribute('aria-hidden','true');runner.src='/turtle/?embed=reference';
     runner.addEventListener('load',()=>updateRunner());detail.append(runner);
     const runnerButtons=make('div','reference-runner-actions');
-    runnerButtons.append(action('Use this code',()=>loadExample(currentExample.code),'btn primary'),action('Expand example ↗',()=>expandExample()));detail.append(runnerButtons);
+    runnerButtons.append(action('Try in practice tab',()=>tryPractice(currentExample),'btn primary'),action('Expand example ↗',()=>expandExample()));detail.append(runnerButtons);
     const notes=make('details','reference-topic-notes');notes.append(make('summary','','Syntax & parameters'));
     notes.append(make('pre','reference-syntax',topic.syntax));
     if(topic.aliases?.length)notes.append(make('p','','Also: '+topic.aliases.join(', ')));
@@ -79,12 +79,14 @@
       for(const id of topic.related||[]){const other=byId.get(id);if(other)related.append(action(other.title,()=>openTopic(id),''));}
       detail.append(related);
     }
-    const full=make('a','','Open this topic in the full reference ↗');full.href='/reference/#'+topic.id;full.target='_blank';full.rel='noopener';
+    const full=make('a','reference-full-link','Open this topic in the full reference ↗');full.href='/turtlereference/#'+topic.id;full.target='_blank';full.rel='noopener';
     const fullRow=make('p');fullRow.append(full);detail.append(fullRow);
     showExample();$('referenceScroll').scrollTop=0;
   }
-  function loadExample(code){
-    workbench.replace(code,'Loaded '+(currentExample.label||currentTopic.title)+' reference example');
+  function tryPractice(example,editedCode){
+    const code=typeof editedCode==='string'?editedCode:example.code;
+    const fresh=typeof editedCode==='string'&&code!==example.code;
+    if(!window.TurtleFiles?.openReferenceExample(currentTopic.id,{...example,code},{fresh}))return;
     if(innerWidth<=1350)workbench.closeSidebar();
   }
   function formattedCode(code){
@@ -140,7 +142,7 @@
     const runner=make('iframe','reference-runner');runner.title='Interactive reference example';runner.src='/turtle/?embed=reference';
     runner.addEventListener('load',()=>{const win=runner.contentWindow;win.TurtleWorkbench.editor.setValue(example.code);win.TurtleWorkbench.editor.refresh();win.TraceTurtleEmbed.run();});
     const actions=make('div','reference-dialog-actions');
-    actions.append(make('p','','Change the code and run it to experiment.'),action('▶ Run',()=>runner.contentWindow.TraceTurtleEmbed?.run(),'btn primary'),action('Stop',()=>runner.contentWindow.TraceTurtleEmbed?.stop()),action('Use this code',()=>{loadExample(runner.contentWindow.TurtleWorkbench?.editor.getValue()||example.code);dialog.close();}));
+    actions.append(make('p','','Change the code and run it to experiment.'),action('▶ Run',()=>runner.contentWindow.TraceTurtleEmbed?.run(),'btn primary'),action('Stop',()=>runner.contentWindow.TraceTurtleEmbed?.stop()),action('Try in practice tab',()=>{tryPractice(example,runner.contentWindow.TurtleWorkbench?.editor.getValue()??example.code);dialog.close();}));
     dialog.append(heading,runner,actions);document.body.append(dialog);
     dialog.addEventListener('close',()=>{runner.contentWindow.TraceTurtleEmbed?.stop();dialog.remove();if(exampleDialog===dialog)exampleDialog=null;});
     dialog.showModal();
@@ -148,6 +150,8 @@
   function showExample(){
     const example=currentExample,content=$('referenceDetail').querySelector('.reference-example-content');if(!example||!content)return;
     $('referenceDetail').querySelectorAll('[data-example-id]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exampleId===example.id)));
+    const fullLink=$('referenceDetail').querySelector('.reference-full-link');
+    if(fullLink)fullLink.href='/turtlereference/#'+currentTopic.id+(example.id==='original'?'':'/'+example.id);
     exampleRun++;
     content.replaceChildren();
     const codeCard=make('section','reference-code-card'),codeHead=make('div','reference-card-heading');codeHead.append(make('strong','','Python'),action('Copy',async()=>{
@@ -167,6 +171,12 @@
   }
   $('commandSearch').addEventListener('input',()=>{browse();$('referenceScroll').scrollTop=0;});
   browse();
+  // Links from the full Reference land on the same command and selected example.
+  const incoming=new URLSearchParams(location.search),incomingTopic=incoming.get('topic');
+  if(incomingTopic&&byId.has(incomingTopic)){
+    openTopic(incomingTopic,incoming.get('example')||'original');
+    workbench.openSidebar();
+  }
 
   let entries=[],selectedId=null,previewId=null,historyEditor=null,diffRows=[],historyOpen=false;
   const diffCache=new Map();
