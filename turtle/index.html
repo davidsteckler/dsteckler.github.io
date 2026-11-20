@@ -855,6 +855,44 @@
       .world-panel{grid-template-rows:47px auto auto 9px var(--output-height,150px)}
       body.course-embed .world-panel{grid-template-rows:47px auto auto 9px var(--output-height,150px)}
     }
+
+/* The A–Z letter lesson presents a compact, side-by-side world and editor
+   inside a host page. Only active for ?embed=course&ui=letters-compact-v1. */
+body.letters-embed,body.letters-embed .app{height:100dvh!important;min-height:0!important;overflow:hidden!important}
+body.letters-embed .app{display:grid!important;grid-template-rows:40px minmax(0,1fr)!important}
+body.letters-embed .appbar{position:static!important;min-height:40px!important;padding:3px 7px!important;z-index:1!important}
+body.letters-embed .appbar-right{width:100%!important}
+body.letters-embed .toolbar{display:flex!important;justify-content:stretch!important;gap:5px!important;width:100%!important}
+body.letters-embed .toolbar .btn{height:32px!important;min-width:0!important;flex:1 1 0!important;padding:0 5px!important;font-size:11px!important}
+body.letters-embed .toolbar .shortcut{font-size:9px}
+body.letters-embed .workspace{display:grid!important;grid-template-columns:minmax(205px,1fr) minmax(205px,1fr)!important;grid-template-rows:minmax(0,1fr)!important;align-items:stretch!important;height:100%!important;min-height:0!important;overflow:hidden!important;gap:5px!important;padding:5px!important}
+body.letters-embed .resize-divider{display:none!important}
+body.letters-embed .code-panel{grid-column:1;grid-row:1;display:grid!important;grid-template-rows:34px minmax(0,1fr)!important;min-height:0!important;height:100%!important;overflow:hidden!important}
+body.letters-embed .world-panel{grid-column:2;grid-row:1;display:grid!important;grid-template-rows:34px minmax(0,1fr) 30px 65px!important;height:100%!important;min-height:0!important;overflow:hidden!important}
+body.letters-embed .panel{border-radius:9px!important}
+body.letters-embed .panel-head{height:34px!important;min-height:34px!important;padding:0 8px!important}
+body.letters-embed .clear-code-btn{font-size:10px!important;height:26px!important;padding:0 6px!important}
+body.letters-embed #codeHistoryBtn{height:26px!important;padding:0 6px!important;font-size:10px!important}
+body.letters-embed .code-panel .CodeMirror{height:100%!important;font-size:13px!important;min-height:0!important}
+body.letters-embed .panel-label,body.letters-embed .panel-mini{font-size:10px!important}
+body.letters-embed .world-head-actions{gap:4px!important}
+body.letters-embed .world-head-actions .btn{font-size:10px!important;padding:0 5px!important;height:26px!important}
+body.letters-embed .world-panel .panel-mini{display:none!important}
+body.letters-embed .world-stage{min-height:0!important;height:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:5px!important;overflow:hidden!important}
+body.letters-embed .world-info{height:30px!important;min-height:30px!important;padding:2px 7px!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:4px!important}
+body.letters-embed .world-copy,body.letters-embed .neon-control{display:none!important}
+body.letters-embed .world-info .toggle{font-size:10px!important}
+body.letters-embed .output-resize-handle{display:none!important}
+body.letters-embed .console{height:65px!important;min-height:65px!important;overflow:hidden!important}
+body.letters-embed .console-head{height:23px!important;min-height:23px!important;font-size:10px!important}
+body.letters-embed #output{font-size:11px!important;line-height:1.25!important;max-height:42px!important;overflow:auto!important}
+@media(max-width:610px){
+ body.letters-embed .app{grid-template-rows:40px minmax(0,1fr)!important}
+ body.letters-embed .workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(200px,1fr) minmax(310px,1.15fr)!important}
+ body.letters-embed .code-panel{grid-column:1;grid-row:1}
+ body.letters-embed .world-panel{grid-column:1;grid-row:2}
+}
+
 /* Keep both trace panes visible when the embedded viewport fits them. */
 @media(min-width:680px){
   body.trace-embed .workspace{display:grid;grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr)!important;overflow:hidden}
@@ -1089,6 +1127,7 @@ for i in range(4):
   var TRACE_EMBED = EMBED_MODE === "trace" || REFERENCE_EMBED;
   var COURSE_EMBED = EMBED_MODE === "course";
   var UNIT1_EMBED = COURSE_EMBED && QUERY_PARAMS.get("ui") === "unit1-console-v2";
+  var LETTERS_EMBED = COURSE_EMBED && QUERY_PARAMS.get("ui") === "letters-compact-v1";
   var COURSE_LESSON = QUERY_PARAMS.get("lesson") || "lesson";
   var COURSE_CODE = QUERY_PARAMS.get("code");
   var EXAMPLE_OVERLAY_CODE = UNIT1_EMBED ? QUERY_PARAMS.get("overlay") : null;
@@ -1185,6 +1224,7 @@ for i in range(4):
   if(TRACE_EMBED) document.body.classList.add("trace-embed");
   if(REFERENCE_EMBED) document.body.classList.add("reference-embed");
   if(COURSE_EMBED) document.body.classList.add("course-embed");
+  if(LETTERS_EMBED) document.body.classList.add("letters-embed");
   if(UNIT1_EMBED) document.body.classList.add("unit1-embed");
   if(PREVIEW_EMBED)document.body.classList.add("preview-embed");
   var DEFAULT_CODE = [
@@ -3039,7 +3079,7 @@ for i in range(4):
   });
 
   function fitWorld(){
-    var mobile=window.innerWidth<=840&&!REFERENCE_EMBED&&!PREVIEW_EMBED;
+    var mobile=window.innerWidth<=840&&!REFERENCE_EMBED&&!PREVIEW_EMBED&&!LETTERS_EMBED;
     var stageWidth=worldStage.offsetWidth;
     var stageHeight=worldStage.offsetHeight;
     var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
