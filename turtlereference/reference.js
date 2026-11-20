@@ -349,7 +349,7 @@
     $('topicGroup').textContent = entry.group;
     $('topicTitle').textContent = entry.title;
     $('topicSummary').textContent = currentExample.summary;
-    $('openInSandbox').href = '/turtle/?topic=' + encodeURIComponent(entry.id) + '&example=' + encodeURIComponent(currentExample.id);
+    $('openInSandbox').href = '/turtle/?topic=' + encodeURIComponent(entry.id) + '&example=' + encodeURIComponent(currentExample.id) + '&practice=1';
     $('colorViewer').hidden = entry.id !== 'color';
     renderTrail();
     renderExampleChoices(); writeSyntax();
