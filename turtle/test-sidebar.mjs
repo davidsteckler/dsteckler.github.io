@@ -71,9 +71,14 @@ try{
   assert(previewSizes.code>previewSizes.width*.3);assert(previewSizes.world>previewSizes.width*.3,'Drawing occupies a full pane in narrow reference embed');
   await page.waitForFunction(()=>document.querySelector('.reference-runner').contentDocument.getElementById('codeStatus').classList.contains('good'));
   assert.equal(await page.locator('.reference-runner-actions button').count(),2);
-  await page.locator('.reference-dialog').getByRole('button',{name:'Use this code',exact:true}).click();
+  await page.locator('.reference-dialog').getByRole('button',{name:'Try in practice tab',exact:true}).click();
+  const colorPractice=await page.locator('.file-tab[aria-selected="true"]').innerText();
+  assert.match(colorPractice,/^try_color_/);
   const loaded=await editor.evaluate(element=>element.CodeMirror.getValue());assert.match(loaded,/limegreen/);
+  await page.locator('.file-return').click();
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),oldCode,'Practice leaves original code intact');
   assert(await page.evaluate(code=>TurtleWorkbench.readHistory().some(entry=>entry.code===code),oldCode));
+  await page.getByRole('tab',{name:colorPractice,exact:true}).click();
   await editor.evaluate(element=>{element.CodeMirror.setValue('forward(137)\nleft(42)');});
   await page.locator('#clearCodeBtn').click();assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),'');
   await page.locator('#codeHistoryBtn').click();
@@ -86,8 +91,12 @@ try{
   await page.locator('#commandSearch').fill('');
   await page.locator('#commandSearch').fill('forward');await page.locator('.reference-topic').filter({has:page.getByText('forward()',{exact:true})}).click();
   await page.waitForFunction(()=>document.querySelector('.reference-engine').contentWindow.TurtleWorkbench?.editor.getValue().includes('forward(100)'));
-  await page.getByRole('button',{name:'Use this code',exact:true}).click();
+  const priorPractice=await editor.evaluate(element=>element.CodeMirror.getValue());
+  await page.getByRole('button',{name:'Try in practice tab',exact:true}).click();
   assert.match(await editor.evaluate(element=>element.CodeMirror.getValue()),/^pensize\(4\)\nforward\(100\)/);
+  await page.locator('.file-return').click();
+  assert.equal(await editor.evaluate(element=>element.CodeMirror.getValue()),priorPractice,'Another example preserves the prior practice file');
+  await page.getByRole('tab',{name:'try_forward_original.py',exact:true}).click();
   await page.locator('#runBtn').click();await page.waitForFunction(()=>document.getElementById('codeStatus').classList.contains('good'));assert(!await page.locator('.error-card').count());
   const displayCode=await editor.evaluate(element=>element.CodeMirror.getValue());
   const initialWorld=await page.locator('#worldScaleBox').evaluate(element=>element.getBoundingClientRect().width);
@@ -141,5 +150,5 @@ try{
   if(process.env.TURTLE_SIDEBAR_PROOF)await page.screenshot({path:path.join(process.env.TURTLE_SIDEBAR_PROOF,'reference-expanded-mobile.png')});
   await page.locator('.reference-dialog').getByRole('button',{name:'Close',exact:true}).click();
   assert.deepEqual(errors,[]);
-  console.log('PASS compact reference code/results, printed booleans, expanded editable example, modal close, desktop/mobile layout, shared reference, history/diffs/restore, code clearing, Python execution, saved zoom and keyboard tabs.');
+  console.log('PASS compact reference code/results, preserved main.py and separate practice tabs, back to code, printed booleans, expanded editable example, modal close, desktop/mobile layout, shared reference, history/diffs/restore, code clearing, Python execution, saved zoom and keyboard tabs.');
 }finally{await browser?.close();server.kill();}
