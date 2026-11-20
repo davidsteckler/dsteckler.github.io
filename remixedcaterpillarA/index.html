@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f1f0e9">
+<meta name="description" content="A full, line-by-line Python Turtle code walkthrough for Remixed Caterpillar. See each step in the real 400 × 400 Turtle world, with a separate editable workspace.">
+<link rel="canonical" href="https://dsteckler.com/remixedcaterpillarA/">
+<title>Remixed Caterpillar · Full Code Walkthrough</title>
+<style>
+:root{--bg:#f1f0e9;--paper:#fffefa;--ink:#24333b;--muted:#5d6a6e;--soft:#839094;--rule:#d9ddd5;--teal:#176b73;--tealDark:#0c555e;--gold:#e49e62;--nav:#eff4ef;--code:#202b32;--codeLine:#d9e7e8;--codeRule:#374750}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font:13px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+button,a{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}button:focus-visible,a:focus-visible,.code-line:focus-visible{outline:3px solid #eba15b;outline-offset:2px}
+[hidden]{display:none!important}
+header{height:48px;background:#fffdf9;border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px}
+.brand{display:flex;align-items:center;gap:9px;flex:0 0 auto;white-space:nowrap;font-weight:850;font-size:12px}
+.brand-icon{width:28px;height:28px;background:var(--teal);color:#fff;border-radius:7px;display:grid;place-items:center;font:850 13px ui-monospace,Consolas,monospace}
+.brand span:last-child{color:var(--soft);font-weight:600;font-size:11px}
+.head-title{font-size:14px;font-weight:850;letter-spacing:-.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.head-title small{font:800 9px ui-monospace,Consolas,monospace;color:#ad6749;letter-spacing:.07em;margin-right:8px}
+.head-links{display:flex;align-items:center;gap:15px;white-space:nowrap;font-weight:750;font-size:10px;color:#4f666a}
+.head-links a:hover{text-decoration:underline}
+.layout{display:grid;grid-template-columns:clamp(190px,15vw,235px) clamp(310px,29vw,420px) minmax(0,1fr);gap:9px;padding:9px;min-height:0;height:calc(100dvh - 48px);max-width:1840px;margin:auto}
+.rail,.lesson,.workspace{background:var(--paper);border:1px solid var(--rule);border-radius:11px;min-height:0;min-width:0;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 6px 24px #23343b08}
+.rail{background:var(--nav);padding:12px 9px 10px}
+.rail-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px;color:var(--teal);font:850 10px ui-monospace,Consolas,monospace;letter-spacing:.06em}
+.rail-head small{font-size:10px;letter-spacing:0;color:#71807f}
+.progress{height:5px;background:#dae5de;border-radius:4px;margin:11px 6px 12px;overflow:hidden}
+.progress div{height:100%;background:var(--teal);transition:width .2s}
+.step-nav{display:grid;grid-template-columns:1fr;grid-auto-rows:minmax(26px,1fr);gap:3px;flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin}
+.step-nav button{border:1px solid transparent;background:transparent;color:#556769;border-radius:6px;min-height:27px;display:flex;align-items:center;gap:9px;text-align:left;padding:5px 8px;font-size:11px;font-weight:720;line-height:1.2;white-space:nowrap}
+.step-nav button span{font:700 10px ui-monospace,Consolas,monospace;opacity:.66;width:18px;flex:0 0 18px}
+.step-nav button:hover{background:#e0ebe4}
+.step-nav button[aria-current=step]{background:var(--teal);color:#fff}
+.step-nav button[aria-current=step] span{opacity:1}
+.rail-foot{border-top:1px solid #dce4dd;padding:10px 5px 0;margin-top:10px;color:#69817a;font:750 9px ui-monospace,Consolas,monospace;letter-spacing:.02em}
+.lesson{padding:0}
+.lesson-top{padding:16px 17px 12px;border-bottom:1px solid #edf0e8;flex:0 0 auto}
+.eyebrow{font:850 10px ui-monospace,Consolas,monospace;color:#aa643c;letter-spacing:.06em}
+h1{font-size:25px;line-height:1.08;letter-spacing:-.05em;margin:7px 0 8px}
+.lesson-top p{margin:0;color:#586a6e;font-size:12px;line-height:1.55}
+.goal{display:flex;align-items:flex-start;gap:7px;margin-top:11px;padding:8px 10px;background:#f1f6f2;border-radius:7px;color:#385e56;font-size:11px;line-height:1.45}
+.goal strong{color:var(--teal);white-space:nowrap}
+.codebar{padding:10px 13px 8px;display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
+.codebar strong{font:850 10px ui-monospace,Consolas,monospace;letter-spacing:.04em}
+.copy-actions{display:flex;gap:5px}
+.mini{border:1px solid #d0dbd5;background:#fff;color:#42656a;padding:5px 7px;font-size:10px;font-weight:760;border-radius:6px}
+.mini:hover{background:#edf5f1}
+.codebox{margin:0 12px;background:var(--code);border:1px solid #3c4c53;border-radius:8px;min-height:125px;flex:1 1 auto;overflow:auto;scrollbar-color:#607880 #26353d}
+.code-lines{padding:9px 0 10px}
+.code-line{display:flex;gap:11px;width:100%;border:0;background:transparent;color:var(--codeLine);font:12px/1.72 ui-monospace,SFMono-Regular,Consolas,monospace;padding:0 11px;text-align:left;white-space:pre;min-height:21px}
+.code-line:hover{background:#304149}.code-line[aria-pressed=true]{background:#315359;border-left:3px solid #f1ae71;padding-left:8px;color:#fff}
+.code-line .number{flex:0 0 25px;text-align:right;color:#7d959b;user-select:none}
+.code-line .source{flex:1;min-width:max-content}
+.code-line .source.comment{color:#9cb5ae}
+.code-line .source.blank{opacity:.3}
+.explain{margin:9px 12px 0;background:#f4f6f2;border:1px solid #e6eae2;border-radius:7px;padding:8px 10px;flex:0 0 auto;min-height:62px}
+.explain strong{font-size:10px;color:var(--teal);letter-spacing:.03em}
+.explain p{margin:2px 0 0;font-size:11px;line-height:1.5;color:#5d6a6b}
+.lesson-actions{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:11px 12px 9px}
+.action{border-radius:7px;border:1px solid #ccd8d2;padding:9px 10px;min-height:36px;background:#fff;color:#335b60;font-size:11px;font-weight:820}
+.action:hover{background:#eaf4ef}
+.action:disabled{opacity:.35;cursor:default}
+.action.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+.action.primary:hover{background:var(--tealDark)}
+.prevnext{display:flex;gap:6px}
+.full-row{padding:0 12px 12px}
+.full-row button{display:block;width:100%;border:1px solid #e0e7de;background:#f8faf6;color:#496667;border-radius:6px;padding:7px 10px;font-size:10px;font-weight:750;text-align:left}
+.full-row button:hover{background:#e8f4ee}
+.workspace{background:#faf8f1}
+.workspace-head{padding:9px 12px;background:#fffdf9;border-bottom:1px solid #e2e4db;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:51px;flex:0 0 51px}
+.workspace-head h2{font-size:13px;letter-spacing:-.02em;margin:0}
+.workspace-head p{margin:1px 0 0;font-size:10px;color:#74817f}
+.mode{font:800 9px ui-monospace,Consolas,monospace;background:#e6f2ed;border-radius:99px;padding:5px 8px;color:var(--teal);white-space:nowrap}
+.mode.example{background:#fff0de;color:#a4622d}
+.switch-back{padding:6px 8px;background:#fff;border:1px solid #d4dfd5;border-radius:6px;font-size:10px;font-weight:790;white-space:nowrap}
+.frame-wrap{flex:1;min-height:0;position:relative;overflow:hidden;background:#ede9df}
+.frame-wrap iframe{border:0;width:100%;height:100%;display:block;background:#eee8df}
+.workfoot{border-top:1px solid #e1e5dd;padding:7px 12px;font-size:10px;color:#687774;background:#fffdf8;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.workfoot a{color:var(--teal);font-weight:760;text-decoration:underline}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#243d41;color:#fff;padding:9px 14px;border-radius:8px;font-size:12px;box-shadow:0 8px 32px #0003;z-index:100}
+dialog{border:1px solid #d0dbd4;border-radius:13px;box-shadow:0 22px 70px #101d2680;background:#fffefa;color:var(--ink);width:min(850px,calc(100vw - 28px));height:min(90dvh,820px);max-height:calc(100dvh - 28px);padding:0;overflow:hidden}
+dialog::backdrop{background:#13262dc0}
+.modal-inner{height:100%;display:flex;flex-direction:column}
+.modal-head{padding:16px 18px;border-bottom:1px solid #dce2db;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-head h2{font-size:19px;margin:0;letter-spacing:-.04em}
+.modal-head p{margin:3px 0 0;color:#657675;font-size:11px}
+.modal-actions{display:flex;align-items:center;gap:6px}
+.modal-actions button{border:1px solid #d1d9d2;border-radius:6px;background:#fff;padding:8px 10px;font-size:11px;font-weight:800}
+.modal-actions .primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+#fullCode{margin:12px 14px 14px;padding:16px;background:var(--code);color:#dce8e7;overflow:auto;flex:1;font:12px/1.7 ui-monospace,Consolas,monospace;white-space:pre;tab-size:4;border-radius:8px}
+@media(max-width:1180px){.layout{grid-template-columns:184px 325px minmax(0,1fr);gap:7px;padding:7px}.head-title{font-size:12px}.head-links{gap:8px}.head-links a:first-child{display:none}.code-line{font-size:11px}}
+@media(max-width:950px){html,body{height:auto;min-height:100%}.layout{display:grid;grid-template-columns:minmax(150px,210px) minmax(0,1fr);height:auto;min-height:calc(100dvh - 48px)}.rail{max-height:620px}.lesson{min-height:620px}.workspace{grid-column:1/-1;height:min(76dvh,730px);min-height:540px}.head-title small{display:none}}
+@media(max-width:600px){header{padding:0 9px;height:44px}.brand span:last-child,.head-links a:nth-child(2){display:none}.head-title{font-size:11px}.layout{display:block;padding:6px;height:auto}.rail{margin-bottom:7px;padding:10px;max-height:none}.rail-head,.rail-foot{display:none}.progress{margin:0 0 8px}.step-nav{display:flex;overflow-x:auto;overflow-y:hidden;gap:4px;scrollbar-width:thin}.step-nav button{min-width:max-content;padding:8px}.lesson{margin-bottom:7px;min-height:520px;height:68dvh}.workspace{height:790px}.lesson-top{padding:13px}.lesson-top h1{font-size:22px}.codebox{min-height:155px}.workfoot{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.progress div{transition:none}}
+</style>
+</head>
+<body>
+<header>
+ <a class="brand" href="/turtle/"><span class="brand-icon" aria-hidden="true">&gt;_</span>TURTLE LAB <span> / FULL WALKTHROUGH</span></a>
+ <div class="head-title"><small>1.3.12</small>Remixed Caterpillar</div>
+ <nav class="head-links" aria-label="Related pages"><a href="/remixedcaterpillar/">Independent challenge</a><a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a><a href="/turtle/" target="_blank" rel="noopener">Sandbox ↗</a></nav>
+</header>
+<main class="layout">
+ <aside class="rail" aria-label="Tutorial stages">
+  <div class="rail-head"><span>BUILD THE SCENE</span><small id="index">01 / 16</small></div>
+  <div class="progress" role="presentation"><div id="progressFill"></div></div>
+  <nav class="step-nav" id="stepNav" aria-label="Choose a stage"></nav>
+  <div class="rail-foot">NO LOOPS · NO FUNCTIONS · REAL PYTHON</div>
+ </aside>
+ <section class="lesson" aria-label="Step-by-step code walkthrough">
+  <div class="lesson-top">
+   <div class="eyebrow" id="eyebrow">STAGE 01 · START</div>
+   <h1 id="lessonTitle">Set up the Turtle world</h1>
+   <p id="intro">Draw with the Python commands you already know.</p>
+   <div class="goal"><strong>Result</strong><span id="goal"></span></div>
+  </div>
+  <div class="codebar"><strong>CODE FOR THIS STAGE</strong><div class="copy-actions"><button class="mini" id="copyStep" type="button">Copy stage</button><button class="mini" id="copySoFar" type="button">Copy code so far</button></div></div>
+  <div class="codebox" id="codeBox" aria-label="Click a Python line to hear its explanation"><div class="code-lines" id="codeLines"></div></div>
+  <div class="explain" aria-live="polite"><strong>WHAT THIS LINE DOES</strong><p id="lineExplain">Click any code line to explore.</p></div>
+  <div class="explain" style="background:#fffaf3;border-color:#f2e5d1"><strong style="color:#a36d40">NOTICE</strong><p id="notice"></p></div>
+  <div class="lesson-actions"><button class="action primary" id="preview" type="button">▶ Preview this stage</button><div class="prevnext"><button class="action" id="previous" type="button">← Back</button><button class="action" id="next" type="button">Next →</button></div></div>
+  <div class="full-row"><button id="openFull" type="button">↗ View and copy the complete finished program</button></div>
+ </section>
+ <section class="workspace" aria-label="Python Turtle editor and drawing world">
+  <div class="workspace-head">
+   <div><h2 id="workTitle">Your Turtle workspace</h2><p id="workNote">Write your own program, run it, and compare.</p></div>
+   <div style="display:flex;gap:7px;align-items:center"><span class="mode" id="mode">MY CODE</span><button type="button" class="switch-back" id="back" hidden>← Return to my code</button></div>
+  </div>
+  <div class="frame-wrap">
+   <iframe id="studentFrame" title="Your editable Python Turtle workspace with the real 400 by 400 drawing world" allow="clipboard-write" loading="eager"></iframe>
+   <iframe id="sampleFrame" title="Live example of the current walkthrough step with Python Turtle" allow="clipboard-write" loading="eager" hidden></iframe>
+  </div>
+  <div class="workfoot"><span>Preview uses a separate example. Your code remains saved in your own editor.</span><a href="/gridworld/" target="_blank" rel="noopener">Explore coordinates ↗</a></div>
+ </section>
+</main>
+<dialog id="fullModal" aria-label="Complete Remixed Caterpillar Python program">
+ <div class="modal-inner">
+  <div class="modal-head"><div><h2>Complete Remixed Caterpillar program</h2><p>All 16 stages together. No loops and no functions.</p></div><div class="modal-actions"><button class="primary" id="copyFull" type="button">Copy all code</button><button id="closeFull" type="button" aria-label="Close full program">Close ✕</button></div></div>
+  <pre id="fullCode"></pre>
+ </div>
+</dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+<script>window.WALKTHROUGH_STEPS=[{"nav":"Setup & sky","title":"Set up the Turtle world","tag":"START","intro":"Start with the drawing speed, pen thickness, and sky color. The world is 400 × 400, with (0, 0) in the middle.","goal":"A blank light-blue sky, ready for the shapes.","tip":"speed(0) draws instantly. The first color you see is the background; no lines are drawn yet.","code":"# Remixed Caterpillar\nspeed(0)\npensize(2)\nbgcolor(\"lightblue\")"},{"nav":"The ground","title":"Draw the filled ground","tag":"BACKGROUND","intro":"Draw a rectangle across the bottom of the world. We visit all four corners and return to the starting point.","goal":"A brown strip from y = -155 to y = -200.","tip":"penup() prevents a stray line from the center. begin_fill() and end_fill() color the inside of the closed outline.","code":"color(\"saddlebrown\")\npenup()\ngoto(-200, -155)\npendown()\nbegin_fill()\ngoto(200, -155)\ngoto(200, -200)\ngoto(-200, -200)\ngoto(-200, -155)\nend_fill()\npenup()"},{"nav":"Body · 1","title":"Draw the first circle","tag":"CATERPILLAR","intro":"The first body segment is a red circle on the left. Move to its bottom point before drawing.","goal":"A 60-unit-wide red segment with its bottom at y = -145.","tip":"With Tracy facing right, circle(30) draws above the starting point. The radius is 30; the diameter is 60.","code":"color(\"tomato\")\npenup()\ngoto(-165, -145)\npendown()\nbegin_fill()\ncircle(30)\nend_fill()\npenup()"},{"nav":"Body · 2","title":"Add a bigger green circle","tag":"CATERPILLAR","intro":"Repeat the same sequence farther right. This second segment is a little larger.","goal":"A green circle with radius 35 that overlaps the first.","tip":"We change both the color and the starting x coordinate. The pattern for every filled circle stays the same.","code":"color(\"mediumseagreen\")\npenup()\ngoto(-105, -145)\npendown()\nbegin_fill()\ncircle(35)\nend_fill()\npenup()"},{"nav":"Body · 3","title":"Add the blue segment","tag":"CATERPILLAR","intro":"Make a third body circle. The caterpillar now starts to grow toward the right.","goal":"A blue circle with radius 40 at x = -35.","tip":"The starting y coordinate stays -145. Since the radius is larger, the top of the circle rises higher.","code":"color(\"royalblue\")\npenup()\ngoto(-35, -145)\npendown()\nbegin_fill()\ncircle(40)\nend_fill()\npenup()"},{"nav":"Body · 4","title":"Add the orange segment","tag":"CATERPILLAR","intro":"The fourth segment is bigger again. Keep the shapes touching or slightly overlapping.","goal":"An orange circle with radius 45 at x = 50.","tip":"Each new penup() is important. It stops a line from connecting one circle to the next.","code":"color(\"coral\")\npenup()\ngoto(50, -145)\npendown()\nbegin_fill()\ncircle(45)\nend_fill()\npenup()"},{"nav":"The head","title":"Draw the caterpillar's head","tag":"CATERPILLAR","intro":"The largest circle becomes the head, on the far right. We will add facial features on top of it.","goal":"A yellow head with radius 50, starting at (130, -145).","tip":"We use the same circle pattern for a fifth time. No loops or functions are needed.","code":"color(\"gold\")\npenup()\ngoto(130, -145)\npendown()\nbegin_fill()\ncircle(50)\nend_fill()\npenup()"},{"nav":"Two eyes","title":"Give the head two eyes","tag":"FACE","intro":"Draw two tiny black circles inside the yellow head. Each eye gets its own fill.","goal":"One eye near x = 119 and another near x = 160.","tip":"The eyes use circle(5), the same command as the body. Their diameter is only 10.","code":"color(\"black\")\npenup()\ngoto(119, -101)\npendown()\nbegin_fill()\ncircle(5)\nend_fill()\npenup()\n\ngoto(160, -101)\npendown()\nbegin_fill()\ncircle(5)\nend_fill()\npenup()"},{"nav":"The smile","title":"Draw a curved smile","tag":"FACE","intro":"Move to the lower part of the face, point diagonally, and draw only part of a circle.","goal":"A curved smile below the two eyes.","tip":"circle(30, 120) draws 120° of a circle. setheading(-60) points Tracy down and to the right before starting.","code":"pensize(3)\npenup()\ngoto(114, -118)\nsetheading(-60)\npendown()\ncircle(30, 120)\npenup()\npensize(2)"},{"nav":"Antennae","title":"Draw two antennae","tag":"FACE","intro":"Each antenna is a short straight line. The turtle's heading controls the direction.","goal":"One line leaning up-left and one leaning up-right.","tip":"setheading(120) points up-left; setheading(60) points up-right. The angles are measured from right = 0°.","code":"color(\"black\")\npenup()\ngoto(108, -71)\nsetheading(120)\npendown()\nforward(46)\npenup()\n\ngoto(164, -64)\nsetheading(60)\npendown()\nforward(46)\npenup()"},{"nav":"The sun","title":"Put a sun in the sky","tag":"SKY","intro":"Use another filled circle, this time in the upper-right portion of the 400 × 400 world.","goal":"A bright sun centered around (115, 137).","tip":"We reset to setheading(0) before circle(42). That makes the circle rise above its starting coordinate.","code":"color(\"gold\")\npenup()\ngoto(115, 95)\nsetheading(0)\npendown()\nbegin_fill()\ncircle(42)\nend_fill()\npenup()"},{"nav":"Top & bottom rays","title":"Draw two vertical sun rays","tag":"SKY","intro":"Draw one short line above the sun and one below it. We lift the pen between rays.","goal":"Two rays, pointing straight up and straight down.","tip":"The sun's top is near y = 179. We begin the upper ray at y = 184 so it sits just outside the circle.","code":"color(\"goldenrod\")\npensize(3)\npenup()\ngoto(115, 184)\nsetheading(90)\npendown()\nforward(13)\npenup()\n\ngoto(115, 89)\nsetheading(270)\npendown()\nforward(14)\npenup()"},{"nav":"Left & right rays","title":"Draw two horizontal sun rays","tag":"SKY","intro":"Add a ray on either side of the sun. The same forward() command works in every direction.","goal":"A ray pointing right and a ray pointing left.","tip":"setheading(0) points right. setheading(180) points left. Only the heading changes, not forward().","code":"goto(163, 137)\nsetheading(0)\npendown()\nforward(15)\npenup()\n\ngoto(67, 137)\nsetheading(180)\npendown()\nforward(15)\npenup()"},{"nav":"Diagonal rays","title":"Finish the sun's rays","tag":"SKY","intro":"Four short diagonal lines make the sun feel complete. Use 45°, 135°, 225°, and 315°.","goal":"A total of eight rays around the sun.","tip":"All eight rays are drawn with the same ingredients: penup(), goto(), setheading(), pendown(), and forward().","code":"goto(150, 172)\nsetheading(45)\npendown()\nforward(14)\npenup()\n\ngoto(80, 172)\nsetheading(135)\npendown()\nforward(14)\npenup()\n\ngoto(80, 102)\nsetheading(225)\npendown()\nforward(14)\npenup()\n\ngoto(150, 102)\nsetheading(315)\npendown()\nforward(14)\npenup()\npensize(2)"},{"nav":"Three birds","title":"Add birds in the sky","tag":"SKY","intro":"Each bird is just two slanted straight lines. The middle point is higher than the two ends.","goal":"Three simple V-shaped birds in the open sky.","tip":"goto() can draw angled lines directly. Start each bird with penup() so they do not connect.","code":"color(\"black\")\npenup()\ngoto(-140, 87)\npendown()\ngoto(-125, 99)\ngoto(-110, 87)\npenup()\n\ngoto(-96, 123)\npendown()\ngoto(-82, 135)\ngoto(-68, 123)\npenup()\n\ngoto(-65, 66)\npendown()\ngoto(-52, 77)\ngoto(-39, 66)\npenup()"},{"nav":"Finish & remix","title":"Finish the full program","tag":"FINISH","intro":"Hide the turtle pointer so only the finished artwork remains. Then make your own creative changes.","goal":"A complete caterpillar scene made from regular Python Turtle commands.","tip":"Try different body colors, a smaller sun, or a dark sky and moon. If you swap the sun for a moon, you can remove its rays and draw stars.","code":"hideturtle()"}];
+(function(){
+"use strict";
+var steps=window.WALKTHROUGH_STEPS;
+var byId=function(id){return document.getElementById(id)};
+var lessonId="remixed-caterpillar-A-student-v1";
+var sampleId="remixed-caterpillar-A-example-v1";
+var starter="# Remixed Caterpillar\n# Follow the walkthrough on the left.\n";
+var student=byId("studentFrame"),sample=byId("sampleFrame");
+var current=0,exampleMode=false,sampleLoaded=false,selectedLine=0;
+var storageKey="remixed-caterpillar-A-walkthrough-step-v1";
+try{var past=parseInt(localStorage.getItem(storageKey),10);if(Number.isInteger(past))current=Math.max(0,Math.min(steps.length-1,past));}catch(error){}
+var fullCode=steps.map(function(s){return "# " + s.nav + "\n" + s.code}).join("\n\n")+"\n";
+var allUntil=function(n){return steps.slice(0,n+1).map(function(s){return "# " + s.nav + "\n" + s.code}).join("\n\n")+"\n";};
+student.src="/turtle/?embed=course&ui=letters-compact-v1&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(starter);
+function lineHelp(line){
+ var s=line.trim(),m;
+ if(!s)return "A blank line separates parts of the drawing. Python skips it.";
+ if(s.charAt(0)==="#")return "A comment describes the program for the reader. Python does not draw it.";
+ if((m=s.match(/^speed\((\d+)\)/)))return "Set Tracy's drawing speed. speed(0) is the fastest setting.";
+ if((m=s.match(/^pensize\((\d+)\)/)))return "Make the pen "+m[1]+" pixels thick for the next lines.";
+ if((m=s.match(/^bgcolor\((.+)\)/)))return "Color the whole Turtle background "+m[1]+". It does not draw an object.";
+ if((m=s.match(/^color\((.+)\)/)))return "Choose "+m[1]+" for new lines and fills.";
+ if(s==="penup()")return "Lift the pen. The next movement changes position without leaving a line.";
+ if(s==="pendown()")return "Lower the pen. The next movement makes a visible line.";
+ if((m=s.match(/^goto\((-?\d+),\s*(-?\d+)\)/)))return "Move to x = "+m[1]+", y = "+m[2]+". Negative x is left; positive y is up.";
+ if(s==="begin_fill()")return "Start recording the outline of a filled shape.";
+ if(s==="end_fill()")return "Fill the shape made since begin_fill().";
+ if((m=s.match(/^circle\((\d+),\s*(\d+)\)/)))return "Draw "+m[2]+"° of a circle with radius "+m[1]+". This makes a curved arc.";
+ if((m=s.match(/^circle\((\d+)\)/)))return "Draw a full circle with radius "+m[1]+", diameter "+(Number(m[1])*2)+". At heading 0°, it grows above the starting point.";
+ if((m=s.match(/^setheading\((-?\d+)\)/)))return "Point Tracy at "+m[1]+"°. Right is 0°, up is 90°, left is 180°, down is 270°.";
+ if((m=s.match(/^forward\((\d+)\)/)))return "Move forward "+m[1]+" units in the current direction, drawing if the pen is down.";
+ if(s==="hideturtle()")return "Hide Tracy's triangle cursor so the drawing is easier to see.";
+ return "This line is part of the program. Read the command, then observe what changes in the world.";
+}
+var nav=byId("stepNav");
+steps.forEach(function(s,i){
+ var button=document.createElement("button");
+ button.type="button";
+ button.innerHTML="<span>"+String(i+1).padStart(2,"0")+"</span>";
+ button.appendChild(document.createTextNode(s.nav));
+ button.setAttribute("aria-label","Stage "+(i+1)+": "+s.title);
+ button.addEventListener("click",function(){go(i)});
+ nav.appendChild(button);
+});
+function toast(message){
+ var el=byId("toast");el.textContent=message;el.hidden=false;
+ clearTimeout(toast.timer);toast.timer=setTimeout(function(){el.hidden=true},1800);
+}
+function copyText(value,label){
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(value).then(function(){toast(label+" copied")}).catch(function(){legacyCopy(value,label)});
+ }else legacyCopy(value,label);
+}
+function legacyCopy(value,label){
+ var el=document.createElement("textarea");el.value=value;el.style.position="fixed";el.style.opacity="0";document.body.appendChild(el);el.select();
+ try{document.execCommand("copy");toast(label+" copied")}catch(error){toast("Select the code to copy it")}
+ el.remove();
+}
+function showLine(index,container){
+ var buttons=Array.from(container.querySelectorAll(".code-line"));
+ selectedLine=Math.max(0,Math.min(buttons.length-1,index));
+ buttons.forEach(function(button,i){button.setAttribute("aria-pressed",i===selectedLine?"true":"false")});
+ var source=buttons[selectedLine]&&buttons[selectedLine].dataset.source;
+ byId("lineExplain").textContent=source===undefined?"Click a line to see exactly what it does.":lineHelp(source);
+}
+function renderCode(){
+ var s=steps[current],lines=s.code.split("\n");
+ var box=byId("codeLines");box.textContent="";
+ lines.forEach(function(line,i){
+  var button=document.createElement("button");button.type="button";button.className="code-line";button.dataset.source=line;
+  var num=document.createElement("span");num.className="number";num.textContent=String(i+1).padStart(2,"0");
+  var src=document.createElement("span");src.className="source"+(line.trim().startsWith("#")?" comment":!line.trim()?" blank":"");src.textContent=line||" ";
+  button.append(num,src);button.addEventListener("click",function(){showLine(i,box)});
+  box.appendChild(button);
+ });
+ showLine(0,box);byId("codeBox").scrollTop=0;
+}
+function render(){
+ var s=steps[current];
+ byId("index").textContent=String(current+1).padStart(2,"0")+" / "+String(steps.length).padStart(2,"0");
+ byId("progressFill").style.width=((current+1)/steps.length*100)+"%";
+ byId("eyebrow").textContent="STAGE "+String(current+1).padStart(2,"0")+" · "+s.tag;
+ byId("lessonTitle").textContent=s.title;
+ byId("intro").textContent=s.intro;
+ byId("goal").textContent=s.goal;
+ byId("notice").textContent=s.tip;
+ byId("previous").disabled=current===0;
+ byId("next").textContent=current===steps.length-1?"First stage ↺":"Next →";
+ Array.from(nav.children).forEach(function(b,i){b.setAttribute("aria-current",i===current?"step":"false")});
+ try{localStorage.setItem(storageKey,String(current))}catch(error){}
+ renderCode();
+ if(exampleMode)runExample();
+}
+function go(index){current=Math.max(0,Math.min(index,steps.length-1));render();}
+function runExample(){
+ if(!exampleMode)return;
+ var code=allUntil(current);
+ byId("workTitle").textContent="Example through stage "+(current+1);
+ byId("workNote").textContent="Running the exact Python Turtle code shown so far.";
+ if(!sample.src||sample.getAttribute("src")===""){
+  sample.src="/turtle/?embed=course&ui=letters-compact-v1&lesson="+encodeURIComponent(sampleId)+"&code="+encodeURIComponent(code);
+  return;
+ }
+ if(!sampleLoaded)return;
+ try{
+  var w=sample.contentWindow;
+  if(!w||!w.TurtleWorkbench)throw new Error("Editor is still loading");
+  w.TurtleWorkbench.replace(code,"Walkthrough example for stage "+(current+1));
+  var run=w.document.getElementById("runBtn");if(run)run.click();
+ }catch(error){toast("Example is loading — select Preview again");}
+}
+sample.addEventListener("load",function(){sampleLoaded=true;if(exampleMode)runExample()});
+function showExample(){
+ exampleMode=true;student.hidden=true;sample.hidden=false;
+ byId("mode").textContent="LIVE EXAMPLE";byId("mode").classList.add("example");
+ byId("back").hidden=false;byId("preview").textContent="↻ Refresh example";
+ runExample();
+}
+function returnToWork(){
+ exampleMode=false;sample.hidden=true;student.hidden=false;
+ byId("workTitle").textContent="Your Turtle workspace";
+ byId("workNote").textContent="Write your own program, run it, and compare.";
+ byId("mode").textContent="MY CODE";byId("mode").classList.remove("example");
+ byId("back").hidden=true;byId("preview").textContent="▶ Preview this stage";
+}
+byId("preview").addEventListener("click",showExample);
+byId("back").addEventListener("click",returnToWork);
+byId("previous").addEventListener("click",function(){if(current>0)go(current-1)});
+byId("next").addEventListener("click",function(){go(current===steps.length-1?0:current+1)});
+byId("copyStep").addEventListener("click",function(){copyText(steps[current].code+"\n","This stage")});
+byId("copySoFar").addEventListener("click",function(){copyText(allUntil(current),"Code so far")});
+byId("openFull").addEventListener("click",function(){byId("fullModal").showModal()});
+byId("closeFull").addEventListener("click",function(){byId("fullModal").close()});
+byId("copyFull").addEventListener("click",function(){copyText(fullCode,"Full program")});
+byId("fullCode").textContent=fullCode;
+byId("fullModal").addEventListener("click",function(event){if(event.target===this)this.close()});
+render();
+})();</script>
+</body>
+</html>
