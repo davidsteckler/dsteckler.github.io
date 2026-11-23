@@ -272,6 +272,15 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
   .color-drawer .color-controls{justify-content:flex-start}
 }
 
+
+.cat-code-sample{padding:0!important;max-height:210px;overflow:auto;white-space:normal!important;scrollbar-width:thin}
+.cat-code-sample canvas{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#codeProgress{font-weight:700;color:#98662b}
+.cat-phase-bar{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;margin:0 0 8px;background:#e7f1ec;color:#176b73;border-radius:5px;font:800 10px/1.3 ui-monospace,monospace}
+.cat-diagram{margin:0 0 8px;padding:5px;border:1px solid #dce5df;border-radius:7px;background:#f9fbf8;flex:none}
+.cat-diagram canvas{display:block;width:100%;max-height:145px;height:auto;object-fit:contain}
+.cat-diagram figcaption{font-size:10px;color:#526e6c;text-align:center;margin:3px 2px 0}
+#colorCode{user-select:none;-webkit-user-select:none}
 </style>
 </head>
 <body>
@@ -306,9 +315,9 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
   <div class="lesson" aria-live="polite">
    <h2 id="stepTitle">Your world, your choices</h2>
    <p class="description" id="stepDescription"></p>
-   <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
-   <div class="code-head"><strong id="codeTitle">Small code example</strong><small>Just this step</small></div>
-   <pre class="sample"><code id="codeSample"></code></pre>
+   <div id="phaseBar" class="cat-phase-bar" hidden><span id="phaseLabel"></span><span id="phaseCount"></span></div><div class="to-do"><strong>Your task</strong><p id="taskText"></p></div><figure id="catDiagram" class="cat-diagram" hidden><canvas id="catDiagramCanvas" width="460" height="218" role="img" aria-label="Drawing reference for this part"></canvas><figcaption id="catDiagramCaption"></figcaption></figure>
+   <div class="code-head"><strong id="codeTitle">Type these lines</strong><small id="codeProgress">Yellow = next</small></div>
+   <div class="sample cat-code-sample" id="codeSample"><canvas id="stepCodeCanvas" role="img" aria-label="Code example to read and type manually"></canvas></div>
    <p class="code-note" id="codeNote"></p>
    <details class="color-drawer"><summary><span aria-hidden="true">◉</span> Color picker <small>optional</small></summary><section class="color-studio" aria-label="Optional color picker">
  <div><strong>Color lab <span style="font-size:11px;color:#84928f;font-weight:600">· optional</span></strong><p>Pick any color and see the Python line. This helps you choose a color; you still add the line to your editor.</p></div>
@@ -340,7 +349,7 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id)};
-var STARTER="# Remixed Caterpillar (1.3.12)\n# Add your drawing commands below, one shape at a time.\nspeed(8)\npensize(2)\n\n";
+var STARTER="";
 var lessonId="remixed-caterpillar";
 $("turtleFrame").src="/turtle/?embed=course&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(STARTER);
 var steps=[
@@ -357,11 +366,11 @@ var steps=[
  {tab:"Sky details",title:"Draw birds or clouds",description:"Birds are a pair of slanted lines. Clouds can be made from a few white circles. You can also add hills, flowers, or something entirely your own.",task:"Choose at least one type of extra detail for the sky and draw it yourself.",code:'color("black")\npenup()\ngoto(-125, 95)\npendown()\ngoto(-108, 111)\ngoto(-91, 95)\npenup()',note:"This is ONE bird. Build more by choosing new coordinates. A cloud can use three small white filled circles placed close together.",try:"Add birds, clouds, or stars. Try to keep them away from the face so your caterpillar is easy to see.",hint:"For a cloud, fill a white circle, lift the pen, move a little to the right, and draw another filled circle. Use separate begin_fill() and end_fill() pairs for each circle."},
  {tab:"Finish",title:"Make the final remix yours",description:"Your picture should have a recognizable caterpillar, a filled ground, a face, and a sky that you've customized. Run it once more and look at every part.",task:"Check your drawing, fix any stray lines, and make at least three creative decisions that are different from the sample.",code:"hideturtle()",note:"This optional command hides Tracy's pointer at the end so your finished drawing is easier to see.",try:"Compare your world with your plan. Once it works, save your code and follow your class directions for submitting the finished work.",hint:"If something looks wrong, inspect the first place the drawing changes unexpectedly. Check color, penup/pendown, goto positions, and circle radius. Fix one line and run again."}
 ];
-var current=0, key="remixed-caterpillar-guide-v1";
+var current=0,phaseMap={},key="remixed-caterpillar-guide-v1";
 var palette={day:{sky:"#acd9e6",ground:"#af5945",sun:"#ffe32c"},night:{sky:"#132641",ground:"#554c6a",sun:"#f5efce"},blood:{sky:"#291e30",ground:"#574050",sun:"#dd5044"}};
 var edits={body:"#ea7643",ground:null,face:"#ffe66b",sky:null,sun:null};
 var scene="day",showGrid=false;
-try{var stored=JSON.parse(localStorage.getItem(key)||"{}");if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));if(["day","night","blood"].includes(stored.scene))scene=stored.scene;showGrid=!!stored.grid;if(stored.edits&&typeof stored.edits==="object"){Object.keys(edits).forEach(function(k){if(typeof stored.edits[k]==="string"&&/^#[a-fA-F0-9]{6}$/.test(stored.edits[k]))edits[k]=stored.edits[k]})}}catch(e){}
+try{var stored=JSON.parse(localStorage.getItem(key)||"{}");if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));if(["day","night","blood"].includes(stored.scene))scene=stored.scene;showGrid=!!stored.grid;if(stored.edits&&typeof stored.edits==="object"){Object.keys(edits).forEach(function(k){if(typeof stored.edits[k]==="string"&&/^#[a-fA-F0-9]{6}$/.test(stored.edits[k]))edits[k]=stored.edits[k]})}if(stored.phases&&typeof stored.phases==="object")phaseMap=stored.phases;}catch(e){}
 $("sceneMode").value=scene;$("gridToggle").checked=showGrid;
 
 // Authored from the original 16-stage full Caterpillar walkthrough.
@@ -399,7 +408,7 @@ function buildWalkthrough(){
 
 var checkTasks=["Background + ground","Five body circles","Two eyes + smile","Two antennae","Sun or moon + extras","Three personal changes"];
 buildWalkthrough();
-function save(){try{localStorage.setItem(key,JSON.stringify({step:current,scene:scene,grid:showGrid,edits:edits}))}catch(e){}}
+function save(){try{localStorage.setItem(key,JSON.stringify({step:current,scene:scene,grid:showGrid,edits:edits,phases:phaseMap}))}catch(e){}}
 var strip=$("stepStrip");
 steps.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.className="step-tab";b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;b.setAttribute("aria-label","Step "+(i+1)+": "+s.title);b.addEventListener("click",function(){current=i;render()});strip.appendChild(b)});
 var canvas=$("guideCanvas"),ctx=canvas.getContext("2d");
@@ -434,33 +443,52 @@ function drawScene(){
   if(current===2){var corners=[[-200,-155,"A"],[200,-155,"B"],[200,-200,"C"],[-200,-200,"D"]];corners.forEach(function(z){ctx.fillStyle="#14384d";ctx.beginPath();ctx.arc(Math.max(10,Math.min(390,sx(z[0]))),Math.max(10,Math.min(390,sy(z[1]))),8,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="bold 10px monospace";ctx.textAlign="center";ctx.fillText(z[2],Math.max(10,Math.min(390,sx(z[0]))),Math.max(10,Math.min(390,sy(z[1])))+3)})}
  }
 }
+
+function partIndex(){return Math.max(0,Math.min((steps[current].phases||[]).length-1,Number(phaseMap[current])||0))}
+function partInfo(){return steps[current].phases?steps[current].phases[partIndex()]:steps[current]}
+function partCode(){return partInfo().piece||partInfo().code}
+function plannedLine(){
+ var n=1;for(var i=0;i<current;i++)n+=codeLines(steps[i].code).length;
+ return n+codeLines(partInfo().code).length-codeLines(partCode()).length;
+}
+function advance(d){
+ var parts=steps[current].phases||[],p=partIndex();
+ if(d>0&&p<parts.length-1){phaseMap[current]=p+1;render();return;}
+ if(d<0&&p>0){phaseMap[current]=p-1;render();return;}
+ current=d>0?(current+1)%steps.length:Math.max(0,current-1);render();
+}
 function render(){
- var s=steps[current];
+ var stage=steps[current],part=partInfo(),parts=stage.phases||[],p=partIndex();
  $("stepCount").textContent=String(current+1).padStart(2,"0")+" / "+steps.length;
  $("progressBar").style.width=((current+1)/steps.length*100)+"%";
- $("stepTitle").textContent=s.title;
- $("stepDescription").textContent=s.description;
- $("taskText").textContent=s.task;
- $("codeTitle").textContent=current===0?"Starting lines":"One small code example";
- $("codeSample").textContent=(current===9&&scene!=="day")?"penup()\ngoto(-145, 120)\nsetheading(90)\npendown()\nforward(12)\nbackward(24)\npenup()":s.code;
- $("codeNote").textContent=current===9&&scene!=="day"?"This is one vertical stroke for a star. Move back to the middle, turn 90 degrees, and draw another stroke. Add more stars yourself.":s.note;
- $("tryText").textContent=s.try;
- $("hintText").textContent=s.hint;
+ $("stepTitle").textContent=parts.length?part.title:stage.title;
+ $("stepDescription").textContent=stage.description;
+ $("taskText").textContent=parts.length?"Type these commands and run your program. "+part.task:stage.task;
+ $("codeTitle").textContent=parts.length?"Type this part · "+(p+1)+" / "+parts.length:"Type these lines";
+ drawCodeExample();
+ $("codeNote").textContent=part.note||stage.note;
+ $("tryText").textContent=part.try||stage.try;
+ $("hintText").textContent=part.hint||stage.hint;
  $("helpBox").open=false;
+ $("phaseBar").hidden=!parts.length;
+ $("phaseLabel").textContent=parts.length?part.title:"";
+ $("phaseCount").textContent=parts.length?"Part "+(p+1)+" of "+parts.length:"";
  $("visualTitle").textContent=current===0?"Example to remix":current===11?"Review your scene":"Your drawing so far";
- $("visualCaption").textContent=current===0?"This is inspiration, not a required color scheme. No full solution code is provided.":current===11?"This picture is one possibility. Your drawing should reflect your choices.":"This preview shows the drawing idea. It does not change or run your Python.";
- $("prevStep").disabled=current===0;
- $("nextStep").textContent=current===steps.length-1?"Back to the beginning ↺":"Next step →";
+ $("visualCaption").textContent="This drawing is one idea. Your art can use different colors.";
+ $("prevStep").disabled=current===0&&p===0;
+ $("nextStep").textContent=p<parts.length-1?"Next part →":current===steps.length-1?"Back to beginning ↺":"Next step →";
  Array.from(strip.children).forEach(function(btn,i){btn.setAttribute("aria-current",i===current?"step":"false")});
- if(current===11){var checked={};try{checked=JSON.parse(localStorage.getItem(key+"-checks")||"{}")}catch(e){}
-  var text=s.try;var list=document.createElement("div");list.className="check-row";checkTasks.forEach(function(label,i){var wrapper=document.createElement("label"),box=document.createElement("input");box.type="checkbox";box.checked=!!checked[i];box.addEventListener("change",function(){checked[i]=box.checked;try{localStorage.setItem(key+"-checks",JSON.stringify(checked))}catch(e){}});wrapper.append(box,document.createTextNode(label));list.appendChild(wrapper)});
-  $("tryText").textContent=text;$("tryText").appendChild(list)
+ if(current===11){
+  var checked={};try{checked=JSON.parse(localStorage.getItem(key+"-checks")||"{}")}catch(e){}
+  var list=document.createElement("div");list.className="check-row";
+  checkTasks.forEach(function(label,i){var wrapper=document.createElement("label"),box=document.createElement("input");box.type="checkbox";box.checked=!!checked[i];box.addEventListener("change",function(){checked[i]=box.checked;try{localStorage.setItem(key+"-checks",JSON.stringify(checked))}catch(e){}});wrapper.append(box,document.createTextNode(label));list.appendChild(wrapper)});
+  $("tryText").appendChild(list);
  }
- save();drawScene()
+ save();drawScene();drawPartPreview();
 }
-$("prevStep").addEventListener("click",function(){if(current>0){current--;render()}});
-$("nextStep").addEventListener("click",function(){current=current===steps.length-1?0:current+1;render()});
-$("sceneMode").addEventListener("change",function(){scene=this.value;save();render();refreshColor()});
+$("prevStep").addEventListener("click",function(){advance(-1)});
+$("nextStep").addEventListener("click",function(){advance(1)});
+$("sceneMode").addEventListener("change",function(){scene=this.value;phaseMap[current]=0;buildWalkthrough();save();render();refreshColor()});
 $("gridToggle").addEventListener("change",function(){showGrid=this.checked;save();drawScene()});
 canvas.addEventListener("pointermove",function(ev){var rect=canvas.getBoundingClientRect();var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);var y=Math.round(200-(ev.clientY-rect.top)/rect.height*400);$("coords").textContent="x "+x+" · y "+y});
 canvas.addEventListener("pointerleave",function(){$("coords").textContent="x 0 · y 0"});
@@ -476,6 +504,42 @@ $("copyColor").addEventListener("click",function(){
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(line).then(function(){btn.textContent="Copied ✓";setTimeout(function(){btn.textContent="Copy line"},1400)}).catch(function(){btn.textContent="Select the line above"})}
  else{btn.textContent="Select the line above"}
 });
+
+var catCodeCanvas=$("stepCodeCanvas"),catCodeCtx=catCodeCanvas.getContext("2d");
+function drawCodeExample(){
+ var piece=codeLines(partCode()),box=$("codeSample"),width=Math.max(220,Math.round(box.getBoundingClientRect().width||340)),d=Math.min(window.devicePixelRatio||1,2);
+ var rowH=24,top=9,height=top+rowH*piece.length+10;
+ catCodeCanvas.style.height=height+"px";catCodeCanvas.width=Math.round(width*d);catCodeCanvas.height=Math.round(height*d);
+ catCodeCtx.setTransform(d,0,0,d,0,0);catCodeCtx.clearRect(0,0,width,height);
+ catCodeCtx.textBaseline="middle";catCodeCtx.font="650 12px ui-monospace,Consolas,monospace";
+ piece.forEach(function(line,i){
+  var y=top+rowH*i,mid=y+rowH/2;
+  if(i===0){catCodeCtx.fillStyle="#514426";catCodeCtx.fillRect(8,y,width-16,rowH);catCodeCtx.fillStyle="#ffd35d";catCodeCtx.fillRect(8,y,4,rowH);}
+  catCodeCtx.fillStyle=i===0?"#ffd35d":"#98a8ab";
+  catCodeCtx.fillText(String(plannedLine()+i),16,mid);
+  catCodeCtx.fillStyle=i===0?"#fff9dc":"#e5eeed";
+  var t=line;while(t.length>5&&catCodeCtx.measureText(t).width>width-68)t=t.slice(0,-2)+"…";
+  catCodeCtx.fillText(t,52,mid);
+ });
+ $("codeProgress").textContent="Yellow = next line";
+ box.scrollTop=0;
+}
+["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(event){$("codeSample").addEventListener(event,function(e){e.preventDefault()});});
+if(window.ResizeObserver)new ResizeObserver(drawCodeExample).observe($("codeSample"));
+function drawPartPreview(){
+ var wrap=$("catDiagram"),parts=steps[current].phases||[];
+ wrap.hidden=!parts.length;if(wrap.hidden)return;
+ var c=$("catDiagramCanvas").getContext("2d");c.clearRect(0,0,460,218);
+ c.fillStyle="#fffdf9";c.fillRect(0,0,460,218);c.drawImage($("guideCanvas"),6,6,205,205);
+ c.strokeStyle="#c9d8d1";c.strokeRect(6,6,205,205);
+ var title=partInfo().title,words=title.split(" "),lines=[],v="";
+ words.forEach(function(w){if((v+" "+w).length>18){lines.push(v);v=w}else v+=(v?" ":"")+w});if(v)lines.push(v);
+ c.fillStyle="#176b73";c.textAlign="left";c.font="800 14px ui-sans-serif,system-ui";
+ lines.slice(0,3).forEach(function(t,i){c.fillText(t,223,45+i*21)});
+ c.fillStyle="#5d7d75";c.font="800 12px ui-monospace,monospace";c.fillText("PART "+(partIndex()+1)+" / "+parts.length,223,137);
+ $("catDiagramCaption").textContent=partInfo().try||"Run and observe what changed.";
+}
+
 render();refreshColor();
 })();
 </script>
