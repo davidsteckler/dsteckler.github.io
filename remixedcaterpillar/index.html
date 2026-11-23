@@ -607,21 +607,93 @@ function drawCodeExample(progress){
 }
 ["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(event){$("codeSample").addEventListener(event,function(e){e.preventDefault()});});
 if(window.ResizeObserver)new ResizeObserver(function(){drawCodeExample(catProgress)}).observe($("codeSample"));
+
+/* Draw each substep from its actual Turtle commands, on a separate preview canvas.
+   This never changes the student's editable program. */
+var catPreviewCanvas=document.createElement("canvas");
+catPreviewCanvas.width=400;catPreviewCanvas.height=400;
+function renderTurtlePreview(code){
+ var c=catPreviewCanvas.getContext("2d"),t={x:0,y:0,heading:0,down:true,color:"black",thick:2,visible:true,fill:null};
+ c.clearRect(0,0,400,400);c.fillStyle="white";c.fillRect(0,0,400,400);
+ function xy(x,y){return [x+200,200-y]}
+ function path(points){
+  if(!points.length)return;
+  if(t.fill)points.slice(1).forEach(function(pt){t.fill.points.push(pt)});
+  if(!t.down)return;
+  c.save();c.beginPath();
+  points.forEach(function(pt,i){var p=xy(pt[0],pt[1]);if(i===0)c.moveTo(p[0],p[1]);else c.lineTo(p[0],p[1])});
+  c.strokeStyle=t.color;c.lineWidth=t.thick;c.lineJoin="round";c.lineCap="round";c.stroke();c.restore();
+ }
+ function move(x,y){path([[t.x,t.y],[x,y]]);t.x=x;t.y=y;}
+ String(code||"").split("\n").forEach(function(raw){
+  var line=raw.trim(),m=line.match(/^([a-z_]+)\((.*)\)$/);
+  if(!m||line.startsWith("#"))return;
+  var cmd=m[1],args=m[2].split(",").map(function(x){return x.trim()}),a=Number(args[0]),b=Number(args[1]);
+  function color(x){return String(x||"black").replace(/^["']|["']$/g,"")}
+  if(cmd==="bgcolor"){c.fillStyle=color(args[0]);c.fillRect(0,0,400,400);return}
+  if(cmd==="color"){t.color=color(args[0]);return}
+  if(cmd==="pensize"){if(Number.isFinite(a))t.thick=a;return}
+  if(cmd==="penup"){t.down=false;return}
+  if(cmd==="pendown"){t.down=true;return}
+  if(cmd==="setheading"||cmd==="seth"){if(Number.isFinite(a))t.heading=a;return}
+  if(cmd==="begin_fill"){t.fill={color:t.color,points:[[t.x,t.y]]};return}
+  if(cmd==="end_fill"){
+   if(t.fill&&t.fill.points.length>=3){
+    var points=t.fill.points;c.save();c.beginPath();
+    points.forEach(function(v,i){var p=xy(v[0],v[1]);if(i===0)c.moveTo(p[0],p[1]);else c.lineTo(p[0],p[1])});
+    c.closePath();c.fillStyle=t.fill.color;c.fill();c.strokeStyle=t.fill.color;c.lineWidth=t.thick;c.stroke();c.restore();
+   }
+   t.fill=null;return;
+  }
+  if(cmd==="hideturtle"){t.visible=false;return}
+  if(cmd==="showturtle"){t.visible=true;return}
+  if(cmd==="goto"||cmd==="setposition"){if(Number.isFinite(a)&&Number.isFinite(b))move(a,b);return}
+  if(cmd==="forward"||cmd==="backward"){
+   var r=t.heading*Math.PI/180,n=cmd==="backward"?-a:a;
+   if(Number.isFinite(n))move(t.x+Math.cos(r)*n,t.y+Math.sin(r)*n);return;
+  }
+  if(cmd==="circle"){
+   if(!Number.isFinite(a))return;
+   var theta=t.heading*Math.PI/180,extent=Number.isFinite(b)?b:360;
+   var cx=t.x-a*Math.sin(theta),cy=t.y+a*Math.cos(theta),angle=theta-Math.PI/2;
+   var points=[[t.x,t.y]],n=Math.max(10,Math.ceil(Math.abs(extent)/4));
+   for(var k=1;k<=n;k++){
+    var r=angle+(extent*k/n)*Math.PI/180;
+    points.push([cx+a*Math.cos(r),cy+a*Math.sin(r)]);
+   }
+   path(points);
+   t.x=points[points.length-1][0];t.y=points[points.length-1][1];t.heading+=extent;
+   return;
+  }
+ });
+ if(t.visible){
+  var center=xy(t.x,t.y),angle=t.heading*Math.PI/180;
+  c.save();c.translate(center[0],center[1]);c.rotate(-angle);
+  c.beginPath();c.moveTo(9,0);c.lineTo(-7,-6);c.lineTo(-7,6);c.closePath();
+  c.fillStyle="#176b73";c.fill();c.lineWidth=1.5;c.strokeStyle="#fff";c.stroke();c.restore();
+ }
+ return t;
+}
 function drawPartPreview(){
  var wrap=$("catDiagram"),parts=steps[current].phases||[];
  wrap.hidden=!parts.length;if(wrap.hidden)return;
- var c=$("catDiagramCanvas").getContext("2d");c.clearRect(0,0,460,218);
- c.fillStyle="#fffdf9";c.fillRect(0,0,460,218);c.drawImage($("guideCanvas"),6,6,205,205);
- c.strokeStyle="#c9d8d1";c.strokeRect(6,6,205,205);
- var title=partInfo().title,words=title.split(" "),lines=[],v="";
- words.forEach(function(w){if((v+" "+w).length>18){lines.push(v);v=w}else v+=(v?" ":"")+w});if(v)lines.push(v);
+ var c=$("catDiagramCanvas").getContext("2d");
+ c.clearRect(0,0,460,218);c.fillStyle="#fffdf9";c.fillRect(0,0,460,218);
+ var program=steps.slice(0,current).map(function(s){return s.code}).join("\n");
+ program+=(program?"\n":"")+partInfo().code;
+ var state=renderTurtlePreview(program);
+ c.drawImage(catPreviewCanvas,6,6,205,205);
+ c.strokeStyle="#c9d8d1";c.lineWidth=1;c.strokeRect(6,6,205,205);
+ var title=partInfo().title,words=title.split(" "),lines=[],text="";
+ words.forEach(function(w){if((text+" "+w).length>19){lines.push(text);text=w}else text+=(text?" ":"")+w});if(text)lines.push(text);
  c.fillStyle="#176b73";c.textAlign="left";c.font="800 14px ui-sans-serif,system-ui";
- lines.slice(0,3).forEach(function(t,i){c.fillText(t,223,45+i*21)});
- c.fillStyle="#5d7d75";c.font="800 12px ui-monospace,monospace";c.fillText("PART "+(partIndex()+1)+" / "+parts.length,223,137);
- $("catDiagramCaption").textContent=partInfo().try||"Run and observe what changed.";
+ lines.slice(0,3).forEach(function(t,i){c.fillText(t,224,42+i*21)});
+ c.fillStyle="#547a71";c.font="750 12px ui-monospace,monospace";
+ c.fillText("PART "+(partIndex()+1)+" / "+parts.length,224,126);
+ c.fillStyle="#566c6b";c.font="650 11px ui-sans-serif,system-ui";
+ c.fillText("Tracy: ("+Math.round(state.x)+", "+Math.round(state.y)+")",224,157);
+ $("catDiagramCaption").textContent=partInfo().try||"Run your own code and compare the drawing.";
 }
-
-
 function normCat(s){
  s=String(s||"").trim().replace(/\s+/g,"");
  return /^(speed|pensize|color|bgcolor)\([^)]*\)$/.test(s)?s.slice(0,s.indexOf("("))+"(*)":s;
