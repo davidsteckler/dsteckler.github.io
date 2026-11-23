@@ -701,8 +701,10 @@ function etchProgress(cm){
  }else{
   nextIndex=Math.min(lines.length-1,Math.max(allEarlierComplete?startAt:0,lastNonempty+1));
  }
+ var pendingNewLine=typed<cmds.length&&nextIndex===lines.length-1&&!!etchNormalize(lines[nextIndex]);
+ if(pendingNewLine)nextIndex=lines.length;
  var startLine=located?located.start+1:nextIndex+1;
- return {commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
+ return {pendingNewLine:pendingNewLine,commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
 }
 
 function etchPlannedLine(index){
@@ -764,7 +766,7 @@ function highlightGuideLines(){
    var oldHeading="# Etch A Sketch (CodeHS 1.3.11)\n# Add each shape as you work through the guide.\n";
    if(cm.getValue().indexOf(oldHeading)===0){
     cm.replaceRange("",{line:0,ch:0},{line:2,ch:0},"remove obsolete heading");
-    try{frame.contentWindow.saveTurtleCode&&frame.contentWindow.saveTurtleCode();}catch(ignore){}
+    try{$("turtleFrame").contentWindow.saveTurtleCode&&$("turtleFrame").contentWindow.saveTurtleCode();}catch(ignore){}
    }
   }
   etchMarkedLines.forEach(function(mark){
@@ -793,7 +795,7 @@ function highlightGuideLines(){
    var handle=cm.addLineClass(index,"background","etch-typed-line");
    etchMarkedLines.push({editor:cm,handle:handle,className:"etch-typed-line"});
   });
-  if(!p.complete){
+  if(!p.complete&&!p.pendingNewLine){
    var active=Math.max(0,Math.min(cm.lineCount()-1,p.nextIndex));
    var handle=cm.addLineClass(active,"background","etch-current-line");
    etchMarkedLines.push({editor:cm,handle:handle,className:"etch-current-line"});
@@ -815,7 +817,7 @@ function highlightGuideLines(){
    if(p.complete){
     note.querySelector(".etch-guide-text").textContent="✓ Step "+(current+1)+": all "+p.commands.length+" command"+(p.commands.length===1?"":"s")+" typed. Run and compare the drawing.";
    }else{
-    var line=p.nextIndex,action=(p.nextIndex>=p.lineCount-1&&etchNormalize(cm.getLine(p.nextIndex)))?" · press Enter for a new line":"";
+    var line=p.nextIndex,action=p.pendingNewLine?" · press Enter for a new line":"";
     note.querySelector(".etch-guide-text").textContent=p.earlierComplete?"Step "+(current+1)+" · Line "+line+": type "+p.commands[p.typed]+action:"Complete earlier steps first. This step begins around line "+etchPlannedLine(current)+".";
    }
   }
