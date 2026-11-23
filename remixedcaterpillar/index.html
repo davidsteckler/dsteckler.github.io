@@ -363,7 +363,42 @@ var edits={body:"#ea7643",ground:null,face:"#ffe66b",sky:null,sun:null};
 var scene="day",showGrid=false;
 try{var stored=JSON.parse(localStorage.getItem(key)||"{}");if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));if(["day","night","blood"].includes(stored.scene))scene=stored.scene;showGrid=!!stored.grid;if(stored.edits&&typeof stored.edits==="object"){Object.keys(edits).forEach(function(k){if(typeof stored.edits[k]==="string"&&/^#[a-fA-F0-9]{6}$/.test(stored.edits[k]))edits[k]=stored.edits[k]})}}catch(e){}
 $("sceneMode").value=scene;$("gridToggle").checked=showGrid;
+
+// Authored from the original 16-stage full Caterpillar walkthrough.
+// Only the current chunk is shown to students. No loops or functions.
+var caterpillarParts=[["speed(0)\npensize(2)"],["bgcolor(\"lightblue\")"],["color(\"saddlebrown\")\npenup()\ngoto(-200, -155)\npendown()\nbegin_fill()","goto(200, -155)\ngoto(200, -200)","goto(-200, -200)\ngoto(-200, -155)","end_fill()\npenup()"],["color(\"tomato\")\npenup()\ngoto(-165, -145)\npendown()","begin_fill()\ncircle(30)\nend_fill()\npenup()"],["color(\"mediumseagreen\")\npenup()\ngoto(-105, -145)\npendown()\nbegin_fill()\ncircle(35)\nend_fill()\npenup()","color(\"royalblue\")\npenup()\ngoto(-35, -145)\npendown()\nbegin_fill()\ncircle(40)\nend_fill()\npenup()","color(\"coral\")\npenup()\ngoto(50, -145)\npendown()\nbegin_fill()\ncircle(45)\nend_fill()\npenup()","color(\"gold\")\npenup()\ngoto(130, -145)\npendown()\nbegin_fill()\ncircle(50)\nend_fill()\npenup()"],["color(\"black\")\npenup()\ngoto(119, -101)\npendown()\nbegin_fill()\ncircle(5)\nend_fill()\npenup()","goto(160, -101)\npendown()\nbegin_fill()\ncircle(5)\nend_fill()\npenup()"],["pensize(3)\npenup()\ngoto(114, -118)\nsetheading(-60)","pendown()\ncircle(30, 120)\npenup()\npensize(2)"],["color(\"black\")\npenup()\ngoto(108, -71)\nsetheading(120)\npendown()\nforward(46)\npenup()","goto(164, -64)\nsetheading(60)\npendown()\nforward(46)\npenup()"],["color(\"gold\")\npenup()\ngoto(115, 95)\nsetheading(0)","pendown()\nbegin_fill()\ncircle(42)\nend_fill()\npenup()"],["color(\"goldenrod\")\npensize(3)\npenup()\ngoto(115, 184)\nsetheading(90)\npendown()\nforward(13)\npenup()\ngoto(115, 89)\nsetheading(270)\npendown()\nforward(14)\npenup()","goto(163, 137)\nsetheading(0)\npendown()\nforward(15)\npenup()\ngoto(67, 137)\nsetheading(180)\npendown()\nforward(15)\npenup()","goto(150, 172)\nsetheading(45)\npendown()\nforward(14)\npenup()\ngoto(80, 172)\nsetheading(135)\npendown()\nforward(14)\npenup()\ngoto(80, 102)\nsetheading(225)\npendown()\nforward(14)\npenup()\ngoto(150, 102)\nsetheading(315)\npendown()\nforward(14)\npenup()\npensize(2)"],["color(\"black\")\npenup()\ngoto(-140, 87)\npendown()\ngoto(-125, 99)\ngoto(-110, 87)\npenup()","goto(-96, 123)\npendown()\ngoto(-82, 135)\ngoto(-68, 123)\npenup()","goto(-65, 66)\npendown()\ngoto(-52, 77)\ngoto(-39, 66)\npenup()"],["penup()\ngoto(0, 0)","hideturtle()"]];
+var nightStarParts=["color(\"white\")\npenup()\ngoto(-145, 133)\npendown()\ngoto(-145, 155)\npenup()\ngoto(-155, 144)\npendown()\ngoto(-135, 144)\npenup()","goto(-64, 164)\npendown()\ngoto(-64, 180)\npenup()\ngoto(-72, 172)\npendown()\ngoto(-56, 172)\npenup()","goto(35, 93)\npendown()\ngoto(35, 109)\npenup()\ngoto(27, 101)\npendown()\ngoto(43, 101)\npenup()"];
+var caterpillarPartTitles=[["Set the drawing speed"],["Choose your sky"],["Move to the ground","Draw the first two sides","Close the rectangle","Fill the ground"],["Position the first circle","Draw and fill the first circle"],["Add the green segment","Add the blue segment","Add the orange segment","Make the yellow head"],["Draw the first eye","Draw the second eye"],["Position the smile","Make the curved line"],["Draw the first antenna","Draw the second antenna"],["Position the sun or moon","Fill the sky circle"],["Draw the vertical rays","Add the horizontal rays","Add the diagonal rays"],["Draw bird one","Draw bird two","Draw bird three"],["Return to the origin","Hide Tracy"]];
+var caterpillarQuestions=[["Why does speed() change how fast the drawing appears?"],["How does bgcolor() differ from color()?"],["Why do you need penup() before moving to the ground?","Which coordinates make the top and right edges?","Why must the last goto() return to the first corner?","What do begin_fill() and end_fill() do together?"],["Where should the bottom of the first circle be?","A radius of 30 means what diameter?"],["What changes between the first and second body circles?","Why does a larger radius make the body taller?","Can you change this segment's color and keep its location?","How does the largest circle become the caterpillar's head?"],["How large should the first eye be?","What must change so the second eye moves right?"],["How does setheading(-60) rotate Tracy?","How does circle(30,120) differ from circle(30)?"],["How does 120 degrees point Tracy up-left?","Why does heading 60 degrees make the line lean up-right?"],["A circle begins at its bottom when Tracy faces right. Where should you start?","Does the sun or moon fit completely inside the world?"],["Why lift the pen before going to the next ray?","How does setheading(180) change the direction?","Where could diagonal rays (or more stars) go?"],["How do two goto() lines make a bird shape?","How do you prevent a line between birds?","Where could you place another bird?"],["Does Tracy get back to (0, 0) without a stray line?","What changes when you add hideturtle()?"]];
+function codeLines(s){return String(s||"").split("\n").filter(function(line){return line.trim()!=="";});}
+function buildWalkthrough(){
+ caterpillarParts.forEach(function(original,i){
+  var pieces=original.slice();
+  if(i===1)pieces=[scene==="night"?'bgcolor("midnightblue")':scene==="blood"?'bgcolor("#291e30")':'bgcolor("lightblue")'];
+  if(i===8&&scene!=="day")pieces=pieces.map(function(part){return part.replace('color("gold")',scene==="blood"?'color("firebrick")':'color("ivory")')});
+  if(i===9&&scene!=="day")pieces=nightStarParts.slice();
+  pieces=pieces.map(function(part){return codeLines(part).join("\n")});
+  var combined="",phases=pieces.map(function(piece,j){
+   combined+=(combined?"\n":"")+piece;
+   return {
+    label:"PART "+(j+1)+" OF "+pieces.length,
+    title:i===9&&scene!=="day"?["Draw your first star","Add another star","Make a third star"][j]:caterpillarPartTitles[i][j],
+    description:steps[i].description,
+    task:i===9&&scene!=="day"?"Make a star from two short crossing lines, moving with penup() between strokes.":caterpillarQuestions[i][j],
+    code:combined,
+    piece:piece,
+    note:steps[i].note,
+    try:i===9&&scene!=="day"?"Run the code and compare the new star with your night sky.":caterpillarQuestions[i][j],
+    hint:steps[i].hint
+   };
+  });
+  steps[i].code=combined;
+  steps[i].phases=phases.length>1?phases:null;
+ });
+}
+
 var checkTasks=["Background + ground","Five body circles","Two eyes + smile","Two antennae","Sun or moon + extras","Three personal changes"];
+buildWalkthrough();
 function save(){try{localStorage.setItem(key,JSON.stringify({step:current,scene:scene,grid:showGrid,edits:edits}))}catch(e){}}
 var strip=$("stepStrip");
 steps.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.className="step-tab";b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;b.setAttribute("aria-label","Step "+(i+1)+": "+s.title);b.addEventListener("click",function(){current=i;render()});strip.appendChild(b)});
