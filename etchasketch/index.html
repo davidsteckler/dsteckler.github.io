@@ -562,7 +562,7 @@ $("outlineToggle").addEventListener("change",function(){showOutline=this.checked
 /* Match the Python Course's line-highlighting workflow in the existing /turtle editor. */
 var etchEditor=null,etchMarkedLines=[],etchHighlightTimer=0,etchEditorReady=false;
 function etchNormalize(line){
- return String(line||"").trim().replace(/\\s+/g,"");
+ return String(line||"").trim().replace(/\s+/g,"");
 }
 function etchLocateBlock(lines,commands,from){
  var best=null;
@@ -570,7 +570,7 @@ function etchLocateBlock(lines,commands,from){
   if(etchNormalize(lines[i])!==etchNormalize(commands[0]))continue;
   var found=[],at=i;
   for(var j=0;j<commands.length;j++){
-   while(at<lines.length&&(!etchNormalize(lines[at])||/^\\s*#/.test(lines[at])))at++;
+   while(at<lines.length&&(!etchNormalize(lines[at])||/^\s*#/.test(lines[at])))at++;
    if(at>=lines.length||etchNormalize(lines[at])!==etchNormalize(commands[j]))break;
    found.push(at);at++;
   }
@@ -580,13 +580,13 @@ function etchLocateBlock(lines,commands,from){
  return best;
 }
 function etchProgress(cm){
- var lines=cm.getValue().split("\\n"),startAt=0,allEarlierComplete=true;
+ var lines=cm.getValue().split("\n"),startAt=0,allEarlierComplete=true;
  for(var i=0;i<current;i++){
-  var prev=etchLocateBlock(lines,steps[i].code.split("\\n"),startAt);
+  var prev=etchLocateBlock(lines,steps[i].code.split("\n"),startAt);
   if(!prev||!prev.complete){allEarlierComplete=false;break;}
   startAt=prev.after;
  }
- var cmds=steps[current].code.split("\\n");
+ var cmds=steps[current].code.split("\n");
  var located=allEarlierComplete?etchLocateBlock(lines,cmds,startAt):null;
  var typed=located?located.indices.length:0;
  var lastNonempty=-1;
@@ -595,7 +595,7 @@ function etchProgress(cm){
  if(located&&typed){
   nextIndex=typed===cmds.length?located.indices[typed-1]:Math.min(located.indices[typed-1]+1,lines.length-1);
   if(typed<cmds.length){
-   while(nextIndex<lines.length-1&&(!etchNormalize(lines[nextIndex])||/^\\s*#/.test(lines[nextIndex])))nextIndex++;
+   while(nextIndex<lines.length-1&&(!etchNormalize(lines[nextIndex])||/^\s*#/.test(lines[nextIndex])))nextIndex++;
    if(nextIndex>=lines.length)nextIndex=lines.length-1;
   }
  }else{
@@ -605,7 +605,7 @@ function etchProgress(cm){
  return {commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
 }
 function renderCodeExample(progress){
- var commands=steps[current].code.split("\\n"),target=$("codeSample");
+ var commands=steps[current].code.split("\n"),target=$("codeSample");
  target.textContent="";
  var typed=progress?progress.typed:0;
  var firstLine=progress?progress.startLine:(current===0?3:0);
