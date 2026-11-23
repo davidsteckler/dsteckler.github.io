@@ -301,6 +301,36 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 .step-item.is-done:not(.is-active) .step-tab{color:#22695f}
 .step-mark-target:focus-within{outline:2px solid #db9a62;outline-offset:-3px}
 @media(max-width:650px){.step-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* Draggable dividers while preserving the original 12-step layout. */
+@media(min-width:1081px){
+ .studio{display:grid!important;grid-template-columns:minmax(0,var(--cat-guide-width,41%)) 10px minmax(0,1fr)!important;gap:0!important}
+ .studio>.guide{grid-column:1;grid-row:1}
+ .studio>.studio-divider{grid-column:2;grid-row:1}
+ .studio>.work-panel{grid-column:3;grid-row:1}
+ .guide{display:grid!important;grid-template-columns:minmax(0,var(--cat-rail-width,260px)) 9px minmax(0,1fr)!important}
+ .guide>.guide-top{grid-column:1;grid-row:1;border-right:0}
+ .guide>.guide-divider{grid-column:2;grid-row:1}
+ .guide>.lesson{grid-column:3;grid-row:1}
+}
+.studio-divider,.guide-divider{position:relative;cursor:col-resize;touch-action:none;user-select:none;background:#f2ede7;min-width:0}
+.guide-divider{background:#e7eee8}
+.studio-divider:before,.guide-divider:before{content:"";position:absolute;top:41%;bottom:41%;left:calc(50% - 2px);width:4px;min-height:30px;background:#afc6c1;border-radius:8px}
+.studio-divider:hover:before,.guide-divider:hover:before,.studio-divider.dragging:before,.guide-divider.dragging:before{background:#176b73}
+body.cat-resizing iframe{pointer-events:none}
+body.cat-resizing,body.cat-resizing *{cursor:col-resize!important;user-select:none!important}
+@media(max-width:1080px){.studio-divider,.guide-divider{display:none!important}}
+#colorCode{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.teacher-trigger{position:fixed;left:2px;bottom:2px;z-index:50;width:18px;height:18px;padding:0;border:0;background:transparent;color:#536b64;opacity:.22;cursor:pointer}
+.teacher-trigger:hover,.teacher-trigger:focus-visible{opacity:1;background:#d9e6df}
+.teacher-dialog{width:min(730px,calc(100vw - 24px));max-height:86dvh;padding:20px;border:1px solid #cbd7d2;border-radius:12px;background:#fffdfa;color:#253239;box-shadow:0 24px 80px #112b325e}
+.teacher-dialog::backdrop{background:rgba(18,35,39,.62)}
+.teacher-top{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.teacher-top h2{margin:0;font-size:23px}.teacher-top button{border:0;background:transparent;font-size:25px;cursor:pointer}
+.teacher-dialog p{font-size:12px;color:#627176}
+#teacherCode{max-height:55dvh;overflow:auto;padding:14px 16px;background:#202a32;color:#f1f5f3;border-radius:8px;font:12px/1.7 ui-monospace,Consolas,monospace}
+.teacher-actions{display:flex;justify-content:space-between;margin-top:12px}
+@media print{.teacher-trigger,.teacher-dialog{display:none!important}}
 </style>
 </head>
 <body>
@@ -316,6 +346,7 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 </header>
 <div class="shell">
 <main class="studio">
+  <button id="teacherTrigger" class="teacher-trigger" type="button" aria-label="Teacher reference" title="Teacher reference">·</button>
  <section class="guide" aria-label="Project walkthrough">
   <div class="guide-top">
    <div class="guide-topline"><span class="tiny-label">Build guide · 12 small steps</span><span class="step-number" id="stepCount">01 / 12</span></div>
@@ -332,7 +363,8 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
    </div>
 </div>
   </div>
-  <div class="lesson" aria-live="polite">
+  <div id="guideDivider" class="guide-divider" role="separator" tabindex="0" aria-label="Resize step navigation and instructions" aria-orientation="vertical"></div>
+   <div class="lesson" aria-live="polite">
    <h2 id="stepTitle">Your world, your choices</h2>
    <p class="description" id="stepDescription"></p>
    <div id="phaseBar" class="cat-phase-bar" hidden><span id="phaseLabel"></span><span id="phaseCount"></span></div><div class="to-do"><strong>Your task</strong><p id="taskText"></p></div><figure id="catDiagram" class="cat-diagram" hidden><canvas id="catDiagramCanvas" width="460" height="218" role="img" aria-label="Drawing reference for this part"></canvas><figcaption id="catDiagramCaption"></figcaption></figure>
@@ -345,7 +377,7 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
   <select id="colorTarget" aria-label="Choose what you are coloring"><option value="body">Body segment</option><option value="ground">Ground</option><option value="face">Face</option><option value="sky">Sky</option><option value="sun">Sun / moon</option></select>
   <input id="colorPick" type="color" value="#ea7643" aria-label="Choose a custom color">
   <code id="colorCode">color("#ea7643")</code>
-  <button class="btn" id="copyColor" type="button">Copy line</button>
+  
  </div>
 </section></details>
    <div class="questions"><h3>Try it yourself</h3><p id="tryText"></p></div>
@@ -357,12 +389,21 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
    </div>
   </div>
  </section>
- <section class="work-panel" aria-label="Live Python Turtle editor">
+ <div id="studioDivider" class="studio-divider" role="separator" tabindex="0" aria-label="Resize guide and Turtle workspace" aria-orientation="vertical"></div>
+  <section class="work-panel" aria-label="Live Python Turtle editor">
   <div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type your code, press Run, and compare your drawing.</p></div><span class="live">REAL PYTHON · AUTO-SAVED</span></div>
   <div class="editor-guide-bar"><span id="editorGuideMessage">Type the highlighted command.</span><div class="editor-guide-actions"><button id="editorScrollTop" type="button">↑ Top</button><button id="editorScrollStep" type="button">↳ This step</button></div></div><iframe id="turtleFrame" class="editor-frame" title="Editable Python Turtle code, Run controls, drawing world and error messages" allow="clipboard-write" loading="eager"></iframe>
   <div class="work-footer"><span>Your code stays here when you change tutorial steps. Save or copy your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
  </section>
 </main>
+
+<dialog id="teacherDialog" class="teacher-dialog" aria-label="Teacher full Caterpillar code">
+ <div class="teacher-top"><h2>Complete Remixed Caterpillar</h2><button id="teacherClose" type="button" aria-label="Close">×</button></div>
+ <p>Full program for the selected sky. Students see one part at a time.</p>
+ <pre id="teacherCode"></pre>
+ <div class="teacher-actions"><button class="btn" type="button" id="teacherCopy">Copy complete code</button><button class="btn primary" type="button" id="teacherDone">Close</button></div>
+</dialog>
+
 <div class="foot-resources"><span>Tip: Every time you add a shape, run your entire program to see what changes.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
 </div>
 <script>
@@ -538,115 +579,62 @@ function refreshColor(){
 }
 $("colorTarget").addEventListener("change",refreshColor);
 $("colorPick").addEventListener("input",function(){edits[$("colorTarget").value]=this.value;refreshColor();save();drawScene()});
-$("copyColor").addEventListener("click",function(){
- var line=$("colorCode").textContent;var btn=this;
- if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(line).then(function(){btn.textContent="Copied ✓";setTimeout(function(){btn.textContent="Copy line"},1400)}).catch(function(){btn.textContent="Select the line above"})}
- else{btn.textContent="Select the line above"}
-});
-
-var catCodeCanvas=$("stepCodeCanvas"),catCodeCtx=catCodeCanvas.getContext("2d"),catProgress=null,catEditor=null,catMarks=[],catTimer=0,catWantScroll=true;
-function drawCodeExample(progress){
- catProgress=progress||null;
- var piece=codeLines(partCode()),box=$("codeSample"),width=Math.max(220,Math.round(box.getBoundingClientRect().width||340)),d=Math.min(window.devicePixelRatio||1,2);
- var rowH=24,top=9,height=top+rowH*piece.length+10;
- catCodeCanvas.style.height=height+"px";catCodeCanvas.width=Math.round(width*d);catCodeCanvas.height=Math.round(height*d);
- catCodeCtx.setTransform(d,0,0,d,0,0);catCodeCtx.clearRect(0,0,width,height);
- catCodeCtx.textBaseline="middle";catCodeCtx.font="650 12px ui-monospace,Consolas,monospace";
- var offset=codeLines(partInfo().code).length-piece.length,seen=progress?Math.max(0,progress.typed-offset):0;seen=Math.min(seen,piece.length);
- piece.forEach(function(line,i){
-  var y=top+rowH*i,mid=y+rowH/2;
-  if(i===seen&&seen<piece.length){catCodeCtx.fillStyle="#514426";catCodeCtx.fillRect(8,y,width-16,rowH);catCodeCtx.fillStyle="#ffd35d";catCodeCtx.fillRect(8,y,4,rowH);}else if(i<seen){catCodeCtx.fillStyle="rgba(23,107,115,.18)";catCodeCtx.fillRect(8,y,width-16,rowH);}
-  catCodeCtx.fillStyle=i===seen&&seen<piece.length?"#ffd35d":"#98a8ab";
-  catCodeCtx.fillText(String(progress&&progress.indices[offset+i]!=null?progress.indices[offset+i]+1:plannedLine()+i),16,mid);
-  catCodeCtx.fillStyle=i<seen?"#a4d1c8":i===seen?"#fff9dc":"#e5eeed";
-  var t=line;while(t.length>5&&catCodeCtx.measureText(t).width>width-68)t=t.slice(0,-2)+"…";
-  catCodeCtx.fillText(t,52,mid);
- });
- $("codeProgress").textContent=progress?(seen>=piece.length?"✓ Part typed":seen+" / "+piece.length+" lines typed · yellow = next"):"Yellow = next line";
- if(progress&&seen<piece.length){var target=top+seen*rowH;if(target<box.scrollTop||target>box.scrollTop+box.clientHeight-rowH)box.scrollTop=Math.max(0,target-30);}else if(!progress)box.scrollTop=0;
-}
-["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(event){$("codeSample").addEventListener(event,function(e){e.preventDefault()});});
-if(window.ResizeObserver)new ResizeObserver(function(){drawCodeExample(catProgress)}).observe($("codeSample"));
-function drawPartPreview(){
- var wrap=$("catDiagram"),parts=steps[current].phases||[];
- wrap.hidden=!parts.length;if(wrap.hidden)return;
- var c=$("catDiagramCanvas").getContext("2d");c.clearRect(0,0,460,218);
- c.fillStyle="#fffdf9";c.fillRect(0,0,460,218);c.drawImage($("guideCanvas"),6,6,205,205);
- c.strokeStyle="#c9d8d1";c.strokeRect(6,6,205,205);
- var title=partInfo().title,words=title.split(" "),lines=[],v="";
- words.forEach(function(w){if((v+" "+w).length>18){lines.push(v);v=w}else v+=(v?" ":"")+w});if(v)lines.push(v);
- c.fillStyle="#176b73";c.textAlign="left";c.font="800 14px ui-sans-serif,system-ui";
- lines.slice(0,3).forEach(function(t,i){c.fillText(t,223,45+i*21)});
- c.fillStyle="#5d7d75";c.font="800 12px ui-monospace,monospace";c.fillText("PART "+(partIndex()+1)+" / "+parts.length,223,137);
- $("catDiagramCaption").textContent=partInfo().try||"Run and observe what changed.";
-}
+$("colorCode").addEventListener("copy",function(e){e.preventDefault()});
+$("colorCode").addEventListener("contextmenu",function(e){e.preventDefault()});
 
 
-function normCat(s){
- s=String(s||"").trim().replace(/\s+/g,"");
- return /^(speed|pensize|color|bgcolor)\([^)]*\)$/.test(s)?s.slice(0,s.indexOf("("))+"(*)":s;
-}
-function locateCat(lines,commands,start){
- var best=null;
- for(var i=start;i<lines.length;i++){
-  if(normCat(lines[i])!==normCat(commands[0]))continue;
-  var ids=[],p=i;
-  for(var j=0;j<commands.length;j++){
-   while(p<lines.length&&(!normCat(lines[p])||lines[p].trim().startsWith("#")))p++;
-   if(p>=lines.length||normCat(lines[p])!==normCat(commands[j]))break;
-   ids.push(p);p++;
-  }
-  if(ids.length===commands.length)return {ids:ids,next:p,complete:true};
-  if(!best||ids.length>best.ids.length)best={ids:ids,next:p,complete:false};
+/* The guide has two draggable outer splits. Turtle also has its own editor/world split. */
+(function(){
+ var studio=document.querySelector(".studio"),guide=document.querySelector(".guide");
+ var main=$("studioDivider"),rail=$("guideDivider");
+ if(!studio||!guide||!main||!rail)return;
+ function stored(k,d){try{return Number(localStorage.getItem("cat-resize-"+k))||d}catch(e){return d}}
+ function save(k,n){try{localStorage.setItem("cat-resize-"+k,String(Math.round(n)))}catch(e){}}
+ function setGuide(n){
+  var max=Math.max(465,studio.clientWidth-520),v=Math.max(465,Math.min(max,Math.round(n)));
+  studio.style.setProperty("--cat-guide-width",v+"px");save("guide",v);
+  if(catEditor)catEditor.refresh();
  }
- return best;
-}
-function readCatProgress(cm){
- var lines=cm.getValue().split("\n"),pos=0,prior=true;
- for(var i=0;i<current;i++){var found=locateCat(lines,codeLines(steps[i].code),pos);if(!found||!found.complete){prior=false;break;}pos=found.next;}
- var commands=codeLines(partInfo().code),result=locateCat(lines,commands,prior?pos:0);
- var typed=result?result.ids.length:0,last=-1;
- for(var k=0;k<lines.length;k++)if(normCat(lines[k]))last=k;
- var next=result&&typed?result.ids[typed-1]+(typed===commands.length?0:1):Math.max(0,last+1);
- return {typed:typed,commands:commands,indices:result?result.ids:[],nextIndex:Math.min(next,lines.length),complete:typed===commands.length,needsEnter:next>=lines.length&&typed<commands.length};
-}
-function scheduleCat(){clearTimeout(catTimer);catTimer=setTimeout(highlightCat,85);}
-function highlightCat(){
- clearTimeout(catTimer);
- try{
-  var frame=$("turtleFrame"),doc=frame.contentDocument,node=doc&&doc.querySelector(".CodeMirror"),cm=node&&node.CodeMirror;
-  if(!cm){catTimer=setTimeout(highlightCat,220);return;}
-  if(catEditor!==cm){
-   if(catEditor)catEditor.off("change",scheduleCat);
-   catEditor=cm;cm.on("change",scheduleCat);cm.setOption("firstLineNumber",1);
-   var heading="# Remixed Caterpillar (1.3.12)\n# Add your drawing commands below, one shape at a time.\n";
-   if(cm.getValue().startsWith(heading)){
-    cm.replaceRange("",{line:0,ch:0},{line:2,ch:0},"remove obsolete heading");
-    try{frame.contentWindow.saveTurtleCode&&frame.contentWindow.saveTurtleCode()}catch(ignore){}
-   }
-  }
-  if(!doc.getElementById("catGuideStyle")){
-   var style=doc.createElement("style");style.id="catGuideStyle";
-   style.textContent=".cat-current{background:rgba(255,211,93,.20)!important;box-shadow:inset 4px 0 #ffd35d}.cat-typed{background:rgba(23,107,115,.10)!important}.CodeMirror-scroll{scrollbar-width:auto;scrollbar-color:#718584 #202a32}";
-   doc.head.appendChild(style);
-  }
-  catMarks.forEach(function(m){try{m.cm.removeLineClass(m.handle,"background",m.cls)}catch(e){}});
-  catMarks=[];
-  var p=readCatProgress(cm);
-  p.indices.forEach(function(i){catMarks.push({cm:cm,handle:cm.addLineClass(i,"background","cat-typed"),cls:"cat-typed"})});
-  if(!p.complete&&!p.needsEnter){var i=Math.min(p.nextIndex,cm.lineCount()-1);catMarks.push({cm:cm,handle:cm.addLineClass(i,"background","cat-current"),cls:"cat-current"});}
-  $("editorGuideMessage").textContent=p.complete?"✓ All commands typed for this part. Run and compare.":"Step "+(current+1)+" · line "+(p.nextIndex+1)+": "+(p.commands[p.typed]||"")+(p.needsEnter?" · press Enter":"");
-  drawCodeExample(p);cm.refresh();
-  if(catWantScroll){
-   catWantScroll=false;var line=Math.max(0,Math.min(p.nextIndex,cm.lineCount()-1));
-   if(line<12)cm.scrollTo(null,0);
-   else{var wanted=Math.max(0,cm.heightAtLine(line,"local")-42);if(Math.abs(cm.getScrollInfo().top-wanted)>cm.getScrollInfo().clientHeight*.65)cm.scrollTo(null,wanted);}
-  }
- }catch(e){drawCodeExample(catProgress);}
-}
-$("turtleFrame").addEventListener("load",function(){catEditor=null;catWantScroll=true;scheduleCat()});
-$("editorScrollTop").addEventListener("click",function(){if(catEditor){catEditor.scrollTo(null,0);catEditor.focus()}});
-$("editorScrollStep").addEventListener("click",function(){if(!catEditor)return;var p=readCatProgress(catEditor),line=Math.max(0,Math.min(p.nextIndex,catEditor.lineCount()-1));catEditor.scrollTo(null,line<12?0:Math.max(0,catEditor.heightAtLine(line,"local")-42));catEditor.focus()});
+ function setRail(n){
+  var max=Math.max(170,guide.clientWidth-250),v=Math.max(170,Math.min(max,Math.round(n)));
+  guide.style.setProperty("--cat-rail-width",v+"px");save("rail",v);
+  drawCodeExample(catProgress);
+ }
+ function makeDrag(el,read,write,defaultWidth){
+  var dragging=false,start=0,initial=0;
+  el.addEventListener("pointerdown",function(e){
+   if(e.button!==0||innerWidth<=1080)return;
+   dragging=true;start=e.clientX;initial=read();el.classList.add("dragging");
+   document.body.classList.add("cat-resizing");el.setPointerCapture(e.pointerId);e.preventDefault();
+  });
+  el.addEventListener("pointermove",function(e){if(dragging)write(initial+e.clientX-start)});
+  function stop(){dragging=false;el.classList.remove("dragging");document.body.classList.remove("cat-resizing")}
+  el.addEventListener("pointerup",stop);el.addEventListener("pointercancel",stop);el.addEventListener("lostpointercapture",stop);
+  el.addEventListener("keydown",function(e){if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();write(read()+(e.key==="ArrowRight"?24:-24))}});
+  el.addEventListener("dblclick",function(){write(defaultWidth())});
+ }
+ var defMain=studio.clientWidth*.41,defRail=Math.min(280,Math.max(225,window.innerWidth*.17));
+ if(innerWidth>1080){setGuide(stored("guide",defMain));setRail(stored("rail",defRail))}
+ makeDrag(main,function(){return guide.getBoundingClientRect().width},setGuide,function(){return studio.clientWidth*.41});
+ makeDrag(rail,function(){return guide.querySelector(".guide-top").getBoundingClientRect().width},setRail,function(){return defRail});
+})();
+var teacherDialog=$("teacherDialog");
+function teacherFullCode(){return steps.map(function(s){return s.code}).join("\n")+"\n";}
+$("teacherTrigger").addEventListener("click",function(){
+ $("teacherCode").textContent=teacherFullCode();
+ if(teacherDialog.showModal)teacherDialog.showModal();else teacherDialog.setAttribute("open","");
+});
+function closeTeacher(){if(teacherDialog.close)teacherDialog.close();else teacherDialog.removeAttribute("open")}
+$("teacherClose").addEventListener("click",closeTeacher);
+$("teacherDone").addEventListener("click",closeTeacher);
+teacherDialog.addEventListener("click",function(e){if(e.target===teacherDialog)closeTeacher()});
+$("teacherCopy").addEventListener("click",function(){
+ var btn=this;function success(){btn.textContent="✓ Copied";setTimeout(function(){btn.textContent="Copy complete code"},1500)}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(teacherFullCode()).then(success,function(){btn.textContent="Select code to copy"});
+ else{var r=document.createRange();r.selectNodeContents($("teacherCode"));getSelection().removeAllRanges();getSelection().addRange(r);
+  if(document.execCommand&&document.execCommand("copy")){getSelection().removeAllRanges();success()}else btn.textContent="Selected · press Ctrl+C";
+ }
+});
 
 render();refreshColor();
 })();
