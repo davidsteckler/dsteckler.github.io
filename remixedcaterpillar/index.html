@@ -584,6 +584,109 @@ $("colorCode").addEventListener("contextmenu",function(e){e.preventDefault()});
 
 
 /* The guide has two draggable outer splits. Turtle also has its own editor/world split. */
+var catCodeCanvas=$("stepCodeCanvas"),catCodeCtx=catCodeCanvas.getContext("2d"),catProgress=null,catEditor=null,catMarks=[],catTimer=0,catWantScroll=true;
+function drawCodeExample(progress){
+ catProgress=progress||null;
+ var piece=codeLines(partCode()),box=$("codeSample"),width=Math.max(220,Math.round(box.getBoundingClientRect().width||340)),d=Math.min(window.devicePixelRatio||1,2);
+ var rowH=24,top=9,height=top+rowH*piece.length+10;
+ catCodeCanvas.style.height=height+"px";catCodeCanvas.width=Math.round(width*d);catCodeCanvas.height=Math.round(height*d);
+ catCodeCtx.setTransform(d,0,0,d,0,0);catCodeCtx.clearRect(0,0,width,height);
+ catCodeCtx.textBaseline="middle";catCodeCtx.font="650 12px ui-monospace,Consolas,monospace";
+ var offset=codeLines(partInfo().code).length-piece.length,seen=progress?Math.max(0,progress.typed-offset):0;seen=Math.min(seen,piece.length);
+ piece.forEach(function(line,i){
+  var y=top+rowH*i,mid=y+rowH/2;
+  if(i===seen&&seen<piece.length){catCodeCtx.fillStyle="#514426";catCodeCtx.fillRect(8,y,width-16,rowH);catCodeCtx.fillStyle="#ffd35d";catCodeCtx.fillRect(8,y,4,rowH);}else if(i<seen){catCodeCtx.fillStyle="rgba(23,107,115,.18)";catCodeCtx.fillRect(8,y,width-16,rowH);}
+  catCodeCtx.fillStyle=i===seen&&seen<piece.length?"#ffd35d":"#98a8ab";
+  catCodeCtx.fillText(String(progress&&progress.indices[offset+i]!=null?progress.indices[offset+i]+1:plannedLine()+i),16,mid);
+  catCodeCtx.fillStyle=i<seen?"#a4d1c8":i===seen?"#fff9dc":"#e5eeed";
+  var t=line;while(t.length>5&&catCodeCtx.measureText(t).width>width-68)t=t.slice(0,-2)+"…";
+  catCodeCtx.fillText(t,52,mid);
+ });
+ $("codeProgress").textContent=progress?(seen>=piece.length?"✓ Part typed":seen+" / "+piece.length+" lines typed · yellow = next"):"Yellow = next line";
+ if(progress&&seen<piece.length){var target=top+seen*rowH;if(target<box.scrollTop||target>box.scrollTop+box.clientHeight-rowH)box.scrollTop=Math.max(0,target-30);}else if(!progress)box.scrollTop=0;
+}
+["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(event){$("codeSample").addEventListener(event,function(e){e.preventDefault()});});
+if(window.ResizeObserver)new ResizeObserver(function(){drawCodeExample(catProgress)}).observe($("codeSample"));
+function drawPartPreview(){
+ var wrap=$("catDiagram"),parts=steps[current].phases||[];
+ wrap.hidden=!parts.length;if(wrap.hidden)return;
+ var c=$("catDiagramCanvas").getContext("2d");c.clearRect(0,0,460,218);
+ c.fillStyle="#fffdf9";c.fillRect(0,0,460,218);c.drawImage($("guideCanvas"),6,6,205,205);
+ c.strokeStyle="#c9d8d1";c.strokeRect(6,6,205,205);
+ var title=partInfo().title,words=title.split(" "),lines=[],v="";
+ words.forEach(function(w){if((v+" "+w).length>18){lines.push(v);v=w}else v+=(v?" ":"")+w});if(v)lines.push(v);
+ c.fillStyle="#176b73";c.textAlign="left";c.font="800 14px ui-sans-serif,system-ui";
+ lines.slice(0,3).forEach(function(t,i){c.fillText(t,223,45+i*21)});
+ c.fillStyle="#5d7d75";c.font="800 12px ui-monospace,monospace";c.fillText("PART "+(partIndex()+1)+" / "+parts.length,223,137);
+ $("catDiagramCaption").textContent=partInfo().try||"Run and observe what changed.";
+}
+
+
+function normCat(s){
+ s=String(s||"").trim().replace(/\s+/g,"");
+ return /^(speed|pensize|color|bgcolor)\([^)]*\)$/.test(s)?s.slice(0,s.indexOf("("))+"(*)":s;
+}
+function locateCat(lines,commands,start){
+ var best=null;
+ for(var i=start;i<lines.length;i++){
+  if(normCat(lines[i])!==normCat(commands[0]))continue;
+  var ids=[],p=i;
+  for(var j=0;j<commands.length;j++){
+   while(p<lines.length&&(!normCat(lines[p])||lines[p].trim().startsWith("#")))p++;
+   if(p>=lines.length||normCat(lines[p])!==normCat(commands[j]))break;
+   ids.push(p);p++;
+  }
+  if(ids.length===commands.length)return {ids:ids,next:p,complete:true};
+  if(!best||ids.length>best.ids.length)best={ids:ids,next:p,complete:false};
+ }
+ return best;
+}
+function readCatProgress(cm){
+ var lines=cm.getValue().split("\n"),pos=0,prior=true;
+ for(var i=0;i<current;i++){var found=locateCat(lines,codeLines(steps[i].code),pos);if(!found||!found.complete){prior=false;break;}pos=found.next;}
+ var commands=codeLines(partInfo().code),result=locateCat(lines,commands,prior?pos:0);
+ var typed=result?result.ids.length:0,last=-1;
+ for(var k=0;k<lines.length;k++)if(normCat(lines[k]))last=k;
+ var next=result&&typed?result.ids[typed-1]+(typed===commands.length?0:1):Math.max(0,last+1);
+ return {typed:typed,commands:commands,indices:result?result.ids:[],nextIndex:Math.min(next,lines.length),complete:typed===commands.length,needsEnter:next>=lines.length&&typed<commands.length};
+}
+function scheduleCat(){clearTimeout(catTimer);catTimer=setTimeout(highlightCat,85);}
+function highlightCat(){
+ clearTimeout(catTimer);
+ try{
+  var frame=$("turtleFrame"),doc=frame.contentDocument,node=doc&&doc.querySelector(".CodeMirror"),cm=node&&node.CodeMirror;
+  if(!cm){catTimer=setTimeout(highlightCat,220);return;}
+  if(catEditor!==cm){
+   if(catEditor)catEditor.off("change",scheduleCat);
+   catEditor=cm;cm.on("change",scheduleCat);cm.setOption("firstLineNumber",1);
+   var heading="# Remixed Caterpillar (1.3.12)\n# Add your drawing commands below, one shape at a time.\n";
+   if(cm.getValue().startsWith(heading)){
+    cm.replaceRange("",{line:0,ch:0},{line:2,ch:0},"remove obsolete heading");
+    try{frame.contentWindow.saveTurtleCode&&frame.contentWindow.saveTurtleCode()}catch(ignore){}
+   }
+  }
+  if(!doc.getElementById("catGuideStyle")){
+   var style=doc.createElement("style");style.id="catGuideStyle";
+   style.textContent=".cat-current{background:rgba(255,211,93,.20)!important;box-shadow:inset 4px 0 #ffd35d}.cat-typed{background:rgba(23,107,115,.10)!important}.CodeMirror-scroll{scrollbar-width:auto;scrollbar-color:#718584 #202a32}";
+   doc.head.appendChild(style);
+  }
+  catMarks.forEach(function(m){try{m.cm.removeLineClass(m.handle,"background",m.cls)}catch(e){}});
+  catMarks=[];
+  var p=readCatProgress(cm);
+  p.indices.forEach(function(i){catMarks.push({cm:cm,handle:cm.addLineClass(i,"background","cat-typed"),cls:"cat-typed"})});
+  if(!p.complete&&!p.needsEnter){var i=Math.min(p.nextIndex,cm.lineCount()-1);catMarks.push({cm:cm,handle:cm.addLineClass(i,"background","cat-current"),cls:"cat-current"});}
+  $("editorGuideMessage").textContent=p.complete?"✓ All commands typed for this part. Run and compare.":"Step "+(current+1)+" · line "+(p.nextIndex+1)+": "+(p.commands[p.typed]||"")+(p.needsEnter?" · press Enter":"");
+  drawCodeExample(p);cm.refresh();
+  if(catWantScroll){
+   catWantScroll=false;var line=Math.max(0,Math.min(p.nextIndex,cm.lineCount()-1));
+   if(line<12)cm.scrollTo(null,0);
+   else{var wanted=Math.max(0,cm.heightAtLine(line,"local")-42);if(Math.abs(cm.getScrollInfo().top-wanted)>cm.getScrollInfo().clientHeight*.65)cm.scrollTo(null,wanted);}
+  }
+ }catch(e){drawCodeExample(catProgress);}
+}
+$("turtleFrame").addEventListener("load",function(){catEditor=null;catWantScroll=true;scheduleCat()});
+$("editorScrollTop").addEventListener("click",function(){if(catEditor){catEditor.scrollTo(null,0);catEditor.focus()}});
+$("editorScrollStep").addEventListener("click",function(){if(!catEditor)return;var p=readCatProgress(catEditor),line=Math.max(0,Math.min(p.nextIndex,catEditor.lineCount()-1));catEditor.scrollTo(null,line<12?0:Math.max(0,catEditor.heightAtLine(line,"local")-42));catEditor.focus()});
 (function(){
  var studio=document.querySelector(".studio"),guide=document.querySelector(".guide");
  var main=$("studioDivider"),rail=$("guideDivider");
