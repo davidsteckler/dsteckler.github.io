@@ -314,12 +314,23 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 @media(max-width:650px){.rail-preview .scene-visual{max-width:205px}.step-strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* Guided typing: keep the original classroom layout and step navigation. */
-.sample .etch-example-row{display:block;margin:0 -7px;padding:1px 7px;border-left:3px solid transparent;border-radius:3px;line-height:1.56}
-.sample .etch-example-number{display:inline-block;min-width:2.3em;padding-right:7px;color:#96a4ac;user-select:none}
-.sample .etch-example-row.is-typed{color:#a3d1c8}
-.sample .etch-example-row.is-current{background:#534627;border-left-color:#ffd35d;color:#fff9dc}
-.sample .etch-example-row.is-current .etch-example-number{color:#ffd35d}
+
+.etch-code-sample{padding:0!important;white-space:normal;overflow:auto}
+.etch-code-sample canvas{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y;cursor:default}
+.etch-code-sample canvas:focus-visible{outline:2px solid #ffd35d;outline-offset:-3px}
 .code-head #codeProgress{font-weight:700;color:#98662b}
+.teacher-trigger{position:fixed;bottom:2px;left:2px;z-index:30;display:grid;place-items:center;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:transparent;color:#536b64;opacity:.24;font-size:17px;cursor:pointer}
+.teacher-trigger:hover,.teacher-trigger:focus-visible{opacity:1;background:#d9e6df}
+.teacher-dialog{width:min(730px,calc(100vw - 26px));max-height:86dvh;padding:20px;background:#fffdfa;color:#253239;border:1px solid #cdd8d4;border-radius:12px;box-shadow:0 24px 80px #112b325e}
+.teacher-dialog::backdrop{background:rgba(18,35,39,.62)}
+.teacher-top{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.teacher-top small{font:750 10px ui-monospace,monospace;color:#176b73;letter-spacing:.1em}
+.teacher-top h2{margin:3px 0 7px;font-size:24px;letter-spacing:-.035em}
+.teacher-dialog p{font-size:12px;color:#627176;margin:2px 0 12px}
+.teacher-x{font-size:26px;line-height:1;border:0;background:none;color:#5e6e70;cursor:pointer}
+.teacher-code{padding:15px 18px;margin:0;overflow:auto;max-height:55dvh;white-space:pre;background:#202a32;color:#f1f5f3;border-radius:8px;font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;user-select:text}
+.teacher-actions{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+@media print{.teacher-trigger,.teacher-dialog{display:none!important}}
 </style>
 </head>
 <body>
@@ -350,13 +361,14 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
       <span class="coord-read" id="coords">x 0 · y 0</span>
      </div>
     </div>
+    <button class="teacher-trigger" id="teacherTrigger" type="button" aria-label="Teacher reference" aria-haspopup="dialog">·</button>
    </div>
    <div class="lesson" aria-live="polite">
     <h2 id="stepTitle">Explore the drawing</h2>
     <p class="description" id="stepDescription"></p>
     <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
     <div class="code-head"><strong id="codeTitle">Type these lines</strong><small id="codeProgress" aria-live="polite">Yellow = next line</small></div>
-    <pre class="sample"><code id="codeSample"></code></pre>
+    <div class="sample etch-code-sample" id="codeSample"><canvas id="stepCodeCanvas" role="img" tabindex="0" aria-label="Visual numbered code reference to read and type manually"></canvas></div>
     <p class="code-note" id="codeNote"></p>
     <div class="questions"><h3>Check your work</h3><p id="tryText"></p></div>
     <details class="help" id="helpBox"><summary>Need a hint?</summary><p id="hintText"></p></details>
@@ -373,6 +385,12 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
    <div class="work-footer"><span>Your code stays here when you change steps. Save your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
   </section>
  </main>
+ <dialog id="teacherDialog" class="teacher-dialog" aria-labelledby="teacherHeading">
+  <div class="teacher-top"><div><small>TEACHER REFERENCE</small><h2 id="teacherHeading">Complete Etch A Sketch code</h2></div><button id="teacherClose" class="teacher-x" type="button" aria-label="Close">×</button></div>
+  <p>Full program with every step together.</p>
+  <pre id="teacherCode" class="teacher-code"></pre>
+  <div class="teacher-actions"><button id="teacherCopy" class="btn" type="button">Copy full code</button><button id="teacherDone" class="btn primary" type="button">Close</button></div>
+ </dialog>
  <div class="foot-resources"><span>Tip: Move with penup() before starting any separate shape.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
 </div>
 <script>
@@ -604,22 +622,46 @@ function etchProgress(cm){
  var startLine=located?located.start+1:nextIndex+1;
  return {commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
 }
-function renderCodeExample(progress){
- var commands=steps[current].code.split("\n"),target=$("codeSample");
- target.textContent="";
- var typed=progress?progress.typed:0;
- var firstLine=progress?progress.startLine:(current===0?3:0);
- commands.forEach(function(command,i){
-  var row=document.createElement("span");row.className="etch-example-row";
-  if(i<typed)row.classList.add("is-typed");
-  else if(i===typed)row.classList.add("is-current");
-  var n=document.createElement("span");n.className="etch-example-number";
-  n.textContent=firstLine?String(firstLine+i).padStart(2,"0"):String(i+1).padStart(2,"0");
-  var body=document.createElement("span");body.textContent=command;
-  row.appendChild(n);row.appendChild(body);target.appendChild(row);
- });
- $("codeProgress").textContent=progress?(progress.complete?"✓ All lines typed":typed+" / "+commands.length+" lines typed · yellow = next"):"Yellow = next line";
+
+function etchPlannedLine(index){
+ if(index===0)return 3;
+ var n=5;for(var i=1;i<index;i++)n+=steps[i].code.split("\n").length;
+ return n;
 }
+var codeCanvas=$("stepCodeCanvas"),codeCtx=codeCanvas.getContext("2d"),lastExampleProgress=null;
+function renderCodeExample(progress){
+ lastExampleProgress=progress||null;
+ var lines=steps[current].code.split("\n"),box=$("codeSample");
+ var width=Math.max(220,Math.round(box.getBoundingClientRect().width||400));
+ var rowHeight=25,top=12,height=top+lines.length*rowHeight+12,dpr=Math.min(window.devicePixelRatio||1,2);
+ codeCanvas.style.height=height+"px";codeCanvas.width=Math.round(width*dpr);codeCanvas.height=Math.round(height*dpr);
+ codeCtx.setTransform(dpr,0,0,dpr,0,0);codeCtx.clearRect(0,0,width,height);
+ codeCtx.font="650 12px ui-monospace,SFMono-Regular,Consolas,monospace";codeCtx.textBaseline="middle";
+ var typed=progress?progress.typed:0,first=etchPlannedLine(current);
+ lines.forEach(function(line,i){
+  var y=top+i*rowHeight,cy=y+rowHeight/2;
+  if(i===typed&&typed<lines.length){
+   codeCtx.fillStyle="#534627";codeCtx.fillRect(9,y,width-18,rowHeight);
+   codeCtx.fillStyle="#ffd35d";codeCtx.fillRect(9,y,4,rowHeight);
+  }else if(i<typed){codeCtx.fillStyle="rgba(23,107,115,.18)";codeCtx.fillRect(9,y,width-18,rowHeight);}
+  codeCtx.fillStyle=i===typed&&typed<lines.length?"#ffd35d":"#96a4ac";
+  codeCtx.fillText(String(first+i).padStart(2,"0"),width<350?14:20,cy);
+  codeCtx.fillStyle=i<typed?"#a3d1c8":i===typed?"#fff9dc":"#e5eeed";
+  var shown=line;
+  while(shown.length>5&&codeCtx.measureText(shown).width>width-75)shown=shown.slice(0,-2)+"…";
+  codeCtx.fillText(shown,width<350?48:55,cy);
+ });
+ $("codeProgress").textContent=progress?(progress.complete?"✓ All lines typed":typed+" / "+lines.length+" lines typed · yellow = next"):"Yellow = next line";
+}
+["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(type){
+ $("codeSample").addEventListener(type,function(ev){ev.preventDefault();});
+});
+codeCanvas.addEventListener("keydown",function(ev){
+ if((ev.ctrlKey||ev.metaKey)&&["c","x","a","s","p"].indexOf(ev.key.toLowerCase())>=0)ev.preventDefault();
+});
+if(window.ResizeObserver)new ResizeObserver(function(){renderCodeExample(lastExampleProgress);}).observe($("codeSample"));
+else window.addEventListener("resize",function(){renderCodeExample(lastExampleProgress);});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){renderCodeExample(lastExampleProgress);});
 function scheduleGuideHighlight(){
  clearTimeout(etchHighlightTimer);
  etchHighlightTimer=setTimeout(highlightGuideLines,65);
@@ -666,7 +708,7 @@ function highlightGuideLines(){
     note.textContent="✓ Step "+(current+1)+": all "+p.commands.length+" command"+(p.commands.length===1?"":"s")+" typed. Run the program and compare the drawing.";
    }else{
     var line=p.nextIndex+1,action=(p.nextIndex>=p.lineCount-1&&etchNormalize(cm.getLine(p.nextIndex)))?" · press Enter for a new line":"";
-    note.textContent="Step "+(current+1)+" · Line "+line+": type "+p.commands[p.typed]+action;
+    note.textContent=p.earlierComplete?"Step "+(current+1)+" · Line "+line+": type "+p.commands[p.typed]+action:"Complete earlier steps first. This step starts at planned line "+etchPlannedLine(current)+".";
    }
   }
   renderCodeExample(p);
@@ -678,6 +720,28 @@ $("turtleFrame").addEventListener("load",function(){
  scheduleGuideHighlight();
 });
 
+
+var teacherDialog=$("teacherDialog");
+var fullProgram=STARTER+steps.slice(1).map(function(s){return s.code;}).join("\n")+"\n";
+$("teacherTrigger").addEventListener("click",function(){
+ $("teacherCode").textContent=fullProgram;
+ if(teacherDialog.showModal)teacherDialog.showModal();else teacherDialog.setAttribute("open","");
+});
+function closeTeacher(){if(teacherDialog.close)teacherDialog.close();else teacherDialog.removeAttribute("open");}
+$("teacherClose").addEventListener("click",closeTeacher);
+$("teacherDone").addEventListener("click",closeTeacher);
+teacherDialog.addEventListener("click",function(ev){if(ev.target===teacherDialog)closeTeacher();});
+$("teacherCopy").addEventListener("click",function(){
+ var btn=this;
+ function success(){btn.textContent="✓ Copied";setTimeout(function(){btn.textContent="Copy full code";},1500);}
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(fullProgram).then(success,function(){btn.textContent="Select the code to copy";});
+ }else{
+  var r=document.createRange();r.selectNodeContents($("teacherCode"));getSelection().removeAllRanges();getSelection().addRange(r);
+  if(document.execCommand&&document.execCommand("copy")){getSelection().removeAllRanges();success();}
+  else btn.textContent="Selected · press Ctrl+C";
+ }
+});
 canvas.addEventListener("pointermove",function(ev){
  var rect=canvas.getBoundingClientRect();
  var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);
