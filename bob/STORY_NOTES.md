@@ -19,6 +19,7 @@ The audience is middle school. Write in plain lowercase with the original's calm
 11. Bob hires the kawaii eye of ra as a witness. She watches lunch, blinks once, and Bob asks for a second witness.
 12. Bob finds a steamroller and drives it, never having driven one. A cow runs from him, yelling that it will eat him. Bob looks back, the steamroller goes in the ditch, and Bob comes out flat as a pancake. The narrator loves pancakes.
 13. At a school bus drill, the bus driver licks his lips, holds a fork and wears a napkin. Bob practices the emergency exit from outside the bus and walks home. The bus follows at four miles an hour.
+14. The narrator orders pizza on doordash. The toppings menu offers lamb. Bob takes the phone, leaves the driver a note, calls the driver to say he is a lamb, and tips forty percent through the mail slot.
 
 ## Visual and delivery continuity
 
