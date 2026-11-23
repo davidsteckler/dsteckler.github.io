@@ -285,6 +285,22 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 .editor-guide-bar{height:32px;flex:0 0 32px;display:flex;align-items:center;gap:7px;padding:3px 9px;box-sizing:border-box;background:#edf3ef;border-bottom:1px solid #d0e0d9;color:#35585b;font:700 10px/1.3 ui-sans-serif,system-ui}
 #editorGuideMessage{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .editor-guide-actions{display:flex;gap:5px;flex-shrink:0}.editor-guide-actions button{padding:3px 7px;border:1px solid #c5d6d0;border-radius:5px;background:#fff;color:#31565c;font:750 10px ui-sans-serif,system-ui;cursor:pointer}
+
+/* Manual 12-step completion with generous navigation hit targets. */
+.step-strip{grid-auto-rows:minmax(42px,1fr)!important;gap:3px!important}
+.step-item{display:grid;grid-template-columns:minmax(0,1fr) 44px;min-height:42px;align-items:stretch;border-radius:7px;overflow:hidden}
+.step-item .step-tab{display:flex;align-items:center;min-height:42px!important;height:100%;width:100%;padding:6px 5px 6px 10px!important;background:transparent!important;color:#536366;border:none!important;border-radius:0!important;text-align:left!important;font-size:11px!important;line-height:1.3}
+.step-item .step-tab:hover,.step-mark-target:hover{background:#e4eee8!important}
+.step-mark-target{display:flex;align-items:center;justify-content:center;min-height:42px;width:44px;cursor:pointer}
+.step-check{width:20px;height:20px;margin:0;cursor:pointer;accent-color:#176b73}
+.step-item.is-active{background:#176b73!important}
+.step-item.is-active .step-tab{color:#fff!important}
+.step-item.is-active .step-tab:hover,.step-item.is-active .step-mark-target:hover{background:#11555c!important}
+.step-item.is-active .step-check{accent-color:#fff}
+.step-item.is-done:not(.is-active){background:#e4eee8}
+.step-item.is-done:not(.is-active) .step-tab{color:#22695f}
+.step-mark-target:focus-within{outline:2px solid #db9a62;outline-offset:-3px}
+@media(max-width:650px){.step-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 </head>
 <body>
@@ -370,11 +386,11 @@ var steps=[
  {tab:"Sky details",title:"Draw birds or clouds",description:"Birds are a pair of slanted lines. Clouds can be made from a few white circles. You can also add hills, flowers, or something entirely your own.",task:"Choose at least one type of extra detail for the sky and draw it yourself.",code:'color("black")\npenup()\ngoto(-125, 95)\npendown()\ngoto(-108, 111)\ngoto(-91, 95)\npenup()',note:"This is ONE bird. Build more by choosing new coordinates. A cloud can use three small white filled circles placed close together.",try:"Add birds, clouds, or stars. Try to keep them away from the face so your caterpillar is easy to see.",hint:"For a cloud, fill a white circle, lift the pen, move a little to the right, and draw another filled circle. Use separate begin_fill() and end_fill() pairs for each circle."},
  {tab:"Finish",title:"Make the final remix yours",description:"Your picture should have a recognizable caterpillar, a filled ground, a face, and a sky that you've customized. Run it once more and look at every part.",task:"Check your drawing, fix any stray lines, and make at least three creative decisions that are different from the sample.",code:"hideturtle()",note:"This optional command hides Tracy's pointer at the end so your finished drawing is easier to see.",try:"Compare your world with your plan. Once it works, save your code and follow your class directions for submitting the finished work.",hint:"If something looks wrong, inspect the first place the drawing changes unexpectedly. Check color, penup/pendown, goto positions, and circle radius. Fix one line and run again."}
 ];
-var current=0,phaseMap={},key="remixed-caterpillar-guide-v1";
+var current=0,phaseMap={},stepMarks={},key="remixed-caterpillar-guide-v1";
 var palette={day:{sky:"#acd9e6",ground:"#af5945",sun:"#ffe32c"},night:{sky:"#132641",ground:"#554c6a",sun:"#f5efce"},blood:{sky:"#291e30",ground:"#574050",sun:"#dd5044"}};
 var edits={body:"#ea7643",ground:null,face:"#ffe66b",sky:null,sun:null};
 var scene="day",showGrid=false;
-try{var stored=JSON.parse(localStorage.getItem(key)||"{}");if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));if(["day","night","blood"].includes(stored.scene))scene=stored.scene;showGrid=!!stored.grid;if(stored.edits&&typeof stored.edits==="object"){Object.keys(edits).forEach(function(k){if(typeof stored.edits[k]==="string"&&/^#[a-fA-F0-9]{6}$/.test(stored.edits[k]))edits[k]=stored.edits[k]})}if(stored.phases&&typeof stored.phases==="object")phaseMap=stored.phases;}catch(e){}
+try{var stored=JSON.parse(localStorage.getItem(key)||"{}");if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));if(["day","night","blood"].includes(stored.scene))scene=stored.scene;showGrid=!!stored.grid;if(stored.edits&&typeof stored.edits==="object"){Object.keys(edits).forEach(function(k){if(typeof stored.edits[k]==="string"&&/^#[a-fA-F0-9]{6}$/.test(stored.edits[k]))edits[k]=stored.edits[k]})}if(stored.phases&&typeof stored.phases==="object")phaseMap=stored.phases;if(stored.stepMarks&&typeof stored.stepMarks==="object")stepMarks=stored.stepMarks;}catch(e){}
 $("sceneMode").value=scene;$("gridToggle").checked=showGrid;
 
 // Authored from the original 16-stage full Caterpillar walkthrough.
@@ -412,9 +428,27 @@ function buildWalkthrough(){
 
 var checkTasks=["Background + ground","Five body circles","Two eyes + smile","Two antennae","Sun or moon + extras","Three personal changes"];
 buildWalkthrough();
-function save(){try{localStorage.setItem(key,JSON.stringify({step:current,scene:scene,grid:showGrid,edits:edits,phases:phaseMap}))}catch(e){}}
+function save(){try{localStorage.setItem(key,JSON.stringify({step:current,scene:scene,grid:showGrid,edits:edits,phases:phaseMap,stepMarks:stepMarks}))}catch(e){}}
 var strip=$("stepStrip");
-steps.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.className="step-tab";b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;b.setAttribute("aria-label","Step "+(i+1)+": "+s.title);b.addEventListener("click",function(){current=i;render()});strip.appendChild(b)});
+var stepChecks=[];
+steps.forEach(function(stage,i){
+ var row=document.createElement("div");row.className="step-item";
+ var button=document.createElement("button");button.type="button";button.className="step-tab";
+ button.textContent=String(i+1).padStart(2,"0")+" "+stage.tab;
+ button.setAttribute("aria-label","Open "+stage.tab);
+ button.addEventListener("click",function(){current=i;render()});
+ var label=document.createElement("label");label.className="step-mark-target";
+ var box=document.createElement("input");box.type="checkbox";box.className="step-check";
+ box.setAttribute("aria-label","Mark "+stage.tab+" complete");
+ box.addEventListener("change",function(){stepMarks[i]=box.checked;save();refreshStepMarks()});
+ label.appendChild(box);row.appendChild(button);row.appendChild(label);strip.appendChild(row);stepChecks.push(box);
+});
+function refreshStepMarks(){
+ stepChecks.forEach(function(box,i){var checked=stepMarks[i]===true;box.checked=checked;
+  box.closest(".step-item").classList.toggle("is-done",checked);
+  box.parentElement.title=checked?"Unmark this step":"Mark complete after checking your drawing";
+ });
+}
 var canvas=$("guideCanvas"),ctx=canvas.getContext("2d");
 function sx(x){return x+200}
 function sy(y){return 200-y}
@@ -481,7 +515,8 @@ function render(){
  $("visualCaption").textContent="This drawing is one idea. Your art can use different colors.";
  $("prevStep").disabled=current===0&&p===0;
  $("nextStep").textContent=p<parts.length-1?"Next part →":current===steps.length-1?"Back to beginning ↺":"Next step →";
- Array.from(strip.children).forEach(function(btn,i){btn.setAttribute("aria-current",i===current?"step":"false")});
+ Array.from(strip.children).forEach(function(row,i){row.classList.toggle("is-active",i===current);row.querySelector(".step-tab").setAttribute("aria-current",i===current?"step":"false")});
+ refreshStepMarks();
  if(current===11){
   var checked={};try{checked=JSON.parse(localStorage.getItem(key+"-checks")||"{}")}catch(e){}
   var list=document.createElement("div");list.className="check-row";
