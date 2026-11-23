@@ -728,7 +728,7 @@ function render(){
  $("stepTitle").textContent=s.title;
  $("stepDescription").textContent=s.description;
  $("taskText").textContent=s.task;
- $("codeTitle").textContent=s.codeTitle|| (current===0?"Already in your starter code":"Type these lines");
+ $("codeTitle").textContent=s.codeTitle|| (current===0?"Type the first command":"Type these lines");
  renderCodeExample();
  $("codeNote").textContent=s.note;
  $("tryText").textContent=s.try;
@@ -807,8 +807,8 @@ function etchProgress(cm){
 }
 
 function etchPlannedLine(index){
- if(index===0)return 0;
- var n=1;for(var i=1;i<index;i++)n+=steps[i].code.split("\n").length;
+ if(index===0)return 1;
+ var n=2;for(var i=1;i<index;i++)n+=steps[i].code.split("\n").length;
  return n;
 }
 var codeCanvas=$("stepCodeCanvas"),codeCtx=codeCanvas.getContext("2d"),lastExampleProgress=null;
@@ -828,7 +828,7 @@ function renderCodeExample(progress){
    codeCtx.fillStyle="#ffd35d";codeCtx.fillRect(9,y,4,rowHeight);
   }else if(i<typed){codeCtx.fillStyle="rgba(23,107,115,.18)";codeCtx.fillRect(9,y,width-18,rowHeight);}
   codeCtx.fillStyle=i===typed&&typed<lines.length?"#ffd35d":"#96a4ac";
-  codeCtx.fillText(String(first+i).padStart(2,"0"),width<350?14:20,cy);
+  codeCtx.fillText(String(first+i),width<350?14:20,cy);
   codeCtx.fillStyle=i<typed?"#a3d1c8":i===typed?"#fff9dc":"#e5eeed";
   var shown=line;
   while(shown.length>5&&codeCtx.measureText(shown).width>width-75)shown=shown.slice(0,-2)+"…";
@@ -860,7 +860,7 @@ function highlightGuideLines(){
    if(etchEditor){etchEditor.off("change",scheduleGuideHighlight);}
    etchEditor=cm;
    cm.on("change",scheduleGuideHighlight);
-   cm.setOption("firstLineNumber",0);
+   cm.setOption("firstLineNumber",1);
    // Keep existing student work. Only strip the obsolete two-line starter heading.
    var oldHeading="# Etch A Sketch (CodeHS 1.3.11)\n# Add each shape as you work through the guide.\n";
    if(cm.getValue().indexOf(oldHeading)===0){
@@ -902,7 +902,7 @@ function highlightGuideLines(){
   var message=$("editorGuideMessage");
   if(p.complete)message.textContent="✓ Step "+(current+1)+": all "+p.commands.length+" commands typed. Run and compare.";
   else{
-   var line=p.nextIndex,action=p.pendingNewLine?" · press Enter for a new line":"";
+   var line=p.nextIndex+1,action=p.pendingNewLine?" · press Enter for a new line":"";
    message.textContent=p.earlierComplete?"Step "+(current+1)+" · line "+line+": "+p.commands[p.typed]+action:"Complete earlier steps first. This step begins around line "+etchPlannedLine(current)+".";
   }
   renderCodeExample(p);
