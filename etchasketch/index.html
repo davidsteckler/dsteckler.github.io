@@ -312,6 +312,14 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 }
 @media(max-width:1080px){.rail-preview{min-width:0}.scene-visual{width:min(100%,270px);max-width:270px}}
 @media(max-width:650px){.rail-preview .scene-visual{max-width:205px}.step-strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Guided typing: keep the original classroom layout and step navigation. */
+.sample .etch-example-row{display:block;margin:0 -7px;padding:1px 7px;border-left:3px solid transparent;border-radius:3px;line-height:1.56}
+.sample .etch-example-number{display:inline-block;min-width:2.3em;padding-right:7px;color:#96a4ac;user-select:none}
+.sample .etch-example-row.is-typed{color:#a3d1c8}
+.sample .etch-example-row.is-current{background:#534627;border-left-color:#ffd35d;color:#fff9dc}
+.sample .etch-example-row.is-current .etch-example-number{color:#ffd35d}
+.code-head #codeProgress{font-weight:700;color:#98662b}
 </style>
 </head>
 <body>
@@ -347,7 +355,7 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
     <h2 id="stepTitle">Explore the drawing</h2>
     <p class="description" id="stepDescription"></p>
     <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
-    <div class="code-head"><strong id="codeTitle">Small code example</strong><small>Just this step</small></div>
+    <div class="code-head"><strong id="codeTitle">Type these lines</strong><small id="codeProgress" aria-live="polite">Yellow = next line</small></div>
     <pre class="sample"><code id="codeSample"></code></pre>
     <p class="code-note" id="codeNote"></p>
     <div class="questions"><h3>Check your work</h3><p id="tryText"></p></div>
@@ -375,7 +383,7 @@ var $=function(id){return document.getElementById(id)};
 var STARTER="# Etch A Sketch (CodeHS 1.3.11)\n# Add each shape as you work through the guide.\nspeed(0)\n\n";
 var lessonId="etch-a-sketch-1-3-11";
 $("turtleFrame").src="/turtle/?embed=course&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(STARTER);
-var steps=[{"tab":"Look at it","title":"Explore the drawing","description":"An Etch A Sketch is made from two rectangles, two circles, and four small triangles. Every part uses coordinates in Tracy's 400 × 400 world.","task":"Study the completed preview. Locate the outside frame, inside screen, two knobs, and four triangles.","code":"speed(0)","note":"The starter program already has speed(0). The speed setting makes drawing happen instantly.","try":"Point out which shapes will need penup() before you start them.","hint":"Moving with penup() changes Tracy's position without leaving a line."},{"tab":"Start at A","title":"Move to the first corner","description":"The outside frame begins at the upper-left corner, A = (-175, 175). Move there before drawing.","task":"Use penup(), goto(-175, 175), and pendown() to get ready to draw the outside frame.","code":"penup()\ngoto(-175, 175)\npendown()","note":"Tracy begins at (0, 0). Lifting the pen keeps the trip to point A invisible.","try":"Run your code. The world should still be empty, because you have only moved into position.","hint":"A negative x goes left. A positive y goes up."},{"tab":"Outer frame","title":"Draw the outside rectangle","description":"Use setx() for a horizontal side and sety() for a vertical side. The frame reaches x = -175 and 175, and y = -175 and 175.","task":"Starting from (-175, 175), go across to x = 175, down to y = -175, left to x = -175, and back up to y = 175.","code":"setx(175)\nsety(-175)","note":"These two lines draw only the top and right sides. Add the bottom and left sides yourself.","try":"Run your code. Do all four sides connect without a diagonal line?","hint":"After sety(-175), use setx(-175), then sety(175)."},{"tab":"Inner screen","title":"Draw the inside screen","description":"The smaller rectangle begins at (-150, 150), uses x = 150 on the right, and stops at y = -100 on the bottom.","task":"Lift the pen and move to (-150, 150). Draw the four sides with setx() and sety(), then return to the starting corner.","code":"penup()\ngoto(-150, 150)\npendown()","note":"The screen has a shorter bottom edge height than the outside frame. Keep its lower boundary at y = -100.","try":"The inside screen should be centered horizontally, with a wide space beneath it for the knobs.","hint":"From the upper-left, setx(150), sety(-100), setx(-150), then sety(150)."},{"tab":"Left knob","title":"Draw the left knob","description":"A circle uses Tracy's current position as its bottom point when Tracy faces right. Your left knob starts at (-125, -160).","task":"Move without drawing to (-125, -160), put the pen down, and make a circle with radius 25.","code":"penup()\ngoto(-125, -160)\npendown()\ncircle(25)","note":"circle(25) draws a circle with a diameter of 50. It sits above its starting point.","try":"The first knob should fit inside the bottom portion of the outside frame.","hint":"Keep the pen up while moving from the screen to the knob."},{"tab":"Right knob","title":"Draw the right knob","description":"The second knob has the same radius and y coordinate as the first. Only the starting x coordinate changes.","task":"Move to (125, -160) without drawing a line. Draw another circle with radius 25.","code":"penup()\ngoto(125, -160)\npendown()","note":"You already used the circle command for the left knob. Use the same radius again.","try":"Are the two knobs at the same height and the same size?","hint":"Add circle(25) after pendown()."},{"tab":"Left arrow","title":"Draw the far-left triangle","description":"The three points for this triangle are highlighted and numbered in the drawing guide.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(-155, -130)\npendown()","note":"The enlarged preview shows the exact coordinates and the order to draw them.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Next arrow","title":"Draw the second triangle","description":"Follow the three numbered points in the drawing guide to create the next triangle.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(-95, -140)\npendown()","note":"The enlarged preview shows the exact coordinates and the order to draw them.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Right arrow","title":"Draw the third triangle","description":"The drawing guide shows exactly where the third triangle goes.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(90, -140)\npendown()","note":"The enlarged preview shows the exact coordinates and the order to draw them.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Final arrow","title":"Draw the far-right triangle","description":"The final triangle is shown with its three coordinates in the preview.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(160, -130)\npendown()","note":"The enlarged preview shows the exact coordinates and the order to draw them.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Finish","title":"Return Tracy to the center","description":"Your Etch A Sketch is complete once both rectangles, both knobs, and all four triangles are visible.","task":"Lift the pen and move Tracy back to (0, 0). Run the entire program and compare it to the completed preview.","code":"penup()\ngoto(0, 0)","note":"Keep penup() before the final goto(), or you will draw a line across your picture.","try":"Check every part: outer frame, inner screen, left and right knobs, four closed triangles, and Tracy at (0, 0).","hint":"If you see a stray diagonal line between shapes, look for a missing penup()."}];
+var steps=[{"tab":"Look at it","title":"Explore the drawing","description":"An Etch A Sketch is made from two rectangles, two circles, and four small triangles. Every part uses coordinates in Tracy's 400 × 400 world.","task":"Study the completed preview. Locate the outside frame, inside screen, two knobs, and four triangles.","code":"speed(0)","note":"The starter program already has speed(0). The speed setting makes drawing happen instantly.","try":"Point out which shapes will need penup() before you start them.","hint":"Moving with penup() changes Tracy's position without leaving a line."},{"tab":"Start at A","title":"Move to the first corner","description":"The outside frame begins at the upper-left corner, A = (-175, 175). Move there before drawing.","task":"Use penup(), goto(-175, 175), and pendown() to get ready to draw the outside frame.","code":"penup()\ngoto(-175, 175)\npendown()","note":"Tracy begins at (0, 0). Lifting the pen keeps the trip to point A invisible.","try":"Run your code. The world should still be empty, because you have only moved into position.","hint":"A negative x goes left. A positive y goes up."},{"tab":"Outer frame","title":"Draw the outside rectangle","description":"Use setx() for a horizontal side and sety() for a vertical side. The frame reaches x = -175 and 175, and y = -175 and 175.","task":"Starting from (-175, 175), go across to x = 175, down to y = -175, left to x = -175, and back up to y = 175.","code":"setx(175)\nsety(-175)\nsetx(-175)\nsety(175)","note":"setx() moves horizontally without changing y. sety() moves vertically without changing x.","try":"Run your code. Do all four sides connect without a diagonal line?","hint":"After sety(-175), use setx(-175), then sety(175)."},{"tab":"Inner screen","title":"Draw the inside screen","description":"The smaller rectangle begins at (-150, 150), uses x = 150 on the right, and stops at y = -100 on the bottom.","task":"Lift the pen and move to (-150, 150). Draw the four sides with setx() and sety(), then return to the starting corner.","code":"penup()\ngoto(-150, 150)\npendown()\nsetx(150)\nsety(-100)\nsetx(-150)\nsety(150)","note":"The screen has a shorter bottom edge height than the outside frame. Keep its lower boundary at y = -100.","try":"The inside screen should be centered horizontally, with a wide space beneath it for the knobs.","hint":"From the upper-left, setx(150), sety(-100), setx(-150), then sety(150)."},{"tab":"Left knob","title":"Draw the left knob","description":"A circle uses Tracy's current position as its bottom point when Tracy faces right. Your left knob starts at (-125, -160).","task":"Move without drawing to (-125, -160), put the pen down, and make a circle with radius 25.","code":"penup()\ngoto(-125, -160)\npendown()\ncircle(25)","note":"circle(25) draws a circle with a diameter of 50. It sits above its starting point.","try":"The first knob should fit inside the bottom portion of the outside frame.","hint":"Keep the pen up while moving from the screen to the knob."},{"tab":"Right knob","title":"Draw the right knob","description":"The second knob has the same radius and y coordinate as the first. Only the starting x coordinate changes.","task":"Move to (125, -160) without drawing a line. Draw another circle with radius 25.","code":"penup()\ngoto(125, -160)\npendown()\ncircle(25)","note":"Use the same circle(25) command for both knobs. Their starting x coordinates are different.","try":"Are the two knobs at the same height and the same size?","hint":"Add circle(25) after pendown()."},{"tab":"Left arrow","title":"Draw the far-left triangle","description":"The three points for this triangle are highlighted and numbered in the drawing guide.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(-155, -130)\npendown()\ngoto(-165, -135)\ngoto(-155, -140)\ngoto(-155, -130)","note":"The last goto() returns to the first point to close the triangle.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Next arrow","title":"Draw the second triangle","description":"Follow the three numbered points in the drawing guide to create the next triangle.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(-95, -140)\npendown()\ngoto(-85, -135)\ngoto(-95, -130)\ngoto(-95, -140)","note":"Use each point in the numbered preview, then return to the first point.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Right arrow","title":"Draw the third triangle","description":"The drawing guide shows exactly where the third triangle goes.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(90, -140)\npendown()\ngoto(85, -130)\ngoto(95, -130)\ngoto(90, -140)","note":"Each goto() moves directly to the next corner of the triangle.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Final arrow","title":"Draw the far-right triangle","description":"The final triangle is shown with its three coordinates in the preview.","task":"Connect points 1 → 2 → 3 → 1 using goto(). Start each separate shape with penup().","code":"penup()\ngoto(160, -130)\npendown()\ngoto(165, -140)\ngoto(155, -140)\ngoto(160, -130)","note":"Return to your starting point to close the final triangle.","try":"Run your code. Does your triangle match the highlighted shape?","hint":"After pendown(), use goto() for points 2 and 3, then return to point 1."},{"tab":"Finish","title":"Return Tracy to the center","description":"Your Etch A Sketch is complete once both rectangles, both knobs, and all four triangles are visible.","task":"Lift the pen and move Tracy back to (0, 0). Run the entire program and compare it to the completed preview.","code":"penup()\ngoto(0, 0)","note":"Keep penup() before the final goto(), or you will draw a line across your picture.","try":"Check every part: outer frame, inner screen, left and right knobs, four closed triangles, and Tracy at (0, 0).","hint":"If you see a stray diagonal line between shapes, look for a missing penup()."}];
 var current=0, showGrid=true, showOutline=false;
 var key="etch-a-sketch-guide-v1";
 try{
@@ -533,8 +541,8 @@ function render(){
  $("stepTitle").textContent=s.title;
  $("stepDescription").textContent=s.description;
  $("taskText").textContent=s.task;
- $("codeTitle").textContent=current===0?"Your starting command":"Small code example";
- $("codeSample").textContent=s.code;
+ $("codeTitle").textContent=current===0?"Already in your starter code":"Type these lines";
+ renderCodeExample();
  $("codeNote").textContent=s.note;
  $("tryText").textContent=s.try;
  $("hintText").textContent=s.hint;
@@ -544,12 +552,132 @@ function render(){
  $("prevStep").disabled=current===0;
  $("nextStep").textContent=current===steps.length-1?"Back to beginning ↺":"Next step →";
  Array.from(strip.children).forEach(function(b,i){b.setAttribute("aria-current",i===current?"step":"false")});
- save();drawScene();
+ save();drawScene();scheduleGuideHighlight();
 }
 $("prevStep").addEventListener("click",function(){if(current>0){current--;render()}});
 $("nextStep").addEventListener("click",function(){current=current===steps.length-1?0:current+1;render()});
 $("gridToggle").addEventListener("change",function(){showGrid=this.checked;save();drawScene()});
 $("outlineToggle").addEventListener("change",function(){showOutline=this.checked;save();drawScene()});
+
+/* Match the Python Course's line-highlighting workflow in the existing /turtle editor. */
+var etchEditor=null,etchMarkedLines=[],etchHighlightTimer=0,etchEditorReady=false;
+function etchNormalize(line){
+ return String(line||"").trim().replace(/\\s+/g,"");
+}
+function etchLocateBlock(lines,commands,from){
+ var best=null;
+ for(var i=from;i<lines.length;i++){
+  if(etchNormalize(lines[i])!==etchNormalize(commands[0]))continue;
+  var found=[],at=i;
+  for(var j=0;j<commands.length;j++){
+   while(at<lines.length&&(!etchNormalize(lines[at])||/^\\s*#/.test(lines[at])))at++;
+   if(at>=lines.length||etchNormalize(lines[at])!==etchNormalize(commands[j]))break;
+   found.push(at);at++;
+  }
+  if(found.length===commands.length)return {indices:found,after:at,complete:true,start:i};
+  if(!best||found.length>best.indices.length)best={indices:found,after:at,complete:false,start:i};
+ }
+ return best;
+}
+function etchProgress(cm){
+ var lines=cm.getValue().split("\\n"),startAt=0,allEarlierComplete=true;
+ for(var i=0;i<current;i++){
+  var prev=etchLocateBlock(lines,steps[i].code.split("\\n"),startAt);
+  if(!prev||!prev.complete){allEarlierComplete=false;break;}
+  startAt=prev.after;
+ }
+ var cmds=steps[current].code.split("\\n");
+ var located=allEarlierComplete?etchLocateBlock(lines,cmds,startAt):null;
+ var typed=located?located.indices.length:0;
+ var lastNonempty=-1;
+ for(var k=0;k<lines.length;k++)if(etchNormalize(lines[k]))lastNonempty=k;
+ var nextIndex;
+ if(located&&typed){
+  nextIndex=typed===cmds.length?located.indices[typed-1]:Math.min(located.indices[typed-1]+1,lines.length-1);
+  if(typed<cmds.length){
+   while(nextIndex<lines.length-1&&(!etchNormalize(lines[nextIndex])||/^\\s*#/.test(lines[nextIndex])))nextIndex++;
+   if(nextIndex>=lines.length)nextIndex=lines.length-1;
+  }
+ }else{
+  nextIndex=Math.min(lines.length-1,Math.max(allEarlierComplete?startAt:0,lastNonempty+1));
+ }
+ var startLine=located?located.start+1:nextIndex+1;
+ return {commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
+}
+function renderCodeExample(progress){
+ var commands=steps[current].code.split("\\n"),target=$("codeSample");
+ target.textContent="";
+ var typed=progress?progress.typed:0;
+ var firstLine=progress?progress.startLine:(current===0?3:0);
+ commands.forEach(function(command,i){
+  var row=document.createElement("span");row.className="etch-example-row";
+  if(i<typed)row.classList.add("is-typed");
+  else if(i===typed)row.classList.add("is-current");
+  var n=document.createElement("span");n.className="etch-example-number";
+  n.textContent=firstLine?String(firstLine+i).padStart(2,"0"):String(i+1).padStart(2,"0");
+  var body=document.createElement("span");body.textContent=command;
+  row.appendChild(n);row.appendChild(body);target.appendChild(row);
+ });
+ $("codeProgress").textContent=progress?(progress.complete?"✓ All lines typed":typed+" / "+commands.length+" lines typed · yellow = next"):"Yellow = next line";
+}
+function scheduleGuideHighlight(){
+ clearTimeout(etchHighlightTimer);
+ etchHighlightTimer=setTimeout(highlightGuideLines,65);
+}
+function highlightGuideLines(){
+ clearTimeout(etchHighlightTimer);
+ try{
+  var doc=$("turtleFrame").contentDocument;
+  var node=doc&&doc.querySelector(".CodeMirror");
+  var cm=node&&node.CodeMirror;
+  if(!cm){etchHighlightTimer=setTimeout(highlightGuideLines,200);return;}
+  if(etchEditor!==cm){
+   if(etchEditor){etchEditor.off("change",scheduleGuideHighlight);}
+   etchEditor=cm;
+   cm.on("change",scheduleGuideHighlight);
+  }
+  etchMarkedLines.forEach(function(mark){
+   try{mark.editor.removeLineClass(mark.handle,"background",mark.className);}catch(e){}
+  });
+  etchMarkedLines=[];
+  if(!doc.getElementById("etchTypingStyle")){
+   var style=doc.createElement("style");style.id="etchTypingStyle";
+   style.textContent=".etch-current-line{background:rgba(255,211,93,.19)!important;box-shadow:inset 4px 0 #ffd35d}.etch-typed-line{background:rgba(23,107,115,.11)!important}.code-panel.etch-guide-active{grid-template-rows:47px auto minmax(0,1fr)}.etch-line-guide{padding:8px 12px;background:#fff1bf;color:#393323;font:13px/1.4 ui-sans-serif,system-ui,sans-serif;}.etch-line-guide strong{font-weight:800}";
+   doc.head.appendChild(style);
+  }
+  var p=etchProgress(cm);
+  p.indices.forEach(function(index){
+   var handle=cm.addLineClass(index,"background","etch-typed-line");
+   etchMarkedLines.push({editor:cm,handle:handle,className:"etch-typed-line"});
+  });
+  if(!p.complete){
+   var active=Math.max(0,Math.min(cm.lineCount()-1,p.nextIndex));
+   var handle=cm.addLineClass(active,"background","etch-current-line");
+   etchMarkedLines.push({editor:cm,handle:handle,className:"etch-current-line"});
+  }
+  var panel=node.closest(".code-panel"),note=doc.getElementById("etchLineGuide");
+  if(panel){
+   if(!note){
+    note=doc.createElement("div");note.id="etchLineGuide";note.className="etch-line-guide";
+    panel.insertBefore(note,node);
+   }
+   panel.classList.add("etch-guide-active");
+   if(p.complete){
+    note.textContent="✓ Step "+(current+1)+": all "+p.commands.length+" command"+(p.commands.length===1?"":"s")+" typed. Run the program and compare the drawing.";
+   }else{
+    var line=p.nextIndex+1,action=(p.nextIndex>=p.lineCount-1&&etchNormalize(cm.getLine(p.nextIndex)))?" · press Enter for a new line":"";
+    note.textContent="Step "+(current+1)+" · Line "+line+": type "+p.commands[p.typed]+action;
+   }
+  }
+  renderCodeExample(p);
+  cm.refresh();
+ }catch(e){renderCodeExample();}
+}
+$("turtleFrame").addEventListener("load",function(){
+ etchEditor=null;
+ scheduleGuideHighlight();
+});
+
 canvas.addEventListener("pointermove",function(ev){
  var rect=canvas.getBoundingClientRect();
  var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);
