@@ -207,6 +207,46 @@ main{max-width:none}
 @media(max-width:1190px) and (min-width:901px){.layout{grid-template-columns:minmax(420px,.92fr) minmax(0,1.08fr)}.guidebody{grid-template-columns:145px minmax(0,1fr)}.guidebody .steps{padding:10px}}
 @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 670px}.guidebody{grid-template-columns:minmax(145px,28%) minmax(0,1fr)}.guide{min-height:570px}.stepbody{overflow:visible}.rail{max-height:650px}.guidebody .steps{overflow:visible}}
 @media(max-width:560px){.guidebody{display:grid;grid-template-columns:minmax(0,1fr)}.rail{max-height:none;border-right:0;border-bottom:1px solid #dce3dd}.rail .stepnav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rail .visual{max-width:220px;align-self:center;width:100%;max-height:none}.guidebody .steps{min-height:0}.layout{grid-template-rows:auto auto 720px}.editor-guide-bar{flex-wrap:wrap}#editorGuideMessage{flex-basis:100%}}
+
+/* Letter Studio v4: adjustable studio, persistent instruction illustration. */
+.layout{--guide-width:42%;--rail-width:185px;--preview-height:clamp(130px,24vh,245px);grid-template-columns:minmax(0,var(--guide-width)) 10px minmax(0,1fr);column-gap:3px}
+.workspace{grid-column:3;grid-row:2}
+#studioDivider{grid-column:2;grid-row:2}
+.guidebody{grid-template-columns:minmax(0,var(--rail-width)) 9px minmax(0,1fr)}
+.rail{padding:13px 9px;overflow:hidden;border-right:0}
+.rail .stepnav{overflow:auto;flex:1;min-height:0;padding-right:2px;scrollbar-width:thin}
+.rail .stepnav .stepitem{min-height:39px}
+.rail .stepselect{min-height:39px}
+.rail-group{display:flex;align-items:center;min-height:42px;padding:0 8px;border:1px solid #dce5df;background:#f9fbf8;border-radius:7px;gap:5px;text-align:left;color:#405e5f;font-size:12px;font-weight:800;flex:none;width:100%}
+.rail-group.active{background:#dcece7;border-color:#a4c9be;color:#176b73}
+.rail-group .group-name{flex:1}
+.rail-group .group-count{font:700 10px monospace;white-space:nowrap}
+.rail .substep{margin-left:9px}
+.splitter{position:relative;min-width:0;min-height:0;cursor:col-resize;touch-action:none;align-self:stretch;outline:none;background:transparent;border-radius:5px}
+.splitter:before{content:"";position:absolute;left:50%;top:50%;width:4px;height:64px;max-height:80%;border-radius:8px;background:#9cb7b1;transform:translate(-50%,-50%)}
+.splitter:hover:before,.splitter:focus-visible:before,.splitter.dragging:before{background:var(--teal);width:5px}
+.splitter.horizontal{height:10px;cursor:row-resize;flex:none;margin:2px 0}
+.splitter.horizontal:before{height:4px;width:54px;max-height:none}
+.splitter.horizontal:hover:before,.splitter.horizontal:focus-visible:before,.splitter.horizontal.dragging:before{height:5px;width:68px}
+body.letter-resizing,body.letter-resizing *{user-select:none!important}
+body.letter-resizing iframe{pointer-events:none}
+.guidebody .steps{padding:12px 15px 9px}
+.stepbody h3{font-size:clamp(18px,1.35vw,24px);margin:3px 0 6px}
+.stepbody p{font-size:13px;line-height:1.4;margin-bottom:8px}
+.steps .visual{height:auto;display:flex;flex:none;min-height:0;max-height:none;padding:8px 0 0;border:none;overflow:visible}
+.steps .visual .art{height:var(--preview-height);max-height:none;width:100%;aspect-ratio:auto;min-height:0;margin:5px 0 4px}
+.steps .visual #preview{width:100%;height:100%;display:block}
+.steps .visual .vtop{font-size:12px}
+.steps .visual .vfoot{font-size:11px}
+.codehead{margin-top:3px;font-size:10px}
+.typing-note{margin:6px 0!important}
+.check-work{margin-top:8px;padding-top:7px}
+.check-work p{font-size:12px;margin:4px 0 6px}
+.stepfoot{padding-top:6px}
+.guidehead .row #resetPanels{margin-left:auto}
+@media(min-width:901px) and (max-height:820px){.layout{--preview-height:clamp(100px,19vh,170px)}.steps .visual{padding-top:3px}.guidebody .steps{padding:8px 11px}.stepbody p{font-size:12px;line-height:1.3}.steps .visual .art{margin:3px 0}.stepbody h3{font-size:18px}.check-work p{font-size:11px}}
+@media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 760px}.workspace{grid-column:1;grid-row:3}#studioDivider,#railDivider{display:none}.guidebody{grid-template-columns:minmax(135px,27%) minmax(0,1fr)}.rail{max-height:600px}.guidebody .steps{padding:10px}.layout{--preview-height:200px}}
+@media(max-width:560px){.guidebody{grid-template-columns:minmax(0,1fr)}.rail .stepnav{display:flex;max-height:260px}.rail{max-height:none;border-bottom:1px solid #dce3dd}.layout{--preview-height:180px}.steps .visual{height:auto;max-height:none}}
 </style></head>
 <body>
 <header><a class="brand" href="/turtlecourse/"><i>&gt;_</i><span class="brand-label">Draw a Letter</span><span class="brand-sub">Python Turtle Studio</span></a><nav><a href="/turtlecourse/">Turtle course</a><a href="/turtlereference/">Reference</a><a href="/turtleprojects/">Projects</a></nav></header>
@@ -214,15 +254,15 @@ main{max-width:none}
 <div class="layout">
 <aside class="panel side" aria-label="Choose a letter"><div class="row"><strong>Choose a letter</strong><span class="counter">A—Z</span></div><div class="az" id="az"></div><div class="sidelinks"><a href="/turtlereference/#movement/left">Turning commands ↗</a><a href="/turtlereference/#movement/forward">More Turtle help ↗</a><a href="/turtle/" target="_blank" rel="noopener">Open full editor ↗</a></div><div class="sideline">All three levels use movement and turns. The drawing becomes more detailed.</div></aside>
 <section class="panel guide" aria-label="Step-by-step letter tutorial">
-<div class="guidehead"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
+<div class="guidehead"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><button type="button" id="resetPanels" class="tiny" title="Reset panel sizes">Reset layout</button><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
 <div class="levels" id="levels"><button type="button" class="level" data-difficulty="beginner">Beginner<small>Block · few turns</small></button><button type="button" class="level" data-difficulty="medium">Medium<small>Bubble · more turns</small></button><button type="button" class="level" data-difficulty="advanced">Advanced<small>3D · extra detail</small></button></div></div>
-<div class="guidebody"><aside class="rail" aria-label="Build guide"><div class="row"><span>BUILD GUIDE</span><span id="railCount">0 / 0</span></div><div class="rail-progress"><span id="railFill"></span></div><div id="stepnav" class="stepnav"></div><div class="visual"><div class="vtop"><span>Drawing guide <span style="font-weight:600;color:#87928e">· 400 × 400 world</span></span><button type="button" id="gridBtn" class="tiny" aria-pressed="true">Grid on</button></div><div class="art"><svg id="preview" viewBox="-13 -13 126 128" role="img" aria-label="Thick block, bubble or 3D letter drawn using turns and forward movements"></svg></div><div class="vfoot"><span><i class="dot"></i>Current step</span><span id="caption">Preview</span></div></div></aside>
-<div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div class="stepbody"><h3 id="stepTitle"></h3><p id="stepInfo"></p><div class="codehead"><span>TYPE THESE LINES</span><span id="codeProgress" aria-live="polite">Yellow = next</span></div><div id="codeSample" class="code-sample"><canvas id="stepCodeCanvas" tabindex="0" role="img" aria-label="Numbered commands to read and type into the editor"></canvas></div>
+<div class="guidebody"><aside class="rail" aria-label="Build guide"><div class="row"><span>BUILD GUIDE</span><span id="railCount">0 / 0</span></div><div class="rail-progress"><span id="railFill"></span></div><div id="stepnav" class="stepnav"></div></aside>
+<div id="railDivider" class="splitter" role="separator" tabindex="0" aria-label="Resize step sidebar" aria-orientation="vertical" title="Drag to resize step sidebar"></div><div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div class="stepbody"><h3 id="stepTitle"></h3><p id="stepInfo"></p><div class="visual"><div class="vtop"><span>Drawing guide <span style="font-weight:600;color:#87928e">· 400 × 400 world</span></span><button type="button" id="gridBtn" class="tiny" aria-pressed="true">Grid on</button></div><div class="art"><svg id="preview" viewBox="-13 -13 126 128" role="img" aria-label="Thick block, bubble or 3D letter drawn using turns and forward movements"></svg></div><div class="vfoot"><span><i class="dot"></i>Current step</span><span id="caption">Preview</span></div></div><div id="previewDivider" class="splitter horizontal" role="separator" tabindex="0" aria-label="Resize drawing guide" aria-orientation="horizontal" title="Drag to resize drawing guide"></div><div class="codehead"><span>TYPE THESE LINES</span><span id="codeProgress" aria-live="polite">Yellow = next</span></div><div id="codeSample" class="code-sample"><canvas id="stepCodeCanvas" tabindex="0" role="img" aria-label="Numbered commands to read and type into the editor"></canvas></div>
 <p class="typing-note">Type each command in the editor. Yellow shows the next line.</p>
 <div class="check-work"><div class="meta">CHECK YOUR WORK</div><p id="checkPrompt">Run your code and compare the highlighted part of the drawing. Check the step when you are happy with it.</p><button type="button" class="btn" id="runStage">▶ Run this step</button></div></div>
 <div class="stepfoot"><button type="button" class="btn" id="prev">← Previous</button><span class="counter" id="stepCount"></span><button type="button" class="btn primary" id="next">Next step →</button></div>
 </div></div></section>
-<section class="panel workspace" aria-label="Live Python Turtle editor"><div class="workhead"><div><strong>Your Turtle workspace</strong><p>Type your code and press Run. Your work is saved automatically.</p></div><span class="pill">REAL PYTHON · LIVE</span></div><div class="editor-guide-bar"><span id="editorGuideMessage" aria-live="polite">Type the highlighted command.</span><button id="editorScrollTop" type="button">↑ Top</button><button id="editorScrollStep" type="button">↳ This step</button></div><iframe id="turtle" title="Editable Python Turtle editor, Run button, and drawing world" allow="clipboard-write" loading="eager"></iframe><div class="workfoot"><span>Your code stays saved when you switch letters.</span><a href="/turtlereference/" target="_blank" rel="noopener">Command help ↗</a></div></section>
+<div id="studioDivider" class="splitter" role="separator" tabindex="0" aria-label="Resize lesson and Turtle workspace" aria-orientation="vertical" title="Drag to resize lesson and workspace"></div><section class="panel workspace" aria-label="Live Python Turtle editor"><div class="workhead"><div><strong>Your Turtle workspace</strong><p>Type your code and press Run. Your work is saved automatically.</p></div><span class="pill">REAL PYTHON · LIVE</span></div><div class="editor-guide-bar"><span id="editorGuideMessage" aria-live="polite">Type the highlighted command.</span><button id="editorScrollTop" type="button">↑ Top</button><button id="editorScrollStep" type="button">↳ This step</button></div><iframe id="turtle" title="Editable Python Turtle editor, Run button, and drawing world" allow="clipboard-write" loading="eager"></iframe><div class="workfoot"><span>Your code stays saved when you switch letters.</span><a href="/turtlereference/" target="_blank" rel="noopener">Command help ↗</a></div></section>
 </div></main><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 
@@ -268,7 +308,7 @@ var letter="S",level="beginner",step=0,grid=true,steps=[],whole="",previewParts=
 var lessonKey="draw-a-letter-turns-v2";
 var marks={};try{marks=JSON.parse(localStorage.getItem("drawaletter-step-marks-v3")||"{}")||{}}catch(e){}
 function markKey(i){return letter+"/"+level+"/"+i}
-$("turtle").src="/turtle/?embed=course&ui=letters-compact-v1&lesson="+encodeURIComponent(lessonKey)+"&code="+encodeURIComponent("");
+$("turtle").src="/turtle/?embed=course&ui=letters-compact-v1&layoutrev=4&lesson="+encodeURIComponent(lessonKey)+"&code="+encodeURIComponent("");
 function simplify(points, tolerance){
  if(points.length<=2)return points.slice();
  function nearestDistance(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1];var t=(dx*dx+dy*dy)?Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy))):0;return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)}
@@ -432,13 +472,24 @@ function render(){
  $("description").textContent=level==="beginner"?"Few steps. Thick lines. Move forward and turn.":level==="medium"?"More turns and shorter movements make rounder edges.":"Build depth with three layers. No functions or loops.";
  document.querySelectorAll(".level").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.difficulty===level?"true":"false")});
  var nav=$("stepnav");nav.replaceChildren();
- steps.forEach(function(s,i){
-  var item=document.createElement("div");item.className="stepitem"+(i===step?" active":"")+(marks[markKey(i)]?" is-done":"");
+ function addStep(i,sub){
+  var s=steps[i],item=document.createElement("div");item.className="stepitem"+(sub?" substep":"")+(i===step?" active":"")+(marks[markKey(i)]?" is-done":"");
   var btn=document.createElement("button");btn.type="button";btn.className="stepselect";btn.textContent=String(i+1).padStart(2,"0")+" "+s.tab;btn.setAttribute("aria-current",i===step?"step":"false");btn.addEventListener("click",function(){step=i;wantScroll=true;render()});item.appendChild(btn);
   var label=document.createElement("label");label.className="stepcheck";label.title="Mark complete after checking your drawing";
   var check=document.createElement("input");check.type="checkbox";check.checked=!!marks[markKey(i)];check.setAttribute("aria-label","Mark step "+(i+1)+" "+s.tab+" complete");
   check.addEventListener("change",function(){marks[markKey(i)]=check.checked;try{localStorage.setItem("drawaletter-step-marks-v3",JSON.stringify(marks))}catch(e){}item.classList.toggle("is-done",check.checked);refreshRail()});
   label.appendChild(check);item.appendChild(label);nav.appendChild(item);
+ }
+ var groups=[];
+ steps.forEach(function(s,i){if(!groups[s.group])groups[s.group]=[];groups[s.group].push(i)});
+ groups.forEach(function(indices){
+  if(indices.length===1){addStep(indices[0],false);return}
+  var active=indices.includes(step),group=document.createElement("button");group.type="button";group.className="rail-group"+(active?" active":"");group.setAttribute("aria-expanded",String(active));group.dataset.group=indices.join(",");
+  var arrow=document.createElement("span");arrow.textContent=active?"▾":"▸";group.appendChild(arrow);
+  var name=document.createElement("span");name.className="group-name";name.textContent=steps[indices[0]].tab.replace(/ 1$/,"");group.appendChild(name);
+  var count=document.createElement("span");count.className="group-count";group.appendChild(count);
+  group.addEventListener("click",function(){if(!active){step=indices.find(function(i){return !marks[markKey(i)]})??indices[0];render()}});nav.appendChild(group);
+  if(active)indices.forEach(function(i){addStep(i,true)});
  });refreshRail();
  var s=steps[step];
  $("stepTitle").textContent=s.title;$("stepInfo").textContent=s.desc;
@@ -461,6 +512,7 @@ function refreshRail(){
  var done=steps.filter(function(_,i){return marks[markKey(i)]===true}).length;
  $("railCount").textContent=done+" / "+steps.length;
  $("railFill").style.width=(steps.length?100*done/steps.length:0)+"%";
+ document.querySelectorAll(".rail-group").forEach(function(g){var list=g.dataset.group.split(",").map(Number),n=list.filter(function(i){return marks[markKey(i)]===true}).length;g.querySelector(".group-count").textContent=n===list.length?"✓ "+n+"/"+list.length:n+"/"+list.length});
 }
 var cmRef=null,marked=[],highlightTimer=0,wantScroll=true,lastProgress=null;
 function normalize(line){return String(line||"").trim().replace(/\s+/g,"").replace(/'/g,'"')}
@@ -492,10 +544,10 @@ var canvas=$("stepCodeCanvas"),ctx=canvas.getContext("2d");
 function renderCodeExample(p){
  lastProgress=p;
  if(!steps[step])return;
- var lines=steps[step].code.split("\n"),width=Math.max(120,Math.round($("codeSample").clientWidth||300)),row=25,top=9,height=top+lines.length*row+9,dpr=Math.min(window.devicePixelRatio||1,2);
+ var lines=steps[step].code.split("\n"),width=Math.max(120,Math.round($("codeSample").clientWidth||300)),row=window.innerHeight<820?23:26,top=8,height=top+lines.length*row+8,dpr=Math.min(window.devicePixelRatio||1,2);
  canvas.style.height=height+"px";canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
- ctx.font="650 12px ui-monospace,Consolas,monospace";ctx.textBaseline="middle";
+ ctx.font="650 14px ui-monospace,Consolas,monospace";ctx.textBaseline="middle";
  var typed=p?p.typed:0,first=p&&p.earlier?p.first:plannedLine(step);
  lines.forEach(function(line,i){
   var y=top+i*row,active=i===typed&&(!p||p.earlier);
@@ -537,6 +589,28 @@ $("editorScrollTop").addEventListener("click",function(){if(cmRef){cmRef.scrollT
 $("editorScrollStep").addEventListener("click",function(){if(cmRef){var p=progress(cmRef),line=Math.min(p.next,cmRef.lineCount()-1);cmRef.scrollIntoView({line:line,ch:0},35);cmRef.focus()}});
 $("turtle").addEventListener("load",function(){wantScroll=true;scheduleGuideHighlight()});
 $("runStage").addEventListener("click",function(){try{var run=$("turtle").contentDocument.getElementById("runBtn");if(run&&!run.disabled){run.click();return}}catch(e){}tell("Press Run in the Turtle workspace.")});
+(function initSplitters(){
+ var layout=document.querySelector(".layout"),guide=document.querySelector(".guidebody"),art=document.querySelector(".steps .art"),key="drawaletter-panel-sizes-v4",saved={};
+ try{saved=JSON.parse(localStorage.getItem(key)||"{}")||{}}catch(e){}
+ function save(){try{localStorage.setItem(key,JSON.stringify(saved))}catch(e){}}
+ function clamp(v,min,max){return Math.min(Math.max(min,max),Math.max(min,v))}
+ function install(id,property,axis,read,bounds){
+  var el=$(id),drag=false,start=0,initial=0;
+  function set(n,persist){var b=bounds(),v=Math.round(clamp(n,b[0],b[1]));layout.style.setProperty(property,v+"px");el.setAttribute("aria-valuemin",String(b[0]));el.setAttribute("aria-valuemax",String(Math.max(b[0],b[1])));el.setAttribute("aria-valuenow",String(v));if(persist){saved[property]=v;save()}}
+  function restore(){if(window.innerWidth>900||axis==="y"){if(Number.isFinite(saved[property]))set(saved[property],false);else{var b=bounds();el.setAttribute("aria-valuemin",String(b[0]));el.setAttribute("aria-valuemax",String(Math.max(b[0],b[1])));el.setAttribute("aria-valuenow",String(Math.round(read())));}}else layout.style.removeProperty(property)}
+  el.addEventListener("pointerdown",function(e){if(e.button!==0)return;drag=true;start=axis==="x"?e.clientX:e.clientY;initial=read();el.setPointerCapture(e.pointerId);el.classList.add("dragging");document.body.classList.add("letter-resizing");e.preventDefault()});
+  el.addEventListener("pointermove",function(e){if(drag)set(initial+(axis==="x"?e.clientX:e.clientY)-start,true)});
+  function finish(){drag=false;el.classList.remove("dragging");document.body.classList.remove("letter-resizing")}
+  ["pointerup","pointercancel","lostpointercapture"].forEach(function(t){el.addEventListener(t,finish)});
+  el.addEventListener("keydown",function(e){var keys=axis==="x"?["ArrowLeft","ArrowRight"]:["ArrowUp","ArrowDown"];if(keys.includes(e.key)){e.preventDefault();set(read()+(e.key===keys[0]?-20:20),true)}});
+  el.addEventListener("dblclick",function(){delete saved[property];layout.style.removeProperty(property);save();restore()});
+  window.addEventListener("resize",restore);restore();
+ }
+ install("studioDivider","--guide-width","x",function(){return document.querySelector(".guide").getBoundingClientRect().width},function(){return [420,Math.max(420,layout.clientWidth-470)]});
+ install("railDivider","--rail-width","x",function(){return document.querySelector(".rail").getBoundingClientRect().width},function(){return [125,Math.min(290,guide.clientWidth-250)]});
+ install("previewDivider","--preview-height","y",function(){return art.getBoundingClientRect().height},function(){return [90,Math.max(120,Math.min(450,guide.clientHeight-255))]});
+ $("resetPanels").addEventListener("click",function(){saved={};save();["--guide-width","--rail-width","--preview-height"].forEach(function(p){layout.style.removeProperty(p)});try{var reset=$("turtle").contentDocument.getElementById("resetLayout");if(reset)reset.click()}catch(e){}});
+})();
 function readHash(){var m=location.hash.slice(1).match(/^([a-z])\/(beginner|medium|advanced)$/);if(m){letter=m[1].toUpperCase();level=m[2];step=0;markLetters();render()}}
 window.addEventListener("hashchange",readHash);
 var m=location.hash.slice(1).match(/^([a-z])\/(beginner|medium|advanced)$/);
