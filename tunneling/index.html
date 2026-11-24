@@ -1,0 +1,406 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tunneling · Turtle Lab</title><style>
+:root{--bg:#f4f0e9;--paper:#fffdfa;--ink:#253239;--muted:#586770;--subtle:#7a878c;--rule:#dddcd5;--teal:#176b73;--teal-dark:#12515a;--soft:#e8f2f0;--orange:#e18d50;--code:#202a32;--shadow:0 7px 24px #24323d0a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #eeac62;outline-offset:2px}
+button:disabled{cursor:default;opacity:.4}
+a{color:inherit}
+.topbar{background:#fffdf8;border-bottom:1px solid var(--rule)}
+.top-inner{width:min(100% - 42px,1680px);height:59px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:-.015em}
+.brand-mark{width:29px;height:29px;display:grid;place-items:center;border-radius:8px;color:#fff;background:var(--teal);font:800 13px ui-monospace,monospace}
+.brand em{font-style:normal;color:#8a9694;font-weight:650}
+.navlinks{display:flex;align-items:center;gap:18px}
+.navlinks a{text-decoration:none;font-weight:700;font-size:11px;color:#506269}
+.navlinks a:hover{text-decoration:underline;text-underline-offset:4px}
+.shell{width:min(100% - 42px,1680px);margin:auto}
+.intro{padding:25px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:26px}
+.kicker{font:850 11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#b15d39;letter-spacing:.13em;text-transform:uppercase}
+h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;margin:5px 0 9px;font-weight:860}
+.intro p{max-width:680px;margin:0;color:#5a676c;font-size:14px;line-height:1.5}
+.intro-info{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.chip{padding:5px 8px;border-radius:5px;background:#eae6dc;color:#5e645e;font:750 10px/1.2 ui-monospace,Consolas,monospace}
+.chip.accent{background:#e4f0ed;color:#1e615d}
+.intro-mark{border-left:1px solid var(--rule);padding-left:24px;min-width:170px;max-width:230px}
+.intro-mark strong{display:block;font-size:13px}
+.intro-mark small{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.studio{display:grid;grid-template-columns:minmax(355px,400px) minmax(0,1fr);gap:15px;align-items:start}
+.guide,.work-panel{background:var(--paper);border:1px solid var(--rule);border-radius:13px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.guide-top{padding:18px 19px 13px;border-bottom:1px solid #ebe9e1}
+.guide-topline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tiny-label{font:850 10px ui-monospace,Consolas,monospace;letter-spacing:.095em;text-transform:uppercase;color:var(--teal)}
+.step-number{font:750 11px ui-monospace,Consolas,monospace;color:#65747a}
+.progress{height:6px;background:#e9eae3;border-radius:5px;overflow:hidden;margin:12px 0 12px}
+.progress>div{height:100%;width:8%;background:var(--teal);transition:width .2s}
+.step-strip{display:flex;gap:5px;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin}
+.step-tab{white-space:nowrap;border:1px solid #e2e4dc;border-radius:7px;color:#617076;background:#fff;padding:7px 9px;font-size:11px;font-weight:740}
+.step-tab:hover{border-color:#a2c1ba}
+.step-tab[aria-current="step"]{background:#176b73;color:#fff;border-color:#176b73}
+.lesson{padding:20px 19px 19px}
+.lesson h2{font-size:26px;letter-spacing:-.045em;line-height:1.15;margin:0 0 8px}
+.description{margin:0 0 13px;color:#526268;font-size:13px;line-height:1.62}
+.to-do{border-left:3px solid #e5a06b;padding:9px 12px;background:#faf3e9;border-radius:0 7px 7px 0;margin-bottom:16px}
+.to-do strong{display:block;font-size:10px;letter-spacing:.085em;text-transform:uppercase;color:#926037;margin-bottom:4px}
+.to-do p{margin:0;font-size:12px;line-height:1.55}
+.visual-head{display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:8px}
+.visual-head strong{font-size:12px}
+.visual-head span{font:650 10px ui-monospace,Consolas,monospace;color:#889396}
+.scene-visual{position:relative;max-width:286px;width:100%;aspect-ratio:1;margin:0 auto;border:1px solid #cbd8d8;border-radius:8px;overflow:hidden;background:#d4edf4}
+#guideCanvas{width:100%;height:100%;display:block}
+.scene-note{font-size:10px;color:#637177;line-height:1.55;margin:8px 0 11px}
+.preview-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
+.preview-controls label{font-size:10px;font-weight:750;color:#5a6a6e}
+.preview-controls select{font-size:11px;padding:6px 7px;border:1px solid #d9dfd7;border-radius:6px;background:#fff;max-width:155px}
+.grid-check{display:flex;align-items:center;gap:4px}
+.grid-check input{accent-color:#176b73}
+.coord-read{font:10px ui-monospace,Consolas,monospace;color:#718083;margin-left:auto}
+.code-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0 7px}
+.code-head strong{font-size:11px}
+.code-head small{font-size:10px;color:#8a9696}
+.sample{background:var(--code);color:#e5eeed;border-radius:8px;border:1px solid #303f47;overflow:auto;margin:0;max-height:245px;padding:13px 14px;tab-size:4;font:12px/1.66 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.sample code{font:inherit}
+.code-note{font-size:11px;color:#607177;margin:9px 0 14px;line-height:1.6}
+.questions{border-top:1px solid #e6e7e0;padding-top:13px}
+.questions h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a45a37;margin:0 0 5px}
+.questions p{font-size:12px;line-height:1.62;margin:0}
+.help{border:1px solid #e0e3db;border-radius:7px;margin:14px 0 0}
+.help summary{cursor:pointer;font-size:11px;font-weight:760;padding:9px 11px}
+.help p{font-size:11px;color:#5c6d70;line-height:1.65;padding:0 11px 11px;margin:0}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.btn{background:#fff;border:1px solid #d3dcd8;color:#20383d;padding:9px 13px;font-weight:800;font-size:11px;min-height:36px;border-radius:7px}
+.btn:hover{background:#f2f8f5}
+.btn.primary{background:#176b73;border-color:#176b73;color:#fff}
+.btn.primary:hover{background:#12515a}
+.step-saved{font-size:10px;color:#768383}
+.work-panel{position:relative}
+.work-head{padding:14px 17px;min-height:61px;border-bottom:1px solid #e8e7df;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.work-head h2{font-size:15px;letter-spacing:-.018em;margin:0}
+.work-head p{margin:2px 0 0;font-size:11px;color:#718087}
+.work-head .live{font:750 10px ui-monospace,Consolas,monospace;color:#24655d;background:#e7f1ed;border:1px solid #c9e0d9;border-radius:99px;padding:6px 9px;white-space:nowrap}
+.editor-frame{display:block;width:100%;height:min(74vh,770px);min-height:630px;border:0;background:#f0ebe1}
+.work-footer{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #e9e8e2;font-size:11px;color:#627176}
+.work-footer a{font-weight:750;color:#176b73}
+.color-studio{margin-top:15px;border:1px solid var(--rule);border-radius:11px;padding:16px 18px;background:#fffdfa;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.color-studio strong{font-size:13px}
+.color-studio p{margin:3px 0 0;font-size:11px;color:#637277}
+.color-controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.color-controls select{border:1px solid var(--rule);border-radius:7px;background:#fff;padding:7px;font-size:11px}
+.color-controls input[type=color]{width:38px;height:34px;border:1px solid var(--rule);border-radius:5px;background:#fff;padding:3px}
+#colorCode{font:750 11px ui-monospace,Consolas,monospace;color:#32454a;background:#eff2ee;padding:8px 10px;border-radius:6px}
+.foot-resources{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between;margin:20px 0 36px;color:#68787b;font-size:11px}
+.foot-resources a{font-weight:750;color:#176b73}
+.check-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.check-row label{border:1px solid #e1e4df;border-radius:7px;display:flex;gap:7px;align-items:start;padding:8px 10px;font-size:11px;color:#51646a;background:#fafbf8}
+.check-row input{accent-color:var(--teal);margin-top:2px}
+[hidden]{display:none!important}
+@media(max-width:1240px){.studio{grid-template-columns:1fr}.guide{display:grid;grid-template-columns:minmax(315px,1fr) minmax(315px,1fr)}.guide-top{grid-column:1/-1}.lesson{grid-column:1/-1;display:grid;grid-template-columns:1fr minmax(275px,.9fr);gap:0 22px}.lesson h2,.lesson>.description,.lesson>.to-do,.lesson>.code-head,.lesson>.sample,.lesson>.code-note,.lesson>.questions,.lesson>.help,.lesson>.actions{grid-column:1}.lesson>.visual-head,.lesson>.scene-visual,.lesson>.scene-note,.lesson>.preview-controls{grid-column:2}.lesson>.visual-head{grid-row:1}.lesson>.scene-visual{grid-row:2/span 3}.lesson>.scene-note{grid-row:5}.lesson>.preview-controls{grid-row:6}.scene-visual{max-width:350px}.lesson h2{grid-row:1}.lesson>.description{grid-row:2}.lesson>.to-do{grid-row:3}.lesson>.code-head{grid-row:4}.lesson>.sample{grid-row:5}.lesson>.code-note{grid-row:6}.lesson>.questions{grid-row:7}.lesson>.help{grid-row:8}.lesson>.actions{grid-row:9}.editor-frame{height:750px}}
+@media(max-width:740px){.shell,.top-inner{width:min(100% - 24px,1680px)}.navlinks{gap:9px}.navlinks a{font-size:10px}.navlinks a:nth-child(2){display:none}.intro{padding:22px 0 18px}.intro-mark{display:none}.intro p{font-size:12px}.lesson{display:block}.guide-top{padding:13px}.lesson{padding:16px}.scene-visual{max-width:310px}.studio{gap:10px}.editor-frame{height:1020px;min-height:840px}.color-studio{grid-template-columns:1fr}.check-row{grid-template-columns:1fr 1fr}}
+@media(max-width:530px){.brand em,.navlinks a:first-child{display:none}.navlinks a{font-size:10px}.check-row{grid-template-columns:1fr}.color-controls{gap:6px}.color-controls #colorCode{font-size:10px}.work-head .live{font-size:9px}.scene-visual{max-width:290px}.editor-frame{height:1050px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.progress>div{transition:none}}
+
+
+/* Full-screen classroom workspace · compact project toolbar and enlarged visual. */
+:root{--rail-size:clamp(236px,17vw,292px)}
+.top-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.top-identity .brand{gap:7px;white-space:nowrap;letter-spacing:.015em;font-size:11px}
+.top-separator{width:1px;height:24px;background:#d3d5ce;flex:0 0 auto}
+.project-identity{display:flex;gap:9px;align-items:baseline;white-space:nowrap;min-width:0}
+.project-code{color:#a66a4c;font:800 9px ui-monospace,Consolas,monospace;letter-spacing:.06em}
+.project-identity strong{font-size:16px;letter-spacing:-.045em;font-weight:840;color:#253239}
+.title-dot{color:#d78856}
+.top-skills{font:750 9px ui-monospace,Consolas,monospace;color:#5d8079;background:#e8f1ed;padding:5px 7px;border-radius:5px;white-space:nowrap;margin-left:4px}
+@media (min-width:1081px){
+  html,body{width:100%;height:100%;height:100dvh;overflow:hidden}
+  body{display:flex;flex-direction:column}
+  .topbar{flex:0 0 43px;min-height:43px}
+  .top-inner{height:43px;width:min(100% - 26px,1720px)}
+  .navlinks{gap:14px;white-space:nowrap}
+  .navlinks a{font-size:10px}
+  .shell{height:calc(100dvh - 43px);width:min(100% - 26px,1720px);min-height:0;display:flex;flex-direction:column;padding:9px 0 10px}
+  .intro{display:none}
+  .studio{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:clamp(556px,39.2vw,677px) minmax(0,1fr);align-items:stretch;gap:10px}
+  .guide{height:100%;min-height:0;display:grid;grid-template-columns:var(--rail-size) minmax(0,1fr);overflow:hidden}
+  .guide-top{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;padding:12px 11px 11px;background:#f1f5ef;border-right:1px solid #dfe5de;border-bottom:0}
+  .guide-topline{padding:0 2px;gap:6px}
+  .tiny-label{font-size:10px;letter-spacing:.015em;white-space:nowrap}
+  .step-number{font-size:10px;white-space:nowrap}
+  .progress{flex:0 0 5px;height:5px;margin:9px 2px 11px}
+  .step-strip{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(29px,1fr);gap:3px;min-height:0;flex:1 1 auto;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding:0}
+  .step-tab{min-width:0;width:100%;padding:5px 10px;min-height:28px;text-align:left;white-space:nowrap;border:1px solid transparent;border-radius:6px;background:transparent;color:#536366;font-size:11px;line-height:1.3;font-weight:740;box-shadow:none;overflow:hidden;text-overflow:ellipsis}
+  .step-tab:hover{background:#e4eee8;border-color:#ccded3}
+  .step-tab[aria-current="step"]{background:#176b73;border-color:#176b73;color:#fff}
+  .rail-preview{flex:0 0 auto;padding:9px 0 0;margin:9px 0 0;border-top:1px solid #d9dfd8;min-height:0;display:flex;flex-direction:column;align-items:stretch}
+  .visual-head{margin:0 2px 7px}
+  .visual-head strong{font-size:10px;text-transform:uppercase;letter-spacing:.035em}
+  .visual-head span{font-size:9px}
+  .scene-visual{width:min(100%,30dvh,268px);max-width:none;margin:0 auto;aspect-ratio:1/1;border-radius:5px;flex:0 0 auto}
+  .scene-note{display:none}
+  .preview-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin:8px 0 0}
+  .preview-controls label{font-size:10px}
+  .preview-controls select{max-width:122px;padding:5px 6px;font-size:10px}
+  .preview-controls .coord-read{display:none}
+  .guide .lesson{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:16px 18px 12px}
+  .lesson h2{font-size:23px;line-height:1.13;margin:0 0 7px}
+  .description{font-size:12px;line-height:1.52;margin-bottom:10px}
+  .to-do{padding:9px 10px;margin-bottom:11px}
+  .to-do strong{font-size:9px;margin-bottom:4px}
+  .to-do p{font-size:11px;line-height:1.5}
+  .code-head{margin:0 0 7px}
+  .code-head strong{font-size:11px}
+  .sample{font-size:11px;line-height:1.52;padding:10px 11px;max-height:200px;flex:0 1 auto}
+  .code-note{font-size:11px;line-height:1.5;margin:7px 0 11px}
+  .questions{padding-top:10px}
+  .questions h3{font-size:10px;margin:0 0 4px}
+  .questions p{font-size:11px;line-height:1.48}
+  .color-drawer{border:1px solid #e4e7e0;border-radius:7px;margin-bottom:9px;background:#f6faf7;flex:0 0 auto}
+  .color-drawer summary{padding:7px 9px;cursor:pointer;font-size:10px;font-weight:800;color:#356660}
+  .color-drawer summary small{font-weight:550;color:#84928b;margin-left:5px}
+  .color-drawer .color-studio{display:block;border:0;margin:0;padding:2px 9px 10px;background:transparent;box-shadow:none}
+  .color-drawer .color-studio>div:first-child{display:none}
+  .color-drawer .color-controls{display:flex;gap:5px}
+  .color-drawer .color-controls select{padding:5px;max-width:115px;font-size:10px}
+  .color-drawer .color-controls input[type=color]{width:30px;height:29px}
+  .color-drawer #colorCode{font-size:9px;max-width:100%;overflow-wrap:anywhere;padding:5px}
+  .color-drawer .btn{padding:5px 8px;min-height:27px;font-size:9px}
+  .help{margin:9px 0 0}
+  .help summary{padding:6px 9px;font-size:10px}
+  .help p{font-size:10.5px;padding:0 9px 9px}
+  .actions{margin-top:auto;padding-top:12px;flex:0 0 auto;gap:5px}
+  .actions .btn{padding:7px 10px;min-height:32px;font-size:10px}
+  .step-saved{display:none}
+  .work-panel{height:100%;min-height:0;display:flex;flex-direction:column}
+  .work-head{min-height:42px;padding:7px 12px;flex:0 0 auto}
+  .work-head h2{font-size:13px}
+  .work-head p{font-size:10px}
+  .work-head .live{font-size:9px;padding:5px 7px}
+  .editor-frame{width:100%;height:100%;min-height:0;flex:1 1 auto}
+  .work-footer,.foot-resources{display:none}
+}
+@media (min-width:1081px) and (max-height:820px){
+  .shell{padding:6px 0}
+  .guide-top{padding:9px 10px}
+  .progress{margin:6px 2px 8px}
+  .step-strip{grid-auto-rows:minmax(26px,1fr);gap:2px}
+  .step-tab{min-height:25px;padding:3px 8px;font-size:10.5px}
+  .rail-preview{padding-top:6px;margin-top:6px}
+  .scene-visual{width:min(100%,30dvh,254px)}
+  .visual-head{margin-bottom:5px}
+  .preview-controls{margin-top:5px}
+  .preview-controls select{padding:3px 5px}
+  .guide .lesson{padding:12px 14px 9px}
+  .lesson h2{font-size:21px;margin-bottom:6px}
+  .description{font-size:11px;margin-bottom:7px}
+  .to-do{padding:7px 9px;margin-bottom:8px}
+  .sample{max-height:160px;font-size:10.5px;line-height:1.42;padding:8px 9px}
+  .code-note{font-size:10px;margin:5px 0 8px}
+  .questions{padding-top:7px}
+  .questions p{font-size:10px}
+  .color-drawer{margin-bottom:7px}
+  .color-drawer summary{padding:5px 8px}
+  .help{margin-top:6px}
+  .actions{padding-top:8px}
+}
+@media (min-width:1081px) and (max-height:700px){
+  .scene-visual{width:min(100%,27dvh,196px)}
+  .step-strip{grid-auto-rows:minmax(24px,1fr);gap:1px}
+  .step-tab{min-height:23px}
+  .guide-top{padding:6px 9px}
+  .preview-controls{gap:4px}
+  .guide .lesson{padding:10px 12px 7px}
+  .sample{max-height:145px}
+}
+@media(max-width:1270px) and (min-width:1081px){
+  .top-skills{display:none}
+  .project-identity{gap:6px}
+  .project-identity strong{font-size:14px}
+  .navlinks{gap:8px}
+  .navlinks a{font-size:9px}
+}
+@media(max-width:1080px){
+  .top-inner{gap:10px}
+  .project-identity{gap:6px}
+  .project-code{display:none}
+  .project-identity strong{font-size:14px}
+  .top-skills{display:none}
+  .top-separator{height:20px}
+  .studio{display:block}
+  .guide{display:grid;grid-template-columns:minmax(225px,260px) minmax(0,1fr);margin-bottom:12px}
+  .guide-top{display:flex;flex-direction:column;padding:14px 12px;border-right:1px solid var(--rule);border-bottom:0}
+  .step-strip{display:grid;grid-template-columns:1fr;gap:3px;overflow:visible}
+  .step-tab{width:100%;text-align:left;white-space:normal}
+  .rail-preview{padding-top:13px;margin-top:14px;border-top:1px solid var(--rule)}
+  .scene-visual{width:min(100%,238px);max-width:none}
+  .scene-note{display:none}
+  .preview-controls{gap:4px}
+  .preview-controls select{max-width:125px}
+  .preview-controls .coord-read{display:none}
+  .lesson{display:block!important;overflow:visible;padding:18px}
+  .editor-frame{height:790px;min-height:700px}
+  .color-drawer{border:1px solid var(--rule);border-radius:8px;margin:12px 0;padding:8px 10px}
+  .color-drawer summary{font-weight:800;cursor:pointer}
+  .color-drawer .color-studio{display:block;margin:8px 0 0;padding:10px}
+  .color-drawer .color-studio>div:first-child{display:none}
+}
+@media(max-width:650px){
+  .top-inner{width:min(100% - 20px,1680px)}
+  .top-identity .brand{font-size:0;gap:0}
+  .top-identity .brand-mark{font-size:13px}
+  .top-separator{display:none}
+  .project-identity strong{font-size:13px}
+  .navlinks a:first-child,.navlinks a:last-child{display:none}
+  .navlinks a{font-size:10px}
+  .guide{grid-template-columns:1fr}
+  .guide-top{border-right:0;border-bottom:1px solid var(--rule)}
+  .step-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .step-tab{text-align:center;font-size:10px;padding:8px 4px}
+  .rail-preview{display:grid;grid-template-columns:minmax(0,210px) 1fr;gap:8px}
+  .rail-preview .visual-head{grid-column:1/-1}
+  .rail-preview .preview-controls{align-self:center}
+  .scene-visual{width:100%;max-width:205px}
+  .color-drawer .color-controls{justify-content:flex-start}
+}
+
+
+/* Etch A Sketch: larger coordinate preview, roomy lesson, original split-panel studio. */
+:root{--rail-size:clamp(248px,19.5vw,306px)}
+.scene-visual{background:#fff;border-color:#d9dbd5}
+.step-tab{font-variant-numeric:tabular-nums}
+.preview-controls{justify-content:center}
+.preview-controls .grid-check{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:750;color:#516269}
+.preview-controls input{accent-color:var(--teal)}
+.preview-controls .coord-read{margin:0}
+.tip-pill{display:inline-flex;border-radius:6px;padding:6px 8px;background:#edf4f0;color:#356b62;font-size:10px;font-weight:750;white-space:nowrap}
+.lesson .code-note{color:#637277}
+@media(min-width:1081px){
+  .studio{grid-template-columns:clamp(625px,44vw,780px) minmax(0,1fr)}
+  .scene-visual{width:min(100%,36dvh,290px);max-width:290px}
+  .guide .lesson{padding:18px 19px 14px}
+  .lesson h2{font-size:25px}
+  .description{font-size:12px}
+  .to-do p{font-size:12px}
+  .sample{font-size:12px;max-height:205px}
+  .step-strip{grid-auto-rows:minmax(28px,1fr)}
+  .step-tab{font-size:11px;padding-left:10px}
+  .preview-controls{margin-top:8px}
+}
+@media(min-width:1081px) and (max-height:820px){
+  .studio{grid-template-columns:clamp(605px,43vw,750px) minmax(0,1fr)}
+  .scene-visual{width:min(100%,32dvh,265px)}
+  .guide .lesson{padding:12px 14px 9px}
+  .lesson h2{font-size:21px}
+  .description,.to-do p{font-size:11px}
+  .sample{font-size:11px;max-height:165px}
+  .step-strip{grid-auto-rows:minmax(24px,1fr)}
+  .step-tab{font-size:10px}
+}
+@media(min-width:1081px) and (max-height:700px){
+  .scene-visual{width:min(100%,25dvh,210px)}
+  .step-strip{grid-auto-rows:minmax(22px,1fr)}
+  .guide .lesson{padding:10px 12px 7px}
+}
+@media(max-width:1080px){.rail-preview{min-width:0}.scene-visual{width:min(100%,270px);max-width:270px}}
+@media(max-width:650px){.rail-preview .scene-visual{max-width:205px}.step-strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Guided typing: keep the original classroom layout and step navigation. */
+
+.etch-code-sample{padding:0!important;white-space:normal;overflow:auto}
+.etch-code-sample canvas{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y;cursor:default}
+.etch-code-sample canvas:focus-visible{outline:2px solid #ffd35d;outline-offset:-3px}
+.code-head #codeProgress{font-weight:700;color:#98662b}
+.teacher-trigger{position:fixed;bottom:2px;left:2px;z-index:30;display:grid;place-items:center;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:transparent;color:#536b64;opacity:.24;font-size:17px;cursor:pointer}
+.teacher-trigger:hover,.teacher-trigger:focus-visible{opacity:1;background:#d9e6df}
+.teacher-dialog{width:min(730px,calc(100vw - 26px));max-height:86dvh;padding:20px;background:#fffdfa;color:#253239;border:1px solid #cdd8d4;border-radius:12px;box-shadow:0 24px 80px #112b325e}
+.teacher-dialog::backdrop{background:rgba(18,35,39,.62)}
+.teacher-top{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.teacher-top small{font:750 10px ui-monospace,monospace;color:#176b73;letter-spacing:.1em}
+.teacher-top h2{margin:3px 0 7px;font-size:24px;letter-spacing:-.035em}
+.teacher-dialog p{font-size:12px;color:#627176;margin:2px 0 12px}
+.teacher-x{font-size:26px;line-height:1;border:0;background:none;color:#5e6e70;cursor:pointer}
+.teacher-code{padding:15px 18px;margin:0;overflow:auto;max-height:55dvh;white-space:pre;background:#202a32;color:#f1f5f3;border-radius:8px;font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;user-select:text}
+.teacher-actions{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+@media print{.teacher-trigger,.teacher-dialog{display:none!important}}
+
+/* Draggable classroom panes. The 11-step guide and the existing Turtle editor remain in place. */
+@media(min-width:1081px){
+ .studio{grid-template-columns:minmax(0,var(--etch-guide-width,44%)) 10px minmax(0,1fr)!important;gap:0!important}
+ .studio>.guide{grid-column:1;grid-row:1;margin-right:0}
+ .studio>.studio-divider{grid-column:2;grid-row:1}
+ .studio>.work-panel{grid-column:3;grid-row:1}
+ .guide{grid-template-columns:minmax(0,var(--etch-rail-width,290px)) 9px minmax(0,1fr)!important}
+ .guide>.guide-top{grid-column:1;grid-row:1;border-right:0}
+ .guide>.guide-divider{grid-column:2;grid-row:1}
+ .guide>.lesson{grid-column:3;grid-row:1}
+}
+.studio-divider,.guide-divider{position:relative;cursor:col-resize;touch-action:none;user-select:none;background:#f4f0e9;min-width:0}
+.guide-divider{background:#e7eee8}
+.studio-divider::before,.guide-divider::before{content:"";position:absolute;z-index:3;top:42%;bottom:42%;left:calc(50% - 2px);width:4px;min-height:32px;background:#b5c9c5;border-radius:8px}
+.studio-divider:hover::before,.studio-divider:focus-visible::before,.studio-divider.dragging::before,.guide-divider:hover::before,.guide-divider:focus-visible::before,.guide-divider.dragging::before{background:#176b73}
+body.etch-resizing iframe{pointer-events:none}
+body.etch-resizing,body.etch-resizing *{cursor:col-resize!important;user-select:none!important}
+.experiment-stage{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:5px 8px;margin:0 0 8px;background:#e9f1ed;border:1px solid #d4e4dd;border-radius:6px;color:#176b73;font:800 9px/1.4 ui-monospace,SFMono-Regular,monospace;letter-spacing:.03em}
+.experiment-stage>span:last-child{color:#527c70;white-space:nowrap}
+.run-experiment{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:8px}
+.run-experiment .btn{padding:5px 9px;min-height:30px;border-color:#add4c8;color:#145b60;background:#eef7f4}
+.run-experiment span{font-size:10px;color:#657875}
+.etch-line-guide{display:flex!important;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.etch-line-guide .etch-guide-text{flex:1 1 210px}
+.etch-line-buttons{display:flex;gap:5px;flex-shrink:0}
+.etch-line-buttons button{font:750 11px ui-sans-serif,system-ui;padding:4px 9px;background:#fff8e2;border:1px solid #bba772;border-radius:5px;cursor:pointer;color:#4f482e}
+.etch-line-buttons button:hover{background:#fff}
+@media(max-width:1080px){.studio-divider,.guide-divider{display:none!important}}
+
+/* Instruction bar stays outside the iframe so CodeMirror owns its own height. */
+.editor-guide-bar{height:32px;min-height:32px;flex:0 0 32px;display:flex;align-items:center;gap:7px;box-sizing:border-box;padding:3px 9px;background:#edf3ef;border-bottom:1px solid #d0e0d9;color:#35585b;font:700 10px/1.3 ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+#editorGuideMessage{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.editor-guide-actions{display:flex;flex:0 0 auto;gap:5px}
+.editor-guide-actions button{border:1px solid #c5d6d0;border-radius:5px;padding:3px 8px;background:#fff;color:#31565c;font:750 10px/1.3 ui-sans-serif,system-ui;cursor:pointer}
+.editor-guide-actions button:hover{background:#e5f4ef}
+.work-panel{min-height:0}
+
+/* Small visuals within the instructions, not just in the left preview. */
+.instruction-visual{margin:0 0 9px;padding:5px;border:1px solid #dce5df;border-radius:8px;background:#f9fbf8;flex:0 0 auto}
+.instruction-visual canvas{display:block;width:100%;height:auto;max-height:190px;object-fit:contain;border-radius:5px}
+.instruction-visual figcaption{text-align:center;margin:4px 3px 0;color:#526e6c;font-size:10px;line-height:1.3;font-weight:700}
+@media(min-width:1081px) and (max-height:780px){.instruction-visual canvas{max-height:145px}.instruction-visual{padding:3px;margin-bottom:6px}.instruction-visual figcaption{font-size:9px}}
+
+/* Large click targets; student-selected checkmarks only. */
+.step-strip{grid-auto-rows:minmax(44px,1fr)!important;gap:4px!important}
+.step-item{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;min-width:0;min-height:44px;border-radius:7px;background:transparent;overflow:hidden}
+.step-item .step-tab{display:flex;align-items:center;width:100%;height:100%;min-height:44px!important;padding:8px 6px 8px 11px!important;line-height:1.3;text-align:left;font-size:11px!important;font-weight:760;color:#536366;background:transparent!important;border:none!important;border-radius:0!important;overflow:hidden;text-overflow:ellipsis}
+.step-item .step-tab:hover{background:#e3eee8!important}
+.step-mark-target{width:44px;height:100%;min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:0 7px 7px 0}
+.step-mark-target:hover{background:#e3eee8}
+.step-check{width:21px;height:21px;margin:0;flex:0 0 auto;cursor:pointer;accent-color:#176b73}
+.step-item.is-active{background:#176b73!important}
+.step-item.is-active .step-tab{background:transparent!important;color:#fff!important}
+.step-item.is-active .step-tab:hover,.step-item.is-active .step-mark-target:hover{background:#125760!important}
+.step-item.is-active .step-check{accent-color:#fff}
+.step-item.is-done:not(.is-active){background:#e4eee8}
+.step-item.is-done:not(.is-active) .step-tab{color:#25685f}
+.step-mark-target:focus-within{outline:2px solid #dc9557;outline-offset:-3px}
+.step-check:focus-visible{outline:2px solid #dc9557;outline-offset:3px}
+@media(max-width:1080px){.step-item{min-height:44px}}
+
+body{height:100dvh;overflow:hidden;display:flex;flex-direction:column}.shell{flex:1;min-height:0;padding:8px 0}.studio{display:grid!important;grid-template-columns:var(--gw,43%) 8px minmax(0,1fr)!important;height:100%;gap:0!important}.guide{display:grid!important;grid-template-columns:var(--rw,40%) 8px minmax(0,1fr)!important;height:100%;margin:0!important}.guide-top,.lesson{min-height:0;overflow:auto}.step-strip{display:flex!important;flex-direction:column;gap:4px;overflow:auto}.step-tab{white-space:normal;text-align:left}.step-row{display:flex;align-items:center;gap:5px}.step-row input{width:17px;height:17px;accent-color:#176b73}.step-row button{flex:1}.divider{cursor:col-resize;background:#d9e3de;touch-action:none;min-width:8px}.divider:hover{background:#176b73}.work-panel{display:flex;flex-direction:column;height:100%;min-height:0}.workspace{display:grid;grid-template-columns:var(--cw,48%) 8px minmax(0,1fr);flex:1;min-height:0}.editor{display:flex;flex-direction:column;min-width:0;min-height:0;background:#202a32;color:white}.editing{display:flex;flex:1;min-height:0;overflow:hidden}.numbers{margin:0;padding:12px 7px;color:#a9b8bf;text-align:right;font:14px/24px monospace;overflow:hidden;white-space:pre;user-select:none}textarea{resize:none;flex:1;min-width:0;border:0;outline:none;background:#202a32;color:#fff;font:14px/24px monospace;padding:12px 8px;white-space:pre;tab-size:4}.world{padding:12px;min-width:0;overflow:auto}.world canvas{width:100%;max-width:500px;display:block;margin:auto;border:1px solid #725a42}.toolbar{display:flex;gap:8px;padding:8px;border-bottom:1px solid #ddd}.status{padding:10px;font-size:12px;white-space:pre-wrap}.scene-visual{width:100%!important;max-width:300px!important;background:#d0b28a}.subdiagram{width:100%;display:block;border-radius:7px;border:1px solid #d9dfd7;margin:8px 0}.step-code{width:100%;display:block}.compass{font:12px monospace;text-align:center;margin:8px 0;color:#176b73}.rubric{font-size:11px}.rubric td,.rubric th{padding:5px;border-bottom:1px solid #ddd;text-align:left}.rubric table{border-collapse:collapse;width:100%}@media(max-width:900px){body{height:auto;overflow:auto}.studio{display:block!important}.guide{height:auto;min-height:500px}.workspace{min-height:540px}.work-panel{height:650px}.divider{display:none}}
+</style></head><body><header class="topbar"><div class="top-inner"><div class="top-identity"><a class="brand" href="/turtle/"><span class="brand-mark">&gt;_</span> TURTLE LAB</a><div class="project-identity"><span class="project-code">CODEHS 2.2.8</span><strong>Tunneling<span class="title-dot">.</span></strong></div><span class="top-skills">TURNING · 5 POINTS</span></div><nav class="navlinks"><a href="/turtlereference/">Command reference ↗</a></nav></div></header><div class="shell"><main class="studio" id="studio"><section class="guide" id="guide"><div class="guide-top"><div class="guide-topline"><span class="tiny-label">Build guide</span><span id="count" class="step-number"></span></div><div class="progress"><div id="progress"></div></div><nav class="step-strip" id="steps"></nav><div class="rail-preview"><div class="visual-head"><strong>Maze reference</strong><span>400 × 400</span></div><div class="scene-visual"><canvas id="reference" width="400" height="400"></canvas></div><div class="compass">↑ 90° · → 0° · ↓ 270° · ← 180°</div></div></div><div class="divider" id="railDrag" role="separator" tabindex="0" aria-label="Resize step list"></div><div class="lesson"><h2 id="title"></h2><p class="description" id="desc"></p><div class="to-do"><strong>Your task</strong><p id="task"></p></div><canvas class="subdiagram" id="diagram" width="400" height="220"></canvas><div class="code-head"><strong>Type these lines</strong><small>Read and type manually</small></div><div class="sample" id="sample"><canvas class="step-code" id="example" width="400" height="90"></canvas></div><p class="code-note" id="note"></p><div class="questions"><h3>Check your work</h3><p id="check"></p></div><details class="help"><summary>Assignment rubric</summary><div class="rubric" style="padding:8px"><table><tr><th>Category</th><th>Advanced goal</th></tr><tr><td>Syntax</td><td>No errors</td></tr><tr><td>Obstacles</td><td>No collisions</td></tr><tr><td>Commands</td><td>Use turning commands</td></tr><tr><td>Readability</td><td>Clear, efficient code</td></tr><tr><td>Execution</td><td>Star, facing down</td></tr></table></div></details><div class="actions"><button class="btn" id="prev">← Previous</button><button class="btn primary" id="next">Next step →</button></div></div></section><div class="divider" id="mainDrag" role="separator" tabindex="0" aria-label="Resize guide"></div><section class="work-panel"><div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type, run, and compare. Each square is 50 pixels.</p></div><span class="live">MAZE PRACTICE</span></div><div class="workspace" id="workspace"><div class="editor"><div class="toolbar"><button class="btn primary" id="run">▶ Run</button><button class="btn" id="reset">Reset code</button></div><div class="editing"><pre class="numbers" id="numbers">1</pre><textarea id="code" spellcheck="false" aria-label="Python turtle code"></textarea></div><div class="status" id="status" aria-live="polite">Tracy begins facing a random direction.</div></div><div class="divider" id="codeDrag" role="separator" tabindex="0" aria-label="Resize code editor"></div><div class="world"><div class="visual-head"><strong>Turtle World</strong><span>50 px per square</span></div><canvas id="world" width="400" height="400"></canvas></div></div></section></main></div><script>
+const $=id=>document.getElementById(id);
+const dirt=['00000001','01011001','01111001','00000011','11101011','10001110','11001110','00000010'];
+const worms=[[0,0],[5,1],[1,2],[7,3],[4,4],[2,5],[6,6],[3,7]];
+const route=[[0,7],[2,7],[2,6],[3,6],[3,3],[5,3],[5,2],[6,2],[6,0],[2,0],[2,1]];
+const heads=[0,90,0,90,0,90,0,90,180,270];
+const titles=['Start facing east','Move up one square','Move right one square','Climb three squares','Cross two squares','Move up one square','Move right one square','Climb to the top','Cross the top','Reach the star'];
+const steps=heads.map((h,i)=>{let a=route[i],b=route[i+1],n=(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1]))*50;return {h,n,title:titles[i],a,b,lines:[(i===0?'setheading':'seth')+'('+h+')','forward('+n+')']};});
+let current=0,marks=JSON.parse(localStorage.getItem('tunnel-marks')||'[]');
+function star(c,x,y){c.fillStyle='#ffdf36';c.beginPath();for(let i=0;i<10;i++){let a=-Math.PI/2+i*Math.PI/5,r=i%2?6:14;c.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r)}c.closePath();c.fill()}
+function turtle(c,x,y,h){c.save();c.translate(x,y);c.rotate(-h*Math.PI/180);c.fillStyle='#087c24';for(let a of [-1,1])for(let b of [-1,1]){c.beginPath();c.ellipse(a*6,b*7,4,3,a*b*.5,0,7);c.fill()}c.beginPath();c.ellipse(0,0,9,6,0,0,7);c.fill();c.beginPath();c.arc(10,0,4,0,7);c.fill();c.restore()}
+function board(canvas,path=[],heading=0,highlight=false){let c=canvas.getContext('2d');c.clearRect(0,0,400,400);for(let y=0;y<8;y++)for(let x=0;x<8;x++){c.fillStyle=dirt[y][x]==='1'?'#a32628':'#d0b28a';c.fillRect(x*50,y*50,50,50);c.strokeStyle='#c7a565';c.strokeRect(x*50,y*50,50,50)}for(let [x,y] of worms){c.beginPath();c.strokeStyle='#f7b6b9';c.lineWidth=4;c.lineCap='round';for(let i=0;i<=24;i++){let px=x*50+13+i,py=y*50+25+Math.sin(i*.52)*2;i?c.lineTo(px,py):c.moveTo(px,py)}c.stroke()}star(c,125,75);if(highlight){let a=route[current],b=route[current+1];c.strokeStyle='#fff4a6';c.lineWidth=5;c.strokeRect(b[0]*50+3,b[1]*50+3,44,44);c.beginPath();c.moveTo(a[0]*50+25,a[1]*50+25);c.lineTo(b[0]*50+25,b[1]*50+25);c.stroke()}if(path.length){c.beginPath();c.strokeStyle='#087c24';c.lineWidth=3;path.forEach(([x,y],i)=>i?c.lineTo(x*50+25,y*50+25):c.moveTo(x*50+25,y*50+25));c.stroke();let [x,y]=path.at(-1);turtle(c,x*50+25,y*50+25,heading)}}
+function diagram(s){let c=$('diagram').getContext('2d');c.fillStyle='#f1f5ef';c.fillRect(0,0,400,220);let dx=s.b[0]-s.a[0],dy=s.b[1]-s.a[1],n=s.n/50,scale=Math.min(52,140/n),x=200-dx*scale/2,y=100-dy*scale/2;for(let i=0;i<=n;i++){let px=x+dx/n*i*scale,py=y+dy/n*i*scale;c.fillStyle=i===n?'#d6eadc':'#e8e0d0';c.fillRect(px-scale/2,py-scale/2,scale,scale);c.strokeStyle='#afbaa9';c.strokeRect(px-scale/2,py-scale/2,scale,scale)}c.strokeStyle='#176b73';c.lineWidth=4;c.beginPath();c.moveTo(x,y);c.lineTo(x+dx*scale,y+dy*scale);c.stroke();turtle(c,x,y,s.h);c.fillStyle='#176b73';c.font='bold 20px system-ui';c.textAlign='center';c.fillText(n+' × 50 = '+s.n+' pixels',200,195)}
+function render(){let s=steps[current];$('count').textContent=(current+1)+' / '+steps.length;$('progress').style.width=(marks.filter(Boolean).length/steps.length*100)+'%';$('steps').replaceChildren();steps.forEach((a,i)=>{let row=document.createElement('div');row.className='step-row';let input=document.createElement('input');input.type='checkbox';input.checked=!!marks[i];input.setAttribute('aria-label','Mark step '+(i+1)+' complete');input.onchange=()=>{marks[i]=input.checked;localStorage.setItem('tunnel-marks',JSON.stringify(marks));render()};let btn=document.createElement('button');btn.className='step-tab';btn.textContent=(i+1)+'. '+a.title;btn.setAttribute('aria-current',i===current?'step':'false');btn.onclick=()=>{current=i;render()};row.append(input,btn);$('steps').append(row)});$('title').textContent=s.title;$('desc').textContent=current===0?'Tracy is stuck underground and starts facing a random direction. Set an absolute heading before moving.':'Use an absolute heading to turn Tracy before moving.';$('task').textContent='Face '+({0:'east',90:'north',180:'west',270:'south'}[s.h])+' and travel '+s.n/50+' grid space(s).';$('note').textContent='Each grid space is 50 pixels. seth() is short for setheading().';$('check').textContent=current===9?'Tracy should be on the star facing down. Run several times, then submit your own code in CodeHS.':'Run your code. Tracy should reach the highlighted square without touching dirt or worms. Check off the step yourself.';board($('reference'),route.slice(0,current+2),s.h,true);diagram(s);let c=$('example').getContext('2d');c.clearRect(0,0,400,90);c.font='17px monospace';s.lines.forEach((l,i)=>{c.fillStyle=i===0?'#ffe08a':'#e5eeed';c.fillText(String(current*2+i+1).padStart(2,' ')+'   '+l,10,29+i*32)});$('prev').disabled=current===0;$('next').disabled=current===9}
+let code=$('code');code.value=localStorage.getItem('tunnel-code')||'';function lineNums(){ $('numbers').textContent=code.value.split('\n').map((_,i)=>i+1).join('\n');$('numbers').scrollTop=code.scrollTop;localStorage.setItem('tunnel-code',code.value)}code.oninput=lineNums;code.onscroll=()=>{$('numbers').scrollTop=code.scrollTop};lineNums();
+function run(){let h=Math.floor(Math.random()*360),x=0,y=7,path=[[x,y]],message='';let lines=code.value.split('\n');outer:for(let i=0;i<lines.length;i++){let l=lines[i].split('#')[0].trim();if(!l)continue;let m=l.match(/^(setheading|seth|left|right|forward|backward)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)$/);if(!m){message='Line '+(i+1)+': use a valid turning or movement command.';break}let n=Number(m[2]);if(m[1]==='setheading'||m[1]==='seth')h=n;else if(m[1]==='left')h+=n;else if(m[1]==='right')h-=n;else{if(m[1]==='backward')n=-n;let rad=h*Math.PI/180,dx=Math.cos(rad)*n/50,dy=-Math.sin(rad)*n/50;let count=Math.min(10000,Math.max(1,Math.ceil(Math.abs(n)/2)));let ox=x,oy=y;for(let k=1;k<=count;k++){x=ox+dx*k/count;y=oy+dy*k/count;let a=Math.round(x),b=Math.round(y);if(a<0||a>7||b<0||b>7||dirt[b][a]==='1'||worms.some(w=>w[0]===a&&w[1]===b)){path.push([x,y]);message='Line '+(i+1)+': Tracy hit an obstacle or left the maze.';break outer}}path.push([x,y])}}board($('world'),path,h);if(!message)message=Math.hypot(x-2,y-1)<.01?(Math.abs(((h%360+360)%360)-270)<.01?'Success! Tracy reached the star facing down.':'Tracy reached the star. Turn her to face down.'):'Tracy has not reached the star yet.';$('status').textContent=message}
+$('run').onclick=run;$('reset').onclick=()=>{if(confirm('Clear your practice code?')){code.value='';lineNums();board($('world'),[[0,7]],Math.random()*360);$('status').textContent='Tracy begins facing a random direction.'}};$('prev').onclick=()=>{if(current>0){current--;render()}};$('next').onclick=()=>{if(current<9){current++;render()}};['copy','cut','contextmenu','dragstart','selectstart'].forEach(t=>$('sample').addEventListener(t,e=>e.preventDefault()));
+function resize(id,container,variable,min,max){let d=$(id),p=$(container);let set=v=>p.style.setProperty(variable,Math.max(min,Math.min(p.clientWidth-max,v))+'px');d.onpointerdown=e=>{d.setPointerCapture(e.pointerId);d.onpointermove=e=>set(e.clientX-p.getBoundingClientRect().left);d.onpointerup=()=>d.onpointermove=null;d.onlostpointercapture=()=>d.onpointermove=null};d.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();set(d.offsetLeft-p.offsetLeft+(e.key==='ArrowRight'?20:-20))}}}resize('mainDrag','studio','--gw',440,380);resize('railDrag','guide','--rw',150,220);resize('codeDrag','workspace','--cw',160,160);render();board($('world'),[[0,7]],Math.random()*360);
+</script></body></html>
