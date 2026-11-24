@@ -247,6 +247,19 @@ body.letter-resizing iframe{pointer-events:none}
 @media(min-width:901px) and (max-height:820px){.layout{--preview-height:clamp(100px,19vh,170px)}.steps .visual{padding-top:3px}.guidebody .steps{padding:8px 11px}.stepbody p{font-size:12px;line-height:1.3}.steps .visual .art{margin:3px 0}.stepbody h3{font-size:18px}.check-work p{font-size:11px}}
 @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 760px}.workspace{grid-column:1;grid-row:3}#studioDivider,#railDivider{display:none}.guidebody{grid-template-columns:minmax(135px,27%) minmax(0,1fr)}.rail{max-height:600px}.guidebody .steps{padding:10px}.layout{--preview-height:200px}}
 @media(max-width:560px){.guidebody{grid-template-columns:minmax(0,1fr)}.rail .stepnav{display:flex;max-height:260px}.rail{max-height:none;border-bottom:1px solid #dce3dd}.layout{--preview-height:180px}.steps .visual{height:auto;max-height:none}}
+
+/* Compare actual outputs before picking a level. */
+.levels{gap:6px;margin-top:8px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.levels .level{display:flex;align-items:center;gap:6px;text-align:left;padding:6px;min-height:88px;min-width:0;border-radius:8px}
+.level-preview{flex:0 1 70px;width:44%;min-width:34px;height:74px;display:block;background:#fffdfa;border:1px solid #e4e8e1;border-radius:5px}
+.level-text{min-width:0;display:flex;flex-direction:column;gap:2px;line-height:1.2}
+.level-text strong{font-size:12px}
+.level-text small{display:block;font-size:11px;font-weight:800;color:#425b5a;margin:0}
+.level-technique,.level-count{font-size:10px;line-height:1.25;font-weight:650;color:#647773}
+.level-count{font-family:ui-monospace,Consolas,monospace;color:var(--teal)}
+.level[aria-pressed=true]{box-shadow:inset 0 0 0 1px #176b73}
+@media(max-width:1200px){.levels .level{flex-direction:column;text-align:center;gap:3px;min-height:112px;padding:4px}.level-preview{width:100%;height:48px;flex:0 0 48px}.level-text{gap:1px}.level-technique{font-size:9px}}
+@media(min-width:901px) and (max-height:820px){.levels .level{min-height:78px}.level-preview{height:58px}.layout{--preview-height:clamp(88px,16vh,145px)}}
 </style></head>
 <body>
 <header><a class="brand" href="/turtlecourse/"><i>&gt;_</i><span class="brand-label">Draw a Letter</span><span class="brand-sub">Python Turtle Studio</span></a><nav><a href="/turtlecourse/">Turtle course</a><a href="/turtlereference/">Reference</a><a href="/turtleprojects/">Projects</a></nav></header>
@@ -255,7 +268,10 @@ body.letter-resizing iframe{pointer-events:none}
 <aside class="panel side" aria-label="Choose a letter"><div class="row"><strong>Choose a letter</strong><span class="counter">A—Z</span></div><div class="az" id="az"></div><div class="sidelinks"><a href="/turtlereference/#movement/left">Turning commands ↗</a><a href="/turtlereference/#movement/forward">More Turtle help ↗</a><a href="/turtle/" target="_blank" rel="noopener">Open full editor ↗</a></div><div class="sideline">All three levels use movement and turns. The drawing becomes more detailed.</div></aside>
 <section class="panel guide" aria-label="Step-by-step letter tutorial">
 <div class="guidehead"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><button type="button" id="resetPanels" class="tiny" title="Reset panel sizes">Reset layout</button><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
-<div class="levels" id="levels"><button type="button" class="level" data-difficulty="beginner">Beginner<small>Block · few turns</small></button><button type="button" class="level" data-difficulty="medium">Medium<small>Bubble · more turns</small></button><button type="button" class="level" data-difficulty="advanced">Advanced<small>3D · extra detail</small></button></div></div>
+<div class="levels" id="levels" aria-label="Compare finished letters and choose a difficulty">
+<button type="button" class="level" data-difficulty="beginner"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Beginner</strong><small>Solid block</small><span class="level-technique">One pass · simple turns</span><span class="level-count"></span></span></button>
+<button type="button" class="level" data-difficulty="medium"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Medium</strong><small>Outlined bubble</small><span class="level-technique">Two passes · precise turns</span><span class="level-count"></span></span></button>
+<button type="button" class="level" data-difficulty="advanced"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Advanced</strong><small>3D shadow</small><span class="level-technique">Three passes · offset path</span><span class="level-count"></span></span></button></div></div>
 <div class="guidebody"><aside class="rail" aria-label="Build guide"><div class="row"><span>BUILD GUIDE</span><span id="railCount">0 / 0</span></div><div class="rail-progress"><span id="railFill"></span></div><div id="stepnav" class="stepnav"></div></aside>
 <div id="railDivider" class="splitter" role="separator" tabindex="0" aria-label="Resize step sidebar" aria-orientation="vertical" title="Drag to resize step sidebar"></div><div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div class="stepbody"><h3 id="stepTitle"></h3><p id="stepInfo"></p><div class="visual"><div class="vtop"><span>Drawing guide <span style="font-weight:600;color:#87928e">· 400 × 400 world</span></span><button type="button" id="gridBtn" class="tiny" aria-pressed="true">Grid on</button></div><div class="art"><svg id="preview" viewBox="-13 -13 126 128" role="img" aria-label="Thick block, bubble or 3D letter drawn using turns and forward movements"></svg></div><div class="vfoot"><span><i class="dot"></i>Current step</span><span id="caption">Preview</span></div></div><div id="previewDivider" class="splitter horizontal" role="separator" tabindex="0" aria-label="Resize drawing guide" aria-orientation="horizontal" title="Drag to resize drawing guide"></div><div class="codehead"><span>TYPE THESE LINES</span><span id="codeProgress" aria-live="polite">Yellow = next</span></div><div id="codeSample" class="code-sample"><canvas id="stepCodeCanvas" tabindex="0" role="img" aria-label="Numbered commands to read and type into the editor"></canvas></div>
 <p class="typing-note">Type each command in the editor. Yellow shows the next line.</p>
@@ -307,7 +323,7 @@ A:"Build the two slanted sides, then the middle bar.",B:"Make the tall spine, th
 var letter="S",level="beginner",step=0,grid=true,steps=[],whole="",previewParts=[];
 var lessonKey="draw-a-letter-turns-v2";
 var marks={};try{marks=JSON.parse(localStorage.getItem("drawaletter-step-marks-v3")||"{}")||{}}catch(e){}
-function markKey(i){return letter+"/"+level+"/"+i}
+function markKey(i){return letter+"/"+level+"/"+(level==="beginner"?"":"outline-v1/")+i}
 $("turtle").src="/turtle/?embed=course&ui=letters-compact-v1&layoutrev=4&lesson="+encodeURIComponent(lessonKey)+"&code="+encodeURIComponent("");
 function simplify(points, tolerance){
  if(points.length<=2)return points.slice();
@@ -318,27 +334,26 @@ function simplify(points, tolerance){
  var left=simplify(points.slice(0,index+1),tolerance),right=simplify(points.slice(index),tolerance);
  return left.slice(0,-1).concat(right);
 }
+// Soften corners with two smaller turns, including the join of closed paths.
 function smooth(points){
  if(points.length<3)return points.slice();
- var output=[points[0]];
- for(var i=1;i<points.length-1;i++){
-  var before=points[i-1],cur=points[i],after=points[i+1];
+ var closed=points[0][0]===points[points.length-1][0]&&points[0][1]===points[points.length-1][1];
+ var p=closed?points.slice(0,-1):points,output=[];
+ for(var i=0;i<p.length;i++){
+  var cur=p[i];
+  if(!closed&&(i===0||i===p.length-1)){output.push(cur);continue}
+  var before=p[(i+p.length-1)%p.length],after=p[(i+1)%p.length];
   var dx=cur[0]-before[0],dy=cur[1]-before[1],ex=after[0]-cur[0],ey=after[1]-cur[1],l1=Math.hypot(dx,dy),l2=Math.hypot(ex,ey);
-  if(l1<1||l2<1){output.push(cur);continue}
-  var bend=Math.abs(dx*ey-dy*ex)/(l1*l2);
-  if(bend<.12){output.push(cur);continue}
-  var cut=Math.min(8,l1*.25,l2*.25);
-  var p=[cur[0]-dx/l1*cut,cur[1]-dy/l1*cut],q=[cur[0]+ex/l2*cut,cur[1]+ey/l2*cut];
-  output.push(p,[(p[0]+2*cur[0]+q[0])/4,(p[1]+2*cur[1]+q[1])/4],q);
+  if(l1<1||l2<1||Math.abs(dx*ey-dy*ex)/(l1*l2)<.15){output.push(cur);continue}
+  var cut=Math.min(7,l1*.24,l2*.24);
+  output.push([cur[0]-dx/l1*cut,cur[1]-dy/l1*cut],[cur[0]+ex/l2*cut,cur[1]+ey/l2*cut]);
  }
- output.push(points[points.length-1]);
- return output;
+ if(closed)output.push(output[0]);return output;
 }
 function getPaths(){
  if(level==="beginner"&&letter==="S")return [[[82,14],[20,14],[20,50],[80,50],[80,90],[20,90]]];
  if(level==="beginner")return GLYPHS[letter].map(function(p){return simplify(p,10)});
- if(level==="medium")return GLYPHS[letter].map(function(p){return p.slice()});
- return GLYPHS[letter].map(function(p){return simplify(p,3)});
+ return GLYPHS[letter].map(smooth);
 }
 function world(p,dx,dy){return {x:(p[0]-50+(dx||0))*2.9,y:(50-p[1]-(dy||0))*2.9}}
 function norm(a){return (a+540)%360-180}
@@ -377,19 +392,13 @@ function makeLesson(){
   add("Get ready","Start with a thick pen","A chunky block letter uses long forward moves and turns. Lift the pen to get to the first corner.","speed · pensize",function(w){w.write("speed(0)");w.write("pensize(42)");w.write('color("black")')});
   add("Draw "+letter,"Make your block letter",hint[letter]+" Read each turn and forward distance. Lift your pen before jumping to another part of the letter.","forward · left · right",function(w){w.strokes(strokes,0,0)});
  }else if(level==="medium"){
-  add("Get ready","Get ready for a bubble letter","Keep the pen thick. More turning points give your letter rounder edges.","pensize · turns",function(w){w.write("speed(0)");w.write("pensize(46)");w.write('color("black")')});
-  if(strokes.length>1){
-   add("Main shape","Shape the first part","Begin the outside of "+letter+". Look for how shorter moves change the angles.","forward · turns",function(w){w.strokes([strokes[0]],0,0)});
-   add("Finish","Complete the bubble letter",hint[letter]+" The turtle repositions with penup() and turns before the next line.","penup · forward · turns",function(w){w.strokes(strokes.slice(1),0,0)});
-  }else{
-   var p=strokes[0],cut=Math.max(1,Math.floor((p.length-1)/2));
-   add("First half","Follow the first half","Draw the first section with several short movements. Notice how the turning angles shape the letter.","forward · turns",function(w){w.strokes([p.slice(0,cut+1)],0,0)});
-   add("Second half","Complete the letter",hint[letter]+" Continue from the end of the first section.","forward · turns",function(w){w.strokes([p.slice(cut)],0,0)});
-  }
+  add("Get ready","Plan an outlined bubble letter","Use a thick black pen first. Then retrace your path with a narrower white pen to leave a black outline.","pensize · color",function(w){w.write("speed(0)");w.write("pensize(49)");w.write('color("black")')});
+  add("Outer shape","Draw the outer shape","Follow the outer path using forward(), left() and right(). Shorter moves and smaller turns soften the corners.","forward · turns",function(w){w.strokes(strokes,0,0)});
+  add("Hollow center","Retrace with a narrower pen","Change the pen size and color. Lift the pen, turn back to the starting point, and trace the same shape. The black outline will remain visible.","pensize · penup · turns",function(w){w.write("pensize(25)");w.write('color("white")');w.strokes(strokes,0,0)});
  }else{
   var sharp=strokes;
-  add("Get ready","Plan a 3D letter","Use the same movement commands to draw a chunky letter in three layers. The second layer sits up and left of the shadow.","pensize · color",function(w){w.write("speed(0)");w.write("pensize(52)");w.write('color("gray")')});
-  add("Shadow","Draw the offset shadow","First draw the entire letter slightly down and right. It becomes the visible 3D edge behind your letter.","forward · turns",function(w){w.strokes(sharp,7,8)});
+  add("Get ready","Plan a 3D letter","Draw the rounded letter three times: an offset gray shadow, a black face, and a white center. Keep track of your position and heading between layers.","pensize · color",function(w){w.write("speed(0)");w.write("pensize(52)");w.write('color("gray")')});
+  add("Shadow","Draw the offset shadow","First draw the entire letter slightly down and right. It becomes the visible 3D edge behind your letter.","forward · turns",function(w){w.strokes(sharp,6,5)});
   add("Face","Draw the front face","Trace the letter again at its original position in black. You are still using only movement and turns.","forward · left · right",function(w){w.write("pensize(49)");w.write('color("black")');w.strokes(sharp,0,0)});
   add("Outline","Create a hollow center","Follow the same paths once more with a narrow white pen. The black edges and gray shadow stay visible.","pen size · turns",function(w){w.write("pensize(25)");w.write('color("white")');w.strokes(sharp,0,0)});
  }
@@ -459,6 +468,24 @@ function draw(){
  }
  $("caption").textContent=step===0?"Finished "+level+" example":"Step "+(step+1)+" of "+steps.length;
 }
+var comparisonLetter="",comparison={};
+function renderLevelChoices(){
+ if(comparisonLetter!==letter){
+  var chosen=level,activeSteps=steps,activeWhole=whole,activePreview=previewParts;
+  ["beginner","medium","advanced"].forEach(function(d){
+   level=d;makeLesson();
+   comparison[d]={parts:previewParts.slice(),commands:steps.reduce(function(sum,s){return sum+s.code.split("\n").length},0)};
+  });
+  level=chosen;steps=activeSteps;whole=activeWhole;previewParts=activePreview;comparisonLetter=letter;
+ }
+ document.querySelectorAll(".level").forEach(function(b){
+  var d=b.dataset.difficulty,data=comparison[d],out=b.querySelector(".level-preview");out.replaceChildren();
+  data.parts.forEach(function(p){
+   svg("line",{x1:p.x1/2.9+50,y1:50-p.y1/2.9,x2:p.x2/2.9+50,y2:50-p.y2/2.9,stroke:p.color==="white"?"#fffdfa":p.color,"stroke-width":p.width/2.9,"stroke-linecap":"round","stroke-linejoin":"round"},out);
+  });
+  b.querySelector(".level-count").textContent=data.commands+" lines";
+ });
+}
 function markLetters(){
  Array.from($("az").children).forEach(function(btn){btn.setAttribute("aria-current",btn.textContent===letter?"true":"false")})
 }
@@ -469,7 +496,7 @@ function render(){
  $("letterLabel").textContent="LETTER "+letter;
  $("levelNum").textContent=(level==="beginner"?"01":level==="medium"?"02":"03")+" / 03";
  $("title").textContent="Draw a "+(level==="beginner"?"block":level==="medium"?"bubble":"3D")+" "+letter;
- $("description").textContent=level==="beginner"?"Few steps. Thick lines. Move forward and turn.":level==="medium"?"More turns and shorter movements make rounder edges.":"Build depth with three layers. No functions or loops.";
+ $("description").textContent=level==="beginner"?"Draw a solid letter in one pass.":level==="medium"?"Create a hollow center by retracing the letter with a narrower pen.":"Add a third, offset layer for depth. All levels use moves and turns.";renderLevelChoices();
  document.querySelectorAll(".level").forEach(function(b){b.setAttribute("aria-pressed",b.dataset.difficulty===level?"true":"false")});
  var nav=$("stepnav");nav.replaceChildren();
  function addStep(i,sub){
