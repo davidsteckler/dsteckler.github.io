@@ -1,4 +1,13 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tunneling · Turtle Lab</title><style>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e9">
+<meta name="description" content="CodeHS 2.2.8 Tunneling: a step-by-step Tracy Python project with a maze navigation guide, left-hand navigation, and a live Turtle editor.">
+<link rel="canonical" href="https://dsteckler.com/tunneling/">
+<title>Tunneling · Turtle Studio</title>
+<style>
 :root{--bg:#f4f0e9;--paper:#fffdfa;--ink:#253239;--muted:#586770;--subtle:#7a878c;--rule:#dddcd5;--teal:#176b73;--teal-dark:#12515a;--soft:#e8f2f0;--orange:#e18d50;--code:#202a32;--shadow:0 7px 24px #24323d0a}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -264,7 +273,7 @@ h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;marg
 }
 
 
-/* Etch A Sketch: larger coordinate preview, roomy lesson, original split-panel studio. */
+/* Tunneling: larger coordinate preview, roomy lesson, original split-panel studio. */
 :root{--rail-size:clamp(248px,19.5vw,306px)}
 .scene-visual{background:#fff;border-color:#d9dbd5}
 .step-tab{font-variant-numeric:tabular-nums}
@@ -383,24 +392,421 @@ body.etch-resizing,body.etch-resizing *{cursor:col-resize!important;user-select:
 .step-mark-target:focus-within{outline:2px solid #dc9557;outline-offset:-3px}
 .step-check:focus-visible{outline:2px solid #dc9557;outline-offset:3px}
 @media(max-width:1080px){.step-item{min-height:44px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="top-inner">
+  <div class="top-identity"><a class="brand" href="/turtle/"><span class="brand-mark" aria-hidden="true">&gt;_</span> TURTLE LAB</a><span class="top-separator" aria-hidden="true"></span><div class="project-identity"><span class="project-code">CODEHS 2.2.8</span><strong>Tunneling<span class="title-dot">.</span></strong></div><span class="top-skills">TURNING · 5 POINTS</span></div>
+  <nav class="navlinks" aria-label="Related tools">
+   <a href="/gridworld/">Coordinate world</a>
+   <a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a>
+   <a href="/turtle/" target="_blank" rel="noopener">Full sandbox ↗</a>
+  </nav>
+ </div>
+</header>
+<div class="shell">
+ <main class="studio">
+  <section class="guide" aria-label="Tunneling walkthrough">
+   <div class="guide-top">
+    <div class="guide-topline"><span class="tiny-label">Build guide · 10 steps</span><span class="step-number" id="stepCount">01 / 10</span></div>
+    <div class="progress" aria-label="Lesson progress"><div id="progressBar"></div></div>
+    <nav class="step-strip" id="stepStrip" aria-label="Choose a project step"></nav>
+    <div class="rail-preview">
+     <div class="visual-head"><strong id="visualTitle">Drawing guide</strong><span>400 × 400</span></div>
+     <div class="scene-visual"><canvas width="400" height="400" id="guideCanvas" role="img" aria-label="Maze with dirt, worms and destination star"></canvas></div>
+     <p class="scene-note" id="visualCaption">A reference drawing that grows with each step.</p>
+     <div class="preview-controls">
+      <label class="grid-check"><input id="gridToggle" type="checkbox" checked> Grid</label>
+      <label class="grid-check"><input id="outlineToggle" type="checkbox"> Show full route</label>
+      <span class="coord-read" id="coords">x 0 · y 0</span>
+     </div>
+    </div>
+    <button class="teacher-trigger" id="teacherTrigger" type="button" aria-label="Teacher reference" aria-haspopup="dialog">·</button>
+   </div>
+   <div class="guide-divider" id="guideDivider" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Resize step list and lesson instructions" title="Drag to resize step list"></div>
+   <div class="lesson" aria-live="polite">
+    <h2 id="stepTitle">Explore the drawing</h2>
+    <p class="description" id="stepDescription"></p>
+    <div id="experimentStage" class="experiment-stage" hidden><span id="experimentStageLabel"></span><span id="experimentStageCount"></span></div>
+    <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
+    <figure class="instruction-visual" id="substepDiagram" hidden>
+     <canvas id="substepCanvas" width="480" height="226" role="img" aria-label="Current drawing substep illustration"></canvas>
+     <figcaption id="substepCaption"></figcaption>
+    </figure>
+    <div class="code-head"><strong id="codeTitle">Type these lines</strong><small id="codeProgress" aria-live="polite">Yellow = next line</small></div>
+    <div class="sample etch-code-sample" id="codeSample"><canvas id="stepCodeCanvas" role="img" tabindex="0" aria-label="Visual numbered code reference to read and type manually"></canvas></div>
+    <p class="code-note" id="codeNote"></p>
+    <div class="questions"><h3>Check your work</h3><p id="tryText"></p><div class="run-experiment" id="runExperiment" hidden><button class="btn" id="runStage" type="button">▶ Run this test</button><span id="runFeedback">Run and look at Turtle World before moving on.</span></div></div>
+    <details class="help" id="helpBox"><summary>Need a hint?</summary><p id="hintText"></p></details>
+    <div class="actions">
+     <button class="btn" id="prevStep" type="button">← Previous</button>
+     <span class="step-saved" id="savedLabel">Step saves on this device</span>
+     <button class="btn primary" id="nextStep" type="button">Next step →</button>
+    </div>
+   </div>
+  </section>
+  <div class="studio-divider" id="studioDivider" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Resize the guide and Turtle workspace" title="Drag to resize guide and workspace"></div>
+  <section class="work-panel" aria-label="Live Python Turtle editor">
+   <div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type your code, press Run, and compare your drawing.</p></div><span class="live">REAL PYTHON · AUTO-SAVED</span></div>
+    <div class="editor-guide-bar"><span id="editorGuideMessage" aria-live="polite">Type the highlighted command.</span><div class="editor-guide-actions"><button id="editorScrollTop" type="button">↑ Top</button><button id="editorScrollStep" type="button">↳ This step</button></div></div>
+   <iframe id="turtleFrame" class="editor-frame" title="Editable Python Turtle code, Run controls, drawing world and error messages" allow="clipboard-write" loading="eager"></iframe>
+   <div class="work-footer"><span>Your code stays here when you change steps. Save your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
+  </section>
+ </main>
+ <dialog id="teacherDialog" class="teacher-dialog" aria-labelledby="teacherHeading">
+  <div class="teacher-top"><div><small>TEACHER REFERENCE</small><h2 id="teacherHeading">Complete Tunneling code</h2></div><button id="teacherClose" class="teacher-x" type="button" aria-label="Close">×</button></div>
+  <p>Full program with every step together.</p>
+  <pre id="teacherCode" class="teacher-code"></pre>
+  <div class="teacher-actions"><button id="teacherCopy" class="btn" type="button">Copy full code</button><button id="teacherDone" class="btn primary" type="button">Close</button></div>
+ </dialog>
+ <div class="foot-resources"><span>Each square is 50 pixels.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
+</div>
+<script>
 
-body{height:100dvh;overflow:hidden;display:flex;flex-direction:column}.shell{flex:1;min-height:0;padding:8px 0}.studio{display:grid!important;grid-template-columns:var(--gw,43%) 8px minmax(0,1fr)!important;height:100%;gap:0!important}.guide{display:grid!important;grid-template-columns:var(--rw,40%) 8px minmax(0,1fr)!important;height:100%;margin:0!important}.guide-top,.lesson{min-height:0;overflow:auto}.step-strip{display:flex!important;flex-direction:column;gap:4px;overflow:auto}.step-tab{white-space:normal;text-align:left}.step-row{display:flex;align-items:center;gap:5px}.step-row input{width:17px;height:17px;accent-color:#176b73}.step-row button{flex:1}.divider{cursor:col-resize;background:#d9e3de;touch-action:none;min-width:8px}.divider:hover{background:#176b73}.work-panel{display:flex;flex-direction:column;height:100%;min-height:0}.workspace{display:grid;grid-template-columns:var(--cw,48%) 8px minmax(0,1fr);flex:1;min-height:0}.editor{display:flex;flex-direction:column;min-width:0;min-height:0;background:#202a32;color:white}.editing{display:flex;flex:1;min-height:0;overflow:hidden}.numbers{margin:0;padding:12px 7px;color:#a9b8bf;text-align:right;font:14px/24px monospace;overflow:hidden;white-space:pre;user-select:none}textarea{resize:none;flex:1;min-width:0;border:0;outline:none;background:#202a32;color:#fff;font:14px/24px monospace;padding:12px 8px;white-space:pre;tab-size:4}.world{padding:12px;min-width:0;overflow:auto}.world canvas{width:100%;max-width:500px;display:block;margin:auto;border:1px solid #725a42}.toolbar{display:flex;gap:8px;padding:8px;border-bottom:1px solid #ddd}.status{padding:10px;font-size:12px;white-space:pre-wrap}.scene-visual{width:100%!important;max-width:300px!important;background:#d0b28a}.subdiagram{width:100%;display:block;border-radius:7px;border:1px solid #d9dfd7;margin:8px 0}.step-code{width:100%;display:block}.compass{font:12px monospace;text-align:center;margin:8px 0;color:#176b73}.rubric{font-size:11px}.rubric td,.rubric th{padding:5px;border-bottom:1px solid #ddd;text-align:left}.rubric table{border-collapse:collapse;width:100%}@media(max-width:900px){body{height:auto;overflow:auto}.studio{display:block!important}.guide{height:auto;min-height:500px}.workspace{min-height:540px}.work-panel{height:650px}.divider{display:none}}
-</style></head><body><header class="topbar"><div class="top-inner"><div class="top-identity"><a class="brand" href="/turtle/"><span class="brand-mark">&gt;_</span> TURTLE LAB</a><div class="project-identity"><span class="project-code">CODEHS 2.2.8</span><strong>Tunneling<span class="title-dot">.</span></strong></div><span class="top-skills">TURNING · 5 POINTS</span></div><nav class="navlinks"><a href="/turtlereference/">Command reference ↗</a></nav></div></header><div class="shell"><main class="studio" id="studio"><section class="guide" id="guide"><div class="guide-top"><div class="guide-topline"><span class="tiny-label">Build guide</span><span id="count" class="step-number"></span></div><div class="progress"><div id="progress"></div></div><nav class="step-strip" id="steps"></nav><div class="rail-preview"><div class="visual-head"><strong>Maze reference</strong><span>400 × 400</span></div><div class="scene-visual"><canvas id="reference" width="400" height="400"></canvas></div><div class="compass">↑ 90° · → 0° · ↓ 270° · ← 180°</div></div></div><div class="divider" id="railDrag" role="separator" tabindex="0" aria-label="Resize step list"></div><div class="lesson"><h2 id="title"></h2><p class="description" id="desc"></p><div class="to-do"><strong>Your task</strong><p id="task"></p></div><canvas class="subdiagram" id="diagram" width="400" height="220"></canvas><div class="code-head"><strong>Type these lines</strong><small>Read and type manually</small></div><div class="sample" id="sample"><canvas class="step-code" id="example" width="400" height="90"></canvas></div><p class="code-note" id="note"></p><div class="questions"><h3>Check your work</h3><p id="check"></p></div><details class="help"><summary>Assignment rubric</summary><div class="rubric" style="padding:8px"><table><tr><th>Category</th><th>Advanced goal</th></tr><tr><td>Syntax</td><td>No errors</td></tr><tr><td>Obstacles</td><td>No collisions</td></tr><tr><td>Commands</td><td>Use turning commands</td></tr><tr><td>Readability</td><td>Clear, efficient code</td></tr><tr><td>Execution</td><td>Star, facing down</td></tr></table></div></details><div class="actions"><button class="btn" id="prev">← Previous</button><button class="btn primary" id="next">Next step →</button></div></div></section><div class="divider" id="mainDrag" role="separator" tabindex="0" aria-label="Resize guide"></div><section class="work-panel"><div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type, run, and compare. Each square is 50 pixels.</p></div><span class="live">MAZE PRACTICE</span></div><div class="workspace" id="workspace"><div class="editor"><div class="toolbar"><button class="btn primary" id="run">▶ Run</button><button class="btn" id="reset">Reset code</button></div><div class="editing"><pre class="numbers" id="numbers">1</pre><textarea id="code" spellcheck="false" aria-label="Python turtle code"></textarea></div><div class="status" id="status" aria-live="polite">Tracy begins facing a random direction.</div></div><div class="divider" id="codeDrag" role="separator" tabindex="0" aria-label="Resize code editor"></div><div class="world"><div class="visual-head"><strong>Turtle World</strong><span>50 px per square</span></div><canvas id="world" width="400" height="400"></canvas></div></div></section></main></div><script>
-const $=id=>document.getElementById(id);
-const dirt=['00000001','01011001','01111001','00000011','11101011','10001110','11001110','00000010'];
-const worms=[[0,0],[5,1],[1,2],[7,3],[4,4],[2,5],[6,6],[3,7]];
-const route=[[0,7],[2,7],[2,6],[3,6],[3,3],[5,3],[5,2],[6,2],[6,0],[2,0],[2,1]];
-const heads=[0,90,0,90,0,90,0,90,180,270];
-const titles=['Start facing east','Move up one square','Move right one square','Climb three squares','Cross two squares','Move up one square','Move right one square','Climb to the top','Cross the top','Reach the star'];
-const steps=heads.map((h,i)=>{let a=route[i],b=route[i+1],n=(Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1]))*50;return {h,n,title:titles[i],a,b,lines:[(i===0?'setheading':'seth')+'('+h+')','forward('+n+')']};});
-let current=0,marks=JSON.parse(localStorage.getItem('tunnel-marks')||'[]');
-function star(c,x,y){c.fillStyle='#ffdf36';c.beginPath();for(let i=0;i<10;i++){let a=-Math.PI/2+i*Math.PI/5,r=i%2?6:14;c.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r)}c.closePath();c.fill()}
-function turtle(c,x,y,h){c.save();c.translate(x,y);c.rotate(-h*Math.PI/180);c.fillStyle='#087c24';for(let a of [-1,1])for(let b of [-1,1]){c.beginPath();c.ellipse(a*6,b*7,4,3,a*b*.5,0,7);c.fill()}c.beginPath();c.ellipse(0,0,9,6,0,0,7);c.fill();c.beginPath();c.arc(10,0,4,0,7);c.fill();c.restore()}
-function board(canvas,path=[],heading=0,highlight=false){let c=canvas.getContext('2d');c.clearRect(0,0,400,400);for(let y=0;y<8;y++)for(let x=0;x<8;x++){c.fillStyle=dirt[y][x]==='1'?'#a32628':'#d0b28a';c.fillRect(x*50,y*50,50,50);c.strokeStyle='#c7a565';c.strokeRect(x*50,y*50,50,50)}for(let [x,y] of worms){c.beginPath();c.strokeStyle='#f7b6b9';c.lineWidth=4;c.lineCap='round';for(let i=0;i<=24;i++){let px=x*50+13+i,py=y*50+25+Math.sin(i*.52)*2;i?c.lineTo(px,py):c.moveTo(px,py)}c.stroke()}star(c,125,75);if(highlight){let a=route[current],b=route[current+1];c.strokeStyle='#fff4a6';c.lineWidth=5;c.strokeRect(b[0]*50+3,b[1]*50+3,44,44);c.beginPath();c.moveTo(a[0]*50+25,a[1]*50+25);c.lineTo(b[0]*50+25,b[1]*50+25);c.stroke()}if(path.length){c.beginPath();c.strokeStyle='#087c24';c.lineWidth=3;path.forEach(([x,y],i)=>i?c.lineTo(x*50+25,y*50+25):c.moveTo(x*50+25,y*50+25));c.stroke();let [x,y]=path.at(-1);turtle(c,x*50+25,y*50+25,heading)}}
-function diagram(s){let c=$('diagram').getContext('2d');c.fillStyle='#f1f5ef';c.fillRect(0,0,400,220);let dx=s.b[0]-s.a[0],dy=s.b[1]-s.a[1],n=s.n/50,scale=Math.min(52,140/n),x=200-dx*scale/2,y=100-dy*scale/2;for(let i=0;i<=n;i++){let px=x+dx/n*i*scale,py=y+dy/n*i*scale;c.fillStyle=i===n?'#d6eadc':'#e8e0d0';c.fillRect(px-scale/2,py-scale/2,scale,scale);c.strokeStyle='#afbaa9';c.strokeRect(px-scale/2,py-scale/2,scale,scale)}c.strokeStyle='#176b73';c.lineWidth=4;c.beginPath();c.moveTo(x,y);c.lineTo(x+dx*scale,y+dy*scale);c.stroke();turtle(c,x,y,s.h);c.fillStyle='#176b73';c.font='bold 20px system-ui';c.textAlign='center';c.fillText(n+' × 50 = '+s.n+' pixels',200,195)}
-function render(){let s=steps[current];$('count').textContent=(current+1)+' / '+steps.length;$('progress').style.width=(marks.filter(Boolean).length/steps.length*100)+'%';$('steps').replaceChildren();steps.forEach((a,i)=>{let row=document.createElement('div');row.className='step-row';let input=document.createElement('input');input.type='checkbox';input.checked=!!marks[i];input.setAttribute('aria-label','Mark step '+(i+1)+' complete');input.onchange=()=>{marks[i]=input.checked;localStorage.setItem('tunnel-marks',JSON.stringify(marks));render()};let btn=document.createElement('button');btn.className='step-tab';btn.textContent=(i+1)+'. '+a.title;btn.setAttribute('aria-current',i===current?'step':'false');btn.onclick=()=>{current=i;render()};row.append(input,btn);$('steps').append(row)});$('title').textContent=s.title;$('desc').textContent=current===0?'Tracy is stuck underground and starts facing a random direction. Set an absolute heading before moving.':'Use an absolute heading to turn Tracy before moving.';$('task').textContent='Face '+({0:'east',90:'north',180:'west',270:'south'}[s.h])+' and travel '+s.n/50+' grid space(s).';$('note').textContent='Each grid space is 50 pixels. seth() is short for setheading().';$('check').textContent=current===9?'Tracy should be on the star facing down. Run several times, then submit your own code in CodeHS.':'Run your code. Tracy should reach the highlighted square without touching dirt or worms. Check off the step yourself.';board($('reference'),route.slice(0,current+2),s.h,true);diagram(s);let c=$('example').getContext('2d');c.clearRect(0,0,400,90);c.font='17px monospace';s.lines.forEach((l,i)=>{c.fillStyle=i===0?'#ffe08a':'#e5eeed';c.fillText(String(current*2+i+1).padStart(2,' ')+'   '+l,10,29+i*32)});$('prev').disabled=current===0;$('next').disabled=current===9}
-let code=$('code');code.value=localStorage.getItem('tunnel-code')||'';function lineNums(){ $('numbers').textContent=code.value.split('\n').map((_,i)=>i+1).join('\n');$('numbers').scrollTop=code.scrollTop;localStorage.setItem('tunnel-code',code.value)}code.oninput=lineNums;code.onscroll=()=>{$('numbers').scrollTop=code.scrollTop};lineNums();
-function run(){let h=Math.floor(Math.random()*360),x=0,y=7,path=[[x,y]],message='';let lines=code.value.split('\n');outer:for(let i=0;i<lines.length;i++){let l=lines[i].split('#')[0].trim();if(!l)continue;let m=l.match(/^(setheading|seth|left|right|forward|backward)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)$/);if(!m){message='Line '+(i+1)+': use a valid turning or movement command.';break}let n=Number(m[2]);if(m[1]==='setheading'||m[1]==='seth')h=n;else if(m[1]==='left')h+=n;else if(m[1]==='right')h-=n;else{if(m[1]==='backward')n=-n;let rad=h*Math.PI/180,dx=Math.cos(rad)*n/50,dy=-Math.sin(rad)*n/50;let count=Math.min(10000,Math.max(1,Math.ceil(Math.abs(n)/2)));let ox=x,oy=y;for(let k=1;k<=count;k++){x=ox+dx*k/count;y=oy+dy*k/count;let a=Math.round(x),b=Math.round(y);if(a<0||a>7||b<0||b>7||dirt[b][a]==='1'||worms.some(w=>w[0]===a&&w[1]===b)){path.push([x,y]);message='Line '+(i+1)+': Tracy hit an obstacle or left the maze.';break outer}}path.push([x,y])}}board($('world'),path,h);if(!message)message=Math.hypot(x-2,y-1)<.01?(Math.abs(((h%360+360)%360)-270)<.01?'Success! Tracy reached the star facing down.':'Tracy reached the star. Turn her to face down.'):'Tracy has not reached the star yet.';$('status').textContent=message}
-$('run').onclick=run;$('reset').onclick=()=>{if(confirm('Clear your practice code?')){code.value='';lineNums();board($('world'),[[0,7]],Math.random()*360);$('status').textContent='Tracy begins facing a random direction.'}};$('prev').onclick=()=>{if(current>0){current--;render()}};$('next').onclick=()=>{if(current<9){current++;render()}};['copy','cut','contextmenu','dragstart','selectstart'].forEach(t=>$('sample').addEventListener(t,e=>e.preventDefault()));
-function resize(id,container,variable,min,max){let d=$(id),p=$(container);let set=v=>p.style.setProperty(variable,Math.max(min,Math.min(p.clientWidth-max,v))+'px');d.onpointerdown=e=>{d.setPointerCapture(e.pointerId);d.onpointermove=e=>set(e.clientX-p.getBoundingClientRect().left);d.onpointerup=()=>d.onpointermove=null;d.onlostpointercapture=()=>d.onpointermove=null};d.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();set(d.offsetLeft-p.offsetLeft+(e.key==='ArrowRight'?20:-20))}}}resize('mainDrag','studio','--gw',440,380);resize('railDrag','guide','--rw',150,220);resize('codeDrag','workspace','--cw',160,160);render();board($('world'),[[0,7]],Math.random()*360);
-</script></body></html>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var STARTER="";
+var lessonId="tunneling-2-2-8";
+$("turtleFrame").src="/turtle/?embed=course&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(STARTER);
+var steps=[{"tab":"right 2","title":"Set Tracy’s starting direction","description":"Tracy begins facing a random direction each time you run. Set an absolute heading before moving.","task":"Face right and travel 2 grid spaces.","code":"setheading(0)\nforward(100)","note":"Each square is 50 pixels. 2 × 50 = 100. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"0 degrees faces right."},{"tab":"up 1","title":"Move up 1 square","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face up and travel 1 grid space.","code":"seth(90)\nforward(50)","note":"Each square is 50 pixels. 1 × 50 = 50. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"90 degrees faces up."},{"tab":"right 1","title":"Move right 1 square","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face right and travel 1 grid space.","code":"seth(0)\nforward(50)","note":"Each square is 50 pixels. 1 × 50 = 50. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"0 degrees faces right."},{"tab":"up 3","title":"Move up 3 squares","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face up and travel 3 grid spaces.","code":"seth(90)\nforward(150)","note":"Each square is 50 pixels. 3 × 50 = 150. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"90 degrees faces up."},{"tab":"right 2","title":"Move right 2 squares","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face right and travel 2 grid spaces.","code":"seth(0)\nforward(100)","note":"Each square is 50 pixels. 2 × 50 = 100. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"0 degrees faces right."},{"tab":"up 1","title":"Move up 1 square","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face up and travel 1 grid space.","code":"seth(90)\nforward(50)","note":"Each square is 50 pixels. 1 × 50 = 50. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"90 degrees faces up."},{"tab":"right 1","title":"Move right 1 square","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face right and travel 1 grid space.","code":"seth(0)\nforward(50)","note":"Each square is 50 pixels. 1 × 50 = 50. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"0 degrees faces right."},{"tab":"up 2","title":"Move up 2 squares","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face up and travel 2 grid spaces.","code":"seth(90)\nforward(100)","note":"Each square is 50 pixels. 2 × 50 = 100. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"90 degrees faces up."},{"tab":"left 4","title":"Move left 4 squares","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face left and travel 4 grid spaces.","code":"seth(180)\nforward(200)","note":"Each square is 50 pixels. 4 × 50 = 200. seth() is short for setheading().","try":"Run your program. Compare Tracy’s position with the highlighted square. Check off the step when finished.","hint":"180 degrees faces left."},{"tab":"Reach star","title":"Reach the star","description":"Turn Tracy before moving along the highlighted tunnel.","task":"Face down and travel 1 grid space.","code":"seth(270)\nforward(50)","note":"Each square is 50 pixels. 1 × 50 = 50. seth() is short for setheading().","try":"Run several times. Tracy should finish on the star facing down without touching obstacles. Submit in CodeHS.","hint":"270 degrees faces down."}];
+var current=0, showGrid=true, showOutline=false, phaseMap={}, stepMarks={};
+var key="tunneling-guide-v1";
+try{
+ var stored=JSON.parse(localStorage.getItem(key)||"{}");
+ if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));
+ if(typeof stored.grid==="boolean")showGrid=stored.grid;
+ if(typeof stored.outline==="boolean")showOutline=stored.outline;
+ if(stored.phases&&typeof stored.phases==="object")phaseMap=stored.phases;
+ if(stored.stepMarks&&typeof stored.stepMarks==="object")stepMarks=stored.stepMarks;
+}catch(e){}
+$("gridToggle").checked=showGrid;
+$("outlineToggle").checked=showOutline;
+function save(){try{localStorage.setItem(key,JSON.stringify({step:current,grid:showGrid,outline:showOutline,phases:phaseMap,stepMarks:stepMarks}))}catch(e){}}
+function activePhaseIndex(){return Math.max(0,Math.min((steps[current].phases||[]).length-1,Number(phaseMap[current])||0))}
+function activePhase(){return steps[current].phases?steps[current].phases[activePhaseIndex()]:steps[current]}
+function activeCode(){return activePhase().code}
+function advanceLesson(direction){var stages=steps[current].phases||[];var phase=activePhaseIndex();if(direction>0&&phase<stages.length-1){phaseMap[current]=phase+1;render();return;}if(direction<0&&phase>0){phaseMap[current]=phase-1;render();return;}current=direction>0?(current+1)%steps.length:Math.max(0,current-1);render()}
+var strip=$("stepStrip"),stepChecks=[];
+steps.forEach(function(s,i){
+ var row=document.createElement("div");row.className="step-item";
+ var b=document.createElement("button");b.type="button";b.className="step-tab";
+ b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;
+ b.setAttribute("aria-label","Open step "+(i+1)+": "+s.tab);
+ b.addEventListener("click",function(){current=i;render()});
+ var markLabel=document.createElement("label");markLabel.className="step-mark-target";
+ markLabel.title="Check when you have finished and reviewed this step";
+ var check=document.createElement("input");check.type="checkbox";check.className="step-check";
+ check.setAttribute("aria-label","Mark step "+(i+1)+": "+s.tab+" complete");
+ check.addEventListener("change",function(){
+  stepMarks[i]=check.checked;
+  save();refreshStepChecks();
+ });
+ markLabel.appendChild(check);
+ row.appendChild(b);row.appendChild(markLabel);strip.appendChild(row);
+ stepChecks.push(check);
+});
+var canvas=$("guideCanvas"),ctx=canvas.getContext("2d");
+var dirt=["00000001","01011001","01111001","00000011","11101011","10001110","11001110","00000010"],worms=[[0,0],[5,1],[1,2],[7,3],[4,4],[2,5],[6,6],[3,7]],route=[[0,7],[2,7],[2,6],[3,6],[3,3],[5,3],[5,2],[6,2],[6,0],[2,0],[2,1]],heads=[0,90,0,90,0,90,0,90,180,270];
+function mazeBackground(c,grid){c.clearRect(0,0,400,400);for(var y=0;y<8;y++)for(var x=0;x<8;x++){c.fillStyle=dirt[y][x]==="1"?"#a32628":"#d0b28a";c.fillRect(x*50,y*50,50,50);if(grid){c.strokeStyle="#c5a260";c.lineWidth=1;c.strokeRect(x*50+.5,y*50+.5,49,49)}}worms.forEach(function(w){c.beginPath();c.strokeStyle="#f7b6b9";c.lineWidth=4;c.lineCap="round";for(var i=0;i<=24;i++){var x=w[0]*50+13+i,y=w[1]*50+25+Math.sin(i*.52)*2;i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()});c.fillStyle="#ffdf36";c.beginPath();for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,r=i%2?6:15;c.lineTo(125+Math.cos(a)*r,75+Math.sin(a)*r)}c.closePath();c.fill();}
+
+function drawScene(){mazeBackground(ctx,showGrid);function trace(last,color,width){ctx.beginPath();route.slice(0,last+1).forEach(function(p,i){i?ctx.lineTo(p[0]*50+25,p[1]*50+25):ctx.moveTo(p[0]*50+25,p[1]*50+25)});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin="round";ctx.stroke()}if(showOutline)trace(10,"#e7e7a2",3);trace(current+1,"#087c24",4);var p=route[current+1];ctx.strokeStyle="#fff4a6";ctx.lineWidth=4;ctx.strokeRect(p[0]*50+4,p[1]*50+4,42,42);}
+var substepCanvas=$("substepCanvas"),subctx=substepCanvas.getContext("2d");
+function drawInstructionPreview(){var c=subctx,p=route[current],q=route[current+1],dx=q[0]-p[0],dy=q[1]-p[1],n=Math.abs(dx)+Math.abs(dy),size=Math.min(48,136/n),x=240-dx*size/2,y=96-dy*size/2;$("substepDiagram").hidden=false;c.fillStyle="#fffefd";c.fillRect(0,0,480,226);for(var i=0;i<=n;i++){var a=x+dx/n*i*size,b=y+dy/n*i*size;c.fillStyle=i===n?"#d6eadc":"#d0b28a";c.fillRect(a-size/2,b-size/2,size,size);c.strokeStyle="#b49b71";c.strokeRect(a-size/2,b-size/2,size,size)}c.beginPath();c.moveTo(x,y);c.lineTo(x+dx*size,y+dy*size);c.strokeStyle="#176b73";c.lineWidth=4;c.stroke();c.fillStyle="#176b73";c.beginPath();c.arc(x,y,7,0,Math.PI*2);c.fill();c.font="bold 17px system-ui";c.textAlign="center";c.fillText(n+" × 50 = "+n*50+" pixels",240,205);$("substepCaption").textContent="Heading "+heads[current]+"° · follow the highlighted tunnel.";}
+function render(){
+ var base=steps[current],s=activePhase(),phaseIndex=activePhaseIndex(),stages=base.phases||[];
+ $("stepCount").textContent=String(current+1).padStart(2,"0")+" / "+steps.length;
+ $("progressBar").style.width=((current+1)/steps.length*100)+"%";
+ $("stepTitle").textContent=s.title;
+ $("stepDescription").textContent=s.description;
+ $("taskText").textContent=s.task;
+ $("codeTitle").textContent=s.codeTitle|| (current===0?"Type the first command":"Type these lines");
+ renderCodeExample();
+ $("codeNote").textContent=s.note;
+ $("tryText").textContent=s.try;
+ $("hintText").textContent=s.hint;
+ $("helpBox").open=false;
+ $("experimentStage").hidden=!stages.length;
+ $("experimentStageLabel").textContent=stages.length?s.label||"EXPERIMENT":"";
+ $("experimentStageCount").textContent=stages.length?"Part "+(phaseIndex+1)+" of "+stages.length:"";
+ $("runExperiment").hidden=!stages.length;
+ $("runFeedback").textContent="Run and compare the Turtle World before moving on.";
+ $("visualTitle").textContent="Maze guide";
+ $("visualCaption").textContent="Follow the highlighted path through the tunnel.";
+ $("prevStep").disabled=current===0&&phaseIndex===0;
+ $("nextStep").textContent=phaseIndex<stages.length-1?(s.next||"Next part →"):current===steps.length-1?"Back to beginning ↺":"Next step →";
+ Array.from(strip.children).forEach(function(row,i){
+  row.querySelector(".step-tab").setAttribute("aria-current",i===current?"step":"false");
+  row.classList.toggle("is-active",i===current);
+ });
+ refreshStepChecks();
+ save();drawScene();drawInstructionPreview();etchWantScroll=true;scheduleGuideHighlight();
+}
+$("prevStep").addEventListener("click",function(){advanceLesson(-1)});
+$("nextStep").addEventListener("click",function(){advanceLesson(1)});
+$("runStage").addEventListener("click",function(){
+ try{
+  var doc=$("turtleFrame").contentDocument,run=doc&&doc.getElementById("runBtn");
+  if(run&&!run.disabled){run.click();$("runFeedback").textContent="Look at Turtle World. What happened?";return;}
+ }catch(e){}
+ $("runFeedback").textContent="Press Run in the Turtle workspace to test your code.";
+});
+$("gridToggle").addEventListener("change",function(){showGrid=this.checked;save();drawScene();drawInstructionPreview()});
+$("outlineToggle").addEventListener("change",function(){showOutline=this.checked;save();drawScene()});
+
+/* Match the Python Course's line-highlighting workflow in the existing /turtle editor. */
+var etchEditor=null,etchMarkedLines=[],etchHighlightTimer=0,etchEditorReady=false,etchWantScroll=false;
+function etchNormalize(line){
+ return String(line||"").trim().replace(/\s+/g,"");
+}
+function etchLocateBlock(lines,commands,from){
+ var best=null;
+ for(var i=from;i<lines.length;i++){
+  if(etchNormalize(lines[i])!==etchNormalize(commands[0]))continue;
+  var found=[],at=i;
+  for(var j=0;j<commands.length;j++){
+   while(at<lines.length&&(!etchNormalize(lines[at])||/^\s*#/.test(lines[at])))at++;
+   if(at>=lines.length||etchNormalize(lines[at])!==etchNormalize(commands[j]))break;
+   found.push(at);at++;
+  }
+  if(found.length===commands.length)return {indices:found,after:at,complete:true,start:i};
+  if(!best||found.length>best.indices.length)best={indices:found,after:at,complete:false,start:i};
+ }
+ return best;
+}
+
+/* Checkmarks are controlled only by students, independently of typed code. */
+function refreshStepChecks(){
+ stepChecks.forEach(function(input,i){
+  var checked=stepMarks[i]===true;
+  input.checked=checked;
+  input.parentElement.parentElement.classList.toggle("is-done",checked);
+  input.parentElement.title=checked?"Unmark this step":"Mark complete after checking your drawing";
+ });
+}
+function etchProgress(cm){
+ var lines=cm.getValue().split("\n"),startAt=0,allEarlierComplete=true;
+ for(var i=0;i<current;i++){
+  var prev=etchLocateBlock(lines,steps[i].code.split("\n"),startAt);
+  if(!prev||!prev.complete){allEarlierComplete=false;break;}
+  startAt=prev.after;
+ }
+ var cmds=activeCode().split("\n");
+ var located=allEarlierComplete?etchLocateBlock(lines,cmds,startAt):null;
+ var typed=located?located.indices.length:0;
+ var lastNonempty=-1;
+ for(var k=0;k<lines.length;k++)if(etchNormalize(lines[k]))lastNonempty=k;
+ var nextIndex;
+ if(located&&typed){
+  nextIndex=typed===cmds.length?located.indices[typed-1]:Math.min(located.indices[typed-1]+1,lines.length-1);
+  if(typed<cmds.length){
+   while(nextIndex<lines.length-1&&(!etchNormalize(lines[nextIndex])||/^\s*#/.test(lines[nextIndex])))nextIndex++;
+   if(nextIndex>=lines.length)nextIndex=lines.length-1;
+  }
+ }else{
+  nextIndex=Math.min(lines.length-1,Math.max(allEarlierComplete?startAt:0,lastNonempty+1));
+ }
+ var pendingNewLine=typed<cmds.length&&nextIndex===lines.length-1&&!!etchNormalize(lines[nextIndex]);
+ if(pendingNewLine)nextIndex=lines.length;
+ var startLine=located?located.start+1:nextIndex+1;
+ return {pendingNewLine:pendingNewLine,commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
+}
+
+function etchPlannedLine(index){return index*2+1;}
+var codeCanvas=$("stepCodeCanvas"),codeCtx=codeCanvas.getContext("2d"),lastExampleProgress=null;
+function renderCodeExample(progress){
+ lastExampleProgress=progress||null;
+ var lines=activeCode().split("\n"),box=$("codeSample");
+ var width=Math.max(220,Math.round(box.getBoundingClientRect().width||400));
+ var rowHeight=25,top=12,height=top+lines.length*rowHeight+12,dpr=Math.min(window.devicePixelRatio||1,2);
+ codeCanvas.style.height=height+"px";codeCanvas.width=Math.round(width*dpr);codeCanvas.height=Math.round(height*dpr);
+ codeCtx.setTransform(dpr,0,0,dpr,0,0);codeCtx.clearRect(0,0,width,height);
+ codeCtx.font="650 12px ui-monospace,SFMono-Regular,Consolas,monospace";codeCtx.textBaseline="middle";
+ var typed=progress?progress.typed:0,first=etchPlannedLine(current);
+ lines.forEach(function(line,i){
+  var y=top+i*rowHeight,cy=y+rowHeight/2;
+  if(i===typed&&typed<lines.length){
+   codeCtx.fillStyle="#534627";codeCtx.fillRect(9,y,width-18,rowHeight);
+   codeCtx.fillStyle="#ffd35d";codeCtx.fillRect(9,y,4,rowHeight);
+  }else if(i<typed){codeCtx.fillStyle="rgba(23,107,115,.18)";codeCtx.fillRect(9,y,width-18,rowHeight);}
+  codeCtx.fillStyle=i===typed&&typed<lines.length?"#ffd35d":"#96a4ac";
+  codeCtx.fillText(String(first+i),width<350?14:20,cy);
+  codeCtx.fillStyle=i<typed?"#a3d1c8":i===typed?"#fff9dc":"#e5eeed";
+  var shown=line;
+  while(shown.length>5&&codeCtx.measureText(shown).width>width-75)shown=shown.slice(0,-2)+"…";
+  codeCtx.fillText(shown,width<350?48:55,cy);
+ });
+ $("codeProgress").textContent=progress?(progress.complete?"✓ All lines typed":typed+" / "+lines.length+" lines typed · yellow = next"):"Yellow = next line";
+}
+["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(type){
+ $("codeSample").addEventListener(type,function(ev){ev.preventDefault();});
+});
+codeCanvas.addEventListener("keydown",function(ev){
+ if((ev.ctrlKey||ev.metaKey)&&["c","x","a","s","p"].indexOf(ev.key.toLowerCase())>=0)ev.preventDefault();
+});
+if(window.ResizeObserver)new ResizeObserver(function(){renderCodeExample(lastExampleProgress);}).observe($("codeSample"));
+else window.addEventListener("resize",function(){renderCodeExample(lastExampleProgress);});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){renderCodeExample(lastExampleProgress);});
+function scheduleGuideHighlight(){
+ clearTimeout(etchHighlightTimer);
+ etchHighlightTimer=setTimeout(highlightGuideLines,65);
+}
+function highlightGuideLines(){
+ clearTimeout(etchHighlightTimer);
+ try{
+  var doc=$("turtleFrame").contentDocument;
+  var node=doc&&doc.querySelector(".CodeMirror");
+  var cm=node&&node.CodeMirror;
+  if(!cm){etchHighlightTimer=setTimeout(highlightGuideLines,200);return;}
+  if(etchEditor!==cm){
+   if(etchEditor){etchEditor.off("change",scheduleGuideHighlight);}
+   etchEditor=cm;
+   cm.on("change",scheduleGuideHighlight);
+   cm.setOption("firstLineNumber",1);
+   // Keep existing student work. Only strip the obsolete two-line starter heading.
+   var oldHeading="# Tunneling (CodeHS 2.2.8)\n# Add each shape as you work through the guide.\n";
+   if(cm.getValue().indexOf(oldHeading)===0){
+    cm.replaceRange("",{line:0,ch:0},{line:2,ch:0},"remove obsolete heading");
+    try{$("turtleFrame").contentWindow.saveTurtleCode&&$("turtleFrame").contentWindow.saveTurtleCode();}catch(ignore){}
+   }
+  }
+  etchMarkedLines.forEach(function(mark){
+   try{mark.editor.removeLineClass(mark.handle,"background",mark.className);}catch(e){}
+  });
+  etchMarkedLines=[];
+  if(!doc.getElementById("etchTypingStyle")){
+   var style=doc.createElement("style");style.id="etchTypingStyle";
+   style.textContent=".etch-current-line{background:rgba(255,211,93,.19)!important;box-shadow:inset 4px 0 #ffd35d}.etch-typed-line{background:rgba(23,107,115,.11)!important}.CodeMirror-scroll{scrollbar-width:auto;scrollbar-color:#718584 #202a32}#editorDivider:before{background:#a8c4c0!important}#editorDivider:hover:before{background:#176b73!important}";
+   doc.head.appendChild(style);
+  }
+  if(steps[current].phases&&activePhaseIndex()===0){
+   var editorLines=cm.getValue().split("\n"),searchStart=0,allPrevious=true;
+   for(var prevIndex=0;prevIndex<current;prevIndex++){
+    var previousBlock=etchLocateBlock(editorLines,steps[prevIndex].code.split("\n"),searchStart);
+    if(!previousBlock||!previousBlock.complete){allPrevious=false;break;}
+    searchStart=previousBlock.after;
+   }
+   var finalBlock=allPrevious&&etchLocateBlock(editorLines,steps[current].code.split("\n"),searchStart);
+   if(finalBlock&&finalBlock.complete){
+    phaseMap[current]=steps[current].phases.length-1;save();render();return;
+   }
+  }
+  var p=etchProgress(cm);
+  p.indices.forEach(function(index){
+   var handle=cm.addLineClass(index,"background","etch-typed-line");
+   etchMarkedLines.push({editor:cm,handle:handle,className:"etch-typed-line"});
+  });
+  if(!p.complete&&!p.pendingNewLine){
+   var active=Math.max(0,Math.min(cm.lineCount()-1,p.nextIndex));
+   var handle=cm.addLineClass(active,"background","etch-current-line");
+   etchMarkedLines.push({editor:cm,handle:handle,className:"etch-current-line"});
+  }
+  var message=$("editorGuideMessage");
+  if(p.complete)message.textContent="✓ Step "+(current+1)+": all "+p.commands.length+" commands typed. Run and compare.";
+  else{
+   var line=p.nextIndex+1,action=p.pendingNewLine?" · press Enter for a new line":"";
+   message.textContent=p.earlierComplete?"Step "+(current+1)+" · line "+line+": "+p.commands[p.typed]+action:"Complete earlier steps first. This step begins around line "+etchPlannedLine(current)+".";
+  }
+  renderCodeExample(p);
+  refreshStepChecks();
+  cm.refresh();
+  if(etchWantScroll){
+   etchWantScroll=false;
+   var target=Math.max(0,Math.min(p.nextIndex,cm.lineCount()-1));
+   if(target<12)cm.scrollTo(null,0);
+   else{
+    var y=Math.max(0,cm.heightAtLine(target,"local")-42);
+    if(Math.abs(cm.getScrollInfo().top-y)>cm.getScrollInfo().clientHeight*.65)cm.scrollTo(null,y);
+   }
+  }
+ }catch(e){renderCodeExample();}
+}
+
+$("editorScrollTop").addEventListener("click",function(){if(etchEditor){etchEditor.scrollTo(null,0);etchEditor.focus();}});
+$("editorScrollStep").addEventListener("click",function(){
+ if(!etchEditor)return;
+ var p=etchProgress(etchEditor),target=Math.max(0,Math.min(p.nextIndex,etchEditor.lineCount()-1));
+ etchEditor.scrollTo(null,target<12?0:Math.max(0,etchEditor.heightAtLine(target,"local")-40));
+ etchEditor.focus();
+});
+$("turtleFrame").addEventListener("load",function(){
+ etchEditor=null;etchWantScroll=true;
+ scheduleGuideHighlight();
+});
+
+
+
+/* Drag to resize the guide, step list and editor. The iframe's own divider
+   continues to resize code versus Turtle World. */
+(function initEtchResizers(){
+ var main=$("studioDivider"),rail=$("guideDivider"),studio=document.querySelector(".studio"),guide=document.querySelector(".guide");
+ if(!main||!rail)return;
+ function saveWidth(name,value){try{localStorage.setItem("tunneling-resize-"+name,String(Math.round(value)));}catch(e){}}
+ function width(name,fallback){try{return Number(localStorage.getItem("tunneling-resize-"+name))||fallback;}catch(e){return fallback;}}
+ function setMain(value){
+  var max=Math.max(460,studio.clientWidth-510),n=Math.max(460,Math.min(max,Math.round(value)));
+  studio.style.setProperty("--etch-guide-width",n+"px");main.setAttribute("aria-valuenow",String(n));saveWidth("guide",n);
+  if(etchEditor)etchEditor.refresh();
+ }
+ function setRail(value){
+  var max=Math.max(185,guide.clientWidth-235),n=Math.max(185,Math.min(max,Math.round(value)));
+  guide.style.setProperty("--etch-rail-width",n+"px");rail.setAttribute("aria-valuenow",String(n));saveWidth("rail",n);
+  renderCodeExample(lastExampleProgress);
+ }
+ function install(divider,getValue,setValue,defaults,min,max){
+  divider.setAttribute("aria-valuemin",String(min));divider.setAttribute("aria-valuemax",String(max));
+  var dragging=false,start=0,original=0;
+  divider.addEventListener("pointerdown",function(ev){
+   if(ev.button!==0||window.innerWidth<=1080)return;
+   dragging=true;start=ev.clientX;original=getValue();divider.classList.add("dragging");
+   document.body.classList.add("etch-resizing");
+   divider.setPointerCapture(ev.pointerId);ev.preventDefault();
+  });
+  divider.addEventListener("pointermove",function(ev){if(dragging)setValue(original+ev.clientX-start);});
+  function done(){dragging=false;divider.classList.remove("dragging");document.body.classList.remove("etch-resizing");}
+  divider.addEventListener("pointerup",done);divider.addEventListener("pointercancel",done);divider.addEventListener("lostpointercapture",done);
+  divider.addEventListener("keydown",function(ev){if(ev.key==="ArrowLeft"||ev.key==="ArrowRight"){ev.preventDefault();setValue(getValue()+(ev.key==="ArrowRight"?24:-24));}});
+  divider.addEventListener("dblclick",function(){setValue(defaults());});
+ }
+ var initialMain=Math.round(studio.clientWidth*.44),initialRail=Math.round(Math.min(306,Math.max(248,window.innerWidth*.195)));
+ if(window.innerWidth>1080){setMain(width("guide",initialMain));setRail(width("rail",initialRail));}
+ install(main,function(){return document.querySelector(".guide").getBoundingClientRect().width;},setMain,function(){return studio.clientWidth*.44;},460,1100);
+ install(rail,function(){return document.querySelector(".guide-top").getBoundingClientRect().width;},setRail,function(){return initialRail;},185,480);
+ window.addEventListener("resize",function(){if(window.innerWidth>1080){setMain(guide.getBoundingClientRect().width);setRail($("stepStrip").parentElement.getBoundingClientRect().width);}});
+})();
+
+var teacherDialog=$("teacherDialog");
+var fullProgram=steps.map(function(s){return s.code;}).join("\n")+"\n";
+$("teacherTrigger").addEventListener("click",function(){
+ $("teacherCode").textContent=fullProgram;
+ if(teacherDialog.showModal)teacherDialog.showModal();else teacherDialog.setAttribute("open","");
+});
+function closeTeacher(){if(teacherDialog.close)teacherDialog.close();else teacherDialog.removeAttribute("open");}
+$("teacherClose").addEventListener("click",closeTeacher);
+$("teacherDone").addEventListener("click",closeTeacher);
+teacherDialog.addEventListener("click",function(ev){if(ev.target===teacherDialog)closeTeacher();});
+$("teacherCopy").addEventListener("click",function(){
+ var btn=this;
+ function success(){btn.textContent="✓ Copied";setTimeout(function(){btn.textContent="Copy full code";},1500);}
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(fullProgram).then(success,function(){btn.textContent="Select the code to copy";});
+ }else{
+  var r=document.createRange();r.selectNodeContents($("teacherCode"));getSelection().removeAllRanges();getSelection().addRange(r);
+  if(document.execCommand&&document.execCommand("copy")){getSelection().removeAllRanges();success();}
+  else btn.textContent="Selected · press Ctrl+C";
+ }
+});
+canvas.addEventListener("pointermove",function(ev){
+ var rect=canvas.getBoundingClientRect();
+ var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);
+ var y=Math.round(200-(ev.clientY-rect.top)/rect.height*400);
+ $("coords").textContent="x "+x+" · y "+y;
+});
+canvas.addEventListener("pointerleave",function(){$("coords").textContent="x 0 · y 0"});
+render();
+})();
+
+</script>
+</body>
+</html>
