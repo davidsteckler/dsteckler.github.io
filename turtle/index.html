@@ -865,15 +865,18 @@ body.letters-embed .appbar-right{width:100%!important}
 body.letters-embed .toolbar{display:flex!important;justify-content:stretch!important;gap:5px!important;width:100%!important}
 body.letters-embed .toolbar .btn{height:32px!important;min-width:0!important;flex:1 1 0!important;padding:0 5px!important;font-size:11px!important}
 body.letters-embed .toolbar .shortcut{font-size:9px}
-body.letters-embed .workspace{display:grid!important;grid-template-columns:minmax(205px,1fr) minmax(205px,1fr)!important;grid-template-rows:minmax(0,1fr)!important;align-items:stretch!important;height:100%!important;min-height:0!important;overflow:hidden!important;gap:5px!important;padding:5px!important}
+body.letters-embed .workspace{display:grid!important;grid-template-columns:minmax(170px,var(--code-fr,53fr)) 10px minmax(170px,var(--world-fr,47fr))!important;grid-template-rows:minmax(0,1fr)!important;align-items:stretch!important;height:100%!important;min-height:0!important;overflow:hidden!important;gap:5px!important;padding:5px!important}
 body.letters-embed .resize-divider{display:none!important}
+body.letters-embed #editorDivider{display:block!important;grid-column:2;grid-row:1;min-width:10px;cursor:col-resize;touch-action:none}
+body.letters-embed #editorDivider:before{height:70px;width:4px;background:#9cb7b1}
+body.letters-embed #editorDivider:hover:before,body.letters-embed #editorDivider:focus-visible:before,body.letters-embed #editorDivider.dragging:before{background:#176b73;width:5px}
 body.letters-embed .code-panel{grid-column:1;grid-row:1;display:grid!important;grid-template-rows:34px minmax(0,1fr)!important;min-height:0!important;height:100%!important;overflow:hidden!important}
-body.letters-embed .world-panel{grid-column:2;grid-row:1;display:grid!important;grid-template-rows:34px minmax(0,1fr) 30px 65px!important;height:100%!important;min-height:0!important;overflow:hidden!important}
+body.letters-embed .world-panel{grid-column:3;grid-row:1;display:grid!important;grid-template-rows:34px minmax(100px,1fr) 30px 9px var(--output-height,100px)!important;height:100%!important;min-height:0!important;overflow:hidden!important}
 body.letters-embed .panel{border-radius:9px!important}
 body.letters-embed .panel-head{height:34px!important;min-height:34px!important;padding:0 8px!important}
 body.letters-embed .clear-code-btn{font-size:10px!important;height:26px!important;padding:0 6px!important}
 body.letters-embed #codeHistoryBtn{height:26px!important;padding:0 6px!important;font-size:10px!important}
-body.letters-embed .code-panel .CodeMirror{height:100%!important;font-size:13px!important;min-height:0!important}
+body.letters-embed .code-panel .CodeMirror{height:100%!important;font-size:15px!important;min-height:0!important}
 body.letters-embed .panel-label,body.letters-embed .panel-mini{font-size:10px!important}
 body.letters-embed .world-head-actions{gap:4px!important}
 body.letters-embed .world-head-actions .btn{font-size:10px!important;padding:0 5px!important;height:26px!important}
@@ -882,15 +885,17 @@ body.letters-embed .world-stage{min-height:0!important;height:auto!important;dis
 body.letters-embed .world-info{height:30px!important;min-height:30px!important;padding:2px 7px!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:4px!important}
 body.letters-embed .world-copy,body.letters-embed .neon-control{display:none!important}
 body.letters-embed .world-info .toggle{font-size:10px!important}
-body.letters-embed .output-resize-handle{display:none!important}
-body.letters-embed .console{height:65px!important;min-height:65px!important;overflow:hidden!important}
+body.letters-embed .output-resize-handle{display:block!important;background:#edf1eb;border-color:#d5e0d9}
+body.letters-embed .output-resize-handle:after{background:#9cb7b1}
+body.letters-embed .console{height:auto!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column}
 body.letters-embed .console-head{height:23px!important;min-height:23px!important;font-size:10px!important}
-body.letters-embed #output{font-size:11px!important;line-height:1.25!important;max-height:42px!important;overflow:auto!important}
+body.letters-embed #output{font-size:12px!important;line-height:1.35!important;max-height:none!important;min-height:0!important;flex:1;overflow:auto!important}
 @media(max-width:610px){
  body.letters-embed .app{grid-template-rows:40px minmax(0,1fr)!important}
  body.letters-embed .workspace{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(200px,1fr) minmax(310px,1.15fr)!important}
  body.letters-embed .code-panel{grid-column:1;grid-row:1}
  body.letters-embed .world-panel{grid-column:1;grid-row:2}
+ body.letters-embed #editorDivider{display:none!important}
 }
 
 /* Keep both trace panes visible when the embedded viewport fits them. */
@@ -1329,8 +1334,8 @@ for i in range(4):
   var libraryDivider = document.getElementById("libraryDivider");
   var outputDivider = document.getElementById("outputDivider");
   function OUTPUT_MAX(){return document.body.classList.contains("unit1-embed")?Math.max(290,Math.round(window.innerHeight*0.6)):290}
-  var LAYOUT_KEY = UNIT1_EMBED ? "dsteckler-turtlecourse-editor-split-v1" : "dsteckler-turtle-layout-v3";
-  var layoutDefaults = { editor:UNIT1_EMBED?48:53, library:300, mobile:355, output:150, libraryVisible:true }; // 150px keeps the desktop workspace in one viewport
+  var LAYOUT_KEY = LETTERS_EMBED ? "dsteckler-letters-editor-layout-v4" : UNIT1_EMBED ? "dsteckler-turtlecourse-editor-split-v1" : "dsteckler-turtle-layout-v3";
+  var layoutDefaults = { editor:UNIT1_EMBED?48:53, library:300, mobile:355, output:LETTERS_EMBED?100:150, libraryVisible:true }; // 150px keeps the desktop workspace in one viewport
   var layoutState = Object.assign({},layoutDefaults);
   function clamp(n,low,high){ return Math.min(high,Math.max(low,n)); }
   try{
@@ -1368,7 +1373,7 @@ for i in range(4):
   function enableDivider(divider,field,min,max,compute){
     var dragging=false;
     divider.addEventListener("pointerdown",function(e){
-      if(e.button!==0||window.innerWidth<=840||(field==="library"&&window.innerWidth<=1350))return;
+      if(e.button!==0||window.innerWidth<=(LETTERS_EMBED?610:840)||(field==="library"&&window.innerWidth<=1350))return;
       dragging=true;
       divider.setPointerCapture(e.pointerId);
       divider.classList.add("dragging");
@@ -3084,7 +3089,7 @@ for i in range(4):
     var stageHeight=worldStage.offsetHeight;
     var usableWidth=Math.max(180,stageWidth-(mobile?20:24));
     var usableHeight=mobile?404:Math.max(180,stageHeight-24);
-    var baseScale=Math.min(1,usableWidth/404,usableHeight/404);
+    var baseScale=Math.min(LETTERS_EMBED?1.75:1,usableWidth/404,usableHeight/404);
     var scale=baseScale*worldDrawingZoom/100;
     worldStage.classList.toggle("drawing-zoomed",worldDrawingZoom>100);
     worldStage.style.height=mobile?(404*baseScale+20)+"px":"";
