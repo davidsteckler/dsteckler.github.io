@@ -277,21 +277,64 @@ body.letter-resizing iframe{pointer-events:none}
 #initialChoice{width:76px;margin-left:auto;text-transform:uppercase}
 .design-extra small{font-size:11px;color:var(--muted)}
 .optional-label{font:800 10px monospace;color:var(--teal);padding:9px 4px 3px;border-top:1px solid #d7e4dd;margin-top:4px}
+
+/* Letter Studio v6: one shared setup row; reference and editor start together. */
+.layout{grid-template-rows:49px auto minmax(0,1fr);row-gap:7px}
+.setupbar{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:minmax(250px,.7fr) minmax(0,1.3fr);align-items:center;gap:14px;padding:8px 12px;min-width:0}
+.setup-info{min-width:0}
+.setup-info .row{justify-content:flex-start;gap:8px}
+.setup-info .row #customizeBtn{margin-left:auto}
+.setup-info .row #resetPanels{margin-left:0}
+.setup-info h2{font-size:23px;line-height:1.1;margin:5px 0}
+.setup-info p{font-size:12px}
+.setupbar .levels{margin:0;gap:6px}
+.setupbar .levels .level{flex-direction:row;text-align:left;min-height:76px;padding:5px 8px}
+.setupbar .level-preview{width:38%;height:62px;flex:0 1 72px}
+.setupbar .level-text{gap:2px}
+.setupbar .level-technique{font-size:10px}
+.guide,#studioDivider,.workspace{grid-row:3}
+.guidebody{height:100%}
+.guidebody .steps{padding:10px 12px 8px;gap:4px}
+.steps>.row{min-height:19px;flex:none}
+.stepbody{padding:0;scrollbar-width:thin}
+.step-context{min-height:57px;display:flex;flex-direction:column;justify-content:flex-start}
+.step-context h3{font-size:18px;line-height:1.2;margin:3px 0 5px}
+.step-context p{font-size:12px;line-height:1.35;margin:0 0 5px}
+.codehead{min-height:19px;align-items:center;margin:0 0 4px;font-size:10px}
+.code-sample{border:1px solid #334249}
+.steps .visual{padding:4px 0 0}
+.steps .visual .art{height:var(--preview-height);margin:5px 0}
+.layout{--preview-height:clamp(105px,23vh,235px)}
+.check-work{margin-top:6px;padding-top:6px}
+.stepfoot{padding-top:5px}
+@media(min-width:901px) and (max-height:850px){
+ .layout{--preview-height:clamp(90px,17vh,155px);grid-template-rows:42px auto minmax(0,1fr)}
+ .setupbar{padding:5px 10px}
+ .setupbar .levels .level{min-height:64px;padding:4px 6px}
+ .setupbar .level-preview{height:52px;flex-basis:60px}
+ .setup-info h2{font-size:20px;margin:3px 0}
+ .step-context{min-height:54px}
+ .step-context h3{font-size:17px}
+ .steps .visual .art{margin:3px 0}
+}
+@media(max-width:1050px) and (min-width:901px){.setupbar{grid-template-columns:minmax(230px,.72fr) minmax(0,1.28fr);gap:8px}.setupbar .level-preview{min-width:28px;width:30%;flex-basis:50px}.setupbar .level-technique{font-size:9px}.setup-info .row{flex-wrap:wrap}}
+@media(max-width:900px){.layout{grid-template-rows:auto auto auto 760px}.setupbar{grid-column:1;grid-row:2;grid-template-columns:1fr;gap:7px}.setupbar .levels .level{min-height:70px}.guide{grid-row:3;min-height:0}.workspace{grid-row:4}.guidebody{height:auto}.stepbody{overflow:visible}.step-context{min-height:0}}
+@media(max-width:560px){.setupbar{padding:8px}.setupbar .levels .level{flex-direction:column;text-align:center;min-height:100px}.setupbar .level-preview{width:100%;height:48px;flex:0 0 48px}.layout{grid-template-rows:auto auto auto 720px}}
 </style></head>
 <body>
 <header><a class="brand" href="/turtlecourse/"><i>&gt;_</i><span class="brand-label">Draw a Letter</span><span class="brand-sub">Python Turtle Studio</span></a><nav><a href="/turtlecourse/">Turtle course</a><a href="/turtlereference/">Reference</a><a href="/turtleprojects/">Projects</a></nav></header>
 <main><div class="intro"><div><div class="eyebrow">LETTER DRAWING LAB · 26 LETTERS · TURNING PRACTICE</div><h1>Draw a Letter</h1><p>Choose a letter. Use forward(), left(), and right() to draw it.</p></div><div class="aside-note">Watch how the same letter changes when you use coordinates, movement, or outlined shapes.</div></div>
 <div class="layout">
 <aside class="panel side" aria-label="Choose a letter"><div class="row"><strong>Choose a letter</strong><span class="counter">A—Z</span></div><div class="az" id="az"></div><div class="sidelinks"><a href="/turtlereference/#movement/left">Turning commands ↗</a><a href="/turtlereference/#movement/forward">More Turtle help ↗</a><a href="/turtle/" target="_blank" rel="noopener">Open full editor ↗</a></div><div class="sideline">All three levels use movement and turns. The drawing becomes more detailed.</div></aside>
-<section class="panel guide" aria-label="Step-by-step letter tutorial">
-<div class="guidehead"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><button type="button" id="customizeBtn" class="tiny customize-button">✎ Customize</button><button type="button" id="resetPanels" class="tiny" title="Reset panel sizes">Reset layout</button><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
-<div class="levels" id="levels" aria-label="Compare finished letters and choose a difficulty">
+<div class="panel guidehead setupbar"><div class="setup-info"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><button type="button" id="customizeBtn" class="tiny customize-button">✎ Customize</button><button type="button" id="resetPanels" class="tiny" title="Reset panel sizes">Reset layout</button><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
+</div><div class="levels" id="levels" aria-label="Compare finished letters and choose a difficulty">
 <button type="button" class="level" data-difficulty="beginner"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Beginner</strong><small>Solid block</small><span class="level-technique">One pass · simple turns</span><span class="level-count"></span></span></button>
 <button type="button" class="level" data-difficulty="medium"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Medium</strong><small>Outlined bubble</small><span class="level-technique">Two passes · precise turns</span><span class="level-count"></span></span></button>
 <button type="button" class="level" data-difficulty="advanced"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Advanced</strong><small>3D shadow</small><span class="level-technique">Three passes · offset path</span><span class="level-count"></span></span></button></div></div>
+<section class="panel guide" aria-label="Step-by-step letter tutorial">
 <div class="guidebody"><aside class="rail" aria-label="Build guide"><div class="row"><span>BUILD GUIDE</span><span id="railCount">0 / 0</span></div><div class="rail-progress"><span id="railFill"></span></div><div id="stepnav" class="stepnav"></div></aside>
-<div id="railDivider" class="splitter" role="separator" tabindex="0" aria-label="Resize step sidebar" aria-orientation="vertical" title="Drag to resize step sidebar"></div><div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div class="stepbody"><h3 id="stepTitle"></h3><p id="stepInfo"></p><div class="visual"><div class="vtop"><span>Drawing guide <span style="font-weight:600;color:#87928e">· 400 × 400 world</span></span><button type="button" id="gridBtn" class="tiny" aria-pressed="true">Grid on</button></div><div class="art"><svg id="preview" viewBox="-13 -13 126 128" role="img" aria-label="Thick block, bubble or 3D letter drawn using turns and forward movements"></svg></div><div class="vfoot"><span><i class="dot"></i>Current step</span><span id="caption">Preview</span></div></div><div id="previewDivider" class="splitter horizontal" role="separator" tabindex="0" aria-label="Resize drawing guide" aria-orientation="horizontal" title="Drag to resize drawing guide"></div><div class="codehead"><span>TYPE THESE LINES</span><span id="codeProgress" aria-live="polite">Yellow = next</span></div><div id="codeSample" class="code-sample"><canvas id="stepCodeCanvas" tabindex="0" role="img" aria-label="Numbered commands to read and type into the editor"></canvas></div>
-<p class="typing-note">Type each command in the editor. Yellow shows the next line.</p>
+<div id="railDivider" class="splitter" role="separator" tabindex="0" aria-label="Resize step sidebar" aria-orientation="vertical" title="Drag to resize step sidebar"></div><div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div class="stepbody"><div class="step-context"><h3 id="stepTitle"></h3><p id="stepInfo"></p></div><div class="codehead"><span>TYPE THESE LINES</span><span id="codeProgress" aria-live="polite">Yellow = next</span></div><div id="codeSample" class="code-sample"><canvas id="stepCodeCanvas" tabindex="0" role="img" aria-label="Numbered commands to read and type into the editor"></canvas></div>
+<p class="typing-note">Read across to the editor. Yellow = next line.</p><div id="previewDivider" class="splitter horizontal" role="separator" tabindex="0" aria-label="Resize drawing guide" aria-orientation="horizontal" title="Drag to resize drawing guide"></div><div class="visual"><div class="vtop"><span>Drawing guide <span style="font-weight:600;color:#87928e">· 400 × 400 world</span></span><button type="button" id="gridBtn" class="tiny" aria-pressed="true">Grid on</button></div><div class="art"><svg id="preview" viewBox="-13 -13 126 128" role="img" aria-label="Thick block, bubble or 3D letter drawn using turns and forward movements"></svg></div><div class="vfoot"><span><i class="dot"></i>Current step</span><span id="caption">Preview</span></div></div>
 <div class="check-work"><div class="meta">CHECK YOUR WORK</div><p id="checkPrompt">Run your code and compare the highlighted part of the drawing. Check the step when you are happy with it.</p><button type="button" class="btn" id="runStage">▶ Run this step</button></div></div>
 <div class="stepfoot"><button type="button" class="btn" id="prev">← Previous</button><span class="counter" id="stepCount"></span><button type="button" class="btn primary" id="next">Next step →</button></div>
 </div></div></section>
@@ -672,7 +715,7 @@ function highlightGuideLines(){
   if(p.earlier&&!p.complete&&p.next<cm.lineCount())mark(p.next,"letter-current-line");
   $("editorGuideMessage").textContent=p.complete?"✓ Step "+(step+1)+": all lines typed. Run and compare.":!p.earlier?"Complete earlier steps first.":"Step "+(step+1)+" · line "+(p.next+1)+": "+p.commands[p.typed]+(p.next>=cm.lineCount()?" · press Enter":"");
   renderCodeExample(p);
-  if(wantScroll){wantScroll=false;cm.refresh();var target=Math.min(p.next,cm.lineCount()-1);if(target<12)cm.scrollTo(null,0);else cm.scrollIntoView({line:target,ch:0},35)}
+  if(wantScroll){wantScroll=false;cm.refresh();var target=Math.min(p.next,cm.lineCount()-1);if(target<5)cm.scrollTo(null,0);else cm.scrollTo(null,Math.max(0,cm.heightAtLine(Math.max(0,target-1),"local")))}
  }catch(e){highlightTimer=setTimeout(highlightGuideLines,300)}
 }
 $("editorScrollTop").addEventListener("click",function(){if(cmRef){cmRef.scrollTo(null,0);cmRef.focus()}});
