@@ -329,17 +329,32 @@ body.letter-resizing iframe{pointer-events:none}
 .dependency-notice .btn{font-size:11px}
 .code-sample.blocked{opacity:.55}
 @media(max-width:1100px){.setup-info .row{flex-wrap:wrap}}
+
+.signature-bar{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-width:0;padding:6px 0 0;border-top:1px solid var(--rule);flex-wrap:wrap}
+.signature-label{display:flex;flex-direction:column;min-width:93px;line-height:1.2;gap:2px}
+.signature-label strong{font-size:12px;color:var(--teal)}
+.signature-label span,.signature-size{font-size:10px;color:var(--muted)}
+#quickInitials,#quickSize{height:31px;border:1px solid #c9d9d3;border-radius:6px;padding:4px 7px;color:var(--ink);background:white;font:700 12px system-ui,sans-serif}
+#quickInitials{width:57px;text-transform:uppercase;letter-spacing:1px}
+.signature-size{display:flex;align-items:center;gap:5px}
+#signatureMini{width:67px;height:32px;flex:none;background:#fff;border:1px solid #e0e6df;border-radius:5px}
+.signature-bar .btn{white-space:nowrap;padding:6px 9px}
+#signatureStatus{font-size:11px;color:#647773;flex:1;min-width:150px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-height:850px) and (min-width:901px){.setupbar{row-gap:4px}.signature-bar{padding-top:4px;gap:6px}}
+@media(max-width:650px){#signatureStatus{flex-basis:100%}}
 </style></head>
 <body>
 <header><a class="brand" href="/turtlecourse/"><i>&gt;_</i><span class="brand-label">Draw a Letter</span><span class="brand-sub">Python Turtle Studio</span></a><nav><a href="/turtlecourse/">Turtle course</a><a href="/turtlereference/">Reference</a><a href="/turtleprojects/">Projects</a></nav></header>
 <main><div class="intro"><div><div class="eyebrow">LETTER DRAWING LAB · 26 LETTERS · TURNING PRACTICE</div><h1>Draw a Letter</h1><p>Choose a letter. Use forward(), left(), and right() to draw it.</p></div><div class="aside-note">Watch how the same letter changes when you use coordinates, movement, or outlined shapes.</div></div>
 <div class="layout">
-<aside class="panel side" aria-label="Choose a letter"><div class="row"><strong>Choose a letter</strong><span class="counter">A—Z</span></div><div class="az" id="az"></div><div class="sidelinks"><a href="/turtlereference/#movement/left">Turning commands ↗</a><a href="/turtlereference/#movement/forward">More Turtle help ↗</a><a href="/turtle/" target="_blank" rel="noopener">Open full editor ↗</a></div><div class="sideline">All three levels use movement and turns. The drawing becomes more detailed.</div></aside>
+<aside class="panel side" aria-label="Choose a letter"><div class="row"><strong>Main letter</strong><span class="counter">A—Z</span></div><div class="az" id="az"></div><div class="sidelinks"><a href="/turtlereference/#movement/left">Turning commands ↗</a><a href="/turtlereference/#movement/forward">More Turtle help ↗</a><a href="/turtle/" target="_blank" rel="noopener">Open full editor ↗</a></div><div class="sideline">All three levels use movement and turns. The drawing becomes more detailed.</div></aside>
 <div class="panel guidehead setupbar"><div class="setup-info"><div class="row"><span id="letterLabel" class="meta">LETTER S</span><button type="button" id="practiceBtn" class="tiny customize-button" hidden>Initials only</button><button type="button" id="customizeBtn" class="tiny customize-button">✎ Customize</button><button type="button" id="resetPanels" class="tiny" title="Reset panel sizes">Reset layout</button><span class="counter" id="levelNum">01 / 03</span></div><h2 id="title">Draw the letter S</h2><p id="description">Make the letter with straight lines.</p>
 </div><div class="levels" id="levels" aria-label="Compare finished letters and choose a difficulty">
 <button type="button" class="level" data-difficulty="beginner"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Beginner</strong><small>Solid block</small><span class="level-technique">One pass · simple turns</span><span class="level-count"></span></span></button>
 <button type="button" class="level" data-difficulty="medium"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Medium</strong><small>Outlined bubble</small><span class="level-technique">Two passes · precise turns</span><span class="level-count"></span></span></button>
-<button type="button" class="level" data-difficulty="advanced"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Advanced</strong><small>3D shadow</small><span class="level-technique">Three passes · offset path</span><span class="level-count"></span></span></button></div></div>
+<button type="button" class="level" data-difficulty="advanced"><svg class="level-preview" viewBox="-15 -15 130 130" aria-hidden="true"></svg><span class="level-text"><strong>Advanced</strong><small>3D shadow</small><span class="level-technique">Three passes · offset path</span><span class="level-count"></span></span></button></div>
+<div class="signature-bar" aria-label="Small initials"><div class="signature-label"><strong>Small initials</strong><span>Optional signature</span></div><label class="signature-input"><span class="sr-only">Your initials</span><input id="quickInitials" type="text" maxlength="3" placeholder="DS" autocomplete="off" aria-label="Your initials, up to three letters"></label><label class="signature-size">Height <select id="quickSize"><option value="16">16 units</option><option value="24">24 units</option></select></label><svg id="signatureMini" viewBox="0 0 110 40" role="img" aria-label="Initials preview"></svg><button type="button" id="attachInitials" class="btn primary">Add to letter</button><button type="button" id="practiceSmall" class="btn">Practice only</button><span id="signatureStatus" aria-live="polite">Choose 1–3 letters. Small initials use shorter forward distances and a thin pen.</span></div></div>
 <section class="panel guide" aria-label="Step-by-step letter tutorial">
 <div class="guidebody"><aside class="rail" aria-label="Build guide"><div class="row"><span>BUILD GUIDE</span><span id="railCount">0 / 0</span></div><div class="rail-progress"><span id="railFill"></span></div><div id="stepnav" class="stepnav"></div></aside>
 <div id="railDivider" class="splitter" role="separator" tabindex="0" aria-label="Resize step sidebar" aria-orientation="vertical" title="Drag to resize step sidebar"></div><div class="steps"><div class="row"><strong style="font-size:11px">Follow the steps</strong><span id="countTop" class="counter">STEP 1 / 4</span></div><div class="stepbody"><div class="step-context"><h3 id="stepTitle"></h3><p id="stepInfo"></p></div><div id="dependencyNotice" class="dependency-notice" hidden><strong>These commands start from your earlier drawing.</strong><span id="dependencyText">Finish the earlier steps before adding this section.</span><div class="actions"><button type="button" id="missingStep" class="btn">Go to missing step</button><button type="button" id="practiceInline" class="btn primary">Practice initials only</button></div></div><div class="codehead"><span>TYPE THESE LINES</span><span id="codeProgress" aria-live="polite">Yellow = next</span></div><div id="codeSample" class="code-sample"><canvas id="stepCodeCanvas" tabindex="0" role="img" aria-label="Numbered commands to read and type into the editor"></canvas></div>
@@ -398,11 +413,11 @@ function designKey(){return letter+"/"+level}
 function design(){
  var d=designs[designKey()]||{};
  function safe(c,f){return palette.includes(c)?c:f}
- return {ink:safe(d.ink,"black"),center:safe(d.center,"white"),shadow:safe(d.shadow,"gray"),accent:safe(d.accent,"black"),border:!!d.border,initials:String(d.initials||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,3)};
+ return {ink:safe(d.ink,"black"),center:safe(d.center,"white"),shadow:safe(d.shadow,"gray"),accent:safe(d.accent,"black"),border:!!d.border,initials:String(d.initials||"").toUpperCase().replace(/[^A-Z]/g,"").slice(0,3),initialSize:d.initialSize===24?24:d.initials?16:24};
 }
-function markKey(i){if(practice)return "practice/"+designKey()+"/"+design().initials+"/"+i;var st=steps[i];return letter+"/"+level+"/"+(level==="beginner"?"":"outline-v1/")+(st&&st.extra?"extra/"+st.extra+"/"+(st.extra==="initials"?design().initials+"/":"")+st.part:i)}
+function markKey(i){if(practice)return "practice-small/"+designKey()+"/"+design().initials+"/"+design().initialSize+"/"+i;var st=steps[i];return letter+"/"+level+"/"+(level==="beginner"?"":"outline-v1/")+(st&&st.extra?"extra/"+st.extra+"/"+(st.extra==="initials"?design().initials+"/"+(design().initialSize===16?"":design().initialSize+"/"):"")+st.part:i)}
 function loadWorkspace(){
- var key=practice?lessonKey+"-initials-practice-"+designKey().replace("/","-")+"-"+design().initials:lessonKey;
+ var key=practice?lessonKey+"-small-initials-"+designKey().replace("/","-")+"-"+design().initials+"-"+design().initialSize:lessonKey;
  if(key===frameLesson)return;
  frameLesson=key;
  $("turtle").src="/turtle/?embed=course&ui=letters-compact-v1&layoutrev=4&lesson="+encodeURIComponent(key)+"&code="+encodeURIComponent("");
@@ -469,10 +484,10 @@ function writer(){
  function strokes(paths,offX,offY){worldStrokes(paths.map(function(points){return points.map(function(p){return world(p,offX,offY)})}))}
  return {write:write,strokes:strokes,worldStrokes:worldStrokes,take:function(){var out=lines.join("\n");lines=[];return out}};
 }
-function signaturePaths(initials,base){
- var size=16,span=19,width=initials.length*span-2;
+function signaturePaths(initials,base,size){
+ size=size||16;var span=size===16?19:Math.round(size*1.2),width=initials.length*span-2;
  // Prefer lower corners; find a clear patch using distance to the letter.
- var positions=[[-184,-166],[184-width,-166],[-184,184],[184-width,184],[-184,-124],[184-width,-124],[-184,142],[184-width,142]];
+ var bottom=size===16?-166:-181+size,positions=[[-184,bottom],[184-width,bottom],[-184,184],[184-width,184],[-184,-124],[184-width,-124],[-184,142],[184-width,142]];
  function clearance(x,y){
   var best=Infinity;
   base.forEach(function(p){
@@ -491,8 +506,8 @@ function signaturePaths(initials,base){
  });
  return paths;
 }
-function practicePaths(initials){
- var size=85,span=99,width=(initials.length-1)*span+size,paths=[];
+function practicePaths(initials,size){
+ size=size||24;var span=Math.round(size*1.2),width=(initials.length-1)*span+size,paths=[];
  initials.split("").forEach(function(ch,i){
   GLYPHS[ch].forEach(function(p){paths.push(simplify(p,10).map(function(q){return {x:-width/2+i*span+q[0]*size/100,y:size/2-q[1]*size/100}}))});
  });
@@ -504,8 +519,8 @@ function makeLesson(baseOnly){
  function colorCommand(c){return 'color("'+c+'")'}
  function add(tab,title,desc,skills,fn){fn(w);steps.push({tab:tab,title:title,desc:desc,skills:skills,code:w.take()})}
  if(practice&&!baseOnly){
-  add("Get ready","Start from the center","This is a separate practice drawing. Tracy begins at (0, 0), facing right. Use the thin pen to draw your initials.","speed · pensize",function(w){w.write("speed(0)");w.write("pensize(7)");w.write(colorCommand(cfg.accent))});
-  cfg.initials.split("").forEach(function(ch,i){var paths=practicePaths(cfg.initials),offset=0;for(var j=0;j<i;j++)offset+=GLYPHS[cfg.initials[j]].length;add("Draw "+ch,"Draw initial "+ch,"Follow the moves and turns for this letter. Lift the pen between separate strokes.","forward · left · right",function(w){w.worldStrokes(paths.slice(offset,offset+GLYPHS[ch].length))})});
+  add("Get ready","Start from the center","Tracy begins at (0, 0), facing right. Your initials are miniature letters, so their forward distances are much shorter.","speed · pensize",function(w){w.write("speed(0)");w.write("pensize(2)");w.write(colorCommand(cfg.accent))});
+  cfg.initials.split("").forEach(function(ch,i){var paths=practicePaths(cfg.initials,cfg.initialSize),offset=0;for(var j=0;j<i;j++)offset+=GLYPHS[cfg.initials[j]].length;add("Draw "+ch,"Draw initial "+ch,"Follow the moves and turns for this letter. Lift the pen between separate strokes.","forward · left · right",function(w){w.worldStrokes(paths.slice(offset,offset+GLYPHS[ch].length))})});
  }else if(level==="beginner"){
   add("Get ready","Start with a thick pen","A chunky block letter uses long forward moves and turns. Lift the pen to get to the first corner.","speed · pensize",function(w){w.write("speed(0)");w.write("pensize(42)");w.write(colorCommand(cfg.ink))});
   add("Draw "+letter,"Make your block letter",hint[letter]+" Read each turn and forward distance. Lift your pen before jumping to another part of the letter.","forward · left · right",function(w){w.strokes(strokes,0,0)});
@@ -527,7 +542,7 @@ function makeLesson(baseOnly){
   steps[steps.length-1].extra="border";
  }
  if(cfg.initials&&(!practice||baseOnly)){
-  add("Initials","Sign your artwork: "+cfg.initials,"Add these commands after the completed letter (and border, if selected). They use Tracy’s ending position and heading. Use Initials only to start from a blank world.","penup · forward · turns",function(w){w.write("pensize(2)");w.write(colorCommand(cfg.accent));w.worldStrokes(signaturePaths(cfg.initials,baseDrawing))});
+  add("Initials","Sign your artwork: "+cfg.initials,"Add these commands after the completed letter (and border, if selected). They use Tracy’s ending position and heading. Use Initials only to start from a blank world.","penup · forward · turns",function(w){w.write("pensize(2)");w.write(colorCommand(cfg.accent));w.worldStrokes(signaturePaths(cfg.initials,baseDrawing,cfg.initialSize))});
   steps[steps.length-1].extra="initials";
  }
  // Keep complete turn-and-move pairs together and limit every guide to seven lines.
@@ -577,6 +592,7 @@ function svg(tag,attrs,parent){
 function draw(){
  var out=$("preview");out.replaceChildren();
  out.setAttribute("viewBox","-20 -20 140 140");
+ if(practice){var span=Math.max(15,(design().initials.length*design().initialSize*1.2+12)/2.9);out.setAttribute("viewBox",[50-span/2,50-span/2,span,span].join(" "))}
  if(grid){
   for(var i=-10;i<=110;i+=10){
    svg("line",{x1:i,y1:-18.96,x2:i,y2:118.96,stroke:"#e2e7e3","stroke-width":.55},out);
@@ -595,7 +611,7 @@ function draw(){
   previewParts.forEach(function(p){if(p.stage<=step)paint(p,p.color==="white"?"#fffdfa":p.color,1)});
   previewParts.forEach(function(p){if(p.stage===step)paint(p,"#dc955d",.72,1.5)});
  }
- $("caption").textContent=step===0?"Finished "+level+" example":"Step "+(step+1)+" of "+steps.length;
+ $("caption").textContent=practice?"Magnified guide · actual initials "+design().initialSize+" units high":step===0?"Finished "+level+" example":"Step "+(step+1)+" of "+steps.length;
 }
 var comparisonLetter="",comparison={};
 function renderLevelChoices(){
@@ -619,8 +635,8 @@ function markLetters(){
  Array.from($("az").children).forEach(function(btn){btn.setAttribute("aria-current",btn.textContent===letter?"true":"false")})
 }
 function render(){
- makeLesson();
- $("practiceBtn").hidden=!design().initials&&!practice;$("practiceBtn").textContent=practice?"← Back to letter":"Initials only";
+ makeLesson();syncSignature();
+ $("practiceBtn").hidden=true;$("practiceBtn").textContent=practice?"← Back to letter":"Initials only";
  $("dependencyNotice").hidden=true;$("codeSample").classList.remove("blocked");$("runStage").disabled=false;
  if(step>=steps.length)step=steps.length-1;
  wantScroll=true;
@@ -665,6 +681,38 @@ AZ.forEach(function(ch){var b=document.createElement("button");b.type="button";b
 document.querySelectorAll(".level").forEach(function(b){b.addEventListener("click",function(){practice=false;level=b.dataset.difficulty;step=0;loadWorkspace();render()})});
 $("gridBtn").addEventListener("click",function(){grid=!grid;this.textContent=grid?"Grid on":"Grid off";this.setAttribute("aria-pressed",grid?"true":"false");draw()});
 $("prev").addEventListener("click",function(){if(step>0){step--;render()}});
+function saveDesign(d){
+ designs[designKey()]=d;
+ try{localStorage.setItem("drawaletter-designs-v1",JSON.stringify(designs))}catch(e){}
+}
+function updateSignatureMini(){
+ var initials=$("quickInitials").value,size=Number($("quickSize").value),out=$("signatureMini");
+ out.replaceChildren();
+ if(!initials){svg("text",{x:55,y:24,"text-anchor":"middle",fill:"#84928b","font-size":12},out).textContent="ABC";return}
+ var paths=practicePaths(initials,size),span=initials.length*size*1.2+8;
+ out.setAttribute("viewBox",[-span/2,-size/2-5,span,size+10].join(" "));
+ paths.forEach(function(p){svg("polyline",{points:p.map(function(q){return q.x+","+(-q.y)}).join(" "),fill:"none",stroke:design().accent,"stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"},out)});
+}
+function syncSignature(){
+ var d=design();$("quickInitials").value=d.initials;$("quickSize").value=String(d.initialSize);
+ $("practiceSmall").textContent=practice?"← Back to letter":"Practice only";
+ $("signatureStatus").textContent=practice?"Separate practice workspace · "+d.initialSize+" units high.":d.initials?"Signature "+d.initials+" · "+d.initialSize+" units high. See Initials under Optional finishing.":"Choose 1–3 letters. Shorter forward distances + thin pen.";
+ updateSignatureMini();
+}
+function quickSignature(only){
+ if(practice&&only){togglePractice();return}
+ var value=$("quickInitials").value,old=design(),size=Number($("quickSize").value);
+ if(!value){$("quickInitials").focus();tell("Type your initials first.");return}
+ old.initials=value;old.initialSize=size;saveDesign(old);
+ if(only){if(!practice)practiceReturn=step;practice=true;step=0}
+ else{practice=false;makeLesson();step=steps.findIndex(function(s){return s.extra==="initials"});if(step<0)step=0}
+ loadWorkspace();render();
+}
+$("quickInitials").addEventListener("input",function(){this.value=this.value.toUpperCase().replace(/[^A-Z]/g,"").slice(0,3);updateSignatureMini()});
+$("quickSize").addEventListener("change",updateSignatureMini);
+$("attachInitials").addEventListener("click",function(){quickSignature(false)});
+$("practiceSmall").addEventListener("click",function(){quickSignature(true)});
+$("quickInitials").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();quickSignature(false)}});
 function togglePractice(){
  if(!practice&&!design().initials)return;
  if(practice){practice=false;step=practiceReturn}else{practiceReturn=step;practice=true;step=0}
@@ -793,9 +841,9 @@ $("runStage").addEventListener("click",function(){try{var run=$("turtle").conten
  $("initialChoice").addEventListener("input",function(){this.value=this.value.toUpperCase().replace(/[^A-Z]/g,"").slice(0,3)});
  $("designForm").addEventListener("submit",function(e){
   e.preventDefault();
-  var d={ink:$("inkChoice").value,center:$("centerChoice").value,shadow:$("shadowChoice").value,accent:$("accentChoice").value,border:$("borderChoice").checked,initials:$("initialChoice").value};
+  var d={ink:$("inkChoice").value,center:$("centerChoice").value,shadow:$("shadowChoice").value,accent:$("accentChoice").value,border:$("borderChoice").checked,initials:$("initialChoice").value,initialSize:design().initialSize};
   if(level!=="beginner"&&d.ink===d.center){tell("Choose different outline and inner colors.");return}
-  designs[designKey()]=d;try{localStorage.setItem("drawaletter-designs-v1",JSON.stringify(designs))}catch(e){}
+  saveDesign(d);
   if(practice&&!d.initials){practice=false;step=0}loadWorkspace();dialog.close();render();tell("Design updated. Type any new commands yourself.");
  });
 })();
