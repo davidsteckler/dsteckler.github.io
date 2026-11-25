@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f0e9">
+<meta name="description" content="Draw a festive Thanksgiving turkey in Tracy Python with a step-by-step guide, coordinates, filled shapes and the live Turtle sandbox.">
+<link rel="canonical" href="https://dsteckler.com/turkey/">
+<title>Thanksgiving Turkey · Turtle Studio</title>
+<style>
+:root{--bg:#f4f0e9;--paper:#fffdfa;--ink:#253239;--muted:#586770;--subtle:#7a878c;--rule:#dddcd5;--teal:#176b73;--teal-dark:#12515a;--soft:#e8f2f0;--orange:#e18d50;--code:#202a32;--shadow:0 7px 24px #24323d0a}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #eeac62;outline-offset:2px}
+button:disabled{cursor:default;opacity:.4}
+a{color:inherit}
+.topbar{background:#fffdf8;border-bottom:1px solid var(--rule)}
+.top-inner{width:min(100% - 42px,1680px);height:59px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:-.015em}
+.brand-mark{width:29px;height:29px;display:grid;place-items:center;border-radius:8px;color:#fff;background:var(--teal);font:800 13px ui-monospace,monospace}
+.brand em{font-style:normal;color:#8a9694;font-weight:650}
+.navlinks{display:flex;align-items:center;gap:18px}
+.navlinks a{text-decoration:none;font-weight:700;font-size:11px;color:#506269}
+.navlinks a:hover{text-decoration:underline;text-underline-offset:4px}
+.shell{width:min(100% - 42px,1680px);margin:auto}
+.intro{padding:25px 0 22px;display:flex;align-items:center;justify-content:space-between;gap:26px}
+.kicker{font:850 11px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;color:#b15d39;letter-spacing:.13em;text-transform:uppercase}
+h1{font-size:clamp(31px,3.3vw,50px);letter-spacing:-.055em;line-height:1.09;margin:5px 0 9px;font-weight:860}
+.intro p{max-width:680px;margin:0;color:#5a676c;font-size:14px;line-height:1.5}
+.intro-info{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.chip{padding:5px 8px;border-radius:5px;background:#eae6dc;color:#5e645e;font:750 10px/1.2 ui-monospace,Consolas,monospace}
+.chip.accent{background:#e4f0ed;color:#1e615d}
+.intro-mark{border-left:1px solid var(--rule);padding-left:24px;min-width:170px;max-width:230px}
+.intro-mark strong{display:block;font-size:13px}
+.intro-mark small{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:5px}
+.studio{display:grid;grid-template-columns:minmax(355px,400px) minmax(0,1fr);gap:15px;align-items:start}
+.guide,.work-panel{background:var(--paper);border:1px solid var(--rule);border-radius:13px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+.guide-top{padding:18px 19px 13px;border-bottom:1px solid #ebe9e1}
+.guide-topline{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tiny-label{font:850 10px ui-monospace,Consolas,monospace;letter-spacing:.095em;text-transform:uppercase;color:var(--teal)}
+.step-number{font:750 11px ui-monospace,Consolas,monospace;color:#65747a}
+.progress{height:6px;background:#e9eae3;border-radius:5px;overflow:hidden;margin:12px 0 12px}
+.progress>div{height:100%;width:8%;background:var(--teal);transition:width .2s}
+.step-strip{display:flex;gap:5px;overflow-x:auto;padding:2px 0 5px;scrollbar-width:thin}
+.step-tab{white-space:nowrap;border:1px solid #e2e4dc;border-radius:7px;color:#617076;background:#fff;padding:7px 9px;font-size:11px;font-weight:740}
+.step-tab:hover{border-color:#a2c1ba}
+.step-tab[aria-current="step"]{background:#176b73;color:#fff;border-color:#176b73}
+.lesson{padding:20px 19px 19px}
+.lesson h2{font-size:26px;letter-spacing:-.045em;line-height:1.15;margin:0 0 8px}
+.description{margin:0 0 13px;color:#526268;font-size:13px;line-height:1.62}
+.to-do{border-left:3px solid #e5a06b;padding:9px 12px;background:#faf3e9;border-radius:0 7px 7px 0;margin-bottom:16px}
+.to-do strong{display:block;font-size:10px;letter-spacing:.085em;text-transform:uppercase;color:#926037;margin-bottom:4px}
+.to-do p{margin:0;font-size:12px;line-height:1.55}
+.visual-head{display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:8px}
+.visual-head strong{font-size:12px}
+.visual-head span{font:650 10px ui-monospace,Consolas,monospace;color:#889396}
+.scene-visual{position:relative;max-width:286px;width:100%;aspect-ratio:1;margin:0 auto;border:1px solid #cbd8d8;border-radius:8px;overflow:hidden;background:#d4edf4}
+#guideCanvas{width:100%;height:100%;display:block}
+.scene-note{font-size:10px;color:#637177;line-height:1.55;margin:8px 0 11px}
+.preview-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 14px}
+.preview-controls label{font-size:10px;font-weight:750;color:#5a6a6e}
+.preview-controls select{font-size:11px;padding:6px 7px;border:1px solid #d9dfd7;border-radius:6px;background:#fff;max-width:155px}
+.grid-check{display:flex;align-items:center;gap:4px}
+.grid-check input{accent-color:#176b73}
+.coord-read{font:10px ui-monospace,Consolas,monospace;color:#718083;margin-left:auto}
+.code-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0 7px}
+.code-head strong{font-size:11px}
+.code-head small{font-size:10px;color:#8a9696}
+.sample{background:var(--code);color:#e5eeed;border-radius:8px;border:1px solid #303f47;overflow:auto;margin:0;max-height:245px;padding:13px 14px;tab-size:4;font:12px/1.66 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}
+.sample code{font:inherit}
+.code-note{font-size:11px;color:#607177;margin:9px 0 14px;line-height:1.6}
+.questions{border-top:1px solid #e6e7e0;padding-top:13px}
+.questions h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a45a37;margin:0 0 5px}
+.questions p{font-size:12px;line-height:1.62;margin:0}
+.help{border:1px solid #e0e3db;border-radius:7px;margin:14px 0 0}
+.help summary{cursor:pointer;font-size:11px;font-weight:760;padding:9px 11px}
+.help p{font-size:11px;color:#5c6d70;line-height:1.65;padding:0 11px 11px;margin:0}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.btn{background:#fff;border:1px solid #d3dcd8;color:#20383d;padding:9px 13px;font-weight:800;font-size:11px;min-height:36px;border-radius:7px}
+.btn:hover{background:#f2f8f5}
+.btn.primary{background:#176b73;border-color:#176b73;color:#fff}
+.btn.primary:hover{background:#12515a}
+.step-saved{font-size:10px;color:#768383}
+.work-panel{position:relative}
+.work-head{padding:14px 17px;min-height:61px;border-bottom:1px solid #e8e7df;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.work-head h2{font-size:15px;letter-spacing:-.018em;margin:0}
+.work-head p{margin:2px 0 0;font-size:11px;color:#718087}
+.work-head .live{font:750 10px ui-monospace,Consolas,monospace;color:#24655d;background:#e7f1ed;border:1px solid #c9e0d9;border-radius:99px;padding:6px 9px;white-space:nowrap}
+.editor-frame{display:block;width:100%;height:min(74vh,770px);min-height:630px;border:0;background:#f0ebe1}
+.work-footer{padding:11px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #e9e8e2;font-size:11px;color:#627176}
+.work-footer a{font-weight:750;color:#176b73}
+.color-studio{margin-top:15px;border:1px solid var(--rule);border-radius:11px;padding:16px 18px;background:#fffdfa;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.color-studio strong{font-size:13px}
+.color-studio p{margin:3px 0 0;font-size:11px;color:#637277}
+.color-controls{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.color-controls select{border:1px solid var(--rule);border-radius:7px;background:#fff;padding:7px;font-size:11px}
+.color-controls input[type=color]{width:38px;height:34px;border:1px solid var(--rule);border-radius:5px;background:#fff;padding:3px}
+#colorCode{font:750 11px ui-monospace,Consolas,monospace;color:#32454a;background:#eff2ee;padding:8px 10px;border-radius:6px}
+.foot-resources{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between;margin:20px 0 36px;color:#68787b;font-size:11px}
+.foot-resources a{font-weight:750;color:#176b73}
+.check-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.check-row label{border:1px solid #e1e4df;border-radius:7px;display:flex;gap:7px;align-items:start;padding:8px 10px;font-size:11px;color:#51646a;background:#fafbf8}
+.check-row input{accent-color:var(--teal);margin-top:2px}
+[hidden]{display:none!important}
+@media(max-width:1240px){.studio{grid-template-columns:1fr}.guide{display:grid;grid-template-columns:minmax(315px,1fr) minmax(315px,1fr)}.guide-top{grid-column:1/-1}.lesson{grid-column:1/-1;display:grid;grid-template-columns:1fr minmax(275px,.9fr);gap:0 22px}.lesson h2,.lesson>.description,.lesson>.to-do,.lesson>.code-head,.lesson>.sample,.lesson>.code-note,.lesson>.questions,.lesson>.help,.lesson>.actions{grid-column:1}.lesson>.visual-head,.lesson>.scene-visual,.lesson>.scene-note,.lesson>.preview-controls{grid-column:2}.lesson>.visual-head{grid-row:1}.lesson>.scene-visual{grid-row:2/span 3}.lesson>.scene-note{grid-row:5}.lesson>.preview-controls{grid-row:6}.scene-visual{max-width:350px}.lesson h2{grid-row:1}.lesson>.description{grid-row:2}.lesson>.to-do{grid-row:3}.lesson>.code-head{grid-row:4}.lesson>.sample{grid-row:5}.lesson>.code-note{grid-row:6}.lesson>.questions{grid-row:7}.lesson>.help{grid-row:8}.lesson>.actions{grid-row:9}.editor-frame{height:750px}}
+@media(max-width:740px){.shell,.top-inner{width:min(100% - 24px,1680px)}.navlinks{gap:9px}.navlinks a{font-size:10px}.navlinks a:nth-child(2){display:none}.intro{padding:22px 0 18px}.intro-mark{display:none}.intro p{font-size:12px}.lesson{display:block}.guide-top{padding:13px}.lesson{padding:16px}.scene-visual{max-width:310px}.studio{gap:10px}.editor-frame{height:1020px;min-height:840px}.color-studio{grid-template-columns:1fr}.check-row{grid-template-columns:1fr 1fr}}
+@media(max-width:530px){.brand em,.navlinks a:first-child{display:none}.navlinks a{font-size:10px}.check-row{grid-template-columns:1fr}.color-controls{gap:6px}.color-controls #colorCode{font-size:10px}.work-head .live{font-size:9px}.scene-visual{max-width:290px}.editor-frame{height:1050px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.progress>div{transition:none}}
+
+
+/* Full-screen classroom workspace · compact project toolbar and enlarged visual. */
+:root{--rail-size:clamp(236px,17vw,292px)}
+.top-identity{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
+.top-identity .brand{gap:7px;white-space:nowrap;letter-spacing:.015em;font-size:11px}
+.top-separator{width:1px;height:24px;background:#d3d5ce;flex:0 0 auto}
+.project-identity{display:flex;gap:9px;align-items:baseline;white-space:nowrap;min-width:0}
+.project-code{color:#a66a4c;font:800 9px ui-monospace,Consolas,monospace;letter-spacing:.06em}
+.project-identity strong{font-size:16px;letter-spacing:-.045em;font-weight:840;color:#253239}
+.title-dot{color:#d78856}
+.top-skills{font:750 9px ui-monospace,Consolas,monospace;color:#5d8079;background:#e8f1ed;padding:5px 7px;border-radius:5px;white-space:nowrap;margin-left:4px}
+@media (min-width:1081px){
+  html,body{width:100%;height:100%;height:100dvh;overflow:hidden}
+  body{display:flex;flex-direction:column}
+  .topbar{flex:0 0 43px;min-height:43px}
+  .top-inner{height:43px;width:min(100% - 26px,1720px)}
+  .navlinks{gap:14px;white-space:nowrap}
+  .navlinks a{font-size:10px}
+  .shell{height:calc(100dvh - 43px);width:min(100% - 26px,1720px);min-height:0;display:flex;flex-direction:column;padding:9px 0 10px}
+  .intro{display:none}
+  .studio{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:clamp(556px,39.2vw,677px) minmax(0,1fr);align-items:stretch;gap:10px}
+  .guide{height:100%;min-height:0;display:grid;grid-template-columns:var(--rail-size) minmax(0,1fr);overflow:hidden}
+  .guide-top{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;padding:12px 11px 11px;background:#f1f5ef;border-right:1px solid #dfe5de;border-bottom:0}
+  .guide-topline{padding:0 2px;gap:6px}
+  .tiny-label{font-size:10px;letter-spacing:.015em;white-space:nowrap}
+  .step-number{font-size:10px;white-space:nowrap}
+  .progress{flex:0 0 5px;height:5px;margin:9px 2px 11px}
+  .step-strip{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:minmax(29px,1fr);gap:3px;min-height:0;flex:1 1 auto;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding:0}
+  .step-tab{min-width:0;width:100%;padding:5px 10px;min-height:28px;text-align:left;white-space:nowrap;border:1px solid transparent;border-radius:6px;background:transparent;color:#536366;font-size:11px;line-height:1.3;font-weight:740;box-shadow:none;overflow:hidden;text-overflow:ellipsis}
+  .step-tab:hover{background:#e4eee8;border-color:#ccded3}
+  .step-tab[aria-current="step"]{background:#176b73;border-color:#176b73;color:#fff}
+  .rail-preview{flex:0 0 auto;padding:9px 0 0;margin:9px 0 0;border-top:1px solid #d9dfd8;min-height:0;display:flex;flex-direction:column;align-items:stretch}
+  .visual-head{margin:0 2px 7px}
+  .visual-head strong{font-size:10px;text-transform:uppercase;letter-spacing:.035em}
+  .visual-head span{font-size:9px}
+  .scene-visual{width:min(100%,30dvh,268px);max-width:none;margin:0 auto;aspect-ratio:1/1;border-radius:5px;flex:0 0 auto}
+  .scene-note{display:none}
+  .preview-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin:8px 0 0}
+  .preview-controls label{font-size:10px}
+  .preview-controls select{max-width:122px;padding:5px 6px;font-size:10px}
+  .preview-controls .coord-read{display:none}
+  .guide .lesson{min-width:0;min-height:0;display:flex;flex-direction:column;gap:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:16px 18px 12px}
+  .lesson h2{font-size:23px;line-height:1.13;margin:0 0 7px}
+  .description{font-size:12px;line-height:1.52;margin-bottom:10px}
+  .to-do{padding:9px 10px;margin-bottom:11px}
+  .to-do strong{font-size:9px;margin-bottom:4px}
+  .to-do p{font-size:11px;line-height:1.5}
+  .code-head{margin:0 0 7px}
+  .code-head strong{font-size:11px}
+  .sample{font-size:11px;line-height:1.52;padding:10px 11px;max-height:200px;flex:0 1 auto}
+  .code-note{font-size:11px;line-height:1.5;margin:7px 0 11px}
+  .questions{padding-top:10px}
+  .questions h3{font-size:10px;margin:0 0 4px}
+  .questions p{font-size:11px;line-height:1.48}
+  .color-drawer{border:1px solid #e4e7e0;border-radius:7px;margin-bottom:9px;background:#f6faf7;flex:0 0 auto}
+  .color-drawer summary{padding:7px 9px;cursor:pointer;font-size:10px;font-weight:800;color:#356660}
+  .color-drawer summary small{font-weight:550;color:#84928b;margin-left:5px}
+  .color-drawer .color-studio{display:block;border:0;margin:0;padding:2px 9px 10px;background:transparent;box-shadow:none}
+  .color-drawer .color-studio>div:first-child{display:none}
+  .color-drawer .color-controls{display:flex;gap:5px}
+  .color-drawer .color-controls select{padding:5px;max-width:115px;font-size:10px}
+  .color-drawer .color-controls input[type=color]{width:30px;height:29px}
+  .color-drawer #colorCode{font-size:9px;max-width:100%;overflow-wrap:anywhere;padding:5px}
+  .color-drawer .btn{padding:5px 8px;min-height:27px;font-size:9px}
+  .help{margin:9px 0 0}
+  .help summary{padding:6px 9px;font-size:10px}
+  .help p{font-size:10.5px;padding:0 9px 9px}
+  .actions{margin-top:auto;padding-top:12px;flex:0 0 auto;gap:5px}
+  .actions .btn{padding:7px 10px;min-height:32px;font-size:10px}
+  .step-saved{display:none}
+  .work-panel{height:100%;min-height:0;display:flex;flex-direction:column}
+  .work-head{min-height:42px;padding:7px 12px;flex:0 0 auto}
+  .work-head h2{font-size:13px}
+  .work-head p{font-size:10px}
+  .work-head .live{font-size:9px;padding:5px 7px}
+  .editor-frame{width:100%;height:100%;min-height:0;flex:1 1 auto}
+  .work-footer,.foot-resources{display:none}
+}
+@media (min-width:1081px) and (max-height:820px){
+  .shell{padding:6px 0}
+  .guide-top{padding:9px 10px}
+  .progress{margin:6px 2px 8px}
+  .step-strip{grid-auto-rows:minmax(26px,1fr);gap:2px}
+  .step-tab{min-height:25px;padding:3px 8px;font-size:10.5px}
+  .rail-preview{padding-top:6px;margin-top:6px}
+  .scene-visual{width:min(100%,30dvh,254px)}
+  .visual-head{margin-bottom:5px}
+  .preview-controls{margin-top:5px}
+  .preview-controls select{padding:3px 5px}
+  .guide .lesson{padding:12px 14px 9px}
+  .lesson h2{font-size:21px;margin-bottom:6px}
+  .description{font-size:11px;margin-bottom:7px}
+  .to-do{padding:7px 9px;margin-bottom:8px}
+  .sample{max-height:160px;font-size:10.5px;line-height:1.42;padding:8px 9px}
+  .code-note{font-size:10px;margin:5px 0 8px}
+  .questions{padding-top:7px}
+  .questions p{font-size:10px}
+  .color-drawer{margin-bottom:7px}
+  .color-drawer summary{padding:5px 8px}
+  .help{margin-top:6px}
+  .actions{padding-top:8px}
+}
+@media (min-width:1081px) and (max-height:700px){
+  .scene-visual{width:min(100%,27dvh,196px)}
+  .step-strip{grid-auto-rows:minmax(24px,1fr);gap:1px}
+  .step-tab{min-height:23px}
+  .guide-top{padding:6px 9px}
+  .preview-controls{gap:4px}
+  .guide .lesson{padding:10px 12px 7px}
+  .sample{max-height:145px}
+}
+@media(max-width:1270px) and (min-width:1081px){
+  .top-skills{display:none}
+  .project-identity{gap:6px}
+  .project-identity strong{font-size:14px}
+  .navlinks{gap:8px}
+  .navlinks a{font-size:9px}
+}
+@media(max-width:1080px){
+  .top-inner{gap:10px}
+  .project-identity{gap:6px}
+  .project-code{display:none}
+  .project-identity strong{font-size:14px}
+  .top-skills{display:none}
+  .top-separator{height:20px}
+  .studio{display:block}
+  .guide{display:grid;grid-template-columns:minmax(225px,260px) minmax(0,1fr);margin-bottom:12px}
+  .guide-top{display:flex;flex-direction:column;padding:14px 12px;border-right:1px solid var(--rule);border-bottom:0}
+  .step-strip{display:grid;grid-template-columns:1fr;gap:3px;overflow:visible}
+  .step-tab{width:100%;text-align:left;white-space:normal}
+  .rail-preview{padding-top:13px;margin-top:14px;border-top:1px solid var(--rule)}
+  .scene-visual{width:min(100%,238px);max-width:none}
+  .scene-note{display:none}
+  .preview-controls{gap:4px}
+  .preview-controls select{max-width:125px}
+  .preview-controls .coord-read{display:none}
+  .lesson{display:block!important;overflow:visible;padding:18px}
+  .editor-frame{height:790px;min-height:700px}
+  .color-drawer{border:1px solid var(--rule);border-radius:8px;margin:12px 0;padding:8px 10px}
+  .color-drawer summary{font-weight:800;cursor:pointer}
+  .color-drawer .color-studio{display:block;margin:8px 0 0;padding:10px}
+  .color-drawer .color-studio>div:first-child{display:none}
+}
+@media(max-width:650px){
+  .top-inner{width:min(100% - 20px,1680px)}
+  .top-identity .brand{font-size:0;gap:0}
+  .top-identity .brand-mark{font-size:13px}
+  .top-separator{display:none}
+  .project-identity strong{font-size:13px}
+  .navlinks a:first-child,.navlinks a:last-child{display:none}
+  .navlinks a{font-size:10px}
+  .guide{grid-template-columns:1fr}
+  .guide-top{border-right:0;border-bottom:1px solid var(--rule)}
+  .step-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .step-tab{text-align:center;font-size:10px;padding:8px 4px}
+  .rail-preview{display:grid;grid-template-columns:minmax(0,210px) 1fr;gap:8px}
+  .rail-preview .visual-head{grid-column:1/-1}
+  .rail-preview .preview-controls{align-self:center}
+  .scene-visual{width:100%;max-width:205px}
+  .color-drawer .color-controls{justify-content:flex-start}
+}
+
+
+/* Thanksgiving Turkey: larger coordinate preview, roomy lesson, original split-panel studio. */
+:root{--rail-size:clamp(248px,19.5vw,306px)}
+.scene-visual{background:#fff;border-color:#d9dbd5}
+.step-tab{font-variant-numeric:tabular-nums}
+.preview-controls{justify-content:center}
+.preview-controls .grid-check{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:750;color:#516269}
+.preview-controls input{accent-color:var(--teal)}
+.preview-controls .coord-read{margin:0}
+.tip-pill{display:inline-flex;border-radius:6px;padding:6px 8px;background:#edf4f0;color:#356b62;font-size:10px;font-weight:750;white-space:nowrap}
+.lesson .code-note{color:#637277}
+@media(min-width:1081px){
+  .studio{grid-template-columns:clamp(625px,44vw,780px) minmax(0,1fr)}
+  .scene-visual{width:min(100%,36dvh,290px);max-width:290px}
+  .guide .lesson{padding:18px 19px 14px}
+  .lesson h2{font-size:25px}
+  .description{font-size:12px}
+  .to-do p{font-size:12px}
+  .sample{font-size:12px;max-height:205px}
+  .step-strip{grid-auto-rows:minmax(28px,1fr)}
+  .step-tab{font-size:11px;padding-left:10px}
+  .preview-controls{margin-top:8px}
+}
+@media(min-width:1081px) and (max-height:820px){
+  .studio{grid-template-columns:clamp(605px,43vw,750px) minmax(0,1fr)}
+  .scene-visual{width:min(100%,32dvh,265px)}
+  .guide .lesson{padding:12px 14px 9px}
+  .lesson h2{font-size:21px}
+  .description,.to-do p{font-size:11px}
+  .sample{font-size:11px;max-height:165px}
+  .step-strip{grid-auto-rows:minmax(24px,1fr)}
+  .step-tab{font-size:10px}
+}
+@media(min-width:1081px) and (max-height:700px){
+  .scene-visual{width:min(100%,25dvh,210px)}
+  .step-strip{grid-auto-rows:minmax(22px,1fr)}
+  .guide .lesson{padding:10px 12px 7px}
+}
+@media(max-width:1080px){.rail-preview{min-width:0}.scene-visual{width:min(100%,270px);max-width:270px}}
+@media(max-width:650px){.rail-preview .scene-visual{max-width:205px}.step-strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Guided typing: keep the original classroom layout and step navigation. */
+
+.etch-code-sample{padding:0!important;white-space:normal;overflow:auto}
+.etch-code-sample canvas{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y;cursor:default}
+.etch-code-sample canvas:focus-visible{outline:2px solid #ffd35d;outline-offset:-3px}
+.code-head #codeProgress{font-weight:700;color:#98662b}
+.teacher-trigger{position:fixed;bottom:2px;left:2px;z-index:30;display:grid;place-items:center;width:18px;height:18px;padding:0;border:0;border-radius:50%;background:transparent;color:#536b64;opacity:.24;font-size:17px;cursor:pointer}
+.teacher-trigger:hover,.teacher-trigger:focus-visible{opacity:1;background:#d9e6df}
+.teacher-dialog{width:min(730px,calc(100vw - 26px));max-height:86dvh;padding:20px;background:#fffdfa;color:#253239;border:1px solid #cdd8d4;border-radius:12px;box-shadow:0 24px 80px #112b325e}
+.teacher-dialog::backdrop{background:rgba(18,35,39,.62)}
+.teacher-top{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.teacher-top small{font:750 10px ui-monospace,monospace;color:#176b73;letter-spacing:.1em}
+.teacher-top h2{margin:3px 0 7px;font-size:24px;letter-spacing:-.035em}
+.teacher-dialog p{font-size:12px;color:#627176;margin:2px 0 12px}
+.teacher-x{font-size:26px;line-height:1;border:0;background:none;color:#5e6e70;cursor:pointer}
+.teacher-code{padding:15px 18px;margin:0;overflow:auto;max-height:55dvh;white-space:pre;background:#202a32;color:#f1f5f3;border-radius:8px;font:12px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;user-select:text}
+.teacher-actions{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
+@media print{.teacher-trigger,.teacher-dialog{display:none!important}}
+
+/* Draggable classroom panes. The 11-step guide and the existing Turtle editor remain in place. */
+@media(min-width:1081px){
+ .studio{grid-template-columns:minmax(0,var(--etch-guide-width,44%)) 10px minmax(0,1fr)!important;gap:0!important}
+ .studio>.guide{grid-column:1;grid-row:1;margin-right:0}
+ .studio>.studio-divider{grid-column:2;grid-row:1}
+ .studio>.work-panel{grid-column:3;grid-row:1}
+ .guide{grid-template-columns:minmax(0,var(--etch-rail-width,290px)) 9px minmax(0,1fr)!important}
+ .guide>.guide-top{grid-column:1;grid-row:1;border-right:0}
+ .guide>.guide-divider{grid-column:2;grid-row:1}
+ .guide>.lesson{grid-column:3;grid-row:1}
+}
+.studio-divider,.guide-divider{position:relative;cursor:col-resize;touch-action:none;user-select:none;background:#f4f0e9;min-width:0}
+.guide-divider{background:#e7eee8}
+.studio-divider::before,.guide-divider::before{content:"";position:absolute;z-index:3;top:42%;bottom:42%;left:calc(50% - 2px);width:4px;min-height:32px;background:#b5c9c5;border-radius:8px}
+.studio-divider:hover::before,.studio-divider:focus-visible::before,.studio-divider.dragging::before,.guide-divider:hover::before,.guide-divider:focus-visible::before,.guide-divider.dragging::before{background:#176b73}
+body.etch-resizing iframe{pointer-events:none}
+body.etch-resizing,body.etch-resizing *{cursor:col-resize!important;user-select:none!important}
+.experiment-stage{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:5px 8px;margin:0 0 8px;background:#e9f1ed;border:1px solid #d4e4dd;border-radius:6px;color:#176b73;font:800 9px/1.4 ui-monospace,SFMono-Regular,monospace;letter-spacing:.03em}
+.experiment-stage>span:last-child{color:#527c70;white-space:nowrap}
+.run-experiment{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:8px}
+.run-experiment .btn{padding:5px 9px;min-height:30px;border-color:#add4c8;color:#145b60;background:#eef7f4}
+.run-experiment span{font-size:10px;color:#657875}
+.etch-line-guide{display:flex!important;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.etch-line-guide .etch-guide-text{flex:1 1 210px}
+.etch-line-buttons{display:flex;gap:5px;flex-shrink:0}
+.etch-line-buttons button{font:750 11px ui-sans-serif,system-ui;padding:4px 9px;background:#fff8e2;border:1px solid #bba772;border-radius:5px;cursor:pointer;color:#4f482e}
+.etch-line-buttons button:hover{background:#fff}
+@media(max-width:1080px){.studio-divider,.guide-divider{display:none!important}}
+
+/* Instruction bar stays outside the iframe so CodeMirror owns its own height. */
+.editor-guide-bar{height:32px;min-height:32px;flex:0 0 32px;display:flex;align-items:center;gap:7px;box-sizing:border-box;padding:3px 9px;background:#edf3ef;border-bottom:1px solid #d0e0d9;color:#35585b;font:700 10px/1.3 ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+#editorGuideMessage{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.editor-guide-actions{display:flex;flex:0 0 auto;gap:5px}
+.editor-guide-actions button{border:1px solid #c5d6d0;border-radius:5px;padding:3px 8px;background:#fff;color:#31565c;font:750 10px/1.3 ui-sans-serif,system-ui;cursor:pointer}
+.editor-guide-actions button:hover{background:#e5f4ef}
+.work-panel{min-height:0}
+
+/* Small visuals within the instructions, not just in the left preview. */
+.instruction-visual{margin:0 0 9px;padding:5px;border:1px solid #dce5df;border-radius:8px;background:#f9fbf8;flex:0 0 auto}
+.instruction-visual canvas{display:block;width:100%;height:auto;max-height:190px;object-fit:contain;border-radius:5px}
+.instruction-visual figcaption{text-align:center;margin:4px 3px 0;color:#526e6c;font-size:10px;line-height:1.3;font-weight:700}
+@media(min-width:1081px) and (max-height:780px){.instruction-visual canvas{max-height:145px}.instruction-visual{padding:3px;margin-bottom:6px}.instruction-visual figcaption{font-size:9px}}
+
+/* Large click targets; student-selected checkmarks only. */
+.step-strip{grid-auto-rows:minmax(44px,1fr)!important;gap:4px!important}
+.step-item{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:stretch;min-width:0;min-height:44px;border-radius:7px;background:transparent;overflow:hidden}
+.step-item .step-tab{display:flex;align-items:center;width:100%;height:100%;min-height:44px!important;padding:8px 6px 8px 11px!important;line-height:1.3;text-align:left;font-size:11px!important;font-weight:760;color:#536366;background:transparent!important;border:none!important;border-radius:0!important;overflow:hidden;text-overflow:ellipsis}
+.step-item .step-tab:hover{background:#e3eee8!important}
+.step-mark-target{width:44px;height:100%;min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:0 7px 7px 0}
+.step-mark-target:hover{background:#e3eee8}
+.step-check{width:21px;height:21px;margin:0;flex:0 0 auto;cursor:pointer;accent-color:#176b73}
+.step-item.is-active{background:#176b73!important}
+.step-item.is-active .step-tab{background:transparent!important;color:#fff!important}
+.step-item.is-active .step-tab:hover,.step-item.is-active .step-mark-target:hover{background:#125760!important}
+.step-item.is-active .step-check{accent-color:#fff}
+.step-item.is-done:not(.is-active){background:#e4eee8}
+.step-item.is-done:not(.is-active) .step-tab{color:#25685f}
+.step-mark-target:focus-within{outline:2px solid #dc9557;outline-offset:-3px}
+.step-check:focus-visible{outline:2px solid #dc9557;outline-offset:3px}
+@media(max-width:1080px){.step-item{min-height:44px}}
+.topbar{background:#fff6e8}.brand-mark{background:#a55332}.top-skills{background:#f6e6cc;color:#84542c}.title-dot{color:#c66c30}.guide-top{background:#fbf2e4!important}.scene-visual{background:#fff0d4}.instruction-visual{background:#fffaf0}.step-tab[aria-current="step"]{background:#a55332!important;border-color:#a55332!important}.progress>div{background:#b86b3c}.btn.primary{background:#a55332;border-color:#a55332}.btn.primary:hover{background:#824022}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="top-inner">
+  <div class="top-identity"><a class="brand" href="/turtle/"><span class="brand-mark" aria-hidden="true">&gt;_</span> TURTLE LAB</a><span class="top-separator" aria-hidden="true"></span><div class="project-identity"><span class="project-code">THANKSGIVING PROJECT</span><strong>Thanksgiving Turkey<span class="title-dot">.</span></strong></div><span class="top-skills">COORDINATES · COLOR · NO LOOPS</span></div>
+  <nav class="navlinks" aria-label="Related tools">
+   <a href="/gridworld/">Coordinate world</a>
+   <a href="/turtlereference/" target="_blank" rel="noopener">Command reference ↗</a>
+   <a href="/turtle/" target="_blank" rel="noopener">Full sandbox ↗</a>
+  </nav>
+ </div>
+</header>
+<div class="shell">
+ <main class="studio">
+  <section class="guide" aria-label="Thanksgiving Turkey walkthrough">
+   <div class="guide-top">
+    <div class="guide-topline"><span class="tiny-label">Build guide · 15 steps</span><span class="step-number" id="stepCount">01 / 15</span></div>
+    <div class="progress" aria-label="Lesson progress"><div id="progressBar"></div></div>
+    <nav class="step-strip" id="stepStrip" aria-label="Choose a project step"></nav>
+    <div class="rail-preview">
+     <div class="visual-head"><strong id="visualTitle">Drawing guide</strong><span>400 × 400</span></div>
+     <div class="scene-visual"><canvas width="400" height="400" id="guideCanvas" role="img" aria-label="Thanksgiving turkey with autumn leaves, colorful feathers, and pumpkins, progressively drawn"></canvas></div>
+     <p class="scene-note" id="visualCaption">A reference drawing that grows with each step.</p>
+     <div class="preview-controls">
+      <label class="grid-check"><input id="gridToggle" type="checkbox" checked> Grid</label>
+      <label class="grid-check"><input id="outlineToggle" type="checkbox"> Show full outline</label>
+      <span class="coord-read" id="coords">x 0 · y 0</span>
+     </div>
+    </div>
+    <button class="teacher-trigger" id="teacherTrigger" type="button" aria-label="Teacher reference" aria-haspopup="dialog">·</button>
+   </div>
+   <div class="guide-divider" id="guideDivider" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Resize step list and lesson instructions" title="Drag to resize step list"></div>
+   <div class="lesson" aria-live="polite">
+    <h2 id="stepTitle">Meet the Thanksgiving turkey</h2>
+    <p class="description" id="stepDescription"></p>
+    <div id="experimentStage" class="experiment-stage" hidden><span id="experimentStageLabel"></span><span id="experimentStageCount"></span></div>
+    <div class="to-do"><strong>Your task</strong><p id="taskText"></p></div>
+    <figure class="instruction-visual" id="substepDiagram" hidden>
+     <canvas id="substepCanvas" width="480" height="226" role="img" aria-label="Current drawing substep illustration"></canvas>
+     <figcaption id="substepCaption"></figcaption>
+    </figure>
+    <div class="code-head"><strong id="codeTitle">Type these lines</strong><small id="codeProgress" aria-live="polite">Yellow = next line</small></div>
+    <div class="sample etch-code-sample" id="codeSample"><canvas id="stepCodeCanvas" role="img" tabindex="0" aria-label="Visual numbered code reference to read and type manually"></canvas></div>
+    <p class="code-note" id="codeNote"></p>
+    <div class="questions"><h3>Check your work</h3><p id="tryText"></p><div class="run-experiment" id="runExperiment" hidden><button class="btn" id="runStage" type="button">▶ Run this test</button><span id="runFeedback">Run and look at Turtle World before moving on.</span></div></div>
+    <details class="help" id="helpBox"><summary>Need a hint?</summary><p id="hintText"></p></details>
+    <div class="actions">
+     <button class="btn" id="prevStep" type="button">← Previous</button>
+     <span class="step-saved" id="savedLabel">Step saves on this device</span>
+     <button class="btn primary" id="nextStep" type="button">Next step →</button>
+    </div>
+   </div>
+  </section>
+  <div class="studio-divider" id="studioDivider" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Resize the guide and Turtle workspace" title="Drag to resize guide and workspace"></div>
+  <section class="work-panel" aria-label="Live Python Turtle editor">
+   <div class="work-head"><div><h2>Your Turtle workspace</h2><p>Type your code, press Run, and compare your drawing.</p></div><span class="live">REAL PYTHON · AUTO-SAVED</span></div>
+    <div class="editor-guide-bar"><span id="editorGuideMessage" aria-live="polite">Type the highlighted command.</span><div class="editor-guide-actions"><button id="editorScrollTop" type="button">↑ Top</button><button id="editorScrollStep" type="button">↳ This step</button></div></div>
+   <iframe id="turtleFrame" class="editor-frame" title="Editable Python Turtle code, Run controls, drawing world and error messages" allow="clipboard-write" loading="eager"></iframe>
+   <div class="work-footer"><span>Your code stays here when you change steps. Save your finished program before switching devices.</span><a href="/turtlereference/" target="_blank" rel="noopener">Turtle command help ↗</a></div>
+  </section>
+ </main>
+ <dialog id="teacherDialog" class="teacher-dialog" aria-labelledby="teacherHeading">
+  <div class="teacher-top"><div><small>TEACHER REFERENCE</small><h2 id="teacherHeading">Complete Thanksgiving Turkey code</h2></div><button id="teacherClose" class="teacher-x" type="button" aria-label="Close">×</button></div>
+  <p>Full program with every step together.</p>
+  <pre id="teacherCode" class="teacher-code"></pre>
+  <div class="teacher-actions"><button id="teacherCopy" class="btn" type="button">Copy full code</button><button id="teacherDone" class="btn primary" type="button">Close</button></div>
+ </dialog>
+ <div class="foot-resources"><span>Tip: Move with penup() before starting any separate shape.</span><span>More help: <a href="/gridworld/">Grid World</a> · <a href="/turtlereference/">Turtle Reference</a> · <a href="/turtle/">Full Sandbox</a></span></div>
+</div>
+<script>
+
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+var STARTER="";
+var lessonId="thanksgiving-turkey-v1";
+$("turtleFrame").src="/turtle/?embed=course&lesson="+encodeURIComponent(lessonId)+"&code="+encodeURIComponent(STARTER);
+var steps=[{"tab":"Start","title":"Meet the Thanksgiving turkey","description":"Look at the finished drawing. We will build it from coordinates, filled shapes and circles, starting with a warm autumn background.","task":"Type the two commands and run them.","shapes":[],"code":"speed(0)\nbgcolor(\"#fff0d4\")","note":"bgcolor() changes the entire Turtle World. Hex colors begin with #.","try":"Is the world a pale golden color?","hint":"The quotation marks around the color are required."},{"tab":"Ground","title":"Paint the autumn ground","description":"The ground is a filled rectangle across the bottom of the world.","task":"Move to the first corner with the pen up, then connect the remaining corners.","shapes":[{"kind":"poly","color":"#bd8551","pts":[[-199,-139],[199,-139],[199,-199],[-199,-199]]}],"code":"penup()\ngoto(-199, -139)\ncolor(\"#bd8551\")\npendown()\nbegin_fill()\ngoto(199, -139)\ngoto(199, -199)\ngoto(-199, -199)\ngoto(-199, -139)\nend_fill()","note":"begin_fill() and end_fill() fill a closed shape with the current color.","try":"Does the ground stretch across the bottom without a diagonal line?","hint":"Keep the pen up until you reach (-199, -139)."},{"tab":"Autumn leaves","title":"Add falling leaves","description":"Two little diamond-shaped leaves make the sky feel like fall. Draw each one separately.","task":"Follow the four points of each leaf and return to its starting point.","shapes":[{"kind":"poly","color":"#d98c37","pts":[[-165,138],[-151,153],[-137,138],[-151,124]]},{"kind":"poly","color":"#b94c35","pts":[[138,132],[151,150],[164,132],[151,119]]}],"code":"penup()\ngoto(-165, 138)\ncolor(\"#d98c37\")\npendown()\nbegin_fill()\ngoto(-151, 153)\ngoto(-137, 138)\ngoto(-151, 124)\ngoto(-165, 138)\nend_fill()\npenup()\ngoto(138, 132)\ncolor(\"#b94c35\")\npendown()\nbegin_fill()\ngoto(151, 150)\ngoto(164, 132)\ngoto(151, 119)\ngoto(138, 132)\nend_fill()","note":"Lift the pen between separate shapes. The last goto() closes each leaf.","try":"Are there two leaves floating near the upper corners?","hint":"Use the highlighted points in the guide."},{"tab":"Far-left feather","title":"Draw the leftmost tail feather","description":"The tail is a fan of five overlapping, filled shapes. Start with the far-left feather.","task":"Follow the numbered corners. Return to the starting point to close the feather.","shapes":[{"kind":"poly","color":"#a94432","pts":[[0,-48],[-156,-9],[-174,30],[-166,64],[-136,66],[-90,39]]}],"code":"penup()\ngoto(0, -48)\ncolor(\"#a94432\")\npendown()\nbegin_fill()\ngoto(-156, -9)\ngoto(-174, 30)\ngoto(-166, 64)\ngoto(-136, 66)\ngoto(-90, 39)\ngoto(0, -48)\nend_fill()","note":"The tail is drawn before the body, so the body can cover the narrow ends.","try":"Does the red feather point outward to the left?","hint":"The starting point is (0, -48)."},{"tab":"Far-right feather","title":"Mirror the first feather","description":"The right feather uses the same y coordinates. Its x coordinates have the opposite signs.","task":"Draw the mirrored feather on the right.","shapes":[{"kind":"poly","color":"#a94432","pts":[[0,-48],[156,-9],[174,30],[166,64],[136,66],[90,39]]}],"code":"penup()\ngoto(0, -48)\ncolor(\"#a94432\")\npendown()\nbegin_fill()\ngoto(156, -9)\ngoto(174, 30)\ngoto(166, 64)\ngoto(136, 66)\ngoto(90, 39)\ngoto(0, -48)\nend_fill()","note":"Changing the sign of x reflects a point across the vertical axis.","try":"Do the two red feathers look symmetrical?","hint":"Compare -156 and 156. The y value stays -9."},{"tab":"Inner-left feather","title":"Add a golden-orange feather","description":"This feather reaches higher than the first one. Its narrow end overlaps the earlier feathers.","task":"Draw and fill the next feather.","shapes":[{"kind":"poly","color":"#e08732","pts":[[0,-48],[-119,40],[-137,91],[-119,122],[-84,130],[-57,102],[-25,42]]}],"code":"penup()\ngoto(0, -48)\ncolor(\"#e08732\")\npendown()\nbegin_fill()\ngoto(-119, 40)\ngoto(-137, 91)\ngoto(-119, 122)\ngoto(-84, 130)\ngoto(-57, 102)\ngoto(-25, 42)\ngoto(0, -48)\nend_fill()","note":"A closed polygon can have more than four sides.","try":"Can you see some of the first red feather behind the orange one?","hint":"Use penup() before moving back to the shared starting point."},{"tab":"Inner-right feather","title":"Mirror the orange feather","description":"Use positive x coordinates to reflect the orange feather on the right.","task":"Connect the points and fill the shape.","shapes":[{"kind":"poly","color":"#e08732","pts":[[0,-48],[119,40],[137,91],[119,122],[84,130],[57,102],[25,42]]}],"code":"penup()\ngoto(0, -48)\ncolor(\"#e08732\")\npendown()\nbegin_fill()\ngoto(119, 40)\ngoto(137, 91)\ngoto(119, 122)\ngoto(84, 130)\ngoto(57, 102)\ngoto(25, 42)\ngoto(0, -48)\nend_fill()","note":"The feathers should be the same size on both sides.","try":"Does the fan look balanced?","hint":"Each point has the same y coordinate as its matching point on the left."},{"tab":"Center feather","title":"Finish the tail fan","description":"The middle feather is taller and has a golden color.","task":"Draw the central feather with its highest point at (0, 169).","shapes":[{"kind":"poly","color":"#eeb64e","pts":[[0,-48],[-47,79],[-44,135],[-26,159],[0,169],[26,159],[44,135],[47,79]]}],"code":"penup()\ngoto(0, -48)\ncolor(\"#eeb64e\")\npendown()\nbegin_fill()\ngoto(-47, 79)\ngoto(-44, 135)\ngoto(-26, 159)\ngoto(0, 169)\ngoto(26, 159)\ngoto(44, 135)\ngoto(47, 79)\ngoto(0, -48)\nend_fill()","note":"Draw the middle feather last so it sits in front of its neighbors.","try":"Can you identify all five feathers?","hint":"The two sides mirror across x = 0."},{"tab":"Body","title":"Draw the turkey's body","description":"The body is a circle with center (0, -66) and radius 65. Tracy begins a circle at its bottom when facing east.","task":"Find the bottom point and draw the filled brown circle.","shapes":[{"kind":"circle","color":"#825035","x":0,"y":-66,"r":65}],"code":"penup()\ngoto(0, -131)\nsetheading(0)\ncolor(\"#825035\")\npendown()\nbegin_fill()\ncircle(65)\nend_fill()","note":"Subtract the radius from the center's y coordinate: -66 - 65 = -131.","try":"Does the body cover the pointed ends of the feathers?","hint":"Use goto(0, -131), then setheading(0) before circle(65).","phases":[{"label":"TEST THE CENTER","title":"Where does a circle begin?","description":"The body center is (0, -66), but Tracy's circle starts at the bottom when facing east.","task":"Try starting at the center first. Run and see where the body ends up.","code":"penup()\ngoto(0, -66)\nsetheading(0)\ncolor(\"#825035\")\npendown()\nbegin_fill()\ncircle(65)\nend_fill()","note":"The circle extends upward from the starting position.","try":"Is the center really at (0, -66)?","hint":"Look at the two circles in the small diagram.","next":"I ran it → Fix the circle","codeTitle":"Try the center first"},{"label":"FIX THE START POINT","title":"Place the body correctly","description":"A radius of 65 means Tracy starts 65 pixels below the center.","task":"Change the starting y coordinate to -131. Run again.","code":"penup()\ngoto(0, -131)\nsetheading(0)\ncolor(\"#825035\")\npendown()\nbegin_fill()\ncircle(65)\nend_fill()","note":"-66 - 65 = -131.","try":"Does the body now cover the bottom of the fan?","hint":"Change only the goto() line.","codeTitle":"Correct the starting point"}]},{"tab":"Head","title":"Add the turkey's head","description":"A smaller brown circle overlaps the top of the body. Its center is (0, 26) and radius is 40.","task":"Calculate the bottom point, then draw a filled circle.","shapes":[{"kind":"circle","color":"#a96f43","x":0,"y":26,"r":40}],"code":"penup()\ngoto(0, -14)\nsetheading(0)\ncolor(\"#a96f43\")\npendown()\nbegin_fill()\ncircle(40)\nend_fill()","note":"26 - 40 = -14. Tracy starts at (0, -14).","try":"Does the head connect to the body?","hint":"Face east with setheading(0)."},{"tab":"Eyes","title":"Give the turkey two eyes","description":"A dot is centered at Tracy's current position. Its number controls the diameter.","task":"Place two dark dots at the same height.","shapes":[{"kind":"dot","color":"#33251e","x":-13,"y":35,"r":5},{"kind":"dot","color":"#33251e","x":13,"y":35,"r":5}],"code":"penup()\ngoto(-13, 35)\ncolor(\"#33251e\")\ndot(10)\npenup()\ngoto(13, 35)\ncolor(\"#33251e\")\ndot(10)","note":"dot(10) makes a circle 10 pixels across. Unlike circle(), it is centered at the current position.","try":"Are the eyes level with each other?","hint":"Keep y = 35 and change only x."},{"tab":"Beak & wattle","title":"Make the turkey's face","description":"A turkey has a red wattle under its beak. A small dot and a triangle form the face.","task":"Draw the wattle first and the orange triangle second.","shapes":[{"kind":"dot","color":"#b94236","x":12,"y":5,"r":11},{"kind":"poly","color":"#f4a437","pts":[[-11,24],[11,24],[0,8]]}],"code":"penup()\ngoto(12, 5)\ncolor(\"#b94236\")\ndot(22)\npenup()\ngoto(-11, 24)\ncolor(\"#f4a437\")\npendown()\nbegin_fill()\ngoto(11, 24)\ngoto(0, 8)\ngoto(-11, 24)\nend_fill()","note":"The order of drawing controls which shapes overlap.","try":"Can you see the red wattle below the beak?","hint":"Close the beak by returning to (-11, 24)."},{"tab":"Feet","title":"Draw the feet","description":"Use thicker lines for the legs and toes. Draw each foot with separate strokes.","task":"Trace the highlighted points and lift the pen between each foot.","shapes":[{"kind":"line","color":"#935128","pts":[[-28,-120],[-28,-151],[-43,-162],[-28,-151],[-28,-165],[-28,-151],[-13,-162]],"width":4},{"kind":"line","color":"#935128","pts":[[28,-120],[28,-151],[13,-162],[28,-151],[28,-165],[28,-151],[43,-162]],"width":4}],"code":"pensize(4)\npenup()\ngoto(-28, -120)\ncolor(\"#935128\")\npendown()\ngoto(-28, -151)\ngoto(-43, -162)\ngoto(-28, -151)\ngoto(-28, -165)\ngoto(-28, -151)\ngoto(-13, -162)\npensize(1)\npensize(4)\npenup()\ngoto(28, -120)\ncolor(\"#935128\")\npendown()\ngoto(28, -151)\ngoto(13, -162)\ngoto(28, -151)\ngoto(28, -165)\ngoto(28, -151)\ngoto(43, -162)\npensize(1)","note":"pensize(4) makes the feet thicker. pensize(1) returns to the normal width.","try":"Do both feet reach the ground?","hint":"All of the toe lines meet at the same point on each foot."},{"tab":"Pumpkins","title":"Decorate the ground","description":"Two small pumpkins finish the festive scene. Orange dots make the fruit; short green lines make the stems.","task":"Add a pumpkin on each side of the turkey.","shapes":[{"kind":"dot","color":"#e97926","x":-139,"y":-157,"r":17.5},{"kind":"line","color":"#60723e","pts":[[-139,-142],[-136,-132]],"width":4},{"kind":"dot","color":"#e97926","x":139,"y":-157,"r":17.5},{"kind":"line","color":"#60723e","pts":[[139,-142],[142,-132]],"width":4}],"code":"penup()\ngoto(-139, -157)\ncolor(\"#e97926\")\ndot(35)\npensize(4)\npenup()\ngoto(-139, -142)\ncolor(\"#60723e\")\npendown()\ngoto(-136, -132)\npensize(1)\npenup()\ngoto(139, -157)\ncolor(\"#e97926\")\ndot(35)\npensize(4)\npenup()\ngoto(139, -142)\ncolor(\"#60723e\")\npendown()\ngoto(142, -132)\npensize(1)","note":"Try changing the orange color or adding your own pumpkin details once you finish.","try":"Are the pumpkins on the ground, away from the turkey?","hint":"dot() is centered, so the pumpkin center is y = -157."},{"tab":"Finish","title":"Finish your Thanksgiving scene","description":"You have built a complete turkey from basic Python Turtle commands.","task":"Return Tracy to the origin without drawing, hide the turtle, and run the full program.","shapes":[],"code":"penup()\ngoto(0, 0)\nhideturtle()","note":"The pen stays up while Tracy returns to (0, 0). hideturtle() hides the icon.","try":"Check the five feathers, body, head, eyes, beak, wattle, feet and festive background. Add your own decoration when done.","hint":"You can personalize the colors after the guided version is complete."}];
+var current=0, showGrid=true, showOutline=false, phaseMap={}, stepMarks={};
+var key="thanksgiving-turkey-guide-v1";
+try{
+ var stored=JSON.parse(localStorage.getItem(key)||"{}");
+ if(Number.isInteger(stored.step))current=Math.max(0,Math.min(steps.length-1,stored.step));
+ if(typeof stored.grid==="boolean")showGrid=stored.grid;
+ if(typeof stored.outline==="boolean")showOutline=stored.outline;
+ if(stored.phases&&typeof stored.phases==="object")phaseMap=stored.phases;
+ if(stored.stepMarks&&typeof stored.stepMarks==="object")stepMarks=stored.stepMarks;
+}catch(e){}
+$("gridToggle").checked=showGrid;
+$("outlineToggle").checked=showOutline;
+function save(){try{localStorage.setItem(key,JSON.stringify({step:current,grid:showGrid,outline:showOutline,phases:phaseMap,stepMarks:stepMarks}))}catch(e){}}
+function activePhaseIndex(){return Math.max(0,Math.min((steps[current].phases||[]).length-1,Number(phaseMap[current])||0))}
+function activePhase(){return steps[current].phases?steps[current].phases[activePhaseIndex()]:steps[current]}
+function activeCode(){return activePhase().code}
+function advanceLesson(direction){var stages=steps[current].phases||[];var phase=activePhaseIndex();if(direction>0&&phase<stages.length-1){phaseMap[current]=phase+1;render();return;}if(direction<0&&phase>0){phaseMap[current]=phase-1;render();return;}current=direction>0?(current+1)%steps.length:Math.max(0,current-1);render()}
+var strip=$("stepStrip"),stepChecks=[];
+steps.forEach(function(s,i){
+ var row=document.createElement("div");row.className="step-item";
+ var b=document.createElement("button");b.type="button";b.className="step-tab";
+ b.textContent=String(i+1).padStart(2,"0")+" "+s.tab;
+ b.setAttribute("aria-label","Open step "+(i+1)+": "+s.tab);
+ b.addEventListener("click",function(){current=i;render()});
+ var markLabel=document.createElement("label");markLabel.className="step-mark-target";
+ markLabel.title="Check when you have finished and reviewed this step";
+ var check=document.createElement("input");check.type="checkbox";check.className="step-check";
+ check.setAttribute("aria-label","Mark step "+(i+1)+": "+s.tab+" complete");
+ check.addEventListener("change",function(){
+  stepMarks[i]=check.checked;
+  save();refreshStepChecks();
+ });
+ markLabel.appendChild(check);
+ row.appendChild(b);row.appendChild(markLabel);strip.appendChild(row);
+ stepChecks.push(check);
+});
+var canvas=$("guideCanvas"),ctx=canvas.getContext("2d");
+function sx(x){return x+200}
+function sy(y){return 200-y}
+
+function paintShape(c,s,ghost,highlight){
+ c.save();c.beginPath();
+ if(s.kind==="circle"||s.kind==="dot"){c.arc(sx(s.x),sy(s.y),s.r,0,Math.PI*2);}
+ else{c.moveTo(sx(s.pts[0][0]),sy(s.pts[0][1]));s.pts.slice(1).forEach(p=>c.lineTo(sx(p[0]),sy(p[1])));if(s.kind==="poly")c.closePath();}
+ c.lineJoin="round";c.lineCap="round";
+ if(ghost){c.strokeStyle="#b5a48b";c.lineWidth=1.5;c.setLineDash([5,5]);c.stroke();}
+ else if(s.kind==="line"){c.strokeStyle=s.color;c.lineWidth=s.width||3;c.stroke();}
+ else{c.fillStyle=s.color;c.fill();if(s.kind!=="dot"){c.strokeStyle=s.color;c.lineWidth=1;c.stroke();}}
+ if(highlight){c.strokeStyle="#176b73";c.lineWidth=2.5;c.setLineDash([5,4]);c.stroke();}
+ c.restore();
+}
+function grid(c){
+ c.save();c.strokeStyle="rgba(100,86,65,.13)";c.lineWidth=1;
+ for(var p=0;p<=400;p+=25){c.beginPath();c.moveTo(p+.5,0);c.lineTo(p+.5,400);c.moveTo(0,p+.5);c.lineTo(400,p+.5);c.stroke();}
+ c.strokeStyle="rgba(86,103,95,.42)";c.beginPath();c.moveTo(200,0);c.lineTo(200,400);c.moveTo(0,200);c.lineTo(400,200);c.stroke();
+ c.fillStyle="#756b5d";c.font="10px monospace";c.fillText("-200",4,196);c.fillText("200",371,196);c.fillText("0",204,196);c.fillText("200",204,12);c.fillText("-200",204,391);c.restore();
+}
+function scene(c,full,highlight,withGrid){
+ c.fillStyle="#fff0d4";c.fillRect(0,0,400,400);
+ if(full||current===0){steps.forEach(s=>s.shapes.forEach(sh=>paintShape(c,sh,false,false)));}
+ else{
+  if(showOutline)steps.slice(current+1).forEach(s=>s.shapes.forEach(sh=>paintShape(c,sh,true,false)));
+  steps.slice(0,current+1).forEach((s,i)=>s.shapes.forEach(sh=>paintShape(c,sh,false,false)));
+  if(highlight)steps[current].shapes.forEach(sh=>paintShape(c,sh,false,true));
+ }
+ if(withGrid)grid(c);
+}
+function drawScene(){ctx.clearRect(0,0,400,400);scene(ctx,false,current>0&&current<steps.length-1,showGrid);}
+var substepCanvas=$("substepCanvas"),subctx=substepCanvas.getContext("2d");
+function drawInstructionPreview(){
+ var holder=$("substepDiagram"),caption=$("substepCaption"),c=subctx;
+ var shapes=steps[current].shapes;holder.hidden=current===0||current===steps.length-1;if(holder.hidden)return;
+ c.clearRect(0,0,480,226);c.fillStyle="#fffaf0";c.fillRect(0,0,480,226);
+ // The left side locates the highlighted shape in the exact 400 x 400 world.
+ c.save();c.translate(8,8);c.scale(.52,.52);scene(c,false,true,false);c.restore();
+ c.fillStyle="#385754";c.font="800 12px system-ui";c.fillText("YOUR NEXT SHAPE",234,20);
+ var sh=shapes[0];var msg="";
+ if(sh.kind==="circle"){
+  var test=steps[current].phases&&activePhaseIndex()===0;
+  var cx=350,cy=104,rr=48;
+  c.lineWidth=3;c.strokeStyle="#176b73";c.setLineDash([5,4]);c.beginPath();c.arc(cx,cy,rr,0,Math.PI*2);c.stroke();c.setLineDash([]);
+  if(test){c.strokeStyle="#d27639";c.beginPath();c.arc(cx,cy-rr,rr,0,Math.PI*2);c.stroke();}
+  c.fillStyle="#176b73";c.beginPath();c.arc(cx,cy,4,0,Math.PI*2);c.fill();
+  c.fillStyle="#d27639";c.beginPath();c.arc(cx,test?cy:cy+rr,4,0,Math.PI*2);c.fill();
+  c.font="bold 12px monospace";c.fillStyle="#385754";c.fillText("center ("+sh.x+", "+sh.y+")",234,183);c.fillText("start ("+sh.x+", "+(test?sh.y:sh.y-sh.r)+")",234,202);
+  msg=test?"Orange circle: starting at the center shifts the circle upward.":"The starting point is one radius below the center.";
+ }else if(sh.kind==="poly"||sh.kind==="line"){
+  var xs=sh.pts.map(p=>p[0]),ys=sh.pts.map(p=>p[1]),loX=Math.min(...xs),hiX=Math.max(...xs),loY=Math.min(...ys),hiY=Math.max(...ys);
+  var scale=Math.min(200/Math.max(1,hiX-loX),116/Math.max(1,hiY-loY));
+  var q=sh.pts.map(p=>[350+(p[0]-(loX+hiX)/2)*scale,100-(p[1]-(loY+hiY)/2)*scale]);
+  c.beginPath();q.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));if(sh.kind==="poly"){c.closePath();c.fillStyle=sh.color;c.fill();}c.strokeStyle="#176b73";c.lineWidth=2;c.stroke();
+  q.forEach((p,i)=>{c.beginPath();c.arc(p[0],p[1],8,0,Math.PI*2);c.fillStyle=i===0?"#a34c2b":"#176b73";c.fill();c.fillStyle="#fff";c.font="bold 9px system-ui";c.textAlign="center";c.fillText(String(i+1),p[0],p[1]+3);});
+  c.textAlign="left";c.fillStyle="#385754";c.font="bold 12px monospace";c.fillText("Start: ("+sh.pts[0].join(", ")+")",234,183);
+  c.font="11px system-ui";c.fillText(sh.kind==="poly"?"Return to point 1 to close.":"Follow the numbered points.",234,202);
+  msg="Teal outlines locate this step on the full drawing. Follow the coordinates in the code guide.";
+ }else{
+  c.fillStyle=sh.color;c.beginPath();c.arc(350,96,35,0,Math.PI*2);c.fill();
+  c.strokeStyle="#176b73";c.beginPath();c.moveTo(341,96);c.lineTo(359,96);c.moveTo(350,87);c.lineTo(350,105);c.stroke();
+  c.font="bold 12px monospace";c.fillStyle="#385754";c.fillText("center ("+sh.x+", "+sh.y+")",234,183);c.fillText("dot("+sh.r*2+")",234,202);msg="A dot is centered on its coordinate. The example at left shows every shape for this step.";
+ }
+ caption.textContent=msg;substepCanvas.setAttribute("aria-label",msg);
+}
+
+function render(){
+ var base=steps[current],s=activePhase(),phaseIndex=activePhaseIndex(),stages=base.phases||[];
+ $("stepCount").textContent=String(current+1).padStart(2,"0")+" / "+steps.length;
+ $("progressBar").style.width=((current+1)/steps.length*100)+"%";
+ $("stepTitle").textContent=s.title;
+ $("stepDescription").textContent=s.description;
+ $("taskText").textContent=s.task;
+ $("codeTitle").textContent=s.codeTitle|| (current===0?"Type the first command":"Type these lines");
+ renderCodeExample();
+ $("codeNote").textContent=s.note;
+ $("tryText").textContent=s.try;
+ $("hintText").textContent=s.hint;
+ $("helpBox").open=false;
+ $("experimentStage").hidden=!stages.length;
+ $("experimentStageLabel").textContent=stages.length?s.label||"EXPERIMENT":"";
+ $("experimentStageCount").textContent=stages.length?"Part "+(phaseIndex+1)+" of "+stages.length:"";
+ $("runExperiment").hidden=!stages.length;
+ $("runFeedback").textContent="Run and compare the Turtle World before moving on.";
+ $("visualTitle").textContent=current===0?"Complete example":current===steps.length-1?"Finished drawing":"Highlighted target";
+ $("visualCaption").textContent="The highlighted example uses the same coordinates as your code.";
+ $("prevStep").disabled=current===0&&phaseIndex===0;
+ $("nextStep").textContent=phaseIndex<stages.length-1?(s.next||"Next part →"):current===steps.length-1?"Back to beginning ↺":"Next step →";
+ Array.from(strip.children).forEach(function(row,i){
+  row.querySelector(".step-tab").setAttribute("aria-current",i===current?"step":"false");
+  row.classList.toggle("is-active",i===current);
+ });
+ refreshStepChecks();
+ save();drawScene();drawInstructionPreview();etchWantScroll=true;scheduleGuideHighlight();
+}
+$("prevStep").addEventListener("click",function(){advanceLesson(-1)});
+$("nextStep").addEventListener("click",function(){advanceLesson(1)});
+$("runStage").addEventListener("click",function(){
+ try{
+  var doc=$("turtleFrame").contentDocument,run=doc&&doc.getElementById("runBtn");
+  if(run&&!run.disabled){run.click();$("runFeedback").textContent="Look at Turtle World. What happened?";return;}
+ }catch(e){}
+ $("runFeedback").textContent="Press Run in the Turtle workspace to test your code.";
+});
+$("gridToggle").addEventListener("change",function(){showGrid=this.checked;save();drawScene();drawInstructionPreview()});
+$("outlineToggle").addEventListener("change",function(){showOutline=this.checked;save();drawScene()});
+
+/* Match the Python Course's line-highlighting workflow in the existing /turtle editor. */
+var etchEditor=null,etchMarkedLines=[],etchHighlightTimer=0,etchEditorReady=false,etchWantScroll=false;
+function etchNormalize(line){
+ return String(line||"").trim().replace(/\s+/g,"");
+}
+function etchLocateBlock(lines,commands,from){
+ var best=null;
+ for(var i=from;i<lines.length;i++){
+  if(etchNormalize(lines[i])!==etchNormalize(commands[0]))continue;
+  var found=[],at=i;
+  for(var j=0;j<commands.length;j++){
+   while(at<lines.length&&(!etchNormalize(lines[at])||/^\s*#/.test(lines[at])))at++;
+   if(at>=lines.length||etchNormalize(lines[at])!==etchNormalize(commands[j]))break;
+   found.push(at);at++;
+  }
+  if(found.length===commands.length)return {indices:found,after:at,complete:true,start:i};
+  if(!best||found.length>best.indices.length)best={indices:found,after:at,complete:false,start:i};
+ }
+ return best;
+}
+
+/* Checkmarks are controlled only by students, independently of typed code. */
+function refreshStepChecks(){
+ stepChecks.forEach(function(input,i){
+  var checked=stepMarks[i]===true;
+  input.checked=checked;
+  input.parentElement.parentElement.classList.toggle("is-done",checked);
+  input.parentElement.title=checked?"Unmark this step":"Mark complete after checking your drawing";
+ });
+}
+function etchProgress(cm){
+ var lines=cm.getValue().split("\n"),startAt=0,allEarlierComplete=true;
+ for(var i=0;i<current;i++){
+  var prev=etchLocateBlock(lines,steps[i].code.split("\n"),startAt);
+  if(!prev||!prev.complete){allEarlierComplete=false;break;}
+  startAt=prev.after;
+ }
+ var cmds=activeCode().split("\n");
+ var located=allEarlierComplete?etchLocateBlock(lines,cmds,startAt):null;
+ var typed=located?located.indices.length:0;
+ var lastNonempty=-1;
+ for(var k=0;k<lines.length;k++)if(etchNormalize(lines[k]))lastNonempty=k;
+ var nextIndex;
+ if(located&&typed){
+  nextIndex=typed===cmds.length?located.indices[typed-1]:Math.min(located.indices[typed-1]+1,lines.length-1);
+  if(typed<cmds.length){
+   while(nextIndex<lines.length-1&&(!etchNormalize(lines[nextIndex])||/^\s*#/.test(lines[nextIndex])))nextIndex++;
+   if(nextIndex>=lines.length)nextIndex=lines.length-1;
+  }
+ }else{
+  nextIndex=Math.min(lines.length-1,Math.max(allEarlierComplete?startAt:0,lastNonempty+1));
+ }
+ var pendingNewLine=typed<cmds.length&&nextIndex===lines.length-1&&!!etchNormalize(lines[nextIndex]);
+ if(pendingNewLine)nextIndex=lines.length;
+ var startLine=located?located.start+1:nextIndex+1;
+ return {pendingNewLine:pendingNewLine,commands:cmds,typed:typed,indices:located?located.indices:[],nextIndex:nextIndex,startLine:startLine,complete:typed===cmds.length,earlierComplete:allEarlierComplete,lineCount:lines.length};
+}
+
+function etchPlannedLine(index){
+ if(index===0)return 1;
+ var n=2;for(var i=1;i<index;i++)n+=steps[i].code.split("\n").length;
+ return n;
+}
+var codeCanvas=$("stepCodeCanvas"),codeCtx=codeCanvas.getContext("2d"),lastExampleProgress=null;
+function renderCodeExample(progress){
+ lastExampleProgress=progress||null;
+ var lines=activeCode().split("\n"),box=$("codeSample");
+ var width=Math.max(220,Math.round(box.getBoundingClientRect().width||400));
+ var rowHeight=25,top=12,height=top+lines.length*rowHeight+12,dpr=Math.min(window.devicePixelRatio||1,2);
+ codeCanvas.style.height=height+"px";codeCanvas.width=Math.round(width*dpr);codeCanvas.height=Math.round(height*dpr);
+ codeCtx.setTransform(dpr,0,0,dpr,0,0);codeCtx.clearRect(0,0,width,height);
+ codeCtx.font="650 12px ui-monospace,SFMono-Regular,Consolas,monospace";codeCtx.textBaseline="middle";
+ var typed=progress?progress.typed:0,first=etchPlannedLine(current);
+ lines.forEach(function(line,i){
+  var y=top+i*rowHeight,cy=y+rowHeight/2;
+  if(i===typed&&typed<lines.length){
+   codeCtx.fillStyle="#534627";codeCtx.fillRect(9,y,width-18,rowHeight);
+   codeCtx.fillStyle="#ffd35d";codeCtx.fillRect(9,y,4,rowHeight);
+  }else if(i<typed){codeCtx.fillStyle="rgba(23,107,115,.18)";codeCtx.fillRect(9,y,width-18,rowHeight);}
+  codeCtx.fillStyle=i===typed&&typed<lines.length?"#ffd35d":"#96a4ac";
+  codeCtx.fillText(String(first+i),width<350?14:20,cy);
+  codeCtx.fillStyle=i<typed?"#a3d1c8":i===typed?"#fff9dc":"#e5eeed";
+  var shown=line;
+  while(shown.length>5&&codeCtx.measureText(shown).width>width-75)shown=shown.slice(0,-2)+"…";
+  codeCtx.fillText(shown,width<350?48:55,cy);
+ });
+ $("codeProgress").textContent=progress?(progress.complete?"✓ All lines typed":typed+" / "+lines.length+" lines typed · yellow = next"):"Yellow = next line";
+}
+["copy","cut","contextmenu","dragstart","selectstart"].forEach(function(type){
+ $("codeSample").addEventListener(type,function(ev){ev.preventDefault();});
+});
+codeCanvas.addEventListener("keydown",function(ev){
+ if((ev.ctrlKey||ev.metaKey)&&["c","x","a","s","p"].indexOf(ev.key.toLowerCase())>=0)ev.preventDefault();
+});
+if(window.ResizeObserver)new ResizeObserver(function(){renderCodeExample(lastExampleProgress);}).observe($("codeSample"));
+else window.addEventListener("resize",function(){renderCodeExample(lastExampleProgress);});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){renderCodeExample(lastExampleProgress);});
+function scheduleGuideHighlight(){
+ clearTimeout(etchHighlightTimer);
+ etchHighlightTimer=setTimeout(highlightGuideLines,65);
+}
+function highlightGuideLines(){
+ clearTimeout(etchHighlightTimer);
+ try{
+  var doc=$("turtleFrame").contentDocument;
+  var node=doc&&doc.querySelector(".CodeMirror");
+  var cm=node&&node.CodeMirror;
+  if(!cm){etchHighlightTimer=setTimeout(highlightGuideLines,200);return;}
+  if(etchEditor!==cm){
+   if(etchEditor){etchEditor.off("change",scheduleGuideHighlight);}
+   etchEditor=cm;
+   cm.on("change",scheduleGuideHighlight);
+   cm.setOption("firstLineNumber",1);
+  }
+  etchMarkedLines.forEach(function(mark){
+   try{mark.editor.removeLineClass(mark.handle,"background",mark.className);}catch(e){}
+  });
+  etchMarkedLines=[];
+  if(!doc.getElementById("etchTypingStyle")){
+   var style=doc.createElement("style");style.id="etchTypingStyle";
+   style.textContent=".etch-current-line{background:rgba(255,211,93,.19)!important;box-shadow:inset 4px 0 #ffd35d}.etch-typed-line{background:rgba(23,107,115,.11)!important}.CodeMirror-scroll{scrollbar-width:auto;scrollbar-color:#718584 #202a32}#editorDivider:before{background:#a8c4c0!important}#editorDivider:hover:before{background:#176b73!important}";
+   doc.head.appendChild(style);
+  }
+  if(steps[current].phases&&activePhaseIndex()===0){
+   var editorLines=cm.getValue().split("\n"),searchStart=0,allPrevious=true;
+   for(var prevIndex=0;prevIndex<current;prevIndex++){
+    var previousBlock=etchLocateBlock(editorLines,steps[prevIndex].code.split("\n"),searchStart);
+    if(!previousBlock||!previousBlock.complete){allPrevious=false;break;}
+    searchStart=previousBlock.after;
+   }
+   var finalBlock=allPrevious&&etchLocateBlock(editorLines,steps[current].code.split("\n"),searchStart);
+   if(finalBlock&&finalBlock.complete){
+    phaseMap[current]=steps[current].phases.length-1;save();render();return;
+   }
+  }
+  var p=etchProgress(cm);
+  p.indices.forEach(function(index){
+   var handle=cm.addLineClass(index,"background","etch-typed-line");
+   etchMarkedLines.push({editor:cm,handle:handle,className:"etch-typed-line"});
+  });
+  if(!p.complete&&!p.pendingNewLine){
+   var active=Math.max(0,Math.min(cm.lineCount()-1,p.nextIndex));
+   var handle=cm.addLineClass(active,"background","etch-current-line");
+   etchMarkedLines.push({editor:cm,handle:handle,className:"etch-current-line"});
+  }
+  var message=$("editorGuideMessage");
+  if(p.complete)message.textContent="✓ Step "+(current+1)+": all "+p.commands.length+" commands typed. Run and compare.";
+  else{
+   var line=p.nextIndex+1,action=p.pendingNewLine?" · press Enter for a new line":"";
+   message.textContent=p.earlierComplete?"Step "+(current+1)+" · line "+line+": "+p.commands[p.typed]+action:"Complete earlier steps first. This step begins around line "+etchPlannedLine(current)+".";
+  }
+  renderCodeExample(p);
+  refreshStepChecks();
+  cm.refresh();
+  if(etchWantScroll){
+   etchWantScroll=false;
+   var target=Math.max(0,Math.min(p.nextIndex,cm.lineCount()-1));
+   if(target<12)cm.scrollTo(null,0);
+   else{
+    var y=Math.max(0,cm.heightAtLine(target,"local")-42);
+    if(Math.abs(cm.getScrollInfo().top-y)>cm.getScrollInfo().clientHeight*.65)cm.scrollTo(null,y);
+   }
+  }
+ }catch(e){renderCodeExample();}
+}
+
+$("editorScrollTop").addEventListener("click",function(){if(etchEditor){etchEditor.scrollTo(null,0);etchEditor.focus();}});
+$("editorScrollStep").addEventListener("click",function(){
+ if(!etchEditor)return;
+ var p=etchProgress(etchEditor),target=Math.max(0,Math.min(p.nextIndex,etchEditor.lineCount()-1));
+ etchEditor.scrollTo(null,target<12?0:Math.max(0,etchEditor.heightAtLine(target,"local")-40));
+ etchEditor.focus();
+});
+$("turtleFrame").addEventListener("load",function(){
+ etchEditor=null;etchWantScroll=true;
+ scheduleGuideHighlight();
+});
+
+
+
+/* Drag to resize the guide, step list and editor. The iframe's own divider
+   continues to resize code versus Turtle World. */
+(function initEtchResizers(){
+ var main=$("studioDivider"),rail=$("guideDivider"),studio=document.querySelector(".studio"),guide=document.querySelector(".guide");
+ if(!main||!rail)return;
+ function saveWidth(name,value){try{localStorage.setItem("turkey-resize-"+name,String(Math.round(value)));}catch(e){}}
+ function width(name,fallback){try{return Number(localStorage.getItem("turkey-resize-"+name))||fallback;}catch(e){return fallback;}}
+ function setMain(value){
+  var max=Math.max(460,studio.clientWidth-510),n=Math.max(460,Math.min(max,Math.round(value)));
+  studio.style.setProperty("--etch-guide-width",n+"px");main.setAttribute("aria-valuenow",String(n));saveWidth("guide",n);
+  if(etchEditor)etchEditor.refresh();
+ }
+ function setRail(value){
+  var max=Math.max(185,guide.clientWidth-235),n=Math.max(185,Math.min(max,Math.round(value)));
+  guide.style.setProperty("--etch-rail-width",n+"px");rail.setAttribute("aria-valuenow",String(n));saveWidth("rail",n);
+  renderCodeExample(lastExampleProgress);
+ }
+ function install(divider,getValue,setValue,defaults,min,max){
+  divider.setAttribute("aria-valuemin",String(min));divider.setAttribute("aria-valuemax",String(max));
+  var dragging=false,start=0,original=0;
+  divider.addEventListener("pointerdown",function(ev){
+   if(ev.button!==0||window.innerWidth<=1080)return;
+   dragging=true;start=ev.clientX;original=getValue();divider.classList.add("dragging");
+   document.body.classList.add("etch-resizing");
+   divider.setPointerCapture(ev.pointerId);ev.preventDefault();
+  });
+  divider.addEventListener("pointermove",function(ev){if(dragging)setValue(original+ev.clientX-start);});
+  function done(){dragging=false;divider.classList.remove("dragging");document.body.classList.remove("etch-resizing");}
+  divider.addEventListener("pointerup",done);divider.addEventListener("pointercancel",done);divider.addEventListener("lostpointercapture",done);
+  divider.addEventListener("keydown",function(ev){if(ev.key==="ArrowLeft"||ev.key==="ArrowRight"){ev.preventDefault();setValue(getValue()+(ev.key==="ArrowRight"?24:-24));}});
+  divider.addEventListener("dblclick",function(){setValue(defaults());});
+ }
+ var initialMain=Math.round(studio.clientWidth*.44),initialRail=Math.round(Math.min(306,Math.max(248,window.innerWidth*.195)));
+ if(window.innerWidth>1080){setMain(width("guide",initialMain));setRail(width("rail",initialRail));}
+ install(main,function(){return document.querySelector(".guide").getBoundingClientRect().width;},setMain,function(){return studio.clientWidth*.44;},460,1100);
+ install(rail,function(){return document.querySelector(".guide-top").getBoundingClientRect().width;},setRail,function(){return initialRail;},185,480);
+ window.addEventListener("resize",function(){if(window.innerWidth>1080){setMain(guide.getBoundingClientRect().width);setRail($("stepStrip").parentElement.getBoundingClientRect().width);}});
+})();
+
+var teacherDialog=$("teacherDialog");
+var fullProgram=steps.map(function(s){return s.code;}).join("\n")+"\n";
+$("teacherTrigger").addEventListener("click",function(){
+ $("teacherCode").textContent=fullProgram;
+ if(teacherDialog.showModal)teacherDialog.showModal();else teacherDialog.setAttribute("open","");
+});
+function closeTeacher(){if(teacherDialog.close)teacherDialog.close();else teacherDialog.removeAttribute("open");}
+$("teacherClose").addEventListener("click",closeTeacher);
+$("teacherDone").addEventListener("click",closeTeacher);
+teacherDialog.addEventListener("click",function(ev){if(ev.target===teacherDialog)closeTeacher();});
+$("teacherCopy").addEventListener("click",function(){
+ var btn=this;
+ function success(){btn.textContent="✓ Copied";setTimeout(function(){btn.textContent="Copy full code";},1500);}
+ if(navigator.clipboard&&navigator.clipboard.writeText){
+  navigator.clipboard.writeText(fullProgram).then(success,function(){btn.textContent="Select the code to copy";});
+ }else{
+  var r=document.createRange();r.selectNodeContents($("teacherCode"));getSelection().removeAllRanges();getSelection().addRange(r);
+  if(document.execCommand&&document.execCommand("copy")){getSelection().removeAllRanges();success();}
+  else btn.textContent="Selected · press Ctrl+C";
+ }
+});
+canvas.addEventListener("pointermove",function(ev){
+ var rect=canvas.getBoundingClientRect();
+ var x=Math.round((ev.clientX-rect.left)/rect.width*400-200);
+ var y=Math.round(200-(ev.clientY-rect.top)/rect.height*400);
+ $("coords").textContent="x "+x+" · y "+y;
+});
+canvas.addEventListener("pointerleave",function(){$("coords").textContent="x 0 · y 0"});
+render();
+})();
+
+</script>
+</body>
+</html>
